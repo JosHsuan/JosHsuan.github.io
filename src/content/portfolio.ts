@@ -1,5 +1,8 @@
 export type Category = 'XR & Interaction' | 'Fabrication & Materials' | 'Architecture & Facades' | 'Generative Studies'
-export type Media = { id: string; alt: string; caption: string; credit: string; fit?: 'contain' }
+export type Media = {
+  id: string; alt: string; caption: string; credit: string; fit?: 'contain';
+  video?: { label: 'Process recording' | 'Interface recording' | 'Simulation' | 'Object study'; duration: number };
+}
 export type Section = { title: string; text: string; media?: string[] }
 export type Project = {
   slug: string; title: string; subtitle: string; category: Category; year: string;
@@ -188,13 +191,35 @@ export const projects: Project[] = [
         "caption": "Motion capture feeds the CAD model. MQTT carries updates and worker decisions, while Firebase stores project and assembly data.",
         "credit": "Chia-Hsuan Chao and Wataru Nomura / ETH MAS DFAB",
         "fit": "contain"
+      },
+      {
+        "id": "xr-global-adaptation",
+        "alt": "A recorded phone interface overlays blue bamboo modules while a tracked control changes the global structure in the workshop.",
+        "caption": "A tracked physical control updates the global design through the mobile XR interface.",
+        "credit": "Chia-Hsuan Chao and Wataru Nomura / ETH MAS DFAB collaborative thesis",
+        "video": {
+          "label": "Interface recording",
+          "duration": 8.84
+        }
+      },
+      {
+        "id": "xr-live-rod-tracking",
+        "alt": "A participant bends a tracked bamboo module while colored target geometry and marker positions update in the XR view.",
+        "caption": "Physical bending and the tracked module geometry are compared in a live XR view.",
+        "credit": "Chia-Hsuan Chao and Wataru Nomura / ETH MAS DFAB collaborative thesis",
+        "video": {
+          "label": "Interface recording",
+          "duration": 10.32
+        }
       }
     ],
     "sections": [
       {
         "title": "Adaptive form finding",
         "text": "Design configuration begins by recognizing wall planes to establish the spatial reference. Foundation points and the intersections of the branching structure can then be repositioned. Branch length and radius remain editable as the physics-based model adjusts to these conditions. The mobile interface exposes these parameters on site, allowing the worker to change the digital proposal while viewing it in relation to the physical space. Curvature, structural geometry, material requirements and site information inform the configuration before it is divided into assembly units.",
-        "media": []
+        "media": [
+          "xr-global-adaptation"
+        ]
       },
       {
         "title": "From a global form to woven modules",
@@ -207,7 +232,8 @@ export const projects: Project[] = [
         "title": "Motion capture and spatial registration",
         "text": "The demonstrator uses ten OptiTrack cameras and passive markers to relate physical movement to the digital model. Tracking fixtures define planes, position points and circular radius controls; QR markers register the design in physical space. Module assembly starts by marking the bottom rod, selecting the module number and attaching markers to the current rod. The application overlays the tracked rod posture and target module geometry, while a larger display mirrors the phone screen for shared observation.",
         "media": [
-          "xr-guidance"
+          "xr-guidance",
+          "xr-live-rod-tracking"
         ]
       },
       {
@@ -401,6 +427,26 @@ export const projects: Project[] = [
         "caption": "Module switching, beam isolation and orientation controls support stacking and assembly tasks.",
         "credit": "Chia-Hsuan Chao / COMPAS XR / ETH MAS DFAB",
         "fit": "contain"
+      },
+      {
+        "id": "caschlatsch-module-selection",
+        "alt": "Phone interface recording switches Caschlatsch modules, isolates a turquoise beam and displays orientation and assembly controls.",
+        "caption": "Module selection, beam isolation and orientation controls are demonstrated in the workshop.",
+        "credit": "Chia-Hsuan Chao / COMPAS XR / ETH MAS DFAB and Gramazio Kohler Research",
+        "video": {
+          "label": "Interface recording",
+          "duration": 24.9
+        }
+      },
+      {
+        "id": "caschlatsch-beam-guidance",
+        "alt": "A phone recording overlays numbered beams and highlights a selected timber member in yellow against the physical workshop assembly.",
+        "caption": "Numbered beam overlays and selection make the current assembly step visible against the physical module.",
+        "credit": "Chia-Hsuan Chao / COMPAS XR / ETH MAS DFAB and Gramazio Kohler Research",
+        "video": {
+          "label": "Interface recording",
+          "duration": 21.5
+        }
       }
     ],
     "sections": [
@@ -421,13 +467,16 @@ export const projects: Project[] = [
       {
         "title": "Fabrication data and assembly plans",
         "text": "COMPAS Timber carries beam and joint information into an assembly plan. Building plans, QR reference frames, checklists and project settings are exported as JSON, with OBJ meshes supplying the visual geometry. Firebase provides the shared storage from which the mobile applications fetch these modules. The applications reconstruct the design in augmented reality and retain information about selected beams and assembly status. This connects the design model to the particular module being prepared in the workshop.",
-        "media": []
+        "media": [
+          "caschlatsch-beam-guidance"
+        ]
       },
       {
         "title": "My contribution to the XR interfaces",
         "text": "During production, I extended COMPAS XR to manage multiple modules. Workers could select a module from the cloud, switch between modules, identify the current beam and follow its sequence step. I also developed controls for the stacking application: orientation arrows, beam isolation for inspecting cutting features, module scaling and rotation, and switching between stacking and assembly views. Information panels expose the selected beam and module rather than requiring workers to infer these identities from geometry alone. The interfaces support locating and checking components before and during assembly.",
         "media": [
-          "caschlatsch-module-interface"
+          "caschlatsch-module-interface",
+          "caschlatsch-module-selection"
         ]
       },
       {
@@ -699,6 +748,16 @@ export const projects: Project[] = [
         "caption": "Height ordering and corrected gripper frames address placement sequence and clearance at the worktable.",
         "credit": "Chia-Hsuan Chao, Kevin Seav and Megi Sinani / ETH MAS DFAB",
         "fit": "contain"
+      },
+      {
+        "id": "vstick-robot-placement",
+        "alt": "A robotic arm moves a gripped timber stick into a small reciprocal V-stick aggregation on the worktable.",
+        "caption": "Recorded robot placement tests the insertion of a timber stick into the aggregation.",
+        "credit": "Chia-Hsuan Chao, Kevin Seav and Megi Sinani / ETH MAS DFAB project documentation",
+        "video": {
+          "label": "Process recording",
+          "duration": 6.8
+        }
       }
     ],
     "sections": [
@@ -727,7 +786,8 @@ export const projects: Project[] = [
         "title": "Robotic demonstrator and collaboration",
         "text": "The small-scale demonstrator tested the generated structure through robot-assisted stick placement, starting with the foundation setup and progressing through pickup and insertion of successive sticks. Chia-Hsuan Chao, Kevin Seav and Megi Sinani developed the aggregation and robotic workflow collaboratively within ETH MAS DFAB in 2023.",
         "media": [
-          "robotic-sequence"
+          "robotic-sequence",
+          "vstick-robot-placement"
         ]
       }
     ],
@@ -746,13 +806,14 @@ export const projects: Project[] = [
     "context": "ETH MAS DFAB / Printing Architecture",
     "location": "Zürich, Switzerland",
     "role": "Collaborative project · print parameters, toolpath studies & physical samples",
-    "summary": "Layer spacing, sampling density, robot movement and time delays are varied to develop printed textures and apply them to more complex forms.",
-    "premise": "The Printing Architecture project studies the deposition path as a means of designing the surface of a printed object. It begins with small samples that isolate printing parameters, then transfers the resulting rules to curved and twisting geometries. The aim is to understand how local dot patterns and continuous paths change when they are applied to a larger form.",
+    "summary": "Dot spacing, delay-height switching and rotating slice planes are tested in ring samples and double-curvature forms through robotic printing.",
+    "premise": "Group 1 studies how deposition instructions can produce a smooth wall or a dotted, textile-like surface within the same printed object. Small rings isolate sampling and movement parameters before rotating slice planes transfer those rules to leaning and twisting forms. Robotic trials compare the digital paths with physical samples, including the effect of the seam and the different handling of PETG and TPU.",
     "tags": [
-      "3D printing",
-      "G-code",
+      "Robotic 3D printing",
       "Non-planar paths",
-      "Material studies"
+      "Dot deposition",
+      "PETG & TPU",
+      "RTDE"
     ],
     "cover": {
       "id": "printing-object",
@@ -772,48 +833,215 @@ export const projects: Project[] = [
         "id": "printing-parameter-matrix",
         "alt": "A matrix of twelve printed rings sits beside layer-height, density, number, textile-length, delay-height and velocity parameters.",
         "caption": "Small printed samples compare changes to slicing, pattern subdivision, delay and movement parameters.",
-        "credit": "Chia-Hsuan Chao and Namdev Talluru / ETH MAS DFAB project documentation",
+        "credit": "Chia-Hsuan Chao, Namdev Talluru and JunJie / ETH MAS DFAB, Group 1",
         "fit": "contain"
       },
       {
         "id": "printing-deposition-strategies",
         "alt": "Three deposition-path diagrams are paired with ring samples and close-up photographs of their resulting textures.",
         "caption": "Changes to movement and programmed delay produce different deposition patterns in the ring studies.",
-        "credit": "Chia-Hsuan Chao and Namdev Talluru / ETH MAS DFAB project documentation",
+        "credit": "Chia-Hsuan Chao, Namdev Talluru and JunJie / ETH MAS DFAB, Group 1",
+        "fit": "contain"
+      },
+      {
+        "id": "printing-density-sequence",
+        "alt": "A ring sampling animation builds radial point arrangements with changing counts and spacing around a circular slice.",
+        "caption": "The point sequence makes the changing arrangement and density of slice samples visible.",
+        "credit": "Chia-Hsuan Chao, Namdev Talluru and JunJie / ETH MAS DFAB, Group 1",
+        "video": {
+          "label": "Simulation",
+          "duration": 9.87
+        }
+      },
+      {
+        "id": "printing-dot-deposition",
+        "alt": "A robotic extrusion nozzle deposits a dotted translucent wall through repeated short movements and pauses.",
+        "caption": "The close-up records dot-based deposition on the curved specimen.",
+        "credit": "Chia-Hsuan Chao, Namdev Talluru and JunJie / ETH MAS DFAB, Group 1",
+        "video": {
+          "label": "Process recording",
+          "duration": 4.4
+        }
+      },
+      {
+        "id": "printing-layer-deposition",
+        "alt": "An extrusion nozzle moves across stacked translucent paths while a new layer is deposited over the preceding strands.",
+        "caption": "A companion Group 1 recording shows the deposition of successive layers.",
+        "credit": "Chia-Hsuan Chao, Namdev Talluru and JunJie / ETH MAS DFAB, Group 1",
+        "video": {
+          "label": "Process recording",
+          "duration": 3.9
+        }
+      },
+      {
+        "id": "printing-plane-rotation",
+        "alt": "A digital diagram rotates one circular slice plane relative to another, showing their local coordinate frames.",
+        "caption": "Rotating one slice plane changes its orientation relative to the preceding layer.",
+        "credit": "Chia-Hsuan Chao, Namdev Talluru and JunJie / ETH MAS DFAB, Group 1",
+        "video": {
+          "label": "Simulation",
+          "duration": 8.64
+        }
+      },
+      {
+        "id": "printing-tilted-layers",
+        "alt": "An animated stack of circular slice curves grows from a ring into a leaning curved wall with locally changing layer orientation.",
+        "caption": "The layer-growth study follows the transition from a base ring to a curved wall.",
+        "credit": "Chia-Hsuan Chao, Namdev Talluru and JunJie / ETH MAS DFAB, Group 1",
+        "video": {
+          "label": "Simulation",
+          "duration": 6.37
+        }
+      },
+      {
+        "id": "printing-shape-transition",
+        "alt": "A digital stack of circular slice curves changes between a curved wall and a taller twisting column.",
+        "caption": "The digital form study compares the geometry generated by changing slice-plane orientation.",
+        "credit": "Chia-Hsuan Chao, Namdev Talluru and JunJie / ETH MAS DFAB, Group 1",
+        "video": {
+          "label": "Simulation",
+          "duration": 4.36
+        }
+      },
+      {
+        "id": "printing-twisted-layers",
+        "alt": "A sequence of circular slices grows into a taller twisting form and returns to its base ring in a digital preview.",
+        "caption": "A second layer sequence develops the twisting geometry from the base slice.",
+        "credit": "Chia-Hsuan Chao, Namdev Talluru and JunJie / ETH MAS DFAB, Group 1",
+        "video": {
+          "label": "Simulation",
+          "duration": 10.73
+        }
+      },
+      {
+        "id": "printing-seam-study",
+        "alt": "A double-curvature digital shell is progressively revealed as its dense slicing lines and seam geometry change.",
+        "caption": "The double-curvature study relates slicing and seam changes to the proposed form.",
+        "credit": "Chia-Hsuan Chao, Namdev Talluru and JunJie / ETH MAS DFAB, Group 1",
+        "video": {
+          "label": "Simulation",
+          "duration": 14.87
+        }
+      },
+      {
+        "id": "printing-specimen-views",
+        "alt": "A recorded presentation sequence shows the twisting white print outdoors in snow and compares translucent specimens under studio light.",
+        "caption": "The presentation sequence compares completed specimens and their surface appearance.",
+        "credit": "Chia-Hsuan Chao, Namdev Talluru and JunJie / ETH MAS DFAB, Group 1",
+        "video": {
+          "label": "Object study",
+          "duration": 8.08
+        }
+      },
+      {
+        "id": "printing-robot-sequence",
+        "alt": "A robot tilts its extrusion nozzle while printing a twisting white object, followed by an outdoor view of the completed specimen.",
+        "caption": "The recorded fabrication sequence connects robot orientation with the completed twisting specimen.",
+        "credit": "Chia-Hsuan Chao, Namdev Talluru and JunJie / ETH MAS DFAB, Group 1",
+        "video": {
+          "label": "Process recording",
+          "duration": 10.933
+        }
+      },
+      {
+        "id": "printing-delay-smooth",
+        "alt": "A small white ring specimen has a smooth continuous wall with fine horizontal extrusion layers.",
+        "caption": "The smooth-wall sample provides a comparison for the delay-height switching study.",
+        "credit": "Chia-Hsuan Chao, Namdev Talluru and JunJie / ETH MAS DFAB, Group 1",
+        "fit": "contain"
+      },
+      {
+        "id": "printing-delay-dotted",
+        "alt": "A white ring specimen has a raised dotted surface that contrasts with the smooth printed rings.",
+        "caption": "The dotted ring records the textile-like surface produced in the parameter trials.",
+        "credit": "Chia-Hsuan Chao, Namdev Talluru and JunJie / ETH MAS DFAB, Group 1",
+        "fit": "contain"
+      },
+      {
+        "id": "printing-form-family",
+        "alt": "Three white printed specimens compare a leaning curved wall, a taller twisting shell and a larger double-curvature form.",
+        "caption": "The specimen family transfers the local deposition rules to more complex forms.",
+        "credit": "Chia-Hsuan Chao, Namdev Talluru and JunJie / ETH MAS DFAB, Group 1",
+        "fit": "contain"
+      },
+      {
+        "id": "printing-material-trials",
+        "alt": "Translucent twisting and curved printed specimens cast bright and dark shadows under directional studio light.",
+        "caption": "The material trials compare the surface and light transmission of the printed specimens.",
+        "credit": "Chia-Hsuan Chao, Namdev Talluru and JunJie / ETH MAS DFAB, Group 1",
         "fit": "contain"
       }
     ],
     "sections": [
       {
         "title": "A parameter matrix for printed texture",
-        "text": "Physical samples compare variations in layer height, density, pattern subdivisions, pattern length, delay height and movement velocity. Each print layer is sampled into toolpath positions; their number is derived from the path length and the selected subdivision and density settings. Changing these values alters the spacing and distribution of deposited material. The parameter matrix compares printing instructions with the resulting rings and close-up surfaces.",
+        "text": "The initial rings compare layer height, point density, point-count arrangement, textile length, delay height and movement velocity. The density setting relates the number of toolpath positions to each slice length. A separate number setting groups or arranges those positions around the slice, while textile length changes the stagger between alternate points in the XY plane.\n\nThe matrix pairs the instructions with physical specimens. The animated point study shows how changes to sampling reorganize the circular slice before material is deposited.",
         "media": [
           "printing-samples",
-          "printing-parameter-matrix"
+          "printing-parameter-matrix",
+          "printing-density-sequence"
         ]
       },
       {
-        "title": "Continuous paths and dotted deposition",
-        "text": "The study compares continuous, smooth sections with dotted and segmented patterns. Delay-height settings organize the transition between these modes, while changes to robot movement and programmed time delays produce different local textures. Path diagrams and ring samples make the deposition strategies explicit before they are used on a more complex geometry.",
+        "title": "Switching between smooth and dotted paths",
+        "text": "Delay height acts as a switching threshold in the group’s path logic. When the local layer height is below that threshold, the program follows a smooth curve; otherwise it uses the dotted strategy. Rotating the slicing planes changes local layer spacing, so one form can pass between the two surface conditions.\n\nRing samples and close views compare smooth continuous walls with textile-like dot patterns. The deposition diagrams connect these surfaces to the corresponding movement and programmed delay.",
         "media": [
-          "printing-deposition-strategies"
+          "printing-deposition-strategies",
+          "printing-delay-smooth",
+          "printing-delay-dotted"
         ]
       },
       {
-        "title": "Transferring the rule to changing geometry",
-        "text": "The established printing rules were applied to a series of larger forms, including curved and twisting objects. The geometry studies compare how the same local pattern behaves as the overall shape changes, examining both its adaptability and its limitations. The resulting objects, including TPU demonstrators, vary in texture and translucency.",
-        "media": []
+        "title": "Movement, pauses and deposited material",
+        "text": "The physical recordings show two related deposition conditions: a nozzle laying successive strands, and a nozzle making short movements over a dotted curved wall. Repeated movement and programmed pauses place material at the sampled positions. Smaller retractive trials produced denser dot patterns, while changes to layer height, density, number and textile length varied the continuous-path samples.\n\nThese clips document the student printing trials. They provide a visual comparison of the deposition behavior without establishing a production speed or surface-performance benchmark.",
+        "media": [
+          "printing-layer-deposition",
+          "printing-dot-deposition"
+        ]
       },
       {
-        "title": "Project contribution",
-        "text": "Chia-Hsuan Chao and Namdev Talluru developed the parameter, toolpath and physical-sample studies as a collaborative term-one project in ETH MAS DFAB in 2023.",
+        "title": "Rotating slice planes",
+        "text": "Changing the plane orientation moves the study beyond horizontal ring layers. The digital previews show the relationship between successive circular planes, the growth of a leaning wall, and transitions toward a twisting column. Local layer spacing changes as the planes rotate, connecting global form generation with the delay-height surface rule.\n\nThe previews are geometric studies. The physical fabrication sequence provides the separate evidence of robot motion and the printed result.",
+        "media": [
+          "printing-plane-rotation",
+          "printing-tilted-layers",
+          "printing-shape-transition",
+          "printing-twisted-layers"
+        ]
+      },
+      {
+        "title": "Double curvature and the seam",
+        "text": "The group generated a complex double-curvature form and printed it repeatedly. The presentation records that changing the seam improved fabrication across different layer heights. The digital sequence reveals the relationship between the proposed shell, its slicing lines and the seam geometry.\n\nThe specimen family compares smaller leaning and twisting forms with a larger result. The record supports a qualitative fabrication observation; it does not isolate the seam change through a quantified comparison.",
+        "media": [
+          "printing-seam-study",
+          "printing-form-family"
+        ]
+      },
+      {
+        "title": "From robot motion to completed specimens",
+        "text": "The fabrication recording shows the robot changing the nozzle orientation while depositing the twisting specimen. It then presents the completed white form outdoors. A separate presentation sequence compares that object with translucent specimens under studio light.\n\nTogether, the process and object views connect the toolpath studies to physical results. Their texture, openings and translucency can be inspected directly, while the source provides no structural test or calibrated optical measurement.",
+        "media": [
+          "printing-robot-sequence",
+          "printing-specimen-views"
+        ]
+      },
+      {
+        "title": "Material handling and remaining limits",
+        "text": "The group reports that PETG required more physical attention than TPU, which handled the parameter changes more easily in these trials because of its flexibility. The presentation associates useful delay-height changes with a 0.3–2.0 mm layer-height difference. This is a reported study range, rather than a general material specification.\n\nThe team also encountered a limit in the number of points it could send through its RTDE robot-control workflow, described as a limitation of its technical experience. Further plane-angle studies, a two-arm setup that could control the print-bed angle, and architectural elements beyond columns remained future proposals.",
+        "media": [
+          "printing-material-trials"
+        ]
+      },
+      {
+        "title": "Collaborative study",
+        "text": "Developed in Term 1 of the 2023–24 MAS DFAB cohort, the project combines parameter development, toolpath studies and physical printing. The supplied presentation names JosHsuan, Namdev and JunJie as Group 1. My contribution is presented within that collaboration; the available record does not assign individual authorship to each parameter, animation or specimen.",
         "media": []
       }
     ],
     "credits": [
-      "Collaborative project: Chia-Hsuan Chao and Namdev Talluru. Printing Architecture, ETH MAS Architecture and Digital Fabrication, 2023.",
-      "Tutors: Ananya Kango, Simon Griffioen and Petrus Aejmelaeus-Lindström.",
-      "Photography: Chia-Hsuan Chao where credited in the source portfolio; other process images and diagrams from ETH MAS DFAB project documentation."
+      "Group 1: Chia-Hsuan Chao (JosHsuan), Namdev Talluru and JunJie, named in JosHsuan_Group01_PrintingArchitecture. ETH MAS DFAB 2023–24, Term 1, Printing Architecture.",
+      "Tutors: Ananya Kango, Simon Griffioen and Petrus Aejmelaeus-Lindström. Images, digital studies and fabrication recordings: Group 1 / ETH MAS DFAB; existing individually credited photography: Chia-Hsuan Chao.",
+      "The presentation supplements the original portfolio with slice-plane, seam and material observations. Companion Group 1 material supplies a second deposition recording. Digital previews and physical recordings are identified separately."
     ]
   },
   {
@@ -929,6 +1157,56 @@ export const projects: Project[] = [
         "alt": "Concept rendering of cylindrical and rounded patterned lamps arranged in a dark interior",
         "caption": "Concept rendering of a proposed family of light shells, extending the pattern to different geometries.",
         "credit": "Paul Jaeggi, Behnur Baiju, Kevin Seav and Chia-Hsuan Chao / ETH MAS DFAB, Group Red"
+      },
+      {
+        "id": "hc3dp-extrusion-simulation",
+        "alt": "An animated digital nozzle follows a folded hollow extrusion path beside its corresponding red tool frames.",
+        "caption": "The digital extrusion preview relates nozzle motion to the folded strand and its tool frames.",
+        "credit": "Paul Jaeggi, Behnur Baiju, Kevin Seav and Chia-Hsuan Chao / ETH MAS DFAB, Group Red",
+        "video": {
+          "label": "Simulation",
+          "duration": 3.91
+        }
+      },
+      {
+        "id": "hc3dp-extrusion-detail",
+        "alt": "A close-up recording shows a nozzle depositing translucent inflated hollow segments beside previously printed strands.",
+        "caption": "The fabrication close-up records hollow extrusion and contact with adjacent strands.",
+        "credit": "Paul Jaeggi, Behnur Baiju, Kevin Seav and Chia-Hsuan Chao / ETH MAS DFAB, Group Red",
+        "video": {
+          "label": "Process recording",
+          "duration": 12.63
+        }
+      },
+      {
+        "id": "hc3dp-contact-simulation",
+        "alt": "A digital nozzle advances along inflated arched strands while the adjacent red frame sequence shows the programmed deposition path.",
+        "caption": "The digital path preview accompanies the physical contact and overinflation studies.",
+        "credit": "Paul Jaeggi, Behnur Baiju, Kevin Seav and Chia-Hsuan Chao / ETH MAS DFAB, Group Red",
+        "video": {
+          "label": "Simulation",
+          "duration": 8.37
+        }
+      },
+      {
+        "id": "hc3dp-point-comparison",
+        "alt": "Four synchronized digital nozzle previews compare top-row, middle-row and bottom-row shifts and tool angle, each labeled above its panel.",
+        "caption": "Four recorded variations compare independent point-row shifts and tool angle.",
+        "credit": "Paul Jaeggi, Behnur Baiju, Kevin Seav and Chia-Hsuan Chao / ETH MAS DFAB, Group Red",
+        "video": {
+          "label": "Simulation",
+          "duration": 2.17
+        }
+      },
+      {
+        "id": "hc3dp-pattern-comparison",
+        "alt": "Four labeled animated digital extrusion previews compare lateral shift, pattern depth, dip height and pattern density.",
+        "caption": "Four recorded variations compare lateral shift, depth, dip and density.",
+        "credit": "Paul Jaeggi, Behnur Baiju, Kevin Seav and Chia-Hsuan Chao / ETH MAS DFAB, Group Red",
+        "video": {
+          "label": "Simulation",
+          "duration": 2.17
+        }
       }
     ],
     "sections": [
@@ -944,7 +1222,9 @@ export const projects: Project[] = [
         "text": "Each layer is represented by bottom, middle and top point rows. Dividing these rows by the pattern length creates corresponding points that can be connected in a repeated sequence. The path logic alternates between the rows, adding or skipping selected points to connect neighboring segments.\n\nSeparate functions control layer count and height, seam width, pattern depth and density. Shifting the three point rows independently changes the shape of the folded unit. Lateral shifts, a dip height and sine-based scaling provide further variations without replacing the underlying sequence.",
         "media": [
           "hc3dp-layer-points",
-          "hc3dp-path-logic"
+          "hc3dp-path-logic",
+          "hc3dp-point-comparison",
+          "hc3dp-pattern-comparison"
         ]
       },
       {
@@ -952,14 +1232,16 @@ export const projects: Project[] = [
         "text": "Tool frames follow the path tangents and can be tilted to change how the strand leaves the nozzle. The presentation records explored frame-angle ranges of 0–30° for the ABB setup and 0–45° for the UR5 setup. These are ranges used in the study, rather than general limits of either robot.\n\nThe workflow separates geometry and slicing from robot communication. JSON transfers the generated data into Python and COMPAS-based processing. The diagram distinguishes the UR control routes from the ABB route, making adaptation between the two setups part of the fabrication work.",
         "media": [
           "hc3dp-tool-frames",
-          "hc3dp-robot-workflow"
+          "hc3dp-robot-workflow",
+          "hc3dp-extrusion-simulation"
         ]
       },
       {
         "title": "Extrusion, inflation and cooling",
         "text": "The printing tests use hollow-core extrusion to form translucent strands. Path movement, air pressure and cooling jointly affect the inflated cross-section and its contact with the preceding material. The UR5 PETG trial reports a nozzle radius of 6 mm, a temperature of 210°C and an extrusion speed of 8 mm/s. Its first layer is 11 mm high, with subsequent layers at 18 mm.\n\nThe team found the process sensitive to air pressure and the cooling system. Moving between robot setups required additional exploration, and each new segment had to cool sufficiently for the next deposition. The geometric path therefore had to be adjusted in relation to the material response.",
         "media": [
-          "hc3dp-printing"
+          "hc3dp-printing",
+          "hc3dp-extrusion-detail"
         ]
       },
       {
@@ -968,7 +1250,8 @@ export const projects: Project[] = [
         "media": [
           "hc3dp-inflation-contact",
           "hc3dp-arch-tests",
-          "hc3dp-overinflation"
+          "hc3dp-overinflation",
+          "hc3dp-contact-simulation"
         ]
       },
       {
@@ -1077,15 +1360,39 @@ export const projects: Project[] = [
       },
       {
         "id": "harmonic-robot-assembly",
-        "alt": "A robotic arm with a vacuum pickup tool placing wooden blocks during a stacking trial",
-        "caption": "Still from the documented robotic pick-and-place sequence.",
-        "credit": "Paul, JosHsuan and Jiaxiang / ETH MAS DFAB, Group 3"
+        "alt": "A robotic arm picks up and places wooden blocks into a growing family of offset and rotated columns on the worktable.",
+        "caption": "The recorded pick-and-place sequence builds the wooden-block column family.",
+        "credit": "Paul, JosHsuan and Jiaxiang / ETH MAS DFAB, Group 3",
+        "video": {
+          "label": "Process recording",
+          "duration": 8.83
+        }
       },
       {
         "id": "harmonic-failed-stack",
         "alt": "Wooden blocks lying across the worktable after a stacking trial",
         "caption": "An unsuccessful stack is documented alongside the standing column trials.",
         "credit": "Paul, JosHsuan and Jiaxiang / ETH MAS DFAB, Group 3"
+      },
+      {
+        "id": "harmonic-rotation-sequence",
+        "alt": "Animated digital block columns change their rotation and lateral offsets while the supporting footprints spread beneath the stack.",
+        "caption": "The animated column study compares rotation, lateral displacement and the supporting footprint.",
+        "credit": "Paul, JosHsuan and Jiaxiang / ETH MAS DFAB, Group 3",
+        "video": {
+          "label": "Simulation",
+          "duration": 10.76
+        }
+      },
+      {
+        "id": "harmonic-weight-envelope",
+        "alt": "An animated rectangular footprint and curved movement envelope change alongside the dimensionless weight and rotation range labels.",
+        "caption": "The movement envelope changes as the rotation study varies its dimensionless weight parameter.",
+        "credit": "Paul, JosHsuan and Jiaxiang / ETH MAS DFAB, Group 3",
+        "video": {
+          "label": "Simulation",
+          "duration": 5.99
+        }
       }
     ],
     "sections": [
@@ -1094,14 +1401,16 @@ export const projects: Project[] = [
         "text": "The study starts with the harmonic stacking diagram, where successive overhangs follow the reciprocal sequence 1/2, 1/4, 1/6 and onward to 1/(2n). The team extends this one-directional arrangement through block rotation and lateral movement.\n\nThe geometric verification distinguishes the center of an individual block from the center of gravity relevant to the supported stack. Movement and rotation are checked against the footprint of the supporting block. The presentation compares stable and unstable configurations, making overlap and the balance point central design variables.",
         "media": [
           "harmonic-balance-rotation",
-          "harmonic-balance-support"
+          "harmonic-balance-support",
+          "harmonic-rotation-sequence"
         ]
       },
       {
         "title": "Rotation and movement weighting",
         "text": "A full rotation study varies the dimensionless weight parameter from 0.1 to 1. The footprint diagrams show how the movement envelope changes with this value over a ±360° rotation range. Here, weight is an algorithm parameter rather than a stated block mass.\n\nThe bottom-up examples compare a single column over a 360° rotation range with four columns over a 90° range, using a weight value of 0.7. These studies establish different families of offsets before robotic assembly.",
         "media": [
-          "harmonic-weight-study"
+          "harmonic-weight-study",
+          "harmonic-weight-envelope"
         ]
       },
       {
@@ -1479,24 +1788,36 @@ export const projects: Project[] = [
       },
       {
         "id": "planet-procedural-elements",
-        "alt": "Procedural tree, leaves, stone and mist-like mesh elements shown together on a turquoise background",
-        "caption": "A still from the element study shows the geometric vocabulary before placement on the planet.",
+        "alt": "A recorded procedural study varies tree branches, leaves, rocks and mist-like mesh elements on a turquoise background.",
+        "caption": "The element sequence shows the geometric vocabulary before placement on the planet.",
         "credit": "Chia-Hsuan Chao / Computational Art presentation",
-        "fit": "contain"
+        "fit": "contain",
+        "video": {
+          "label": "Simulation",
+          "duration": 6
+        }
       },
       {
         "id": "planet-mesh-perturbation",
-        "alt": "Triangular spherical mesh with randomly displaced vertices on a turquoise background",
-        "caption": "Small random displacements of mesh vertices create the host landscape.",
+        "alt": "The vertices and colors of a triangular spherical mesh change through a sequence of generated landscapes on a turquoise background.",
+        "caption": "The mesh sequence compares randomly perturbed host landscapes.",
         "credit": "Chia-Hsuan Chao / Computational Art presentation",
-        "fit": "contain"
+        "fit": "contain",
+        "video": {
+          "label": "Simulation",
+          "duration": 6
+        }
       },
       {
         "id": "planet-oriented-elements",
-        "alt": "Generated colorful spherical garden populated with trees and plants against a turquoise background",
-        "caption": "Procedural elements are located and oriented around the three-dimensional planet.",
+        "alt": "A recorded output sequence compares colorful spherical gardens with changing tree, plant and mist configurations against a turquoise background.",
+        "caption": "The output sequence compares populated planets as colors and element configurations change.",
         "credit": "Chia-Hsuan Chao / Computational Art presentation",
-        "fit": "contain"
+        "fit": "contain",
+        "video": {
+          "label": "Simulation",
+          "duration": 39
+        }
       }
     ],
     "sections": [
@@ -1538,7 +1859,7 @@ export const projects: Project[] = [
     "credits": [
       "ETH MAS DFAB, Term 1, 2023. Tutors: Ananya Kango, Simon Griffioen and Petrus Aejmelaeus-Lindström.",
       "Generative geometry and visual composition: Chia-Hsuan Chao. Artistic reference: Harold Cohen. Tools: Rhino.Geometry and GHPython.",
-      "Additional acknowledgments in Computational Art_JosHsuan: Joana and Kyle for help with aesthetic decisions. Presentation figures and process stills: Chia-Hsuan Chao."
+      "Additional acknowledgments in Computational Art_JosHsuan: Joana and Kyle for help with aesthetic decisions. Presentation figures and recorded generation studies: Chia-Hsuan Chao."
     ]
   }
 ]

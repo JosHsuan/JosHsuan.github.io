@@ -20,8 +20,9 @@ Embedded media is extracted directly rather than recreated. Exports preserve
 colors and aspect ratios, flatten slide transparency onto white where needed,
 omit embedded metadata, and use WebP at up to 1600 pixels with 640-pixel
 thumbnails. GIF frame indices are recorded in [media provenance](media-provenance.json).
-Only fixed stills are published, preserving the existing image and reduced-motion
-behavior. Full presentations, logos, blank template slides and source caches are
+The first supplement published fixed stills. The subsequent
+[motion supplement](motion-supplement.md) restores the full sequences with manual
+playback and static posters. Full presentations, logos, blank template slides and source caches are
 not distributed.
 
 ## Attribution and limits

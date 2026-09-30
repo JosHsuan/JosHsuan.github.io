@@ -162,3 +162,28 @@ report is kept in the ignored `.asset-cache/live-verification.json`.
   by SHA-256, with text line endings normalized. All seven retired case/media
   paths continue to return the current custom HTTP 404. The comparison report
   remains in the ignored `.asset-cache/live-verification.json`.
+
+## Printing and motion supplement verification
+
+- The existing Dot-Based Non-Planar Printing case expands from four to eight
+  sections using the supplied Group 1 deck, with JunJie added to the team credit.
+  Slice-plane, seam, material and fabrication evidence is mapped in the
+  [motion source review](motion-supplement.md).
+- The inventory remains 15 Work cases and four Lab studies, with six featured
+  cases. It now contains 82 sections, 119 attributed media figures and 26 clips
+  across seven cases. Static posters keep the index still; clips never autoplay.
+- All 26 clips were individually played and paused in the production browser
+  at 320 × 568. Every player decoded its expected video, with no playback error.
+  All seven routes had zero horizontal content overflow and no WebGL canvas.
+- Desktop review at 1280 × 720 verifies the expanded case layout and manual
+  playback. Navigating to another section pauses a clip when it leaves the
+  reading viewport. A dialog pauses the inline player, plays separately and
+  stops on Escape, returning focus to its enlargement trigger.
+- The video dialog was reviewed at 390 × 844, with readable captions/credits
+  and no horizontal overflow. Viewport overrides were reset after review.
+- All 23 automated tests pass, including MP4 atom structure, streaming metadata,
+  source timing, visual-only tracks, exact provenance and poster availability.
+  TypeScript, the production build and static release verification pass for 19
+  complete cases and 399 local references. Static players have native manual
+  controls and preserve captions and credits without JavaScript.
+- Publication and post-deployment verification are recorded below after execution.

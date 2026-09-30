@@ -7,6 +7,8 @@
 
 ## Current phase
 
+- September 30 motion supplement: the owner authorizes supplementing Dot-Based Non-Planar Printing from the Group 1 presentation and reviewing prior archives for GIF/video content, integrating suitable recordings and publishing directly. Preserve project/team credits, distinguish simulations from physical and interface recordings, and keep all playback manual with still posters and pause controls. See `docs/motion-supplement.md`.
+
 - September 30 Credits cleanup: the owner requests removing the interface-reference section and the historical Thinker section from the public Credits page. Keep the retained mesh and its accompanying attribution/license files. This overrides earlier instructions to display those two sections on that page.
 
 - September 30 presentation supplement: the owner authorizes completing and publishing two new cases from the Light Lights and Robotic Bricks presentations and enriching the existing Planet of Colorful Garden case from Computational Art_JosHsuan. Preserve the current case architecture and glass workspace. See `docs/presentation-supplement.md` for slide coverage, team credits and source limits. This request explicitly authorizes direct publication after validation.

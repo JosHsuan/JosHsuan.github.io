@@ -23,18 +23,23 @@ for (const [section, items] of [['work', projects], ['lab', lab]]) for (const pr
     requireContent(sections[index], `<h2>${escape(item.title)}</h2>`, 'section heading')
     for (const paragraph of item.text.split('\n\n')) requireContent(sections[index], `<p>${escape(paragraph)}</p>`, 'section paragraph')
     const media = item.media === undefined ? project.gallery.slice(index, index + 1) : project.gallery.filter(image => item.media.includes(image.id))
-    for (const image of media) requireContent(sections[index], `src="/media/${image.id}.webp"`, 'assigned section image')
+    for (const image of media) requireContent(sections[index], `${image.video ? 'poster' : 'src'}="/media/${image.id}.webp"`, 'assigned section media')
   }
   const figures = [...main.matchAll(/<figure>([\s\S]*?)<\/figure>/g)].map(match => match[1])
   for (const media of [project.cover, ...project.gallery]) {
-    const matches = figures.filter(figure => figure.includes(`src="/media/${media.id}.webp"`))
+    const matches = figures.filter(figure => figure.includes(`${media.video ? 'poster' : 'src'}="/media/${media.id}.webp"`))
     if (matches.length !== 1) throw new Error(`Expected one static figure for ${media.id} in ${path}; found ${matches.length}`)
-    requireContent(matches[0], `alt="${escape(media.alt)}"`, 'image text alternative')
+    requireContent(matches[0], `${media.video ? 'aria-label' : 'alt'}="${escape(media.alt)}"`, 'media text alternative')
+    if (media.video) {
+      requireContent(matches[0], `src="/media/${media.id}.mp4"`, 'playable video')
+      requireContent(matches[0], 'controls playsinline muted preload="none"', 'manual video controls')
+      if (/autoplay|\sloop(?:\s|>)/.test(matches[0])) throw new Error(`Unexpected automatic motion: ${media.id}`)
+    }
     requireContent(matches[0], `<figcaption>${escape(media.caption)}<br><small>${escape(media.credit)}</small></figcaption>`, 'image caption and credit')
   }
   for (const link of project.links ?? []) requireContent(main, `href="${escape(link.url)}"`, 'project source link')
   requireContent(html, `<link rel="canonical" href="https://joshsuan.github.io/${section}/${project.slug}/"`, 'case canonical link')
-  for (const match of html.matchAll(/(?:src|href)="(\/(?!\/)[^"#]*)"/g)) {
+  for (const match of html.matchAll(/(?:src|href|poster)="(\/(?!\/)[^"#]*)"/g)) {
     const target = match[1].endsWith('/') ? `${match[1]}index.html` : match[1]
     await access(`dist${target}`)
     checked++

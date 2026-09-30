@@ -700,15 +700,6 @@
     "export": "/media/harmonic-attractor.webp"
   },
   {
-    "id": "harmonic-robot-assembly",
-    "source": "Group_3_JJP_Paul,JosHsuan,Jiaxiang.pptx, slide 9, ppt/media/image47.gif, GIF frame 20 (zero-based)",
-    "originalSize": [
-      1920,
-      1080
-    ],
-    "export": "/media/harmonic-robot-assembly.webp"
-  },
-  {
     "id": "harmonic-failed-stack",
     "source": "Group_3_JJP_Paul,JosHsuan,Jiaxiang.pptx, slide 10, ppt/media/image44.jpg",
     "originalSize": [
@@ -716,6 +707,78 @@
       1276
     ],
     "export": "/media/harmonic-failed-stack.webp"
+  },
+  {
+    "id": "xr-global-adaptation",
+    "source": "T3_Interview.pptx, slide 2, ppt/media/image11.gif, GIF frame 110 (zero-based)",
+    "originalSize": [
+      540,
+      1200
+    ],
+    "export": "/media/xr-global-adaptation.webp"
+  },
+  {
+    "id": "xr-live-rod-tracking",
+    "source": "T3_Interview.pptx, slide 2, ppt/media/image12.gif, GIF frame 170 (zero-based)",
+    "originalSize": [
+      540,
+      720
+    ],
+    "export": "/media/xr-live-rod-tracking.webp"
+  },
+  {
+    "id": "caschlatsch-module-selection",
+    "source": "T3_Interview.pptx, slide 8, ppt/media/image34.gif, GIF frame 80 (zero-based), crop (170, 0, 530, 700)",
+    "originalSize": [
+      360,
+      700
+    ],
+    "export": "/media/caschlatsch-module-selection.webp"
+  },
+  {
+    "id": "caschlatsch-beam-guidance",
+    "source": "T3_Interview.pptx, slide 9, ppt/media/image37.gif, GIF frame 160 (zero-based), crop (170, 0, 530, 700)",
+    "originalSize": [
+      360,
+      700
+    ],
+    "export": "/media/caschlatsch-beam-guidance.webp"
+  },
+  {
+    "id": "vstick-robot-placement",
+    "source": "T3_Interview.pptx, slide 11, ppt/media/image45.gif, GIF frame 100 (zero-based)",
+    "originalSize": [
+      517,
+      618
+    ],
+    "export": "/media/vstick-robot-placement.webp"
+  },
+  {
+    "id": "harmonic-rotation-sequence",
+    "source": "Group_3_JJP_Paul,JosHsuan,Jiaxiang.pptx, slide 4, ppt/media/image31.gif, GIF frame 60 (zero-based)",
+    "originalSize": [
+      640,
+      920
+    ],
+    "export": "/media/harmonic-rotation-sequence.webp"
+  },
+  {
+    "id": "harmonic-weight-envelope",
+    "source": "Group_3_JJP_Paul,JosHsuan,Jiaxiang.pptx, slide 5, ppt/media/image18.gif, GIF frame 65 (zero-based)",
+    "originalSize": [
+      518,
+      511
+    ],
+    "export": "/media/harmonic-weight-envelope.webp"
+  },
+  {
+    "id": "harmonic-robot-assembly",
+    "source": "Group_3_JJP_Paul,JosHsuan,Jiaxiang.pptx, slide 9, ppt/media/image47.gif, GIF frame 20 (zero-based)",
+    "originalSize": [
+      1920,
+      1080
+    ],
+    "export": "/media/harmonic-robot-assembly.webp"
   },
   {
     "id": "planet-procedural-elements",
@@ -743,5 +806,176 @@
       1666
     ],
     "export": "/media/planet-oriented-elements.webp"
+  },
+  {
+    "id": "printing-density-sequence",
+    "source": "JosHsuan_Group01_PrintingArchitecture.pptx, slide 8, ppt/media/image28.gif, GIF frame 90 (zero-based)",
+    "originalSize": [
+      1115,
+      1077
+    ],
+    "export": "/media/printing-density-sequence.webp"
+  },
+  {
+    "id": "printing-plane-rotation",
+    "source": "JosHsuan_Group01_PrintingArchitecture.pptx, slide 12, ppt/media/image46.gif, GIF frame 75 (zero-based)",
+    "originalSize": [
+      1115,
+      1077
+    ],
+    "export": "/media/printing-plane-rotation.webp"
+  },
+  {
+    "id": "printing-tilted-layers",
+    "source": "JosHsuan_Group01_PrintingArchitecture.pptx, slide 12, ppt/media/image48.gif, GIF frame 60 (zero-based)",
+    "originalSize": [
+      806,
+      1065
+    ],
+    "export": "/media/printing-tilted-layers.webp"
+  },
+  {
+    "id": "printing-shape-transition",
+    "source": "JosHsuan_Group01_PrintingArchitecture.pptx, slide 12, ppt/media/image49.gif, GIF frame 30 (zero-based)",
+    "originalSize": [
+      1115,
+      1077
+    ],
+    "export": "/media/printing-shape-transition.webp"
+  },
+  {
+    "id": "printing-twisted-layers",
+    "source": "JosHsuan_Group01_PrintingArchitecture.pptx, slide 12, ppt/media/image51.gif, GIF frame 110 (zero-based)",
+    "originalSize": [
+      1115,
+      1077
+    ],
+    "export": "/media/printing-twisted-layers.webp"
+  },
+  {
+    "id": "printing-seam-study",
+    "source": "JosHsuan_Group01_PrintingArchitecture.pptx, slide 13, ppt/media/image59.gif, GIF frame 150 (zero-based)",
+    "originalSize": [
+      1115,
+      1077
+    ],
+    "export": "/media/printing-seam-study.webp"
+  },
+  {
+    "id": "printing-specimen-views",
+    "source": "JosHsuan_Group01_PrintingArchitecture.pptx, slide 18, ppt/media/image60.gif, GIF frame 12 (zero-based)",
+    "originalSize": [
+      2500,
+      1253
+    ],
+    "export": "/media/printing-specimen-views.webp"
+  },
+  {
+    "id": "printing-dot-deposition",
+    "source": "JosHsuan_Group01_PrintingArchitecture.pptx, slide 10, ppt/media/image61.gif, GIF frame 12 (zero-based)",
+    "originalSize": [
+      2500,
+      1304
+    ],
+    "export": "/media/printing-dot-deposition.webp"
+  },
+  {
+    "id": "printing-layer-deposition",
+    "source": "Namdev_Group01_PrintingArchitecture.pptx, slide 2, ppt/media/image5.gif, GIF frame 20 (zero-based)",
+    "originalSize": [
+      600,
+      338
+    ],
+    "export": "/media/printing-layer-deposition.webp"
+  },
+  {
+    "id": "hc3dp-extrusion-simulation",
+    "source": "Final Presentation Group-Red.pptx, slide 11, ppt/media/image67.gif, GIF frame 12 (zero-based)",
+    "originalSize": [
+      2307,
+      2500
+    ],
+    "export": "/media/hc3dp-extrusion-simulation.webp"
+  },
+  {
+    "id": "hc3dp-extrusion-detail",
+    "source": "Final Presentation Group-Red.pptx, slide 27, ppt/media/image75.gif, GIF frame 15 (zero-based)",
+    "originalSize": [
+      2500,
+      1258
+    ],
+    "export": "/media/hc3dp-extrusion-detail.webp"
+  },
+  {
+    "id": "hc3dp-contact-simulation",
+    "source": "Final Presentation Group-Red.pptx, slide 18, ppt/media/image74.gif, GIF frame 20 (zero-based)",
+    "originalSize": [
+      2307,
+      2500
+    ],
+    "export": "/media/hc3dp-contact-simulation.webp"
+  },
+  {
+    "id": "printing-robot-sequence",
+    "source": "Printing Architecture / Group 1 / VIDEO/Sequence 01.mp4, frame at 2 s",
+    "originalSize": [
+      1920,
+      1080
+    ],
+    "export": "/media/printing-robot-sequence.webp"
+  },
+  {
+    "id": "printing-delay-smooth",
+    "source": "JosHsuan_Group01_PrintingArchitecture.pptx, slide 9, ppt/media/image40.jpg",
+    "originalSize": [
+      2048,
+      1365
+    ],
+    "export": "/media/printing-delay-smooth.webp"
+  },
+  {
+    "id": "printing-delay-dotted",
+    "source": "JosHsuan_Group01_PrintingArchitecture.pptx, slide 9, ppt/media/image42.jpg",
+    "originalSize": [
+      2048,
+      1365
+    ],
+    "export": "/media/printing-delay-dotted.webp"
+  },
+  {
+    "id": "printing-form-family",
+    "source": "JosHsuan_Group01_PrintingArchitecture.pptx, slide 13, ppt/media/image50.png",
+    "originalSize": [
+      2048,
+      1182
+    ],
+    "export": "/media/printing-form-family.webp"
+  },
+  {
+    "id": "printing-material-trials",
+    "source": "JosHsuan_Group01_PrintingArchitecture.pptx, slide 16, ppt/media/image58.jpg",
+    "originalSize": [
+      2048,
+      1365
+    ],
+    "export": "/media/printing-material-trials.webp"
+  },
+  {
+    "id": "hc3dp-point-comparison",
+    "source": "Final Presentation Group-Red.pptx, slide 14, comparison of ppt/media/image71.gif, ppt/media/image69.gif, ppt/media/image73.gif, ppt/media/image68.gif, GIF frame 15, crop [441, 580, 1766, 1897], labels from slide positions",
+    "originalSize": [
+      1440,
+      1680
+    ],
+    "export": "/media/hc3dp-point-comparison.webp"
+  },
+  {
+    "id": "hc3dp-pattern-comparison",
+    "source": "Final Presentation Group-Red.pptx, slide 15, comparison of ppt/media/image70.gif, ppt/media/image66.gif, ppt/media/image72.gif, ppt/media/image65.gif, GIF frame 15, crop [441, 580, 1766, 1897], labels from slide positions",
+    "originalSize": [
+      1440,
+      1680
+    ],
+    "export": "/media/hc3dp-pattern-comparison.webp"
   }
 ]
