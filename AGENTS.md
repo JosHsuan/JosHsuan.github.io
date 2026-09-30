@@ -7,6 +7,8 @@
 
 ## Current phase
 
+- September 30 Credits cleanup: the owner requests removing the interface-reference section and the historical Thinker section from the public Credits page. Keep the retained mesh and its accompanying attribution/license files. This overrides earlier instructions to display those two sections on that page.
+
 - September 30 presentation supplement: the owner authorizes completing and publishing two new cases from the Light Lights and Robotic Bricks presentations and enriching the existing Planet of Colorful Garden case from Computational Art_JosHsuan. Preserve the current case architecture and glass workspace. See `docs/presentation-supplement.md` for slide coverage, team credits and source limits. This request explicitly authorizes direct publication after validation.
 
 - September 30 content revision: remove Woodflow and ChinPaoSan from the published portfolio, including their routes and dedicated media. Expand all retained cases against the original portfolio's methods, diagrams, fabrication and outcomes. Use factual research narratives informed by ITECH, IntCDC, ETH ITA and Gramazio Kohler Research, and remove generic slogans across the interface and case copy. Retain source attribution, bounded individual contributions and the approved glass workspace behavior. See `docs/content-revision.md`.

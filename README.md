@@ -55,5 +55,6 @@ GitHub Actions. Live site: <https://joshsuan.github.io/>.
 
 See [release notes](docs/portfolio-release.md) and the
 [content revision](docs/content-revision.md) for source decisions and verification.
-The [credits page](public/credits.html) preserves project attribution and the
-retained historical Thinker mesh’s CC BY-SA 4.0 license.
+The [credits page](public/credits.html) preserves project attribution. The retained
+historical Thinker mesh’s attribution and CC BY-SA 4.0 terms remain in its
+[license file](public/licenses/thinker.md).
