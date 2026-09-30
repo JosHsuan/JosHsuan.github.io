@@ -1,0 +1,416 @@
+[
+  {
+    "id": "echo-shared",
+    "source": "EchoXR03.ai, physical page 1, image Im13.tif",
+    "originalSize": [
+      1800,
+      1008
+    ],
+    "export": "/media/echo-shared.webp"
+  },
+  {
+    "id": "echo-room",
+    "source": "EchoXR03.ai, physical page 1, image Im2.tif",
+    "originalSize": [
+      1800,
+      834
+    ],
+    "export": "/media/echo-room.webp"
+  },
+  {
+    "id": "echo-gesture",
+    "source": "EchoXR04.ai, physical page 1, image Im0.tif",
+    "originalSize": [
+      1800,
+      1287
+    ],
+    "export": "/media/echo-gesture.webp"
+  },
+  {
+    "id": "echo-setup",
+    "source": "Materials/EchoXR/HardwareArchitectureSetUp.png",
+    "originalSize": [
+      4961,
+      3508
+    ],
+    "export": "/media/echo-setup.webp"
+  },
+  {
+    "id": "xr-structure",
+    "source": "Materials/MAS_T3_MoCap/GlobalShape-05.jpg",
+    "originalSize": [
+      2048,
+      1365
+    ],
+    "export": "/media/xr-structure.webp"
+  },
+  {
+    "id": "xr-guidance",
+    "source": "Materials/MAS_T3_MoCap/ModuleAssembly-32.jpg",
+    "originalSize": [
+      2048,
+      1365
+    ],
+    "export": "/media/xr-guidance.webp"
+  },
+  {
+    "id": "xr-assembly",
+    "source": "Materials/MAS_T3_MoCap/GlobalShapeAssembly-11.jpg",
+    "originalSize": [
+      2048,
+      1365
+    ],
+    "export": "/media/xr-assembly.webp"
+  },
+  {
+    "id": "metal-prototype",
+    "source": "Materials/Model_Photo/Photo01.png",
+    "originalSize": [
+      3990,
+      2079
+    ],
+    "export": "/media/metal-prototype.webp"
+  },
+  {
+    "id": "metal-detail",
+    "source": "Materials/Model_Photo/IMG_E0269.JPG",
+    "originalSize": [
+      4032,
+      3024
+    ],
+    "export": "/media/metal-detail.webp"
+  },
+  {
+    "id": "metal-analysis",
+    "source": "Materials/Model_Photo/00.jpg",
+    "originalSize": [
+      1417,
+      945
+    ],
+    "export": "/media/metal-analysis.webp"
+  },
+  {
+    "id": "caschlatsch-built",
+    "source": "Materials/catchlatch/Caschlatsch/DSCF2686.JPG",
+    "originalSize": [
+      2080,
+      3120
+    ],
+    "export": "/media/caschlatsch-built.webp"
+  },
+  {
+    "id": "caschlatsch-model",
+    "source": "Materials/catchlatch/catchlatch_overall.jpg",
+    "originalSize": [
+      4961,
+      3508
+    ],
+    "export": "/media/caschlatsch-model.webp"
+  },
+  {
+    "id": "caschlatsch-joint",
+    "source": "Materials/catchlatch/Caschlatsch/DSCF2753.JPG",
+    "originalSize": [
+      3120,
+      2080
+    ],
+    "export": "/media/caschlatsch-joint.webp"
+  },
+  {
+    "id": "installation-built",
+    "source": "Materials/InstallationArt06.png",
+    "originalSize": [
+      4608,
+      3456
+    ],
+    "export": "/media/installation-built.webp"
+  },
+  {
+    "id": "installation-panels",
+    "source": "Materials/InstallationArt02.png",
+    "originalSize": [
+      5184,
+      2912
+    ],
+    "export": "/media/installation-panels.webp"
+  },
+  {
+    "id": "installation-assembly",
+    "source": "Materials/AssemblyPhoto.png",
+    "originalSize": [
+      1477,
+      1108
+    ],
+    "export": "/media/installation-assembly.webp"
+  },
+  {
+    "id": "installation-process",
+    "source": "Materials/InstallationArtProcess01.jpg",
+    "originalSize": [
+      3508,
+      2480
+    ],
+    "export": "/media/installation-process.webp"
+  },
+  {
+    "id": "heat-machine",
+    "source": "Materials/S__230604807.jpg",
+    "originalSize": [
+      4032,
+      3024
+    ],
+    "export": "/media/heat-machine.webp"
+  },
+  {
+    "id": "heat-material",
+    "source": "Materials/RotateCutting/IMG_9898.JPG",
+    "originalSize": [
+      3456,
+      3456
+    ],
+    "export": "/media/heat-material.webp"
+  },
+  {
+    "id": "heat-detail",
+    "source": "Materials/RotateCutting/IMG_9890.JPG",
+    "originalSize": [
+      3456,
+      3456
+    ],
+    "export": "/media/heat-detail.webp"
+  },
+  {
+    "id": "robotic-assembly",
+    "source": "Materials/Spacial_Assemblies/DSCF0687.jpg",
+    "originalSize": [
+      3049,
+      2033
+    ],
+    "export": "/media/robotic-assembly.webp"
+  },
+  {
+    "id": "robotic-sequence",
+    "source": "Materials/Spacial_Assemblies/visual2.jpg",
+    "originalSize": [
+      4961,
+      4961
+    ],
+    "export": "/media/robotic-sequence.webp"
+  },
+  {
+    "id": "robotic-prototype",
+    "source": "Materials/Spacial_Assemblies/DSCF0699.jpg",
+    "originalSize": [
+      3044,
+      2029
+    ],
+    "export": "/media/robotic-prototype.webp"
+  },
+  {
+    "id": "printing-object",
+    "source": "JosHsuan_CV&Portfolio_2025.Ver2.pdf, physical page 54, image Im1.jp2",
+    "originalSize": [
+      1800,
+      1169
+    ],
+    "export": "/media/printing-object.webp"
+  },
+  {
+    "id": "printing-samples",
+    "source": "JosHsuan_CV&Portfolio_2025.Ver2.pdf, physical page 54, image Im0.jp2",
+    "originalSize": [
+      1800,
+      879
+    ],
+    "export": "/media/printing-samples.webp"
+  },
+  {
+    "id": "inside-out",
+    "source": "Materials/JosHsuan_Portfolio 38.jpg",
+    "originalSize": [
+      2485,
+      3508
+    ],
+    "export": "/media/inside-out.webp"
+  },
+  {
+    "id": "inside-out-workshop",
+    "source": "Materials/IDF2019.jpg",
+    "originalSize": [
+      4032,
+      3024
+    ],
+    "export": "/media/inside-out-workshop.webp"
+  },
+  {
+    "id": "mesh-sphere",
+    "source": "JosHsuan_CV&Portfolio_2025.Ver2.pdf, physical page 64, image Im1.jp2",
+    "originalSize": [
+      1800,
+      1050
+    ],
+    "export": "/media/mesh-sphere.webp"
+  },
+  {
+    "id": "mesh-detail",
+    "source": "JosHsuan_CV&Portfolio_2025.Ver2.pdf, physical page 64, image Im0.jp2",
+    "originalSize": [
+      1800,
+      1222
+    ],
+    "export": "/media/mesh-detail.webp"
+  },
+  {
+    "id": "planet-garden",
+    "source": "JosHsuan_CV&Portfolio_2025.Ver2.pdf, physical page 67, image Im0.jp2",
+    "originalSize": [
+      1273,
+      1800
+    ],
+    "export": "/media/planet-garden.webp"
+  },
+  {
+    "id": "planet-variations",
+    "source": "JosHsuan_CV&Portfolio_2025.Ver2.pdf, physical page 66, image Im0.jp2",
+    "originalSize": [
+      1800,
+      1112
+    ],
+    "export": "/media/planet-variations.webp"
+  },
+  {
+    "id": "terminal-model",
+    "source": "Materials/高雄港務中心/LobeD_3D.jpg",
+    "originalSize": [
+      4961,
+      3508
+    ],
+    "export": "/media/terminal-model.webp"
+  },
+  {
+    "id": "terminal-detail",
+    "source": "Materials/高雄港務中心/Detail.jpg",
+    "originalSize": [
+      4961,
+      3508
+    ],
+    "export": "/media/terminal-detail.webp"
+  },
+  {
+    "id": "terminal-frame",
+    "source": "Materials/高雄港務中心/LobeD_Steel.jpg",
+    "originalSize": [
+      4961,
+      3508
+    ],
+    "export": "/media/terminal-frame.webp"
+  },
+  {
+    "id": "dome-tessellation",
+    "source": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf, physical page 22, image Im0.jp2",
+    "originalSize": [
+      1790,
+      1800
+    ],
+    "export": "/media/dome-tessellation.webp"
+  },
+  {
+    "id": "dome-panels",
+    "source": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf, physical page 22, image Im0.jp2",
+    "originalSize": [
+      1800,
+      1209
+    ],
+    "export": "/media/dome-panels.webp"
+  },
+  {
+    "id": "church-model",
+    "source": "Materials/金山凱悅飯店/Church_3D.jpg",
+    "originalSize": [
+      4961,
+      3508
+    ],
+    "export": "/media/church-model.webp"
+  },
+  {
+    "id": "church-detail",
+    "source": "Materials/金山凱悅飯店/Church_3D_Back.jpg",
+    "originalSize": [
+      4961,
+      3508
+    ],
+    "export": "/media/church-detail.webp"
+  },
+  {
+    "id": "church-construction",
+    "source": "Materials/金山凱悅飯店/LINE_ALBUM_220328_2_f88e4f5427.jpg",
+    "originalSize": [
+      888,
+      666
+    ],
+    "export": "/media/church-construction.webp"
+  },
+  {
+    "id": "void-lamp",
+    "source": "Materials/OtherWorks/ModexLamp.jpg",
+    "originalSize": [
+      1440,
+      1438
+    ],
+    "export": "/media/void-lamp.webp"
+  },
+  {
+    "id": "void-detail",
+    "source": "Materials/OtherWorks/ModexLamp04.jpg",
+    "originalSize": [
+      2900,
+      2900
+    ],
+    "export": "/media/void-detail.webp"
+  },
+  {
+    "id": "puff-waffle",
+    "source": "Materials/OtherWorks/Differential Growth Pattern Hex tile03.jpg",
+    "originalSize": [
+      2480,
+      2480
+    ],
+    "export": "/media/puff-waffle.webp"
+  },
+  {
+    "id": "eggshell",
+    "source": "Materials/OtherWorks/3DP_EggShell.jpg",
+    "originalSize": [
+      3024,
+      3024
+    ],
+    "export": "/media/eggshell.webp"
+  },
+  {
+    "id": "eggshell-detail",
+    "source": "Materials/OtherWorks/3DP_EggShell06.jpg",
+    "originalSize": [
+      3024,
+      3024
+    ],
+    "export": "/media/eggshell-detail.webp"
+  },
+  {
+    "id": "f5-robots",
+    "source": "Materials/OtherWorks/DigitalFuture2019_02.jpg",
+    "originalSize": [
+      1080,
+      1080
+    ],
+    "export": "/media/f5-robots.webp"
+  },
+  {
+    "id": "f5-space",
+    "source": "Materials/OtherWorks/DigitalFuture2019_01.jpg",
+    "originalSize": [
+      1080,
+      1080
+    ],
+    "export": "/media/f5-space.webp"
+  }
+]

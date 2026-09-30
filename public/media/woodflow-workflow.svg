@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+<title id="title">Geometry, material, making</title><desc id="desc">An editorial diagram of computational timber design practice, with three connected areas and abstract timber grain lines.</desc>
+<rect width="1600" height="1000" fill="#182321"/>
+<g stroke="#c6ac7e" stroke-width="2" fill="none" opacity=".48">
+<path d="M105 630Q310 310 615 555T1110 455T1490 385M105 650Q310 330 615 575T1110 475T1490 405M105 670Q310 350 615 595T1110 495T1490 425M105 690Q310 370 615 615T1110 515T1490 445M105 710Q310 390 615 635T1110 535T1490 465M105 730Q310 410 615 655T1110 555T1490 485M105 750Q310 430 615 675T1110 575T1490 505M105 770Q310 450 615 695T1110 595T1490 525M105 790Q310 470 615 715T1110 615T1490 545M105 810Q310 490 615 735T1110 635T1490 565"/>
+</g>
+<g fill="#e5ddd0" font-family="Arial,sans-serif"><text x="105" y="195" font-size="26" letter-spacing="5">WOODFLOW / SOFTWARE PRACTICE</text><text x="105" y="333" font-size="67">Geometry.</text><text x="605" y="333" font-size="67">Material.</text><text x="1105" y="333" font-size="67">Making.</text></g>
+<g fill="#a4b4aa" font-family="monospace" font-size="20"><text x="105" y="890">01 / REPRESENT</text><text x="605" y="890">02 / RELATE</text><text x="1105" y="890">03 / REALIZE</text></g>
+<g stroke="#98aaa0" fill="none"><path d="M465 310h65m-10-10 10 10-10 10M965 310h65m-10-10 10 10-10 10"/></g>
+</svg>

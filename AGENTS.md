@@ -1,0 +1,57 @@
+# Project collaboration instructions
+
+## Language
+
+- Use English as the primary language for all project artifacts, including documentation, code comments, identifiers, filenames, and interface copy.
+- Chat with the owner in Traditional Chinese.
+
+## Current phase
+
+- September 30, 2026: the owner now requests a complete personal website and GitHub publication. This supersedes earlier content pauses and the local-only deployment restriction below. Retain the frosted-glass terminal, navigation and reversible reading contract. Temporarily set aside the background 3D concept while preserving an independent background component for future expansion. The active site uses static neutral illumination and no mounted WebGL renderer. Build the portfolio from the supplied archives, keep team and image credits, and supplement factual gaps with primary public sources. Public company coverage remains a high-level practice overview; do not distribute private code, configuration or product parameters. See `docs/portfolio-release.md` for the current release and validation record.
+
+- The earlier decisions below are history where they conflict with this September 30 direction. No removed particle feature is authorized for restoration.
+
+- Latest owner request: remove The Spirit entirely, including its particle simulation, glass cube, exposure controls, assets and feature route. Preserve the approved frosted-glass terminal on neutral illumination. Do not restore the removed feature from older requirements or historical research.
+
+- Full terminal expansion must remain reversible. Upward background scrolling reverses immediately; inside the terminal, content reads upward first, then further upward scrolling at its top returns to the compact opening. Both direct expansion buttons remain reversible. Reduced motion retains its static expanded reading state. `docs/workspace-interaction.md` records the current implementation. This supersedes all earlier completion-latch instructions below.
+
+- Earlier Arrival and particle studies are historical context only. Continue reviewing the retained glass workspace before introducing further effects or resuming portfolio content. No deployment is authorized.
+
+- The owner has paused project-content refinement and explicitly requested gradual local implementation of the confirmed opening. A new opening study is now implemented; continue refining it before resuming case-study content. The rejected earlier prototype remains excluded as a baseline.
+- The owner requested removal of the prototype so it does not constrain future thinking. Do not recover, reproduce, or extend it as the default starting point.
+- Use `references/concept-reference.png` as reference material. Do not treat every element in the image as an approved implementation requirement.
+- Begin with concept discussion. Build a new prototype when the owner requests implementation of the new direction.
+- The owner's September 27 request authorizes this new local opening prototype. `docs/opening-implementation.md` records the current implementation, proposed iteration rounds, checks, and remaining visual work. Local review controls and provisional portfolio index text are study aids, not finalized public-site content. Deployment is outside the current request.
+- Develop the new 3D background through gradual discussion of storyboards, composition, and camera movement before implementation.
+- The main 3D visual sets the tone through the opening few storyboard scenes. The visitor starts inside the space, floating among forms at different depths, with a progression from open/sparse to dense/interwoven.
+- Prioritize a clear terminal-inspired interface for presenting the owner's previous projects. The full browsing experience must not become an effects showcase or require a continuous camera journey.
+- The terminal interface is visible and usable from the first opening shot. Access to the interface does not depend on completing the 3D opening sequence.
+- The terminal starts as a smaller independent frosted-glass window and expands through the final opening scroll interval. The owner specified downward scrolling as the timeline, replacing elapsed-time playback, and accepted the recommended handoff. Exact progress boundaries remain adjustable; do not implement a six-second timer or the earlier 0.8-second timed expansion by default.
+- After expansion, the terminal occupies most of the screen with a small amount of the spatial background visible around it. The 3D motion settles, and the frosted surface retains soft background light. Expansion preserves a comfortable text size and reflows the content.
+- Use [weitingworks.com](https://weitingworks.com/) as an interface reference. Set the opening tone first; discuss project content, categories, and presentation separately afterward.
+- `docs/concept-direction.md` records the current owner-confirmed direction, reference observations, and open decisions. Earlier assistant proposals are not approved requirements.
+- The owner endorsed the overall v1 storyboard and requested a new geometry exploration inspired by the supplied abstract tattoo photograph. Preserve the established opening and terminal behavior while discussing tattoo-derived forms; the v2 geometry is a proposal pending review.
+- The owner requested dynamic motion trails on the fine lines and [Edan Kwan's The Spirit](https://github.com/edankwan/The-Spirit)-inspired effects on selected elements. The v3 storyboard introduced localized smoky particles while preserving the portfolio-first composition. Step 5 below records the subsequently accepted placement and treatment; exact intensity, timing, and implementation remain open.
+- The owner requested a more dispersed first shot for stronger beginning-to-end contrast, selected existing shapes developed into volumetric glass or highly reflective forms, and refined fine dust floating through the transitions. The v4 storyboard introduced object/material pairings and dust placement; step 5 records the subsequently accepted material roles. Exact geometry, optical values, and dust distribution remain subject to refinement.
+- The owner endorsed the current visual effect direction and requested motion that evolves from disordered, multi-axis tumbling and weightless drifting toward an ordered final assembly. Consider acceleration as well as speed, and give each object its own pacing. Steps 1 through 4 record the accepted composition and motion direction; exact transforms, trajectories, and timing curves remain to be refined.
+- In step 1 of the six-step opening discussion, the owner selected a final assembly with visible gaps and independently suspended objects. Preserve that separation; exact positions and orientations remain illustrative. `docs/opening-decision-plan.md` records the completed direction discussion and remaining refinements.
+- In step 2, the owner accepted sparse middle/far main objects with different starting orientations and a small peripheral near-field fragment. Preserve the open composition and the sense of already being inside the space; exact transforms remain illustrative.
+- In step 3, the owner selected gentle forward camera travel with a slight rightward shift and stable viewing orientation. The camera settles before the objects finish assembling. Exact displacement, lens, and timing remain open.
+- In step 4, the owner accepted independent acceleration and braking, separately settling translation and rotation, and staggered arrivals. The camera settles first, followed by the slab, loop, spine, and small fragments. The later scroll-timeline instruction supersedes the initially accepted six-second duration: preserve the relative choreography while making its progress follow downward scrolling. Exact scroll intervals and curves remain to be refined.
+- In step 5, the owner accepted cool gray glass and dark silver metal against charcoal, with a small amount of warm-white reflected light. Use smoked etched glass for the slab, clearer glass for the loop, narrow metal highlights, fading off-white trails, local Spirit-inspired smoke at the slab notch and spine hook, and sparse softly lit dust. Effects build through the middle of the opening and subside toward the reading state. Exact optical settings and particle levels remain to be tuned.
+- Step 6 originally limited reversal to the unfinished opening. The latest owner request supersedes that limit: full expansion also reverses with upward scrolling. Resting input must not advance the sequence on a timer; terminal content keeps reading priority until its top is reached.
+- During the opening, background scrolling controls the scene and terminal content scrolling prioritizes reading. Retain an entry that goes directly to the expanded work interface. Exact scroll distance, progress boundaries, input-region behavior, control copy, and screen/motion/graphics adaptations remain for refinement. Completing the six-step direction discussion does not authorize implementation.
+- Earlier implementation details, object definitions, animation sequences, timing, and UI decisions are not current requirements. Revisit them only if the owner explicitly brings them into the new concept.
+- The owner supplied `C:/Users/JosHsuan/Desktop/JosHsuan_CV_2022` and the `echoXR`, `StrongbyForm`, and `MAS_T3_MoCap` folders under `C:/Users/JosHsuan/Documents/GitHub` for read-only content assessment. `docs/portfolio-content-audit.md` records 15 main projects and 4 short studies after deduplication, plus a separate CV-only lead. MAS_T3_MoCap is the portfolio's XR thesis; the Woodflow repositories are one proposed program case. Do not inflate the inventory with repeated versions or dependencies.
+- The content audit proposes six featured cases, a complete work index, and a lighter Lab gallery. Specific categories, ordering, and case layouts remain recommendations, not individually confirmed requirements. The owner subsequently paused this discussion to review the opening locally first. Preserve role and photography credits, resolve conflicting source dates, and define an appropriate public scope for company work before publication. The opening implementation request does not authorize publication of source portfolio or company materials.
+
+## Engineering reference
+
+- Historical Arrival correction is now rejected as an active scene. `docs/opening-visual-requirements.md` and the iteration 03 section of `docs/opening-implementation.md` are history only. Do not restore its chamber, silhouette or ink-ring choreography by default. Preserve the subsequently approved terminal glass and scroll/reading contract.
+- The particle shader sources and their dedicated assets have been removed. The unrelated historical Thinker adaptation remains CC BY-SA 4.0 with visible credits and a downloadable adapted mesh. Retain its credits, license files, and source links while retaining or reusing that asset.
+
+- `docs/technical-options.md` records general architectural ideas that may be reused.
+- `docs/creative-skills-research.md` records candidate creative and UI/UX skills for discussion; recommendations are not installation or design decisions.
+- The new opening study uses React 19, React Three Fiber 9, Three.js, TypeScript, and Vite. `package.json` and `pnpm-lock.yaml` record the installed versions. Do not bring back dependencies or implementation details from the rejected prototype.
+- Preserve clear module responsibilities and explicit resource ownership if a 3D implementation is selected.
+
