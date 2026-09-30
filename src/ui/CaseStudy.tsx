@@ -25,11 +25,10 @@ export default function CaseStudy({ project, section, next }: { project: Project
   const close = () => { dialog.current?.close(); setViewing(null) }
   useEffect(() => {
     if (!viewing) return
-    dialog.current?.closest('.case-study')?.querySelectorAll('video').forEach(video => video.pause())
     if (!dialog.current?.open) dialog.current?.showModal()
   }, [viewing])
   const figure = (media: Media, hero = false) => <figure className={hero ? 'case-hero' : 'case-figure'} key={media.id} data-reading-anchor>
-    {media.video ? <MotionMedia media={media} onEnlarge={() => setViewing(media)} /> : <button className={`figure-open${media.fit === 'contain' ? ' image-contain' : ''}`} onClick={() => setViewing(media)} aria-label={`Enlarge image: ${media.caption}`}>
+    {media.video ? <MotionMedia media={media} onEnlarge={() => setViewing(media)} suspended={viewing !== null} /> : <button className={`figure-open${media.fit === 'contain' ? ' image-contain' : ''}`} onClick={() => setViewing(media)} aria-label={`Enlarge image: ${media.caption}`}>
       <img src={mediaUrl(media)} alt={media.alt} loading={hero ? 'eager' : 'lazy'} decoding="async" />
       <span className="image-open" aria-hidden="true">↗</span>
     </button>}

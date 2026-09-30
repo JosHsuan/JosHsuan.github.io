@@ -74,7 +74,8 @@ preserving source sequence timing. Simulation exports are limited to 960 pixels;
 physical and interface recordings to 1280 pixels without upscaling. The comparison
 layout is 1440 × 1680. Static WebP posters and 640-pixel thumbnails retain the
 index's still-image behavior. Total MP4 payload is approximately 38 MB, fetched
-only when a reader starts playback. Clips have no audio track; the native film's
+only when a recording enters the reading viewport or a reader starts playback.
+Clips have no audio track; the native film's
 soundtrack is omitted. No narration or invented motion is added.
 
 The retained Caschlatsch phone recording is cropped to its existing phone frame.
@@ -87,15 +88,23 @@ Poster sources appear in [image provenance](media-provenance.json).
 
 ## Reading behavior and verification
 
-Videos have a still poster, explicit Play/Pause, native seeking/fullscreen controls after playback begins
-and a separate enlargement action. There is no autoplay or loop. Playback pauses
-when a clip leaves the terminal viewport, the document becomes hidden, another
-clip starts, a dialog opens or the route unmounts. Closing the dialog stops its
-player and restores focus. Reduced-motion users retain the static expanded
-workspace and choose whether to play any clip. Static HTML includes the same
-manual native player, captions and credits without requiring JavaScript.
+On October 1 the owner requested GIF-like motion or looping video, superseding
+the initial manual-only policy. All 24 retained recordings now use silent looping
+MP4 playback. Videos start automatically when at least 15% of their area enters
+the reading viewport; multiple visible recordings can play together. Still
+posters, explicit Play/Pause, native seeking/fullscreen controls after playback
+begins and a separate enlargement action remain available.
+
+Playback pauses when a clip leaves the viewport, the document becomes hidden,
+a dialog suspends the inline clips or the route unmounts. Returning to the visible
+reading area resumes a loop unless the reader paused it. A manual pause persists
+when scrolling away and back. An enlarged recording loops independently; closing
+the dialog stops it, restores focus and allows visible inline loops to resume.
+Reduced-motion users retain the static expanded workspace and start any clip
+manually. Static HTML uses manually started looping players with native controls,
+captions and credits without requiring JavaScript.
 
 Automated release checks validate MP4 structure, streaming layout, visual-only
 tracks, source duration, provenance, poster availability, exactly one case figure,
-section assignment, manual playback markup and local resources. Browser review
+section assignment, looping fallback markup and local resources. Browser review
 and publication results are recorded in [the release notes](portfolio-release.md).

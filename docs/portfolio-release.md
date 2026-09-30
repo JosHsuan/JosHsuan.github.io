@@ -217,3 +217,31 @@ report is kept in the ignored `.asset-cache/live-verification.json`.
 - Publication uses the existing Pages workflow. The post-deployment comparison
   includes all generated resources and checks that both removed MP4 files and
   their four poster/thumbnail paths return the current custom HTTP 404.
+
+## Looping motion release
+
+October 1, 2026. The owner requests GIF-like motion or continuously looping video
+and authorizes adjustment through completion. This supersedes the earlier
+manual-only playback policy. The existing 24 silent MP4 exports are retained;
+the two previously removed recordings remain excluded.
+
+- Every inline and enlarged player loops. Visible recordings start automatically,
+  while offscreen recordings retain their posters and pause. Manual pauses persist
+  across scrolling. Reduced-motion users start the loops manually.
+- A dialog suspends inline recordings, plays its own loop and stops on close.
+  Visible inline recordings resume unless the reader paused them. Hidden pages
+  pause playback; returning to the page resumes eligible visible recordings.
+- All 24 recordings were individually reviewed at 320 × 568. Every inline and
+  modal player had looping enabled; each modal recording started automatically,
+  decoded at its expected width and advanced in time without error. All modal
+  views had zero horizontal overflow and suspended every inline recording.
+- Desktop review directly observed the 2.17-second comparison finish and wrap to
+  its beginning, both inline and enlarged. Manual pause persisted after scrolling
+  away and back. Closing with Escape stopped the modal and restored focus. A
+  visible recording resumed after returning to the reading viewport.
+- All 23 tests, TypeScript, production build and release checks pass. Static
+  fallback markup preserves native controls and looping for all 24 clips across
+  19 complete cases and 393 local references. The fallback requires manual start
+  so readers without JavaScript retain control over motion.
+- Publication uses the existing Pages workflow, followed by comparison of all
+  generated files with the reviewed build and HTTP 404 checks for retired media.

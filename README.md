@@ -26,7 +26,7 @@ runs at `http://127.0.0.1:4173/`. `dist/` is generated and ignored.
 - `src/content/portfolio.ts`: project records, media descriptions, roles and credits.
 - `src/ui/Terminal.tsx`: workspace layout, navigation, filters and reading positions.
 - `src/ui/CaseStudy.tsx`: case reading and modal image/video enlargement.
-- `src/ui/MotionMedia.tsx`: manual clip playback and visibility-based pausing.
+- `src/ui/MotionMedia.tsx`: visible looping clips, pause controls and reduced-motion manual start.
 - `src/ui/Profile.tsx`: About and Contact.
 - `src/ui/WorkspaceBackdrop.tsx`: independently replaceable static background.
 - `src/opening/`: reversible, scroll-driven expansion and input routing.
@@ -39,7 +39,7 @@ runs at `http://127.0.0.1:4173/`. `dist/` is generated and ignored.
 - `docs/motion-provenance.json`: original sequence, crop, duration and video export register.
 
 Both hash navigation and static paths such as `/work/echoxr/` open the workspace.
-Static pages preserve full case text, images and manual video players without JavaScript. The owner’s
+Static pages preserve full case text, images and manually started looping video players without JavaScript. The owner’s
 original portfolio PDFs and company repositories are not bundled.
 
 ## Interaction

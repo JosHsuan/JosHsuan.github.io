@@ -32,8 +32,8 @@ for (const [section, items] of [['work', projects], ['lab', lab]]) for (const pr
     requireContent(matches[0], `${media.video ? 'aria-label' : 'alt'}="${escape(media.alt)}"`, 'media text alternative')
     if (media.video) {
       requireContent(matches[0], `src="/media/${media.id}.mp4"`, 'playable video')
-      requireContent(matches[0], 'controls playsinline muted preload="none"', 'manual video controls')
-      if (/autoplay|\sloop(?:\s|>)/.test(matches[0])) throw new Error(`Unexpected automatic motion: ${media.id}`)
+      requireContent(matches[0], 'controls playsinline muted loop preload="none"', 'looping video with manual controls')
+      if (/autoplay/.test(matches[0])) throw new Error(`Static fallback must preserve manual start for reduced motion: ${media.id}`)
     }
     requireContent(matches[0], `<figcaption>${escape(media.caption)}<br><small>${escape(media.credit)}</small></figcaption>`, 'image caption and credit')
   }
