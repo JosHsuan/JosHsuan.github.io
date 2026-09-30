@@ -186,4 +186,13 @@ report is kept in the ignored `.asset-cache/live-verification.json`.
   TypeScript, the production build and static release verification pass for 19
   complete cases and 399 local references. Static players have native manual
   controls and preserve captions and credits without JavaScript.
-- Publication and post-deployment verification are recorded below after execution.
+- Release commit `0aa8d93` was published successfully by
+  [run 36781004855](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/36781004855).
+  Both the build and Pages deployment jobs completed successfully.
+- All 299 generated public pages and resources, including the 26 MP4 files,
+  match the reviewed production build by SHA-256, with text line endings
+  normalized. All seven retired case/media paths return the current custom
+  HTTP 404. The ignored `.asset-cache/live-verification.json` retains the report.
+- The live printing case was opened in the browser. Its native fabrication
+  recording decoded at 1280 × 720, played and paused successfully with the
+  expected 10.93-second duration and Group 1 credit.
