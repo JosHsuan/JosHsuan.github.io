@@ -80,6 +80,34 @@ export const projects: Project[] = [
         "caption": "Application setup, networking and optical motion capture connect to a shared multi-user headset environment.",
         "credit": "EchoXR / Gramazio Kohler Research",
         "fit": "contain"
+      },
+      {
+        "id": "echo-room-controls",
+        "alt": "A first-person VR recording shows the palm menu opening, acoustic-panel toggles and a switch from an open office to acoustic curtains.",
+        "caption": "The palm menu connects acoustic-element toggles and room-partition choices to the visible architectural model.",
+        "credit": "EchoXR project documentation / Gramazio Kohler Research and ETH Design++ Immersive Design Lab",
+        "video": { "label": "Interface recording", "duration": 13.3 }
+      },
+      {
+        "id": "echo-sound-source",
+        "alt": "Tracked virtual hands hold and reposition a portable speaker beside acoustic curtains inside the VR room.",
+        "caption": "Tracked hands grasp and reposition a sound source within the virtual room.",
+        "credit": "EchoXR project documentation / Gramazio Kohler Research and ETH Design++ Immersive Design Lab",
+        "video": { "label": "Interface recording", "duration": 12 }
+      },
+      {
+        "id": "echo-shared-avatar",
+        "alt": "Another participant's tracked headset and translucent hands move above a desk in the shared virtual office.",
+        "caption": "Another participant's headset and hand movements are visible in the shared room model.",
+        "credit": "EchoXR project documentation / Gramazio Kohler Research and ETH Design++ Immersive Design Lab",
+        "video": { "label": "Interface recording", "duration": 12 }
+      },
+      {
+        "id": "echo-lab-collaboration",
+        "alt": "Two participants wearing VR headsets, headphones and backpack computers use hand gestures in the same physical lab space.",
+        "caption": "Co-located participants use tracked hands while wearing headsets, headphones and backpack computers in the lab.",
+        "credit": "EchoXR project documentation / Gramazio Kohler Research and ETH Design++ Immersive Design Lab",
+        "video": { "label": "Process recording", "duration": 12 }
       }
     ],
     "sections": [
@@ -87,6 +115,7 @@ export const projects: Project[] = [
         "title": "Acoustic design within a shared model",
         "text": "The prototype places an architectural acoustic review inside a shared VR session. Participants can compare an open room, a room divided by walls and glazing, and a configuration using acoustic curtains. Desk, wall and ceiling panels can be enabled separately. These variations make the placement of acoustic treatment part of a spatial discussion rather than a separate set of numerical results. Participants' voices are processed through the virtual room, so conversation itself becomes a source for exploring its acoustic conditions.",
         "media": [
+          "echo-room-controls",
           "echo-room"
         ]
       },
@@ -95,21 +124,24 @@ export const projects: Project[] = [
         "text": "A palm-activated interface gives access to the room configuration without physical controllers. Turning the left palm toward the head reveals the menu; lowering or turning the hand dismisses it. A loading indicator and scaling animation communicate activation. Toggles control acoustic elements, while a dropdown selects room arrangements. Tracked hands also support teleportation, rotation and sound-source manipulation. The interface combines in-world controls with visible hands so that users can operate the model while maintaining a shared view of the room.",
         "media": [
           "echo-gesture",
-          "echo-palm-navigation"
+          "echo-palm-navigation",
+          "echo-sound-source"
         ]
       },
       {
         "title": "Tracking in a shared physical space",
         "text": "Headset tracking and OptiTrack motion capture relate participants to the same physical environment. The setup uses headsets, headphones and microphones, with optical markers attached to the headset assemblies. Room scanning through Meta's Mixed Reality Utility Kit supplies local environmental information. A proximity-aware boundary system controls passthrough, the headset's live view of the physical room, and adjusts virtual-surface transparency as participants approach physical boundaries or one another. Participants can therefore see their surroundings during co-located use while retaining the virtual design context.",
         "media": [
-          "echo-setup"
+          "echo-setup",
+          "echo-lab-collaboration"
         ]
       },
       {
         "title": "Synchronizing participants and design changes",
         "text": "The Unity application separates continuous tracking from discrete design events. Photon Fusion synchronizes headset and hand representations, and shared object states carry changes such as enabling an acoustic panel. An interaction requests control of a shared object before changing its networked state. Photon Voice provides the communication stream; spatial audio places the voices and other sound sources within the virtual room. Steam Audio supplies the acoustic rendering, with surface settings for absorption, transmission and scattering associated with the room geometry.",
         "media": [
-          "echo-integration-workflow"
+          "echo-integration-workflow",
+          "echo-shared-avatar"
         ]
       },
       {
@@ -127,7 +159,7 @@ export const projects: Project[] = [
       "Gramazio Kohler Research, ETH Zürich. Project co-leads: Fabio Scotto and Achilleas Xydis. System implementation: Chia-Hsuan Chao and Giacomo Montiani.",
       "IHIET 2025 paper: Fabio Scotto, Chia-Hsuan Chao, Giacomo Montiani, Achilleas Xydis, Fabio Gramazio and Matthias Kohler; pp. 204–212.",
       "Research funding: ETH Foundation, with support from Andreas Weiss. Development and testing infrastructure: ETH Design++ Immersive Design Lab.",
-      "Images: EchoXR project documentation / Gramazio Kohler Research. Tracking, networking and audio systems build on OptiTrack, Meta XR, Photon and Steam Audio."
+      "Images and recordings: EchoXR project documentation / Gramazio Kohler Research and ETH Design++ Immersive Design Lab. Tracking, networking and audio systems build on OptiTrack, Meta XR, Photon and Steam Audio."
     ],
     "links": [
       {
@@ -261,7 +293,12 @@ export const projects: Project[] = [
       "Tutors: Alexandra Moisi and Prof. Daniela Mitterberger. MAS in Architecture and Digital Fabrication / ETH Zürich.",
       "Software research context: COMPAS and COMPAS XR; motion capture: OptiTrack; mobile XR development: Unity. Images: collaborative thesis documentation / ETH MAS DFAB."
     ],
-    "links": []
+    "links": [
+      {
+        "label": "XAIA Lab · project archive",
+        "url": "https://xaialab.org/xr-active-bending"
+      }
+    ]
   },
   {
     "slug": "metal-panels",

@@ -19,7 +19,7 @@ function atoms(buffer: Buffer, start = 0, end = buffer.length): Atom[] {
 test('source-derived clips have one case figure, a still poster and exact provenance', () => {
   const media = [...projects,...lab].flatMap(p => [p.cover,...p.gallery]).filter(m => m.video)
   const provenance = JSON.parse(readFileSync('docs/motion-provenance.json','utf8'))
-  assert.equal(media.length,24)
+  assert.equal(media.length,28)
   assert.equal(new Set(media.map(m => m.id)).size,media.length)
   assert.deepEqual(new Set(provenance.map((p: {id:string}) => p.id)),new Set(media.map(m=>m.id)))
   assert.deepEqual(new Set(readdirSync('public/media').filter(p=>p.endsWith('.mp4'))),new Set(media.map(m=>`${m.id}.mp4`)))

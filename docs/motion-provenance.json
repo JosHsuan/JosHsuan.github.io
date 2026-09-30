@@ -382,5 +382,98 @@
     "layout": "2 by 2 comparison; source frame timing retained",
     "export": "/media/hc3dp-pattern-comparison.mp4",
     "bytes": 176779
+  },
+  {
+    "id": "echo-room-controls",
+    "label": "Interface recording",
+    "source": "EchoXR / Video_Materials / JosHsuan_Recording02.mp4",
+    "sourceDuration": 300.17,
+    "segments": [
+      {
+        "startSeconds": 57,
+        "endSeconds": 62
+      },
+      {
+        "startSeconds": 73,
+        "endSeconds": 82
+      }
+    ],
+    "duration": 13.3,
+    "fps": 30,
+    "sourceSize": [
+      2554,
+      1248
+    ],
+    "loopCrossfadeSeconds": 0.3,
+    "audio": "omitted",
+    "export": "/media/echo-room-controls.mp4",
+    "bytes": 2888147,
+    "editCrossfadeSeconds": 0.4
+  },
+  {
+    "id": "echo-sound-source",
+    "label": "Interface recording",
+    "source": "EchoXR / Video_Materials / JosHsuan_Recording.mp4",
+    "sourceDuration": 389.01,
+    "segments": [
+      {
+        "startSeconds": 370,
+        "endSeconds": 382.3
+      }
+    ],
+    "duration": 12,
+    "fps": 30,
+    "sourceSize": [
+      2554,
+      1234
+    ],
+    "loopCrossfadeSeconds": 0.3,
+    "audio": "omitted",
+    "export": "/media/echo-sound-source.mp4",
+    "bytes": 1432798
+  },
+  {
+    "id": "echo-shared-avatar",
+    "label": "Interface recording",
+    "source": "EchoXR / Video_Materials / JosHsuan_Recording02.mp4",
+    "sourceDuration": 300.17,
+    "segments": [
+      {
+        "startSeconds": 169,
+        "endSeconds": 181.3
+      }
+    ],
+    "duration": 12,
+    "fps": 30,
+    "sourceSize": [
+      2554,
+      1248
+    ],
+    "loopCrossfadeSeconds": 0.3,
+    "audio": "omitted",
+    "export": "/media/echo-shared-avatar.mp4",
+    "bytes": 2009871
+  },
+  {
+    "id": "echo-lab-collaboration",
+    "label": "Process recording",
+    "source": "EchoXR / Video_Materials / DCIM/100GOPRO/GX010978.MP4",
+    "sourceDuration": 254.08,
+    "segments": [
+      {
+        "startSeconds": 193,
+        "endSeconds": 205.3
+      }
+    ],
+    "duration": 12,
+    "fps": 30,
+    "sourceSize": [
+      2704,
+      1520
+    ],
+    "loopCrossfadeSeconds": 0.3,
+    "audio": "omitted",
+    "export": "/media/echo-lab-collaboration.mp4",
+    "bytes": 2054518
   }
 ]

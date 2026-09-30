@@ -36,6 +36,7 @@ runs at `http://127.0.0.1:4173/`. `dist/` is generated and ignored.
 - `docs/portfolio-case-coverage.md`: original portfolio chapter and figure coverage.
 - `docs/presentation-supplement.md`: coverage of the three supplementary presentations.
 - `docs/motion-supplement.md`: printing supplement, archive motion search and playback behavior.
+- `docs/echoxr-video-supplement.md`: EchoXR source review, highlight edits and section coverage.
 - `docs/motion-provenance.json`: original sequence, crop, duration and video export register.
 
 Both hash navigation and static paths such as `/work/echoxr/` open the workspace.

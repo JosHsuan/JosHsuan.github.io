@@ -959,5 +959,41 @@
       1680
     ],
     "export": "/media/hc3dp-pattern-comparison.webp"
+  },
+  {
+    "id": "echo-room-controls",
+    "source": "EchoXR / Video_Materials / JosHsuan_Recording02.mp4, source frame at 80.2 s; edited output frame at 11.5 s",
+    "originalSize": [
+      1280,
+      626
+    ],
+    "export": "/media/echo-room-controls.webp"
+  },
+  {
+    "id": "echo-sound-source",
+    "source": "EchoXR / Video_Materials / JosHsuan_Recording.mp4, source frame at 376.3 s; edited output frame at 6 s",
+    "originalSize": [
+      1280,
+      618
+    ],
+    "export": "/media/echo-sound-source.webp"
+  },
+  {
+    "id": "echo-shared-avatar",
+    "source": "EchoXR / Video_Materials / JosHsuan_Recording02.mp4, source frame at 175.3 s; edited output frame at 6 s",
+    "originalSize": [
+      1280,
+      626
+    ],
+    "export": "/media/echo-shared-avatar.webp"
+  },
+  {
+    "id": "echo-lab-collaboration",
+    "source": "EchoXR / Video_Materials / DCIM/100GOPRO/GX010978.MP4, source frame at 199.3 s; edited output frame at 6 s",
+    "originalSize": [
+      1280,
+      720
+    ],
+    "export": "/media/echo-lab-collaboration.webp"
   }
 ]

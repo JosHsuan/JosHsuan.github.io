@@ -7,6 +7,8 @@
 
 ## Current phase
 
+- October 1 EchoXR highlights: the owner supplies the read-only Video_Materials folder under GKR&Design++ / Presentation_Materials and authorizes selecting short highlights, integrating them into the existing EchoXR case with looping playback and completing publication. Use source-grounded room controls, sound-source interaction and shared-session/lab recordings; preserve research-team credits and individual contribution boundaries. Add the owner's XAIA Lab project-archive link under Credits & context in XR-assisted Bending-Active Assembly. See `docs/echoxr-video-supplement.md`.
+
 - October 1 looping media: the owner requests GIF-like motion or looping video across the site and authorizes adjustment through completion. Use the existing silent MP4 recordings with continuous loops, automatic playback in view, pause controls and still posters. Pause recordings outside the reading viewport and while a dialog or hidden page suspends them. Reduced-motion users start playback manually. This supersedes the earlier manual-only playback rule; the two removed recordings stay excluded.
 
 - October 1 motion cleanup: the owner requests removing the Caschlatsch numbered-beam guidance recording and the companion Group 1 layer-deposition recording, including their captions and dedicated public media. The remaining motion supplement stays published with manual playback.

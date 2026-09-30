@@ -3,8 +3,8 @@
 Release record: September 30, 2026. The revised content contains **13 Work cases and 4 Lab studies**, with 62 narrative sections and 67 project images or figures. Twenty-three process figures were added to connect the methods described in the original material with the displayed results. The active records are in `src/content/portfolio.ts`; exact image files, PDF figures and crop bounds are registered in `docs/media-provenance.json`.
 
 Later releases add two Work cases and expand the printing and motion coverage.
-The current 15 Work / 4 Lab inventory contains 82 sections, 117 attributed media
-figures and 24 playable clips. See [presentation coverage](presentation-supplement.md)
+The current 15 Work / 4 Lab inventory contains 82 sections, 121 attributed media
+figures and 28 playable clips. See [presentation coverage](presentation-supplement.md)
 and [printing/motion coverage](motion-supplement.md) for the additional sources.
 
 This record consolidates the source reviews for the retained 17 cases. Coverage means that each case preserves its supported context, methods, result, contribution and attribution at the depth available in its source. It does not mean that every archive file, image, working model, code module or historical version is included in the public website. Woodflow and ChinPaoSan / dome-tessellation were removed at the owner's request. The CV-only refinery project remains outside the inventory because a supporting case package has not been located.

@@ -245,3 +245,36 @@ the two previously removed recordings remain excluded.
   so readers without JavaScript retain control over motion.
 - Publication uses the existing Pages workflow, followed by comparison of all
   generated files with the reviewed build and HTTP 404 checks for retired media.
+
+## EchoXR highlights and thesis archive link
+
+October 1, 2026. The owner authorizes selecting short looping highlights from
+the supplied EchoXR footage and adding the professor's lab archive link to the
+XR-assisted Bending-Active Assembly credits. Source selection and edit windows
+are recorded in [the supplement](echoxr-video-supplement.md).
+
+- Four EchoXR excerpts show palm-menu room controls, sound-source manipulation,
+  another participant's tracked headset/hands, and co-located lab interaction.
+  The silent exports run for 12–13.3 seconds, with a short blended loop boundary,
+  still posters and manual pause controls. The physical recording retains real
+  timing rather than using the source capture's high frame rate as slow motion.
+- Existing narrative sections, project/team credits and bounded contributions
+  are retained. The four clips add approximately 8.4 MB. Raw recordings, unused
+  takes, audio and embedded source metadata are not published.
+- The inventory contains 15 Work cases, four Lab studies, 82 sections, 121
+  attributed figures and 28 clips across eight cases. The two owner-removed
+  recordings and all other retired routes/media remain excluded.
+- All four clips were individually observed completing a natural loop at
+  320 × 568. Each decoded without error and suspended the inline players while
+  enlarged. Captions and credits fit the dialog without horizontal overflow.
+  Manual pause worked, and Escape closed the dialog and restored trigger focus.
+- Desktop review at 1280 × 720 confirms zero reading-body horizontal overflow
+  and no WebGL canvas. The XAIA Lab link appears after the credit paragraphs in
+  Credits & context; its official destination was reviewed in the browser.
+- All 23 automated tests, TypeScript, production build and release checks pass
+  for 19 complete static cases and 405 local references. Media checks verify
+  exact source provenance, posters, durations, one visual track and streaming
+  metadata for all 28 clips.
+- Publication uses the existing Pages workflow. Post-deployment verification
+  compares the 305 generated public resources with the reviewed production
+  build and checks HTTP 404 responses for the 13 retired case/media paths.

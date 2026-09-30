@@ -30,7 +30,9 @@ Across seven reviewed presentation containers there are 43 GIF occurrences:
 35 distinct embedded files plus the eight exact duplicates in the companion
 Group 1 deck. Twenty-nine of those 35 distinct files contribute to 23 published
 GIF-derived clips, including two four-panel comparisons. The native Group 1 film
-brings the release to **24 clips across seven cases**. Four of the remaining GIFs
+brings this archive supplement to **24 clips across seven cases**. The later
+[EchoXR footage review](echoxr-video-supplement.md) adds four native-video edits,
+bringing the current publication to **28 clips across eight cases**. Four of the remaining GIFs
 are two resized duplicates of printing footage, an alternate low-resolution HC3DP
 view, and a repeated plane-rotation study; two further recordings were removed at
 the owner's request. No unrelated classmate project is used.
@@ -61,6 +63,7 @@ Two-arm printing and work beyond columns are identified as future proposals.
 
 | Case | Clips | Coverage |
 | --- | ---: | --- |
+| EchoXR | 4 | Palm-menu room controls, sound-source interaction, shared participant movements and co-located lab operation. |
 | XR-assisted Bending-Active Assembly | 2 | Global adaptation and live rod tracking. |
 | Caschlatsch | 1 | Module selection, beam isolation and orientation controls. |
 | V-Shape Modular Aggregation | 1 | Robotic stick placement. |
@@ -73,7 +76,7 @@ The exports use H.264/yuv420p MP4 with streaming metadata before video data,
 preserving source sequence timing. Simulation exports are limited to 960 pixels;
 physical and interface recordings to 1280 pixels without upscaling. The comparison
 layout is 1440 × 1680. Static WebP posters and 640-pixel thumbnails retain the
-index's still-image behavior. Total MP4 payload is approximately 38 MB, fetched
+index's still-image behavior. Total MP4 payload is approximately 47 MB, fetched
 only when a recording enters the reading viewport or a reader starts playback.
 Clips have no audio track; the native film's
 soundtrack is omitted. No narration or invented motion is added.
@@ -89,7 +92,7 @@ Poster sources appear in [image provenance](media-provenance.json).
 ## Reading behavior and verification
 
 On October 1 the owner requested GIF-like motion or looping video, superseding
-the initial manual-only policy. All 24 retained recordings now use silent looping
+the initial manual-only policy. All 28 retained recordings now use silent looping
 MP4 playback. Videos start automatically when at least 15% of their area enters
 the reading viewport; multiple visible recordings can play together. Still
 posters, explicit Play/Pause, native seeking/fullscreen controls after playback
