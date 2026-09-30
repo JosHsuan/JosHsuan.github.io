@@ -155,3 +155,10 @@ report is kept in the ignored `.asset-cache/live-verification.json`.
   diagram opens in the image dialog, closes with Escape and restores trigger focus.
 - Searches for `light lights`, `robotic bricks` and `colorful garden` each find
   the correct case. All projects displays the complete 15-case Work inventory.
+- Release commit `f492705` was published successfully by
+  [run 36767410848](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/36767410848).
+  Both the build and Pages deployment jobs completed successfully.
+- All 221 generated public pages and resources match the reviewed local build
+  by SHA-256, with text line endings normalized. All seven retired case/media
+  paths continue to return the current custom HTTP 404. The comparison report
+  remains in the ignored `.asset-cache/live-verification.json`.
