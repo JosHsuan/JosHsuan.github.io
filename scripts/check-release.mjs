@@ -51,7 +51,8 @@ for (const file of files.filter(f => f.endsWith('.js'))) {
   if (/WebGLRenderer|ParticleThinker|NeutralScene|UnrealBloomPass/.test(source)) throw new Error(`Unexpected 3D code in active bundle ${file}`)
   if (/woodflow|ChinPaoSan|dome-tessellation/i.test(source)) throw new Error(`Removed project in active bundle ${file}`)
 }
-for (const path of ['work/woodflow', 'work/dome-tessellation', 'media/woodflow-workflow.svg', 'media/dome-tessellation.webp', 'media/dome-panels.webp']) if (existsSync(`dist/${path}`)) throw new Error(`Removed publication path: ${path}`)
+const retiredMedia = ['caschlatsch-beam-guidance', 'printing-layer-deposition'].flatMap(id => [`media/${id}.mp4`, `media/${id}.webp`, `media/${id}-thumb.webp`])
+for (const path of ['work/woodflow', 'work/dome-tessellation', 'media/woodflow-workflow.svg', 'media/dome-tessellation.webp', 'media/dome-panels.webp', ...retiredMedia]) if (existsSync(`dist/${path}`)) throw new Error(`Removed publication path: ${path}`)
 if (/woodflow|dome-tessellation/i.test(await readFile('dist/sitemap.xml','utf8'))) throw new Error('Removed project in sitemap.')
 const site = (await readFile('dist/index.html', 'utf8')) + (await readFile('dist/resume.html', 'utf8'))
 if (/Born in|1994\.07|apiKey|databaseURL|firebaseConfig|Study controls|Full case studies will follow/.test(site)) throw new Error('Unexpected private or provisional content in release.')

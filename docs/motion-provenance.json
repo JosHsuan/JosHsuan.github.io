@@ -50,26 +50,6 @@
     "bytes": 2735297
   },
   {
-    "id": "caschlatsch-beam-guidance",
-    "label": "Interface recording",
-    "source": "T3_Interview.pptx, slide 9, ppt/media/image37.gif",
-    "sourceFrames": 240,
-    "usedFrames": [
-      12,
-      226
-    ],
-    "sourceDuration": 24.0,
-    "duration": 21.5,
-    "crop": [
-      170,
-      0,
-      530,
-      700
-    ],
-    "export": "/media/caschlatsch-beam-guidance.mp4",
-    "bytes": 2484764
-  },
-  {
     "id": "vstick-robot-placement",
     "label": "Process recording",
     "source": "T3_Interview.pptx, slide 11, ppt/media/image45.gif",
@@ -293,21 +273,6 @@
     "crop": null,
     "export": "/media/printing-dot-deposition.mp4",
     "bytes": 804172
-  },
-  {
-    "id": "printing-layer-deposition",
-    "label": "Process recording",
-    "source": "Namdev_Group01_PrintingArchitecture.pptx, slide 2, ppt/media/image5.gif",
-    "sourceFrames": 39,
-    "usedFrames": [
-      0,
-      38
-    ],
-    "sourceDuration": 3.9,
-    "duration": 3.9,
-    "crop": null,
-    "export": "/media/printing-layer-deposition.mp4",
-    "bytes": 103231
   },
   {
     "id": "hc3dp-extrusion-simulation",

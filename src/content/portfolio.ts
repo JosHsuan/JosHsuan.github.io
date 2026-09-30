@@ -437,16 +437,6 @@ export const projects: Project[] = [
           "label": "Interface recording",
           "duration": 24.9
         }
-      },
-      {
-        "id": "caschlatsch-beam-guidance",
-        "alt": "A phone recording overlays numbered beams and highlights a selected timber member in yellow against the physical workshop assembly.",
-        "caption": "Numbered beam overlays and selection make the current assembly step visible against the physical module.",
-        "credit": "Chia-Hsuan Chao / COMPAS XR / ETH MAS DFAB and Gramazio Kohler Research",
-        "video": {
-          "label": "Interface recording",
-          "duration": 21.5
-        }
       }
     ],
     "sections": [
@@ -467,9 +457,7 @@ export const projects: Project[] = [
       {
         "title": "Fabrication data and assembly plans",
         "text": "COMPAS Timber carries beam and joint information into an assembly plan. Building plans, QR reference frames, checklists and project settings are exported as JSON, with OBJ meshes supplying the visual geometry. Firebase provides the shared storage from which the mobile applications fetch these modules. The applications reconstruct the design in augmented reality and retain information about selected beams and assembly status. This connects the design model to the particular module being prepared in the workshop.",
-        "media": [
-          "caschlatsch-beam-guidance"
-        ]
+        "media": []
       },
       {
         "title": "My contribution to the XR interfaces",
@@ -864,16 +852,6 @@ export const projects: Project[] = [
         }
       },
       {
-        "id": "printing-layer-deposition",
-        "alt": "An extrusion nozzle moves across stacked translucent paths while a new layer is deposited over the preceding strands.",
-        "caption": "A companion Group 1 recording shows the deposition of successive layers.",
-        "credit": "Chia-Hsuan Chao, Namdev Talluru and JunJie / ETH MAS DFAB, Group 1",
-        "video": {
-          "label": "Process recording",
-          "duration": 3.9
-        }
-      },
-      {
         "id": "printing-plane-rotation",
         "alt": "A digital diagram rotates one circular slice plane relative to another, showing their local coordinate frames.",
         "caption": "Rotating one slice plane changes its orientation relative to the preceding layer.",
@@ -993,9 +971,8 @@ export const projects: Project[] = [
       },
       {
         "title": "Movement, pauses and deposited material",
-        "text": "The physical recordings show two related deposition conditions: a nozzle laying successive strands, and a nozzle making short movements over a dotted curved wall. Repeated movement and programmed pauses place material at the sampled positions. Smaller retractive trials produced denser dot patterns, while changes to layer height, density, number and textile length varied the continuous-path samples.\n\nThese clips document the student printing trials. They provide a visual comparison of the deposition behavior without establishing a production speed or surface-performance benchmark.",
+        "text": "The physical recording shows a nozzle making short movements over a dotted curved wall. Repeated movement and programmed pauses place material at the sampled positions. Smaller retractive trials produced denser dot patterns, while changes to layer height, density, number and textile length varied the continuous-path samples.\n\nThe clip documents a student printing trial. It provides a visual record of the deposition behavior without establishing a production speed or surface-performance benchmark.",
         "media": [
-          "printing-layer-deposition",
           "printing-dot-deposition"
         ]
       },

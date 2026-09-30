@@ -7,6 +7,8 @@
 
 ## Current phase
 
+- October 1 motion cleanup: the owner requests removing the Caschlatsch numbered-beam guidance recording and the companion Group 1 layer-deposition recording, including their captions and dedicated public media. The remaining motion supplement stays published with manual playback.
+
 - September 30 motion supplement: the owner authorizes supplementing Dot-Based Non-Planar Printing from the Group 1 presentation and reviewing prior archives for GIF/video content, integrating suitable recordings and publishing directly. Preserve project/team credits, distinguish simulations from physical and interface recordings, and keep all playback manual with still posters and pause controls. See `docs/motion-supplement.md`.
 
 - September 30 Credits cleanup: the owner requests removing the interface-reference section and the historical Thinker section from the public Credits page. Keep the retained mesh and its accompanying attribution/license files. This overrides earlier instructions to display those two sections on that page.

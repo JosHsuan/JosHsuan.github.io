@@ -196,3 +196,24 @@ report is kept in the ignored `.asset-cache/live-verification.json`.
 - The live printing case was opened in the browser. Its native fabrication
   recording decoded at 1280 × 720, played and paused successfully with the
   expected 10.93-second duration and Group 1 credit.
+
+## Requested recording removal
+
+- The owner requested removing the Caschlatsch numbered-beam guidance recording
+  and the companion Group 1 successive-layer deposition recording. Their case
+  figures, captions, MP4 files, posters and thumbnails are removed. The original
+  archive files remain read only.
+- The printing deposition paragraph now describes its retained dot-deposition
+  recording. The Caschlatsch assembly-data section retains its text and uses the
+  existing layout for sections without media.
+- The current inventory contains 82 sections, 117 attributed figures and 24 clips
+  across seven cases. Caschlatsch retains one clip and printing retains nine.
+- All 23 automated tests pass. TypeScript, production build and static release
+  verification pass for 19 complete cases and 393 local references. The release
+  check also rejects the six retired media paths.
+- Both affected production-preview pages were checked in the browser: the
+  requested captions and players are absent, retained recordings appear and
+  neither reading body has horizontal overflow.
+- Publication uses the existing Pages workflow. The post-deployment comparison
+  includes all generated resources and checks that both removed MP4 files and
+  their four poster/thumbnail paths return the current custom HTTP 404.
