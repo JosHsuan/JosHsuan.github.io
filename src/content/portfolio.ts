@@ -817,6 +817,329 @@ export const projects: Project[] = [
     ]
   },
   {
+    "slug": "hc3dp-caustics",
+    "title": "HC3DP Caustics",
+    "subtitle": "Inflation-based pattern exploration for printed light shells",
+    "category": "Fabrication & Materials",
+    "year": "2023",
+    "context": "ETH MAS DFAB / Light Lights, Term 1",
+    "location": "Zürich, Switzerland",
+    "role": "Collaborator in a four-person pattern exploration and robotic printing study",
+    "summary": "A Light Lights study varies hollow-core extrusion paths and inflation to produce translucent patterned shells and compare their projected caustics.",
+    "premise": "HC3DP Caustics investigates how repeated folds in a hollow printed strand alter the light projected by a translucent shell. Developed by Group Red in ETH MAS DFAB, the study connects a programmable path to robotic extrusion, physical pattern tests and illuminated prototypes. The project uses the existing Hollow-Core 3D Printing process developed at ETH Digital Building Technologies.",
+    "tags": [
+      "Light Lights",
+      "Hollow-core 3D printing",
+      "PETG",
+      "Python",
+      "COMPAS",
+      "UR5",
+      "ABB",
+      "Caustics"
+    ],
+    "cover": {
+      "id": "hc3dp-lit-shells",
+      "alt": "Two translucent patterned cylindrical shells illuminated on a reflective tabletop",
+      "caption": "Printed shells under illumination reveal the repeated inflated pattern and its projected light.",
+      "credit": "Paul Jaeggi, Behnur Baiju, Kevin Seav and Chia-Hsuan Chao / ETH MAS DFAB, Group Red"
+    },
+    "gallery": [
+      {
+        "id": "hc3dp-pattern-tests",
+        "alt": "Rows of orange hollow extrusions comparing repeated folds and pattern spacing",
+        "caption": "Early extrusion samples compare repeated folds before the pattern is wrapped into a shell.",
+        "credit": "Paul Jaeggi, Behnur Baiju, Kevin Seav and Chia-Hsuan Chao / ETH MAS DFAB, Group Red"
+      },
+      {
+        "id": "hc3dp-layer-points",
+        "alt": "Three sampled point rows below a simulated extrusion tool and repeated folded strand",
+        "caption": "Bottom, middle and top point rows supply the repeated pattern within a layer.",
+        "credit": "Paul Jaeggi, Behnur Baiju, Kevin Seav and Chia-Hsuan Chao / ETH MAS DFAB, Group Red",
+        "fit": "contain"
+      },
+      {
+        "id": "hc3dp-path-logic",
+        "alt": "A simulated extrusion tool above a folded strand with red connecting paths below",
+        "caption": "The point sequence connects adjacent pattern segments into an extrusion path.",
+        "credit": "Paul Jaeggi, Behnur Baiju, Kevin Seav and Chia-Hsuan Chao / ETH MAS DFAB, Group Red",
+        "fit": "contain"
+      },
+      {
+        "id": "hc3dp-tool-frames",
+        "alt": "Tilted extrusion tool and repeated pattern with sampled tool frames below",
+        "caption": "Tool orientation is an additional variable alongside the position of the path.",
+        "credit": "Paul Jaeggi, Behnur Baiju, Kevin Seav and Chia-Hsuan Chao / ETH MAS DFAB, Group Red",
+        "fit": "contain"
+      },
+      {
+        "id": "hc3dp-robot-workflow",
+        "alt": "Workflow diagram connecting geometry generation, JSON, Python, COMPAS and robot interfaces",
+        "caption": "The computational workflow connects geometry and slicing to separate UR and ABB fabrication setups.",
+        "credit": "Paul Jaeggi, Behnur Baiju, Kevin Seav and Chia-Hsuan Chao / ETH MAS DFAB, Group Red",
+        "fit": "contain"
+      },
+      {
+        "id": "hc3dp-printing",
+        "alt": "Close view of an extrusion nozzle depositing a transparent inflated strand on a flat bed",
+        "caption": "Robotic extrusion of a hollow strand during a physical printing test.",
+        "credit": "Paul Jaeggi, Behnur Baiju, Kevin Seav and Chia-Hsuan Chao / ETH MAS DFAB, Group Red"
+      },
+      {
+        "id": "hc3dp-inflation-contact",
+        "alt": "Diagram of inflated extrusion bends showing a sticky contact area between adjacent segments",
+        "caption": "The diagram identifies where inflation creates contact between neighboring bends.",
+        "credit": "Paul Jaeggi, Behnur Baiju, Kevin Seav and Chia-Hsuan Chao / ETH MAS DFAB, Group Red",
+        "fit": "contain"
+      },
+      {
+        "id": "hc3dp-arch-tests",
+        "alt": "Three white hollow extrusion samples with different contact conditions between adjacent arches",
+        "caption": "Physical arch tests examine contact between neighboring inflated segments.",
+        "credit": "Paul Jaeggi, Behnur Baiju, Kevin Seav and Chia-Hsuan Chao / ETH MAS DFAB, Group Red",
+        "fit": "contain"
+      },
+      {
+        "id": "hc3dp-overinflation",
+        "alt": "Orange hollow extrusion deformed into a curled shrimp-like shape",
+        "caption": "An overinflated sample records the curled deformation described as the shrimp phenomenon.",
+        "credit": "Paul Jaeggi, Behnur Baiju, Kevin Seav and Chia-Hsuan Chao / ETH MAS DFAB, Group Red"
+      },
+      {
+        "id": "hc3dp-plain-cylinder",
+        "alt": "Digital model of a hollow cylinder made with regular horizontal extrusion layers",
+        "caption": "The regular-layer cylinder provides the reference for the reported printing-statistics comparison.",
+        "credit": "Paul Jaeggi, Behnur Baiju, Kevin Seav and Chia-Hsuan Chao / ETH MAS DFAB, Group Red",
+        "fit": "contain"
+      },
+      {
+        "id": "hc3dp-pattern-cylinder",
+        "alt": "Digital model of a cylinder formed from repeated folded hollow extrusion segments",
+        "caption": "The patterned cylinder increases the path length in the course comparison.",
+        "credit": "Paul Jaeggi, Behnur Baiju, Kevin Seav and Chia-Hsuan Chao / ETH MAS DFAB, Group Red",
+        "fit": "contain"
+      },
+      {
+        "id": "hc3dp-caustic-test",
+        "alt": "A hand holding a light source inside a printed shell and projecting a radial pattern onto a wall",
+        "caption": "A handheld lighting test records the caustic pattern projected through a printed shell.",
+        "credit": "Paul Jaeggi, Behnur Baiju, Kevin Seav and Chia-Hsuan Chao / ETH MAS DFAB, Group Red"
+      },
+      {
+        "id": "hc3dp-design-family",
+        "alt": "Concept rendering of cylindrical and rounded patterned lamps arranged in a dark interior",
+        "caption": "Concept rendering of a proposed family of light shells, extending the pattern to different geometries.",
+        "credit": "Paul Jaeggi, Behnur Baiju, Kevin Seav and Chia-Hsuan Chao / ETH MAS DFAB, Group Red"
+      }
+    ],
+    "sections": [
+      {
+        "title": "Repeated folds and initial samples",
+        "text": "The initial concept combines a simplified Z-order curve with references to Greek meanders and the Hilbert curve. A small repeated geometric motif provides the basis for more complex projected caustics. Early straight samples test the folded strand before the same logic is applied around cylindrical and rounded geometries.\n\nThe study explores nonplanar motion within each pattern while retaining planar layer addition because of the fabrication setup. This constraint determines how the folded strand can be repeated vertically.",
+        "media": [
+          "hc3dp-pattern-tests"
+        ]
+      },
+      {
+        "title": "Layer sampling and path construction",
+        "text": "Each layer is represented by bottom, middle and top point rows. Dividing these rows by the pattern length creates corresponding points that can be connected in a repeated sequence. The path logic alternates between the rows, adding or skipping selected points to connect neighboring segments.\n\nSeparate functions control layer count and height, seam width, pattern depth and density. Shifting the three point rows independently changes the shape of the folded unit. Lateral shifts, a dip height and sine-based scaling provide further variations without replacing the underlying sequence.",
+        "media": [
+          "hc3dp-layer-points",
+          "hc3dp-path-logic"
+        ]
+      },
+      {
+        "title": "Tool orientation and robot transfer",
+        "text": "Tool frames follow the path tangents and can be tilted to change how the strand leaves the nozzle. The presentation records explored frame-angle ranges of 0–30° for the ABB setup and 0–45° for the UR5 setup. These are ranges used in the study, rather than general limits of either robot.\n\nThe workflow separates geometry and slicing from robot communication. JSON transfers the generated data into Python and COMPAS-based processing. The diagram distinguishes the UR control routes from the ABB route, making adaptation between the two setups part of the fabrication work.",
+        "media": [
+          "hc3dp-tool-frames",
+          "hc3dp-robot-workflow"
+        ]
+      },
+      {
+        "title": "Extrusion, inflation and cooling",
+        "text": "The printing tests use hollow-core extrusion to form translucent strands. Path movement, air pressure and cooling jointly affect the inflated cross-section and its contact with the preceding material. The UR5 PETG trial reports a nozzle radius of 6 mm, a temperature of 210°C and an extrusion speed of 8 mm/s. Its first layer is 11 mm high, with subsequent layers at 18 mm.\n\nThe team found the process sensitive to air pressure and the cooling system. Moving between robot setups required additional exploration, and each new segment had to cool sufficiently for the next deposition. The geometric path therefore had to be adjusted in relation to the material response.",
+        "media": [
+          "hc3dp-printing"
+        ]
+      },
+      {
+        "title": "Arch contact and overinflation",
+        "text": "Arched segments create contact zones between adjacent inflated bends. The team explored these contacts as a way to improve the integrity of the printed pattern and compared them in physical samples. The tests show how a local path decision changes the connection between neighboring strands.\n\nOverinflation produced a curled deformation that the group called the shrimp phenomenon. The deformed sample and collision diagram identify a fabrication failure that the path design alone could not resolve. Pressure, cooling and contact had to be considered together.",
+        "media": [
+          "hc3dp-inflation-contact",
+          "hc3dp-arch-tests",
+          "hc3dp-overinflation"
+        ]
+      },
+      {
+        "title": "Reported printing comparison",
+        "text": "For the two cylinder designs shown, the presentation reports a path or filament length of 16.94 m, a printing time of 0.392 h and a total weight of 0.79 kg for the regular-layer version. The patterned version reports 21.75 m, 0.503 h and 1.02 kg.\n\nThis course comparison records the additional material and time associated with the patterned path. It concerns these two designs and their stated printing statistics, with no claim of a general production benchmark or measured lighting efficiency.",
+        "media": [
+          "hc3dp-plain-cylinder",
+          "hc3dp-pattern-cylinder"
+        ]
+      },
+      {
+        "title": "Illuminated prototypes",
+        "text": "The completed translucent shells produce visible caustic patterns when illuminated. Photographs compare the light projected through different geometries, while close views show the inflated pattern in the printed material. The group identified increased shell transparency and local light patterns following the robot movement as outcomes of the exploration.\n\nThe evidence consists of illuminated prototypes and photographic comparisons. The project does not report a calibrated optical measurement or a quantified structural test.",
+        "media": [
+          "hc3dp-caustic-test"
+        ]
+      },
+      {
+        "title": "Proposed family of light shells",
+        "text": "Digital studies extend the pattern to cylinders, spheres and elongated light shells. The interior renderings show how these variants might be used as lamps. They remain design proposals alongside the physically printed specimens.\n\nI participated as one of the four Group Red collaborators. Pattern exploration, computational workflow and fabrication results are credited to the team.",
+        "media": [
+          "hc3dp-design-family"
+        ]
+      }
+    ],
+    "credits": [
+      "ETH MAS DFAB 2023–24, Term 1, Light Lights. Group Red: Paul Jaeggi, Behnur Baiju, Kevin Seav and Chia-Hsuan Chao, listed as JosHsuan Chao in the presentation.",
+      "Course tutors: Petrus Aejmelaeus-Lindström, Simon Griffioen, Ananya Kango and Nik Eftekhar. Professor: Benjamin Dillenburger.",
+      "Hollow-Core 3D Printing technology: ETH Digital Building Technologies. The student study develops pattern and lighting explorations using this existing process.",
+      "Photographs, diagrams and renders: Group Red project documentation from Final Presentation Group-Red. Individual photographer and task assignments are not specified."
+    ],
+    "links": [
+      {
+        "label": "ETH DBT: Hollow-Core 3D Printing research",
+        "url": "https://dbt.arch.ethz.ch/research-stream/hc3dp/"
+      }
+    ]
+  },
+  {
+    "slug": "harmonic-stacking",
+    "title": "Harmonic Stacking",
+    "subtitle": "Balance studies and robotic placement of wooden blocks",
+    "category": "Fabrication & Materials",
+    "year": "2023",
+    "context": "ETH MAS DFAB / Robotic Bricks, Term 1",
+    "location": "Zürich, Switzerland",
+    "role": "Participant in the three-person Group 3 computational stacking study",
+    "summary": "A Robotic Bricks study combines harmonic offsets, rotation and balance-point checks to generate wooden-block columns for robotic pick-and-place trials.",
+    "premise": "Harmonic Stacking explores how a stack can depart from a vertical column while retaining enough overlap between successive blocks. Group 3 combines harmonic-series offsets with rotation, compares bottom-up and top-down construction logic, and tests the resulting arrangements through robotic placement of small wooden blocks.",
+    "tags": [
+      "Robotic Bricks",
+      "Python",
+      "Harmonic series",
+      "Balance",
+      "Attractor fields",
+      "Robotic pick-and-place"
+    ],
+    "cover": {
+      "id": "harmonic-stacking-built",
+      "alt": "A family of small wooden-block columns with different rotations and lateral offsets on a robot worktable",
+      "caption": "Physical stacking trials compare a family of columns with changing rotation and offset.",
+      "credit": "Paul, JosHsuan and Jiaxiang / ETH MAS DFAB, Group 3"
+    },
+    "gallery": [
+      {
+        "id": "harmonic-balance-rotation",
+        "alt": "Plan diagram of rotated rectangular blocks with marked centers and radial directions",
+        "caption": "Rotation studies distinguish each block center from the balance condition of the stack.",
+        "credit": "Paul, JosHsuan and Jiaxiang / ETH MAS DFAB, Group 3",
+        "fit": "contain"
+      },
+      {
+        "id": "harmonic-balance-support",
+        "alt": "Geometric balance diagram comparing a rotated block, support rectangle and marked points",
+        "caption": "The balance-point study relates movement and rotation to the supporting footprint.",
+        "credit": "Paul, JosHsuan and Jiaxiang / ETH MAS DFAB, Group 3",
+        "fit": "contain"
+      },
+      {
+        "id": "harmonic-weight-study",
+        "alt": "Ten footprint diagrams comparing weight parameters from 0.1 to 1 over a full rotation",
+        "caption": "A dimensionless weight parameter changes the movement envelope over a ±360° rotation study.",
+        "credit": "Paul, JosHsuan and Jiaxiang / ETH MAS DFAB, Group 3",
+        "fit": "contain"
+      },
+      {
+        "id": "harmonic-bottom-up",
+        "alt": "Plan view of four curved block stacks generated outward from a starting cross pattern",
+        "caption": "Bottom-up generation controls the base arrangement while the upper pattern emerges.",
+        "credit": "Paul, JosHsuan and Jiaxiang / ETH MAS DFAB, Group 3",
+        "fit": "contain"
+      },
+      {
+        "id": "harmonic-top-down",
+        "alt": "Plan view of four curved stacks generated from a cross-shaped top arrangement",
+        "caption": "Top-down generation starts from the requested upper arrangement.",
+        "credit": "Paul, JosHsuan and Jiaxiang / ETH MAS DFAB, Group 3",
+        "fit": "contain"
+      },
+      {
+        "id": "harmonic-attractor",
+        "alt": "Digital row of green and yellow block columns with locally varying rotations",
+        "caption": "An attractor modifies the rotation sequence across a family of columns.",
+        "credit": "Paul, JosHsuan and Jiaxiang / ETH MAS DFAB, Group 3",
+        "fit": "contain"
+      },
+      {
+        "id": "harmonic-robot-assembly",
+        "alt": "A robotic arm with a vacuum pickup tool placing wooden blocks during a stacking trial",
+        "caption": "Still from the documented robotic pick-and-place sequence.",
+        "credit": "Paul, JosHsuan and Jiaxiang / ETH MAS DFAB, Group 3"
+      },
+      {
+        "id": "harmonic-failed-stack",
+        "alt": "Wooden blocks lying across the worktable after a stacking trial",
+        "caption": "An unsuccessful stack is documented alongside the standing column trials.",
+        "credit": "Paul, JosHsuan and Jiaxiang / ETH MAS DFAB, Group 3"
+      }
+    ],
+    "sections": [
+      {
+        "title": "Harmonic offsets and balance points",
+        "text": "The study starts with the harmonic stacking diagram, where successive overhangs follow the reciprocal sequence 1/2, 1/4, 1/6 and onward to 1/(2n). The team extends this one-directional arrangement through block rotation and lateral movement.\n\nThe geometric verification distinguishes the center of an individual block from the center of gravity relevant to the supported stack. Movement and rotation are checked against the footprint of the supporting block. The presentation compares stable and unstable configurations, making overlap and the balance point central design variables.",
+        "media": [
+          "harmonic-balance-rotation",
+          "harmonic-balance-support"
+        ]
+      },
+      {
+        "title": "Rotation and movement weighting",
+        "text": "A full rotation study varies the dimensionless weight parameter from 0.1 to 1. The footprint diagrams show how the movement envelope changes with this value over a ±360° rotation range. Here, weight is an algorithm parameter rather than a stated block mass.\n\nThe bottom-up examples compare a single column over a 360° rotation range with four columns over a 90° range, using a weight value of 0.7. These studies establish different families of offsets before robotic assembly.",
+        "media": [
+          "harmonic-weight-study"
+        ]
+      },
+      {
+        "title": "Bottom-up and top-down arrangements",
+        "text": "Bottom-up generation fixes the starting pattern and allows the upper configuration to emerge from successive transformations. The group found that this approach could control the base while leaving the top pattern difficult to prescribe.\n\nTop-down generation instead begins with a requested top arrangement. The comparison uses four-column configurations to show how the direction of generation changes which part of the stack is controlled. Physical trials accompany the digital arrangements.",
+        "media": [
+          "harmonic-bottom-up",
+          "harmonic-top-down"
+        ]
+      },
+      {
+        "title": "Column model and attractor field",
+        "text": "A Brick object stores the block geometry and supplies rotation, pickup-frame and base-rectangle operations. A HarmoColumn object accepts the top frame, number of layers, rotation and weight parameters, then constructs the sequence of placement frames. This separates individual-block operations from the rules governing the full column.\n\nAttractor functions evaluate distance, identify an affected index in the column and remap the rotation values. The final digital family varies local rotation in response to an attractor point. A separate dynamic balance investigation appears as work in progress rather than a completed verification method.",
+        "media": [
+          "harmonic-attractor"
+        ]
+      },
+      {
+        "title": "Robotic placement trials",
+        "text": "The generated arrangements are tested with a robotic pick-and-place sequence using a vacuum pickup tool. The robot places small wooden blocks on the worktable, translating the placement frames into a physical stack. The recorded sequence and resulting columns allow the digital arrangement to be compared with its assembly behavior.\n\nThe study documents both standing columns and an unsuccessful stack. These outcomes expose the limits of geometric balance assumptions during physical placement, where contact and accumulated positioning differences also affect the result.",
+        "media": [
+          "harmonic-robot-assembly",
+          "harmonic-failed-stack"
+        ]
+      },
+      {
+        "title": "Column family and contribution",
+        "text": "The physical result is a family of columns with different amounts of rotation and lateral displacement. Together with the four-column arrangement tests, they establish a small-scale fabrication study of controlled overhangs. The presentation provides geometric checks and prototype observations, without a load-test result or a validated architectural-scale structure.\n\nI participated in Group 3 with Paul and Jiaxiang. The computational method and robotic trials are presented as the group’s shared work.",
+        "media": []
+      }
+    ],
+    "credits": [
+      "ETH MAS DFAB 2023–24, Term 1, Robotic Bricks. Group 3: Paul, JosHsuan and Jiaxiang, as credited in Group_3_JJP_Paul,JosHsuan,Jiaxiang.",
+      "JosHsuan is Chia-Hsuan Chao. The source identifies the other collaborators by their given names and does not allocate individual programming or fabrication tasks.",
+      "Photographs, geometric diagrams and computational studies: Group 3 project documentation. Individual photographer credits are not specified."
+    ]
+  },
+  {
     "slug": "inside-out",
     "title": "Inside Out",
     "subtitle": "Form finding and weighted mesh segmentation of a Split P surface",
@@ -1119,14 +1442,14 @@ export const projects: Project[] = [
   {
     "slug": "planet-garden",
     "title": "Planet of Colorful Garden",
-    "subtitle": "Procedural elements and controlled random variation",
+    "subtitle": "Procedural garden elements on a perturbed mesh planet",
     "category": "Generative Studies",
     "year": "2023",
     "context": "ETH MAS DFAB / Generative Art",
     "location": "Zürich, Switzerland",
     "role": "Generative geometry, procedural elements & visual composition",
     "summary": "Rhino.Geometry and GHPython generate garden compositions by placing procedural elements on 3D geometry and varying their positions and colors.",
-    "premise": "Inspired by Harold Cohen's artwork, Planet of Colorful Garden was developed as a generative-art study in ETH MAS DFAB. The algorithm combines a defined vocabulary of elements with sampled locations on a host surface or mesh, then applies random transformations to produce variations in the final composition.",
+    "premise": "Inspired by Harold Cohen’s garden-like drawings, Planet of Colorful Garden uses generated plants and a changing spherical landscape to express the idea of an individual inner world. Developed as a computational-art study in ETH MAS DFAB, the work combines a vocabulary of procedural elements with random growth, placement and color. The result is a family of digital gardens and the final composition The Blooming of Forest.",
     "tags": [
       "GHPython",
       "Rhino.Geometry",
@@ -1136,7 +1459,7 @@ export const projects: Project[] = [
     "cover": {
       "id": "planet-garden",
       "alt": "Colorful garden-like spherical composition with branches and foliage",
-      "caption": "Procedural elements populate a three-dimensional garden.",
+      "caption": "The Blooming of Forest, the final composition of the computational-art study.",
       "credit": "Chia-Hsuan Chao / project portfolio"
     },
     "gallery": [
@@ -1153,32 +1476,69 @@ export const projects: Project[] = [
         "caption": "Element types, sampling locations, random transforms and value processing in the generative workflow.",
         "credit": "Chia-Hsuan Chao / project portfolio",
         "fit": "contain"
+      },
+      {
+        "id": "planet-procedural-elements",
+        "alt": "Procedural tree, leaves, stone and mist-like mesh elements shown together on a turquoise background",
+        "caption": "A still from the element study shows the geometric vocabulary before placement on the planet.",
+        "credit": "Chia-Hsuan Chao / Computational Art presentation",
+        "fit": "contain"
+      },
+      {
+        "id": "planet-mesh-perturbation",
+        "alt": "Triangular spherical mesh with randomly displaced vertices on a turquoise background",
+        "caption": "Small random displacements of mesh vertices create the host landscape.",
+        "credit": "Chia-Hsuan Chao / Computational Art presentation",
+        "fit": "contain"
+      },
+      {
+        "id": "planet-oriented-elements",
+        "alt": "Generated colorful spherical garden populated with trees and plants against a turquoise background",
+        "caption": "Procedural elements are located and oriented around the three-dimensional planet.",
+        "credit": "Chia-Hsuan Chao / Computational Art presentation",
+        "fit": "contain"
       }
     ],
     "sections": [
       {
+        "title": "Garden imagery and individual worlds",
+        "text": "Harold Cohen’s drawings provided an artistic reference for treating a garden as an expression of a person’s inner world. I translated this idea into a computational vocabulary whose elements and landscape could change between outputs. The concept proposed a garden that a person could configure to explore a distinct atmosphere. The documented result is the generated artwork and its variations.",
+        "media": []
+      },
+      {
         "title": "Generating a vocabulary of elements",
-        "text": "Separate procedures generate trees, branches, spiral plants, mushrooms, large leaves, mesh balls, stones and mist-like elements. These are represented using lines and curves, meshes and NURBS surfaces. Sampling functions locate points on the host surface or mesh, providing positions for the elements within the three-dimensional composition.",
+        "text": "Separate procedures generate trees, branches, spiral plants, mushrooms, large leaves, mesh balls, stones and mist-like elements. Lines and curves describe branching forms, NURBS surfaces describe leaves and mushrooms, and meshes form the stones and mist. Random growth parameters vary individual elements before they are placed together.\n\nInitial studies distribute the elements on an XY plane. This isolates the geometry of each element before the same vocabulary is assembled on the planet.",
+        "media": [
+          "planet-procedural-elements"
+        ]
+      },
+      {
+        "title": "A perturbed mesh landscape",
+        "text": "The host planet is represented as a mesh. Small random movements of its vertices change the local landscape rather than placing every garden on an identical sphere. Sampling functions locate points on either a mesh or a surface. Local planes then orient the generated elements around the three-dimensional host.\n\nThe mesh perturbation and element placement are separate operations, allowing the landscape and its population to vary independently.",
+        "media": [
+          "planet-mesh-perturbation",
+          "planet-oriented-elements"
+        ]
+      },
+      {
+        "title": "Four groups of custom functions",
+        "text": "The workflow is organized into element generation, value processing, random transformations and location on 3D geometry. Value-processing functions remap numbers and generate color components within the integer range 0–255. Transformation functions provide perturbation and small random movement in the XY plane or in three dimensions.\n\nThese functions supply variation while preserving the structure of the generated elements and the placement procedure. Rhino.Geometry and GHPython provide the geometric and scripting environment.",
         "media": [
           "planet-generation-functions"
         ]
       },
       {
-        "title": "Applying variation",
-        "text": "The workflow combines the generated elements with small random movements in the plane or in three dimensions, perturbation, color jitter and value remapping. The parameters alter the arrangement and color of the elements while retaining the structure of the underlying procedures. A set of generated variations shows how the same vocabulary produces different garden-like compositions.",
+        "title": "Generated families and final composition",
+        "text": "The variations combine changing element growth, mist distribution, color and the perturbed planetary landscape. The output grid compares the different atmospheres produced by this shared set of procedures.\n\nThe final image, The Blooming of Forest, expresses my anticipation of new experiences during the course through dense branching and foliage. My work covers procedural element generation, landscape construction, placement and visual composition. The presentation thanks Ananya and Simon for tutoring, and Joana and Kyle for help with aesthetic decisions.",
         "media": [
           "planet-variations"
         ]
-      },
-      {
-        "title": "Visual result",
-        "text": "The project concludes with a composed poster and a series of algorithmic outputs. My work covers the procedural element generation, placement and visual composition.",
-        "media": []
       }
     ],
     "credits": [
       "ETH MAS DFAB, Term 1, 2023. Tutors: Ananya Kango, Simon Griffioen and Petrus Aejmelaeus-Lindström.",
-      "Generative geometry and visual composition: Chia-Hsuan Chao. Artistic reference: Harold Cohen. Tools: Rhino.Geometry and GHPython."
+      "Generative geometry and visual composition: Chia-Hsuan Chao. Artistic reference: Harold Cohen. Tools: Rhino.Geometry and GHPython.",
+      "Additional acknowledgments in Computational Art_JosHsuan: Joana and Kyle for help with aesthetic decisions. Presentation figures and process stills: Chia-Hsuan Chao."
     ]
   }
 ]

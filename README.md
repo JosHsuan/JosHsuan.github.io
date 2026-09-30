@@ -2,7 +2,7 @@
 
 Computational design, XR and digital fabrication by Chia-Hsuan Chao.
 
-The portfolio presents 13 main projects and four Lab studies within a frosted-glass
+The portfolio presents 15 main projects and four Lab studies within a frosted-glass
 terminal workspace. A static neutral background leaves room for a future scene
 without coupling it to content or navigation.
 
@@ -33,6 +33,7 @@ runs at `http://127.0.0.1:4173/`. `dist/` is generated and ignored.
 - `public/media/`: optimized project photographs, method diagrams and thumbnails.
 - `docs/media-provenance.json`: source register for exported project media.
 - `docs/portfolio-case-coverage.md`: original portfolio chapter and figure coverage.
+- `docs/presentation-supplement.md`: coverage of the three supplementary presentations.
 
 Both hash navigation and static paths such as `/work/echoxr/` open the workspace.
 Static pages preserve full case text and images without JavaScript. The owner’s

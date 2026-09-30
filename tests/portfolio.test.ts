@@ -4,10 +4,10 @@ import { existsSync, readFileSync } from 'node:fs'
 import { projects, lab, categories, filterProjects } from '../src/content/portfolio.ts'
 import { parseRoute, routeFromLocation } from '../src/navigation/routes.ts'
 
-test('the retained inventory has 13 cases and four distinct Lab studies', () => {
-  assert.equal(projects.length, 13)
+test('the expanded inventory has 15 cases and four distinct Lab studies', () => {
+  assert.equal(projects.length, 15)
   assert.equal(lab.length, 4)
-  assert.equal(new Set([...projects, ...lab].map(p => p.slug)).size, 17)
+  assert.equal(new Set([...projects, ...lab].map(p => p.slug)).size, 19)
   assert.equal(projects.filter(p => p.featured).length, 6)
   for (const p of [...projects, ...lab]) {
     assert.ok(categories.includes(p.category))

@@ -7,12 +7,12 @@ the earlier local-only phase and paused content work.
 
 ## Website scope
 
-- 13 main project entries, six featured cases, and four separate Lab studies.
+- 15 main project entries, six featured cases, and four separate Lab studies.
 - Work selection, category filtering, multi-word search and an empty-state reset.
 - Individual case pages with original project media, role descriptions, methods,
   credits, source links and previous/next navigation.
-- 62 subject-specific case sections, a contents list for longer cases, and 23
-  additional original process figures paired with the methods they explain.
+- 78 subject-specific case sections and 93 attributed photographs/figures, with
+  a contents list for longer cases and figures paired with the methods they explain.
 - About, selected experience, education, publications, a printable public résumé,
   professional email contact and GitHub profile.
 - Keyboard-accessible navigation, focus placement, modal image enlargement,
@@ -75,6 +75,8 @@ study references in `references/` also remain outside the public source history.
 [Content revision](content-revision.md) records the institutional narrative
 references. [Case coverage](portfolio-case-coverage.md) maps all retained cases to
 their source chapters and records date reconciliation and attribution limits.
+[Presentation supplement](presentation-supplement.md) records the two new cases,
+the Computational Art expansion and 26 additional presentation-derived figures.
 
 ## Build and publication
 
@@ -136,3 +138,20 @@ The post-deployment comparison checks every generated page and resource against
 the local production build by SHA-256, and separately checks HTTP 404 responses
 for both retired cases and their five dedicated media paths. Its local execution
 report is kept in the ignored `.asset-cache/live-verification.json`.
+
+## Supplementary presentation verification
+
+- Two new Work cases, HC3DP Caustics and Harmonic Stacking, use the existing
+  shared case structure. Planet of Colorful Garden is expanded on its existing route.
+- The inventory contains 15 main cases, four Lab studies, 78 sections and 93
+  attributed photographs/figures. The 26 new exports include exact slide/media
+  provenance and thumbnails. The source presentations are not uploaded.
+- All 22 automated tests pass. TypeScript, the production build and static
+  release verification pass for 19 complete cases and 321 local references.
+- Desktop preview was reviewed at 1280 × 720, with mobile views at 390 × 844
+  and 320 × 568. The three supplemented routes render their expected headings,
+  sections and figures without horizontal overflow or a WebGL canvas.
+- The contents list focuses the selected section heading. The new inflation
+  diagram opens in the image dialog, closes with Escape and restores trigger focus.
+- Searches for `light lights`, `robotic bricks` and `colorful garden` each find
+  the correct case. All projects displays the complete 15-case Work inventory.
