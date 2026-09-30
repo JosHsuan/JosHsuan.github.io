@@ -4,10 +4,10 @@ import { existsSync, readFileSync } from 'node:fs'
 import { projects, lab, categories, filterProjects } from '../src/content/portfolio.ts'
 import { parseRoute, routeFromLocation } from '../src/navigation/routes.ts'
 
-test('the deduplicated source inventory has 15 cases and four distinct Lab studies', () => {
-  assert.equal(projects.length, 15)
+test('the retained inventory has 13 cases and four distinct Lab studies', () => {
+  assert.equal(projects.length, 13)
   assert.equal(lab.length, 4)
-  assert.equal(new Set([...projects, ...lab].map(p => p.slug)).size, 19)
+  assert.equal(new Set([...projects, ...lab].map(p => p.slug)).size, 17)
   assert.equal(projects.filter(p => p.featured).length, 6)
   for (const p of [...projects, ...lab]) {
     assert.ok(categories.includes(p.category))
@@ -17,16 +17,28 @@ test('the deduplicated source inventory has 15 cases and four distinct Lab studi
 test('all published images have local exports, text alternatives, captions and source credits', () => {
   for (const p of [...projects, ...lab]) for (const media of [p.cover, ...p.gallery]) {
     assert.ok(media.alt.length > 20 && media.caption && media.credit)
-    const extension = media.id === 'woodflow-workflow' ? '.svg' : '.webp'
-    assert.ok(existsSync(`public/media/${media.id}${extension}`), media.id)
-    if (extension === '.webp') assert.ok(existsSync(`public/media/${media.id}-thumb.webp`), media.id)
+    assert.ok(existsSync(`public/media/${media.id}.webp`), media.id)
+    assert.ok(existsSync(`public/media/${media.id}-thumb.webp`), media.id)
   }
 })
 test('category and multi-word search operate on the same project records', () => {
   assert.equal(filterProjects(projects, 'All', 'unity tracking').length, 1)
-  assert.equal(filterProjects(projects, 'Architecture & Facades', '').length, 4)
+  assert.equal(filterProjects(projects, 'Architecture & Facades', '').length, 3)
   assert.equal(filterProjects(projects, 'All', 'NON-PLANAR').length, 1)
   assert.equal(filterProjects(projects, 'All', 'unavailable-search-term').length, 0)
+})
+test('removed projects have no active records or dedicated public media', () => {
+  assert.equal(projects.some(p => ['woodflow', 'dome-tessellation'].includes(p.slug)), false)
+  assert.equal(existsSync('public/media/woodflow-workflow.svg'), false)
+  assert.equal(existsSync('public/media/dome-tessellation.webp'), false)
+  assert.equal(existsSync('public/media/dome-panels.webp'), false)
+})
+test('section figures refer to existing attributed media without duplicates', () => {
+  for (const project of [...projects, ...lab]) {
+    const ids = project.sections.flatMap(section => section.media ?? [])
+    assert.equal(new Set(ids).size, ids.length, project.slug)
+    for (const id of ids) assert.ok(project.gallery.some(media => media.id === id), `${project.slug}: ${id}`)
+  }
 })
 test('shared project paths, static deep links and invalid routes are handled', () => {
   assert.deepEqual(parseRoute('#/work/echoxr'), { section: 'work', slug: 'echoxr' })

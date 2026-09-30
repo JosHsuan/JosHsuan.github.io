@@ -7,10 +7,12 @@ the earlier local-only phase and paused content work.
 
 ## Website scope
 
-- 15 main project entries, six featured cases, and four separate Lab studies.
+- 13 main project entries, six featured cases, and four separate Lab studies.
 - Work selection, category filtering, multi-word search and an empty-state reset.
 - Individual case pages with original project media, role descriptions, methods,
   credits, source links and previous/next navigation.
+- 62 subject-specific case sections, a contents list for longer cases, and 23
+  additional original process figures paired with the methods they explain.
 - About, selected experience, education, publications, a printable public résumé,
   professional email contact and GitHub profile.
 - Keyboard-accessible navigation, focus placement, modal image enlargement,
@@ -50,27 +52,29 @@ study references in `references/` also remain outside the public source history.
   The experience date refers to the research project period, not an inferred
   employment termination date.
 - Caschlatsch: use the official spelling from the
-  [GKR project page](https://www.gramaziokohler.arch.ethz.ch/web/lehre/e/0/0/0/496.html),
+  [GKR project page](https://gramaziokohler.arch.ethz.ch/web/lehre/e/0/0/0/496.html),
   with a full-team link. The [opening record](https://dfab.ch/news/opening-of-caschlatsch)
   supports September 2024 unveiling.
 - Metal panels: NCKU's [thesis record](https://thesis.lib.ncku.edu.tw/thesis/detail/e9eac9c2b822e64726474a184f9e5c1a/)
   and [publication listing](https://researchoutput.ncku.edu.tw/en/persons/kane-yanagawa/)
   distinguish the 2020 thesis from the 2023 co-authored CAADRIA paper.
-- Heat Rotate Cutting uses 2018–20 because the project metadata and portfolio
-  index refer to different dates. The case explains the two archive labels.
-- Nan Shan uses 2021–22, preserving the distinction between project metadata and
-  the later portfolio index. It retains the three-person development scope.
-- Kaohsiung and ChinPaoSan use practice/design-development labels rather than
-  silently choosing conflicting project and CV dates.
-- Woodflow is one high-level software-practice entry with a newly authored,
-  generic editorial diagram and [public company link](https://www.strongbyform.com/).
-  It distributes no internal source, infrastructure, roadmap, product values or
-  company screenshots, and makes no delivered ERP or production-performance claim.
+- Heat Rotate Cutting uses its chapter date, 2018; Nan Shan uses its chapter date,
+  2021. Conflicting index dates are documented in the coverage record rather than
+  treated as continuous development periods. Stare at the Silence uses 2023.
+- Kaohsiung uses a professional-practice date label because the chapter and
+  employment dates do not establish a precise project period.
+- The owner's content revision removes Woodflow and ChinPaoSan from the active
+  inventory, generated pages, sitemap and dedicated public images. The original
+  source archives remain read only.
 - Jan Kyselý's credited photographs, Li Wei construction photography, institutional
   context, collaborators, architecture teams and source project credits are retained.
 - Birth date, personal phone numbers, third-party CVs and personal-information
   directories are excluded. The public résumé is newly typeset from selected
   professional information; the original CV PDFs are not distributed.
+
+[Content revision](content-revision.md) records the institutional narrative
+references. [Case coverage](portfolio-case-coverage.md) maps all retained cases to
+their source chapters and records date reconciliation and attribution limits.
 
 ## Build and publication
 
@@ -83,7 +87,7 @@ same content records with `scripts/build-pages.mjs`.
 and pull requests. Only main pushes/manual runs deploy the build artifact to
 GitHub Pages. Publication and live verification are recorded after execution.
 
-## Verification record
+## Initial release verification (before the content revision)
 
 - 20 automated tests pass; TypeScript and the production build pass.
 - Desktop preview reviewed at 1280 × 720; mobile at 390 × 844 and 320 × 568;
@@ -110,3 +114,25 @@ GitHub Pages. Publication and live verification are recorded after execution.
   downloadable retained mesh. An unknown path returns the custom 404 with HTTP 404.
 - Raw source archives, local study references and build caches are excluded from
   the public repository. No private company source or original CV PDF is uploaded.
+
+## Content revision verification
+
+- 22 automated tests pass. TypeScript, the production build and the strengthened
+  static release verifier pass for 17 complete cases and 271 local references.
+- The source coverage record accounts for all 62 case sections and 67 project
+  photographs/figures, including 23 new process exports with exact provenance.
+- All 17 production case routes were reviewed at 320 × 568. Each renders its
+  expected sections and figures with no horizontal overflow or WebGL canvas.
+- Contents navigation moves focus to the requested heading and scrolls only the
+  reading body. The outer terminal clips its contents without becoming an
+  additional scroll container. Reduced-motion navigation uses immediate scrolling.
+- The new process figure dialog opens, closes with Escape and restores focus to
+  its image trigger. Desktop and phone layouts retain readable text and captions.
+- Static documents contain a no-JavaScript scrolling override so the complete
+  case text remains reachable outside the interactive workspace.
+
+Publication uses the existing [Pages workflow](https://github.com/JosHsuan/JosHsuan.github.io/actions/workflows/pages.yml).
+The post-deployment comparison checks every generated page and resource against
+the local production build by SHA-256, and separately checks HTTP 404 responses
+for both retired cases and their five dedicated media paths. Its local execution
+report is kept in the ignored `.asset-cache/live-verification.json`.

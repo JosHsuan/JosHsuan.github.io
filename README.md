@@ -2,7 +2,7 @@
 
 Computational design, XR and digital fabrication by Chia-Hsuan Chao.
 
-The portfolio presents 15 main projects and four Lab studies within a frosted-glass
+The portfolio presents 13 main projects and four Lab studies within a frosted-glass
 terminal workspace. A static neutral background leaves room for a future scene
 without coupling it to content or navigation.
 
@@ -30,8 +30,9 @@ runs at `http://127.0.0.1:4173/`. `dist/` is generated and ignored.
 - `src/ui/WorkspaceBackdrop.tsx`: independently replaceable static background.
 - `src/opening/`: reversible, scroll-driven expansion and input routing.
 - `scripts/build-pages.mjs`: complete static case HTML, metadata and sitemap.
-- `public/media/`: optimized project images, thumbnails and an editorial diagram.
+- `public/media/`: optimized project photographs, method diagrams and thumbnails.
 - `docs/media-provenance.json`: source register for exported project media.
+- `docs/portfolio-case-coverage.md`: original portfolio chapter and figure coverage.
 
 Both hash navigation and static paths such as `/work/echoxr/` open the workspace.
 Static pages preserve full case text and images without JavaScript. The owner’s
@@ -51,6 +52,7 @@ The GitHub Actions workflow tests and builds main pushes and pull requests. Main
 pushes publish `dist/` to GitHub Pages when the repository’s Pages source is set to
 GitHub Actions. Live site: <https://joshsuan.github.io/>.
 
-See [release notes](docs/portfolio-release.md) for source decisions and verification.
+See [release notes](docs/portfolio-release.md) and the
+[content revision](docs/content-revision.md) for source decisions and verification.
 The [credits page](public/credits.html) preserves project attribution and the
 retained historical Thinker mesh’s CC BY-SA 4.0 license.

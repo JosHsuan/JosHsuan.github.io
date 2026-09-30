@@ -4,6 +4,11 @@ Reviewed September 27, 2026. This is a content-planning document based on the ow
 
 Current status: on September 30, the owner authorized completion of the personal website and publication on GitHub. [Portfolio release](portfolio-release.md) records the resulting scope, editorial decisions and verification. This audit remains the source inventory and historical proposal.
 
+The subsequent content revision removes Woodflow and ChinPaoSan from the website,
+leaving 13 main cases and four Lab studies. [Case coverage](portfolio-case-coverage.md)
+records the retained chapters, methods, contribution boundaries and date decisions.
+The 15-project count below remains the original source inventory.
+
 ## Findings and editorial scope
 
 The inspected material supports **15 main projects and 4 short studies**, after consolidating portfolio versions and related repositories. One additional project appears in the CV but lacks a substantial inspected case package. These are editorial presentation units, not counts of folders, applications, or independently verified finished products.

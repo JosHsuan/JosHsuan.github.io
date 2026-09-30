@@ -129,7 +129,6 @@ export default function App() {
     <footer className="scene-footer">
       <div className="scroll-instruction"><span className="scroll-arrow" aria-hidden="true">{state.reduced ? '↓' : state.completed ? '↑' : '↓'}</span><div>{state.reduced ? 'SCROLL TO READ' : state.completed ? 'SCROLL UP TO RETURN' : 'SCROLL TO OPEN'}<span>{state.reduced ? 'Scroll inside the window to browse the portfolio.' : state.completed ? 'At the top of the content, keep scrolling up.' : 'Scroll outside the window, or select View work.'}</span></div></div>
       <div className="sequence-status" aria-hidden="true"><span className="phase-label">{state.phase}</span><div ref={progressTrack} className="progress-track"><i /></div><span><span ref={progress}>000</span> / 100</span></div>
-      <span className="site-footer-note">DESIGN ↔ CODE ↔ MAKE</span>
     </footer>
     <span className="sr-only" role="status">{state.reduced ? 'Workspace expanded. Scroll to read the portfolio.' : state.completed ? 'Workspace expanded. Scroll up from the top of the content to return.' : ''}</span>
   </main>

@@ -1,6 +1,6 @@
 import type { Project, Media } from '../content/portfolio'
 
-export const mediaUrl = (media: Media, thumbnail = false) => `/media/${media.id}${media.id === 'woodflow-workflow' ? '.svg' : `${thumbnail ? '-thumb' : ''}.webp`}`
+export const mediaUrl = (media: Media, thumbnail = false) => `/media/${media.id}${thumbnail ? '-thumb' : ''}.webp`
 
 export default function ProjectCard({ project, section = 'work', index }: { project: Project; section?: 'work' | 'lab'; index: number }) {
   return <article className="project-card" data-reading-anchor>

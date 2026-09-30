@@ -306,24 +306,6 @@
     "export": "/media/terminal-frame.webp"
   },
   {
-    "id": "dome-tessellation",
-    "source": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf, physical page 22, image Im0.jp2",
-    "originalSize": [
-      1790,
-      1800
-    ],
-    "export": "/media/dome-tessellation.webp"
-  },
-  {
-    "id": "dome-panels",
-    "source": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf, physical page 22, image Im0.jp2",
-    "originalSize": [
-      1800,
-      1209
-    ],
-    "export": "/media/dome-panels.webp"
-  },
-  {
     "id": "church-model",
     "source": "Materials/金山凱悅飯店/Church_3D.jpg",
     "originalSize": [
@@ -412,5 +394,120 @@
       1080
     ],
     "export": "/media/f5-space.webp"
+  },
+  {
+    "id": "echo-palm-navigation",
+    "source": "C:/Users/JosHsuan/Desktop/JosHsuan_CV_2022/EchoXR02.ai, physical PDF page 1, Left-half gesture navigation and palm-menu activation diagram; normalized crop [0.011, 0.022, 0.492, 0.938]",
+    "export": "/media/echo-palm-navigation.webp"
+  },
+  {
+    "id": "echo-integration-workflow",
+    "source": "C:/Users/JosHsuan/Desktop/JosHsuan_CV_2022/EchoXR01.ai, physical PDF page 1, Lower-left application, networking and motion-capture architecture diagram; normalized crop [0.03, 0.486, 0.472, 0.788]",
+    "export": "/media/echo-integration-workflow.webp"
+  },
+  {
+    "id": "xr-form-finding-modules",
+    "source": "C:/Users/JosHsuan/Desktop/JosHsuan_CV_2022/PDF/JosHsuan_CV&Portfolio_2025.Ver2.pdf, physical PDF page 8, Fig.1-04 Adaptive Form-Finding and Modularization Process, diagram region only; normalized crop [0.043, 0.478, 0.641, 0.968]",
+    "export": "/media/xr-form-finding-modules.webp"
+  },
+  {
+    "id": "xr-cad-data-exchange",
+    "source": "C:/Users/JosHsuan/Desktop/JosHsuan_CV_2022/PDF/JosHsuan_CV&Portfolio_2025.Ver2.pdf, physical PDF page 10, Fig.1-07 Cloud-Based Motion Capture and XR Integration System, diagram region only; normalized crop [0.035, 0.04, 0.963, 0.341]",
+    "export": "/media/xr-cad-data-exchange.webp"
+  },
+  {
+    "id": "caschlatsch-voxel-beams",
+    "source": "C:/Users/JosHsuan/Desktop/JosHsuan_CV_2022/PDF/JosHsuan_CV&Portfolio_2025.Ver2.pdf, physical PDF page 16, Fig.2-04 Voxel-to-Beam Transformation Process, left occupancy and individual beam diagram regions only; normalized crop [0.02, 0.616, 0.713, 0.858]",
+    "export": "/media/caschlatsch-voxel-beams.webp"
+  },
+  {
+    "id": "caschlatsch-module-interface",
+    "source": "C:/Users/JosHsuan/Desktop/JosHsuan_CV_2022/PDF/JosHsuan_CV&Portfolio_2025.Ver2.pdf, physical PDF page 18, Fig.2-08 Augmented Reality-Based Beam and Module Assembly System, phone interaction sequence; normalized crop [0.046, 0.389, 0.963, 0.854]",
+    "export": "/media/caschlatsch-module-interface.webp"
+  },
+  {
+    "id": "metal-form-approximation",
+    "source": "JosHsuan_CV&Portfolio_2025.Ver2.pdf, physical page 24, Fig. 3-04; crop [34, 786, 826, 1000] in 849 x 1200 reference rendering, scaled from the 4800-pixel PDF rendering.",
+    "export": "/media/metal-form-approximation.webp"
+  },
+  {
+    "id": "metal-regression-calibration",
+    "source": "JosHsuan_CV&Portfolio_2025.Ver2.pdf, physical page 25, Fig. 3-05 to Fig. 3-07; crop [24, 28, 818, 1000] in 849 x 1200 reference rendering, scaled from the 4800-pixel PDF rendering.",
+    "export": "/media/metal-regression-calibration.webp"
+  },
+  {
+    "id": "heat-corexy-system",
+    "source": "JosHsuan_CV&Portfolio_2025.Ver2.pdf, physical page 33, Fig. 4-03; crop [28, 28, 820, 994] in 849 x 1200 reference rendering, scaled from the 4800-pixel PDF rendering.",
+    "export": "/media/heat-corexy-system.webp"
+  },
+  {
+    "id": "heat-toolpath-textures",
+    "source": "JosHsuan_CV&Portfolio_2025.Ver2.pdf, physical page 37, Fig. 4-09 to Fig. 4-13; crop [43, 53, 804, 920] in 849 x 1200 reference rendering, scaled from the 4800-pixel PDF rendering.",
+    "export": "/media/heat-toolpath-textures.webp"
+  },
+  {
+    "id": "vstick-motion-data",
+    "source": "JosHsuan_CV&Portfolio_2025.Ver2.pdf, physical page 49, Fig. 6-05; crop [30, 613, 818, 1033] in 849 x 1200 reference rendering, scaled from the 4800-pixel PDF rendering.",
+    "export": "/media/vstick-motion-data.webp"
+  },
+  {
+    "id": "vstick-frame-correction",
+    "source": "JosHsuan_CV&Portfolio_2025.Ver2.pdf, physical page 51, Fig. 6-09; crop [30, 736, 818, 1052] in 849 x 1200 reference rendering, scaled from the 4800-pixel PDF rendering.",
+    "export": "/media/vstick-frame-correction.webp"
+  },
+  {
+    "id": "printing-parameter-matrix",
+    "source": "JosHsuan_CV&Portfolio_2025.Ver2.pdf, physical page 56, Fig. 7-03 with adjacent parameter labels; crop [289, 21, 837, 355] in 849 x 1200 reference rendering, scaled from the 4800-pixel PDF rendering.",
+    "export": "/media/printing-parameter-matrix.webp"
+  },
+  {
+    "id": "printing-deposition-strategies",
+    "source": "JosHsuan_CV&Portfolio_2025.Ver2.pdf, physical page 57, Fig. 7-05; crop [30, 21, 818, 489] in 849 x 1200 reference rendering, scaled from the 4800-pixel PDF rendering.",
+    "export": "/media/printing-deposition-strategies.webp"
+  },
+  {
+    "id": "inside-split-p-geometry",
+    "source": "JosHsuan_CV&Portfolio_2025.Ver2.pdf, physical page 62, Split P equation and three complete form variants within Fig. 8-05; crop [28, 848, 681, 1155] in 849 x 1200 reference rendering, scaled from the 4800-pixel PDF rendering.",
+    "export": "/media/inside-split-p-geometry.webp"
+  },
+  {
+    "id": "inside-weighted-segmentation",
+    "source": "JosHsuan_CV&Portfolio_2025.Ver2.pdf, physical page 62, Weighted-segmentation method block within Fig. 8-05; crop [479, 351, 837, 755] in 849 x 1200 reference rendering, scaled from the 4800-pixel PDF rendering.",
+    "export": "/media/inside-weighted-segmentation.webp"
+  },
+  {
+    "id": "installation-opening-schemes",
+    "source": "C:/Users/JosHsuan/Desktop/JosHsuan_CV_2022/PDF/JosHsuan_CV&Portfolio_2025.Ver2.pdf; physical page 40, Fig.5-04; normalized crop (0.037,0.623,0.965,0.957), excluding page text and footer",
+    "export": "/media/installation-opening-schemes.webp"
+  },
+  {
+    "id": "installation-panel-joints",
+    "source": "C:/Users/JosHsuan/Desktop/JosHsuan_CV_2022/PDF/JosHsuan_CV&Portfolio_2025.Ver2.pdf; physical page 41, upper-right three-joint detail (printed as Fig.3-05) and Fig.5-06; normalized crops (0.420,0.016,0.965,0.185) and (0.420,0.215,0.965,0.383), stacked without prose",
+    "export": "/media/installation-panel-joints.webp"
+  },
+  {
+    "id": "terminal-extrusion-output",
+    "source": "C:/Users/JosHsuan/Desktop/JosHsuan_CV_2022/PDF/JosHsuan_CV&Portfolio_2025.VerFacade.pdf; physical page 17, Fig.1-29; normalized model crop (0.025,0.020,0.490,0.325), drawings crop (0.495,0.020,0.956,0.352), placed side by side without prose or caption",
+    "export": "/media/terminal-extrusion-output.webp"
+  },
+  {
+    "id": "terminal-panel-output",
+    "source": "C:/Users/JosHsuan/Desktop/JosHsuan_CV_2022/PDF/JosHsuan_CV&Portfolio_2025.VerFacade.pdf; physical page 17, Fig.1-30; normalized model crop (0.025,0.377,0.490,0.688), drawings crop (0.497,0.377,0.956,0.692), placed side by side without prose or caption",
+    "export": "/media/terminal-panel-output.webp"
+  },
+  {
+    "id": "church-planarization",
+    "source": "C:/Users/JosHsuan/Desktop/JosHsuan_CV_2022/PDF/JosHsuan_CV&Portfolio_2025.VerFacade.pdf; physical page 27, Fig.1-38 schematic row; normalized crop (0.027,0.023,0.962,0.169), excluding explanatory prose",
+    "export": "/media/church-planarization.webp"
+  },
+  {
+    "id": "church-panel-deviations",
+    "source": "C:/Users/JosHsuan/Desktop/JosHsuan_CV_2022/PDF/JosHsuan_CV&Portfolio_2025.VerFacade.pdf; physical page 27, Fig.1-39 comparison; normalized crop (0.027,0.277,0.962,0.716), excluding lower title, section and prose",
+    "export": "/media/church-panel-deviations.webp"
+  },
+  {
+    "id": "planet-generation-functions",
+    "source": "C:/Users/JosHsuan/Desktop/JosHsuan_CV_2022/PDF/JosHsuan_CV&Portfolio_2025.Ver2.pdf; physical page 67, Fig.10-02 function diagram; normalized crop (0.542,0.755,0.970,0.961), excluding footer and poster caption",
+    "export": "/media/planet-generation-functions.webp"
   }
 ]

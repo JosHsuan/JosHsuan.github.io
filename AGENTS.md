@@ -7,6 +7,8 @@
 
 ## Current phase
 
+- September 30 content revision: remove Woodflow and ChinPaoSan from the published portfolio, including their routes and dedicated media. Expand all retained cases against the original portfolio's methods, diagrams, fabrication and outcomes. Use factual research narratives informed by ITECH, IntCDC, ETH ITA and Gramazio Kohler Research, and remove generic slogans across the interface and case copy. Retain source attribution, bounded individual contributions and the approved glass workspace behavior. See `docs/content-revision.md`.
+
 - September 30, 2026: the owner now requests a complete personal website and GitHub publication. This supersedes earlier content pauses and the local-only deployment restriction below. Retain the frosted-glass terminal, navigation and reversible reading contract. Temporarily set aside the background 3D concept while preserving an independent background component for future expansion. The active site uses static neutral illumination and no mounted WebGL renderer. Build the portfolio from the supplied archives, keep team and image credits, and supplement factual gaps with primary public sources. Public company coverage remains a high-level practice overview; do not distribute private code, configuration or product parameters. See `docs/portfolio-release.md` for the current release and validation record.
 
 - The earlier decisions below are history where they conflict with this September 30 direction. No removed particle feature is authorized for restoration.
