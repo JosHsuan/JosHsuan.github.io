@@ -26,4 +26,3 @@ export function panelRect(p: number, width: number, height: number) {
   const t = expansionAt(p)
   return { x: mix(start.x, end.x, t), y: mix(start.y, end.y, t), w: mix(start.w, end.w, t), h: mix(start.h, end.h, t) }
 }
-

@@ -65,4 +65,3 @@ export class OpeningController {
 
   stop = () => { cancelAnimationFrame(this.raf); this.raf = 0 }
 }
-

@@ -54,4 +54,3 @@
 - `docs/creative-skills-research.md` records candidate creative and UI/UX skills for discussion; recommendations are not installation or design decisions.
 - The new opening study uses React 19, React Three Fiber 9, Three.js, TypeScript, and Vite. `package.json` and `pnpm-lock.yaml` record the installed versions. Do not bring back dependencies or implementation details from the rejected prototype.
 - Preserve clear module responsibilities and explicit resource ownership if a 3D implementation is selected.
-

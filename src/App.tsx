@@ -134,4 +134,3 @@ export default function App() {
     <span className="sr-only" role="status">{state.reduced ? 'Workspace expanded. Scroll to read the portfolio.' : state.completed ? 'Workspace expanded. Scroll up from the top of the content to return.' : ''}</span>
   </main>
 }
-

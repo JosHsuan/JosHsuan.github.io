@@ -100,4 +100,13 @@ GitHub Pages. Publication and live verification are recorded after execution.
   page retains project credits, the CC BY-SA license and downloadable adapted mesh.
 - Static output checks cover all 19 complete case texts and 275 local references.
   The active JavaScript bundle contains no mounted 3D renderer.
-- Remaining release check: GitHub Actions publication and live-site verification.
+- GitHub Pages now uses the GitHub Actions source. Release commit `fcb81f6`
+  was published successfully by [run 36737969752](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/36737969752).
+- The live site at <https://joshsuan.github.io/> was opened in the browser and
+  displays the retained frosted-glass workspace and portfolio navigation.
+- All 128 published pages and resources match the reviewed production build by
+  SHA-256 (text line endings normalized). This covers all case and directory pages,
+  résumé, attribution, images, thumbnails, scripts, styles, license files and the
+  downloadable retained mesh. An unknown path returns the custom 404 with HTTP 404.
+- Raw source archives, local study references and build caches are excluded from
+  the public repository. No private company source or original CV PDF is uploaded.
