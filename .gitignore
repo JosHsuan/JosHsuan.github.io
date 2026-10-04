@@ -1,8 +1,0 @@
-node_modules/
-.pnpm-store/
-dist/
-.vite/
-*.log
-.asset-cache/
-# Local visual references are not publication assets.
-references/
