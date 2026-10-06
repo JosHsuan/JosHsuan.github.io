@@ -1,5 +1,7 @@
 # Personal Website Direction: Design Technologies Engineer
 
+> Historical design reference. The current software and materials-source policies are maintained in [architecture Sections 00 and 12](architecture.md#00-current-project-baseline-and-source-authority). The implemented GitHub framework governs software; the designated external preparation folder governs project/CV/content preparation. English is now the primary project language. The original single-page/Vite direction, copy and candidate selection below are retained as earlier discussion, not current implementation instructions or an automatic publication list.
+
 Prepared on 2026-10-05 (Europe/Berlin), based on 18 preference questions and one source-location confirmation: **19 questions in total**.
 
 This revision incorporates the name, role evidence, asset permissions, and development preferences from the earlier asset-preparation conversation. The website direction confirmed in this conversation remains the design reference.
