@@ -1,0 +1,14 @@
+:root {
+  --color-paper: #f6f5f1;
+  --color-surface: #eeede8;
+  --color-ink: #252824;
+  --color-muted: #62675f;
+  --color-line: #d5d8ce;
+  --color-accent: #345d47;
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2.5rem;
+  --space-5: 4rem;
+  --page-width: 88rem;
+}
