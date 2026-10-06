@@ -1,0 +1,47 @@
+name: Publish reviewed Pages artifact
+on:
+  workflow_dispatch:
+    inputs:
+      validation_run_id:
+        description: Successful CI run ID for this exact commit (root export)
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Verify tested artifact provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_ID: ${{ inputs.validation_run_id }}
+          EXPECTED_SHA: ${{ github.sha }}
+          EXPECTED_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          [[ "$RUN_ID" =~ ^[0-9]+$ ]] || exit 1
+          gh api "repos/$GH_REPO/actions/runs/$RUN_ID" > run.json
+          jq -e --arg sha "$EXPECTED_SHA" --arg branch "$EXPECTED_BRANCH" '.conclusion == "success" and .head_sha == $sha and .head_branch == $branch and .event == "push" and .path == ".github/workflows/ci.yml"' run.json
+      - uses: actions/download-artifact@v4
+        with:
+          name: static-export-root
+          path: out
+          run-id: ${{ inputs.validation_run_id }}
+          github-token: ${{ github.token }}
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+      - name: Deploy the already-tested output
+        id: deployment
+        uses: actions/deploy-pages@v4

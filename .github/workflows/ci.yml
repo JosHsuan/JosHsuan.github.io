@@ -1,0 +1,43 @@
+name: Validate static export
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: root
+            basePath: ''
+          - name: subpath
+            basePath: /portfolio-test
+    env:
+      NEXT_PUBLIC_BASE_PATH: ${{ matrix.basePath }}
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm exec playwright install --with-deps chromium firefox webkit
+      - run: pnpm test:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-report-${{ matrix.name }}
+          path: |
+            playwright-report/
+            test-results/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: static-export-${{ matrix.name }}
+          path: out/
+          include-hidden-files: true
+          retention-days: 14
