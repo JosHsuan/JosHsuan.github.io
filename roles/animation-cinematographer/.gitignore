@@ -1,0 +1,6 @@
+node_modules/
+.runtime/
+dist/
+verification/screenshots/
+*.log
+/src/bending-active/framing-hull.private.mjs

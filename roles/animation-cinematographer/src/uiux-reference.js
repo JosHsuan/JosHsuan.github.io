@@ -1,0 +1,2 @@
+// Read-only catalog vocabulary. These are not owner choices.
+export const uiuxIds = ["font-plex-sans","font-inter","font-space-grotesk","font-plex-mono","font-jetbrains-mono","icons-lucide","icons-phosphor","icons-tabler","identity-glyphs","identity-palette","ui-focus-rail","ui-command","motion-reveal","motion-linework","motion-reflow","motion-theatre","spatial-wirefield","spatial-hatch","spatial-ascii","feedback-type","feedback-glyph","feedback-key","feedback-card","feedback-navigation","feedback-panel","feedback-assembly"];

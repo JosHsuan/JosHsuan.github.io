@@ -1,0 +1,14 @@
+# Keep normal source portable and acquired/hash-pinned bytes unchanged.
+*.json text eol=lf
+*.js text eol=lf
+*.mjs text eol=lf
+*.jsx text eol=lf
+*.cjs text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+assets/** -text
+licenses/** -text
+LICENSE*.txt -text
+skills/vendor/** -text
+src/materials/vendor/** -text
+src/motion/theatre/*.json -text

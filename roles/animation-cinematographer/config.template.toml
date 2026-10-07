@@ -1,0 +1,20 @@
+# Animation Cinematographer only. The launcher renders this into a dedicated CODEX_HOME.
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+web_search = "live"
+[history]
+persistence = "none"
+[mcp_servers.cinema_catalog]
+command = "__NODE__"
+args = ["__ROLE_ROOT__/mcp/catalog-server.mjs"]
+cwd = "__ROLE_ROOT__"
+enabled_tools = ["cinema_list_studies", "cinema_get_study", "cinema_catalog_status"]
+startup_timeout_sec = 15
+tool_timeout_sec = 20
+[mcp_servers.cinema_browser]
+command = "__NODE__"
+args = ["__ROLE_ROOT__/node_modules/@playwright/mcp/cli.js", "--browser", "chromium", "--executable-path", "__CHROMIUM__", "--headless", "--isolated", "--allowed-origins", "http://127.0.0.1:4182", "--output-dir", "__ROLE_ROOT__/.runtime/browser-output"]
+cwd = "__ROLE_ROOT__"
+enabled_tools = ["browser_navigate", "browser_snapshot", "browser_click", "browser_type", "browser_press_key", "browser_take_screenshot", "browser_resize", "browser_console_messages", "browser_close"]
+startup_timeout_sec = 30
+tool_timeout_sec = 40

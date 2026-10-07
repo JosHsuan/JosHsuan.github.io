@@ -1,0 +1,53 @@
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { createBendingActiveCameraPlan, sampleBendingActivePose } from '../../src/bending-active/camera-plan.mjs';
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1);
+renderer.setSize(innerWidth, innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.12;
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#0b0d10');
+const pmrem = new THREE.PMREMGenerator(renderer), room = new RoomEnvironment();
+const environment = pmrem.fromScene(room, 0.04);
+scene.environment = environment.texture;
+scene.environmentIntensity = 0.8;
+room.dispose(); pmrem.dispose();
+const key = new THREE.DirectionalLight('#fff3e3', 2.1); key.position.set(3, 6, 4); scene.add(key);
+const fill = new THREE.DirectionalLight('#d2dbe4', 0.55); fill.position.set(-4, 2, -3); scene.add(fill);
+const camera = new THREE.PerspectiveCamera(38, innerWidth / innerHeight, 0.001, 100);
+const gltf = await new GLTFLoader().loadAsync('/model.glb');
+const reviewMaterial = new THREE.MeshStandardMaterial({ color: '#aeb4b8', metalness: 0.82, roughness: 0.34, side: THREE.DoubleSide });
+let vertices = 0, triangles = 0;
+gltf.scene.traverse(object => {
+  if (!object.isMesh) return;
+  const previous = Array.isArray(object.material) ? object.material : [object.material];
+  for (const material of previous) material.dispose();
+  object.material = reviewMaterial;
+  vertices += object.geometry.attributes.position?.count ?? 0;
+  triangles += (object.geometry.index?.count ?? object.geometry.attributes.position?.count ?? 0) / 3;
+});
+scene.add(gltf.scene); gltf.scene.updateMatrixWorld(true);
+const box = new THREE.Box3().setFromObject(gltf.scene);
+const bounds = { min: box.min.toArray(), max: box.max.toArray() };
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshBasicMaterial({ color: '#15191d' }));
+ground.rotation.x = -Math.PI / 2; ground.position.y = box.min.y - 0.009; scene.add(ground);
+let current = null, frames = 0;
+function setView(u = 0, frontDegrees = 30) {
+  renderer.setSize(innerWidth, innerHeight);
+  const az = frontDegrees * Math.PI / 180;
+  const plan = createBendingActiveCameraPlan({ bounds, aspect: innerWidth / innerHeight, forward: [Math.sin(az), 0, Math.cos(az)] });
+  const pose = sampleBendingActivePose(plan, u);
+  camera.position.fromArray(pose.position); camera.up.fromArray(pose.up); camera.lookAt(...pose.target);
+  camera.fov = pose.fov; camera.aspect = pose.aspect; camera.near = pose.near; camera.far = pose.far; camera.updateProjectionMatrix();
+  renderer.render(scene, camera); frames++;
+  current = { u, frontDegrees, width: innerWidth, height: innerHeight, bounds, vertices, triangles, pose, frames };
+  return current;
+}
+window.__cameraReview = { setView, state: () => current, ready: true };
+setView();
+addEventListener('beforeunload', () => { scene.traverse(object => object.geometry?.dispose()); reviewMaterial.dispose(); ground.material.dispose(); environment.dispose(); renderer.dispose(); });

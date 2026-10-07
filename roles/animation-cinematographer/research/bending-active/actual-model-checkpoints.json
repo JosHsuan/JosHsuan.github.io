@@ -1,0 +1,1303 @@
+{
+  "role": "Animation Cinematographer",
+  "generatedAt": "2026-10-07T21:40:12.899Z",
+  "measuredModel": {
+    "sourceObjectId": "03aa204e-af4c-4e84-9007-ac16d19c1ecc",
+    "sourceUnits": "millimeters",
+    "sourceBounds": {
+      "min": [
+        -10900.048828125,
+        -4758.4638671875,
+        8.087958335876465
+      ],
+      "max": [
+        -8523.8388671875,
+        -1658.038330078125,
+        732.9448852539062
+      ]
+    },
+    "displayBounds": {
+      "min": [
+        -1.18810498046875,
+        0,
+        -1.5502127685546876
+      ],
+      "max": [
+        1.18810498046875,
+        0.7248569269180298,
+        1.5502127685546876
+      ]
+    },
+    "transform": "Translate original X/Y center and ground minZ; scale millimeters by 0.001; map (x,y,z) to (x,z,-y).",
+    "evidenceStatus": "Conversion-owner measurements; geometry and visual framing must be validated against the resulting asset."
+  },
+  "status": "Mathematical framing checkpoints; not rendered-image evidence.",
+  "variants": [
+    {
+      "frontDegrees": 0,
+      "aspect": 1.7777777777777777,
+      "checkpoints": [
+        {
+          "position": [
+            2.139178795464653,
+            1.6690031264111211,
+            4.02321017473806
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            -0.12940390019757722,
+            0.9612616959383189,
+            -0.2433733398206189
+          ],
+          "fov": 38,
+          "aspect": 1.7777777777777777,
+          "near": 0.27883883076133004,
+          "far": 8.678481759156226,
+          "distance": 4.740194445268028,
+          "owner": "procedural-story",
+          "chapter": "form",
+          "progress": 0,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        },
+        {
+          "position": [
+            -0.11118806780818954,
+            1.2190718394488465,
+            3.7632075234876385
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            0.006552422617032164,
+            0.9750770939403746,
+            -0.22176953494707466
+          ],
+          "fov": 38,
+          "aspect": 1.7777777777777777,
+          "near": 0.22355367482727365,
+          "far": 7.473102552444882,
+          "distance": 3.8610790622420748,
+          "owner": "procedural-story",
+          "chapter": "system",
+          "progress": 0.3,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        },
+        {
+          "position": [
+            -1.9013907781784494,
+            1.0765643593024605,
+            3.575995957485667
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            0.0815228813442158,
+            0.9848077530122081,
+            -0.15332224047535542
+          ],
+          "fov": 38,
+          "aspect": 1.7777777777777777,
+          "near": 0.2152339984541819,
+          "far": 8.059230627564794,
+          "distance": 4.112544717936572,
+          "owner": "procedural-story",
+          "chapter": "system",
+          "progress": 0.5,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        },
+        {
+          "position": [
+            -1.6900437113332833,
+            1.1021379686137958,
+            3.686486545873844
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            0.07477916265611942,
+            0.9837689771716784,
+            -0.16311553079654775
+          ],
+          "fov": 38,
+          "aspect": 1.7777777777777777,
+          "near": 0.21838917022180465,
+          "far": 8.047248581860298,
+          "distance": 4.122329553922439,
+          "owner": "procedural-story",
+          "chapter": "make",
+          "progress": 0.7,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        },
+        {
+          "position": [
+            0.8381620076325693,
+            1.3675535653717974,
+            3.943242217729096
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            -0.050298390359964376,
+            0.9702957262759967,
+            -0.23663532174578925
+          ],
+          "fov": 38,
+          "aspect": 1.7777777777777777,
+          "near": 0.235609250564106,
+          "far": 7.939889548314226,
+          "distance": 4.154750438860909,
+          "owner": "procedural-story",
+          "chapter": "make",
+          "progress": 1,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        }
+      ]
+    },
+    {
+      "frontDegrees": 0,
+      "aspect": 0.7,
+      "checkpoints": [
+        {
+          "position": [
+            4.289211955651026,
+            2.982207453960646,
+            8.066834440472782
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            -0.12940390019757722,
+            0.9612616959383189,
+            -0.2433733398206189
+          ],
+          "fov": 38,
+          "aspect": 0.7,
+          "near": 0.7552634879552506,
+          "far": 13.442728331095429,
+          "distance": 9.504441017207231,
+          "owner": "procedural-story",
+          "chapter": "form",
+          "progress": 0,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        },
+        {
+          "position": [
+            -0.2133423359639665,
+            2.0061147197667095,
+            7.220662249145517
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            0.006552422617032164,
+            0.9750770939403746,
+            -0.22176953494707466
+          ],
+          "fov": 38,
+          "aspect": 0.7,
+          "near": 0.578291115336948,
+          "far": 11.020476957541625,
+          "distance": 7.408453467338818,
+          "owner": "procedural-story",
+          "chapter": "system",
+          "progress": 0.3,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        },
+        {
+          "position": [
+            -4.215601510829445,
+            1.9457496807520056,
+            7.92839332877092
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            0.0815228813442158,
+            0.9848077530122081,
+            -0.15332224047535542
+          ],
+          "fov": 38,
+          "aspect": 0.7,
+          "near": 0.715777875808717,
+          "far": 13.064669401110145,
+          "distance": 9.117983491481922,
+          "owner": "procedural-story",
+          "chapter": "system",
+          "progress": 0.5,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        },
+        {
+          "position": [
+            -3.6835089051245538,
+            1.9746509942557853,
+            8.034825329834494
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            0.07477916265611942,
+            0.9837689771716784,
+            -0.16311553079654775
+          ],
+          "fov": 38,
+          "aspect": 0.7,
+          "near": 0.7046322435798587,
+          "far": 12.909679315440838,
+          "distance": 8.98476028750298,
+          "owner": "procedural-story",
+          "chapter": "make",
+          "progress": 0.7,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        },
+        {
+          "position": [
+            1.6576910694791824,
+            2.3503340115241214,
+            7.7988233176853035
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            -0.050298390359964376,
+            0.9702957262759967,
+            -0.23663532174578925
+          ],
+          "fov": 38,
+          "aspect": 0.7,
+          "near": 0.6418479846465427,
+          "far": 12.002276889138596,
+          "distance": 8.217137779685276,
+          "owner": "procedural-story",
+          "chapter": "make",
+          "progress": 1,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        }
+      ]
+    },
+    {
+      "frontDegrees": 30,
+      "aspect": 1.7777777777777777,
+      "checkpoints": [
+        {
+          "position": [
+            3.713373879770593,
+            1.6180091674867902,
+            2.320373529649276
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            -0.2337537348301975,
+            0.961261695938319,
+            -0.14606554478973033
+          ],
+          "fov": 38,
+          "aspect": 1.7777777777777777,
+          "near": 0.26970886393261445,
+          "far": 8.399773822536687,
+          "distance": 4.555190642814681,
+          "owner": "procedural-story",
+          "chapter": "form",
+          "progress": 0,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        },
+        {
+          "position": [
+            2.03177418246278,
+            1.3373313522857972,
+            3.7722112473568084
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            -0.10521020303085576,
+            0.9750770939403746,
+            -0.1953342623581436
+          ],
+          "fov": 38,
+          "aspect": 1.7777777777777777,
+          "near": 0.24335119133618793,
+          "far": 8.34117036795568,
+          "distance": 4.394100552542046,
+          "owner": "procedural-story",
+          "chapter": "system",
+          "progress": 0.3,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        },
+        {
+          "position": [
+            0.13126716121455348,
+            1.025645540783654,
+            3.758999676269276
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            -0.006060234003882329,
+            0.9848077530122082,
+            -0.17354239588891238
+          ],
+          "fov": 38,
+          "aspect": 1.7777777777777777,
+          "near": 0.21898140037975491,
+          "far": 7.43529703006376,
+          "distance": 3.8193149288139208,
+          "owner": "procedural-story",
+          "chapter": "system",
+          "progress": 0.5,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        },
+        {
+          "position": [
+            0.35949445215564035,
+            1.0629176955929327,
+            3.823533845131924
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            -0.016797110864345814,
+            0.9837689771716784,
+            -0.178651774749653
+          ],
+          "fov": 38,
+          "aspect": 1.7777777777777777,
+          "near": 0.2210958114593455,
+          "far": 7.583040590364636,
+          "distance": 3.903758764362312,
+          "owner": "procedural-story",
+          "chapter": "make",
+          "progress": 0.7,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        },
+        {
+          "position": [
+            2.907036691738257,
+            1.4456335143937642,
+            3.228591330912164
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            -0.16187734469409001,
+            0.9702957262759966,
+            -0.17978300488457546
+          ],
+          "fov": 38,
+          "aspect": 1.7777777777777777,
+          "near": 0.25006247498749756,
+          "far": 8.440854470249791,
+          "distance": 4.477499021945649,
+          "owner": "procedural-story",
+          "chapter": "make",
+          "progress": 1,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        }
+      ]
+    },
+    {
+      "frontDegrees": 30,
+      "aspect": 0.7,
+      "checkpoints": [
+        {
+          "position": [
+            7.920883708445064,
+            3.0406690783754957,
+            4.949517469445219
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            -0.2337537348301975,
+            0.961261695938319,
+            -0.14606554478973033
+          ],
+          "fov": 38,
+          "aspect": 0.7,
+          "near": 0.7858435172606765,
+          "far": 13.561120355817307,
+          "distance": 9.7165371760953,
+          "owner": "procedural-story",
+          "chapter": "form",
+          "progress": 0,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        },
+        {
+          "position": [
+            4.305720757044972,
+            2.4284354246442694,
+            7.994042058362581
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            -0.10521020303085576,
+            0.9750770939403746,
+            -0.1953342623581436
+          ],
+          "fov": 38,
+          "aspect": 0.7,
+          "near": 0.7351356615823414,
+          "far": 13.259015070417217,
+          "distance": 9.31194525500358,
+          "owner": "procedural-story",
+          "chapter": "system",
+          "progress": 0.3,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        },
+        {
+          "position": [
+            0.25146903407471477,
+            1.6329561131282744,
+            7.201130952573681
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            -0.006060234003882329,
+            0.9848077530122082,
+            -0.17354239588891238
+          ],
+          "fov": 38,
+          "aspect": 0.7,
+          "near": 0.5687176201916817,
+          "far": 10.932659228183027,
+          "distance": 7.316677126933188,
+          "owner": "procedural-story",
+          "chapter": "system",
+          "progress": 0.5,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        },
+        {
+          "position": [
+            0.704009069470937,
+            1.7342181240001595,
+            7.487744214858049
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            -0.016797110864345814,
+            0.9837689771716784,
+            -0.178651774749653
+          ],
+          "fov": 38,
+          "aspect": 0.7,
+          "near": 0.5952050497886348,
+          "far": 11.324132973657532,
+          "distance": 7.644851147655205,
+          "owner": "procedural-story",
+          "chapter": "make",
+          "progress": 0.7,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        },
+        {
+          "position": [
+            6.075015553131343,
+            2.6260694936395597,
+            6.746988301089663
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            -0.16187734469409001,
+            0.9702957262759966,
+            -0.17978300488457546
+          ],
+          "fov": 38,
+          "aspect": 0.7,
+          "near": 0.7380034182079411,
+          "far": 13.320263902454226,
+          "distance": 9.356908454150085,
+          "owner": "procedural-story",
+          "chapter": "make",
+          "progress": 1,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        }
+      ]
+    },
+    {
+      "frontDegrees": 45,
+      "aspect": 1.7777777777777777,
+      "checkpoints": [
+        {
+          "position": [
+            3.910378874426623,
+            1.5349449565735764,
+            1.195522798040001
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            -0.2635933142888717,
+            0.9612616959383189,
+            -0.08058856360548361
+          ],
+          "fov": 38,
+          "aspect": 1.7777777777777777,
+          "near": 0.26260815596790404,
+          "far": 7.868074417302535,
+          "distance": 4.253837400374053,
+          "owner": "procedural-story",
+          "chapter": "form",
+          "progress": 0,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        },
+        {
+          "position": [
+            2.955768525833634,
+            1.3429392973382819,
+            3.135749051821582
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            -0.15218147955596,
+            0.9750770939403747,
+            -0.16144800448736712
+          ],
+          "fov": 38,
+          "aspect": 1.7777777777777777,
+          "near": 0.24443909511362258,
+          "far": 8.380843800045081,
+          "distance": 4.41937678747392,
+          "owner": "procedural-story",
+          "chapter": "system",
+          "progress": 0.3,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        },
+        {
+          "position": [
+            1.1773168574649213,
+            1.0724586184318876,
+            3.8508299260246583
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            -0.050769813726477084,
+            0.9848077530122081,
+            -0.16606057816719963
+          ],
+          "fov": 38,
+          "aspect": 1.7777777777777777,
+          "near": 0.22239209783810476,
+          "far": 7.94036159505178,
+          "distance": 4.088900698599681,
+          "owner": "procedural-story",
+          "chapter": "system",
+          "progress": 0.5,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        },
+        {
+          "position": [
+            1.4085155975767212,
+            1.1004702960305588,
+            3.7932099016810428
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            -0.06246324493748814,
+            0.9837689771716784,
+            -0.16821695094867592
+          ],
+          "fov": 38,
+          "aspect": 1.7777777777777777,
+          "near": 0.22114636492008444,
+          "far": 8.001089078740298,
+          "distance": 4.113035775853837,
+          "owner": "procedural-story",
+          "chapter": "make",
+          "progress": 0.7,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        },
+        {
+          "position": [
+            3.4916078318906965,
+            1.400447014139294,
+            2.2674766384977154
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            -0.2028927735810069,
+            0.9702957262759966,
+            -0.13176010776840916
+          ],
+          "fov": 38,
+          "aspect": 1.7777777777777777,
+          "near": 0.24169809159245,
+          "far": 8.150935587667613,
+          "distance": 4.290717663679321,
+          "owner": "procedural-story",
+          "chapter": "make",
+          "progress": 1,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        }
+      ]
+    },
+    {
+      "frontDegrees": 45,
+      "aspect": 0.7,
+      "checkpoints": [
+        {
+          "position": [
+            8.860544943771142,
+            3.019238818204462,
+            2.7089404437542397
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            -0.2635933142888717,
+            0.9612616959383189,
+            -0.08058856360548361
+          ],
+          "fov": 38,
+          "aspect": 0.7,
+          "near": 0.8011033309892235,
+          "far": 13.253026167515728,
+          "distance": 9.638789150587245,
+          "owner": "procedural-story",
+          "chapter": "form",
+          "progress": 0,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        },
+        {
+          "position": [
+            6.375154905233952,
+            2.477245100014632,
+            6.763346241284207
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            -0.15218147955596,
+            0.9750770939403747,
+            -0.16144800448736712
+          ],
+          "fov": 38,
+          "aspect": 0.7,
+          "near": 0.7556955301304427,
+          "far": 13.49340815021328,
+          "distance": 9.53194113764212,
+          "owner": "procedural-story",
+          "chapter": "system",
+          "progress": 0.3,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        },
+        {
+          "position": [
+            2.4665390035057406,
+            1.8499779364843747,
+            8.067685558210016
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            -0.050769813726477084,
+            0.9848077530122081,
+            -0.16606057816719963
+          ],
+          "fov": 38,
+          "aspect": 0.7,
+          "near": 0.6701476277255676,
+          "far": 12.41791689392641,
+          "distance": 8.56645599747431,
+          "owner": "procedural-story",
+          "chapter": "system",
+          "progress": 0.5,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        },
+        {
+          "position": [
+            3.0036031367125418,
+            1.9362731316691693,
+            8.088868294039367
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            -0.06246324493748814,
+            0.9837689771716784,
+            -0.16821695094867592
+          ],
+          "fov": 38,
+          "aspect": 0.7,
+          "near": 0.6869312043192046,
+          "far": 12.658937472731502,
+          "distance": 8.770884169845038,
+          "owner": "procedural-story",
+          "chapter": "make",
+          "progress": 0.7,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        },
+        {
+          "position": [
+            7.554476892985142,
+            2.6082955634184746,
+            4.9059346569396896
+          ],
+          "target": [
+            0,
+            0.3624284634590149,
+            0
+          ],
+          "up": [
+            -0.2028927735810069,
+            0.9702957262759966,
+            -0.13176010776840916
+          ],
+          "fov": 38,
+          "aspect": 0.7,
+          "near": 0.7409702001732824,
+          "far": 13.143656673475935,
+          "distance": 9.283438749487642,
+          "owner": "procedural-story",
+          "chapter": "make",
+          "progress": 1,
+          "focusBounds": {
+            "min": [
+              -1.18810498046875,
+              0,
+              -1.5502127685546876
+            ],
+            "max": [
+              1.18810498046875,
+              0.7248569269180298,
+              1.5502127685546876
+            ]
+          },
+          "detailId": null,
+          "detailStatus": "whole-model-fallback",
+          "motionKind": "deterministic-procedural",
+          "modelRevision": "source-object:03aa204e-af4c-4e84-9007-ac16d19c1ecc"
+        }
+      ]
+    }
+  ]
+}

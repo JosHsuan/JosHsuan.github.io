@@ -1,0 +1,29 @@
+{
+  "verifiedAt": "2026-10-07T20:41:34.358Z",
+  "results": [
+    {
+      "server": "cinema-catalog",
+      "passed": true,
+      "checks": [
+        "initialize",
+        "three read-only tools",
+        "real study details",
+        "unknown ID rejected"
+      ]
+    },
+    {
+      "server": "Playwright",
+      "version": "0.0.83",
+      "passed": true,
+      "checks": [
+        "initialize",
+        "tool discovery",
+        "real local navigation",
+        "accessible snapshot",
+        "screenshot",
+        "close"
+      ],
+      "browserNote": "Pinned project Chromium headless shell; MCP carries its own Playwright alpha. This exact combination was exercised."
+    }
+  ]
+}

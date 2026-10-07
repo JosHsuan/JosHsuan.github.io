@@ -1,0 +1,1168 @@
+{
+  "capturedAt": "2026-10-07T21:44:41.026Z",
+  "sourceModel": "C:\\Users\\JosHsuan\\Documents\\GitHub\\JosHsuan.github.io\\roles\\uiux-designer\\cases\\bending-active-thesis\\public\\assets\\assembly.glb",
+  "modelSHA256": "c56dfda835e6538ad360f76967ba65603ff48d055228a7d400a2293554bbb058",
+  "bytes": 3614676,
+  "fixtureMaterial": {
+    "color": "#aeb4b8",
+    "metalness": 0.82,
+    "roughness": 0.34,
+    "source": "Neutral material for camera review; not a measured reconstruction"
+  },
+  "renderer": "Chromium headless / repository-pinned Three.js / original role capture harness",
+  "idleVerified": true,
+  "captures": [
+    {
+      "file": "shots/front-0-u-0.png",
+      "u": 0,
+      "frontDegrees": 0,
+      "width": 1280,
+      "height": 800,
+      "bounds": {
+        "min": [
+          -1.18810498046875,
+          0,
+          -1.5502127685546876
+        ],
+        "max": [
+          1.18810498046875,
+          0.7248569269180298,
+          1.5502127685546876
+        ]
+      },
+      "vertices": 84626,
+      "triangles": 131881,
+      "pose": {
+        "position": [
+          2.139178795464653,
+          1.6690031264111211,
+          4.02321017473806
+        ],
+        "target": [
+          0,
+          0.3624284634590149,
+          0
+        ],
+        "up": [
+          -0.12940390019757722,
+          0.9612616959383189,
+          -0.2433733398206189
+        ],
+        "fov": 38,
+        "aspect": 1.6,
+        "near": 0.27883883076133004,
+        "far": 8.678481759156226,
+        "distance": 4.740194445268028,
+        "owner": "procedural-story",
+        "chapter": "form",
+        "progress": 0,
+        "focusBounds": {
+          "min": [
+            -1.18810498046875,
+            0,
+            -1.5502127685546876
+          ],
+          "max": [
+            1.18810498046875,
+            0.7248569269180298,
+            1.5502127685546876
+          ]
+        },
+        "detailId": null,
+        "detailStatus": "whole-model-fallback",
+        "motionKind": "deterministic-procedural",
+        "modelRevision": "unrecorded"
+      },
+      "frames": 2,
+      "sha256": "f877654abe1360d8613d5a856ec2e32e490f3242fc83b71907b072a5d7008ea6"
+    },
+    {
+      "file": "shots/front-0-u-30.png",
+      "u": 0.3,
+      "frontDegrees": 0,
+      "width": 1280,
+      "height": 800,
+      "bounds": {
+        "min": [
+          -1.18810498046875,
+          0,
+          -1.5502127685546876
+        ],
+        "max": [
+          1.18810498046875,
+          0.7248569269180298,
+          1.5502127685546876
+        ]
+      },
+      "vertices": 84626,
+      "triangles": 131881,
+      "pose": {
+        "position": [
+          -0.11856002530396728,
+          1.2758687483377646,
+          4.012714565545425
+        ],
+        "target": [
+          0,
+          0.3624284634590149,
+          0
+        ],
+        "up": [
+          0.006552422617032164,
+          0.9750770939403746,
+          -0.22176953494707466
+        ],
+        "fov": 38,
+        "aspect": 1.6,
+        "near": 0.2491532839362193,
+        "far": 7.729098643534338,
+        "distance": 4.117075153331531,
+        "owner": "procedural-story",
+        "chapter": "system",
+        "progress": 0.3,
+        "focusBounds": {
+          "min": [
+            -1.18810498046875,
+            0,
+            -1.5502127685546876
+          ],
+          "max": [
+            1.18810498046875,
+            0.7248569269180298,
+            1.5502127685546876
+          ]
+        },
+        "detailId": null,
+        "detailStatus": "whole-model-fallback",
+        "motionKind": "deterministic-procedural",
+        "modelRevision": "unrecorded"
+      },
+      "frames": 3,
+      "sha256": "9f8179b883ff229020166e4ad5ce4ee6bfa6a18c6b4119318b9e4f3ece3a1fd3"
+    },
+    {
+      "file": "shots/front-0-u-50.png",
+      "u": 0.5,
+      "frontDegrees": 0,
+      "width": 1280,
+      "height": 800,
+      "bounds": {
+        "min": [
+          -1.18810498046875,
+          0,
+          -1.5502127685546876
+        ],
+        "max": [
+          1.18810498046875,
+          0.7248569269180298,
+          1.5502127685546876
+        ]
+      },
+      "vertices": 84626,
+      "triangles": 131881,
+      "pose": {
+        "position": [
+          -2.0683956764109954,
+          1.1392890732215,
+          3.8900864894340867
+        ],
+        "target": [
+          0,
+          0.3624284634590149,
+          0
+        ],
+        "up": [
+          0.0815228813442158,
+          0.9848077530122081,
+          -0.15332224047535542
+        ],
+        "fov": 38,
+        "aspect": 1.6,
+        "near": 0.251355721562241,
+        "far": 8.420447858645387,
+        "distance": 4.473761949017164,
+        "owner": "procedural-story",
+        "chapter": "system",
+        "progress": 0.5,
+        "focusBounds": {
+          "min": [
+            -1.18810498046875,
+            0,
+            -1.5502127685546876
+          ],
+          "max": [
+            1.18810498046875,
+            0.7248569269180298,
+            1.5502127685546876
+          ]
+        },
+        "detailId": null,
+        "detailStatus": "whole-model-fallback",
+        "motionKind": "deterministic-procedural",
+        "modelRevision": "unrecorded"
+      },
+      "frames": 4,
+      "sha256": "85b310656ee18ee5bc5cd0f38b794528c9ee66019dbf989bf1522a308eb0b253"
+    },
+    {
+      "file": "shots/front-0-u-70.png",
+      "u": 0.7,
+      "frontDegrees": 0,
+      "width": 1280,
+      "height": 800,
+      "bounds": {
+        "min": [
+          -1.18810498046875,
+          0,
+          -1.5502127685546876
+        ],
+        "max": [
+          1.18810498046875,
+          0.7248569269180298,
+          1.5502127685546876
+        ]
+      },
+      "vertices": 84626,
+      "triangles": 131881,
+      "pose": {
+        "position": [
+          -1.8339020242872925,
+          1.1651028261343517,
+          4.00028419007719
+        ],
+        "target": [
+          0,
+          0.3624284634590149,
+          0
+        ],
+        "up": [
+          0.07477916265611942,
+          0.9837689771716784,
+          -0.16311553079654775
+        ],
+        "fov": 38,
+        "aspect": 1.6,
+        "near": 0.25347887654661266,
+        "far": 8.39814564510838,
+        "distance": 4.4732266171705195,
+        "owner": "procedural-story",
+        "chapter": "make",
+        "progress": 0.7,
+        "focusBounds": {
+          "min": [
+            -1.18810498046875,
+            0,
+            -1.5502127685546876
+          ],
+          "max": [
+            1.18810498046875,
+            0.7248569269180298,
+            1.5502127685546876
+          ]
+        },
+        "detailId": null,
+        "detailStatus": "whole-model-fallback",
+        "motionKind": "deterministic-procedural",
+        "modelRevision": "unrecorded"
+      },
+      "frames": 5,
+      "sha256": "9432bc23b8be9c1e53c9f58ec64c777fb9432c5acfd94260fd22f359b0438bd3"
+    },
+    {
+      "file": "shots/front-0-u-100.png",
+      "u": 1,
+      "frontDegrees": 0,
+      "width": 1280,
+      "height": 800,
+      "bounds": {
+        "min": [
+          -1.18810498046875,
+          0,
+          -1.5502127685546876
+        ],
+        "max": [
+          1.18810498046875,
+          0.7248569269180298,
+          1.5502127685546876
+        ]
+      },
+      "vertices": 84626,
+      "triangles": 131881,
+      "pose": {
+        "position": [
+          0.874948267304115,
+          1.4116677016183086,
+          4.116307962594943
+        ],
+        "target": [
+          0,
+          0.3624284634590149,
+          0
+        ],
+        "up": [
+          -0.050298390359964376,
+          0.9702957262759967,
+          -0.23663532174578925
+        ],
+        "fov": 38,
+        "aspect": 1.6,
+        "near": 0.2538441177046608,
+        "far": 8.122238219719776,
+        "distance": 4.337099110266458,
+        "owner": "procedural-story",
+        "chapter": "make",
+        "progress": 1,
+        "focusBounds": {
+          "min": [
+            -1.18810498046875,
+            0,
+            -1.5502127685546876
+          ],
+          "max": [
+            1.18810498046875,
+            0.7248569269180298,
+            1.5502127685546876
+          ]
+        },
+        "detailId": null,
+        "detailStatus": "whole-model-fallback",
+        "motionKind": "deterministic-procedural",
+        "modelRevision": "unrecorded"
+      },
+      "frames": 6,
+      "sha256": "303f01b9379640eb7ca560b1c0f2c635268ee55a3e8a79c64a00041d0f5e1646"
+    },
+    {
+      "file": "shots/front-30-u-0.png",
+      "u": 0,
+      "frontDegrees": 30,
+      "width": 1280,
+      "height": 800,
+      "bounds": {
+        "min": [
+          -1.18810498046875,
+          0,
+          -1.5502127685546876
+        ],
+        "max": [
+          1.18810498046875,
+          0.7248569269180298,
+          1.5502127685546876
+        ]
+      },
+      "vertices": 84626,
+      "triangles": 131881,
+      "pose": {
+        "position": [
+          3.713373879770593,
+          1.6180091674867902,
+          2.320373529649276
+        ],
+        "target": [
+          0,
+          0.3624284634590149,
+          0
+        ],
+        "up": [
+          -0.2337537348301975,
+          0.961261695938319,
+          -0.14606554478973033
+        ],
+        "fov": 38,
+        "aspect": 1.6,
+        "near": 0.26970886393261445,
+        "far": 8.399773822536687,
+        "distance": 4.555190642814681,
+        "owner": "procedural-story",
+        "chapter": "form",
+        "progress": 0,
+        "focusBounds": {
+          "min": [
+            -1.18810498046875,
+            0,
+            -1.5502127685546876
+          ],
+          "max": [
+            1.18810498046875,
+            0.7248569269180298,
+            1.5502127685546876
+          ]
+        },
+        "detailId": null,
+        "detailStatus": "whole-model-fallback",
+        "motionKind": "deterministic-procedural",
+        "modelRevision": "unrecorded"
+      },
+      "frames": 7,
+      "sha256": "c7952e8a3aa6c810ad105df6ecab4594c6c060e378e6f298228113df440de084"
+    },
+    {
+      "file": "shots/front-30-u-30.png",
+      "u": 0.3,
+      "frontDegrees": 30,
+      "width": 1280,
+      "height": 800,
+      "bounds": {
+        "min": [
+          -1.18810498046875,
+          0,
+          -1.5502127685546876
+        ],
+        "max": [
+          1.18810498046875,
+          0.7248569269180298,
+          1.5502127685546876
+        ]
+      },
+      "vertices": 84626,
+      "triangles": 131881,
+      "pose": {
+        "position": [
+          2.10791635023889,
+          1.373866524337489,
+          3.913577519338381
+        ],
+        "target": [
+          0,
+          0.3624284634590149,
+          0
+        ],
+        "up": [
+          -0.10521020303085576,
+          0.9750770939403746,
+          -0.1953342623581436
+        ],
+        "fov": 38,
+        "aspect": 1.6,
+        "near": 0.25981839248406363,
+        "far": 8.505842379434437,
+        "distance": 4.558772564020803,
+        "owner": "procedural-story",
+        "chapter": "system",
+        "progress": 0.3,
+        "focusBounds": {
+          "min": [
+            -1.18810498046875,
+            0,
+            -1.5502127685546876
+          ],
+          "max": [
+            1.18810498046875,
+            0.7248569269180298,
+            1.5502127685546876
+          ]
+        },
+        "detailId": null,
+        "detailStatus": "whole-model-fallback",
+        "motionKind": "deterministic-procedural",
+        "modelRevision": "unrecorded"
+      },
+      "frames": 8,
+      "sha256": "1ce71650c3e9068740743ea350d0b0aea35c02a85f520e371d7faf6ffa6184bd"
+    },
+    {
+      "file": "shots/front-30-u-50.png",
+      "u": 0.5,
+      "frontDegrees": 30,
+      "width": 1280,
+      "height": 800,
+      "bounds": {
+        "min": [
+          -1.18810498046875,
+          0,
+          -1.5502127685546876
+        ],
+        "max": [
+          1.18810498046875,
+          0.7248569269180298,
+          1.5502127685546876
+        ]
+      },
+      "vertices": 84626,
+      "triangles": 131881,
+      "pose": {
+        "position": [
+          0.1399415231735342,
+          1.069472076932235,
+          4.007400902394337
+        ],
+        "target": [
+          0,
+          0.3624284634590149,
+          0
+        ],
+        "up": [
+          -0.006060234003882329,
+          0.9848077530122082,
+          -0.17354239588891238
+        ],
+        "fov": 38,
+        "aspect": 1.6,
+        "near": 0.2442200966548425,
+        "far": 7.687683992814636,
+        "distance": 4.071701891564796,
+        "owner": "procedural-story",
+        "chapter": "system",
+        "progress": 0.5,
+        "focusBounds": {
+          "min": [
+            -1.18810498046875,
+            0,
+            -1.5502127685546876
+          ],
+          "max": [
+            1.18810498046875,
+            0.7248569269180298,
+            1.5502127685546876
+          ]
+        },
+        "detailId": null,
+        "detailStatus": "whole-model-fallback",
+        "motionKind": "deterministic-procedural",
+        "modelRevision": "unrecorded"
+      },
+      "frames": 9,
+      "sha256": "0a0c150b1e935c34b45a2201c847adc3ee5eccad908907e01addc09b20bad793"
+    },
+    {
+      "file": "shots/front-30-u-70.png",
+      "u": 0.7,
+      "frontDegrees": 30,
+      "width": 1280,
+      "height": 800,
+      "bounds": {
+        "min": [
+          -1.18810498046875,
+          0,
+          -1.5502127685546876
+        ],
+        "max": [
+          1.18810498046875,
+          0.7248569269180298,
+          1.5502127685546876
+        ]
+      },
+      "vertices": 84626,
+      "triangles": 131881,
+      "pose": {
+        "position": [
+          0.3843563317557133,
+          1.1113620564058253,
+          4.087961397586387
+        ],
+        "target": [
+          0,
+          0.3624284634590149,
+          0
+        ],
+        "up": [
+          -0.016797110864345814,
+          0.9837689771716784,
+          -0.178651774749653
+        ],
+        "fov": 38,
+        "aspect": 1.6,
+        "near": 0.24809338535939732,
+        "far": 7.853016329365155,
+        "distance": 4.17373450336283,
+        "owner": "procedural-story",
+        "chapter": "make",
+        "progress": 0.7,
+        "focusBounds": {
+          "min": [
+            -1.18810498046875,
+            0,
+            -1.5502127685546876
+          ],
+          "max": [
+            1.18810498046875,
+            0.7248569269180298,
+            1.5502127685546876
+          ]
+        },
+        "detailId": null,
+        "detailStatus": "whole-model-fallback",
+        "motionKind": "deterministic-procedural",
+        "modelRevision": "unrecorded"
+      },
+      "frames": 10,
+      "sha256": "5b4c38f6753c66941cf83097bdabb016a49b6d7e97b103339f29f7f99806045e"
+    },
+    {
+      "file": "shots/front-30-u-100.png",
+      "u": 1,
+      "frontDegrees": 30,
+      "width": 1280,
+      "height": 800,
+      "bounds": {
+        "min": [
+          -1.18810498046875,
+          0,
+          -1.5502127685546876
+        ],
+        "max": [
+          1.18810498046875,
+          0.7248569269180298,
+          1.5502127685546876
+        ]
+      },
+      "vertices": 84626,
+      "triangles": 131881,
+      "pose": {
+        "position": [
+          2.907036691738257,
+          1.4456335143937642,
+          3.228591330912164
+        ],
+        "target": [
+          0,
+          0.3624284634590149,
+          0
+        ],
+        "up": [
+          -0.16187734469409001,
+          0.9702957262759966,
+          -0.17978300488457546
+        ],
+        "fov": 38,
+        "aspect": 1.6,
+        "near": 0.25006247498749756,
+        "far": 8.440854470249791,
+        "distance": 4.477499021945649,
+        "owner": "procedural-story",
+        "chapter": "make",
+        "progress": 1,
+        "focusBounds": {
+          "min": [
+            -1.18810498046875,
+            0,
+            -1.5502127685546876
+          ],
+          "max": [
+            1.18810498046875,
+            0.7248569269180298,
+            1.5502127685546876
+          ]
+        },
+        "detailId": null,
+        "detailStatus": "whole-model-fallback",
+        "motionKind": "deterministic-procedural",
+        "modelRevision": "unrecorded"
+      },
+      "frames": 11,
+      "sha256": "83a119adfce0589a2b0a5a68234066b92ec327fa1021e6b583ccbdf620edc2b2"
+    },
+    {
+      "file": "shots/front-45-u-0.png",
+      "u": 0,
+      "frontDegrees": 45,
+      "width": 1280,
+      "height": 800,
+      "bounds": {
+        "min": [
+          -1.18810498046875,
+          0,
+          -1.5502127685546876
+        ],
+        "max": [
+          1.18810498046875,
+          0.7248569269180298,
+          1.5502127685546876
+        ]
+      },
+      "vertices": 84626,
+      "triangles": 131881,
+      "pose": {
+        "position": [
+          4.267607353657671,
+          1.6420589465881765,
+          1.3047385044317503
+        ],
+        "target": [
+          0,
+          0.3624284634590149,
+          0
+        ],
+        "up": [
+          -0.2635933142888717,
+          0.9612616959383189,
+          -0.08058856360548361
+        ],
+        "fov": 38,
+        "aspect": 1.6,
+        "near": 0.3014686325158344,
+        "far": 8.256679182781838,
+        "distance": 4.642442165853356,
+        "owner": "procedural-story",
+        "chapter": "form",
+        "progress": 0,
+        "focusBounds": {
+          "min": [
+            -1.18810498046875,
+            0,
+            -1.5502127685546876
+          ],
+          "max": [
+            1.18810498046875,
+            0.7248569269180298,
+            1.5502127685546876
+          ]
+        },
+        "detailId": null,
+        "detailStatus": "whole-model-fallback",
+        "motionKind": "deterministic-procedural",
+        "modelRevision": "unrecorded"
+      },
+      "frames": 12,
+      "sha256": "e26599209fb1bbec718c22111da93dc2fd5b9221afd63872b1c495bef07e7e3a"
+    },
+    {
+      "file": "shots/front-45-u-30.png",
+      "u": 0.3,
+      "frontDegrees": 45,
+      "width": 1280,
+      "height": 800,
+      "bounds": {
+        "min": [
+          -1.18810498046875,
+          0,
+          -1.5502127685546876
+        ],
+        "max": [
+          1.18810498046875,
+          0.7248569269180298,
+          1.5502127685546876
+        ]
+      },
+      "vertices": 84626,
+      "triangles": 131881,
+      "pose": {
+        "position": [
+          2.955768525833634,
+          1.3429392973382819,
+          3.135749051821582
+        ],
+        "target": [
+          0,
+          0.3624284634590149,
+          0
+        ],
+        "up": [
+          -0.15218147955596,
+          0.9750770939403747,
+          -0.16144800448736712
+        ],
+        "fov": 38,
+        "aspect": 1.6,
+        "near": 0.24443909511362258,
+        "far": 8.380843800045081,
+        "distance": 4.41937678747392,
+        "owner": "procedural-story",
+        "chapter": "system",
+        "progress": 0.3,
+        "focusBounds": {
+          "min": [
+            -1.18810498046875,
+            0,
+            -1.5502127685546876
+          ],
+          "max": [
+            1.18810498046875,
+            0.7248569269180298,
+            1.5502127685546876
+          ]
+        },
+        "detailId": null,
+        "detailStatus": "whole-model-fallback",
+        "motionKind": "deterministic-procedural",
+        "modelRevision": "unrecorded"
+      },
+      "frames": 13,
+      "sha256": "47b363f9b9716b8255ad5b024642ebe549bcbfb11259d4da30c1a79db7671285"
+    },
+    {
+      "file": "shots/front-45-u-50.png",
+      "u": 0.5,
+      "frontDegrees": 45,
+      "width": 1280,
+      "height": 800,
+      "bounds": {
+        "min": [
+          -1.18810498046875,
+          0,
+          -1.5502127685546876
+        ],
+        "max": [
+          1.18810498046875,
+          0.7248569269180298,
+          1.5502127685546876
+        ]
+      },
+      "vertices": 84626,
+      "triangles": 131881,
+      "pose": {
+        "position": [
+          1.2703535071792071,
+          1.1285682599408302,
+          4.1551390953576215
+        ],
+        "target": [
+          0,
+          0.3624284634590149,
+          0
+        ],
+        "up": [
+          -0.050769813726477084,
+          0.9848077530122081,
+          -0.16606057816719963
+        ],
+        "fov": 38,
+        "aspect": 1.6,
+        "near": 0.25470435257225144,
+        "far": 8.263484142393247,
+        "distance": 4.412023245941149,
+        "owner": "procedural-story",
+        "chapter": "system",
+        "progress": 0.5,
+        "focusBounds": {
+          "min": [
+            -1.18810498046875,
+            0,
+            -1.5502127685546876
+          ],
+          "max": [
+            1.18810498046875,
+            0.7248569269180298,
+            1.5502127685546876
+          ]
+        },
+        "detailId": null,
+        "detailStatus": "whole-model-fallback",
+        "motionKind": "deterministic-procedural",
+        "modelRevision": "unrecorded"
+      },
+      "frames": 14,
+      "sha256": "fc59a11539383a6c240063ed3d5ae2e84023ab167763147736b8d11c87754254"
+    },
+    {
+      "file": "shots/front-45-u-70.png",
+      "u": 0.7,
+      "frontDegrees": 45,
+      "width": 1280,
+      "height": 800,
+      "bounds": {
+        "min": [
+          -1.18810498046875,
+          0,
+          -1.5502127685546876
+        ],
+        "max": [
+          1.18810498046875,
+          0.7248569269180298,
+          1.5502127685546876
+        ]
+      },
+      "vertices": 84626,
+      "triangles": 131881,
+      "pose": {
+        "position": [
+          1.523625007617451,
+          1.160785964581799,
+          4.1032058681398915
+        ],
+        "target": [
+          0,
+          0.3624284634590149,
+          0
+        ],
+        "up": [
+          -0.06246324493748814,
+          0.9837689771716784,
+          -0.16821695094867592
+        ],
+        "fov": 38,
+        "aspect": 1.6,
+        "near": 0.2547597038457942,
+        "far": 8.337222467997396,
+        "distance": 4.449169165110935,
+        "owner": "procedural-story",
+        "chapter": "make",
+        "progress": 0.7,
+        "focusBounds": {
+          "min": [
+            -1.18810498046875,
+            0,
+            -1.5502127685546876
+          ],
+          "max": [
+            1.18810498046875,
+            0.7248569269180298,
+            1.5502127685546876
+          ]
+        },
+        "detailId": null,
+        "detailStatus": "whole-model-fallback",
+        "motionKind": "deterministic-procedural",
+        "modelRevision": "unrecorded"
+      },
+      "frames": 15,
+      "sha256": "9c56046cab37bd3d141451d0e12c78a2f88652aab9349a5e8c32d855eb64af31"
+    },
+    {
+      "file": "shots/front-45-u-100.png",
+      "u": 1,
+      "frontDegrees": 45,
+      "width": 1280,
+      "height": 800,
+      "bounds": {
+        "min": [
+          -1.18810498046875,
+          0,
+          -1.5502127685546876
+        ],
+        "max": [
+          1.18810498046875,
+          0.7248569269180298,
+          1.5502127685546876
+        ]
+      },
+      "vertices": 84626,
+      "triangles": 131881,
+      "pose": {
+        "position": [
+          3.4916078318906965,
+          1.400447014139294,
+          2.2674766384977154
+        ],
+        "target": [
+          0,
+          0.3624284634590149,
+          0
+        ],
+        "up": [
+          -0.2028927735810069,
+          0.9702957262759966,
+          -0.13176010776840916
+        ],
+        "fov": 38,
+        "aspect": 1.6,
+        "near": 0.24169809159245,
+        "far": 8.150935587667613,
+        "distance": 4.290717663679321,
+        "owner": "procedural-story",
+        "chapter": "make",
+        "progress": 1,
+        "focusBounds": {
+          "min": [
+            -1.18810498046875,
+            0,
+            -1.5502127685546876
+          ],
+          "max": [
+            1.18810498046875,
+            0.7248569269180298,
+            1.5502127685546876
+          ]
+        },
+        "detailId": null,
+        "detailStatus": "whole-model-fallback",
+        "motionKind": "deterministic-procedural",
+        "modelRevision": "unrecorded"
+      },
+      "frames": 16,
+      "sha256": "28af5c83d8842bfa300c81a6c3137a3e612a8b823200ab3440c6caabf9e5be5e"
+    },
+    {
+      "file": "shots/portrait-front-30-u-0.png",
+      "u": 0,
+      "frontDegrees": 30,
+      "width": 560,
+      "height": 800,
+      "bounds": {
+        "min": [
+          -1.18810498046875,
+          0,
+          -1.5502127685546876
+        ],
+        "max": [
+          1.18810498046875,
+          0.7248569269180298,
+          1.5502127685546876
+        ]
+      },
+      "vertices": 84626,
+      "triangles": 131881,
+      "pose": {
+        "position": [
+          7.920883708445064,
+          3.0406690783754957,
+          4.949517469445219
+        ],
+        "target": [
+          0,
+          0.3624284634590149,
+          0
+        ],
+        "up": [
+          -0.2337537348301975,
+          0.961261695938319,
+          -0.14606554478973033
+        ],
+        "fov": 38,
+        "aspect": 0.7,
+        "near": 0.7858435172606765,
+        "far": 13.561120355817307,
+        "distance": 9.7165371760953,
+        "owner": "procedural-story",
+        "chapter": "form",
+        "progress": 0,
+        "focusBounds": {
+          "min": [
+            -1.18810498046875,
+            0,
+            -1.5502127685546876
+          ],
+          "max": [
+            1.18810498046875,
+            0.7248569269180298,
+            1.5502127685546876
+          ]
+        },
+        "detailId": null,
+        "detailStatus": "whole-model-fallback",
+        "motionKind": "deterministic-procedural",
+        "modelRevision": "unrecorded"
+      },
+      "frames": 17,
+      "sha256": "62f02c0dcef395f464941ae037582eca8270af5679271facb9c2dddd8d6bd32f"
+    },
+    {
+      "file": "shots/portrait-front-30-u-50.png",
+      "u": 0.5,
+      "frontDegrees": 30,
+      "width": 560,
+      "height": 800,
+      "bounds": {
+        "min": [
+          -1.18810498046875,
+          0,
+          -1.5502127685546876
+        ],
+        "max": [
+          1.18810498046875,
+          0.7248569269180298,
+          1.5502127685546876
+        ]
+      },
+      "vertices": 84626,
+      "triangles": 131881,
+      "pose": {
+        "position": [
+          0.25146903407471477,
+          1.6329561131282744,
+          7.201130952573681
+        ],
+        "target": [
+          0,
+          0.3624284634590149,
+          0
+        ],
+        "up": [
+          -0.006060234003882329,
+          0.9848077530122082,
+          -0.17354239588891238
+        ],
+        "fov": 38,
+        "aspect": 0.7,
+        "near": 0.5687176201916817,
+        "far": 10.932659228183027,
+        "distance": 7.316677126933188,
+        "owner": "procedural-story",
+        "chapter": "system",
+        "progress": 0.5,
+        "focusBounds": {
+          "min": [
+            -1.18810498046875,
+            0,
+            -1.5502127685546876
+          ],
+          "max": [
+            1.18810498046875,
+            0.7248569269180298,
+            1.5502127685546876
+          ]
+        },
+        "detailId": null,
+        "detailStatus": "whole-model-fallback",
+        "motionKind": "deterministic-procedural",
+        "modelRevision": "unrecorded"
+      },
+      "frames": 18,
+      "sha256": "38446e00bc2f2691c46b77f7d31e65145fa9d7b29add70ec9b4ce78d9a56c04d"
+    },
+    {
+      "file": "shots/portrait-front-30-u-100.png",
+      "u": 1,
+      "frontDegrees": 30,
+      "width": 560,
+      "height": 800,
+      "bounds": {
+        "min": [
+          -1.18810498046875,
+          0,
+          -1.5502127685546876
+        ],
+        "max": [
+          1.18810498046875,
+          0.7248569269180298,
+          1.5502127685546876
+        ]
+      },
+      "vertices": 84626,
+      "triangles": 131881,
+      "pose": {
+        "position": [
+          6.075015553131343,
+          2.6260694936395597,
+          6.746988301089663
+        ],
+        "target": [
+          0,
+          0.3624284634590149,
+          0
+        ],
+        "up": [
+          -0.16187734469409001,
+          0.9702957262759966,
+          -0.17978300488457546
+        ],
+        "fov": 38,
+        "aspect": 0.7,
+        "near": 0.7380034182079411,
+        "far": 13.320263902454226,
+        "distance": 9.356908454150085,
+        "owner": "procedural-story",
+        "chapter": "make",
+        "progress": 1,
+        "focusBounds": {
+          "min": [
+            -1.18810498046875,
+            0,
+            -1.5502127685546876
+          ],
+          "max": [
+            1.18810498046875,
+            0.7248569269180298,
+            1.5502127685546876
+          ]
+        },
+        "detailId": null,
+        "detailStatus": "whole-model-fallback",
+        "motionKind": "deterministic-procedural",
+        "modelRevision": "unrecorded"
+      },
+      "frames": 19,
+      "sha256": "5b595b83327d299194f97c61726c6dcfcad492aef69a3107e9ee3db6bc92cf51"
+    }
+  ]
+}

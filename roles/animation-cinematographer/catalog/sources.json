@@ -1,0 +1,78 @@
+{
+  "retrievedAt": "2026-10-07",
+  "policy": "Primary sources; original procedural adaptation. No Lusion or Tiffen artwork or footage copied.",
+  "references": {
+    "lusion": {
+      "label": "Lusion · native scroll / DOM and WebGL",
+      "url": "https://github.com/lusionltd/WebGL-Scroll-Sync/tree/d2f2c844b449878c760e3f435ab01c85ed5ee072"
+    },
+    "r3f": {
+      "label": "React Three Fiber · demand rendering",
+      "url": "https://r3f.docs.pmnd.rs/advanced/scaling-performance"
+    },
+    "three-camera": {
+      "label": "Three.js · PerspectiveCamera",
+      "url": "https://threejs.org/docs/pages/PerspectiveCamera.html"
+    },
+    "three-curve": {
+      "label": "Three.js · Curve / arc-length sampling",
+      "url": "https://threejs.org/docs/pages/Curve.html"
+    },
+    "three-physical": {
+      "label": "Three.js · physical materials",
+      "url": "https://threejs.org/docs/pages/MeshPhysicalMaterial.html"
+    },
+    "three-buffer": {
+      "label": "Three.js · BufferGeometry",
+      "url": "https://threejs.org/docs/pages/BufferGeometry.html"
+    },
+    "three-bokeh": {
+      "label": "Three.js · depth / Bokeh shader reference",
+      "url": "https://github.com/mrdoob/three.js/blob/9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8/examples/jsm/shaders/BokehShader.js"
+    },
+    "three-post": {
+      "label": "Three.js · postprocessing",
+      "url": "https://threejs.org/manual/en/post-processing.html"
+    },
+    "rapier": {
+      "label": "Rapier JS · pinned physics runtime",
+      "url": "https://github.com/dimforge/rapier.js/tree/v0.19.3"
+    },
+    "theatre": {
+      "label": "Theatre · advanced input mapping",
+      "url": "https://www.theatrejs.com/docs/latest/manual/advanced"
+    },
+    "tiffen": {
+      "label": "Tiffen · Black Pro-Mist reference",
+      "url": "https://tiffen.com/products/black-pro-mist-filter"
+    }
+  },
+  "implementation": {
+    "lusion": "Native scrolling retained. Canvas and HTML rail share one sticky block; no floating DOM-bound objects. Lusion padding/offset algorithm is not copied or claimed.",
+    "theatre": "Existing genuine UIUX Studio export reused byte-for-byte, sought by u. No new authoring claimed.",
+    "diffusion": "Original linear-HDR bright-pass separable blur, not a calibrated filter model.",
+    "dof": "Original single-depth gather shader; Three BokehShader read as a depth conversion reference.",
+    "geometry": "Original abstract aperture / frame / depth-target test fixture; no owner project content."
+  },
+  "pins": {
+    "lusion": "d2f2c844b449878c760e3f435ab01c85ed5ee072",
+    "three": "0.186.1 / 9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8",
+    "playwrightMcp": "0.0.83 / f183dad4a52965583e3cc1d59b88cdc279e2e57d",
+    "theatre": "0.7.2",
+    "openaiPlaywrightSkill": "49f948faa9258a0c61caceaf225e179651397431"
+  },
+  "assets": [
+    {
+      "file": "assets/studio_small_09_1k.hdr",
+      "sha256": "e7cfda5f4e98e623db12b8bfd0184e048488e4855d9c83e2751fb44a32e80c45",
+      "source": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_09_1k.hdr",
+      "license": "CC0-1.0 / Poly Haven / Sergej Majboroda"
+    },
+    {
+      "file": "src/motion/theatre/motion.state.json",
+      "sha256": "684e3bcbde3fa6326d9bdacc27aee03b0a44141d7320be5951b21d6aba2411ab",
+      "source": "roles/uiux-designer/src/motion/theatre/spatial/motion.state.json",
+      "license": "Existing local authored export; reuse provenance in motion.manifest.json"
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "role": "animation-cinematographer",
+  "activation": "codex-role.ps1",
+  "home": ".runtime/codex-home",
+  "reviewOrigin": "http://127.0.0.1:4182",
+  "reviewStorageKey": "cinema-interaction-review-v1",
+  "globalConfigSHA256": "719e39d8c6bfee3e10b7964043b50183a64568cc21081476957ee71eec00bb4e",
+  "skills": [
+    {
+      "name": "cinema-shot-design",
+      "path": "skills/cinema-shot-design",
+      "source": "Original role workflow informed by the available R3F fundamentals, animation and shaders skills, Three docs and camera experiments",
+      "license": "Project-original instructions"
+    },
+    {
+      "name": "cinema-interaction-review",
+      "path": "skills/cinema-interaction-review",
+      "source": "Original single-input review and source-evidence workflow",
+      "license": "Project-original instructions"
+    },
+    {
+      "name": "playwright",
+      "path": "skills/vendor/playwright",
+      "repository": "https://github.com/openai/skills",
+      "revision": "49f948faa9258a0c61caceaf225e179651397431",
+      "sourcePath": "skills/.curated/playwright",
+      "license": "Apache-2.0",
+      "adaptation": "Animation Cinematographer display metadata only; original skill/license/notice retained",
+      "platformNote": "npx is unavailable in this host toolchain. The Bash CLI recipe was not executed. The role uses its pinned browser MCP and explicit requested test scripts instead; no global CLI was installed."
+    }
+  ],
+  "mcp": [
+    {
+      "name": "cinema_catalog",
+      "source": "mcp/catalog-server.mjs",
+      "access": "Read-only closed local study catalog; no arbitrary files or shell",
+      "verification": "verification/mcp-results.json"
+    },
+    {
+      "name": "cinema_browser",
+      "package": "@playwright/mcp",
+      "version": "0.0.83",
+      "revision": "f183dad4a52965583e3cc1d59b88cdc279e2e57d",
+      "source": "https://github.com/microsoft/playwright-mcp",
+      "license": "Apache-2.0",
+      "access": "Explicit loopback origin, tool allowlist, isolated ephemeral browser profile, role output directory",
+      "verification": "verification/mcp-results.json",
+      "note": "Playwright 1.64 alpha is confined to the role lockfile. The project 1.63 Chromium headless shell was actually tested. Allowed-origins is a request restriction, not an OS security sandbox."
+    }
+  ],
+  "optionalRuntime": [],
+  "configurationReferences": [
+    "https://learn.chatgpt.com/docs/config-file/config-advanced",
+    "https://learn.chatgpt.com/docs/extend/mcp?surface=cli",
+    "https://learn.chatgpt.com/docs/build-skills"
+  ],
+  "activationEvidence": "verification/config-loader.json records the installed CLI loading only cinema registrations. No desktop hot loading claimed. No credentials copied.",
+  "sourceCopyRevision": "single-input-review-2026-10-07-v1; local source copies, no cross-role runtime dependency"
+}

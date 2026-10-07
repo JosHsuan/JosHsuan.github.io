@@ -1,0 +1,221 @@
+{
+  "verifiedAt": "2026-10-07T20:52:47.844Z",
+  "role": "animation-cinematographer",
+  "syntheticProfiles": true,
+  "results": [
+    {
+      "name": "chromium/locked: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "chromium/handheld: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "chromium/trajectory: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "chromium/timing: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "chromium/parallax: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "chromium/zoom: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "chromium/dollyzoom: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "chromium/focus: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "chromium/mist: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "chromium/reveal: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "chromium/language: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "chromium/crane: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "chromium/score: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "chromium: native scroll is exclusive",
+      "passed": true
+    },
+    {
+      "name": "chromium: role review and screenshots",
+      "passed": true
+    },
+    {
+      "name": "webkit/locked: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "webkit/handheld: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "webkit/trajectory: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "webkit/timing: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "webkit/parallax: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "webkit/zoom: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "webkit/dollyzoom: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "webkit/focus: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "webkit/mist: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "webkit/reveal: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "webkit/language: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "webkit/crane: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "webkit/score: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "webkit: native scroll is exclusive",
+      "passed": true
+    },
+    {
+      "name": "webkit: role review and screenshots",
+      "passed": true
+    },
+    {
+      "name": "mobile/locked: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "mobile/handheld: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "mobile/trajectory: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "mobile/timing: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "mobile/parallax: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "mobile/zoom: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "mobile/dollyzoom: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "mobile/focus: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "mobile/mist: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "mobile/reveal: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "mobile/language: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "mobile/crane: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "mobile/score: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "mobile: native scroll is exclusive",
+      "passed": true
+    },
+    {
+      "name": "mobile: role review and screenshots",
+      "passed": true
+    },
+    {
+      "name": "reduced motion: fixed pose and explicit opt-in",
+      "passed": true
+    },
+    {
+      "name": "no JavaScript: all comparisons and sources remain readable",
+      "passed": true
+    },
+    {
+      "name": "context loss: captured fallback",
+      "passed": true
+    },
+    {
+      "name": "blocked storage: export still works",
+      "passed": true
+    },
+    {
+      "name": "missing HDR: frozen captured fallback",
+      "passed": true
+    },
+    {
+      "name": "review import: exact role and source preservation",
+      "passed": true
+    },
+    {
+      "name": "WebGL unavailable: readable capture",
+      "passed": true
+    }
+  ],
+  "failures": [],
+  "limits": [
+    "Emulated Pixel 7; no physical device",
+    "Firefox launch previously unavailable on this Windows host; not claimed passed",
+    "Owner UIUX saved state not accessed by these tests"
+  ]
+}

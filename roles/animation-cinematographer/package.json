@@ -1,0 +1,22 @@
+{
+  "name": "portfolio-animation-cinematographer-desk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.19.0",
+  "engines": {
+    "node": "24.19.0",
+    "pnpm": "11.19.0"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "preview": "node scripts/serve.mjs",
+    "test": "node --test tests/interaction.test.mjs",
+    "verify:mcp": "node scripts/verify-mcp.mjs",
+    "verify": "node scripts/verify-interactions.mjs",
+    "validate": "node scripts/validate-interactions.mjs"
+  },
+  "devDependencies": {
+    "@playwright/mcp": "0.0.83"
+  }
+}

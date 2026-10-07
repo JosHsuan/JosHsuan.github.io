@@ -1,0 +1,29 @@
+{
+  "builtAt": "2026-10-07T23:10:46.113Z",
+  "role": "animation-cinematographer",
+  "count": 13,
+  "studioExcluded": true,
+  "theatreModules": [
+    "javascript/esm|[project]/roles/animation-cinematographer/scripts/ts-loader.cjs![project]/roles/animation-cinematographer/src/motion/theatre/runtime.js",
+    "json|[project]/roles/animation-cinematographer/src/motion/theatre/motion.state.json",
+    "json|[project]/roles/animation-cinematographer/src/motion/theatre/motion.manifest.json",
+    "[project]/roles/animation-cinematographer/scripts/ts-loader.cjs![project]/src/motion/theatre/createController.ts",
+    "[project]/roles/animation-cinematographer/scripts/ts-loader.cjs![project]/src/motion/theatre/projectRegistry.ts",
+    "javascript/dynamic|[project]/node_modules/.pnpm/@theatre+core@0.7.2/node_modules/@theatre/core/dist/index.js",
+    "[project]/node_modules/.pnpm/@theatre+dataverse@0.7.2/node_modules/@theatre/dataverse/dist/index.js"
+  ],
+  "assets": [
+    {
+      "file": "chunks\\95.33a9723b.js",
+      "bytes": 29717
+    },
+    {
+      "file": "chunks\\96.997750ba.js",
+      "bytes": 1371747
+    },
+    {
+      "file": "desk.js",
+      "bytes": 2198391
+    }
+  ]
+}
