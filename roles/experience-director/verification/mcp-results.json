@@ -1,0 +1,32 @@
+{
+  "verifiedAt": "2026-10-07T22:50:00.157Z",
+  "results": [
+    {
+      "server": "experience-story",
+      "passed": true,
+      "checks": [
+        "initialize",
+        "three closed read-only tools",
+        "all seven chapters",
+        "real make composition",
+        "complete layer contract",
+        "unknown/path/type arguments rejected"
+      ]
+    },
+    {
+      "server": "Playwright",
+      "version": "0.0.83",
+      "passed": true,
+      "checks": [
+        "initialize",
+        "tool discovery",
+        "real local thesis navigation",
+        "accessible snapshot",
+        "PageDown",
+        "screenshot",
+        "close"
+      ],
+      "note": "Tool verification only; not final case visual acceptance. Exact MCP alpha/root Chromium combination exercised."
+    }
+  ]
+}

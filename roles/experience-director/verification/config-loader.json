@@ -1,0 +1,48 @@
+[
+  {
+    "name": "experience_browser",
+    "enabled": true,
+    "disabled_reason": null,
+    "transport": {
+      "type": "stdio",
+      "command": "C:/Users/JosHsuan/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node.exe",
+      "args": [
+        "C:/Users/JosHsuan/Documents/GitHub/JosHsuan.github.io/roles/experience-director/node_modules/@playwright/mcp/cli.js",
+        "--browser",
+        "chromium",
+        "--executable-path",
+        "C:/Users/JosHsuan/AppData/Local/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-win64/chrome-headless-shell.exe",
+        "--headless",
+        "--isolated",
+        "--allowed-origins",
+        "http://127.0.0.1:4184",
+        "--output-dir",
+        "D:/JosHsuan_Website/_work/bending-active-thesis/cinematic-integration/director-browser"
+      ],
+      "env": null,
+      "env_vars": [],
+      "cwd": "C:/Users/JosHsuan/Documents/GitHub/JosHsuan.github.io/roles/experience-director"
+    },
+    "startup_timeout_sec": 30.0,
+    "tool_timeout_sec": 40.0,
+    "auth_status": "unsupported"
+  },
+  {
+    "name": "experience_story",
+    "enabled": true,
+    "disabled_reason": null,
+    "transport": {
+      "type": "stdio",
+      "command": "C:/Users/JosHsuan/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node.exe",
+      "args": [
+        "C:/Users/JosHsuan/Documents/GitHub/JosHsuan.github.io/roles/experience-director/mcp/story-server.mjs"
+      ],
+      "env": null,
+      "env_vars": [],
+      "cwd": "C:/Users/JosHsuan/Documents/GitHub/JosHsuan.github.io/roles/experience-director"
+    },
+    "startup_timeout_sec": 15.0,
+    "tool_timeout_sec": 20.0,
+    "auth_status": "unsupported"
+  }
+]

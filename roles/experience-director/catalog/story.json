@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "role": "experience-director",
+  "case": "Bending-Active Metal Panel Deformation",
+  "status": "local-review-direction",
+  "preview": "http://127.0.0.1:4184/",
+  "chapters": [
+    {"id":"overview","purpose":"Name the metal-panel thesis and central question","textSide":"left","model":"complete angled assembly"},
+    {"id":"form","purpose":"Explain bending-active metal-panel research","textSide":"left","model":"held complete silhouette"},
+    {"id":"system","purpose":"Explain documented computational workflow and contribution","textSide":"left","evidenceSide":"right","model":"recede behind evidence"},
+    {"id":"pattern","purpose":"Relate real pattern/detail evidence to the research","textSide":"left","evidenceSide":"right","model":"detail emphasis without invented analysis"},
+    {"id":"make","purpose":"Relate geometry to documented joining and fabrication","textSide":"right","evidenceSide":"left","model":"counter-composed and subdued"},
+    {"id":"validation","purpose":"Separate prototype evidence from browser visualization","textSide":"left","evidenceSide":"right","model":"settle to understandable assembly"},
+    {"id":"credits","purpose":"Contributions, collaborators, limitations and source status","textSide":"left","model":"complete stable ending"}
+  ]
+}

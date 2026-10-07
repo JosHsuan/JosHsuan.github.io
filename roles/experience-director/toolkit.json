@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "role": "experience-director",
+  "displayName": "Interactive Experience Director",
+  "activation": "codex-role.ps1",
+  "home": ".runtime/codex-home",
+  "reviewOrigin": "http://127.0.0.1:4184",
+  "globalConfigSHA256": "719e39d8c6bfee3e10b7964043b50183a64568cc21081476957ee71eec00bb4e",
+  "skills": [
+    {
+      "name": "experience-direction",
+      "path": "skills/experience-direction",
+      "source": "Original project integration-direction workflow informed by design guidance, primary Lusion research and cross-role discussion",
+      "license": "Project-original instructions"
+    },
+    {
+      "name": "playwright",
+      "path": "skills/vendor/playwright",
+      "repository": "https://github.com/openai/skills",
+      "revision": "49f948faa9258a0c61caceaf225e179651397431",
+      "sourcePath": "skills/.curated/playwright",
+      "license": "Apache-2.0",
+      "adaptation": "Role-specific SKILL and display metadata; license/notice/reference/asset/wrapper files retained. Pinned MCP replaces unavailable npx/Bash.",
+      "upstreamSkillSHA256": "0ffaabcc8e0990627c4725f18bf1c7955534a796c1c199e872909de2013ce6a8"
+    }
+  ],
+  "mcp": [
+    {
+      "name": "experience_story",
+      "source": "mcp/story-server.mjs",
+      "access": "Read-only closed chapter/contract documents; no arbitrary paths, shell or mutations",
+      "verification": "verification/mcp-results.json"
+    },
+    {
+      "name": "experience_browser",
+      "package": "@playwright/mcp",
+      "version": "0.0.83",
+      "revision": "f183dad4a52965583e3cc1d59b88cdc279e2e57d",
+      "source": "https://github.com/microsoft/playwright-mcp",
+      "license": "Apache-2.0",
+      "access": "Explicit loopback origin, eight enabled tools, isolated profile, D: working-output folder",
+      "verification": "verification/mcp-results.json",
+      "note": "MCP Playwright alpha stays in role lockfile. Root pinned Chromium headless shell is used; origin restriction is not an OS sandbox."
+    }
+  ],
+  "researchReferences": [
+    {
+      "url": "https://lusion.co/",
+      "inspected": "2026-10-08",
+      "use": "Visual research only; no assets/fonts copied"
+    },
+    {
+      "url": "https://labs.lusion.co/",
+      "inspected": "2026-10-08",
+      "use": "Layered media/editorial research only; no assets/fonts copied"
+    },
+    {
+      "repository": "https://github.com/lusionltd/WebGL-Scroll-Sync",
+      "revision": "d2f2c844b449878c760e3f435ab01c85ed5ee072",
+      "license": "MIT",
+      "use": "Technical reference; no imported source"
+    }
+  ],
+  "activationEvidence": "verification/config-loader.json records installed CLI loading only experience registrations. No desktop hot-loading or credential copying."
+}
