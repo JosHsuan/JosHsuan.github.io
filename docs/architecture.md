@@ -8,11 +8,11 @@
 |---|---|
 | Owner | JosHsuan Chao |
 | Audience | The owner, collaborating developers, and coding agents |
-| Revision | **2.2 — 7 October 2026; documentation-only design-guidelines integration** |
+| Revision | **2.4 — 8 October 2026; isolated role workspaces and cinematic local thesis review** |
 | Language | English for project documentation and future website content; Traditional Chinese for discussion with the owner |
 | Scope | Portfolio, Research & Development, About/CV, Contact, and selected interactive project stories |
 | Delivery baseline | Next.js static export to GitHub Pages; no paid domain, paid storage, or continuously running backend required for the initial release |
-| Status | **Existing empty framework with materials-source and design-guidelines documentation. The portfolio implementation has been withdrawn. No implementation phase is currently authorized; full scene/authoring acceptance remains pending.** |
+| Status | **Empty production portfolio framework. Isolated role research and the local thesis review are implemented; public content integration and deployment remain deferred.** |
 | Evidence | Existing repository implementation, inspected preparation records, and the original official-documentation/source register; evidence scope is recorded in Sections 12 and 22 |
 | Repository destination | `docs/architecture.md` is the maintained architecture; software implementation in the GitHub working folder takes precedence over older proposed layouts |
 | Design reference | `docs/WEBSITE_DESIGN_GUIDELINES.md` — supplied v1.0, preserved verbatim; presentation requirements for a later explicitly authorized implementation |
@@ -20,7 +20,17 @@
 
 ## Executive decision
 
-**Current scope — 7 October 2026:** The owner requested withdrawal of the portfolio implementation and integration of [Website Design Guidelines v1.0](WEBSITE_DESIGN_GUIDELINES.md) without starting implementation. The software/content baseline is restored to the empty framework. This revision integrates the guide in Markdown only. Its execution brief, phase sequence and ready-to-use prompt are retained as reference and do not activate work. [Decision 0002](decisions/0002-design-guidelines-integration.md) records the withdrawal, precedence and deferred choices.
+**Owner-authorized local thesis review — 7 October 2026:** The owner explicitly confirmed the Bending-Active Thesis local work page following further 3D Artist texture/shader research. [Decision 0004](decisions/0004-local-thesis-review.md) records the narrow private-source/local-derivative boundary. The [case workspace](../roles/uiux-designer/cases/bending-active-thesis/README.md) is a separate Next static review at port 4184 with sanitized local data, a verified CAD mesh and on-demand rendering. A scoped Geometry Engineer role fills the model-conversion gap. The production public snapshot, generated routes and publication gates remain unchanged; the ordinary build does not read private drives.
+
+**Cinematic case revision — 8 October 2026:** The owner subsequently requested continuous background 3D, layered native-scroll storytelling, decorative pointer tilt and a coordinating role. [Decision 0005](decisions/0005-cinematic-thesis-integration.md) records the local implementation and the new Interactive Experience Director. Seven measured chapters now share one demand-rendered scene and camera writer. New working material processing and captures take place under `D:\JosHsuan_Website\_work\bending-active-thesis\cinematic-integration`, followed by an explicit sanitized review handoff. Automatic background loading is a local immersive-preview exception, with the measured mobile transfer overrun retained rather than silently changing the Section 14 targets. This does not populate the production root or authorize publication.
+
+**UI/UX role proposal scope — 7 October 2026:** After the documentation-only integration, the owner requested UI/UX-specific skills/MCP setup, public-source asset research and individually working local proposals. [The opt-in role workspace](../roles/uiux-designer/README.md) contains those materials and its inspection desk. This authorizes local prototypes within that role, while the production framework/content/routes remain empty. [Decision 0003](decisions/0003-uiux-material-workspace.md) defines the separation; role tooling is not automatically activated for other roles or imported by the public site.
+
+The subsequent [spatial editorial feature proposal](../roles/uiux-designer/research/spatial-editorial-system.md) extends the owner's Saved preferences into an index, method reader, media inspection, comparison, geometry workbench and shared actions. Its same-origin review surface reads local Saved choices without rewriting them. These are tested role prototypes and proposed integration contracts, not populated portfolio features or changes to the approved production stack.
+
+Round 04 additionally applies [material-specific spatial feedback](../roles/uiux-designer/research/applied-feedback.md) to all 19 original materials across Icons, Interface, Motion, Spatial, Typography and Identity. Stable IDs preserve Saved records; each specimen offers Baseline/Spatial comparison. The existing Theatre export and property-ownership boundary remain intact, while picked geometry, shader response and DOM/SVG feedback stay inside the role workspace.
+
+**Preserved documentation checkpoint — 7 October 2026:** The owner requested withdrawal of the portfolio implementation and integration of [Website Design Guidelines v1.0](WEBSITE_DESIGN_GUIDELINES.md) without starting implementation. The software/content baseline was restored to the empty framework in revision 2.2. Its execution brief, phase sequence and ready-to-use prompt remain reference material and do not activate portfolio work. [Decision 0002](decisions/0002-design-guidelines-integration.md) records the withdrawal, precedence and deferred choices. The subsequent role proposal request is separately scoped above.
 
 **Recommended composition:** Next.js + React + TypeScript for the website; Three.js + React Three Fiber + Drei for 3D; Theatre Core + development-only Studio for authored motion; GSAP for DOM animation and scroll input; narrowly scoped Zustand stores for shared interaction state; Playwright for browser regression testing.
 
@@ -92,7 +102,7 @@ The private candidate file currently declares `zh-Hant`, and the existing empty 
 
 The repository already has a Next.js/React/TypeScript static framework, five empty sections and a 404 page, validated empty content, an empty scene registry, motion controller/adapters, and CI/manual deployment definitions. The installed toolchain and earlier verification results are recorded in [compatibility.md](compatibility.md), not inferred from the architectural examples below.
 
-This revision integrates the preparation workspace and supplied design guidelines with that framework **in Markdown only**, after withdrawing the portfolio implementation. It does not select projects, import or translate drafts, copy CVs or assets, run preparation/conversion scripts, generate scene data, implement the guide, or deploy. The public content arrays remain empty and the profile remains `null`. The existing Chinese scaffold UI and Projects/Research routes remain in place; future English copy and logical Work/Lab routes are deferred.
+The production portfolio remains at the framework baseline restored by the **Markdown-only integration in revision 2.2**. No projects, private drafts, CVs or professional assets are selected/imported, no preparation drive is wired into build/runtime, and no guide implementation or deployment is activated. Revision 2.3 adds separately authorized UI/UX tools and local proposal specimens under `roles/uiux-designer/`, as scoped in the executive note and decision 0003. Public content arrays remain empty and the profile remains `null`. The existing Chinese scaffold UI and Projects/Research routes remain in place; future English copy and logical Work/Lab routes are deferred.
 
 The owner will discuss how to use the materials step by step. Sections 07–20 retain design requirements and future acceptance criteria; they are not an instruction to begin those phases now. The full P0 scene/Studio proof has not been completed.
 

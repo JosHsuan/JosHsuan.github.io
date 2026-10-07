@@ -20,7 +20,19 @@ The supplied [Website Design Guidelines v1.0](docs/WEBSITE_DESIGN_GUIDELINES.md)
 
 On 7 October 2026 the owner requested withdrawal of the portfolio implementation and integration of this guide **without starting implementation**. The repository is back to the empty framework. The guide's phases, commands, execution brief and embedded implementation prompt are future reference, not a current task. English UI adaptation, Work/Lab route changes, project selection, media, scenes, authored motion and optional terminal/ASCII interfaces remain deferred. Prior approval of the three proposed identity strings is recorded but does not populate the site. See [decision 0002](docs/decisions/0002-design-guidelines-integration.md) for precedence, reconciliation and withdrawal verification.
 
+## Role-specific local proposals
+
+The owner subsequently authorized an isolated [UI/UX designer material workspace](roles/uiux-designer/README.md). Its opt-in skills/MCP configuration, pinned licensed assets and 26 working specimens live under `roles/uiux-designer/`, with a separate local inspection desk at `http://127.0.0.1:4175/`. Round 02 adds seven [spatial motion and object-feedback proposals](roles/uiux-designer/research/spatial-feedback.md). Round 03 extends the Saved direction into [six connected feature proposals](roles/uiux-designer/research/spatial-editorial-system.md), reviewed at `http://127.0.0.1:4175/features/` in the same browser. This is proposal work; the portfolio remains the empty framework. Normal application builds do not include those assets, tools or experiments. [Decision 0003](docs/decisions/0003-uiux-material-workspace.md) records the role and delivery boundaries.
+
+Round 04 applies the spatial vocabulary directly to [19 existing materials](roles/uiux-designer/research/applied-feedback.md): Icons, Interface, Motion, Spatial, Typography and Identity. Each keeps its original controls and Saved ID, with a Baseline/Spatial comparison inside its working specimen. [Review the applied collection](http://127.0.0.1:4175/?collection=applied-feedback#materials).
+
+The owner has recorded these rounds as the [UIUX design plan](roles/uiux-designer/UIUX_DESIGN_PLAN.md), with Saved as the authoritative preference source. The plan preserves the distinction between the original browser choices, an uncaptured snapshot and curator proposals. The separately authorized [3D Artist workspace](roles/3d-artist/README.md) now includes twelve material, lighting, physics, texture and shader studies. Its [initial session brief](roles/3d-artist/SESSION_BRIEF.md) remains historical; the role's research and verification records describe the implemented work. See the [role index](roles/README.md) for workspace boundaries and local preview entry points.
+
 ## Development
+
+The owner also authorized a [local Bending-Active Thesis case review](roles/uiux-designer/cases/bending-active-thesis/README.md), now available at `http://127.0.0.1:4184/`. It combines the metal-panel thesis evidence, an inspected derivative of the supplied Rhino assembly, and the UIUX/3D Artist/cinematography research. [Geometry Engineer](roles/geometry-engineer/README.md) provides an isolated conversion skill and read-only MCP. [Decision 0004](docs/decisions/0004-local-thesis-review.md) defines this local-only content boundary; the production framework and public snapshot remain empty.
+
+The subsequent [cinematic integration](docs/decisions/0005-cinematic-thesis-integration.md) replaces the initial boxed viewer with one persistent background scene and seven naturally scrolling chapters. The new [Interactive Experience Director](roles/experience-director/README.md) coordinates layers, source evidence and cross-role acceptance. Working crops, narrative preparation and rendered captures remain under the designated D-drive work area; prepared local handoffs are explicit. Public deployment remains separate.
 
 Use Node **24.19.0** and pnpm **11.19.0**.
 
