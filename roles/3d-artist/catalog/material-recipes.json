@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "role": "3d-artist",
+  "adapter": "src/materials/inspection-material.js",
+  "ownership": "uniforms only; no cameras, clocks, geometry deformation or simulation fields",
+  "recipes": [
+    {"id":"directional-grain","study":"bamboo-grain","mode":"grain","requires":"verified UV X aligned to the member length","inputs":"progress in [0,1]; same progress moves the key light in the specimen","appearance":"nonmetal, warm base, two spatial simplex noise scales modulating colour and roughness","evidence":"procedural appearance only","source":"webgl-noise pinned MIT source; Three standard material","fallback":"mode material on geometry without valid UVs"},
+    {"id":"pbr-reference","study":"bamboo-pbr","mode":null,"requires":"UV mapped independent planar swatch","inputs":"progress in [0,1] controls the identical light sweep","appearance":"sRGB diffuse + OpenGL normal + NoColorSpace roughness, compared with diffuse only","evidence":"Poly Haven Bamboo Wall by Amal Kumar, CC0; not an owner project material","source":"catalog/texture-assets.json","fallback":"captured comparison if any map fails"},
+    {"id":"height-contours","study":"surface-contours","mode":"contours","requires":"world-axis convention and rendered world bounding box","inputs":"progress in [0,1] maps to normalized world height","appearance":"14 fixed height bands plus one moving orange band; antialias via derivatives","evidence":"geometric height reading only; no stress/curvature/unit claim","source":"original GLSL extension using Three material APIs","fallback":"neutral material; geometry and reading labels remain"},
+    {"id":"attention-hatching","study":"surface-focus","mode":"focus","requires":"world bounding box; no UV required","inputs":"progress in [0,1] maps to world-X focus band","appearance":"Gaussian focus plus diagonal antialiased hatch","evidence":"spatial attention only; not component ID selection","source":"original GLSL extension using Three material APIs","fallback":"fixed HTML labels and neutral material"}
+  ]
+}

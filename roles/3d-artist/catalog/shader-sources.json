@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "role": "3d-artist",
+  "retrievedAt": "2026-10-07",
+  "upstream": "https://github.com/stegu/webgl-noise",
+  "revision": "22434e04d7753f7e949e8d724ab3da2864c17a0f",
+  "license": "MIT",
+  "source": "src/noise2D.glsl",
+  "adaptation": "Original GLSL retained byte-for-byte; JS string wrapper preserves exact contents. Original UV mapping/material logic separate.",
+  "assets": [
+    {
+      "file": "src/materials/vendor/noise2D.glsl",
+      "sha256": "b0f27c923227e8b2d7618f09dc666e2397f608ca7929f798da632647c3f41884"
+    },
+    {
+      "file": "src/materials/vendor/noise2D.js",
+      "sha256": "abe417c75af6356959ac26e88d6d635f7815cc102a2bc5a11de3fa85b62e07e7"
+    },
+    {
+      "file": "licenses/webgl-noise-MIT.txt",
+      "sha256": "bdafce1bb01517c9ae6c4f3620c01340790b5e9d039ae9e356347d1174250916"
+    }
+  ]
+}

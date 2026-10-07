@@ -1,0 +1,4 @@
+interface:
+  display_name: "3D Artist — Controlled studies"
+  short_description: "Build and verify isolated physical visual studies"
+  default_prompt: "Use $artist3d-studies to extend a controlled 3D study and verify its actual rendering."

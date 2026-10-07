@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "role": "3d-artist",
+  "activation": "codex-role.ps1",
+  "home": ".runtime/codex-home",
+  "reviewOrigin": "http://127.0.0.1:4180",
+  "reviewStorageKey": "artist3d-interaction-review-v2",
+  "globalConfigSHA256": "719e39d8c6bfee3e10b7964043b50183a64568cc21081476957ee71eec00bb4e",
+  "skills": [
+    {
+      "name": "artist3d-studies",
+      "path": "skills/artist3d-studies",
+      "source": "Original role workflow, informed by the available r3f-fundamentals, r3f-shaders, r3f-animation skills and primary docs",
+      "license": "Project-original instructions; no upstream source files copied"
+    },
+    {
+      "name": "playwright",
+      "path": "skills/vendor/playwright",
+      "repository": "https://github.com/openai/skills",
+      "revision": "49f948faa9258a0c61caceaf225e179651397431",
+      "sourcePath": "skills/.curated/playwright",
+      "license": "Apache-2.0",
+      "adaptation": "3D Artist display metadata only; original skill and notices retained",
+      "platformNote": "npx is unavailable in this host toolchain. The Bash CLI recipe was not executed. The role uses its pinned browser MCP and explicit requested test scripts instead; no global CLI was installed."
+    },
+    {
+      "name": "artist3d-texture-shader",
+      "path": "skills/artist3d-texture-shader",
+      "source": "Original 3D Artist instructions grounded in Three official docs, pinned stegu/webgl-noise and Poly Haven public material documentation",
+      "license": "Project-original workflow; source-code licenses separately retained"
+    }
+  ],
+  "mcp": [
+    {
+      "name": "artist3d_catalog",
+      "source": "mcp/catalog-server.mjs",
+      "access": "Read-only closed local study catalog and material recipes; no arbitrary files, shell or network",
+      "verification": "verification/mcp-results.json"
+    },
+    {
+      "name": "artist3d_browser",
+      "package": "@playwright/mcp",
+      "version": "0.0.83",
+      "revision": "f183dad4a52965583e3cc1d59b88cdc279e2e57d",
+      "source": "https://github.com/microsoft/playwright-mcp",
+      "license": "Apache-2.0",
+      "access": "Explicit loopback origin, tool allowlist, isolated ephemeral browser profile, role output directory",
+      "verification": "verification/mcp-results.json",
+      "note": "Playwright 1.64 alpha is confined to the role lockfile. The project 1.63 Chromium headless shell was actually tested. Allowed-origins is a request restriction, not an OS security sandbox."
+    }
+  ],
+  "optionalRuntime": [
+    {
+      "package": "@dimforge/rapier3d-compat",
+      "version": "0.19.3",
+      "revision": "0fd32c1cbbc7018af36f09b190c16ce72fbb9301",
+      "license": "Apache-2.0",
+      "purpose": "Two genuine contact trajectories cached at startup for reversible single-input review",
+      "compatibility": "Direct framework-independent WASM API; no new React wrapper peer dependency. Verified with existing React 19.3.0 / Fiber 9.8.1 / Three 0.186.1. Current interaction desk prepares both caches once, then frees both worlds.",
+      "upstream": "https://github.com/dimforge/rapier.js/tree/v0.19.3",
+      "maintenanceNote": "Historical JS repository now points to dimforge/rapier/typescript. This is a pinned tested prototype version, not a claim to be latest."
+    }
+  ],
+  "configurationReferences": [
+    "https://learn.chatgpt.com/docs/config-file/config-advanced",
+    "https://learn.chatgpt.com/docs/extend/mcp?surface=cli",
+    "https://learn.chatgpt.com/docs/build-skills"
+  ],
+  "activationEvidence": "verification/config-loader.json shows the installed CLI loading only artist3d registrations. No claim of desktop-chat hot loading. No credentials copied.",
+  "archivedReviewStorageKey": "artist3d-review-v1"
+}

@@ -1,0 +1,20 @@
+{
+  "reviewedAt": "2026-10-08",
+  "scope": "Owner-authorized local thesis integration and categorized commit preparation",
+  "historicalBaseline": "interaction-boundary-before.json",
+  "policy": "Preserve the historical baseline. Only these two reviewed documentation revisions supersede its hashes; all 253 remaining protected files must still match.",
+  "files": [
+    {
+      "file": "README.md",
+      "previousSHA256": "1f517af956576ae748c3429f8c16f455d9ead7e94822c0513e896f366a660d44",
+      "reviewedSHA256": "4b8f99d12b4d300f5043d8d6f37f6f6e19387423cb0926830760b27a47e97310",
+      "reason": "Document isolated role workspaces, completed local case and role index; production content and deployment remain separate."
+    },
+    {
+      "file": "docs/architecture.md",
+      "previousSHA256": "e15acb515f47c1fbe93c59310372f535797e6a2e23b8924f2bf47b8cc423f998",
+      "reviewedSHA256": "ed46622b27c8878e4dfe52b22f57433750be51e0d7d4c37d5f83dae0ea3fe768",
+      "reason": "Record decisions 0003–0005, local working-material boundary and current architecture revision 2.4."
+    }
+  ]
+}

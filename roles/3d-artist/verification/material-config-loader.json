@@ -1,0 +1,15 @@
+{
+  "verifiedAt": "2026-10-07T21:41:47.4526491Z",
+  "role": "3d-artist",
+  "mcpNames": [
+    "artist3d_catalog",
+    "artist3d_browser"
+  ],
+  "materialRecipeEnabled": true,
+  "skills": [
+    "artist3d-studies",
+    "artist3d-texture-shader",
+    "playwright"
+  ],
+  "globalConfigSha256": "719e39d8c6bfee3e10b7964043b50183a64568cc21081476957ee71eec00bb4e"
+}

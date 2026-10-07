@@ -1,0 +1,95 @@
+{
+  "reviewedAt": "2026-10-07",
+  "sources": [
+    {
+      "id": "three-physical",
+      "title": "Three.js physical material",
+      "url": "https://threejs.org/docs/pages/MeshPhysicalMaterial.html",
+      "application": "Installed Three 0.186.1: roughness, clearcoat, transmission, IOR, thickness; additional per-pixel cost."
+    },
+    {
+      "id": "three-source",
+      "title": "Three.js source",
+      "url": "https://github.com/mrdoob/three.js",
+      "application": "Installed npm three@0.186.1; source files hashed locally; MIT."
+    },
+    {
+      "id": "three-shadows",
+      "title": "Three.js light shadows",
+      "url": "https://threejs.org/docs/pages/LightShadow.html",
+      "application": "VSM filter radius and blur samples. Filter softness is not emitter size."
+    },
+    {
+      "id": "three-color",
+      "title": "Three.js color management source",
+      "url": "https://github.com/mrdoob/three.js/blob/dev/src/math/ColorManagement.js",
+      "application": "Installed source checked: linear working space, sRGB output; ACES in Fiber."
+    },
+    {
+      "id": "three-shader",
+      "title": "Three.js ShaderMaterial",
+      "url": "https://threejs.org/docs/pages/ShaderMaterial.html",
+      "application": "WebGL custom shader model; lights/shadows are not automatic."
+    },
+    {
+      "id": "three-points",
+      "title": "Three.js Points",
+      "url": "https://threejs.org/docs/pages/Points.html",
+      "application": "Buffer-based particle rendering."
+    },
+    {
+      "id": "three-camera",
+      "title": "Three.js PerspectiveCamera",
+      "url": "https://threejs.org/docs/pages/PerspectiveCamera.html",
+      "application": "Vertical FOV and projection update; orthographic comparison is an original matched framing."
+    },
+    {
+      "id": "polyhaven",
+      "title": "Studio Small 09 — Sergej Majboroda",
+      "url": "https://polyhaven.com/a/studio_small_09",
+      "application": "1K HDR, CC0. Local bytes only; downloaded asset, not website preview renders."
+    },
+    {
+      "id": "polyhaven-license",
+      "title": "Poly Haven asset license",
+      "url": "https://polyhaven.com/license",
+      "application": "CC0 applies to asset bytes, not all website content."
+    },
+    {
+      "id": "rapier",
+      "title": "Rapier JavaScript guide",
+      "url": "https://rapier.rs/docs/user_guides/javascript/getting_started_js/",
+      "application": "World, rigid bodies, colliders; fixed timestep integration."
+    },
+    {
+      "id": "rapier-source",
+      "title": "Rapier JS bindings",
+      "url": "https://github.com/dimforge/rapier.js",
+      "application": "Pinned @dimforge/rapier3d-compat@0.19.3; Apache-2.0; WASM embedded in local JS. No React peer dependency."
+    },
+    {
+      "id": "r3f-performance",
+      "title": "Fiber on-demand rendering",
+      "url": "https://r3f.docs.pmnd.rs/advanced/scaling-performance",
+      "application": "Invalidate only during active work; imperative state and cleanup."
+    },
+    {
+      "id": "theatre",
+      "title": "Theatre project/export lifecycle",
+      "url": "https://www.theatrejs.com/docs/latest/manual/projects",
+      "application": "Actual Studio save-file export, Core replay through existing adapter."
+    },
+    {
+      "id": "pbrt-scattering",
+      "title": "Physically Based Rendering, volume scattering",
+      "url": "https://pbr-book.org/4ed/Volume_Scattering",
+      "application": "Physical reference that distinguishes volumetric scattering from our labeled surface approximation. No code copied."
+    },
+    {
+      "id": "playwright-mcp",
+      "title": "Microsoft Playwright MCP",
+      "url": "https://github.com/microsoft/playwright-mcp",
+      "application": "Pinned 0.0.83; isolated profile, explicit loopback and tool allowlist."
+    }
+  ]
+}

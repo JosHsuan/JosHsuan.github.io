@@ -1,0 +1,16 @@
+{
+  "verifiedAt": "2026-10-07T23:10:45.714Z",
+  "role": "3d-artist",
+  "passed": true,
+  "checks": [
+    "Single-input catalog and role identity",
+    "24 actual A/B capture states and hashes",
+    "Genuine Theatre export, local project identity and clip manifest",
+    "Built runtime excludes Studio",
+    "51 real browser groups passed (see report limits)",
+    "Actual MCP calls and installed CLI role-only configuration load",
+    "Global configuration unchanged",
+    "253 protected files unchanged; 2 explicitly reviewed integration documents match pinned revisions",
+    "Direct Theatre imports and private-path boundaries"
+  ]
+}

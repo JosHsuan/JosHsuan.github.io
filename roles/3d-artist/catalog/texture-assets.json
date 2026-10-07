@@ -1,0 +1,38 @@
+{
+  "id": "polyhaven-bamboo-wall",
+  "author": "Amal Kumar",
+  "source": "https://polyhaven.com/a/bamboo_wall",
+  "license": "CC0-1.0",
+  "sourceWidthMeters": 2,
+  "purpose": "Independent bamboo-wall PBR reference swatch, not evidence of any owner project finish",
+  "downloadedAt": "2026-10-07",
+  "assets": [
+    {
+      "channel": "Diffuse",
+      "file": "assets/textures/bamboo_wall_diff_1k.jpg",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/bamboo_wall/bamboo_wall_diff_1k.jpg",
+      "bytes": 677974,
+      "md5": "ad341e84a39181511ce42178c4c4e174",
+      "sha256": "5321f063d8d03d8666202e6f0e10619598f4d2814712f1d08f28d11b689ee79a",
+      "colorSpace": "srgb"
+    },
+    {
+      "channel": "nor_gl",
+      "file": "assets/textures/bamboo_wall_nor_gl_1k.jpg",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/bamboo_wall/bamboo_wall_nor_gl_1k.jpg",
+      "bytes": 726676,
+      "md5": "3aeb33fe5b27c0835a45f48dfbe8ea5d",
+      "sha256": "817783d0ae812d1567839861b0b4c81c392fd2bb77806ce03cb86c44ba3933a2",
+      "colorSpace": "data"
+    },
+    {
+      "channel": "rough",
+      "file": "assets/textures/bamboo_wall_rough_1k.jpg",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/bamboo_wall/bamboo_wall_rough_1k.jpg",
+      "bytes": 479118,
+      "md5": "5634816d0215c6b400c74c49676ddae9",
+      "sha256": "4e439cb9d2a684a188feca3da418464147ba4b4bda1e37418ad76879e620275b",
+      "colorSpace": "data"
+    }
+  ]
+}

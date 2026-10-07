@@ -1,0 +1,41 @@
+{
+  "verifiedAt": "2026-10-07T19:34:02.866Z",
+  "testData": "All browser contexts and preference fixtures are synthetic. Not owner Saved evidence.",
+  "results": [
+    {
+      "profile": "chromium-desktop",
+      "result": "FAIL",
+      "checks": [
+        "materials: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "lighting: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "refraction: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown"
+      ],
+      "error": "page.waitForFunction: Timeout 30000ms exceeded.\n    at C:\\Users\\JosHsuan\\Documents\\GitHub\\JosHsuan.github.io\\roles\\3d-artist\\scripts\\verify-browser.mjs:26:80",
+      "consoleErrors": []
+    },
+    {
+      "profile": "webkit-desktop",
+      "result": "FAIL",
+      "checks": [
+        "materials: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "lighting: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "refraction: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "scattering: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown"
+      ],
+      "error": "AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert(after.physicsSteps>1)\n\n    at file:///C:/Users/JosHsuan/Documents/GitHub/JosHsuan.github.io/roles/3d-artist/scripts/verify-browser.mjs:33:95",
+      "consoleErrors": []
+    },
+    {
+      "profile": "chromium-touch",
+      "result": "FAIL",
+      "checks": [
+        "materials: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "lighting: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "refraction: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "scattering: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown"
+      ],
+      "error": "page.waitForFunction: Timeout 30000ms exceeded.\n    at C:\\Users\\JosHsuan\\Documents\\GitHub\\JosHsuan.github.io\\roles\\3d-artist\\scripts\\verify-browser.mjs:26:80",
+      "consoleErrors": []
+    }
+  ]
+}

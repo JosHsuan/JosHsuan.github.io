@@ -1,0 +1,30 @@
+{
+  "verifiedAt": "2026-10-07T20:54:09.796Z",
+  "results": [
+    {
+      "role": "3d-artist",
+      "check": "All contact-sheet images loaded and captured for visual review",
+      "passed": true
+    },
+    {
+      "role": "animation-cinematographer",
+      "check": "All contact-sheet images loaded and captured for visual review",
+      "passed": true
+    },
+    {
+      "role": "3d-artist",
+      "check": "Archived bench reload retains its own route and sources",
+      "passed": true
+    },
+    {
+      "role": "3d-artist",
+      "check": "No WebGL uses frozen captured checkpoint",
+      "passed": true
+    },
+    {
+      "role": "animation-cinematographer",
+      "check": "No WebGL uses frozen captured checkpoint",
+      "passed": true
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-07",
+  "role": "3d-artist",
+  "scope": "Four public-source texture/shader proposals added to existing eight single-input studies",
+  "studies": 12,
+  "actualCaptures": 24,
+  "browserChecks": 51,
+  "browserFailures": 0,
+  "finalEntryProfiles": [
+    "Chromium desktop",
+    "Pixel 7 emulation"
+  ],
+  "unitChecks": 10,
+  "materialRecipeMcpVerified": true,
+  "browserMcpVerified": true,
+  "skillValidated": "artist3d-texture-shader",
+  "privateAssetsCopied": false,
+  "privateFactsInDesk": false,
+  "sourceModelUsedInDesk": false,
+  "globalConfigSha256": "719e39d8c6bfee3e10b7964043b50183a64568cc21081476957ee71eec00bb4e",
+  "rootDependencyChanges": false,
+  "deployed": false,
+  "limits": [
+    "Firefox unverified",
+    "No physical-device check",
+    "Not a calibrated material reconstruction",
+    "Original-position shader supports static meshes; not skinned, morph or instanced mesh coordinate binding",
+    "UIUX owner Saved snapshot remains unknown"
+  ]
+}

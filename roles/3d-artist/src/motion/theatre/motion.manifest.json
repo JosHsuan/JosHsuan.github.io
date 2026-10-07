@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "role": "3d-artist",
+  "projectId": "artist3d.inspection.v1",
+  "sheetId": "Main",
+  "core": "0.7.2",
+  "studio": "0.7.2",
+  "stateRevision": "684e3bcbde3fa6326d9bdacc27aee03b0a44141d7320be5951b21d6aba2411ab",
+  "clips": {
+    "inspection": {
+      "end": 4.8,
+      "start": 0
+    }
+  },
+  "requiredBindings": [
+    "Pose.assemblyProgress",
+    "Pose.camera.position.x",
+    "Pose.camera.position.y",
+    "Pose.camera.position.z"
+  ],
+  "checkpoints": [
+    [
+      0,
+      0,
+      4.8,
+      3.2,
+      6.8
+    ],
+    [
+      0.4,
+      0.05,
+      4.6,
+      3.1,
+      6.7
+    ],
+    [
+      1.2,
+      0.38,
+      3.2,
+      3.6,
+      7.4
+    ],
+    [
+      2.4,
+      1,
+      -1.8,
+      4.2,
+      8.2
+    ],
+    [
+      3.6,
+      0.88,
+      -3.8,
+      3.7,
+      7.4
+    ],
+    [
+      4.8,
+      0,
+      4.8,
+      3.2,
+      6.8
+    ]
+  ],
+  "authoredAt": "2026-10-07",
+  "provenance": "Byte-identical reuse of the genuine UIUX spatial score (2026-10-07), source roles/uiux-designer/src/motion/theatre/spatial/motion.state.json. Its four tracks reveal ring spacing while the camera traverses the aperture. This is deliberate score reuse, not a claim of new Studio authoring."
+}

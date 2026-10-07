@@ -1,0 +1,2158 @@
+{
+  "capturedAt": "2026-10-07T21:40:57.764Z",
+  "source": "Actual built dist, Chromium headless shell, 1440x1000 DPR1; synthetic review profile",
+  "results": [
+    {
+      "id": "proximity",
+      "u": 0.3,
+      "filename": "proximity.png",
+      "sha256": "2e92c1e8a460fc0645a6a878412c3b4ccdaab27a25a6210d04aa059464e225a5",
+      "state": {
+        "frames": 3,
+        "u": 0.3000000046070788,
+        "mode": "pointer",
+        "ready": true,
+        "study": "proximity",
+        "views": [
+          {
+            "variant": "a",
+            "position": [
+              4.8,
+              2.9,
+              7.8
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "focalLengthMm": 38.059137628358556
+          },
+          {
+            "variant": "b",
+            "position": [
+              4.8,
+              2.9,
+              7.8
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": 4.800000073713261,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "focalLengthMm": 38.059137628358556
+          }
+        ],
+        "physicsFrames": 241,
+        "renderer": "WebKit WebGL",
+        "memory": {
+          "geometries": 30,
+          "textures": 4
+        }
+      }
+    },
+    {
+      "id": "proximity",
+      "u": 0.7,
+      "filename": "proximity-late.png",
+      "sha256": "ccda80a46ac2187aa1a09172ce383a2eda98fbe4a428995d256bfc7da6643ea0",
+      "state": {
+        "frames": 4,
+        "u": 0.7000000184283153,
+        "mode": "pointer",
+        "ready": true,
+        "study": "proximity",
+        "views": [
+          {
+            "variant": "a",
+            "position": [
+              4.8,
+              2.9,
+              7.8
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "focalLengthMm": 38.059137628358556
+          },
+          {
+            "variant": "b",
+            "position": [
+              4.8,
+              2.9,
+              7.8
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": 11.200000294853044,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "focalLengthMm": 38.059137628358556
+          }
+        ],
+        "physicsFrames": 241,
+        "renderer": "WebKit WebGL",
+        "memory": {
+          "geometries": 30,
+          "textures": 4
+        }
+      }
+    },
+    {
+      "id": "section",
+      "u": 0.3,
+      "filename": "section.png",
+      "sha256": "3adf791d716c9a1db37994db041e6db90cd93526995a886cf3feda4961d8138d",
+      "state": {
+        "frames": 3,
+        "u": 0.3000000046070788,
+        "mode": "pointer",
+        "ready": true,
+        "study": "section",
+        "views": [
+          {
+            "variant": "a",
+            "position": [
+              4.8,
+              2.9,
+              7.8
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "focalLengthMm": 38.059137628358556
+          },
+          {
+            "variant": "b",
+            "position": [
+              4.8,
+              2.9,
+              7.8
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0.16308000609516535,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "focalLengthMm": 38.059137628358556
+          }
+        ],
+        "physicsFrames": 241,
+        "renderer": "WebKit WebGL",
+        "memory": {
+          "geometries": 30,
+          "textures": 4
+        }
+      }
+    },
+    {
+      "id": "section",
+      "u": 0.7,
+      "filename": "section-late.png",
+      "sha256": "2d0e4c94d0dca848a1c09f9696a2fce3e505e4641cc96ab58584fadbc05ea1f8",
+      "state": {
+        "frames": 4,
+        "u": 0.7000000184283153,
+        "mode": "pointer",
+        "ready": true,
+        "study": "section",
+        "views": [
+          {
+            "variant": "a",
+            "position": [
+              4.8,
+              2.9,
+              7.8
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "focalLengthMm": 38.059137628358556
+          },
+          {
+            "variant": "b",
+            "position": [
+              4.8,
+              2.9,
+              7.8
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0.8369200243806603,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "focalLengthMm": 38.059137628358556
+          }
+        ],
+        "physicsFrames": 241,
+        "renderer": "WebKit WebGL",
+        "memory": {
+          "geometries": 30,
+          "textures": 4
+        }
+      }
+    },
+    {
+      "id": "grazing",
+      "u": 0.3,
+      "filename": "grazing.png",
+      "sha256": "45311ae5165b27cc659889f6e947dcf3d8f472778555d18453c269abdbff2574",
+      "state": {
+        "frames": 3,
+        "u": 0.3000000046070788,
+        "mode": "pointer",
+        "ready": true,
+        "study": "grazing",
+        "views": [
+          {
+            "variant": "a",
+            "position": [
+              4.8,
+              2.9,
+              7.8
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "focalLengthMm": 38.059137628358556
+          },
+          {
+            "variant": "b",
+            "position": [
+              4.8,
+              2.9,
+              7.8
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              -2.399999944715054,
+              1.3,
+              3
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "focalLengthMm": 38.059137628358556
+          }
+        ],
+        "physicsFrames": 241,
+        "renderer": "WebKit WebGL",
+        "memory": {
+          "geometries": 30,
+          "textures": 4
+        }
+      }
+    },
+    {
+      "id": "grazing",
+      "u": 0.7,
+      "filename": "grazing-late.png",
+      "sha256": "57319d5ac4adf6f5d91b4ad1e28a38cd4abeb8a63d09dde2c4280389e27b58b9",
+      "state": {
+        "frames": 4,
+        "u": 0.7000000184283153,
+        "mode": "pointer",
+        "ready": true,
+        "study": "grazing",
+        "views": [
+          {
+            "variant": "a",
+            "position": [
+              4.8,
+              2.9,
+              7.8
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "focalLengthMm": 38.059137628358556
+          },
+          {
+            "variant": "b",
+            "position": [
+              4.8,
+              2.9,
+              7.8
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              2.400000221139784,
+              1.3,
+              3
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "focalLengthMm": 38.059137628358556
+          }
+        ],
+        "physicsFrames": 241,
+        "renderer": "WebKit WebGL",
+        "memory": {
+          "geometries": 30,
+          "textures": 4
+        }
+      }
+    },
+    {
+      "id": "lens",
+      "u": 0.3,
+      "filename": "lens.png",
+      "sha256": "51db449f11dc00fb79ffa4e701340ccc1b18693af16982f208fafe2d2ef9da0a",
+      "state": {
+        "frames": 3,
+        "u": 0.3000000046070788,
+        "mode": "pointer",
+        "ready": true,
+        "study": "lens",
+        "views": [
+          {
+            "variant": "a",
+            "position": [
+              0,
+              0,
+              7
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "lensX": -0.5599999871001793,
+            "focalLengthMm": 38.059137628358556
+          },
+          {
+            "variant": "b",
+            "position": [
+              0,
+              0,
+              7
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": true,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "lensX": -0.5599999871001793,
+            "focalLengthMm": 38.059137628358556
+          }
+        ],
+        "physicsFrames": 241,
+        "renderer": "WebKit WebGL",
+        "memory": {
+          "geometries": 22,
+          "textures": 5
+        }
+      }
+    },
+    {
+      "id": "lens",
+      "u": 0.7,
+      "filename": "lens-late.png",
+      "sha256": "f9469f3336331d73edbdae30df6d54a48ee72c8bee6402237cbdc9c8e33b8974",
+      "state": {
+        "frames": 4,
+        "u": 0.7000000184283153,
+        "mode": "pointer",
+        "ready": true,
+        "study": "lens",
+        "views": [
+          {
+            "variant": "a",
+            "position": [
+              0,
+              0,
+              7
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "lensX": 0.5600000515992827,
+            "focalLengthMm": 38.059137628358556
+          },
+          {
+            "variant": "b",
+            "position": [
+              0,
+              0,
+              7
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": true,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "lensX": 0.5600000515992827,
+            "focalLengthMm": 38.059137628358556
+          }
+        ],
+        "physicsFrames": 241,
+        "renderer": "WebKit WebGL",
+        "memory": {
+          "geometries": 22,
+          "textures": 5
+        }
+      }
+    },
+    {
+      "id": "particles",
+      "u": 0.3,
+      "filename": "particles.png",
+      "sha256": "8a280d0030978579da7de0ad44f311729c914cd513d353ea6b1899358a9c4e91",
+      "state": {
+        "frames": 3,
+        "u": 0.3000000046070788,
+        "mode": "pointer",
+        "ready": true,
+        "study": "particles",
+        "views": [
+          {
+            "variant": "a",
+            "position": [
+              4.8,
+              2.9,
+              7.8
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": true,
+            "contact": false,
+            "owner": "analytic",
+            "brush": 100,
+            "focalLengthMm": 38.059137628358556
+          },
+          {
+            "variant": "b",
+            "position": [
+              4.8,
+              2.9,
+              7.8
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": true,
+            "contact": false,
+            "owner": "analytic",
+            "brush": -0.7999999815716847,
+            "focalLengthMm": 38.059137628358556
+          }
+        ],
+        "physicsFrames": 241,
+        "renderer": "WebKit WebGL",
+        "memory": {
+          "geometries": 4,
+          "textures": 4
+        }
+      }
+    },
+    {
+      "id": "particles",
+      "u": 0.7,
+      "filename": "particles-late.png",
+      "sha256": "b696afdc0cb4b01c53acd71f6c9ffcc45be9c35677bf020e88deb06506181b90",
+      "state": {
+        "frames": 4,
+        "u": 0.7000000184283153,
+        "mode": "pointer",
+        "ready": true,
+        "study": "particles",
+        "views": [
+          {
+            "variant": "a",
+            "position": [
+              4.8,
+              2.9,
+              7.8
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": true,
+            "contact": false,
+            "owner": "analytic",
+            "brush": 100,
+            "focalLengthMm": 38.059137628358556
+          },
+          {
+            "variant": "b",
+            "position": [
+              4.8,
+              2.9,
+              7.8
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": true,
+            "contact": false,
+            "owner": "analytic",
+            "brush": 0.8000000737132611,
+            "focalLengthMm": 38.059137628358556
+          }
+        ],
+        "physicsFrames": 241,
+        "renderer": "WebKit WebGL",
+        "memory": {
+          "geometries": 4,
+          "textures": 4
+        }
+      }
+    },
+    {
+      "id": "contact",
+      "u": 0.3,
+      "filename": "contact.png",
+      "sha256": "30b9500c70b29767e3c36d4c5e10d00da7c77de5e552656a53af9050ed6e4ab6",
+      "state": {
+        "frames": 3,
+        "u": 0.3000000046070788,
+        "mode": "pointer",
+        "ready": true,
+        "study": "contact",
+        "views": [
+          {
+            "variant": "a",
+            "position": [
+              5,
+              4,
+              7
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": true,
+            "owner": "analytic",
+            "frame": 72,
+            "focalLengthMm": 38.059137628358556,
+            "physicsSample": [
+              -1.0800000429153442,
+              -1.1312966346740723,
+              -0.67229163646698
+            ]
+          },
+          {
+            "variant": "b",
+            "position": [
+              5,
+              4,
+              7
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": true,
+            "owner": "analytic",
+            "frame": 72,
+            "focalLengthMm": 38.059137628358556,
+            "physicsSample": [
+              -1.0800000429153442,
+              -0.878464937210083,
+              -0.8586206436157227
+            ]
+          }
+        ],
+        "physicsFrames": 241,
+        "renderer": "WebKit WebGL",
+        "memory": {
+          "geometries": 20,
+          "textures": 4
+        }
+      }
+    },
+    {
+      "id": "contact",
+      "u": 0.7,
+      "filename": "contact-late.png",
+      "sha256": "d5dcfaeba3f2f79df94c0a7ff90126030355071c1003f1b103768ab4a91fc5fa",
+      "state": {
+        "frames": 4,
+        "u": 0.7000000184283153,
+        "mode": "pointer",
+        "ready": true,
+        "study": "contact",
+        "views": [
+          {
+            "variant": "a",
+            "position": [
+              5,
+              4,
+              7
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": true,
+            "owner": "analytic",
+            "frame": 168,
+            "focalLengthMm": 38.059137628358556,
+            "physicsSample": [
+              -1.0800000429153442,
+              -1.1308910846710205,
+              -1.2493113279342651
+            ]
+          },
+          {
+            "variant": "b",
+            "position": [
+              5,
+              4,
+              7
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": true,
+            "owner": "analytic",
+            "frame": 168,
+            "focalLengthMm": 38.059137628358556,
+            "physicsSample": [
+              -1.0800000429153442,
+              -0.9794710874557495,
+              -0.6565986275672913
+            ]
+          }
+        ],
+        "physicsFrames": 241,
+        "renderer": "WebKit WebGL",
+        "memory": {
+          "geometries": 20,
+          "textures": 4
+        }
+      }
+    },
+    {
+      "id": "finish",
+      "u": 0.3,
+      "filename": "finish.png",
+      "sha256": "be914a35d534f98133d152ab43407c3a7e17be2fa52777bb5fed1308c666203b",
+      "state": {
+        "frames": 3,
+        "u": 0.3000000046070788,
+        "mode": "pointer",
+        "ready": true,
+        "study": "finish",
+        "views": [
+          {
+            "variant": "a",
+            "position": [
+              4.8,
+              2.9,
+              7.8
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "focalLengthMm": 38.059137628358556
+          },
+          {
+            "variant": "b",
+            "position": [
+              4.8,
+              2.9,
+              7.8
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": 4.800000073713261,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 1,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "focalLengthMm": 38.059137628358556
+          }
+        ],
+        "physicsFrames": 241,
+        "renderer": "WebKit WebGL",
+        "memory": {
+          "geometries": 30,
+          "textures": 4
+        }
+      }
+    },
+    {
+      "id": "finish",
+      "u": 0.7,
+      "filename": "finish-late.png",
+      "sha256": "1917026cc1270fc429a882a7011b6398a4af290c36e9e8924fb5d0c1beb46889",
+      "state": {
+        "frames": 4,
+        "u": 0.7000000184283153,
+        "mode": "pointer",
+        "ready": true,
+        "study": "finish",
+        "views": [
+          {
+            "variant": "a",
+            "position": [
+              4.8,
+              2.9,
+              7.8
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "focalLengthMm": 38.059137628358556
+          },
+          {
+            "variant": "b",
+            "position": [
+              4.8,
+              2.9,
+              7.8
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": 11.200000294853044,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 1,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "focalLengthMm": 38.059137628358556
+          }
+        ],
+        "physicsFrames": 241,
+        "renderer": "WebKit WebGL",
+        "memory": {
+          "geometries": 30,
+          "textures": 4
+        }
+      }
+    },
+    {
+      "id": "reader",
+      "u": 0.3,
+      "filename": "reader.png",
+      "sha256": "879404444fda02f63c39ef1f196c05f88b009a9f8b64d9fa74d528a8433e6010",
+      "state": {
+        "frames": 3,
+        "u": 0.3000000046070788,
+        "mode": "pointer",
+        "ready": true,
+        "study": "reader",
+        "views": [
+          {
+            "variant": "a",
+            "position": [
+              4.8,
+              2.9,
+              7.8
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "focalLengthMm": 38.059137628358556
+          },
+          {
+            "variant": "b",
+            "position": [
+              2.8775247727477375,
+              3.6386970272702714,
+              7.451596036360362
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0.41998692817928057,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "theatre",
+            "focalLengthMm": 38.059137628358556
+          }
+        ],
+        "physicsFrames": 241,
+        "renderer": "WebKit WebGL",
+        "memory": {
+          "geometries": 30,
+          "textures": 4
+        }
+      }
+    },
+    {
+      "id": "reader",
+      "u": 0.7,
+      "filename": "reader-late.png",
+      "sha256": "b5d9e5197bb81efaa3fef075d390731c51785fe864459835f3690b6f04596ba1",
+      "state": {
+        "frames": 4,
+        "u": 0.7000000184283153,
+        "mode": "pointer",
+        "ready": true,
+        "study": "reader",
+        "views": [
+          {
+            "variant": "a",
+            "position": [
+              4.8,
+              2.9,
+              7.8
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "focalLengthMm": 38.059137628358556
+          },
+          {
+            "variant": "b",
+            "position": [
+              -3.671010039754113,
+              3.732247490061472,
+              7.451595984098355
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0.8877393976147532,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "theatre",
+            "focalLengthMm": 38.059137628358556
+          }
+        ],
+        "physicsFrames": 241,
+        "renderer": "WebKit WebGL",
+        "memory": {
+          "geometries": 30,
+          "textures": 4
+        }
+      }
+    },
+    {
+      "id": "bamboo-grain",
+      "u": 0.3,
+      "filename": "bamboo-grain.png",
+      "sha256": "69756b760de0eba03e5629d3d134c544ed0477f1eb76f693bd58877148441c6e",
+      "state": {
+        "frames": 3,
+        "u": 0.3000000046070788,
+        "mode": "pointer",
+        "ready": true,
+        "study": "bamboo-grain",
+        "views": [
+          {
+            "variant": "a",
+            "position": [
+              3.2,
+              2.3,
+              7
+            ],
+            "target": [
+              0,
+              0.1,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              -2.399999944715054,
+              2.4,
+              3
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "materialProgress": 0.3000000046070788,
+            "materialMode": "material",
+            "focalLengthMm": 38.059137628358556
+          },
+          {
+            "variant": "b",
+            "position": [
+              3.2,
+              2.3,
+              7
+            ],
+            "target": [
+              0,
+              0.1,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              -2.399999944715054,
+              2.4,
+              3
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "materialProgress": 0.3000000046070788,
+            "materialMode": "bamboo-grain",
+            "focalLengthMm": 38.059137628358556
+          }
+        ],
+        "physicsFrames": 241,
+        "renderer": "WebKit WebGL",
+        "memory": {
+          "geometries": 7,
+          "textures": 4
+        }
+      }
+    },
+    {
+      "id": "bamboo-grain",
+      "u": 0.7,
+      "filename": "bamboo-grain-late.png",
+      "sha256": "c11bec6aa63ef5d2576daa46f40fd2634b0b7063ead7c7cae8984b8c843e0695",
+      "state": {
+        "frames": 4,
+        "u": 0.7000000184283153,
+        "mode": "pointer",
+        "ready": true,
+        "study": "bamboo-grain",
+        "views": [
+          {
+            "variant": "a",
+            "position": [
+              3.2,
+              2.3,
+              7
+            ],
+            "target": [
+              0,
+              0.1,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              2.400000221139784,
+              2.4,
+              3
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "materialProgress": 0.7000000184283153,
+            "materialMode": "material",
+            "focalLengthMm": 38.059137628358556
+          },
+          {
+            "variant": "b",
+            "position": [
+              3.2,
+              2.3,
+              7
+            ],
+            "target": [
+              0,
+              0.1,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              2.400000221139784,
+              2.4,
+              3
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "materialProgress": 0.7000000184283153,
+            "materialMode": "bamboo-grain",
+            "focalLengthMm": 38.059137628358556
+          }
+        ],
+        "physicsFrames": 241,
+        "renderer": "WebKit WebGL",
+        "memory": {
+          "geometries": 7,
+          "textures": 4
+        }
+      }
+    },
+    {
+      "id": "bamboo-pbr",
+      "u": 0.3,
+      "filename": "bamboo-pbr.png",
+      "sha256": "46a990cab44d21ef2c0e2224c97c42d7e14d5efa085bb4ccfebaf0c089563e11",
+      "state": {
+        "frames": 3,
+        "u": 0.3000000046070788,
+        "mode": "pointer",
+        "ready": true,
+        "study": "bamboo-pbr",
+        "views": [
+          {
+            "variant": "a",
+            "position": [
+              0,
+              0.2,
+              8
+            ],
+            "target": [
+              0,
+              0.1,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              -2.399999944715054,
+              2.4,
+              3
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "materialProgress": 0.3000000046070788,
+            "materialMode": "material",
+            "focalLengthMm": 38.059137628358556
+          },
+          {
+            "variant": "b",
+            "position": [
+              0,
+              0.2,
+              8
+            ],
+            "target": [
+              0,
+              0.1,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              -2.399999944715054,
+              2.4,
+              3
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "materialProgress": 0.3000000046070788,
+            "materialMode": "bamboo-pbr",
+            "focalLengthMm": 38.059137628358556
+          }
+        ],
+        "physicsFrames": 241,
+        "renderer": "WebKit WebGL",
+        "memory": {
+          "geometries": 4,
+          "textures": 7
+        }
+      }
+    },
+    {
+      "id": "bamboo-pbr",
+      "u": 0.7,
+      "filename": "bamboo-pbr-late.png",
+      "sha256": "dfe27ec056aa8e83c76606b5a9296ec8b426e18b3b9a965ca0b84b7756316d1e",
+      "state": {
+        "frames": 4,
+        "u": 0.7000000184283153,
+        "mode": "pointer",
+        "ready": true,
+        "study": "bamboo-pbr",
+        "views": [
+          {
+            "variant": "a",
+            "position": [
+              0,
+              0.2,
+              8
+            ],
+            "target": [
+              0,
+              0.1,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              2.400000221139784,
+              2.4,
+              3
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "materialProgress": 0.7000000184283153,
+            "materialMode": "material",
+            "focalLengthMm": 38.059137628358556
+          },
+          {
+            "variant": "b",
+            "position": [
+              0,
+              0.2,
+              8
+            ],
+            "target": [
+              0,
+              0.1,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              2.400000221139784,
+              2.4,
+              3
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "materialProgress": 0.7000000184283153,
+            "materialMode": "bamboo-pbr",
+            "focalLengthMm": 38.059137628358556
+          }
+        ],
+        "physicsFrames": 241,
+        "renderer": "WebKit WebGL",
+        "memory": {
+          "geometries": 4,
+          "textures": 7
+        }
+      }
+    },
+    {
+      "id": "surface-contours",
+      "u": 0.3,
+      "filename": "surface-contours.png",
+      "sha256": "e6faf807bca1fa1db5a0986096b63687661c84af30f3ca6b28f9bf4247a48190",
+      "state": {
+        "frames": 3,
+        "u": 0.3000000046070788,
+        "mode": "pointer",
+        "ready": true,
+        "study": "surface-contours",
+        "views": [
+          {
+            "variant": "a",
+            "position": [
+              3.2,
+              2.3,
+              7
+            ],
+            "target": [
+              0,
+              0.1,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "materialProgress": 0.3000000046070788,
+            "materialMode": "material",
+            "focalLengthMm": 38.059137628358556
+          },
+          {
+            "variant": "b",
+            "position": [
+              3.2,
+              2.3,
+              7
+            ],
+            "target": [
+              0,
+              0.1,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "materialProgress": 0.3000000046070788,
+            "materialMode": "surface-contours",
+            "focalLengthMm": 38.059137628358556
+          }
+        ],
+        "physicsFrames": 241,
+        "renderer": "WebKit WebGL",
+        "memory": {
+          "geometries": 7,
+          "textures": 4
+        }
+      }
+    },
+    {
+      "id": "surface-contours",
+      "u": 0.7,
+      "filename": "surface-contours-late.png",
+      "sha256": "a7a39809c4789254c6414124bbd23275ebd1d9a2d9dd4cfc6aaae41fd22da92c",
+      "state": {
+        "frames": 4,
+        "u": 0.7000000184283153,
+        "mode": "pointer",
+        "ready": true,
+        "study": "surface-contours",
+        "views": [
+          {
+            "variant": "a",
+            "position": [
+              3.2,
+              2.3,
+              7
+            ],
+            "target": [
+              0,
+              0.1,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "materialProgress": 0.7000000184283153,
+            "materialMode": "material",
+            "focalLengthMm": 38.059137628358556
+          },
+          {
+            "variant": "b",
+            "position": [
+              3.2,
+              2.3,
+              7
+            ],
+            "target": [
+              0,
+              0.1,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "materialProgress": 0.7000000184283153,
+            "materialMode": "surface-contours",
+            "focalLengthMm": 38.059137628358556
+          }
+        ],
+        "physicsFrames": 241,
+        "renderer": "WebKit WebGL",
+        "memory": {
+          "geometries": 7,
+          "textures": 4
+        }
+      }
+    },
+    {
+      "id": "surface-focus",
+      "u": 0.3,
+      "filename": "surface-focus.png",
+      "sha256": "913e896531ba35653ddf3fc0f805b48c345685ae5e7483c6856146f9f6240587",
+      "state": {
+        "frames": 3,
+        "u": 0.3000000046070788,
+        "mode": "pointer",
+        "ready": true,
+        "study": "surface-focus",
+        "views": [
+          {
+            "variant": "a",
+            "position": [
+              3.2,
+              2.3,
+              7
+            ],
+            "target": [
+              0,
+              0.1,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "materialProgress": 0.3000000046070788,
+            "materialMode": "material",
+            "focalLengthMm": 38.059137628358556
+          },
+          {
+            "variant": "b",
+            "position": [
+              3.2,
+              2.3,
+              7
+            ],
+            "target": [
+              0,
+              0.1,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "materialProgress": 0.3000000046070788,
+            "materialMode": "surface-focus",
+            "focalLengthMm": 38.059137628358556
+          }
+        ],
+        "physicsFrames": 241,
+        "renderer": "WebKit WebGL",
+        "memory": {
+          "geometries": 7,
+          "textures": 4
+        }
+      }
+    },
+    {
+      "id": "surface-focus",
+      "u": 0.7,
+      "filename": "surface-focus-late.png",
+      "sha256": "17248655408ec279b8b3fdf5a41609fa04ea79950fbc366cc133b7769bb07940",
+      "state": {
+        "frames": 4,
+        "u": 0.7000000184283153,
+        "mode": "pointer",
+        "ready": true,
+        "study": "surface-focus",
+        "views": [
+          {
+            "variant": "a",
+            "position": [
+              3.2,
+              2.3,
+              7
+            ],
+            "target": [
+              0,
+              0.1,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "materialProgress": 0.7000000184283153,
+            "materialMode": "material",
+            "focalLengthMm": 38.059137628358556
+          },
+          {
+            "variant": "b",
+            "position": [
+              3.2,
+              2.3,
+              7
+            ],
+            "target": [
+              0,
+              0.1,
+              0
+            ],
+            "fov": 35,
+            "roll": 0,
+            "focus": 9,
+            "blur": 0,
+            "mist": 0,
+            "spread": 1,
+            "turn": 0,
+            "assembly": 0,
+            "selection": -1,
+            "light": [
+              4,
+              6,
+              4
+            ],
+            "finish": 0,
+            "glass": false,
+            "particles": false,
+            "contact": false,
+            "owner": "analytic",
+            "materialProgress": 0.7000000184283153,
+            "materialMode": "surface-focus",
+            "focalLengthMm": 38.059137628358556
+          }
+        ],
+        "physicsFrames": 241,
+        "renderer": "WebKit WebGL",
+        "memory": {
+          "geometries": 7,
+          "textures": 4
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "verifiedAt": "2026-10-07T21:44:47.899Z",
+  "results": [
+    {
+      "profile": "Chromium desktop",
+      "newEntryLinks": 4,
+      "directLinkLoaded": true,
+      "matchedStateReadout": true,
+      "noOverflow": true,
+      "noShaderErrors": true
+    },
+    {
+      "profile": "Pixel 7 emulation",
+      "newEntryLinks": 4,
+      "directLinkLoaded": true,
+      "matchedStateReadout": true,
+      "noOverflow": true,
+      "noShaderErrors": true
+    }
+  ]
+}

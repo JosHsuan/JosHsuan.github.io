@@ -1,0 +1,18 @@
+import {createRequire} from 'node:module';
+import {fileURLToPath} from 'node:url';
+import {mkdir,writeFile} from 'node:fs/promises';
+import {executablePath} from './browser-path.mjs';
+const require=createRequire(new URL('../../../package.json',import.meta.url));
+const {chromium}=require('@playwright/test');
+const browser=await chromium.launch({executablePath,headless:true});
+const page=await browser.newPage({viewport:{width:1440,height:1100}});
+const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(['error','warning'].includes(m.type()))console.log(m.type(),m.text().slice(0,700));});
+await page.goto('http://127.0.0.1:4180/?study=materials');
+await page.getByRole('button',{name:'Open live stage',exact:true}).click();
+await page.waitForTimeout(3500);
+console.log(await page.locator('.stage-badge').innerText());
+console.log(await page.evaluate(()=>window.__artist3d?.inspect()));
+await mkdir(new URL('../verification/screenshots/',import.meta.url),{recursive:true});
+await page.screenshot({path:fileURLToPath(new URL('../verification/screenshots/first-stage.png',import.meta.url))});
+console.log(errors);
+await browser.close();

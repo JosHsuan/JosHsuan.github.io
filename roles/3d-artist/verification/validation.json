@@ -1,0 +1,43 @@
+{
+  "verifiedAt": "2026-10-07T19:47:42.980Z",
+  "studies": 7,
+  "previews": 14,
+  "licensedAssetHashes": 1,
+  "score": {
+    "tracks": 4,
+    "keyframes": 24,
+    "hash": "684e3bcbde3fa6326d9bdacc27aee03b0a44141d7320be5951b21d6aba2411ab",
+    "provenance": "Byte-identical reuse of the genuine UIUX spatial score (2026-10-07), source roles/uiux-designer/src/motion/theatre/spatial/motion.state.json. Its four tracks reveal ring spacing while the camera traverses the aperture. This is deliberate score reuse, not a claim of new Studio authoring."
+  },
+  "untouchedExistingFiles": 262,
+  "rootLockfileUnchanged": true,
+  "studioExcluded": true,
+  "bundles": [
+    {
+      "file": "chunks\\171.02c5bdad.js",
+      "bytes": 2238635,
+      "gzipBytes": 830763
+    },
+    {
+      "file": "chunks\\376.02190bf8.js",
+      "bytes": 2493,
+      "gzipBytes": 927
+    },
+    {
+      "file": "chunks\\763.6222c290.js",
+      "bytes": 30875,
+      "gzipBytes": 8308
+    },
+    {
+      "file": "chunks\\785.4560f8b2.js",
+      "bytes": 2852226,
+      "gzipBytes": 573647
+    },
+    {
+      "file": "desk.js",
+      "bytes": 712390,
+      "gzipBytes": 133208
+    }
+  ],
+  "note": "Gzip sizes are offline measurements. The loopback server serves raw bytes; these are not transfer timing, GPU memory or field performance measurements."
+}

@@ -1,0 +1,35 @@
+{
+  "builtAt": "2026-10-07T19:47:42.689Z",
+  "studioExcluded": true,
+  "theatreModules": [
+    "javascript/esm|[project]/roles/3d-artist/scripts/ts-loader.cjs![project]/roles/3d-artist/src/motion/theatre/runtime.js",
+    "json|[project]/roles/3d-artist/src/motion/theatre/motion.state.json",
+    "json|[project]/roles/3d-artist/src/motion/theatre/motion.manifest.json",
+    "[project]/roles/3d-artist/scripts/ts-loader.cjs![project]/src/motion/theatre/createController.ts",
+    "[project]/roles/3d-artist/scripts/ts-loader.cjs![project]/src/motion/theatre/projectRegistry.ts",
+    "javascript/dynamic|[project]/node_modules/.pnpm/@theatre+core@0.7.2/node_modules/@theatre/core/dist/index.js",
+    "[project]/node_modules/.pnpm/@theatre+dataverse@0.7.2/node_modules/@theatre/dataverse/dist/index.js"
+  ],
+  "assets": [
+    {
+      "name": "chunks/171.02c5bdad.js",
+      "size": 2238635
+    },
+    {
+      "name": "chunks/376.02190bf8.js",
+      "size": 2493
+    },
+    {
+      "name": "chunks/763.6222c290.js",
+      "size": 30875
+    },
+    {
+      "name": "chunks/785.4560f8b2.js",
+      "size": 2852226
+    },
+    {
+      "name": "desk.js",
+      "size": 712390
+    }
+  ]
+}

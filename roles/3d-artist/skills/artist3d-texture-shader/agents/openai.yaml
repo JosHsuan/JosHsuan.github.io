@@ -1,0 +1,4 @@
+interface:
+  display_name: "3D Artist · Texture and Shader"
+  short_description: "Source and verify one-input material studies"
+  default_prompt: "Use $artist3d-texture-shader to develop a sourced, single-input material comparison in the 3D Artist workspace."

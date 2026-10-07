@@ -1,0 +1,64 @@
+{
+  "verifiedAt": "2026-10-07T19:43:18.652Z",
+  "testData": "All browser contexts and preference fixtures are synthetic. Not owner Saved evidence.",
+  "results": [
+    {
+      "profile": "chromium-desktop",
+      "result": "PASS",
+      "checks": [
+        "materials: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "lighting: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "refraction: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "scattering: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "physics: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "particles: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "Theatre full score completes and returns to idle",
+        "camera: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "Real download + round-trip import, malformed rejection without overwrite, persistence, separate hashed UIUX evidence",
+        "Filters, narrow layout without horizontal overflow, captured contact sheet",
+        "Reduced motion: no autoplay; live stage returns to rest",
+        "Offscreen stage pauses",
+        "Real WEBGL_lose_context fallback and recovery",
+        "No remote runtime asset requests or page/shader errors"
+      ]
+    },
+    {
+      "profile": "webkit-desktop",
+      "result": "PASS",
+      "checks": [
+        "materials: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "lighting: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "refraction: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "scattering: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "physics: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "particles: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "camera: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "Real download + round-trip import, malformed rejection without overwrite, persistence, separate hashed UIUX evidence",
+        "Filters, narrow layout without horizontal overflow, captured contact sheet",
+        "Reduced motion: no autoplay; live stage returns to rest",
+        "Offscreen stage pauses",
+        "Real WEBGL_lose_context fallback and recovery",
+        "No remote runtime asset requests or page/shader errors"
+      ]
+    },
+    {
+      "profile": "chromium-touch",
+      "result": "PASS",
+      "checks": [
+        "materials: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "lighting: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "refraction: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "scattering: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "physics: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "particles: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "camera: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "Real download + round-trip import, malformed rejection without overwrite, persistence, separate hashed UIUX evidence",
+        "Filters, narrow layout without horizontal overflow, captured contact sheet",
+        "Reduced motion: no autoplay; live stage returns to rest",
+        "Offscreen stage pauses",
+        "Real WEBGL_lose_context fallback and recovery",
+        "No remote runtime asset requests or page/shader errors"
+      ]
+    }
+  ]
+}

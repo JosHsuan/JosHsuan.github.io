@@ -1,0 +1,164 @@
+{
+  "retrievedAt": "2026-10-07",
+  "policy": "Primary sources; original procedural adaptation. No Lusion or Tiffen artwork or footage copied.",
+  "references": {
+    "bamboo": {
+      "label": "Poly Haven · Bamboo Wall / Amal Kumar / CC0",
+      "url": "https://polyhaven.com/a/bamboo_wall"
+    },
+    "noise": {
+      "label": "stegu / Ashima Arts · pinned MIT simplex noise",
+      "url": "https://github.com/stegu/webgl-noise/tree/22434e04d7753f7e949e8d724ab3da2864c17a0f"
+    },
+    "three-material": {
+      "label": "Three.js · standard PBR material and data maps",
+      "url": "https://threejs.org/docs/pages/MeshStandardMaterial.html"
+    },
+    "three-color": {
+      "label": "Three.js · colour management",
+      "url": "https://threejs.org/manual/en/color-management.html"
+    },
+    "three-shader": {
+      "label": "Three.js · material shader extension / WebGL",
+      "url": "https://threejs.org/docs/pages/Material.html"
+    },
+    "lusion": {
+      "label": "Lusion · native scroll / DOM and WebGL",
+      "url": "https://github.com/lusionltd/WebGL-Scroll-Sync/tree/d2f2c844b449878c760e3f435ab01c85ed5ee072"
+    },
+    "r3f": {
+      "label": "React Three Fiber · demand rendering",
+      "url": "https://r3f.docs.pmnd.rs/advanced/scaling-performance"
+    },
+    "three-camera": {
+      "label": "Three.js · PerspectiveCamera",
+      "url": "https://threejs.org/docs/pages/PerspectiveCamera.html"
+    },
+    "three-curve": {
+      "label": "Three.js · Curve / arc-length sampling",
+      "url": "https://threejs.org/docs/pages/Curve.html"
+    },
+    "three-physical": {
+      "label": "Three.js · physical materials",
+      "url": "https://threejs.org/docs/pages/MeshPhysicalMaterial.html"
+    },
+    "three-buffer": {
+      "label": "Three.js · BufferGeometry",
+      "url": "https://threejs.org/docs/pages/BufferGeometry.html"
+    },
+    "three-bokeh": {
+      "label": "Three.js · depth / Bokeh shader reference",
+      "url": "https://github.com/mrdoob/three.js/blob/9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8/examples/jsm/shaders/BokehShader.js"
+    },
+    "three-post": {
+      "label": "Three.js · postprocessing",
+      "url": "https://threejs.org/manual/en/post-processing.html"
+    },
+    "rapier": {
+      "label": "Rapier JS · pinned physics runtime",
+      "url": "https://github.com/dimforge/rapier.js/tree/v0.19.3"
+    },
+    "theatre": {
+      "label": "Theatre · advanced input mapping",
+      "url": "https://www.theatrejs.com/docs/latest/manual/advanced"
+    },
+    "tiffen": {
+      "label": "Tiffen · Black Pro-Mist reference",
+      "url": "https://tiffen.com/products/black-pro-mist-filter"
+    }
+  },
+  "implementation": {
+    "lusion": "Native scrolling retained. Canvas and HTML rail share one sticky block; no floating DOM-bound objects. Lusion padding/offset algorithm is not copied or claimed.",
+    "theatre": "Existing genuine UIUX Studio export reused byte-for-byte, sought by u. No new authoring claimed.",
+    "diffusion": "Original linear-HDR bright-pass separable blur, not a calibrated filter model.",
+    "dof": "Original single-depth gather shader; Three BokehShader read as a depth conversion reference.",
+    "geometry": "Original abstract aperture / frame / depth-target test fixture; no owner project content.",
+    "textureShader": "Public CC0 bamboo-wall PBR reference swatch; pinned MIT simplex noise; original strip specimens, world-height contours and attention hatching. No owner-project material or structural analysis claim."
+  },
+  "pins": {
+    "lusion": "d2f2c844b449878c760e3f435ab01c85ed5ee072",
+    "three": "0.186.1 / 9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8",
+    "playwrightMcp": "0.0.83 / f183dad4a52965583e3cc1d59b88cdc279e2e57d",
+    "theatre": "0.7.2",
+    "openaiPlaywrightSkill": "49f948faa9258a0c61caceaf225e179651397431"
+  },
+  "assets": [
+    {
+      "file": "assets/studio_small_09_1k.hdr",
+      "sha256": "e7cfda5f4e98e623db12b8bfd0184e048488e4855d9c83e2751fb44a32e80c45",
+      "source": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_09_1k.hdr",
+      "license": "CC0-1.0 / Poly Haven / Sergej Majboroda"
+    },
+    {
+      "file": "src/motion/theatre/motion.state.json",
+      "sha256": "684e3bcbde3fa6326d9bdacc27aee03b0a44141d7320be5951b21d6aba2411ab",
+      "source": "roles/uiux-designer/src/motion/theatre/spatial/motion.state.json",
+      "license": "Existing local authored export; reuse provenance in motion.manifest.json"
+    }
+  ],
+  "textureResearch": {
+    "assets": {
+      "id": "polyhaven-bamboo-wall",
+      "author": "Amal Kumar",
+      "source": "https://polyhaven.com/a/bamboo_wall",
+      "license": "CC0-1.0",
+      "sourceWidthMeters": 2,
+      "purpose": "Independent bamboo-wall PBR reference swatch, not evidence of any owner project finish",
+      "downloadedAt": "2026-10-07",
+      "assets": [
+        {
+          "channel": "Diffuse",
+          "file": "assets/textures/bamboo_wall_diff_1k.jpg",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/bamboo_wall/bamboo_wall_diff_1k.jpg",
+          "bytes": 677974,
+          "md5": "ad341e84a39181511ce42178c4c4e174",
+          "sha256": "5321f063d8d03d8666202e6f0e10619598f4d2814712f1d08f28d11b689ee79a",
+          "colorSpace": "srgb"
+        },
+        {
+          "channel": "nor_gl",
+          "file": "assets/textures/bamboo_wall_nor_gl_1k.jpg",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/bamboo_wall/bamboo_wall_nor_gl_1k.jpg",
+          "bytes": 726676,
+          "md5": "3aeb33fe5b27c0835a45f48dfbe8ea5d",
+          "sha256": "817783d0ae812d1567839861b0b4c81c392fd2bb77806ce03cb86c44ba3933a2",
+          "colorSpace": "data"
+        },
+        {
+          "channel": "rough",
+          "file": "assets/textures/bamboo_wall_rough_1k.jpg",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/bamboo_wall/bamboo_wall_rough_1k.jpg",
+          "bytes": 479118,
+          "md5": "5634816d0215c6b400c74c49676ddae9",
+          "sha256": "4e439cb9d2a684a188feca3da418464147ba4b4bda1e37418ad76879e620275b",
+          "colorSpace": "data"
+        }
+      ]
+    },
+    "shader": {
+      "schemaVersion": 1,
+      "role": "3d-artist",
+      "retrievedAt": "2026-10-07",
+      "upstream": "https://github.com/stegu/webgl-noise",
+      "revision": "22434e04d7753f7e949e8d724ab3da2864c17a0f",
+      "license": "MIT",
+      "source": "src/noise2D.glsl",
+      "adaptation": "Original GLSL retained byte-for-byte; JS string wrapper preserves exact contents. Original UV mapping/material logic separate.",
+      "assets": [
+        {
+          "file": "src/materials/vendor/noise2D.glsl",
+          "sha256": "b0f27c923227e8b2d7618f09dc666e2397f608ca7929f798da632647c3f41884"
+        },
+        {
+          "file": "src/materials/vendor/noise2D.js",
+          "sha256": "abe417c75af6356959ac26e88d6d635f7815cc102a2bc5a11de3fa85b62e07e7"
+        },
+        {
+          "file": "licenses/webgl-noise-MIT.txt",
+          "sha256": "bdafce1bb01517c9ae6c4f3620c01340790b5e9d039ae9e356347d1174250916"
+        }
+      ]
+    },
+    "recipes": "catalog/material-recipes.json"
+  }
+}

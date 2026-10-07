@@ -1,0 +1,1022 @@
+[
+  {
+    "file": ".env.example",
+    "sha256": "99781806804d646857c70ad45a7c333854095fb3d6aae82cb8b5cf678fe6705b"
+  },
+  {
+    "file": ".github/workflows/ci.yml",
+    "sha256": "9b196fa6edbd93795a614be7f2c96eda30765dc00d224c38b0c8b860e8e72a62"
+  },
+  {
+    "file": ".github/workflows/deploy-pages.yml",
+    "sha256": "f17cc633d94d14de57fd67d382d09ecc5c54fbbdfa4453230e1dad0c6bbdae42"
+  },
+  {
+    "file": ".gitignore",
+    "sha256": "b2c0395dceaacd3664f3af239d579b8c5ccc924fb3f289529b665c1c9670b401"
+  },
+  {
+    "file": ".node-version",
+    "sha256": "7e8a2fa94951112b894a3dbe3d05efef5e9263741fa49125f0a70f40fedab4cc"
+  },
+  {
+    "file": ".npmrc",
+    "sha256": "06fb8d7684f7f219ee36c610666958705959d8922be6cd29cbf9de80973f21e5"
+  },
+  {
+    "file": ".nvmrc",
+    "sha256": "7e8a2fa94951112b894a3dbe3d05efef5e9263741fa49125f0a70f40fedab4cc"
+  },
+  {
+    "file": "AGENTS.md",
+    "sha256": "bb28608c65ec1c58c838a9af1f75afd9d2f99a0c82f4f95b0cab4c298ba34fc0"
+  },
+  {
+    "file": "README.md",
+    "sha256": "1f517af956576ae748c3429f8c16f455d9ead7e94822c0513e896f366a660d44"
+  },
+  {
+    "file": "content/assets.manifest.json",
+    "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+  },
+  {
+    "file": "content/profile/index.json",
+    "sha256": "38e0b9de817f645c4bec37c0d4a3e58baecccb040f5718dc069a72c7385a0bed"
+  },
+  {
+    "file": "content/projects/index.json",
+    "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+  },
+  {
+    "file": "content/research/index.json",
+    "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+  },
+  {
+    "file": "docs/WEBSITE_DESIGN_GUIDELINES.md",
+    "sha256": "4fc99cf5faf5ee6107da2a7d0dde05bce7664e994d3b55c1bbe64553e1d0f317"
+  },
+  {
+    "file": "docs/architecture.md",
+    "sha256": "e15acb515f47c1fbe93c59310372f535797e6a2e23b8924f2bf47b8cc423f998"
+  },
+  {
+    "file": "docs/asset-pipeline.md",
+    "sha256": "8d22d6a075030aac1247305767b70ea6526917263bc383a38f0713dba76d2d9b"
+  },
+  {
+    "file": "docs/compatibility.md",
+    "sha256": "19a0f3dc998c59925c058602ce66b766f4a014756ec8212c7e10accb02486e30"
+  },
+  {
+    "file": "docs/decisions/0001-empty-framework.md",
+    "sha256": "7119d3d43706cc6f9da9cb4cbce600a0ff04bfd55609c8ae58fb6c6093d6141d"
+  },
+  {
+    "file": "docs/decisions/0002-design-guidelines-integration.md",
+    "sha256": "3b3cde31c5f74667ba9d748a7f05a1c2eac410add9429f4d3c0dd3ba930a38a1"
+  },
+  {
+    "file": "docs/motion-authoring.md",
+    "sha256": "64ee6c37c9733507044753c7d7002539e8d680f3584187c230a8c0a0039b84ce"
+  },
+  {
+    "file": "docs/personal-website-direction.md",
+    "sha256": "2a6852c3a6d41d7eda613183f1c00cbe807a293a8df8a1a19c00add61736f652"
+  },
+  {
+    "file": "docs/pmndrs-personal-website-guide.md",
+    "sha256": "658597baac38b72b378b7602dce59deabbccc453914854dd09b49fa3dcc1974a"
+  },
+  {
+    "file": "docs/toolchain.md",
+    "sha256": "09f6025f4cd1e9f4f8df7dbbcd8d92590d980defc0f09fdb63329705109038e5"
+  },
+  {
+    "file": "eslint.config.mjs",
+    "sha256": "b2a5435b8b31d4585dea90bfec3fa1bdb4f40251605d8cac855dbc3afec28e68"
+  },
+  {
+    "file": "next-env.d.ts",
+    "sha256": "1862ac4bbbc5192d4bf562161df66ea547ed3e67173100656ab606ae9797db2b"
+  },
+  {
+    "file": "next.config.ts",
+    "sha256": "bae080cc3f5c1d6603858de1ba57191e524cdb6627751fcbeadf484c7de77ebc"
+  },
+  {
+    "file": "package.json",
+    "sha256": "08e1ef89f3ded38632dfe3abcaf1f89214bc64d43b84f3d2d00c92b7adc156bf"
+  },
+  {
+    "file": "playwright.config.ts",
+    "sha256": "cdaafdde3caae1ba2cfb72e1a7b69c2947dc9744cbd2009f2885506c5a071a48"
+  },
+  {
+    "file": "pnpm-lock.yaml",
+    "sha256": "0ae27ab48daea7593d50cf0f2336100e55993151f2a5b163251441d88fc8c05a"
+  },
+  {
+    "file": "pnpm-workspace.yaml",
+    "sha256": "6abcd7632c1939abbf834f54e3c718def308be943ac6082643d56624d7c058dc"
+  },
+  {
+    "file": "public/decoders/.gitkeep",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "public/downloads/.gitkeep",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "public/media/.gitkeep",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "public/models/.gitkeep",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "scripts/audit-build.ts",
+    "sha256": "9a736bf4a250f18a39ed3696205339b73d42230b3d68af60cb9a961b7ddfb27c"
+  },
+  {
+    "file": "scripts/content-source.ts",
+    "sha256": "6c330ee1da2192eaa55be1e8f99b0382b04c24e40670481e99b5a1057b7168da"
+  },
+  {
+    "file": "scripts/export-content.ts",
+    "sha256": "984eec1265239f6d9e7e51350e362615dff92d239148899f1ed6c5a97b723c17"
+  },
+  {
+    "file": "scripts/serve-export.ts",
+    "sha256": "4889b83c46a48ce42b0aeb2f2dfc41ddfac829658d90a9874026d7b942a42874"
+  },
+  {
+    "file": "scripts/validate-content.ts",
+    "sha256": "6a4cc0808a293e185fb6c28d0c457700af2c60017711e54f31d9b035036f2f2f"
+  },
+  {
+    "file": "scripts/validate-motion.ts",
+    "sha256": "544999ea12efebb646f827749fd78acb6020c3bfe2331b03dabcd2171d7d7734"
+  },
+  {
+    "file": "src/app/about/page.tsx",
+    "sha256": "35942982b955f71f6d1955c2ebae083aad6bb0046d29acbe99e4b4869083c911"
+  },
+  {
+    "file": "src/app/contact/page.tsx",
+    "sha256": "17b42a653c0ea7904db2b5d670c322a79140aecb82ff80328e8c67c447ec8640"
+  },
+  {
+    "file": "src/app/layout.tsx",
+    "sha256": "cfec684aa3888ddc1be45371c654c9ab0d9651f4db2fe358cafd4dcf6cc168de"
+  },
+  {
+    "file": "src/app/not-found.tsx",
+    "sha256": "fd591a696df57ba840eb1b0ced0896ca4989443b84c15520826bebe14406b0c9"
+  },
+  {
+    "file": "src/app/page.tsx",
+    "sha256": "d5508b8df52473a6f642cd1a24d2c9b59f62da9aba7ae169119b7852498827d5"
+  },
+  {
+    "file": "src/app/projects/page.tsx",
+    "sha256": "e17e904e07f033ffe58edf855229ddf42feb7243448fbffa4fa1502cd488161f"
+  },
+  {
+    "file": "src/app/research/page.tsx",
+    "sha256": "67b7a0f792d839962a68a0b1ff636056b1668163edafa0c4854b428f8269e6b9"
+  },
+  {
+    "file": "src/components/content/EntryDetail.tsx",
+    "sha256": "01903e5479a786deffd6b86f69feffe199c3ad9a2ef54056160fcdf8e5a28a61"
+  },
+  {
+    "file": "src/components/content/EntryList.tsx",
+    "sha256": "11a075d6594bf1543902a15777c413ac4a46c355575e68bfdd5cb5b2a473daf8"
+  },
+  {
+    "file": "src/components/layout/Navigation.tsx",
+    "sha256": "e9fcc927a100c588d54dcdc3656fbca7a2d31dc853c2d11275663416110a955b"
+  },
+  {
+    "file": "src/components/layout/SiteShell.module.css",
+    "sha256": "7fb736308a208e32bba9ac627016dab87890f965e0c6dfa83cb649e763141246"
+  },
+  {
+    "file": "src/components/ui/PageFrame.module.css",
+    "sha256": "108053c2961800e5894e5bb04f7aa685aff44b70693a19467d6a4ed5a6a762a7"
+  },
+  {
+    "file": "src/components/ui/PageFrame.tsx",
+    "sha256": "8aa30213ddd28d989a9e6b9d61fa6a07f6886c25af98e98594c052945f137a3b"
+  },
+  {
+    "file": "src/content/read.ts",
+    "sha256": "e17601aef64af5934dde2951504b35f0cb5700c0de0be837ac0ff4ecba3e4aa4"
+  },
+  {
+    "file": "src/content/schema.ts",
+    "sha256": "60c16e5ee40d3c9152e7707446aeddaf2bf429acd1dc1452e56ffc811c2ccbe8"
+  },
+  {
+    "file": "src/features/preferences/MotionPreference.tsx",
+    "sha256": "8fda15cc57cbc461db49c8b4b71d6eed9618b7bd151afa89c8497a2df909ed68"
+  },
+  {
+    "file": "src/features/scene-viewer/SceneCanvas.tsx",
+    "sha256": "1d5c4e95aa54a1de681674e1fdb7398d4c215494f692cfbd07e9a6794fdd4e7c"
+  },
+  {
+    "file": "src/features/scene-viewer/SceneDirector.ts",
+    "sha256": "ff3053d8114515e9b0b838c9738456256402689e506ac03244776e43f52f92d3"
+  },
+  {
+    "file": "src/features/scene-viewer/SceneFallback.tsx",
+    "sha256": "953f6c1dc0424d569c4d6751a62747805285f86e661e52d218887e15fca7c053"
+  },
+  {
+    "file": "src/features/scene-viewer/SceneIsland.tsx",
+    "sha256": "adb10174c18e9e12028773dc49d8a6cf400d80c5c1126f0f060a48e4c892eb95"
+  },
+  {
+    "file": "src/features/scene-viewer/SceneViewer.module.css",
+    "sha256": "ea46c24b5fb87d75176c0e89bc2293dd2fa6f7da1463d0bc052eca99a3bfecd1"
+  },
+  {
+    "file": "src/generated/public-content.json",
+    "sha256": "e124e1f6d13e59610afe8ea31e6ce4c01d7a1fc3c62f17c975be40b30a6dee6c"
+  },
+  {
+    "file": "src/lib/paths.ts",
+    "sha256": "a78bd2ce8df7d2cd4c8c087622500ac09442bffd5dc71c9f8591999e34fea89b"
+  },
+  {
+    "file": "src/motion/contracts.ts",
+    "sha256": "c9e5e43fe55500398003fa2d02b702a19baf20bb9b6a072a3defad86c8837363"
+  },
+  {
+    "file": "src/motion/createController.ts",
+    "sha256": "bc393cbf1e99ad09aef0f7a62a55d7467535be0e02b382dbfa5153f167036c1e"
+  },
+  {
+    "file": "src/motion/manifest.ts",
+    "sha256": "c6c2cc3a55fc3ebe77e35434e7a210569599222919cebee2201cb4d101049292"
+  },
+  {
+    "file": "src/motion/scroll/useSceneScroll.ts",
+    "sha256": "c7f4d9bd86fad4de57a9e1b9a9a1be9a7617c0315a011723b754beae51e82d3f"
+  },
+  {
+    "file": "src/motion/theatre/createController.ts",
+    "sha256": "eeb49004a56f3988a2e31aedfbe07c404bf7407205d2cb2cdf08ea66f3cf14e3"
+  },
+  {
+    "file": "src/motion/theatre/projectRegistry.ts",
+    "sha256": "4bfb4f26ff0f36a33477c13604b760f621aa62f669b3fee97e58c108ad347c54"
+  },
+  {
+    "file": "src/motion/theatre/studio.dev.ts",
+    "sha256": "f11933674a1b3c93fa4ff94d096d388be616698f577cb57604c065c0358d5e55"
+  },
+  {
+    "file": "src/scenes/registry.ts",
+    "sha256": "55a9740d3213454b8e029a4b9a8a358930c3f4379bf88e8a9d4006363657dc35"
+  },
+  {
+    "file": "src/scenes/shared/InspectionControls.tsx",
+    "sha256": "1085f8b5369a0e8cff444e6c0b92d6a0ea6ac317ecad76e7298b8576cf9ecca2"
+  },
+  {
+    "file": "src/scenes/shared/applyCameraPose.ts",
+    "sha256": "468d8188d7c899950a94e277fe70093a24538add38955b41612eeeb73662413f"
+  },
+  {
+    "file": "src/styles/globals.css",
+    "sha256": "19d9e4d4a154794cbb8eabe81d4978ecb981e6ba8e41211d2021665658eec51b"
+  },
+  {
+    "file": "src/styles/tokens.css",
+    "sha256": "41460b0668afb229106c658179085251c719b791bb1f16e57e56d23a95adec41"
+  },
+  {
+    "file": "tests/e2e/scaffold.spec.ts",
+    "sha256": "a1f69a0e0a0cae6bec76a5a79366611a183b32eba0e43d1543cc28ebc7c26e93"
+  },
+  {
+    "file": "tests/integration/motion.test.ts",
+    "sha256": "4319f72ff34b13240503bba0dd734f085c8210d49e993f6b211189f35420c4d1"
+  },
+  {
+    "file": "tests/unit/content.test.ts",
+    "sha256": "1acb2c65eaf14f4843433d33ab04a2d059ad31c4eb343b5f3238f04c042b7e1e"
+  },
+  {
+    "file": "tests/unit/paths.test.ts",
+    "sha256": "4b3a937bbebb3b328a245d9fab1464f458c5459a80197753cfeb3b7e9c02c530"
+  },
+  {
+    "file": "tsconfig.json",
+    "sha256": "1c3b245b633f618ff5108ad2409fa3f36055919e8299a90fa2e77b8f84e3684d"
+  },
+  {
+    "file": "roles/uiux-designer/.gitattributes",
+    "sha256": "86dcd0fb0617b450cf104439c6e0e2502a9324168e46227d0ce4e47747b01606"
+  },
+  {
+    "file": "roles/uiux-designer/.gitignore",
+    "sha256": "2c8f3f41074b9b5db715d35aa234f8fbb95adbfdb97c39e4c213670d89a226f2"
+  },
+  {
+    "file": "roles/uiux-designer/AGENTS.md",
+    "sha256": "65b39854f4b1657e852514e483c1efff2674e09637f5c57fbf15689aa65d5396"
+  },
+  {
+    "file": "roles/uiux-designer/assets/fonts/ibmplexmono.ttf",
+    "sha256": "6a3412f058c7d8dfd9170c41e85ade48e5156ecb89356110ca57a0a27734af46"
+  },
+  {
+    "file": "roles/uiux-designer/assets/fonts/ibmplexsans.ttf",
+    "sha256": "3b031aa4216174205bd8471f88a49b91f093169e9e87bd5262242bc5967fe2e3"
+  },
+  {
+    "file": "roles/uiux-designer/assets/fonts/inter.ttf",
+    "sha256": "29160a80ff49ddcab2c97711247e08b1fab27a484a329ce8b813d820dc559031"
+  },
+  {
+    "file": "roles/uiux-designer/assets/fonts/jetbrainsmono.ttf",
+    "sha256": "48715a42ec242c21e9f02692891e147d022299a52e48d5e413e1a942193ffeda"
+  },
+  {
+    "file": "roles/uiux-designer/assets/fonts/spacegrotesk.ttf",
+    "sha256": "acad6de1fc93436f5c0f1f4137751ef04f1aea3063e7036535970ffcfbd79f72"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-lucide/aperture.svg",
+    "sha256": "4bf4b9978b6f9eeb4421e70762b1bbc70a98ed5bd92e5382f1cd7f72cb5e2252"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-lucide/arrow-up-right.svg",
+    "sha256": "50b2503b9d11881142255466b7e3461d022b919735841c321d72003ac9959fe1"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-lucide/box.svg",
+    "sha256": "511862693d914d2bf1947c9ccc513595f2a256541f5dd4f6f9ac8383cd41ac4f"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-lucide/code-xml.svg",
+    "sha256": "a6d2110227be375be21da7324d3c09262c1bf019d06bdeab356d515342ab7cce"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-lucide/download.svg",
+    "sha256": "3daeee13ded5a3afa2198b1bb4e2262d163922f97d96ac6ff9953e8ed4fe039d"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-lucide/layers.svg",
+    "sha256": "ce16d0a955e3581cda17f6b2fd5c5bc2034b405f9cecc31c8ebb8495b4afc1bb"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-lucide/menu.svg",
+    "sha256": "af6491988ac1ba30dc5414f485bc48713e957e1edb0fbef4a0dd8691c3c21598"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-lucide/move-3d.svg",
+    "sha256": "1c76c067c9ef6922af206ca42fc275e82cb5c4413422ce284c7015d3682f55eb"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-lucide/pause.svg",
+    "sha256": "f122ec4ea7f5693a0b1baafa9c708b53980dc87b4aacb297c6e6f71c1a4c115c"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-lucide/play.svg",
+    "sha256": "d7c34786135922a92b6896f6c2384ceeb0346afbf6041dc79982011411409833"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-lucide/rotate-ccw.svg",
+    "sha256": "622685386ab4017eabfde01cd74550a20b1924df233b353f73b6b155371f2afd"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-lucide/x.svg",
+    "sha256": "4a9cdab38fbb96162e7dace28e33f4ca0e49d8963a6162abc3d4691b7d675117"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-phosphor/arrow-counter-clockwise.svg",
+    "sha256": "4eb160d5ae781107c674481ac081962e6bce6281a646129e6c3f960b9dd5dac6"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-phosphor/arrow-up-right.svg",
+    "sha256": "44db5257b360ec04863eb6daaa41f220c8b714d23fb81403517d0a30acfda9f4"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-phosphor/bounding-box.svg",
+    "sha256": "f8cd5f6ad171105ae796a31b7d6856ef143843bb4f73d4a2e21cd8648a1b135e"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-phosphor/circle-notch.svg",
+    "sha256": "7db6049b3b6f951dba2872d63c52f85c6de9ea95e7bda4d598c84bc443a5f035"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-phosphor/code.svg",
+    "sha256": "882462ff89cc7b864cb2af1a3a2660bd796f01bdac35b6d4cff7c131fb74e3dc"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-phosphor/cube.svg",
+    "sha256": "7c0f13cb492d0dd212e48ab259dabec4627df32d71aa00ce31b3228c0f35112b"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-phosphor/download-simple.svg",
+    "sha256": "c48678aa09b44ba4974954690ee6cc846379c448a7214f8c802604c2a1562014"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-phosphor/list.svg",
+    "sha256": "fb1851842c74b40a3f42ce3d6ae0e67ede556b624218e79c0f4ead7d9ceec51f"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-phosphor/pause.svg",
+    "sha256": "7a9a8fe311234262b85c6e332f77db4ba9a59b6ca4292c41d327977cf61a2fc9"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-phosphor/play.svg",
+    "sha256": "885b3ed2095889c4ff063dac35dc424cb9f6c00273ab44e2f90dc9dadbee661a"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-phosphor/stack.svg",
+    "sha256": "ee9eaaeb345e8a28c9662cf8a59147cb86080bd922e41f143444189e0116ea7e"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-phosphor/x.svg",
+    "sha256": "7397b15e1fa66eaf6ff9b59fe91d483cb5c3bcf75b2fe052097ab6f0593b513a"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-tabler/aperture.svg",
+    "sha256": "182daf72f09ef99efb401e4cceee3faf4b2ad59ef1eb5f0ffc76635b62dcb5ea"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-tabler/arrow-up-right.svg",
+    "sha256": "b7d952b0b6fbd089b110d85639ffffc001bb41fe53040e5e7f3e3f65ddc22595"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-tabler/axis-x.svg",
+    "sha256": "38e9761b1489f778192eb9b07ffb2409da1db56d4828e882bda2f93ef5a135b8"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-tabler/code.svg",
+    "sha256": "ff3d40c83c1a908bc3aa173671232e5015dba2f7f3538edc23fa2218a3d329e2"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-tabler/cube.svg",
+    "sha256": "c4a7861461d49cd1d60538f68f206b884580d9de32fc68fac6f1b7e23994781f"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-tabler/download.svg",
+    "sha256": "c13f6f9cf87deee99e331622169efd59cd764b376994540347e50d6bb5e2e0ef"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-tabler/menu-2.svg",
+    "sha256": "bcef199c5e53082a56c7bf33d4c48181b71373eb5d923cce8884aca09d106842"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-tabler/player-pause.svg",
+    "sha256": "d9be9ab25e52cdcae17def18d41edc0855fa44caa8492cde2b5b8cd085e8c5a6"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-tabler/player-play.svg",
+    "sha256": "e2bff69284f1dc77224c47c03798017206a29d4ef665549db724b0a4534d8e5c"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-tabler/rotate-clockwise.svg",
+    "sha256": "df4126db6c4a8ef7fc713b2497e21d3b8c70bac9a9fb45db1f58e5dd486f467d"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-tabler/stack-2.svg",
+    "sha256": "fbe45033ef093505d88dd56cc421290aebc51a5e9dd6c49b68bda588f4d952d9"
+  },
+  {
+    "file": "roles/uiux-designer/assets/icons/icons-tabler/x.svg",
+    "sha256": "9350785360414c39450c3505f17d1745e55a7534edace8548e30cf49e3727d43"
+  },
+  {
+    "file": "roles/uiux-designer/assets/original/form.svg",
+    "sha256": "900b6cd5cf47dda02e3add18e2dc544aa93812ba5a9f6f6e7d8c006bf8d23f3d"
+  },
+  {
+    "file": "roles/uiux-designer/assets/original/make.svg",
+    "sha256": "b71f568ac2d2f44abecc6a8dd0f0ca35b74ac2ef956fe9cc09728969cb085208"
+  },
+  {
+    "file": "roles/uiux-designer/assets/original/system.svg",
+    "sha256": "dbfd74394c9ac7fe98154a6d493ec9b22e36468963343c5556c9631c5414b5fa"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/applied-font-inter.png",
+    "sha256": "7c00c2486e0b3bc72889bf4a293dbd0441965608b3edf204a7c23e2dd3fe8f97"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/applied-font-jetbrains-mono.png",
+    "sha256": "01edcef32085e1b70ef476369cb66c099e27770165a333daf6fcf5926d40fc91"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/applied-font-plex-mono.png",
+    "sha256": "82dd1737df1629861d7096a8eba156f4d28e0fa502d8f4b27ed658ac626c71a1"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/applied-font-plex-sans.png",
+    "sha256": "cb5ffef9b7f691e78f555892a8a0f4a4b175b5ce8d4bafb22bf825f9435c451c"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/applied-font-space-grotesk.png",
+    "sha256": "d7a22076b08878a4318b04bb8f16f5e2d22105032199ac2028e277732ae17009"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/applied-icons-lucide.png",
+    "sha256": "66c652413cfbcf56494d3e5dece304689e403bd7085dd4e23b8ff109f7591487"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/applied-icons-phosphor.png",
+    "sha256": "c9c8cde1dcb6698cc82d24aa2376a2b8bbee0da713d774fb75c846ec52b8c966"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/applied-icons-tabler.png",
+    "sha256": "123ad7e3b8f824b369ec753f99fd67638c7422684c4f1298709003ed8b769bf9"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/applied-identity-glyphs.png",
+    "sha256": "ab95c85b9dcc6622118a0f600b65334b4e8b2cf4e5af668e8b1b6eccbbd44f01"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/applied-identity-palette.png",
+    "sha256": "aae7279e32aecd558ed73217c36a24da6fc0414f8a26ff1e03dbebe146cefd55"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/applied-motion-linework.png",
+    "sha256": "b601f601b5767803b41cb65c5e7bf52f56b7b9d42273d9cfba4a81d8bb316a57"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/applied-motion-reflow.png",
+    "sha256": "90d27911f43b2183bc3038dd9ce57ce8230157abf8403aeaae80e82dcb5cf87d"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/applied-motion-reveal.png",
+    "sha256": "6f29e415cf69f8e3570cbb562cf833f85ca98ca9263db1d63afe9515567e8818"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/applied-motion-theatre.png",
+    "sha256": "cec2321bc4085d398b8584331a8936cc83da31673bc593cbff9c9a1490fb252c"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/applied-spatial-ascii.png",
+    "sha256": "b5bc20e2ed68b8628b1d3374c14b89bea522dd9a07999fa829a40c24ceb4a917"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/applied-spatial-hatch.png",
+    "sha256": "4e044d900ca96d547c52e5e4b8bf5d0dfbd3b723f2e04089d3afb42c87a267ea"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/applied-spatial-wirefield.png",
+    "sha256": "768a86ff2a5204c2a38bb50e481a3d84c4a634ad35cbc12646d81000281592bc"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/applied-ui-command.png",
+    "sha256": "558b3c6b04cc91e4497aae131c0cd736c1525b814b1979f1290021c1ddb1cec2"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/applied-ui-focus-rail.png",
+    "sha256": "476ad7af185c51fbec52dc463ac4dea49436f44f7264d2620f8c3cdcf811019e"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/feedback-assembly.png",
+    "sha256": "d49300af4b20a62b6643b79f3a099ca9287de2d4e5117100b88856f044b7a2f6"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/feedback-card.png",
+    "sha256": "970f1befd171ee0cf8d6d765042add62e2ed2066831555a2729f9e6c6cbe01ea"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/feedback-glyph.png",
+    "sha256": "7ae2c7c006fed5d044d203c00c222147eed0df65f603c7a3f17be4831753edfb"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/feedback-key.png",
+    "sha256": "92046f6db62fe9fc271ba8c34db48b458c93a61848de4d070cd41ccdf314e074"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/feedback-navigation.png",
+    "sha256": "564ad43b7dc4c8de5bcbf4b1a22dc7a63f77a0a06f72a7950b13016948eaa0dc"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/feedback-panel.png",
+    "sha256": "453e2fdf57593ab1a082e692e09364b2f3fb20a745328fcceb3c4324c7842ca1"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/feedback-type.png",
+    "sha256": "3350c4b2b7cd07c149ad1999336aa667f91c2aade554c432e072fdbbe5dbb059"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/hatch.png",
+    "sha256": "b3cc7aeacbd0cc5ad9e53c4dd94b469b0159579c178f3fed65f8262e9b36a473"
+  },
+  {
+    "file": "roles/uiux-designer/assets/previews/wirefield.png",
+    "sha256": "5c6de60a46aee9ff615d484638ea178e3e641b9b21f042f5fc7224a9ac6e820e"
+  },
+  {
+    "file": "roles/uiux-designer/catalog/applied-feedback.manifest.json",
+    "sha256": "559e6f7ac2c3f6e3542e3c4be0b763f053d858f8cf9df2ff7bd48e2ca74fe7df"
+  },
+  {
+    "file": "roles/uiux-designer/catalog/assets.manifest.json",
+    "sha256": "6d0b850dc3cb2913071d5112926138a624081c6cb600daaf1d7558ad51b7dd88"
+  },
+  {
+    "file": "roles/uiux-designer/catalog/features.manifest.json",
+    "sha256": "f2b8c32ef43d8152846f5ccae9882ca5db1dfeeb8b3931402420bdd8767e4d02"
+  },
+  {
+    "file": "roles/uiux-designer/catalog/materials.json",
+    "sha256": "ce7e1bf1abd75527852a4f4d9670d2a18ac02708be7f25a910634bfaf16257c7"
+  },
+  {
+    "file": "roles/uiux-designer/catalog/previews.manifest.json",
+    "sha256": "693a127e2c3fbe5ee20b95db82fb8c7f0b97ebd310171aff8988dace01711693"
+  },
+  {
+    "file": "roles/uiux-designer/codex-role.ps1",
+    "sha256": "318087596e89bfc800197deae49874042606f7a06f356e98bf1a68a36a3d3644"
+  },
+  {
+    "file": "roles/uiux-designer/config.template.toml",
+    "sha256": "1ef4801bd0af368925fdf6fe48e695ed58d996a9c364d590d68352b5fda2316b"
+  },
+  {
+    "file": "roles/uiux-designer/eslint.config.mjs",
+    "sha256": "9a7f7c2761212277132a0d3d19838b6fa3582657dce5a4893dda9db1923658d6"
+  },
+  {
+    "file": "roles/uiux-designer/licenses/ibmplexmono-OFL.txt",
+    "sha256": "7e6b2818edbd8f6a01ae80641cc8f16a51080d08fb4e532be3a0b6f74adb07da"
+  },
+  {
+    "file": "roles/uiux-designer/licenses/ibmplexsans-OFL.txt",
+    "sha256": "7e6b2818edbd8f6a01ae80641cc8f16a51080d08fb4e532be3a0b6f74adb07da"
+  },
+  {
+    "file": "roles/uiux-designer/licenses/icons-lucide.txt",
+    "sha256": "b495047bd93a9b06913511076f504daba17d5bbeb3e0650f3bb53a4220329c57"
+  },
+  {
+    "file": "roles/uiux-designer/licenses/icons-phosphor.txt",
+    "sha256": "b5b1f1da112d18ea2147decfd48ddc1bf2b5aeb6c265381579340e95b15a2bb2"
+  },
+  {
+    "file": "roles/uiux-designer/licenses/icons-tabler.txt",
+    "sha256": "b740a1d46122672da62833e97f7e7c8a13fa85cbc7445b584b297cc00dde93db"
+  },
+  {
+    "file": "roles/uiux-designer/licenses/inter-OFL.txt",
+    "sha256": "5b9321a4298cfeb6b34354164a1c3afc3db114569984c502b9b35d988fd58c57"
+  },
+  {
+    "file": "roles/uiux-designer/licenses/jetbrainsmono-OFL.txt",
+    "sha256": "b2fe5e8987594e9ffd1d2ca52a2f5d73eb8335243893c5d6254b5ad69269591d"
+  },
+  {
+    "file": "roles/uiux-designer/licenses/spacegrotesk-OFL.txt",
+    "sha256": "564ce565c371c5e5bbf286006565a7c9aa55a9f56e7ca58d56e05d649dd61a72"
+  },
+  {
+    "file": "roles/uiux-designer/mcp/catalog-server.mjs",
+    "sha256": "148bfd5a705551a02c1bae3961a9610d778ab73b4086c4175e356c07dd6bfd84"
+  },
+  {
+    "file": "roles/uiux-designer/open-gallery.ps1",
+    "sha256": "b024f1433ce2a82d7776098d169ce34eafa154e54eb75cbca1817fd858a71069"
+  },
+  {
+    "file": "roles/uiux-designer/package.json",
+    "sha256": "9bd6742f849ab4ce81d6fbcd8c0510dc54299dc20013b8bfd56628829a3f1eda"
+  },
+  {
+    "file": "roles/uiux-designer/pnpm-lock.yaml",
+    "sha256": "d4c5a27b4d03560ff12847dadaf0c140734d3d9490bec2791afe2a99a0526afa"
+  },
+  {
+    "file": "roles/uiux-designer/preview/applied.css",
+    "sha256": "204b98aed9b21eb9c968f14131753f724d8d5a21f7785e02fb83796806fbe51d"
+  },
+  {
+    "file": "roles/uiux-designer/preview/features/index.html",
+    "sha256": "4755962ba215e79612bab1f8578781840c4a1d46ae8150c4eb4b5f6bef41c384"
+  },
+  {
+    "file": "roles/uiux-designer/preview/features/system.css",
+    "sha256": "e08c3c1f2276a2c6ba9ecfd3e9ba51efe09bcf0720ee6e95bf68b4174d6d927e"
+  },
+  {
+    "file": "roles/uiux-designer/preview/feedback.css",
+    "sha256": "8b9442e94e81262401e7698924e38c7270408286b74c6b6015d368fa270c6847"
+  },
+  {
+    "file": "roles/uiux-designer/preview/gallery.css",
+    "sha256": "aeea9db3d7cf1684589594f56c0a77cee9f43e9812f478cb5e8244d5e52f1b26"
+  },
+  {
+    "file": "roles/uiux-designer/preview/gallery.js",
+    "sha256": "df40eddfb267d25438b6408ecdb600bf782dd10a7f2dd9be3b9997b9735a1fdf"
+  },
+  {
+    "file": "roles/uiux-designer/preview/index.html",
+    "sha256": "7db59516ca7890377ce9b616e1e0de7745e07efe97b4ed7c9bd73adce8ccb0aa"
+  },
+  {
+    "file": "roles/uiux-designer/preview/specimen.css",
+    "sha256": "d282572e913a2eb9c70b2708d3dfac35470b262ac3a2798be368d2f0042ccd53"
+  },
+  {
+    "file": "roles/uiux-designer/preview/specimen.html",
+    "sha256": "3255c41605c87da9501404c88c1d157a7b162667f20f309632d40b4e7d4d3fb8"
+  },
+  {
+    "file": "roles/uiux-designer/README.md",
+    "sha256": "4e8f98e65da30057357c35225261d299a5a567b2f8d2cc1ec0f8377eb00039ba"
+  },
+  {
+    "file": "roles/uiux-designer/research/applied-feedback-plan.md",
+    "sha256": "f27a4418c7a77b7373b9b94e95a52def12c98af997521b8b4d8ef51ebc26861e"
+  },
+  {
+    "file": "roles/uiux-designer/research/applied-feedback.md",
+    "sha256": "f0c571b5a4f9a909a0d833709d5d3f329a7764bbe05f5a4182da7dfd57c5a704"
+  },
+  {
+    "file": "roles/uiux-designer/research/spatial-editorial-plan.md",
+    "sha256": "df9b2efad16c07cdbc87979d69cea7ac907bb8ae8a56b5b58e230a723b0f1878"
+  },
+  {
+    "file": "roles/uiux-designer/research/spatial-editorial-system.md",
+    "sha256": "b7915323d587aee5b97f80a33abe6ced5c2ca1ea9bba82c98af12c960186cbb5"
+  },
+  {
+    "file": "roles/uiux-designer/research/spatial-feedback.md",
+    "sha256": "ea9dc4ce404fa632ff4a64eb1850ab3a9e1e5b749611901a82cbe033c020aa00"
+  },
+  {
+    "file": "roles/uiux-designer/scripts/acquire-assets.mjs",
+    "sha256": "c742f93f621a82ba68280233338a018a488cbed9a6342039b5c7e940ab1de000"
+  },
+  {
+    "file": "roles/uiux-designer/scripts/author-spatial.mjs",
+    "sha256": "a017c0244c2d285841c4e2cbd3d3deb8f389c6c5a08d7166812036a006383fe2"
+  },
+  {
+    "file": "roles/uiux-designer/scripts/author.mjs",
+    "sha256": "049ae27e95e9f4c7daabcff86859f66a40cc69fddc5179cf1a086b1907ec78c3"
+  },
+  {
+    "file": "roles/uiux-designer/scripts/browser-path.mjs",
+    "sha256": "79cda6766be3aff14000b770086b3e05feb6533d685927d2d0aaf5aa1f36f582"
+  },
+  {
+    "file": "roles/uiux-designer/scripts/build.mjs",
+    "sha256": "4837e49e144a17ddccf363bef538417650fdf86dba4997965f31632a591acc6c"
+  },
+  {
+    "file": "roles/uiux-designer/scripts/capture-applied-layouts.mjs",
+    "sha256": "2366575bbb927f6a23f839601b383b178c7432c51d42dda40bc7305e296aef1c"
+  },
+  {
+    "file": "roles/uiux-designer/scripts/capture-feedback.mjs",
+    "sha256": "915c524261ae83f6ea0fb4f5a3551a944a97fa36549b74643ceaddc7220e23e8"
+  },
+  {
+    "file": "roles/uiux-designer/scripts/capture-previews.mjs",
+    "sha256": "f5f33390da1f2ddad9f92472a8cea7a71ddd2bef4a4810733e2f9fd6ee037dce"
+  },
+  {
+    "file": "roles/uiux-designer/scripts/serve.mjs",
+    "sha256": "de079eaa06b71509bc78996d8b457ac9ebb85c655cf20e01402fcf64af9ecdd3"
+  },
+  {
+    "file": "roles/uiux-designer/scripts/test-response.mjs",
+    "sha256": "6548bc5331f224952c3e05884beb478c7765b7c7fb0542bb6f4580872f5423d0"
+  },
+  {
+    "file": "roles/uiux-designer/scripts/ts-loader.cjs",
+    "sha256": "0b66dceaffcffeb03b641c6f612b8378397a18e47ba4c97769cfec271911b4e9"
+  },
+  {
+    "file": "roles/uiux-designer/scripts/validate.mjs",
+    "sha256": "3a551da7db991aa7a7af8e0a60fe99a8de3ada948048e875c690dd36baf12ad7"
+  },
+  {
+    "file": "roles/uiux-designer/scripts/verify-applied-feedback.mjs",
+    "sha256": "cf0317d31ffdfc20414713b92410a703ece5b3ed50b163754e27a5514c7237d9"
+  },
+  {
+    "file": "roles/uiux-designer/scripts/verify-features.mjs",
+    "sha256": "1c66d80a17dc9345a668ed014d6661f6b7fcf8b19471a5c28d4614608b9f7a8d"
+  },
+  {
+    "file": "roles/uiux-designer/scripts/verify-feedback-resilience.mjs",
+    "sha256": "e466a4f818fe0a6a6fb70f6257407cfb02a3fea865ca9998f8c403cb7e9edf05"
+  },
+  {
+    "file": "roles/uiux-designer/scripts/verify-gallery.mjs",
+    "sha256": "2a061e17739bca42fbfde3f2b9206499713e4a981111db5a0a24b7d376f3081c"
+  },
+  {
+    "file": "roles/uiux-designer/scripts/verify-mcp.mjs",
+    "sha256": "2d694a5cc64bb053026587a874c2efd7a6ed1ccb83c865d38ba45e3fe1b10244"
+  },
+  {
+    "file": "roles/uiux-designer/scripts/verify-spatial-feedback.mjs",
+    "sha256": "f0d8fa4452241b839efc50c4086c6d89c1b3f771b5ca68f447d0d466796df088"
+  },
+  {
+    "file": "roles/uiux-designer/scripts/version-motion.mjs",
+    "sha256": "48a1def473c97226c138de3118447bdc51f4c0ddcfc74eb2e75633a93dd231d0"
+  },
+  {
+    "file": "roles/uiux-designer/scripts/version-spatial-motion.mjs",
+    "sha256": "9cf28ee8c1c24e006c1bf62c581ffcae45c6b8947ec72e2f08f2927836552132"
+  },
+  {
+    "file": "roles/uiux-designer/scripts/write-catalog.mjs",
+    "sha256": "1e7ad53305bb0fc592b821813dd3dedc24f3f05abad6a7907d60cb5f39e1ac27"
+  },
+  {
+    "file": "roles/uiux-designer/skills/uiux-material-curation/agents/openai.yaml",
+    "sha256": "6ce846d7f64ccf8abdea2a3a3006e1250b60a8d39826f28b737ddf631557de35"
+  },
+  {
+    "file": "roles/uiux-designer/skills/uiux-material-curation/SKILL.md",
+    "sha256": "b73052f7e1686447fa900da77c01c0875e423ffc8f8f13f549a4439aac47bd9e"
+  },
+  {
+    "file": "roles/uiux-designer/skills/vendor/frontend-design/agents/openai.yaml",
+    "sha256": "4b8094f1c24d3f840d03a1125b7106796884d5f4b5c114e6b8c016a9834a5fec"
+  },
+  {
+    "file": "roles/uiux-designer/skills/vendor/frontend-design/LICENSE.txt",
+    "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
+  },
+  {
+    "file": "roles/uiux-designer/skills/vendor/frontend-design/SKILL.md",
+    "sha256": "d91970639e9f5c37682ac7ab60094d35f1c7c1f38d731bd56396563aee10c1d3"
+  },
+  {
+    "file": "roles/uiux-designer/skills/vendor/playwright/agents/openai.yaml",
+    "sha256": "21ad991c7e2574f1191818d12ca58b3738d61b3aac605ede2e17ee42556fa613"
+  },
+  {
+    "file": "roles/uiux-designer/skills/vendor/playwright/assets/playwright-small.svg",
+    "sha256": "f1d213c0f76735d8272c3d3e9fbf71fe7b894e2d1588907044c780f2c33a9732"
+  },
+  {
+    "file": "roles/uiux-designer/skills/vendor/playwright/assets/playwright.png",
+    "sha256": "521669f088c838196c6c852ccc9abdd7234d8f37fc9a8a7a9af7db2d50193381"
+  },
+  {
+    "file": "roles/uiux-designer/skills/vendor/playwright/LICENSE.txt",
+    "sha256": "9a7110fc2d2f964038e5dc49128f908f29f47a574c961cba16085914e879cbda"
+  },
+  {
+    "file": "roles/uiux-designer/skills/vendor/playwright/NOTICE.txt",
+    "sha256": "417d5d3372914ecfd9fe102ac1d7dc2119253209f9718d6c222f616876c1904b"
+  },
+  {
+    "file": "roles/uiux-designer/skills/vendor/playwright/references/cli.md",
+    "sha256": "7c069a8206ba20b9ddbdc42436b04de30bb3aa4a825ba98680757ee62e954900"
+  },
+  {
+    "file": "roles/uiux-designer/skills/vendor/playwright/references/workflows.md",
+    "sha256": "a2b5835a00ebee3906c146adf7f764f7718ea3f89a8702d86eaa135dfe0fc8c2"
+  },
+  {
+    "file": "roles/uiux-designer/skills/vendor/playwright/scripts/playwright_cli.sh",
+    "sha256": "aa3fdff5d0e4556177f4dfd5f04117e772aa54f94b6a2e34b6c0edf629c6b9b5"
+  },
+  {
+    "file": "roles/uiux-designer/skills/vendor/playwright/SKILL.md",
+    "sha256": "0ffaabcc8e0990627c4725f18bf1c7955534a796c1c199e872909de2013ce6a8"
+  },
+  {
+    "file": "roles/uiux-designer/src/applied-feedback/controls.js",
+    "sha256": "3c916047ec5217801be62d008e25c4e16f0fe40223a09ba697c062bea3c67175"
+  },
+  {
+    "file": "roles/uiux-designer/src/feature-system/features.js",
+    "sha256": "f3030b8338aa11bfffcf573d789fbfd065c6ea2ec7010930128eadfb4c8187ab"
+  },
+  {
+    "file": "roles/uiux-designer/src/feature-system/geometry.js",
+    "sha256": "fea99a2475adef3b368555d8fcd29afd125de3834f40493cf6ea17cbfc50e769"
+  },
+  {
+    "file": "roles/uiux-designer/src/motion/theatre/authoring.js",
+    "sha256": "56cd44ec760cb3f69317dce3c3cb1ad3f0576a74c546d7f43f91c9db8085e7a9"
+  },
+  {
+    "file": "roles/uiux-designer/src/motion/theatre/motion.manifest.json",
+    "sha256": "449ead240ed836f1a58115f86e3774d9fa59c5132875dc8d1949240c64f1e215"
+  },
+  {
+    "file": "roles/uiux-designer/src/motion/theatre/motion.state.json",
+    "sha256": "1b5274abd5e2756d862d174f93732665ce1a2cd20bc65a269385d68b2670ffe3"
+  },
+  {
+    "file": "roles/uiux-designer/src/motion/theatre/pose.json",
+    "sha256": "bb81d6379120e30d3f589c7d77024147f77b8fedcc0b13f0519e3623b2ae4475"
+  },
+  {
+    "file": "roles/uiux-designer/src/motion/theatre/spatial/authoring.js",
+    "sha256": "caa30418d0e7f242bba1b174e86dcc6699eab6e5b8e7d34fa3efbb262c9b5378"
+  },
+  {
+    "file": "roles/uiux-designer/src/motion/theatre/spatial/binding.js",
+    "sha256": "452fadd9e591da00f459fbda1e11a396af0cab32ef7373165fc154aec9982c4c"
+  },
+  {
+    "file": "roles/uiux-designer/src/motion/theatre/spatial/motion.manifest.json",
+    "sha256": "16c7b1eeb37c2467bd7b53ab990d1d700c82ef28627867a887a9ae5a40a93ada"
+  },
+  {
+    "file": "roles/uiux-designer/src/motion/theatre/spatial/motion.state.json",
+    "sha256": "684e3bcbde3fa6326d9bdacc27aee03b0a44141d7320be5951b21d6aba2411ab"
+  },
+  {
+    "file": "roles/uiux-designer/src/motion/theatre/specimen.js",
+    "sha256": "3926a9809d6bc698f1dc16db48730f57be5f3caf5b4433aef0a0ed698002a7d8"
+  },
+  {
+    "file": "roles/uiux-designer/src/spatial-feedback/assembly.jsx",
+    "sha256": "1e150da99c72cf5a178902c0db4331521479911a03c690fe964e5512c3197db2"
+  },
+  {
+    "file": "roles/uiux-designer/src/spatial-feedback/dom.js",
+    "sha256": "95a5fe3b743a6be7212633efc447fb1d54a986fd9753f12dbaf63e6cfc7fc329"
+  },
+  {
+    "file": "roles/uiux-designer/src/spatial-feedback/geometry.js",
+    "sha256": "246c6c3fa746cfa4b043409187231c9de91d93fb309ff91aa88a665f4a2c018a"
+  },
+  {
+    "file": "roles/uiux-designer/src/spatial-feedback/response.js",
+    "sha256": "b3567bbae9e310f0e405f4ccc0703fe620e76053d437e5c4037e76a5b15b64f7"
+  },
+  {
+    "file": "roles/uiux-designer/src/specimen.js",
+    "sha256": "a33f3b441181ed1f3053dbe6bc9ff12d103e310ef6ea64c76a39ff28f2708f00"
+  },
+  {
+    "file": "roles/uiux-designer/src/specimens/ascii.js",
+    "sha256": "b9f0ea9696be7a7726316c6df2427c5fc9ac0f72f0c12c7df00469769b097e38"
+  },
+  {
+    "file": "roles/uiux-designer/src/specimens/assets.js",
+    "sha256": "8c416b1a422cf386680bfcf6a3ec1c3981fd8a11465e067b0049cb2d02ac227e"
+  },
+  {
+    "file": "roles/uiux-designer/src/specimens/command.js",
+    "sha256": "e3b9eff2557abab0dde9db6d38e63c2ba0b73692731effca14612e79d1b7c03b"
+  },
+  {
+    "file": "roles/uiux-designer/src/specimens/focus.js",
+    "sha256": "779a400a635f5b7aaef6fe59d67e867b44631c327a541edf8bf183d4b0faf196"
+  },
+  {
+    "file": "roles/uiux-designer/src/specimens/hatch.js",
+    "sha256": "8969e8d1ac4ec886a72588ae182624a3266365a38b6e7135bd9024c01e1e23ed"
+  },
+  {
+    "file": "roles/uiux-designer/src/specimens/helpers.js",
+    "sha256": "d79ea1dd8bde2ada71056889235e9f77e1902609c8b637c2c3489e9efa822d36"
+  },
+  {
+    "file": "roles/uiux-designer/src/specimens/reflow.js",
+    "sha256": "4b9f96fe6db99016f34897ef2e0c3502d90d40035a403030e88eb1f9cd7c2862"
+  },
+  {
+    "file": "roles/uiux-designer/src/specimens/reveal.js",
+    "sha256": "fd43ae071510a9127447b2d3ad8b7ad5e63526bef5792221e86e3e6c39d44193"
+  },
+  {
+    "file": "roles/uiux-designer/src/specimens/section-geometry.js",
+    "sha256": "4d340de9ce6d5b48b97bd1a6a94ba680d05fcb48f53164fcc12208c6c756ac13"
+  },
+  {
+    "file": "roles/uiux-designer/src/specimens/spatial.jsx",
+    "sha256": "3493676423bfcb1a2f3b2f98659319320a00cf9cd3a3e5360ab5f57e171650fc"
+  },
+  {
+    "file": "roles/uiux-designer/src/specimens/trace.js",
+    "sha256": "517243a85d7843196c7c8ae8e174be97db5572ec3204a47a7920a1cc94f4da31"
+  },
+  {
+    "file": "roles/uiux-designer/toolkit.json",
+    "sha256": "7e90839cb4acd6b274e20a7b6caf7df7fa78f934e6e5d2302f5e739011fff03e"
+  },
+  {
+    "file": "roles/uiux-designer/UIUX_DESIGN_PLAN.md",
+    "sha256": "ab6c40313131123fa02ff7ee05df425c72bb2c454bbbd61a3be567cd56cb0a89"
+  }
+]

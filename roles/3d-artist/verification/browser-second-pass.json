@@ -1,0 +1,35 @@
+{
+  "verifiedAt": "2026-10-07T19:35:48.547Z",
+  "testData": "All browser contexts and preference fixtures are synthetic. Not owner Saved evidence.",
+  "results": [
+    {
+      "profile": "chromium-desktop",
+      "result": "FAIL",
+      "checks": [],
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n3 !== 2\n\n    at idle (file:///C:/Users/JosHsuan/Documents/GitHub/JosHsuan.github.io/roles/3d-artist/scripts/verify-browser.mjs:18:162)\n    at async file:///C:/Users/JosHsuan/Documents/GitHub/JosHsuan.github.io/roles/3d-artist/scripts/verify-browser.mjs:20:78",
+      "consoleErrors": []
+    },
+    {
+      "profile": "webkit-desktop",
+      "result": "FAIL",
+      "checks": [
+        "materials: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "lighting: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "refraction: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "scattering: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "physics: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "particles: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "camera: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown"
+      ],
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n0 !== 1\n\n    at file:///C:/Users/JosHsuan/Documents/GitHub/JosHsuan.github.io/roles/3d-artist/scripts/verify-browser.mjs:53:226",
+      "consoleErrors": []
+    },
+    {
+      "profile": "chromium-touch",
+      "result": "FAIL",
+      "checks": [],
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n3 !== 2\n\n    at idle (file:///C:/Users/JosHsuan/Documents/GitHub/JosHsuan.github.io/roles/3d-artist/scripts/verify-browser.mjs:18:162)\n    at async file:///C:/Users/JosHsuan/Documents/GitHub/JosHsuan.github.io/roles/3d-artist/scripts/verify-browser.mjs:20:78",
+      "consoleErrors": []
+    }
+  ]
+}

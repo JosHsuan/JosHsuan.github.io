@@ -1,0 +1,19 @@
+✔ single input: inactive source ignored, equivalents clamped, unsubscribed listeners released (0.7471ms)
+✔ minimum jerk has zero endpoint velocity/acceleration and matches numerical derivatives (0.2336ms)
+✔ dolly zoom holds the origin plane and locked camera stays fixed (0.8035ms)
+✔ poses are finite, reproducible and controlled by one named owner (2.2905ms)
+✔ arc length sampling produces approximately equal travel increments (1.1564ms)
+✔ review roles, ranges and UIUX evidence stay separate (0.4712ms)
+✔ material adapter reverses input without touching geometry or advancing material version (2.1335ms)
+✔ material adapter rejects invalid bounds and modes while clamping progress (0.4401ms)
+✔ material A/B studies preserve camera, geometry and shared input/light (0.5018ms)
+using deprecated parameters for the initialization function; pass a single object instead
+✔ cached real Rapier worlds are finite, reversible and distinct at matched contact time (72.3891ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 285.1513

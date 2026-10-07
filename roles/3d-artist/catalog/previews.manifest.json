@@ -1,0 +1,948 @@
+{
+  "captures": [
+    {
+      "id": "materials",
+      "variant": "a",
+      "path": "assets/posters/materials-a.png",
+      "params": {
+        "roughness": 0.25,
+        "metalness": 1,
+        "coat": 0,
+        "exposure": 1,
+        "fill": 0.4,
+        "softness": 1,
+        "transmission": 1,
+        "thickness": 1.2,
+        "ior": 1.5,
+        "scatter": 0,
+        "restitution": 0.15,
+        "gravity": 9.81,
+        "count": 900,
+        "seed": 17,
+        "flow": 0.6,
+        "lens": 35,
+        "azimuth": 35,
+        "elevation": 24,
+        "projection": "perspective"
+      },
+      "actualState": {
+        "frames": 2,
+        "time": 0,
+        "physicsSteps": 0,
+        "owner": "inspection",
+        "assembly": 0,
+        "pose": {},
+        "stepDelta": 0,
+        "stepPending": false,
+        "camera": {
+          "position": [
+            4.768292147157889,
+            3.7013034519897814,
+            6.809826925527617
+          ],
+          "projection": "PerspectiveCamera",
+          "fov": 35
+        },
+        "memory": {
+          "geometries": 25,
+          "textures": 5
+        },
+        "calls": 48
+      },
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "sha256": "950836b0a9213ed08ade13b9f4b1b9f752bdce7d3c90fbdebc2b7014cdce8b18",
+      "capture": "Actual Chromium canvas; deterministic 90 manual steps for physics/particles, initial pose for static studies.",
+      "capturedAt": "2026-10-07T19:40:43.160Z"
+    },
+    {
+      "id": "materials",
+      "variant": "b",
+      "path": "assets/posters/materials-b.png",
+      "params": {
+        "roughness": 0.48,
+        "metalness": 0,
+        "coat": 1,
+        "exposure": 1,
+        "fill": 0.4,
+        "softness": 1,
+        "transmission": 1,
+        "thickness": 1.2,
+        "ior": 1.5,
+        "scatter": 0,
+        "restitution": 0.15,
+        "gravity": 9.81,
+        "count": 900,
+        "seed": 17,
+        "flow": 0.6,
+        "lens": 35,
+        "azimuth": 35,
+        "elevation": 24,
+        "projection": "perspective"
+      },
+      "actualState": {
+        "frames": 2,
+        "time": 0,
+        "physicsSteps": 0,
+        "owner": "inspection",
+        "assembly": 0,
+        "pose": {},
+        "stepDelta": 0,
+        "stepPending": false,
+        "camera": {
+          "position": [
+            4.768292147157889,
+            3.7013034519897814,
+            6.809826925527617
+          ],
+          "projection": "PerspectiveCamera",
+          "fov": 35
+        },
+        "memory": {
+          "geometries": 25,
+          "textures": 5
+        },
+        "calls": 48
+      },
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "sha256": "31bf18fa0e2ce98a3953699c3dbfb6d1cbf647f7dbe39a32e8b419f263a2fa34",
+      "capture": "Actual Chromium canvas; deterministic 90 manual steps for physics/particles, initial pose for static studies.",
+      "capturedAt": "2026-10-07T19:40:45.156Z"
+    },
+    {
+      "id": "lighting",
+      "variant": "a",
+      "path": "assets/posters/lighting-a.png",
+      "params": {
+        "roughness": 0.55,
+        "metalness": 0.05,
+        "coat": 0,
+        "exposure": 1,
+        "fill": 0.02,
+        "softness": 0,
+        "transmission": 1,
+        "thickness": 1.2,
+        "ior": 1.5,
+        "scatter": 0,
+        "restitution": 0.15,
+        "gravity": 9.81,
+        "count": 900,
+        "seed": 17,
+        "flow": 0.6,
+        "lens": 35,
+        "azimuth": 35,
+        "elevation": 24,
+        "projection": "perspective"
+      },
+      "actualState": {
+        "frames": 2,
+        "time": 0,
+        "physicsSteps": 0,
+        "owner": "inspection",
+        "assembly": 0,
+        "pose": {},
+        "stepDelta": 0,
+        "stepPending": false,
+        "camera": {
+          "position": [
+            4.768292147157889,
+            3.7013034519897814,
+            6.809826925527617
+          ],
+          "projection": "PerspectiveCamera",
+          "fov": 35
+        },
+        "memory": {
+          "geometries": 25,
+          "textures": 5
+        },
+        "calls": 48
+      },
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "sha256": "010fa30b772cfc9745fbd1fdafe93b4a7ff67e402ec06b03214e897a743862a8",
+      "capture": "Actual Chromium canvas; deterministic 90 manual steps for physics/particles, initial pose for static studies.",
+      "capturedAt": "2026-10-07T19:40:46.969Z"
+    },
+    {
+      "id": "lighting",
+      "variant": "b",
+      "path": "assets/posters/lighting-b.png",
+      "params": {
+        "roughness": 0.55,
+        "metalness": 0.05,
+        "coat": 0,
+        "exposure": 1,
+        "fill": 1.5,
+        "softness": 4,
+        "transmission": 1,
+        "thickness": 1.2,
+        "ior": 1.5,
+        "scatter": 0,
+        "restitution": 0.15,
+        "gravity": 9.81,
+        "count": 900,
+        "seed": 17,
+        "flow": 0.6,
+        "lens": 35,
+        "azimuth": 35,
+        "elevation": 24,
+        "projection": "perspective"
+      },
+      "actualState": {
+        "frames": 2,
+        "time": 0,
+        "physicsSteps": 0,
+        "owner": "inspection",
+        "assembly": 0,
+        "pose": {},
+        "stepDelta": 0,
+        "stepPending": false,
+        "camera": {
+          "position": [
+            4.768292147157889,
+            3.7013034519897814,
+            6.809826925527617
+          ],
+          "projection": "PerspectiveCamera",
+          "fov": 35
+        },
+        "memory": {
+          "geometries": 25,
+          "textures": 5
+        },
+        "calls": 48
+      },
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "sha256": "b814eb416b50024698583e8ab9aba7aa0988aea1a21c4fd424c374877e168750",
+      "capture": "Actual Chromium canvas; deterministic 90 manual steps for physics/particles, initial pose for static studies.",
+      "capturedAt": "2026-10-07T19:40:48.592Z"
+    },
+    {
+      "id": "refraction",
+      "variant": "a",
+      "path": "assets/posters/refraction-a.png",
+      "params": {
+        "roughness": 0.03,
+        "metalness": 1,
+        "coat": 0,
+        "exposure": 1,
+        "fill": 0.4,
+        "softness": 1,
+        "transmission": 1,
+        "thickness": 0.5,
+        "ior": 1.45,
+        "scatter": 0,
+        "restitution": 0.15,
+        "gravity": 9.81,
+        "count": 900,
+        "seed": 17,
+        "flow": 0.6,
+        "lens": 35,
+        "azimuth": 35,
+        "elevation": 24,
+        "projection": "perspective"
+      },
+      "actualState": {
+        "frames": 2,
+        "time": 0,
+        "physicsSteps": 0,
+        "owner": "inspection",
+        "assembly": 0,
+        "pose": {},
+        "stepDelta": 0,
+        "stepPending": false,
+        "camera": {
+          "position": [
+            4.768292147157889,
+            3.7013034519897814,
+            6.809826925527617
+          ],
+          "projection": "PerspectiveCamera",
+          "fov": 35
+        },
+        "memory": {
+          "geometries": 18,
+          "textures": 6
+        },
+        "calls": 36
+      },
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "sha256": "84f4247cdc50c34a30997fb7f5f18a3987bd02530fca7c2d5d7e3f08445da246",
+      "capture": "Actual Chromium canvas; deterministic 90 manual steps for physics/particles, initial pose for static studies.",
+      "capturedAt": "2026-10-07T19:40:51.004Z"
+    },
+    {
+      "id": "refraction",
+      "variant": "b",
+      "path": "assets/posters/refraction-b.png",
+      "params": {
+        "roughness": 0.23,
+        "metalness": 1,
+        "coat": 0,
+        "exposure": 1,
+        "fill": 0.4,
+        "softness": 1,
+        "transmission": 1,
+        "thickness": 2.5,
+        "ior": 1.9,
+        "scatter": 0,
+        "restitution": 0.15,
+        "gravity": 9.81,
+        "count": 900,
+        "seed": 17,
+        "flow": 0.6,
+        "lens": 35,
+        "azimuth": 35,
+        "elevation": 24,
+        "projection": "perspective"
+      },
+      "actualState": {
+        "frames": 2,
+        "time": 0,
+        "physicsSteps": 0,
+        "owner": "inspection",
+        "assembly": 0,
+        "pose": {},
+        "stepDelta": 0,
+        "stepPending": false,
+        "camera": {
+          "position": [
+            4.768292147157889,
+            3.7013034519897814,
+            6.809826925527617
+          ],
+          "projection": "PerspectiveCamera",
+          "fov": 35
+        },
+        "memory": {
+          "geometries": 18,
+          "textures": 6
+        },
+        "calls": 36
+      },
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "sha256": "76b9548ede230a1ba5cb4369761909202b2b4aadeaf62d37cb3230e9ea297745",
+      "capture": "Actual Chromium canvas; deterministic 90 manual steps for physics/particles, initial pose for static studies.",
+      "capturedAt": "2026-10-07T19:40:53.283Z"
+    },
+    {
+      "id": "scattering",
+      "variant": "a",
+      "path": "assets/posters/scattering-a.png",
+      "params": {
+        "roughness": 0.3,
+        "metalness": 1,
+        "coat": 0,
+        "exposure": 1,
+        "fill": 0.4,
+        "softness": 1,
+        "transmission": 1,
+        "thickness": 1.2,
+        "ior": 1.5,
+        "scatter": 0,
+        "restitution": 0.15,
+        "gravity": 9.81,
+        "count": 900,
+        "seed": 17,
+        "flow": 0.6,
+        "lens": 35,
+        "azimuth": 35,
+        "elevation": 24,
+        "projection": "perspective"
+      },
+      "actualState": {
+        "frames": 2,
+        "time": 0,
+        "physicsSteps": 0,
+        "owner": "inspection",
+        "assembly": 0,
+        "pose": {},
+        "stepDelta": 0,
+        "stepPending": false,
+        "camera": {
+          "position": [
+            4.768292147157889,
+            3.7013034519897814,
+            6.809826925527617
+          ],
+          "projection": "PerspectiveCamera",
+          "fov": 35
+        },
+        "memory": {
+          "geometries": 6,
+          "textures": 5
+        },
+        "calls": 8
+      },
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "sha256": "3f7ad8201eb36aa47e454d94f421512871467033ef2dd7a43484e339f851ff60",
+      "capture": "Actual Chromium canvas; deterministic 90 manual steps for physics/particles, initial pose for static studies.",
+      "capturedAt": "2026-10-07T19:40:54.851Z"
+    },
+    {
+      "id": "scattering",
+      "variant": "b",
+      "path": "assets/posters/scattering-b.png",
+      "params": {
+        "roughness": 0.3,
+        "metalness": 1,
+        "coat": 0,
+        "exposure": 1,
+        "fill": 0.4,
+        "softness": 1,
+        "transmission": 1,
+        "thickness": 1.2,
+        "ior": 1.5,
+        "scatter": 1,
+        "restitution": 0.15,
+        "gravity": 9.81,
+        "count": 900,
+        "seed": 17,
+        "flow": 0.6,
+        "lens": 35,
+        "azimuth": 35,
+        "elevation": 24,
+        "projection": "perspective"
+      },
+      "actualState": {
+        "frames": 2,
+        "time": 0,
+        "physicsSteps": 0,
+        "owner": "inspection",
+        "assembly": 0,
+        "pose": {},
+        "stepDelta": 0,
+        "stepPending": false,
+        "camera": {
+          "position": [
+            4.768292147157889,
+            3.7013034519897814,
+            6.809826925527617
+          ],
+          "projection": "PerspectiveCamera",
+          "fov": 35
+        },
+        "memory": {
+          "geometries": 6,
+          "textures": 5
+        },
+        "calls": 8
+      },
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "sha256": "8100a398f3640a0f15a118e9d61dcd1545041fae6dea805e40d8ad6ab1c69512",
+      "capture": "Actual Chromium canvas; deterministic 90 manual steps for physics/particles, initial pose for static studies.",
+      "capturedAt": "2026-10-07T19:40:56.304Z"
+    },
+    {
+      "id": "physics",
+      "variant": "a",
+      "path": "assets/posters/physics-a.png",
+      "params": {
+        "roughness": 0.3,
+        "metalness": 1,
+        "coat": 0,
+        "exposure": 1,
+        "fill": 0.4,
+        "softness": 1,
+        "transmission": 1,
+        "thickness": 1.2,
+        "ior": 1.5,
+        "scatter": 0,
+        "restitution": 0.1,
+        "gravity": 9.81,
+        "count": 900,
+        "seed": 17,
+        "flow": 0.6,
+        "lens": 35,
+        "azimuth": 35,
+        "elevation": 24,
+        "projection": "perspective"
+      },
+      "actualState": {
+        "frames": 93,
+        "time": 1.4999999999999996,
+        "physicsSteps": 90,
+        "owner": "inspection",
+        "assembly": 0,
+        "pose": {},
+        "stepDelta": 0.016666666666666666,
+        "stepPending": false,
+        "bodies": [
+          [
+            -1.0800000429153442,
+            -1.1312962770462036,
+            -0.7929795384407043
+          ],
+          [
+            -0.36000001430511475,
+            -1.1312822103500366,
+            0.10609506070613861
+          ],
+          [
+            0.36000001430511475,
+            -1.1313471794128418,
+            1.0333659648895264
+          ],
+          [
+            1.0800000429153442,
+            -1.1312962770462036,
+            -0.7929795384407043
+          ],
+          [
+            -1.0800000429153442,
+            -1.1312975883483887,
+            0.44255244731903076
+          ],
+          [
+            -0.36000001430511475,
+            -1.1311564445495605,
+            1.2498575448989868
+          ],
+          [
+            0.36000001430511475,
+            -1.1313426494598389,
+            -1.013114094734192
+          ],
+          [
+            1.0800000429153442,
+            -1.1312975883483887,
+            0.44255244731903076
+          ],
+          [
+            -1.0800000429153442,
+            -1.1311722993850708,
+            1.2488352060317993
+          ],
+          [
+            -0.36000001430511475,
+            -1.1313145160675049,
+            -1.1931169033050537
+          ],
+          [
+            0.36000001430511475,
+            -1.131282925605774,
+            0.16211698949337006
+          ],
+          [
+            1.0800000429153442,
+            -1.1311721801757812,
+            1.2488712072372437
+          ]
+        ],
+        "camera": {
+          "position": [
+            4.768292147157889,
+            3.7013034519897814,
+            6.809826925527617
+          ],
+          "projection": "PerspectiveCamera",
+          "fov": 35
+        },
+        "memory": {
+          "geometries": 20,
+          "textures": 5
+        },
+        "calls": 35
+      },
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "sha256": "b2777cc943d555ca8621ba433a20bb0cdf433c60f33ea10b5dfb08135d123412",
+      "capture": "Actual Chromium canvas; deterministic 90 manual steps for physics/particles, initial pose for static studies.",
+      "capturedAt": "2026-10-07T19:41:07.539Z"
+    },
+    {
+      "id": "physics",
+      "variant": "b",
+      "path": "assets/posters/physics-b.png",
+      "params": {
+        "roughness": 0.3,
+        "metalness": 1,
+        "coat": 0,
+        "exposure": 1,
+        "fill": 0.4,
+        "softness": 1,
+        "transmission": 1,
+        "thickness": 1.2,
+        "ior": 1.5,
+        "scatter": 0,
+        "restitution": 0.85,
+        "gravity": 9.81,
+        "count": 900,
+        "seed": 17,
+        "flow": 0.6,
+        "lens": 35,
+        "azimuth": 35,
+        "elevation": 24,
+        "projection": "perspective"
+      },
+      "actualState": {
+        "frames": 93,
+        "time": 1.4999999999999996,
+        "physicsSteps": 90,
+        "owner": "inspection",
+        "assembly": 0,
+        "pose": {},
+        "stepDelta": 0.016666666666666666,
+        "stepPending": false,
+        "bodies": [
+          [
+            -1.0800000429153442,
+            -0.6819026470184326,
+            -1.2350717782974243
+          ],
+          [
+            -0.36000001430511475,
+            -0.04217337816953659,
+            0.14461761713027954
+          ],
+          [
+            0.36000001430511475,
+            -0.19711878895759583,
+            0.7826435565948486
+          ],
+          [
+            1.0800000429153442,
+            -0.6819026470184326,
+            -1.2350717782974243
+          ],
+          [
+            -1.0800000429153442,
+            -0.6385648846626282,
+            -0.34909337759017944
+          ],
+          [
+            -0.36000001430511475,
+            -1.0521689653396606,
+            0.8115811347961426
+          ],
+          [
+            0.36000001430511475,
+            -1.1443283557891846,
+            0.1267230361700058
+          ],
+          [
+            1.0800000429153442,
+            -0.6385648846626282,
+            -0.34909337759017944
+          ],
+          [
+            -1.0800000429153442,
+            -1.0847820043563843,
+            0.08961993455886841
+          ],
+          [
+            -0.36000001430511475,
+            -1.0099514722824097,
+            0.2922254204750061
+          ],
+          [
+            0.36000001430511475,
+            -1.1144425868988037,
+            1.1187978982925415
+          ],
+          [
+            1.0800000429153442,
+            -1.0847820043563843,
+            0.08961993455886841
+          ]
+        ],
+        "camera": {
+          "position": [
+            4.768292147157889,
+            3.7013034519897814,
+            6.809826925527617
+          ],
+          "projection": "PerspectiveCamera",
+          "fov": 35
+        },
+        "memory": {
+          "geometries": 20,
+          "textures": 5
+        },
+        "calls": 35
+      },
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "sha256": "bd41193864d73abad788f41cd8d6e65f7e83c9e1752547c31a82e31bfadfd0ac",
+      "capture": "Actual Chromium canvas; deterministic 90 manual steps for physics/particles, initial pose for static studies.",
+      "capturedAt": "2026-10-07T19:41:19.433Z"
+    },
+    {
+      "id": "particles",
+      "variant": "a",
+      "path": "assets/posters/particles-a.png",
+      "params": {
+        "roughness": 0.3,
+        "metalness": 1,
+        "coat": 0,
+        "exposure": 1,
+        "fill": 0.4,
+        "softness": 1,
+        "transmission": 1,
+        "thickness": 1.2,
+        "ior": 1.5,
+        "scatter": 0,
+        "restitution": 0.15,
+        "gravity": 9.81,
+        "count": 900,
+        "seed": 17,
+        "flow": 0,
+        "lens": 35,
+        "azimuth": 35,
+        "elevation": 24,
+        "projection": "perspective"
+      },
+      "actualState": {
+        "frames": 92,
+        "time": 1.4999999999999996,
+        "physicsSteps": 0,
+        "owner": "inspection",
+        "assembly": 0,
+        "pose": {},
+        "stepDelta": 0.016666666666666666,
+        "stepPending": false,
+        "particleSample": [
+          0.07498381286859512,
+          0.5287231802940369,
+          1.6239334344863892,
+          -0.4356747269630432,
+          0.14867672324180603,
+          1.4275004863739014,
+          -0.4118088483810425,
+          -0.3821938633918762,
+          -0.7644276022911072
+        ],
+        "camera": {
+          "position": [
+            4.768292147157889,
+            3.7013034519897814,
+            6.809826925527617
+          ],
+          "projection": "PerspectiveCamera",
+          "fov": 35
+        },
+        "memory": {
+          "geometries": 6,
+          "textures": 5
+        },
+        "calls": 8
+      },
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "sha256": "014676d62d5ad8528ea05f7325ef6528008d776acbe6a29bf519da43d85fffda",
+      "capture": "Actual Chromium canvas; deterministic 90 manual steps for physics/particles, initial pose for static studies.",
+      "capturedAt": "2026-10-07T19:41:28.496Z"
+    },
+    {
+      "id": "particles",
+      "variant": "b",
+      "path": "assets/posters/particles-b.png",
+      "params": {
+        "roughness": 0.3,
+        "metalness": 1,
+        "coat": 0,
+        "exposure": 1,
+        "fill": 0.4,
+        "softness": 1,
+        "transmission": 1,
+        "thickness": 1.2,
+        "ior": 1.5,
+        "scatter": 0,
+        "restitution": 0.15,
+        "gravity": 9.81,
+        "count": 900,
+        "seed": 17,
+        "flow": 1,
+        "lens": 35,
+        "azimuth": 35,
+        "elevation": 24,
+        "projection": "perspective"
+      },
+      "actualState": {
+        "frames": 92,
+        "time": 1.4999999999999996,
+        "physicsSteps": 0,
+        "owner": "inspection",
+        "assembly": 0,
+        "pose": {},
+        "stepDelta": 0.016666666666666666,
+        "stepPending": false,
+        "particleSample": [
+          -1.2192857265472412,
+          0.5287231802940369,
+          1.0752322673797607,
+          -1.3577080965042114,
+          0.14867672324180603,
+          0.6198378801345825,
+          0.11036322265863419,
+          -0.3821938633918762,
+          -0.8612526059150696
+        ],
+        "camera": {
+          "position": [
+            4.768292147157889,
+            3.7013034519897814,
+            6.809826925527617
+          ],
+          "projection": "PerspectiveCamera",
+          "fov": 35
+        },
+        "memory": {
+          "geometries": 6,
+          "textures": 5
+        },
+        "calls": 8
+      },
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "sha256": "5f2d58dee4c5da39fe8996c1c05b99c621c5295681b3e8181c854275c05939ce",
+      "capture": "Actual Chromium canvas; deterministic 90 manual steps for physics/particles, initial pose for static studies.",
+      "capturedAt": "2026-10-07T19:41:36.917Z"
+    },
+    {
+      "id": "camera",
+      "variant": "a",
+      "path": "assets/posters/camera-a.png",
+      "params": {
+        "roughness": 0.3,
+        "metalness": 1,
+        "coat": 0,
+        "exposure": 1,
+        "fill": 0.4,
+        "softness": 1,
+        "transmission": 1,
+        "thickness": 1.2,
+        "ior": 1.5,
+        "scatter": 0,
+        "restitution": 0.15,
+        "gravity": 9.81,
+        "count": 900,
+        "seed": 17,
+        "flow": 0.6,
+        "lens": 35,
+        "azimuth": 35,
+        "elevation": 24,
+        "projection": "perspective"
+      },
+      "actualState": {
+        "frames": 3,
+        "time": 0,
+        "physicsSteps": 0,
+        "owner": "inspection",
+        "assembly": 0,
+        "pose": {},
+        "stepDelta": 0,
+        "stepPending": false,
+        "camera": {
+          "position": [
+            4.768292147157889,
+            3.7013034519897814,
+            6.809826925527617
+          ],
+          "projection": "PerspectiveCamera",
+          "fov": 35
+        },
+        "memory": {
+          "geometries": 25,
+          "textures": 5
+        },
+        "calls": 48
+      },
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "sha256": "5e05b5559ce0410183d205ae2c1996508c7cc0df1a5e7c98e949b976668a3bcc",
+      "capture": "Actual Chromium canvas; deterministic 90 manual steps for physics/particles, initial pose for static studies.",
+      "capturedAt": "2026-10-07T19:41:38.586Z"
+    },
+    {
+      "id": "camera",
+      "variant": "b",
+      "path": "assets/posters/camera-b.png",
+      "params": {
+        "roughness": 0.3,
+        "metalness": 1,
+        "coat": 0,
+        "exposure": 1,
+        "fill": 0.4,
+        "softness": 1,
+        "transmission": 1,
+        "thickness": 1.2,
+        "ior": 1.5,
+        "scatter": 0,
+        "restitution": 0.15,
+        "gravity": 9.81,
+        "count": 900,
+        "seed": 17,
+        "flow": 0.6,
+        "lens": 35,
+        "azimuth": 35,
+        "elevation": 24,
+        "projection": "orthographic"
+      },
+      "actualState": {
+        "frames": 3,
+        "time": 0,
+        "physicsSteps": 0,
+        "owner": "inspection",
+        "assembly": 0,
+        "pose": {},
+        "stepDelta": 0,
+        "stepPending": false,
+        "camera": {
+          "position": [
+            4.768292147157889,
+            3.7013034519897814,
+            6.809826925527617
+          ],
+          "projection": "OrthographicCamera",
+          "fov": null
+        },
+        "memory": {
+          "geometries": 25,
+          "textures": 5
+        },
+        "calls": 48
+      },
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "sha256": "e4d1d96821ba394f42fa1a9ade8e21b3645e145dd94c59986bcd402169268a51",
+      "capture": "Actual Chromium canvas; deterministic 90 manual steps for physics/particles, initial pose for static studies.",
+      "capturedAt": "2026-10-07T19:41:40.245Z"
+    }
+  ]
+}

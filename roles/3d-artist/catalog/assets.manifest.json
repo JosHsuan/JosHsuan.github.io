@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "assets": [
+    {
+      "path": "assets/studio_small_09_1k.hdr",
+      "source": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_09_1k.hdr",
+      "sourcePage": "https://polyhaven.com/a/studio_small_09",
+      "author": "Sergej Majboroda / Poly Haven",
+      "license": "CC0-1.0",
+      "notice": "licenses/CC0-1.0.txt",
+      "retrievedAt": "2026-10-07",
+      "pinnedFile": "studio_small_09_1k.hdr",
+      "use": "Shared environment lighting; converted to PMREM at runtime",
+      "versionNote": "Provider URL is mutable; the acquired bytes and SHA-256 are the reproducibility pin.",
+      "sha256": "e7cfda5f4e98e623db12b8bfd0184e048488e4855d9c83e2751fb44a32e80c45",
+      "bytes": 1615248
+    }
+  ],
+  "originalGeometry": {
+    "author": "3D Artist role / original procedural study",
+    "recipe": "src/scenes.jsx",
+    "provenance": "Generated independently for this local proposal; no professional project claim"
+  },
+  "posters": "catalog/previews.manifest.json"
+}

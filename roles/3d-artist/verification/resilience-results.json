@@ -1,0 +1,11 @@
+{
+  "verifiedAt": "2026-10-07T19:45:46.631Z",
+  "result": "PASS",
+  "checks": [
+    "No JavaScript: all seven real static A/B studies and explanations readable",
+    "Denied storage: in-memory Save/notes and real export work",
+    "Actual touch-emulated taps: load, B preset, manual step and Save",
+    "Synthetic document-hidden signal pauses time; real OS/tab suspension is not claimed",
+    "WebGL disabled at browser launch: readable fallback and Saved still work"
+  ]
+}

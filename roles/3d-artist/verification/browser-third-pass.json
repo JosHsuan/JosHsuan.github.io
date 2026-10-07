@@ -1,0 +1,52 @@
+{
+  "verifiedAt": "2026-10-07T19:39:14.835Z",
+  "testData": "All browser contexts and preference fixtures are synthetic. Not owner Saved evidence.",
+  "results": [
+    {
+      "profile": "chromium-desktop",
+      "result": "FAIL",
+      "checks": [
+        "materials: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "lighting: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "refraction: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "scattering: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "physics: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "particles: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "Theatre full score completes and returns to idle",
+        "camera: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown"
+      ],
+      "error": "locator.textContent: Error: strict mode violation: getByRole('status') resolved to 4 elements:\n    1) <output>0.25</output> aka getByRole('status', { name: 'Roughness' })\n    2) <output>1</output> aka getByRole('status', { name: 'Metalness' })\n    3) <output>0</output> aka getByRole('status', { name: 'Clearcoat' })\n    4) <p role=\"status\" class=\"notice\">Import rejected: Expected property name or '}' in…</p> aka getByText('Import rejected: Expected')\n\nCall log:\n\u001b[2m  - waiting for getByRole('status')\u001b[22m\n\n    at C:\\Users\\JosHsuan\\Documents\\GitHub\\JosHsuan.github.io\\roles\\3d-artist\\scripts\\verify-browser.mjs:54:287",
+      "consoleErrors": []
+    },
+    {
+      "profile": "webkit-desktop",
+      "result": "FAIL",
+      "checks": [
+        "materials: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "lighting: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "refraction: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "scattering: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "physics: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "particles: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "camera: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown"
+      ],
+      "error": "locator.textContent: Error: strict mode violation: getByRole('status') resolved to 4 elements:\n    1) <output>0.25</output> aka getByRole('status', { name: 'Roughness' })\n    2) <output>1</output> aka getByRole('status', { name: 'Metalness' })\n    3) <output>0</output> aka getByRole('status', { name: 'Clearcoat' })\n    4) <p role=\"status\" class=\"notice\">Import rejected: JSON Parse error: Expected '}'</p> aka getByText('Import rejected: JSON Parse')\n\nCall log:\n\u001b[2m  - waiting for getByRole('status')\u001b[22m\n\n    at C:\\Users\\JosHsuan\\Documents\\GitHub\\JosHsuan.github.io\\roles\\3d-artist\\scripts\\verify-browser.mjs:54:287",
+      "consoleErrors": []
+    },
+    {
+      "profile": "chromium-touch",
+      "result": "FAIL",
+      "checks": [
+        "materials: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "lighting: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "refraction: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "scattering: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "physics: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "particles: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown",
+        "camera: direct URL, real rendering, A/B, parameter keyboard input, reset, idle, capture, teardown"
+      ],
+      "error": "locator.textContent: Error: strict mode violation: getByRole('status') resolved to 4 elements:\n    1) <output>0.25</output> aka getByRole('status', { name: 'Roughness' })\n    2) <output>1</output> aka getByRole('status', { name: 'Metalness' })\n    3) <output>0</output> aka getByRole('status', { name: 'Clearcoat' })\n    4) <p role=\"status\" class=\"notice\">Import rejected: Expected property name or '}' in…</p> aka getByText('Import rejected: Expected')\n\nCall log:\n\u001b[2m  - waiting for getByRole('status')\u001b[22m\n\n    at C:\\Users\\JosHsuan\\Documents\\GitHub\\JosHsuan.github.io\\roles\\3d-artist\\scripts\\verify-browser.mjs:54:287",
+      "consoleErrors": []
+    }
+  ]
+}

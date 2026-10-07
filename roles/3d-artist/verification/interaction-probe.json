@@ -1,0 +1,263 @@
+[
+  {
+    "port": 4180,
+    "id": "section",
+    "errors": [],
+    "state": {
+      "frames": 1,
+      "u": 0.5,
+      "mode": "pointer",
+      "ready": true,
+      "study": "section",
+      "views": [
+        {
+          "variant": "a",
+          "position": [
+            4.8,
+            2.9,
+            7.8
+          ],
+          "target": [
+            0,
+            0,
+            0
+          ],
+          "fov": 35,
+          "roll": 0,
+          "focus": 9,
+          "blur": 0,
+          "mist": 0,
+          "spread": 1,
+          "turn": 0,
+          "assembly": 0,
+          "selection": -1,
+          "light": [
+            4,
+            6,
+            4
+          ],
+          "finish": 0,
+          "glass": false,
+          "particles": false,
+          "contact": false,
+          "owner": "analytic",
+          "focalLengthMm": 38.059137628358556
+        },
+        {
+          "variant": "b",
+          "position": [
+            4.8,
+            2.9,
+            7.8
+          ],
+          "target": [
+            0,
+            0,
+            0
+          ],
+          "fov": 35,
+          "roll": 0,
+          "focus": 9,
+          "blur": 0,
+          "mist": 0,
+          "spread": 1,
+          "turn": 0,
+          "assembly": 0.5,
+          "selection": -1,
+          "light": [
+            4,
+            6,
+            4
+          ],
+          "finish": 0,
+          "glass": false,
+          "particles": false,
+          "contact": false,
+          "owner": "analytic",
+          "focalLengthMm": 38.059137628358556
+        }
+      ],
+      "physicsFrames": 241,
+      "renderer": "WebKit WebGL",
+      "memory": {
+        "geometries": 30,
+        "textures": 4
+      }
+    },
+    "text": "50%Ready · no autonomous playbackSave ASave B"
+  },
+  {
+    "port": 4182,
+    "id": "mist",
+    "errors": [],
+    "state": {
+      "frames": 1,
+      "u": 0.5,
+      "mode": "pointer",
+      "ready": true,
+      "study": "mist",
+      "views": [
+        {
+          "variant": "a",
+          "position": [
+            3,
+            1.8,
+            9
+          ],
+          "target": [
+            0,
+            0,
+            0
+          ],
+          "fov": 35,
+          "roll": 0,
+          "focus": 9,
+          "blur": 0,
+          "mist": 0,
+          "spread": 2.5,
+          "turn": 0,
+          "assembly": 0,
+          "selection": -1,
+          "light": [
+            4,
+            6,
+            4
+          ],
+          "finish": 0,
+          "glass": false,
+          "particles": false,
+          "contact": false,
+          "owner": "analytic",
+          "focalLengthMm": 38.059137628358556
+        },
+        {
+          "variant": "b",
+          "position": [
+            3,
+            1.8,
+            9
+          ],
+          "target": [
+            0,
+            0,
+            0
+          ],
+          "fov": 35,
+          "roll": 0,
+          "focus": 9,
+          "blur": 0,
+          "mist": 0.275,
+          "spread": 2.5,
+          "turn": 0,
+          "assembly": 0,
+          "selection": -1,
+          "light": [
+            4,
+            6,
+            4
+          ],
+          "finish": 0,
+          "glass": false,
+          "particles": false,
+          "contact": false,
+          "owner": "analytic",
+          "focalLengthMm": 38.059137628358556
+        }
+      ],
+      "physicsFrames": 0,
+      "renderer": "WebKit WebGL",
+      "memory": {
+        "geometries": 30,
+        "textures": 6
+      }
+    },
+    "text": "50%Ready · no autonomous playbackSave ASave B"
+  },
+  {
+    "port": 4182,
+    "id": "dollyzoom",
+    "errors": [],
+    "state": {
+      "frames": 1,
+      "u": 0.5,
+      "mode": "pointer",
+      "ready": true,
+      "study": "dollyzoom",
+      "views": [
+        {
+          "variant": "a",
+          "position": [
+            0,
+            0,
+            9
+          ],
+          "target": [
+            0,
+            0,
+            0
+          ],
+          "fov": 35,
+          "roll": 0,
+          "focus": 9,
+          "blur": 0,
+          "mist": 0,
+          "spread": 1,
+          "turn": 0,
+          "assembly": 0,
+          "selection": -1,
+          "light": [
+            4,
+            6,
+            4
+          ],
+          "finish": 0,
+          "glass": false,
+          "particles": false,
+          "contact": false,
+          "owner": "analytic",
+          "focalLengthMm": 38.059137628358556
+        },
+        {
+          "variant": "b",
+          "position": [
+            0,
+            0,
+            9
+          ],
+          "target": [
+            0,
+            0,
+            0
+          ],
+          "fov": 35,
+          "roll": 0,
+          "focus": 9,
+          "blur": 0,
+          "mist": 0,
+          "spread": 1,
+          "turn": 0,
+          "assembly": 0,
+          "selection": -1,
+          "light": [
+            4,
+            6,
+            4
+          ],
+          "finish": 0,
+          "glass": false,
+          "particles": false,
+          "contact": false,
+          "owner": "analytic",
+          "focalLengthMm": 38.059137628358556
+        }
+      ],
+      "physicsFrames": 0,
+      "renderer": "WebKit WebGL",
+      "memory": {
+        "geometries": 30,
+        "textures": 4
+      }
+    },
+    "text": "50%Ready · no autonomous playbackSave ASave B"
+  }
+]

@@ -1,0 +1,8 @@
+import {createRequire} from 'node:module';
+import {writeFile} from 'node:fs/promises';
+import assert from 'node:assert/strict';
+import {executablePath} from './browser-path.mjs';
+const {chromium,devices}=createRequire(new URL('../../../package.json',import.meta.url))('@playwright/test');
+const browser=await chromium.launch({headless:true,executablePath}),results=[];
+try{for(const mobile of [false,true]){const page=await browser.newPage(mobile?devices['Pixel 7']:{viewport:{width:1440,height:1000}});const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});await page.goto('http://127.0.0.1:4180/');assert.equal(await page.locator('.material-shortcuts a').count(),4);await page.locator('.material-shortcuts a').filter({hasText:'Contours'}).click();await page.waitForFunction(()=>window.__study?.inspect().ready);assert.equal(await page.evaluate(()=>window.__study.inspect().study),'surface-contours');assert.match(await page.locator('.metrics').textContent(),/Matched A\/B camera and light/);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);assert.deepEqual(errors,[]);results.push({profile:mobile?'Pixel 7 emulation':'Chromium desktop',newEntryLinks:4,directLinkLoaded:true,matchedStateReadout:true,noOverflow:true,noShaderErrors:true});await page.close();}}finally{await browser.close();}
+await writeFile(new URL('../verification/material-entry.json',import.meta.url),JSON.stringify({verifiedAt:new Date().toISOString(),results},null,2)+'\n');console.log(JSON.stringify(results,null,2));

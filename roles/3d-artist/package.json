@@ -1,0 +1,25 @@
+{
+  "name": "portfolio-3d-artist-desk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.19.0",
+  "engines": {
+    "node": "24.19.0",
+    "pnpm": "11.19.0"
+  },
+  "scripts": {
+    "build": "node scripts/build-interactions.mjs",
+    "preview": "node scripts/serve.mjs",
+    "validate": "node scripts/validate-interactions.mjs",
+    "test": "node --test tests/interaction.test.mjs tests/physics-cache.test.mjs",
+    "verify": "node scripts/verify-interactions.mjs",
+    "verify:mcp": "node scripts/verify-mcp.mjs"
+  },
+  "dependencies": {
+    "@dimforge/rapier3d-compat": "0.19.3"
+  },
+  "devDependencies": {
+    "@playwright/mcp": "0.0.83"
+  }
+}

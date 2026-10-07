@@ -1,0 +1,217 @@
+{
+  "verifiedAt": "2026-10-07T21:43:51.138Z",
+  "role": "3d-artist",
+  "syntheticProfiles": true,
+  "results": [
+    {
+      "name": "chromium/proximity: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "chromium/section: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "chromium/grazing: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "chromium/lens: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "chromium/particles: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "chromium/contact: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "chromium/finish: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "chromium/reader: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "chromium/bamboo-grain: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "chromium/bamboo-pbr: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "chromium/surface-contours: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "chromium/surface-focus: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "chromium: native scroll is exclusive",
+      "passed": true
+    },
+    {
+      "name": "chromium: role review and screenshots",
+      "passed": true
+    },
+    {
+      "name": "webkit/proximity: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "webkit/section: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "webkit/grazing: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "webkit/lens: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "webkit/particles: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "webkit/contact: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "webkit/finish: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "webkit/reader: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "webkit/bamboo-grain: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "webkit/bamboo-pbr: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "webkit/surface-contours: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "webkit/surface-focus: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "webkit: native scroll is exclusive",
+      "passed": true
+    },
+    {
+      "name": "webkit: role review and screenshots",
+      "passed": true
+    },
+    {
+      "name": "mobile/proximity: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "mobile/section: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "mobile/grazing: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "mobile/lens: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "mobile/particles: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "mobile/contact: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "mobile/finish: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "mobile/reader: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "mobile/bamboo-grain: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "mobile/bamboo-pbr: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "mobile/surface-contours: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "mobile/surface-focus: input + reversible A/B",
+      "passed": true
+    },
+    {
+      "name": "mobile: native scroll is exclusive",
+      "passed": true
+    },
+    {
+      "name": "mobile: role review and screenshots",
+      "passed": true
+    },
+    {
+      "name": "reduced motion: fixed pose and explicit opt-in",
+      "passed": true
+    },
+    {
+      "name": "no JavaScript: all comparisons and sources remain readable",
+      "passed": true
+    },
+    {
+      "name": "context loss: captured fallback",
+      "passed": true
+    },
+    {
+      "name": "blocked storage: export still works",
+      "passed": true
+    },
+    {
+      "name": "missing HDR: frozen captured fallback",
+      "passed": true
+    },
+    {
+      "name": "texture failure stays local to the PBR swatch",
+      "passed": true
+    },
+    {
+      "name": "shader representation is pixel-reversible",
+      "passed": true
+    },
+    {
+      "name": "review import: exact role and source preservation",
+      "passed": true
+    },
+    {
+      "name": "WebGL unavailable: readable capture",
+      "passed": true
+    }
+  ],
+  "failures": [],
+  "limits": [
+    "Emulated Pixel 7; no physical device",
+    "Firefox launch previously unavailable on this Windows host; not claimed passed",
+    "Owner UIUX saved state not accessed by these tests"
+  ]
+}
