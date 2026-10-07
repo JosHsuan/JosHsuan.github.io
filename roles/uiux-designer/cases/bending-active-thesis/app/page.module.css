@@ -1,0 +1,178 @@
+.skip{position:fixed;z-index:60;top:.5rem;left:1rem;padding:1rem;background:var(--accent);color:var(--ink);transform:translateY(-160%)}
+.skip:focus{transform:translateY(0)}
+.masthead{position:fixed;inset:0 0 auto;z-index:30;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;min-height:6.5rem;padding:1.9rem 4vw;pointer-events:none;background:linear-gradient(180deg,#090d0d 0%,#090d0df7 52%,#090d0db8 76%,transparent 100%);font-size:.72rem}
+.owner{font-weight:600;letter-spacing:.015em;text-shadow:0 1px 12px #000}
+.owner>span:first-child{margin:0 .75rem;color:var(--accent)}
+.discipline,.openingLabel,.chapterLabel,.projectType,.scrollCue,.spatialNotation,.methodSequence li>span,.evidence figcaption>span,.measurements dt,.endnote{font-family:var(--mono);font-size:.63rem;line-height:1.5;letter-spacing:.12em}
+.discipline{font-weight:400;color:var(--muted)}
+.story{position:relative;z-index:2}
+.chapter{position:relative;min-height:125svh;isolation:isolate}
+.chapterInner{position:sticky;top:0;min-height:100svh;max-width:1800px;margin:0 auto;padding:14svh 6vw 12svh;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:2vw;align-items:center}
+.copy{grid-column:1/6;max-width:34rem;position:relative;z-index:3}
+.copy>p,.closingCopy>p{font-size:clamp(.98rem,1.16vw,1.16rem);line-height:1.72;color:var(--muted);max-width:35rem;margin:1.3rem 0}
+.chapterLabel{display:flex;align-items:center;gap:.9rem;color:var(--accent);margin-bottom:1.65rem}
+.glyph{display:inline-flex;flex:0 0 auto;align-items:center;justify-content:center;width:28px;height:28px;transform:perspective(400px) rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg));transform-origin:center}
+.glyph svg{display:block;width:100%;height:100%;stroke:currentColor;stroke-width:1.2;stroke-linejoin:round;stroke-linecap:round}
+.chapterHeading{font-weight:400;font-size:clamp(2.7rem,4.6vw,5.4rem);line-height:.99;letter-spacing:-.065em;margin:0 0 2.4rem;color:var(--paper);max-width:42rem}
+.chapterHeading>span{display:block}
+.headingLast{font-family:Georgia,'Times New Roman',serif;font-style:italic;letter-spacing:-.06em}
+.overview{min-height:135svh}
+.openingCopy{grid-column:1/8;align-self:center;max-width:53rem;position:relative;z-index:3;padding-bottom:5svh}
+.openingLabel{display:flex;align-items:center;gap:.85rem;color:var(--accent);margin-bottom:2.4rem}
+.openingLabel .glyph{width:25px;height:25px}
+.openingCopy h1{font-size:clamp(6rem,11.9vw,12.5rem);font-weight:400;line-height:.79;letter-spacing:-.084em;margin:0 0 2rem}
+.openingCopy h1>span{display:block;margin-top:.12em}
+.subtitle{font-size:clamp(1.05rem,1.75vw,1.75rem);letter-spacing:-.035em;color:var(--paper);margin:0 0 1.6rem .2rem}
+.openingText{max-width:26rem;font-size:clamp(1rem,1.25vw,1.25rem);line-height:1.6;color:var(--muted);margin:0 0 2.8rem .2rem}
+.projectType{max-width:30rem;color:var(--muted);font-size:.61rem;letter-spacing:.025em;margin-left:.2rem}
+.projectType>span{color:var(--accent)}
+.scrollCue{position:absolute;left:6vw;bottom:5.5svh;display:flex;align-items:center;gap:1rem;font-size:.6rem;color:var(--muted);letter-spacing:.045em}
+.scrollLine{display:inline-block;height:36px;width:1px;background:linear-gradient(var(--accent),transparent)}
+.form{min-height:135svh}
+.form .chapterInner{padding-top:18svh}
+.copy .marginNote{border-left:1px solid var(--accent);font-size:.83rem;line-height:1.65;padding-left:1.2rem;max-width:23rem;margin-top:2.5rem;color:var(--paper)}
+.spatialNotation{position:absolute;right:8vw;bottom:17svh;color:#ced3ce;font-size:.57rem;letter-spacing:.1em;display:flex;gap:1rem;align-items:flex-start}
+.spatialNotation>span{width:60px;height:1px;background:#ffffff70;display:block;margin-top:6px}
+.spatialNotation>p{margin:0}
+.system{min-height:125svh}
+.methodSequence{list-style:none;margin:2rem 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:.8rem 1.3rem;max-width:29rem}
+.methodSequence li{font-size:.78rem;line-height:1.55;display:flex;gap:.7rem;border-top:1px solid #adbcb332;padding-top:.7rem;color:var(--paper)}
+.methodSequence li>span{color:var(--accent);letter-spacing:0;padding-top:.05rem}
+.evidence{grid-column:7/13;margin:0;position:relative;z-index:2;min-width:0;opacity:1}
+.mediaFrame{transform-origin:50% 50%;transform:perspective(1400px) translate3d(0,0,0);will-change:auto}
+.mediaFrame img{display:block;width:100%;height:auto;max-width:100%;box-shadow:0 24px 90px #0004}
+.evidence figcaption{display:flex;align-items:flex-start;gap:1rem;margin:1.15rem 0 0;max-width:44rem;color:var(--muted)}
+.evidence figcaption>span{color:var(--accent);font-size:.55rem;white-space:nowrap;padding-top:.12rem}
+.evidence figcaption>p{font-size:.72rem;line-height:1.6;margin:0;max-width:34rem}
+.geometryImage{grid-column:6/13;margin-top:10svh}
+.geometryImage .mediaFrame{padding:.6rem;background:#eeefec}
+.libraryImage{grid-column:8/13;max-width:520px;justify-self:end}
+.libraryImage .mediaFrame{padding:.45rem;background:#eff0ee}
+.copy .smallNote,.closingCopy .smallNote{font-size:.78rem;line-height:1.75;color:#b3bcb7;max-width:31rem;margin-top:1.65rem}
+.pattern{min-height:115svh}
+.pattern .chapterHeading{font-size:clamp(2.8rem,4.4vw,5.1rem)}
+.make{min-height:120svh}
+.make .copy{grid-column:8/13;grid-row:1}
+.connectionImage{grid-column:2/6;grid-row:1;max-width:380px;justify-self:start}
+.connectionImage .mediaFrame img{max-height:68svh;width:auto;max-width:100%;object-fit:contain}
+.connectionImage figcaption{max-width:24rem}
+.measurements{display:flex;gap:2rem;flex-wrap:wrap;margin:2rem 0 0}
+.measurements>div{border-top:1px solid #adbcb33d;padding-top:1rem}
+.measurements dt{font-size:.58rem;letter-spacing:.05em;color:var(--muted);margin-bottom:.6rem}
+.measurements dd{font-size:clamp(1.15rem,1.7vw,1.75rem);letter-spacing:-.04em;margin:0;color:var(--paper)}
+.validation{min-height:120svh}
+.validation .chapterHeading{font-size:clamp(2.5rem,4.1vw,4.9rem)}
+.prototypeImage{grid-column:7/13;margin-top:6svh}
+.credits{min-height:105svh}
+.closingCopy{grid-column:1/7;max-width:40rem;position:relative;z-index:3}
+.closingCopy .chapterHeading{font-size:clamp(3.4rem,6.8vw,8rem);margin-bottom:2rem}
+.closingCopy .closingSummary{font-size:1.15rem;color:var(--paper);max-width:32rem;margin-bottom:2rem}
+.closingCopy>p:not(.closingSummary){font-size:.85rem}
+.sourceNotes{max-width:35rem;color:var(--muted);font-size:.72rem;line-height:1.7;margin-top:1.8rem;padding-top:1rem;border-top:1px solid #adbcb33d}
+.sourceNotes summary{cursor:pointer;display:list-item;color:var(--paper);padding:.3rem 0;font-size:.77rem}
+.sourceNotes p{margin:1rem 0}
+.sourceLinks{display:flex;gap:1.3rem;flex-wrap:wrap}
+.sourceLinks a{padding:.65rem 0;color:var(--paper);font-family:var(--mono);font-size:.65rem}
+.endnote{grid-column:1/-1;display:flex;justify-content:space-between;gap:1rem;align-self:end;color:var(--muted);border-top:1px solid #adbcb32c;padding-top:1rem;font-size:.58rem;letter-spacing:.055em;margin-top:3rem}
+:global(html[data-cinematic-ready]) .mediaFrame{transform:perspective(1400px) translate3d(0,var(--media-shift,0px),0) scale(var(--media-scale,1)) rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg))}
+:global(html[data-cinematic-ready]) .evidence{opacity:1}
+:global(html[data-cinematic-static]) .mediaFrame,:global(html[data-cinematic-static]) .glyph{transform:none!important}
+:global(html[data-cinematic-static]) .evidence{opacity:1}
+@media(min-width:1800px){.chapterInner{padding-left:108px;padding-right:108px}.scrollCue{left:108px}}
+@media(max-width:1100px){
+  .chapterInner{padding-left:5vw;padding-right:5vw;gap:1.8vw}
+  .copy{grid-column:1/7;max-width:31rem}
+  .chapterHeading{font-size:clamp(2.7rem,4.7vw,3.8rem)}
+  .copy>p{font-size:1rem;line-height:1.68}
+  .geometryImage{grid-column:7/13}
+  .libraryImage{grid-column:8/13}
+  .make .copy{grid-column:7/13}
+  .connectionImage{grid-column:1/6;max-width:330px}
+  .validation .copy{grid-column:1/6}
+  .validation .chapterHeading{font-size:3rem}
+  .prototypeImage{grid-column:7/13}
+  .closingCopy{grid-column:1/8;max-width:38rem}
+  .scrollCue{left:5vw}
+}
+@media(max-width:780px){
+  .masthead{min-height:5.7rem;padding:1.2rem 1.3rem;font-size:.66rem}
+  .discipline{font-size:.55rem;letter-spacing:.08em}
+  .owner>span:first-child{margin:0 .4rem}
+  .chapter{min-height:0}
+  .chapterInner{position:relative;min-height:100svh;display:flex;flex-direction:column;align-items:stretch;justify-content:center;padding:7rem 1.5rem 5.5rem;gap:2rem}
+  .overview{min-height:125svh}
+  .overview .chapterInner{min-height:100svh;position:sticky;padding-top:14svh;justify-content:flex-start}
+  .openingCopy{align-self:stretch;padding-bottom:0;max-width:38rem}
+  .openingLabel{font-size:.57rem;margin-bottom:1.8rem;gap:.75rem}
+  .openingLabel .glyph{width:22px;height:22px}
+  .openingCopy h1{font-size:clamp(5rem,14.6vw,7.4rem);letter-spacing:-.08em;margin-bottom:1.45rem}
+  .subtitle{font-size:clamp(1rem,3vw,1.3rem);margin-bottom:1.25rem}
+  .openingText{font-size:.98rem;max-width:23rem;margin-bottom:1.5rem}
+  .projectType{font-size:.56rem;letter-spacing:.01em;max-width:21rem;line-height:1.7}
+  .scrollCue{bottom:4.3svh;left:1.5rem;font-size:.55rem}
+  .copy,.closingCopy{max-width:38rem}
+  .chapterLabel{font-size:.59rem;margin-bottom:1.45rem;gap:.75rem}
+  .glyph{width:25px;height:25px}
+  .chapterHeading,.pattern .chapterHeading,.validation .chapterHeading{font-size:clamp(2.7rem,7.2vw,4rem);margin-bottom:1.7rem}
+  .copy>p{font-size:1rem;line-height:1.72;margin:1.15rem 0}
+  .form .chapterInner{justify-content:flex-start;padding-top:6.4rem;padding-bottom:32svh;min-height:110svh}
+  .form .marginNote,.spatialNotation{display:none}
+  .copy .marginNote{font-size:.79rem;max-width:25rem;margin-top:2rem}
+  .methodSequence{margin-top:1.65rem;max-width:32rem}
+  .methodSequence li{font-size:.75rem}
+  .evidence{margin:0;max-width:100%;width:100%}
+  .evidence figcaption{gap:.75rem;margin-top:.85rem}
+  .evidence figcaption>span{font-size:.5rem}
+  .evidence figcaption>p{font-size:.69rem;line-height:1.6}
+  .geometryImage{margin-top:.5rem}
+  .geometryImage .mediaFrame{padding:.35rem}
+  .libraryImage{max-width:410px;align-self:center}
+  .connectionImage{order:2;max-width:290px;align-self:center}
+  .make .copy{order:1}
+  .connectionImage .mediaFrame img{width:100%;max-height:65svh;object-fit:cover;object-position:50% 45%}
+  .prototypeImage{margin-top:.5rem}
+  .measurements{gap:1.5rem;margin-top:1.8rem}
+  .measurements dd{font-size:1.28rem}
+  .copy .smallNote,.closingCopy .smallNote{font-size:.74rem;line-height:1.7}
+  .credits .chapterInner{min-height:105svh}
+  .closingCopy .chapterHeading{font-size:clamp(3.8rem,11vw,5.5rem)}
+  .closingCopy .closingSummary{font-size:1.05rem;margin-bottom:1.5rem}
+  .closingCopy>p:not(.closingSummary){font-size:.81rem}
+  .endnote{margin-top:2rem;font-size:.54rem}
+}
+@media(max-width:400px){
+  .chapterInner{padding-left:1.25rem;padding-right:1.25rem}
+  .masthead{padding-left:1.25rem;padding-right:1.25rem}
+  .discipline{display:none}.owner>span:first-child{display:none}
+  .openingCopy h1{font-size:18.8vw}
+  .openingText{font-size:.93rem;max-width:19rem}
+  .openingLabel{margin-bottom:1.4rem}
+  .chapterHeading,.pattern .chapterHeading,.validation .chapterHeading{font-size:2.7rem}
+}
+@media(min-width:781px) and (max-height:740px){
+  .chapterInner{position:relative;padding-top:7rem;padding-bottom:5rem}
+  .chapter{min-height:110svh}
+  .overview .chapterInner{min-height:105svh;padding-top:7rem;padding-bottom:8rem}
+  .openingCopy h1{font-size:clamp(5.5rem,9vw,9rem)}
+  .openingLabel{margin-bottom:1.5rem}
+  .openingText{margin-bottom:1.5rem}
+  .chapterHeading{font-size:clamp(2.5rem,4vw,4.5rem)}
+  .connectionImage .mediaFrame img{max-height:70svh}
+}
+@media(prefers-reduced-motion:reduce){
+  .chapterInner,.overview .chapterInner{position:relative}
+  .chapter{min-height:100svh}
+  .mediaFrame,.glyph,:global(html[data-cinematic-ready]) .mediaFrame{transform:none!important}
+  :global(html[data-cinematic-ready]) .evidence{opacity:1}
+}
+@media print{
+  .masthead,.skip,.scrollCue,.spatialNotation{display:none}
+  .chapter,.overview,.form,.system,.pattern,.make,.validation,.credits{min-height:0;break-inside:avoid}
+  .chapterInner,.overview .chapterInner{position:static;display:block;min-height:0;padding:2rem}
+  .copy,.openingCopy,.closingCopy{max-width:none}
+  .openingCopy h1{font-size:5rem}
+  .chapterHeading,.closingCopy .chapterHeading{font-size:3rem}
+  .evidence{max-width:65%;margin:1.5rem auto;opacity:1!important}
+  .mediaFrame,.glyph{transform:none!important}
+  .sourceNotes{display:block}
+}

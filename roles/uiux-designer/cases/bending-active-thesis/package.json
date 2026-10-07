@@ -1,0 +1,8 @@
+{
+  "name": "bending-active-local-review",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.19.0",
+  "engines": { "node": "24.19.0", "pnpm": "11.19.0" },
+  "scripts": { "build": "next build --webpack", "preview": "node scripts/serve.mjs" }
+}

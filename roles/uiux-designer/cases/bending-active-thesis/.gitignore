@@ -1,0 +1,8 @@
+.next/
+out/
+node_modules/
+public/assets/
+content/review.json
+verification/
+.runtime/
+/components/vendor/framing-hull.private.mjs
