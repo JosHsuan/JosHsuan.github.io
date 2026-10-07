@@ -14,6 +14,12 @@ English is the primary project language. Discussions with the owner use Traditio
 
 The preparation path is a documentation-level designation. It is not an environment variable, import source, watched directory or build dependency. This integration updates Markdown only; it does not use materials to populate the website. The private folder and website content inputs remain unchanged. Normal builds work without that drive.
 
+## Design guidelines and current scope
+
+The supplied [Website Design Guidelines v1.0](docs/WEBSITE_DESIGN_GUIDELINES.md) are preserved verbatim as the presentation reference. They describe cinematic engineering editorial, an original **FORM / SYSTEM / MAKE** identity, accessible reading/navigation, truthful case studies and future procedural experiments. The [architecture](docs/architecture.md) continues to govern the stack, software boundaries, exact versions and static deployment; preparation records continue to govern factual content and publication limits.
+
+On 7 October 2026 the owner requested withdrawal of the portfolio implementation and integration of this guide **without starting implementation**. The repository is back to the empty framework. The guide's phases, commands, execution brief and embedded implementation prompt are future reference, not a current task. English UI adaptation, Work/Lab route changes, project selection, media, scenes, authored motion and optional terminal/ASCII interfaces remain deferred. Prior approval of the three proposed identity strings is recorded but does not populate the site. See [decision 0002](docs/decisions/0002-design-guidelines-integration.md) for precedence, reconciliation and withdrawal verification.
+
 ## Development
 
 Use Node **24.19.0** and pnpm **11.19.0**.

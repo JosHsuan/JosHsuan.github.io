@@ -8,16 +8,19 @@
 |---|---|
 | Owner | JosHsuan Chao |
 | Audience | The owner, collaborating developers, and coding agents |
-| Revision | **2.1 — 6 October 2026; framework and materials-source reconciliation** |
+| Revision | **2.2 — 7 October 2026; documentation-only design-guidelines integration** |
 | Language | English for project documentation and future website content; Traditional Chinese for discussion with the owner |
 | Scope | Portfolio, Research & Development, About/CV, Contact, and selected interactive project stories |
 | Delivery baseline | Next.js static export to GitHub Pages; no paid domain, paid storage, or continuously running backend required for the initial release |
-| Status | **Existing empty framework plus a documentation-only materials integration plan. No materials have been imported. Full scene/authoring acceptance remains pending.** |
+| Status | **Existing empty framework with materials-source and design-guidelines documentation. The portfolio implementation has been withdrawn. No implementation phase is currently authorized; full scene/authoring acceptance remains pending.** |
 | Evidence | Existing repository implementation, inspected preparation records, and the original official-documentation/source register; evidence scope is recorded in Sections 12 and 22 |
 | Repository destination | `docs/architecture.md` is the maintained architecture; software implementation in the GitHub working folder takes precedence over older proposed layouts |
+| Design reference | `docs/WEBSITE_DESIGN_GUIDELINES.md` — supplied v1.0, preserved verbatim; presentation requirements for a later explicitly authorized implementation |
 | Materials preparation root | `D:\JosHsuan_Website\_private\portfolio-preparation` — designated source for all project, CV, and content preparation |
 
 ## Executive decision
+
+**Current scope — 7 October 2026:** The owner requested withdrawal of the portfolio implementation and integration of [Website Design Guidelines v1.0](WEBSITE_DESIGN_GUIDELINES.md) without starting implementation. The software/content baseline is restored to the empty framework. This revision integrates the guide in Markdown only. Its execution brief, phase sequence and ready-to-use prompt are retained as reference and do not activate work. [Decision 0002](decisions/0002-design-guidelines-integration.md) records the withdrawal, precedence and deferred choices.
 
 **Recommended composition:** Next.js + React + TypeScript for the website; Three.js + React Three Fiber + Drei for 3D; Theatre Core + development-only Studio for authored motion; GSAP for DOM animation and scroll input; narrowly scoped Zustand stores for shared interaction state; Playwright for browser regression testing.
 
@@ -41,6 +44,7 @@ This follows Theatre's documented framework-agnostic integration model, but the 
 
 | Need | Read |
 |---|---|
+| Understand future visual direction and its current authorization boundary | [Website Design Guidelines](WEBSITE_DESIGN_GUIDELINES.md) and [decision 0002](decisions/0002-design-guidelines-integration.md) |
 | Resolve source authority, language, and the current documentation-only scope | [Section 00](#00-current-project-baseline-and-source-authority) |
 | Locate private materials and understand their future mapping into the website | [Section 12](#12-content-architecture-and-materials-preparation) |
 | Understand the selected stack and system boundaries | [Sections 01–06](#01-product-goals-and-non-negotiable-principles) |
@@ -74,6 +78,8 @@ No environment variable, filesystem alias, junction, importer, watcher, startup 
 4. Source records establish what is documented; they do not automatically settle conflicts, authorize publication or turn a draft into an approved claim. More recent explicit owner decisions take precedence over historical records. Unresolved differences remain visible until the relevant material is discussed.
 5. Repository `content/` files are the website's eventual reviewed publication input. `src/generated/public-content.json` is derived build data. Neither replaces the external evidence and preparation records.
 
+For presentation, content hierarchy, interaction behavior and visual acceptance, use the supplied [Website Design Guidelines](WEBSITE_DESIGN_GUIDELINES.md) alongside this architecture. The guide does not override the owner's current scope, the implemented software architecture, factual evidence or publication permissions. Its references supply principles; their assets and layouts are not templates. Its proposed routes, copy, phases and optional interfaces are not instructions to change the empty framework during this documentation integration.
+
 The preparation folder's architecture suggestions cannot change the software stack. Conversely, the website's public schema cannot force a disputed year, authorship claim, CV date or permission status into a made-up value merely to pass validation.
 
 ### 0.3 Project language
@@ -86,7 +92,7 @@ The private candidate file currently declares `zh-Hant`, and the existing empty 
 
 The repository already has a Next.js/React/TypeScript static framework, five empty sections and a 404 page, validated empty content, an empty scene registry, motion controller/adapters, and CI/manual deployment definitions. The installed toolchain and earlier verification results are recorded in [compatibility.md](compatibility.md), not inferred from the architectural examples below.
 
-This revision reconciles the preparation workspace with that framework **in Markdown only**. It does not select projects, import or translate drafts, copy CVs or assets, run preparation/conversion scripts, generate scene data, modify application code, or deploy. The public content arrays remain empty and the profile remains `null`.
+This revision integrates the preparation workspace and supplied design guidelines with that framework **in Markdown only**, after withdrawing the portfolio implementation. It does not select projects, import or translate drafts, copy CVs or assets, run preparation/conversion scripts, generate scene data, implement the guide, or deploy. The public content arrays remain empty and the profile remains `null`. The existing Chinese scaffold UI and Projects/Research routes remain in place; future English copy and logical Work/Lab routes are deferred.
 
 The owner will discuss how to use the materials step by step. Sections 07–20 retain design requirements and future acceptance criteria; they are not an instruction to begin those phases now. The full P0 scene/Studio proof has not been completed.
 
@@ -95,6 +101,8 @@ The owner will discuss how to use the materials step by step. Sections 07–20 r
 | Document | Current interpretation |
 |---|---|
 | This architecture | Maintained integration plan and source/language policy. |
+| `docs/WEBSITE_DESIGN_GUIDELINES.md` | Verbatim supplied v1.0 presentation reference; future phases and embedded prompts are not current implementation authorization. |
+| `docs/decisions/0002-design-guidelines-integration.md` | Portfolio withdrawal, documentation-only scope and guide/architecture reconciliation. |
 | `README.md`, `docs/decisions/0001-empty-framework.md` | Current setup and framework implementation decision. |
 | `docs/compatibility.md`, `docs/toolchain.md` | Actual recorded dependency/tool validation, with explicit gaps. |
 | `docs/asset-pipeline.md`, `docs/motion-authoring.md` | Repository publication and later scene-authoring procedures under the scope defined here. |

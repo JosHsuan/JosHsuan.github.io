@@ -2,6 +2,8 @@
 
 Read `README.md`, `docs/decisions/0001-empty-framework.md`, and relevant parts of `docs/architecture.md` before changes. The architecture is a reference proposal; the user's current task determines which phase is authorized.
 
+Read `docs/WEBSITE_DESIGN_GUIDELINES.md` for future presentation, content hierarchy, interaction and visual acceptance. Its implementation phases, execution brief and ready-to-use prompt are reference material, not authorization to start them. The current owner request is documentation integration only after withdrawing the portfolio implementation; see `docs/decisions/0002-design-guidelines-integration.md`. Preserve the existing empty framework until the owner explicitly requests another implementation step.
+
 This is an empty framework. Do not add personal copy, fictional projects, sample models, or fabricated Theatre exports to fill the layout. Preserve the existing planning documents.
 
 The designated root for all project, CV and content preparation is `D:\JosHsuan_Website\_private\portfolio-preparation`. The GitHub working folder is authoritative for software architecture; current records in that external folder are authoritative for materials and content preparation, with their evidence and review limits preserved. See architecture Sections 00 and 12 for priority and field mapping.
