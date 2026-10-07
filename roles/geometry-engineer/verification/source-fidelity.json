@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "sourceSHA256": "c12ca628488a4449ea587965410d7df6baa815b36397c8344e2e14a3f533b14c",
+  "assetSHA256": "c56dfda835e6538ad360f76967ba65603ff48d055228a7d400a2293554bbb058",
+  "verticesCompared": 84626,
+  "faceIndicesExact": true,
+  "maximumPositionRoundingErrorMeters": 5.91278075390278e-08,
+  "maximumNormalRoundingError": 0,
+  "transform": "translate + mm-to-m + positive-determinant (x,z,-y) rotation",
+  "topologyChanged": false
+}

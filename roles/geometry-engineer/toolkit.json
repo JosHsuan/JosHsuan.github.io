@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "role": "geometry-engineer",
+  "activation": "codex-role.ps1",
+  "home": ".runtime/codex-home",
+  "skills": [{"name":"geometry-review","path":"skills/geometry-review","source":"Project-original instructions grounded in McNeel rhino3dm and Khronos glTF documentation","license":"Project-original"}],
+  "mcp": [{"name":"geometry_review","source":"mcp/model-server.mjs","access":"Two read-only tools over one sanitized local conversion record; no source paths, arbitrary code, network or CAD mutation","verification":"verification/mcp.json"}],
+  "runtime": {"package":"rhino3dm","version":"8.17.0","python":"CPython 3.11 x64","repository":"https://github.com/mcneel/rhino3dm","release":"https://pypi.org/project/rhino3dm/8.17.0/","license":"MIT","wheel":"rhino3dm-8.17.0-cp311-cp311-win_amd64.whl","sha256":"ce41a98088e823b5652e87eb3886cc51ee68ca3e99bb87efa18f068eb40678cf","scope":".runtime/python817 only"},
+  "compatibilityNote":"8.35.0 DLL initialization failed on this host; 8.17.0 imported and read the exact source successfully. No global Python package was changed.",
+  "reviewedNotInstalled":["https://github.com/mcneel/RhinoMCP","https://github.com/reer-ide/rhino_mcp","https://github.com/firstofthekind/rhino-mcp"],
+  "globalConfigSHA256":"719e39d8c6bfee3e10b7964043b50183a64568cc21081476957ee71eec00bb4e"
+}

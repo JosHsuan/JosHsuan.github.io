@@ -1,0 +1,26 @@
+{
+  "verifiedAt": "2026-10-07T22:58:52.229Z",
+  "passed": true,
+  "meshes": 1,
+  "vertices": 84626,
+  "triangles": 131881,
+  "bytes": 3614676,
+  "dimensions": [
+    2.3762099609375,
+    0.7248569269180298,
+    3.100425537109375
+  ],
+  "sha256": "c56dfda835e6538ad360f76967ba65603ff48d055228a7d400a2293554bbb058",
+  "checks": [
+    "GLB header and digest",
+    "actual GLTFLoader parse",
+    "finite buffers and index range",
+    "unit normals",
+    "measured Box3 and counts",
+    "local-only status"
+  ],
+  "limits": [
+    "Source shape fidelity is separately compared against the original 3dm by verify_source.py.",
+    "Open source mesh preserved; not proof of a watertight fabrication solid."
+  ]
+}

@@ -1,0 +1,23 @@
+import {readFile,mkdir,writeFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import assert from 'node:assert/strict';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {Box3,Vector3} from 'three';
+const base=new URL('../../uiux-designer/cases/bending-active-thesis/public/assets/',import.meta.url);
+const bytes=await readFile(new URL('assembly.glb',base)),record=JSON.parse(await readFile(new URL('model.json',base)));
+assert.equal(createHash('sha256').update(bytes).digest('hex'),record.revision);
+assert.equal(bytes.readUInt32LE(0),0x46546c67);assert.equal(bytes.readUInt32LE(4),2);assert.equal(bytes.readUInt32LE(8),bytes.length);
+const buffer=bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);
+const model=await new GLTFLoader().parseAsync(buffer,'');
+let vertices=0,triangles=0,meshes=0;
+model.scene.traverse(node=>{if(!node.isMesh)return;meshes++;const g=node.geometry,p=g.attributes.position,n=g.attributes.normal,indices=g.index.array;vertices+=p.count;triangles+=indices.length/3;
+ assert.equal(n.count,p.count);assert([...p.array,...n.array].every(Number.isFinite));assert([...indices].every(i=>i>=0&&i<p.count));
+ for(let i=0;i<n.count;i++){const length=Math.hypot(n.getX(i),n.getY(i),n.getZ(i));assert(Math.abs(length-1)<.001,'Non-unit source normal');}
+});
+const box=new Box3().setFromObject(model.scene),dimensions=box.getSize(new Vector3()).toArray();
+assert.equal(vertices,record.vertices);assert.equal(triangles,record.triangles);assert.equal(meshes,1);
+for(const name of ['min','max'])for(let i=0;i<3;i++)assert(Math.abs(box[name].toArray()[i]-record.bounds[name][i])<1e-6);
+assert.equal(record.publishable,false);assert.equal(record.status,'local-review-only');
+const report={verifiedAt:new Date().toISOString(),passed:true,meshes,vertices,triangles,bytes:bytes.length,dimensions,sha256:record.revision,checks:['GLB header and digest','actual GLTFLoader parse','finite buffers and index range','unit normals','measured Box3 and counts','local-only status'],limits:['Source shape fidelity is separately compared against the original 3dm by verify_source.py.','Open source mesh preserved; not proof of a watertight fabrication solid.']};
+await mkdir(new URL('../verification/',import.meta.url),{recursive:true});await writeFile(new URL('../verification/model.json',import.meta.url),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));
+model.scene.traverse(n=>{if(n.isMesh){n.geometry.dispose();n.material.dispose();}});

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Geometry Engineer — CAD review"
+  short_description: "Inspect CAD and verify traceable local mesh derivatives"
+  default_prompt: "Use $geometry-review to inspect the selected model and verify its local-review mesh handoff."

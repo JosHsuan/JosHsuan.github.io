@@ -1,0 +1,19 @@
+{
+  "verifiedAt": "2026-10-07T21:49:50.132Z",
+  "passed": true,
+  "server": {
+    "name": "geometry-review",
+    "version": "1.0.0"
+  },
+  "tools": [
+    "geometry_model_record",
+    "geometry_conversion_limits"
+  ],
+  "checks": [
+    "initialize",
+    "list",
+    "actual record read",
+    "actual scope/limits read",
+    "arbitrary path rejected"
+  ]
+}
