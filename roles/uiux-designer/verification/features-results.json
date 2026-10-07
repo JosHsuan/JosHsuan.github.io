@@ -1,0 +1,75 @@
+{
+  "checkedAt": "2026-10-07T18:44:55.336Z",
+  "results": [
+    {
+      "browser": "chromium",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fixture": "Synthetic preferences used only in isolated automated browser; not observed owner choices",
+      "checks": [
+        "No preference is invented in a clean browser; no initial canvas/iframe",
+        "Saved fixture and its note are read exactly; selected/unselected patterns are distinguished",
+        "Index search/filter/empty state, selected reader/direct URL, native chapter anchors and annotation/anatomy work",
+        "Image inspection actually zooms, resets, closes with Escape and returns focus",
+        "Two-study limit, aligned comparison criteria and tray link work",
+        "Real geometry/part changes, undo/redo, and downloaded SVG/JSON match the current state",
+        "Command actions update the same state; unsupported action search is explicit",
+        "OS reduced motion applies to direct geometry and authored playback; opt-in actual WebGL closes/disposes without losing the free arrangement",
+        "Feature review export and comparison persist; original Saved choices remain byte-for-byte unchanged; direct reader reload and returning from the original gallery retain working controls",
+        "Null/malformed preference records retain working controls and an explicit missing/unreadable basis"
+      ],
+      "consoleErrors": 0,
+      "externalRequests": 0,
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": {
+        "width": 1366,
+        "height": 1000
+      },
+      "fixture": "Synthetic preferences used only in isolated automated browser; not observed owner choices",
+      "checks": [
+        "No preference is invented in a clean browser; no initial canvas/iframe",
+        "Saved fixture and its note are read exactly; selected/unselected patterns are distinguished",
+        "Index search/filter/empty state, selected reader/direct URL, native chapter anchors and annotation/anatomy work",
+        "Image inspection actually zooms, resets, closes with Escape and returns focus",
+        "Two-study limit, aligned comparison criteria and tray link work",
+        "Real geometry/part changes, undo/redo, and downloaded SVG/JSON match the current state",
+        "Command actions update the same state; unsupported action search is explicit",
+        "OS reduced motion applies to direct geometry and authored playback; opt-in actual WebGL closes/disposes without losing the free arrangement",
+        "Feature review export and comparison persist; original Saved choices remain byte-for-byte unchanged; direct reader reload and returning from the original gallery retain working controls",
+        "Null/malformed preference records retain working controls and an explicit missing/unreadable basis"
+      ],
+      "consoleErrors": 0,
+      "externalRequests": 0,
+      "passed": true
+    },
+    {
+      "browser": "chromium-touch",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fixture": "Synthetic preferences used only in isolated automated browser; not observed owner choices",
+      "checks": [
+        "No preference is invented in a clean browser; no initial canvas/iframe",
+        "Saved fixture and its note are read exactly; selected/unselected patterns are distinguished",
+        "Index search/filter/empty state, selected reader/direct URL, native chapter anchors and annotation/anatomy work",
+        "Image inspection actually zooms, resets, closes with Escape and returns focus",
+        "Two-study limit, aligned comparison criteria and tray link work",
+        "Real geometry/part changes, undo/redo, and downloaded SVG/JSON match the current state",
+        "Command actions update the same state; unsupported action search is explicit",
+        "OS reduced motion applies to direct geometry and authored playback; opt-in actual WebGL closes/disposes without losing the free arrangement",
+        "Feature review export and comparison persist; original Saved choices remain byte-for-byte unchanged; direct reader reload and returning from the original gallery retain working controls",
+        "Touch image open/close works",
+        "Null/malformed preference records retain working controls and an explicit missing/unreadable basis"
+      ],
+      "consoleErrors": 0,
+      "externalRequests": 0,
+      "passed": true
+    }
+  ]
+}

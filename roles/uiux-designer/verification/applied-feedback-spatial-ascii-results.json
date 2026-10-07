@@ -1,0 +1,68 @@
+{
+  "checkedAt": "2026-10-07T18:51:41.914Z",
+  "materials": 1,
+  "configurations": 6,
+  "fixtures": "Synthetic Saved data only; no owner preference inference",
+  "results": [
+    {
+      "browser": "chromium",
+      "reduced": false,
+      "id": "spatial-ascii",
+      "checks": [
+        "Actual generated samples partition into height ranges",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": true,
+      "id": "spatial-ascii",
+      "checks": [
+        "Actual generated samples partition into height ranges",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": false,
+      "id": "spatial-ascii",
+      "checks": [
+        "Actual generated samples partition into height ranges",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": true,
+      "id": "spatial-ascii",
+      "checks": [
+        "Actual generated samples partition into height ranges",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": false,
+      "id": "spatial-ascii",
+      "checks": [
+        "Actual generated samples partition into height ranges",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": true,
+      "id": "spatial-ascii",
+      "checks": [
+        "Actual generated samples partition into height ranges",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    }
+  ]
+}

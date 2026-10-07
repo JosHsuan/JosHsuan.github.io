@@ -1,0 +1,1157 @@
+{
+  "checkedAt": "2026-10-07T18:42:06.311Z",
+  "materials": 19,
+  "configurations": 6,
+  "fixtures": "Synthetic Saved data only; no owner preference inference",
+  "results": [
+    {
+      "browser": "chromium",
+      "reduced": false,
+      "id": "font-plex-sans",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": false,
+      "id": "font-inter",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": false,
+      "id": "font-space-grotesk",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": false,
+      "id": "font-plex-mono",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": false,
+      "id": "font-jetbrains-mono",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": false,
+      "id": "icons-lucide",
+      "checks": [
+        "Release outside cancels activation",
+        "Original SVG download verified byte-for-byte",
+        "Actual glyph selection, keyboard/touch activation and stable button",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": false,
+      "id": "icons-phosphor",
+      "checks": [
+        "Release outside cancels activation",
+        "Original SVG download verified byte-for-byte",
+        "Actual glyph selection, keyboard/touch activation and stable button",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": false,
+      "id": "icons-tabler",
+      "checks": [
+        "Release outside cancels activation",
+        "Original SVG download verified byte-for-byte",
+        "Actual glyph selection, keyboard/touch activation and stable button",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": false,
+      "id": "identity-glyphs",
+      "checks": [
+        "Original identity plate and explanation respond",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": false,
+      "id": "identity-palette",
+      "checks": [
+        "Swatch depth with unchanged measured contrast",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": false,
+      "id": "ui-focus-rail",
+      "checks": [
+        "Selected inner plate with native control",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": false,
+      "id": "ui-command",
+      "checks": [
+        "Real shared representation changes its spatial object",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": false,
+      "id": "motion-reveal",
+      "checks": [
+        "Hinges follow actual reveal time; pause/replay or reduced direct state",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": false,
+      "id": "motion-linework",
+      "checks": [
+        "Independent construction planes and actual SVG stroke",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": false,
+      "id": "motion-reflow",
+      "checks": [
+        "GSAP placement and nested part inspection have distinct property owners",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": false,
+      "id": "motion-theatre",
+      "checks": [
+        "Actual exported midpoint plus independent nested selection",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": false,
+      "id": "spatial-wirefield",
+      "checks": [
+        "Actual canvas raycast synchronizes numbered control",
+        "CPU vertex lift, rendered output, baseline comparison and idle rendering",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": false,
+      "id": "spatial-hatch",
+      "checks": [
+        "Actual canvas raycast synchronizes numbered control",
+        "Real WebGL context loss retains diagram and Retry remounts",
+        "CPU vertex lift, rendered output, baseline comparison and idle rendering",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": false,
+      "id": "spatial-ascii",
+      "checks": [
+        "Actual generated samples partition into height ranges",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": true,
+      "id": "font-plex-sans",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": true,
+      "id": "font-inter",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": true,
+      "id": "font-space-grotesk",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": true,
+      "id": "font-plex-mono",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": true,
+      "id": "font-jetbrains-mono",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": true,
+      "id": "icons-lucide",
+      "checks": [
+        "Actual glyph selection, keyboard/touch activation and stable button",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": true,
+      "id": "icons-phosphor",
+      "checks": [
+        "Actual glyph selection, keyboard/touch activation and stable button",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": true,
+      "id": "icons-tabler",
+      "checks": [
+        "Actual glyph selection, keyboard/touch activation and stable button",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": true,
+      "id": "identity-glyphs",
+      "checks": [
+        "Original identity plate and explanation respond",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": true,
+      "id": "identity-palette",
+      "checks": [
+        "Swatch depth with unchanged measured contrast",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": true,
+      "id": "ui-focus-rail",
+      "checks": [
+        "Selected inner plate with native control",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": true,
+      "id": "ui-command",
+      "checks": [
+        "Real shared representation changes its spatial object",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": true,
+      "id": "motion-reveal",
+      "checks": [
+        "Hinges follow actual reveal time; pause/replay or reduced direct state",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": true,
+      "id": "motion-linework",
+      "checks": [
+        "Independent construction planes and actual SVG stroke",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": true,
+      "id": "motion-reflow",
+      "checks": [
+        "GSAP placement and nested part inspection have distinct property owners",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": true,
+      "id": "motion-theatre",
+      "checks": [
+        "Actual exported midpoint plus independent nested selection",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": true,
+      "id": "spatial-wirefield",
+      "checks": [
+        "CPU vertex lift, rendered output, baseline comparison and idle rendering",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": true,
+      "id": "spatial-hatch",
+      "checks": [
+        "CPU vertex lift, rendered output, baseline comparison and idle rendering",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "chromium",
+      "reduced": true,
+      "id": "spatial-ascii",
+      "checks": [
+        "Actual generated samples partition into height ranges",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": false,
+      "id": "font-plex-sans",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": false,
+      "id": "font-inter",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": false,
+      "id": "font-space-grotesk",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": false,
+      "id": "font-plex-mono",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": false,
+      "id": "font-jetbrains-mono",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": false,
+      "id": "icons-lucide",
+      "checks": [
+        "Actual glyph selection, keyboard/touch activation and stable button",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": false,
+      "id": "icons-phosphor",
+      "checks": [
+        "Actual glyph selection, keyboard/touch activation and stable button",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": false,
+      "id": "icons-tabler",
+      "checks": [
+        "Actual glyph selection, keyboard/touch activation and stable button",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": false,
+      "id": "identity-glyphs",
+      "checks": [
+        "Original identity plate and explanation respond",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": false,
+      "id": "identity-palette",
+      "checks": [
+        "Swatch depth with unchanged measured contrast",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": false,
+      "id": "ui-focus-rail",
+      "checks": [
+        "Selected inner plate with native control",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": false,
+      "id": "ui-command",
+      "checks": [
+        "Real shared representation changes its spatial object",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": false,
+      "id": "motion-reveal",
+      "checks": [
+        "Hinges follow actual reveal time; pause/replay or reduced direct state",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": false,
+      "id": "motion-linework",
+      "checks": [
+        "Independent construction planes and actual SVG stroke",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": false,
+      "id": "motion-reflow",
+      "checks": [
+        "GSAP placement and nested part inspection have distinct property owners",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": false,
+      "id": "motion-theatre",
+      "checks": [
+        "Actual exported midpoint plus independent nested selection",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": false,
+      "id": "spatial-wirefield",
+      "checks": [
+        "CPU vertex lift, rendered output, baseline comparison and idle rendering",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": false,
+      "id": "spatial-hatch",
+      "checks": [
+        "CPU vertex lift, rendered output, baseline comparison and idle rendering",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": false,
+      "id": "spatial-ascii",
+      "checks": [
+        "Actual generated samples partition into height ranges",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": true,
+      "id": "font-plex-sans",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": true,
+      "id": "font-inter",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": true,
+      "id": "font-space-grotesk",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": true,
+      "id": "font-plex-mono",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": true,
+      "id": "font-jetbrains-mono",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": true,
+      "id": "icons-lucide",
+      "checks": [
+        "Actual glyph selection, keyboard/touch activation and stable button",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": true,
+      "id": "icons-phosphor",
+      "checks": [
+        "Actual glyph selection, keyboard/touch activation and stable button",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": true,
+      "id": "icons-tabler",
+      "checks": [
+        "Actual glyph selection, keyboard/touch activation and stable button",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": true,
+      "id": "identity-glyphs",
+      "checks": [
+        "Original identity plate and explanation respond",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": true,
+      "id": "identity-palette",
+      "checks": [
+        "Swatch depth with unchanged measured contrast",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": true,
+      "id": "ui-focus-rail",
+      "checks": [
+        "Selected inner plate with native control",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": true,
+      "id": "ui-command",
+      "checks": [
+        "Real shared representation changes its spatial object",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": true,
+      "id": "motion-reveal",
+      "checks": [
+        "Hinges follow actual reveal time; pause/replay or reduced direct state",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": true,
+      "id": "motion-linework",
+      "checks": [
+        "Independent construction planes and actual SVG stroke",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": true,
+      "id": "motion-reflow",
+      "checks": [
+        "GSAP placement and nested part inspection have distinct property owners",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": true,
+      "id": "motion-theatre",
+      "checks": [
+        "Actual exported midpoint plus independent nested selection",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": true,
+      "id": "spatial-wirefield",
+      "checks": [
+        "CPU vertex lift, rendered output, baseline comparison and idle rendering",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": true,
+      "id": "spatial-hatch",
+      "checks": [
+        "CPU vertex lift, rendered output, baseline comparison and idle rendering",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "webkit",
+      "reduced": true,
+      "id": "spatial-ascii",
+      "checks": [
+        "Actual generated samples partition into height ranges",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": false,
+      "id": "font-plex-sans",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": false,
+      "id": "font-inter",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": false,
+      "id": "font-space-grotesk",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": false,
+      "id": "font-plex-mono",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": false,
+      "id": "font-jetbrains-mono",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": false,
+      "id": "icons-lucide",
+      "checks": [
+        "Actual glyph selection, keyboard/touch activation and stable button",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": false,
+      "id": "icons-phosphor",
+      "checks": [
+        "Actual glyph selection, keyboard/touch activation and stable button",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": false,
+      "id": "icons-tabler",
+      "checks": [
+        "Actual glyph selection, keyboard/touch activation and stable button",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": false,
+      "id": "identity-glyphs",
+      "checks": [
+        "Original identity plate and explanation respond",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": false,
+      "id": "identity-palette",
+      "checks": [
+        "Swatch depth with unchanged measured contrast",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": false,
+      "id": "ui-focus-rail",
+      "checks": [
+        "Selected inner plate with native control",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": false,
+      "id": "ui-command",
+      "checks": [
+        "Real shared representation changes its spatial object",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": false,
+      "id": "motion-reveal",
+      "checks": [
+        "Hinges follow actual reveal time; pause/replay or reduced direct state",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": false,
+      "id": "motion-linework",
+      "checks": [
+        "Independent construction planes and actual SVG stroke",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": false,
+      "id": "motion-reflow",
+      "checks": [
+        "GSAP placement and nested part inspection have distinct property owners",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": false,
+      "id": "motion-theatre",
+      "checks": [
+        "Actual exported midpoint plus independent nested selection",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": false,
+      "id": "spatial-wirefield",
+      "checks": [
+        "CPU vertex lift, rendered output, baseline comparison and idle rendering",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": false,
+      "id": "spatial-hatch",
+      "checks": [
+        "CPU vertex lift, rendered output, baseline comparison and idle rendering",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": false,
+      "id": "spatial-ascii",
+      "checks": [
+        "Actual generated samples partition into height ranges",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": true,
+      "id": "font-plex-sans",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": true,
+      "id": "font-inter",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": true,
+      "id": "font-space-grotesk",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": true,
+      "id": "font-plex-mono",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": true,
+      "id": "font-jetbrains-mono",
+      "checks": [
+        "Word-local transforms with unchanged body text",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": true,
+      "id": "icons-lucide",
+      "checks": [
+        "Actual glyph selection, keyboard/touch activation and stable button",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": true,
+      "id": "icons-phosphor",
+      "checks": [
+        "Actual glyph selection, keyboard/touch activation and stable button",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": true,
+      "id": "icons-tabler",
+      "checks": [
+        "Actual glyph selection, keyboard/touch activation and stable button",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": true,
+      "id": "identity-glyphs",
+      "checks": [
+        "Original identity plate and explanation respond",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": true,
+      "id": "identity-palette",
+      "checks": [
+        "Swatch depth with unchanged measured contrast",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": true,
+      "id": "ui-focus-rail",
+      "checks": [
+        "Selected inner plate with native control",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": true,
+      "id": "ui-command",
+      "checks": [
+        "Real shared representation changes its spatial object",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": true,
+      "id": "motion-reveal",
+      "checks": [
+        "Hinges follow actual reveal time; pause/replay or reduced direct state",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": true,
+      "id": "motion-linework",
+      "checks": [
+        "Independent construction planes and actual SVG stroke",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": true,
+      "id": "motion-reflow",
+      "checks": [
+        "GSAP placement and nested part inspection have distinct property owners",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": true,
+      "id": "motion-theatre",
+      "checks": [
+        "Actual exported midpoint plus independent nested selection",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": true,
+      "id": "spatial-wirefield",
+      "checks": [
+        "CPU vertex lift, rendered output, baseline comparison and idle rendering",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": true,
+      "id": "spatial-hatch",
+      "checks": [
+        "CPU vertex lift, rendered output, baseline comparison and idle rendering",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    },
+    {
+      "browser": "touch",
+      "reduced": true,
+      "id": "spatial-ascii",
+      "checks": [
+        "Actual generated samples partition into height ranges",
+        "Baseline/Spatial and narrow layout"
+      ],
+      "passed": true
+    }
+  ]
+}

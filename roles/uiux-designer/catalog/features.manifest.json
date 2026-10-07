@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "role": "uiux-designer",
+  "collection": "spatial-editorial-v1",
+  "publicationApproval": false,
+  "reviewSurface": "/features/",
+  "preferenceSource": "uiux-material-review-v1 in this browser's same-origin localStorage; never overwritten by the feature prototype",
+  "features": [
+    { "id": "study-index", "anchor": "index", "spatialVerb": "advance", "basis": ["feedback-card", "feedback-key"], "implemented": "Seven real study links, search, category filter, empty state, selected reader and comparison selection" },
+    { "id": "method-reader", "anchor": "reader", "spatialVerb": "locate / separate", "basis": ["feedback-navigation", "feedback-panel", "feedback-type"], "implemented": "Readable chapters, native anchors, selected study methods/sources/limits, annotations and interaction anatomy" },
+    { "id": "media-inspection", "anchor": "reader", "spatialVerb": "inspect", "basis": ["feedback-card"], "implemented": "Native image dialog, zoom, keyboard-scroll region, reset, captured-image download and focus return" },
+    { "id": "comparison", "anchor": "compare", "spatialVerb": "align", "basis": ["feedback-card", "feedback-navigation"], "implemented": "Two-study tray, aligned semantic table, remove/clear, persisted comparison and honest feature-review export" },
+    { "id": "geometry-workbench", "anchor": "workbench", "spatialVerb": "change / isolate / return", "basis": ["feedback-assembly", "feedback-key"], "implemented": "Actual parameterized SVG geometry, part selection, undo/redo, real SVG/JSON exports, optional existing Theatre score" },
+    { "id": "shared-actions", "anchor": "main", "spatialVerb": "access", "basis": ["feedback-key", "feedback-panel"], "implemented": "Searchable native command dialog executing the same actions as visible controls" }
+  ]
+}

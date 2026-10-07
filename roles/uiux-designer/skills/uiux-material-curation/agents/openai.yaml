@@ -1,0 +1,4 @@
+interface:
+  display_name: "UIUX designer / material curation"
+  short_description: "Role-only sourced specimens and local proposal review"
+  default_prompt: "Use $uiux-material-curation to develop and review sourced UIUX materials in the isolated role workspace."

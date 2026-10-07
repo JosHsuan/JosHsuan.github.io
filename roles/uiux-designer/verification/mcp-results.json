@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-07",
+  "role": "uiux-designer",
+  "results": [
+    {
+      "server": "uiux-material-catalog",
+      "result": "PASS",
+      "tools": [
+        "uiux_list_materials",
+        "uiux_get_material",
+        "uiux_catalog_status"
+      ],
+      "checks": [
+        "initialize",
+        "read-only tools",
+        "font query",
+        "material detail/deep link",
+        "unknown ID rejected"
+      ]
+    },
+    {
+      "server": "Playwright",
+      "result": "PASS",
+      "checks": [
+        "initialize",
+        "configured tool availability",
+        "actual loopback navigation",
+        "accessible snapshot",
+        "actual screenshot",
+        "browser close"
+      ],
+      "registeredVersion": "0.0.83"
+    }
+  ]
+}

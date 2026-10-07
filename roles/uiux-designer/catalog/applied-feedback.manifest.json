@@ -1,0 +1,224 @@
+{
+  "schemaVersion": 1,
+  "role": "uiux-designer",
+  "revision": "applied-feedback-v1",
+  "publicationApproval": false,
+  "reviewSurface": "/?collection=applied-feedback",
+  "materials": [
+    {
+      "id": "font-plex-sans",
+      "category": "Typography",
+      "revision": "applied-feedback-v1",
+      "name": "Word-plane typography",
+      "basis": [
+        "feedback-type"
+      ],
+      "ownership": "Word spans own transforms; CSS font parameters remain independent.",
+      "review": "New application proposal; retains the existing material ID and Saved status."
+    },
+    {
+      "id": "font-inter",
+      "category": "Typography",
+      "revision": "applied-feedback-v1",
+      "name": "Word-plane typography",
+      "basis": [
+        "feedback-type"
+      ],
+      "ownership": "Word spans own transforms; CSS font parameters remain independent.",
+      "review": "New application proposal; retains the existing material ID and Saved status."
+    },
+    {
+      "id": "font-space-grotesk",
+      "category": "Typography",
+      "revision": "applied-feedback-v1",
+      "name": "Word-plane typography",
+      "basis": [
+        "feedback-type"
+      ],
+      "ownership": "Word spans own transforms; CSS font parameters remain independent.",
+      "review": "New application proposal; retains the existing material ID and Saved status."
+    },
+    {
+      "id": "font-plex-mono",
+      "category": "Typography",
+      "revision": "applied-feedback-v1",
+      "name": "Word-plane typography",
+      "basis": [
+        "feedback-type"
+      ],
+      "ownership": "Word spans own transforms; CSS font parameters remain independent.",
+      "review": "New application proposal; retains the existing material ID and Saved status."
+    },
+    {
+      "id": "font-jetbrains-mono",
+      "category": "Typography",
+      "revision": "applied-feedback-v1",
+      "name": "Word-plane typography",
+      "basis": [
+        "feedback-type"
+      ],
+      "ownership": "Word spans own transforms; CSS font parameters remain independent.",
+      "review": "New application proposal; retains the existing material ID and Saved status."
+    },
+    {
+      "id": "icons-lucide",
+      "category": "Icons",
+      "revision": "applied-feedback-v1",
+      "name": "Tactile icon inspection",
+      "basis": [
+        "feedback-key",
+        "feedback-card"
+      ],
+      "ownership": "Fixed labeled buttons own input; inner glyph rigs own depth. Flat glyph shapes are preserved.",
+      "review": "New application proposal; retains the existing material ID and Saved status."
+    },
+    {
+      "id": "icons-phosphor",
+      "category": "Icons",
+      "revision": "applied-feedback-v1",
+      "name": "Tactile icon inspection",
+      "basis": [
+        "feedback-key",
+        "feedback-card"
+      ],
+      "ownership": "Fixed labeled buttons own input; inner glyph rigs own depth. Flat glyph shapes are preserved.",
+      "review": "New application proposal; retains the existing material ID and Saved status."
+    },
+    {
+      "id": "icons-tabler",
+      "category": "Icons",
+      "revision": "applied-feedback-v1",
+      "name": "Tactile icon inspection",
+      "basis": [
+        "feedback-key",
+        "feedback-card"
+      ],
+      "ownership": "Fixed labeled buttons own input; inner glyph rigs own depth. Flat glyph shapes are preserved.",
+      "review": "New application proposal; retains the existing material ID and Saved status."
+    },
+    {
+      "id": "identity-glyphs",
+      "category": "Identity",
+      "revision": "applied-feedback-v1",
+      "name": "Identity mark plates",
+      "basis": [
+        "feedback-glyph"
+      ],
+      "ownership": "Mark plates use CSS perspective; these are not volumetric meshes.",
+      "review": "New application proposal; retains the existing material ID and Saved status."
+    },
+    {
+      "id": "identity-palette",
+      "category": "Identity",
+      "revision": "applied-feedback-v1",
+      "name": "Separated color plates",
+      "basis": [
+        "feedback-card"
+      ],
+      "ownership": "Only decorative color surfaces move; contrast is measured from the original color pairs.",
+      "review": "New application proposal; retains the existing material ID and Saved status."
+    },
+    {
+      "id": "ui-focus-rail",
+      "category": "Interface",
+      "revision": "applied-feedback-v1",
+      "name": "Navigation detents",
+      "basis": [
+        "feedback-navigation"
+      ],
+      "ownership": "Inner plates move; semantic buttons retain stable hit regions.",
+      "review": "New application proposal; retains the existing material ID and Saved status."
+    },
+    {
+      "id": "ui-command",
+      "category": "Interface",
+      "revision": "applied-feedback-v1",
+      "name": "Layered representation state",
+      "basis": [
+        "feedback-panel",
+        "feedback-key"
+      ],
+      "ownership": "The command whitelist is unchanged; faces are CSS planes, not camera-controlled geometry.",
+      "review": "New application proposal; retains the existing material ID and Saved status."
+    },
+    {
+      "id": "motion-reveal",
+      "category": "Motion",
+      "revision": "applied-feedback-v1",
+      "name": "Hinged aperture",
+      "basis": [
+        "feedback-panel"
+      ],
+      "ownership": "Existing native animation owns time/clip; decorative leaves follow its evaluated progress.",
+      "review": "New application proposal; retains the existing material ID and Saved status."
+    },
+    {
+      "id": "motion-linework",
+      "category": "Motion",
+      "revision": "applied-feedback-v1",
+      "name": "Construction-line stack",
+      "basis": [
+        "feedback-card"
+      ],
+      "ownership": "Stroke animation owns dash offset; a separate rig owns plane transforms. No toolpath claim.",
+      "review": "New application proposal; retains the existing material ID and Saved status."
+    },
+    {
+      "id": "motion-reflow",
+      "category": "Motion",
+      "revision": "applied-feedback-v1",
+      "name": "Part-face inspection",
+      "basis": [
+        "feedback-card",
+        "feedback-key"
+      ],
+      "ownership": "GSAP owns outer placement; direct response owns nested face transforms.",
+      "review": "New application proposal; retains the existing material ID and Saved status."
+    },
+    {
+      "id": "motion-theatre",
+      "category": "Motion",
+      "revision": "applied-feedback-v1",
+      "name": "Authored section with local inspection",
+      "basis": [
+        "feedback-assembly"
+      ],
+      "ownership": "Existing genuine export/adapter owns outer groups; local inspection owns inner groups. No fabricated keyframes.",
+      "review": "New application proposal; retains the existing material ID and Saved status."
+    },
+    {
+      "id": "spatial-wirefield",
+      "category": "Spatial",
+      "revision": "applied-feedback-v1",
+      "name": "Picked field-band lift",
+      "basis": [
+        "feedback-assembly"
+      ],
+      "ownership": "CPU geometry buffers, bounds and raycasts agree. One response owns vertices; stepped camera remains independent.",
+      "review": "New application proposal; retains the existing material ID and Saved status."
+    },
+    {
+      "id": "spatial-hatch",
+      "category": "Spatial",
+      "revision": "applied-feedback-v1",
+      "name": "Material response to selected geometry",
+      "basis": [
+        "feedback-assembly"
+      ],
+      "ownership": "The same response owns CPU geometry and shader focus uniforms. No postprocessing or simulation package.",
+      "review": "New application proposal; retains the existing material ID and Saved status."
+    },
+    {
+      "id": "spatial-ascii",
+      "category": "Spatial",
+      "revision": "applied-feedback-v1",
+      "name": "Height-range planes",
+      "basis": [
+        "feedback-card",
+        "feedback-type"
+      ],
+      "ownership": "Deterministic text slices of the existing height field; CSS perspective, not WebGL or professional analysis.",
+      "review": "New application proposal; retains the existing material ID and Saved status."
+    }
+  ]
+}

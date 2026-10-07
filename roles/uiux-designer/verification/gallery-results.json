@@ -1,0 +1,81 @@
+{
+  "date": "2026-10-07",
+  "role": "uiux-designer",
+  "results": [
+    {
+      "browser": "chromium-desktop",
+      "initialViewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "materialSpecimens": 26,
+      "result": "PASS",
+      "runtimeErrors": 0,
+      "externalPreviewRequests": 0,
+      "flows": [
+        "filter",
+        "keyboard/skip",
+        "actual asset loading/downloads",
+        "first collection controls; second collection mount/source smoke (dedicated interaction report separately)",
+        "actual Studio replay/seek",
+        "real R3F/GLSL",
+        "comparison",
+        "notes/preferences",
+        "download export",
+        "reduced motion",
+        "responsive widths",
+        "closed-stage disposal"
+      ]
+    },
+    {
+      "browser": "webkit-desktop",
+      "initialViewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "materialSpecimens": 26,
+      "result": "PASS",
+      "runtimeErrors": 0,
+      "externalPreviewRequests": 0,
+      "flows": [
+        "filter",
+        "keyboard/skip",
+        "actual asset loading/downloads",
+        "first collection controls; second collection mount/source smoke (dedicated interaction report separately)",
+        "actual Studio replay/seek",
+        "real R3F/GLSL",
+        "comparison",
+        "notes/preferences",
+        "download export",
+        "reduced motion",
+        "responsive widths",
+        "closed-stage disposal"
+      ]
+    },
+    {
+      "browser": "chromium-mobile-emulation",
+      "initialViewport": {
+        "width": 390,
+        "height": 844
+      },
+      "materialSpecimens": 26,
+      "result": "PASS",
+      "runtimeErrors": 0,
+      "externalPreviewRequests": 0,
+      "flows": [
+        "filter",
+        "keyboard/skip",
+        "actual asset loading/downloads",
+        "first collection controls; second collection mount/source smoke (dedicated interaction report separately)",
+        "actual Studio replay/seek",
+        "real R3F/GLSL",
+        "comparison",
+        "notes/preferences",
+        "download export",
+        "reduced motion",
+        "responsive widths",
+        "closed-stage disposal"
+      ]
+    }
+  ]
+}

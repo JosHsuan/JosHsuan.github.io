@@ -1,0 +1,12 @@
+import { readFile, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+const stateUrl = new URL('../src/motion/theatre/motion.state.json', import.meta.url);
+const bytes = await readFile(stateUrl);
+const state = JSON.parse(bytes.toString('utf8'));
+const tracks = state.sheetsById?.Main?.sequence?.tracksByObject?.Pose;
+if (!tracks) throw new Error('Actual Pose tracks are required. Do not fabricate state.');
+const assemblyTrack = Object.entries(tracks.trackIdByPropPath).find(([key]) => key === '["assemblyProgress"]')?.[1];
+if (!assemblyTrack || tracks.trackData[assemblyTrack].keyframes.length < 3) throw new Error('Studio assembly track is missing its three keyframes.');
+const manifest = { schemaVersion: 1, role: 'uiux-designer', projectId: 'uiux.section-study.v1', sheetId: 'Main', core: '0.7.2', studio: '0.7.2', stateRevision: createHash('sha256').update(bytes).digest('hex'), clips: { assembly: { start: 0, end: 2.4 } }, requiredBindings: ['Pose.assemblyProgress'], authoredAt: '2026-10-07', provenance: 'Sequenced and captured using the actual Studio property menu and transactions, then downloaded with createContentOfSaveFile.' };
+await writeFile(new URL('../src/motion/theatre/motion.manifest.json', import.meta.url), JSON.stringify(manifest, null, 2) + '\n');
+console.log('Versioned genuine UIUX Studio export.');

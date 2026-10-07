@@ -1,0 +1,6 @@
+interface:
+  display_name: "UIUX designer / browser review"
+  short_description: "Role-only browser inspection and visual review guidance"
+  icon_small: "./assets/playwright-small.svg"
+  icon_large: "./assets/playwright.png"
+  default_prompt: "Automate this browser workflow with Playwright and produce a reliable script with run steps."

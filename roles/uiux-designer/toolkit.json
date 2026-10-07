@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "role": "uiux-designer",
+  "activation": "codex-role.ps1",
+  "scope": "Opt-in isolated CODEX_HOME; no repository-root .codex or .agents registration",
+  "testedCodexVersion": "0.144.1",
+  "skills": [
+    { "name": "uiux-material-curation", "path": "skills/uiux-material-curation", "origin": "Project-original role workflow" },
+    { "name": "frontend-design", "path": "skills/vendor/frontend-design", "repo": "anthropics/skills", "revision": "683bc88e56f3e09ba94f7055977f3d3aa499f202", "sourcePath": "skills/frontend-design", "license": "Apache-2.0", "adaptation": "UIUX display metadata added; upstream skill and license retained" },
+    { "name": "playwright", "path": "skills/vendor/playwright", "repo": "openai/skills", "revision": "49f948faa9258a0c61caceaf225e179651397431", "sourcePath": "skills/.curated/playwright", "license": "Apache-2.0", "adaptation": "Display labels scoped to UIUX; upstream prompts, icons, notices and policy preserved", "platformNote": "CLI guidance is retained; this Windows role uses the configured browser MCP for local inspection" }
+  ],
+  "mcp": [
+    { "name": "uiux_catalog", "source": "mcp/catalog-server.mjs", "transport": "stdio", "access": "read-only local catalog tools", "tested": true },
+    { "name": "uiux_browser", "package": "@playwright/mcp", "version": "0.0.83", "transport": "stdio", "access": "isolated browser profile; configured loopback origin and tool allowlist", "tested": true, "note": "Its transitive Playwright 1.64 alpha is isolated in the role lockfile; the browser binary is the existing stable project Playwright 1.63 headless shell. Actual protocol/rendering was verified." }
+  ],
+  "productionDependenciesChanged": false,
+  "globalConfigFingerprintBeforeAfter": "719e39d8c6bfee3e10b7964043b50183a64568cc21081476957ee71eec00bb4e",
+  "configurationReferences": [
+    "https://developers.openai.com/codex/config-advanced/",
+    "https://developers.openai.com/codex/mcp/",
+    "https://developers.openai.com/codex/skills/",
+    "https://github.com/microsoft/playwright-mcp"
+  ]
+}

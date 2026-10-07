@@ -1,0 +1,11 @@
+# Original acquired bytes and source fingerprints remain stable across hosts.
+assets/** -text
+licenses/** -text
+skills/vendor/** -text
+*.json text eol=lf
+*.js text eol=lf
+*.mjs text eol=lf
+*.jsx text eol=lf
+*.cjs text eol=lf
+*.css text eol=lf
+*.html text eol=lf

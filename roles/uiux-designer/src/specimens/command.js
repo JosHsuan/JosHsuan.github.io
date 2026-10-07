@@ -1,0 +1,18 @@
+import { node, control, scaffold } from './helpers.js';
+import { feedbackControls } from '../applied-feedback/controls.js';
+export default function command(root, material, context) {
+  const parts = scaffold(root, material); const { container, stage, controls, status } = parts; const object = node('div', undefined, { class: 'command-object' }); const figure = node('div', undefined, { class: 'outline-figure', 'aria-hidden': 'true' }); const faces = [node('span', undefined, { class: 'command-face' }), node('span', undefined, { class: 'command-face' })]; figure.append(...faces); object.append(figure); stage.append(object);
+  const feedback = feedbackControls(parts, context, { filled: 0, open: 1 }, (value, spatial) => { figure.style.transform = spatial ? `rotateX(${-18 + value.filled * 8}deg) rotateY(${-26 - value.filled * 9}deg) rotateZ(12deg)` : 'rotate(30deg)'; faces.forEach((face, i) => { face.hidden = !spatial; face.style.transform = `translateZ(${value.open * (i + 1) * (18 + value.filled * 12)}px)`; }); });
+  let view = 'outline'; const selectors = [];
+  const setView = next => { view = next; figure.classList.toggle('filled', view === 'filled'); selectors.forEach(button => button.setAttribute('aria-pressed', String(button.textContent.toLowerCase() === view))); feedback.to({ filled: Number(view === 'filled') }); status.textContent = `Representation: ${view}. The buttons and commands share this state.`; };
+  for (const label of ['Outline', 'Filled']) { const button = control(controls, label, () => setView(label.toLowerCase())); selectors.push(button); }
+  const dialog = node('dialog', undefined, { class: 'command-dialog' }); const input = node('input', undefined, { type: 'text', 'aria-label': 'Command', autocomplete: 'off' }); const result = node('p', '', { class: 'command-status', role: 'status' }); const suggestions = node('div', undefined, { class: 'suggestions' });
+  const execute = value => { const normalized = value.trim().toLowerCase(); if (normalized === 'help') result.textContent = 'Commands: view outline, view filled, reset, help. No arbitrary input is executed.'; else if (normalized === 'view outline' || normalized === 'view filled') { setView(normalized.split(' ')[1]); result.textContent = `View set to ${view}.`; } else if (normalized === 'reset') { setView('outline'); result.textContent = 'Outline restored.'; } else if (normalized === 'inspect') result.textContent = 'Unavailable here: this DOM specimen has no camera.'; else result.textContent = 'Unknown command. Select a suggestion or type help.'; };
+  ['help', 'view outline', 'view filled', 'reset'].forEach(label => control(suggestions, label, () => { input.value = label; execute(label); }));
+  dialog.append(node('h2', 'Commands / secondary interface'), input, suggestions, result); control(dialog, 'Close commands', () => dialog.close()); container.append(dialog);
+  const open = () => { if (!dialog.open) dialog.showModal(); input.focus(); }; const openButton = control(controls, 'Open commands', open);
+  input.addEventListener('keydown', event => { if (event.key === 'Enter' && !event.isComposing) { event.preventDefault(); execute(input.value); } });
+  const shortcut = event => { if (event.key === '/' && !event.isComposing && !event.target.closest('input,textarea,[contenteditable="true"]')) { event.preventDefault(); open(); } }; document.addEventListener('keydown', shortcut);
+  dialog.addEventListener('close', () => openButton.focus()); setView(view);
+  return () => { feedback.destroy(); document.removeEventListener('keydown', shortcut); if (dialog.open) dialog.close(); };
+}

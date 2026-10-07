@@ -1,0 +1,1551 @@
+{
+  "schemaVersion": 1,
+  "role": "uiux-designer",
+  "title": "Material studies",
+  "reviewedAt": "2026-10-07",
+  "categories": [
+    "Spatial feedback",
+    "Typography",
+    "Icons",
+    "Identity",
+    "Interface",
+    "Motion",
+    "Spatial"
+  ],
+  "materials": [
+    {
+      "role": "uiux-designer",
+      "reviewState": "proposal-only",
+      "publicationApproval": false,
+      "createdAt": "2026-10-07",
+      "id": "font-plex-sans",
+      "name": "IBM Plex Sans",
+      "category": "Typography",
+      "recommendation": "preferred",
+      "description": "Humanist grotesk with a clear technical voice. Variable width and weight in the supplied font.",
+      "proposal": "優先提案：正文、案例標題與控制介面使用同一字體，讓工程感保持清楚而不冷硬。\n\nRound 04：短標題按字詞展開、抬升與返回；原本的文字、字級、字重控制保留，正文不動。",
+      "demo": "font",
+      "sourceFiles": [
+        "src/specimens/assets.js",
+        "src/specimens/helpers.js",
+        "src/applied-feedback/controls.js",
+        "src/spatial-feedback/response.js",
+        "preview/applied.css"
+      ],
+      "thumbnail": "assets/previews/applied-font-plex-sans.png",
+      "license": "OFL-1.1",
+      "origin": "External licensed asset",
+      "sources": [
+        {
+          "title": "google/fonts",
+          "url": "https://github.com/google/fonts/tree/5e8a3ba899557829a76cfdac30fa512bda91d7ca",
+          "revision": "5e8a3ba899557829a76cfdac30fa512bda91d7ca"
+        },
+        {
+          "title": "W3C: interaction animation controls",
+          "url": "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html"
+        }
+      ],
+      "assets": [
+        "assets/fonts/ibmplexsans.ttf",
+        "assets/previews/applied-font-plex-sans.png"
+      ],
+      "notices": [
+        "licenses/ibmplexsans-OFL.txt"
+      ],
+      "fallback": "Readable static specimen and ordinary controls.",
+      "reducedMotion": "No automatic motion. Direct interaction feedback snaps to its target. Existing reveal/trace playback resolves to its complete state.",
+      "integration": "Candidate only. A later owner decision is required before copying it into production.",
+      "family": "IBM Plex Sans",
+      "cssFamily": "Plex Sans",
+      "dependency": "Local TTF; CSS @font-face",
+      "parameters": [
+        "Text",
+        "Size",
+        "Weight",
+        "Feedback: Baseline / Spatial",
+        "Lift heading"
+      ],
+      "tradeoff": "Its distinctive shapes carry more character than a neutral system sans; test long case-study passages.",
+      "appliedFeedback": {
+        "revision": "applied-feedback-v1",
+        "name": "Word-plane typography",
+        "basis": [
+          "feedback-type"
+        ],
+        "ownership": "Word spans own transforms; CSS font parameters remain independent.",
+        "review": "New application proposal; retains the existing material ID and Saved status."
+      }
+    },
+    {
+      "role": "uiux-designer",
+      "reviewState": "proposal-only",
+      "publicationApproval": false,
+      "createdAt": "2026-10-07",
+      "id": "font-inter",
+      "name": "Inter",
+      "category": "Typography",
+      "recommendation": "alternative",
+      "description": "Neutral variable sans-serif for continuous reading and interface labels.",
+      "proposal": "備選：若希望讓作品與空間影像承擔更多性格，Inter 可降低字體的存在感。\n\nRound 04：短標題按字詞展開、抬升與返回；原本的文字、字級、字重控制保留，正文不動。",
+      "demo": "font",
+      "sourceFiles": [
+        "src/specimens/assets.js",
+        "src/specimens/helpers.js",
+        "src/applied-feedback/controls.js",
+        "src/spatial-feedback/response.js",
+        "preview/applied.css"
+      ],
+      "thumbnail": "assets/previews/applied-font-inter.png",
+      "license": "OFL-1.1",
+      "origin": "External licensed asset",
+      "sources": [
+        {
+          "title": "google/fonts",
+          "url": "https://github.com/google/fonts/tree/5e8a3ba899557829a76cfdac30fa512bda91d7ca",
+          "revision": "5e8a3ba899557829a76cfdac30fa512bda91d7ca"
+        },
+        {
+          "title": "W3C: interaction animation controls",
+          "url": "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html"
+        }
+      ],
+      "assets": [
+        "assets/fonts/inter.ttf",
+        "assets/previews/applied-font-inter.png"
+      ],
+      "notices": [
+        "licenses/inter-OFL.txt"
+      ],
+      "fallback": "Readable static specimen and ordinary controls.",
+      "reducedMotion": "No automatic motion. Direct interaction feedback snaps to its target. Existing reveal/trace playback resolves to its complete state.",
+      "integration": "Candidate only. A later owner decision is required before copying it into production.",
+      "family": "Inter",
+      "cssFamily": "Inter",
+      "dependency": "Local TTF; CSS @font-face",
+      "parameters": [
+        "Text",
+        "Size",
+        "Weight",
+        "Feedback: Baseline / Spatial",
+        "Lift heading"
+      ],
+      "tradeoff": "Familiar and readable, but less distinctive for the anthology identity.",
+      "appliedFeedback": {
+        "revision": "applied-feedback-v1",
+        "name": "Word-plane typography",
+        "basis": [
+          "feedback-type"
+        ],
+        "ownership": "Word spans own transforms; CSS font parameters remain independent.",
+        "review": "New application proposal; retains the existing material ID and Saved status."
+      }
+    },
+    {
+      "role": "uiux-designer",
+      "reviewState": "proposal-only",
+      "publicationApproval": false,
+      "createdAt": "2026-10-07",
+      "id": "font-space-grotesk",
+      "name": "Space Grotesk",
+      "category": "Typography",
+      "recommendation": "accent",
+      "description": "A geometric display option for short chapter openings and compact titles.",
+      "proposal": "標題選項：只用於篇章開頭及短標題，長文仍搭配清楚的正文系統。\n\nRound 04：短標題按字詞展開、抬升與返回；原本的文字、字級、字重控制保留，正文不動。",
+      "demo": "font",
+      "sourceFiles": [
+        "src/specimens/assets.js",
+        "src/specimens/helpers.js",
+        "src/applied-feedback/controls.js",
+        "src/spatial-feedback/response.js",
+        "preview/applied.css"
+      ],
+      "thumbnail": "assets/previews/applied-font-space-grotesk.png",
+      "license": "OFL-1.1",
+      "origin": "External licensed asset",
+      "sources": [
+        {
+          "title": "google/fonts",
+          "url": "https://github.com/google/fonts/tree/5e8a3ba899557829a76cfdac30fa512bda91d7ca",
+          "revision": "5e8a3ba899557829a76cfdac30fa512bda91d7ca"
+        },
+        {
+          "title": "W3C: interaction animation controls",
+          "url": "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html"
+        }
+      ],
+      "assets": [
+        "assets/fonts/spacegrotesk.ttf",
+        "assets/previews/applied-font-space-grotesk.png"
+      ],
+      "notices": [
+        "licenses/spacegrotesk-OFL.txt"
+      ],
+      "fallback": "Readable static specimen and ordinary controls.",
+      "reducedMotion": "No automatic motion. Direct interaction feedback snaps to its target. Existing reveal/trace playback resolves to its complete state.",
+      "integration": "Candidate only. A later owner decision is required before copying it into production.",
+      "family": "Space Grotesk",
+      "cssFamily": "Space Grotesk",
+      "dependency": "Local TTF; CSS @font-face",
+      "parameters": [
+        "Text",
+        "Size",
+        "Weight",
+        "Feedback: Baseline / Spatial",
+        "Lift heading"
+      ],
+      "tradeoff": "More expressive at large sizes; avoid using its personality for every small UI label.",
+      "appliedFeedback": {
+        "revision": "applied-feedback-v1",
+        "name": "Word-plane typography",
+        "basis": [
+          "feedback-type"
+        ],
+        "ownership": "Word spans own transforms; CSS font parameters remain independent.",
+        "review": "New application proposal; retains the existing material ID and Saved status."
+      }
+    },
+    {
+      "role": "uiux-designer",
+      "reviewState": "proposal-only",
+      "publicationApproval": false,
+      "createdAt": "2026-10-07",
+      "id": "font-plex-mono",
+      "name": "IBM Plex Mono",
+      "category": "Typography",
+      "recommendation": "preferred",
+      "description": "A regular-weight mono face for dimensions, identifiers and measured information.",
+      "proposal": "優先提案：與 Plex Sans 配對；技術標籤、參數與代碼使用等寬字，正文保留比例字。\n\nRound 04：短標題按字詞展開、抬升與返回；原本的文字、字級、字重控制保留，正文不動。",
+      "demo": "font",
+      "sourceFiles": [
+        "src/specimens/assets.js",
+        "src/specimens/helpers.js",
+        "src/applied-feedback/controls.js",
+        "src/spatial-feedback/response.js",
+        "preview/applied.css"
+      ],
+      "thumbnail": "assets/previews/applied-font-plex-mono.png",
+      "license": "OFL-1.1",
+      "origin": "External licensed asset",
+      "sources": [
+        {
+          "title": "google/fonts",
+          "url": "https://github.com/google/fonts/tree/5e8a3ba899557829a76cfdac30fa512bda91d7ca",
+          "revision": "5e8a3ba899557829a76cfdac30fa512bda91d7ca"
+        },
+        {
+          "title": "W3C: interaction animation controls",
+          "url": "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html"
+        }
+      ],
+      "assets": [
+        "assets/fonts/ibmplexmono.ttf",
+        "assets/previews/applied-font-plex-mono.png"
+      ],
+      "notices": [
+        "licenses/ibmplexmono-OFL.txt"
+      ],
+      "fallback": "Readable static specimen and ordinary controls.",
+      "reducedMotion": "No automatic motion. Direct interaction feedback snaps to its target. Existing reveal/trace playback resolves to its complete state.",
+      "integration": "Candidate only. A later owner decision is required before copying it into production.",
+      "family": "IBM Plex Mono",
+      "cssFamily": "Plex Mono",
+      "fixedWeight": true,
+      "dependency": "Local regular TTF; CSS @font-face",
+      "parameters": [
+        "Text",
+        "Size",
+        "Feedback: Baseline / Spatial",
+        "Lift heading"
+      ],
+      "tradeoff": "Only the regular face is included in this specimen. Do not synthesize bold as a supplied font weight.",
+      "appliedFeedback": {
+        "revision": "applied-feedback-v1",
+        "name": "Word-plane typography",
+        "basis": [
+          "feedback-type"
+        ],
+        "ownership": "Word spans own transforms; CSS font parameters remain independent.",
+        "review": "New application proposal; retains the existing material ID and Saved status."
+      }
+    },
+    {
+      "role": "uiux-designer",
+      "reviewState": "proposal-only",
+      "publicationApproval": false,
+      "createdAt": "2026-10-07",
+      "id": "font-jetbrains-mono",
+      "name": "JetBrains Mono",
+      "category": "Typography",
+      "recommendation": "alternative",
+      "description": "A variable mono option for code excerpts and a secondary command language.",
+      "proposal": "備選：適合少量指令及程式片段；不把整個網站做成終端機。\n\nRound 04：短標題按字詞展開、抬升與返回；原本的文字、字級、字重控制保留，正文不動。",
+      "demo": "font",
+      "sourceFiles": [
+        "src/specimens/assets.js",
+        "src/specimens/helpers.js",
+        "src/applied-feedback/controls.js",
+        "src/spatial-feedback/response.js",
+        "preview/applied.css"
+      ],
+      "thumbnail": "assets/previews/applied-font-jetbrains-mono.png",
+      "license": "OFL-1.1",
+      "origin": "External licensed asset",
+      "sources": [
+        {
+          "title": "google/fonts",
+          "url": "https://github.com/google/fonts/tree/5e8a3ba899557829a76cfdac30fa512bda91d7ca",
+          "revision": "5e8a3ba899557829a76cfdac30fa512bda91d7ca"
+        },
+        {
+          "title": "W3C: interaction animation controls",
+          "url": "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html"
+        }
+      ],
+      "assets": [
+        "assets/fonts/jetbrainsmono.ttf",
+        "assets/previews/applied-font-jetbrains-mono.png"
+      ],
+      "notices": [
+        "licenses/jetbrainsmono-OFL.txt"
+      ],
+      "fallback": "Readable static specimen and ordinary controls.",
+      "reducedMotion": "No automatic motion. Direct interaction feedback snaps to its target. Existing reveal/trace playback resolves to its complete state.",
+      "integration": "Candidate only. A later owner decision is required before copying it into production.",
+      "family": "JetBrains Mono",
+      "cssFamily": "JetBrains Mono",
+      "dependency": "Local variable TTF; CSS @font-face",
+      "parameters": [
+        "Text",
+        "Size",
+        "Weight",
+        "Feedback: Baseline / Spatial",
+        "Lift heading"
+      ],
+      "tradeoff": "Its coding association is strong. Use only where it improves the reading of technical information.",
+      "appliedFeedback": {
+        "revision": "applied-feedback-v1",
+        "name": "Word-plane typography",
+        "basis": [
+          "feedback-type"
+        ],
+        "ownership": "Word spans own transforms; CSS font parameters remain independent.",
+        "review": "New application proposal; retains the existing material ID and Saved status."
+      }
+    },
+    {
+      "role": "uiux-designer",
+      "reviewState": "proposal-only",
+      "publicationApproval": false,
+      "createdAt": "2026-10-07",
+      "id": "icons-lucide",
+      "name": "Lucide / outline",
+      "category": "Icons",
+      "recommendation": "preferred",
+      "description": "Twelve actual SVGs for navigation, scene representation and playback controls.",
+      "proposal": "優先提案：線條節制、圖示命名清楚，適合低干擾的導覽與檢視控制。\n\nRound 04：直接作用於每個真實 SVG 圖示：點選提起，按下壓縮，取消返回。下載仍保留來源的原始檔案。",
+      "demo": "icons",
+      "sourceFiles": [
+        "src/specimens/assets.js",
+        "src/specimens/helpers.js",
+        "src/applied-feedback/controls.js",
+        "src/spatial-feedback/response.js",
+        "preview/applied.css"
+      ],
+      "thumbnail": "assets/previews/applied-icons-lucide.png",
+      "license": "ISC",
+      "origin": "External licensed asset",
+      "sources": [
+        {
+          "title": "lucide-icons/lucide",
+          "url": "https://github.com/lucide-icons/lucide/tree/b56741cf30c08fc7248bf41ddd3a261367aa9579",
+          "revision": "b56741cf30c08fc7248bf41ddd3a261367aa9579"
+        },
+        {
+          "title": "W3C: interaction animation controls",
+          "url": "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html"
+        }
+      ],
+      "assets": [
+        "assets/icons/icons-lucide/aperture.svg",
+        "assets/icons/icons-lucide/arrow-up-right.svg",
+        "assets/icons/icons-lucide/box.svg",
+        "assets/icons/icons-lucide/code-xml.svg",
+        "assets/icons/icons-lucide/download.svg",
+        "assets/icons/icons-lucide/layers.svg",
+        "assets/icons/icons-lucide/menu.svg",
+        "assets/icons/icons-lucide/move-3d.svg",
+        "assets/icons/icons-lucide/pause.svg",
+        "assets/icons/icons-lucide/play.svg",
+        "assets/icons/icons-lucide/rotate-ccw.svg",
+        "assets/icons/icons-lucide/x.svg",
+        "assets/previews/applied-icons-lucide.png"
+      ],
+      "notices": [
+        "licenses/icons-lucide.txt"
+      ],
+      "fallback": "Readable static specimen and ordinary controls.",
+      "reducedMotion": "No automatic motion. Direct interaction feedback snaps to its target. Existing reveal/trace playback resolves to its complete state.",
+      "integration": "Candidate only. A later owner decision is required before copying it into production.",
+      "dependency": "Local SVG; no icon package required",
+      "parameters": [
+        "Size",
+        "Icon selection",
+        "Feedback: Baseline / Spatial",
+        "Inspect a glyph",
+        "Press / release / cancel"
+      ],
+      "tradeoff": "Use icons with text labels. The icon set is for controls, not a substitute for an original identity.",
+      "appliedFeedback": {
+        "revision": "applied-feedback-v1",
+        "name": "Tactile icon inspection",
+        "basis": [
+          "feedback-key",
+          "feedback-card"
+        ],
+        "ownership": "Fixed labeled buttons own input; inner glyph rigs own depth. Flat glyph shapes are preserved.",
+        "review": "New application proposal; retains the existing material ID and Saved status."
+      }
+    },
+    {
+      "role": "uiux-designer",
+      "reviewState": "proposal-only",
+      "publicationApproval": false,
+      "createdAt": "2026-10-07",
+      "id": "icons-phosphor",
+      "name": "Phosphor / regular",
+      "category": "Icons",
+      "recommendation": "alternative",
+      "description": "The same functional control roles expressed through a regular Phosphor selection.",
+      "proposal": "備選：較有圖形份量，適合需要明顯控制識別的實驗頁。\n\nRound 04：直接作用於每個真實 SVG 圖示：點選提起，按下壓縮，取消返回。下載仍保留來源的原始檔案。",
+      "demo": "icons",
+      "sourceFiles": [
+        "src/specimens/assets.js",
+        "src/specimens/helpers.js",
+        "src/applied-feedback/controls.js",
+        "src/spatial-feedback/response.js",
+        "preview/applied.css"
+      ],
+      "thumbnail": "assets/previews/applied-icons-phosphor.png",
+      "license": "MIT",
+      "origin": "External licensed asset",
+      "sources": [
+        {
+          "title": "phosphor-icons/core",
+          "url": "https://github.com/phosphor-icons/core/tree/2b75f3ad12b420c9504ef05df8d2564a28f8500e",
+          "revision": "2b75f3ad12b420c9504ef05df8d2564a28f8500e"
+        },
+        {
+          "title": "W3C: interaction animation controls",
+          "url": "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html"
+        }
+      ],
+      "assets": [
+        "assets/icons/icons-phosphor/arrow-counter-clockwise.svg",
+        "assets/icons/icons-phosphor/arrow-up-right.svg",
+        "assets/icons/icons-phosphor/bounding-box.svg",
+        "assets/icons/icons-phosphor/circle-notch.svg",
+        "assets/icons/icons-phosphor/code.svg",
+        "assets/icons/icons-phosphor/cube.svg",
+        "assets/icons/icons-phosphor/download-simple.svg",
+        "assets/icons/icons-phosphor/list.svg",
+        "assets/icons/icons-phosphor/pause.svg",
+        "assets/icons/icons-phosphor/play.svg",
+        "assets/icons/icons-phosphor/stack.svg",
+        "assets/icons/icons-phosphor/x.svg",
+        "assets/previews/applied-icons-phosphor.png"
+      ],
+      "notices": [
+        "licenses/icons-phosphor.txt"
+      ],
+      "fallback": "Readable static specimen and ordinary controls.",
+      "reducedMotion": "No automatic motion. Direct interaction feedback snaps to its target. Existing reveal/trace playback resolves to its complete state.",
+      "integration": "Candidate only. A later owner decision is required before copying it into production.",
+      "dependency": "Local SVG; no icon package required",
+      "parameters": [
+        "Size",
+        "Icon selection",
+        "Feedback: Baseline / Spatial",
+        "Inspect a glyph",
+        "Press / release / cancel"
+      ],
+      "tradeoff": "The broader silhouettes need careful comparison at small sizes.",
+      "appliedFeedback": {
+        "revision": "applied-feedback-v1",
+        "name": "Tactile icon inspection",
+        "basis": [
+          "feedback-key",
+          "feedback-card"
+        ],
+        "ownership": "Fixed labeled buttons own input; inner glyph rigs own depth. Flat glyph shapes are preserved.",
+        "review": "New application proposal; retains the existing material ID and Saved status."
+      }
+    },
+    {
+      "role": "uiux-designer",
+      "reviewState": "proposal-only",
+      "publicationApproval": false,
+      "createdAt": "2026-10-07",
+      "id": "icons-tabler",
+      "name": "Tabler / outline",
+      "category": "Icons",
+      "recommendation": "alternative",
+      "description": "Twelve outline SVGs, including axis and stacked-layer language.",
+      "proposal": "備選：工程語彙較多；先保持一套主要 icon，避免把三套混在同一導覽。\n\nRound 04：直接作用於每個真實 SVG 圖示：點選提起，按下壓縮，取消返回。下載仍保留來源的原始檔案。",
+      "demo": "icons",
+      "sourceFiles": [
+        "src/specimens/assets.js",
+        "src/specimens/helpers.js",
+        "src/applied-feedback/controls.js",
+        "src/spatial-feedback/response.js",
+        "preview/applied.css"
+      ],
+      "thumbnail": "assets/previews/applied-icons-tabler.png",
+      "license": "MIT",
+      "origin": "External licensed asset",
+      "sources": [
+        {
+          "title": "tabler/tabler-icons",
+          "url": "https://github.com/tabler/tabler-icons/tree/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d",
+          "revision": "a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d"
+        },
+        {
+          "title": "W3C: interaction animation controls",
+          "url": "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html"
+        }
+      ],
+      "assets": [
+        "assets/icons/icons-tabler/aperture.svg",
+        "assets/icons/icons-tabler/arrow-up-right.svg",
+        "assets/icons/icons-tabler/axis-x.svg",
+        "assets/icons/icons-tabler/code.svg",
+        "assets/icons/icons-tabler/cube.svg",
+        "assets/icons/icons-tabler/download.svg",
+        "assets/icons/icons-tabler/menu-2.svg",
+        "assets/icons/icons-tabler/player-pause.svg",
+        "assets/icons/icons-tabler/player-play.svg",
+        "assets/icons/icons-tabler/rotate-clockwise.svg",
+        "assets/icons/icons-tabler/stack-2.svg",
+        "assets/icons/icons-tabler/x.svg",
+        "assets/previews/applied-icons-tabler.png"
+      ],
+      "notices": [
+        "licenses/icons-tabler.txt"
+      ],
+      "fallback": "Readable static specimen and ordinary controls.",
+      "reducedMotion": "No automatic motion. Direct interaction feedback snaps to its target. Existing reveal/trace playback resolves to its complete state.",
+      "integration": "Candidate only. A later owner decision is required before copying it into production.",
+      "dependency": "Local SVG; no icon package required",
+      "parameters": [
+        "Size",
+        "Icon selection",
+        "Feedback: Baseline / Spatial",
+        "Inspect a glyph",
+        "Press / release / cancel"
+      ],
+      "tradeoff": "Useful technical range, but a single family should own the eventual interface.",
+      "appliedFeedback": {
+        "revision": "applied-feedback-v1",
+        "name": "Tactile icon inspection",
+        "basis": [
+          "feedback-key",
+          "feedback-card"
+        ],
+        "ownership": "Fixed labeled buttons own input; inner glyph rigs own depth. Flat glyph shapes are preserved.",
+        "review": "New application proposal; retains the existing material ID and Saved status."
+      }
+    },
+    {
+      "role": "uiux-designer",
+      "reviewState": "proposal-only",
+      "publicationApproval": false,
+      "createdAt": "2026-10-07",
+      "id": "identity-glyphs",
+      "name": "FORM / SYSTEM / MAKE",
+      "category": "Identity",
+      "recommendation": "preferred",
+      "description": "Three original geometric marks paired with readable labels.",
+      "proposal": "身份提案：圓弧與剖線代表 FORM、連接節點代表 SYSTEM、配合面代表 MAKE；不借用影集符號。\n\nRound 04：同一組原創身份圖形，各自以不同軸向開啟；清楚呈現三個主題的差異。",
+      "demo": "glyphs",
+      "sourceFiles": [
+        "src/specimens/assets.js",
+        "src/specimens/helpers.js",
+        "src/applied-feedback/controls.js",
+        "src/spatial-feedback/response.js",
+        "preview/applied.css"
+      ],
+      "thumbnail": "assets/previews/applied-identity-glyphs.png",
+      "license": "Project-authored specimen capture; underlying font/icon notices retained with material",
+      "origin": "Original local specimen",
+      "sources": [
+        {
+          "title": "W3C: interaction animation controls",
+          "url": "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html"
+        }
+      ],
+      "assets": [
+        "assets/original/form.svg",
+        "assets/original/system.svg",
+        "assets/original/make.svg"
+      ],
+      "notices": [],
+      "fallback": "Readable static specimen and ordinary controls.",
+      "reducedMotion": "No automatic motion. Direct interaction feedback snaps to its target. Existing reveal/trace playback resolves to its complete state.",
+      "integration": "Candidate only. A later owner decision is required before copying it into production.",
+      "dependency": "Original SVG",
+      "parameters": [
+        "Size",
+        "Feedback: Baseline / Spatial",
+        "Inspect FORM / SYSTEM / MAKE"
+      ],
+      "tradeoff": "These are thematic categories, not proficiency ratings. Review the vocabulary before adopting the marks.",
+      "appliedFeedback": {
+        "revision": "applied-feedback-v1",
+        "name": "Identity mark plates",
+        "basis": [
+          "feedback-glyph"
+        ],
+        "ownership": "Mark plates use CSS perspective; these are not volumetric meshes.",
+        "review": "New application proposal; retains the existing material ID and Saved status."
+      }
+    },
+    {
+      "role": "uiux-designer",
+      "reviewState": "proposal-only",
+      "publicationApproval": false,
+      "createdAt": "2026-10-07",
+      "id": "identity-palette",
+      "name": "Graphite / paper / orange",
+      "category": "Identity",
+      "recommendation": "preferred",
+      "description": "The supplied palette interpreted as surfaces, readable text and one controlled interaction accent.",
+      "proposal": "色彩提案：橘色主要用於互動與焦點；空間物件的材質仍以中性色呈現。\n\nRound 04：把色票變成可分離的表面；文字與實際對比數值維持固定，避免材質效果干擾判讀。",
+      "demo": "palette",
+      "sourceFiles": [
+        "src/specimens/assets.js",
+        "src/specimens/helpers.js",
+        "src/applied-feedback/controls.js",
+        "src/spatial-feedback/response.js",
+        "preview/applied.css"
+      ],
+      "thumbnail": "assets/previews/applied-identity-palette.png",
+      "license": "Project-authored specimen capture; underlying font/icon notices retained with material",
+      "origin": "Original local specimen",
+      "sources": [
+        {
+          "title": "W3C: interaction animation controls",
+          "url": "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html"
+        }
+      ],
+      "assets": [
+        "assets/previews/applied-identity-palette.png"
+      ],
+      "notices": [],
+      "fallback": "Readable static specimen and ordinary controls.",
+      "reducedMotion": "No automatic motion. Direct interaction feedback snaps to its target. Existing reveal/trace playback resolves to its complete state.",
+      "integration": "Candidate only. A later owner decision is required before copying it into production.",
+      "dependency": "CSS custom properties",
+      "parameters": [
+        "Surface context",
+        "Feedback: Baseline / Spatial",
+        "Separate color plates"
+      ],
+      "tradeoff": "Thin decorative rules need not be as bright as controls. Contrast is calculated per displayed pairing.",
+      "appliedFeedback": {
+        "revision": "applied-feedback-v1",
+        "name": "Separated color plates",
+        "basis": [
+          "feedback-card"
+        ],
+        "ownership": "Only decorative color surfaces move; contrast is measured from the original color pairs.",
+        "review": "New application proposal; retains the existing material ID and Saved status."
+      }
+    },
+    {
+      "role": "uiux-designer",
+      "reviewState": "proposal-only",
+      "publicationApproval": false,
+      "createdAt": "2026-10-07",
+      "id": "ui-focus-rail",
+      "name": "Navigation focus rail",
+      "category": "Interface",
+      "recommendation": "preferred",
+      "description": "An accessible visible state for hover, keyboard focus and the selected destination.",
+      "proposal": "功能提案：讓滑鼠、鍵盤與觸控都有相同的定位線索；不需要開動畫或輸入指令才能導覽。\n\nRound 04：將目前選取的項目帶到閱讀平面；原本 Tab、Enter 與選取狀態保留，按鈕範圍固定。",
+      "demo": "focus",
+      "sourceFiles": [
+        "src/specimens/focus.js",
+        "src/specimens/helpers.js",
+        "src/applied-feedback/controls.js",
+        "src/spatial-feedback/response.js",
+        "preview/applied.css"
+      ],
+      "thumbnail": "assets/previews/applied-ui-focus-rail.png",
+      "license": "Project-authored specimen capture; underlying font/icon notices retained with material",
+      "origin": "Original local specimen",
+      "sources": [
+        {
+          "title": "MDN focus-visible",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible"
+        },
+        {
+          "title": "W3C: interaction animation controls",
+          "url": "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html"
+        }
+      ],
+      "assets": [
+        "assets/previews/applied-ui-focus-rail.png"
+      ],
+      "notices": [],
+      "fallback": "Readable static specimen and ordinary controls.",
+      "reducedMotion": "No automatic motion. Direct interaction feedback snaps to its target. Existing reveal/trace playback resolves to its complete state.",
+      "integration": "Candidate only. A later owner decision is required before copying it into production.",
+      "dependency": "DOM / CSS",
+      "parameters": [
+        "Active item",
+        "Feedback: Baseline / Spatial",
+        "Select a navigation state"
+      ],
+      "tradeoff": "A small cue that supports navigation. Keep the normal link text and focus outline.",
+      "appliedFeedback": {
+        "revision": "applied-feedback-v1",
+        "name": "Navigation detents",
+        "basis": [
+          "feedback-navigation"
+        ],
+        "ownership": "Inner plates move; semantic buttons retain stable hit regions.",
+        "review": "New application proposal; retains the existing material ID and Saved status."
+      }
+    },
+    {
+      "role": "uiux-designer",
+      "reviewState": "proposal-only",
+      "publicationApproval": false,
+      "createdAt": "2026-10-07",
+      "id": "ui-command",
+      "name": "Secondary command panel",
+      "category": "Interface",
+      "recommendation": "study",
+      "description": "A bounded, non-shell command surface tied to the same visible representation controls.",
+      "proposal": "功能提案：指令只是第二介面；先有可點選的控制，再提供 help、view outline、view filled、reset。\n\nRound 04：相同的 Outline／Filled 狀態直接改變物件各層，指令與按鈕共享同一個結果。",
+      "demo": "command",
+      "sourceFiles": [
+        "src/specimens/command.js",
+        "src/specimens/helpers.js",
+        "src/applied-feedback/controls.js",
+        "src/spatial-feedback/response.js",
+        "preview/applied.css"
+      ],
+      "thumbnail": "assets/previews/applied-ui-command.png",
+      "license": "Project-authored specimen capture; underlying font/icon notices retained with material",
+      "origin": "Original local specimen",
+      "sources": [
+        {
+          "title": "W3C: interaction animation controls",
+          "url": "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html"
+        }
+      ],
+      "assets": [
+        "assets/previews/applied-ui-command.png"
+      ],
+      "notices": [],
+      "fallback": "Readable static specimen and ordinary controls.",
+      "reducedMotion": "No automatic motion. Direct interaction feedback snaps to its target. Existing reveal/trace playback resolves to its complete state.",
+      "integration": "Candidate only. A later owner decision is required before copying it into production.",
+      "dependency": "DOM / native dialog",
+      "parameters": [
+        "Representation",
+        "Allowlisted command",
+        "Feedback: Baseline / Spatial",
+        "Outline / Filled from either interface"
+      ],
+      "tradeoff": "Optional. Context-dependent commands explicitly report unavailability and never execute arbitrary input.",
+      "appliedFeedback": {
+        "revision": "applied-feedback-v1",
+        "name": "Layered representation state",
+        "basis": [
+          "feedback-panel",
+          "feedback-key"
+        ],
+        "ownership": "The command whitelist is unchanged; faces are CSS planes, not camera-controlled geometry.",
+        "review": "New application proposal; retains the existing material ID and Saved status."
+      }
+    },
+    {
+      "role": "uiux-designer",
+      "reviewState": "proposal-only",
+      "publicationApproval": false,
+      "createdAt": "2026-10-07",
+      "id": "motion-reveal",
+      "name": "Editorial aperture",
+      "category": "Motion",
+      "recommendation": "accent",
+      "description": "A user-triggered CSS mask reveals a short geometric heading.",
+      "proposal": "動畫提案：只放在篇章開頭或單一重點；不要把每個段落都套同樣的入場動畫。\n\nRound 04：揭示時像打開構件外殼；左右鉸鏈讀取原有 reveal 的同一進度，不增加獨立播放時鐘。",
+      "demo": "reveal",
+      "sourceFiles": [
+        "src/specimens/reveal.js",
+        "src/specimens/helpers.js",
+        "src/applied-feedback/controls.js",
+        "src/spatial-feedback/response.js",
+        "preview/applied.css"
+      ],
+      "thumbnail": "assets/previews/applied-motion-reveal.png",
+      "license": "Project-authored specimen capture; underlying font/icon notices retained with material",
+      "origin": "Original local specimen",
+      "sources": [
+        {
+          "title": "MDN clip-path",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/clip-path"
+        },
+        {
+          "title": "W3C: interaction animation controls",
+          "url": "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html"
+        }
+      ],
+      "assets": [
+        "assets/previews/applied-motion-reveal.png"
+      ],
+      "notices": [],
+      "fallback": "Readable static specimen and ordinary controls.",
+      "reducedMotion": "No automatic motion. Direct interaction feedback snaps to its target. Existing reveal/trace playback resolves to its complete state.",
+      "integration": "Candidate only. A later owner decision is required before copying it into production.",
+      "dependency": "Web Animations / CSS clip-path",
+      "parameters": [
+        "Duration",
+        "Play / pause / reset",
+        "Feedback: Baseline / Spatial",
+        "Play / pause / reset reveal"
+      ],
+      "tradeoff": "The specimen demonstrates a visual entrance; production body text must render immediately.",
+      "appliedFeedback": {
+        "revision": "applied-feedback-v1",
+        "name": "Hinged aperture",
+        "basis": [
+          "feedback-panel"
+        ],
+        "ownership": "Existing native animation owns time/clip; decorative leaves follow its evaluated progress.",
+        "review": "New application proposal; retains the existing material ID and Saved status."
+      }
+    },
+    {
+      "role": "uiux-designer",
+      "reviewState": "proposal-only",
+      "publicationApproval": false,
+      "createdAt": "2026-10-07",
+      "id": "motion-linework",
+      "name": "Linework trace",
+      "category": "Motion",
+      "recommendation": "preferred",
+      "description": "One SVG path moves from a diagrammatic outline to a complete geometric reading.",
+      "proposal": "動畫提案：可用於方法圖解、輪廓或組裝關係，幫助理解規則；不偽裝成加工刀路。\n\nRound 04：將基準面、座標線與實際 SVG 描邊分成三層；可一邊調整分層，一邊檢視描繪進度。",
+      "demo": "trace",
+      "sourceFiles": [
+        "src/specimens/trace.js",
+        "src/specimens/helpers.js",
+        "src/applied-feedback/controls.js",
+        "src/spatial-feedback/response.js",
+        "preview/applied.css"
+      ],
+      "thumbnail": "assets/previews/applied-motion-linework.png",
+      "license": "Project-authored specimen capture; underlying font/icon notices retained with material",
+      "origin": "Original local specimen",
+      "sources": [
+        {
+          "title": "MDN SVG stroke-dasharray",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Attribute/stroke-dasharray"
+        },
+        {
+          "title": "W3C: interaction animation controls",
+          "url": "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html"
+        }
+      ],
+      "assets": [
+        "assets/previews/applied-motion-linework.png"
+      ],
+      "notices": [],
+      "fallback": "Readable static specimen and ordinary controls.",
+      "reducedMotion": "No automatic motion. Direct interaction feedback snaps to its target. Existing reveal/trace playback resolves to its complete state.",
+      "integration": "Candidate only. A later owner decision is required before copying it into production.",
+      "dependency": "SVG / Web Animations",
+      "parameters": [
+        "Progress",
+        "Replay",
+        "Duration",
+        "Feedback: Baseline / Spatial",
+        "Plane separation",
+        "Trace progress"
+      ],
+      "tradeoff": "An illustrative path, not toolpath generation or engineering analysis.",
+      "appliedFeedback": {
+        "revision": "applied-feedback-v1",
+        "name": "Construction-line stack",
+        "basis": [
+          "feedback-card"
+        ],
+        "ownership": "Stroke animation owns dash offset; a separate rig owns plane transforms. No toolpath claim.",
+        "review": "New application proposal; retains the existing material ID and Saved status."
+      }
+    },
+    {
+      "role": "uiux-designer",
+      "reviewState": "proposal-only",
+      "publicationApproval": false,
+      "createdAt": "2026-10-07",
+      "id": "motion-reflow",
+      "name": "Assembly reflow / GSAP",
+      "category": "Motion",
+      "recommendation": "study",
+      "description": "Six DOM parts move between a packed layout and an exploded reading through one owner.",
+      "proposal": "動畫提案：適合介面或示意圖的狀態轉換；在明確分工下使用既有 GSAP，不與 Theatre 競爭相同屬性。\n\nRound 04：原本 GSAP 排列加上可逐件檢視的構件表面；外層排列與內層抬升各有一個控制者。",
+      "demo": "reflow",
+      "sourceFiles": [
+        "src/specimens/reflow.js",
+        "src/specimens/helpers.js",
+        "src/applied-feedback/controls.js",
+        "src/spatial-feedback/response.js",
+        "preview/applied.css"
+      ],
+      "thumbnail": "assets/previews/applied-motion-reflow.png",
+      "license": "Project-authored specimen capture; underlying font/icon notices retained with material",
+      "origin": "Original local specimen",
+      "sources": [
+        {
+          "title": "GSAP tween lifecycle",
+          "url": "https://gsap.com/docs/v3/GSAP/gsap.to/"
+        },
+        {
+          "title": "W3C: interaction animation controls",
+          "url": "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html"
+        }
+      ],
+      "assets": [
+        "assets/previews/applied-motion-reflow.png"
+      ],
+      "notices": [],
+      "fallback": "Readable static specimen and ordinary controls.",
+      "reducedMotion": "No automatic motion. Direct interaction feedback snaps to its target. Existing reveal/trace playback resolves to its complete state.",
+      "integration": "Candidate only. A later owner decision is required before copying it into production.",
+      "dependency": "Existing GSAP 3.15.0",
+      "parameters": [
+        "Layout",
+        "Separation",
+        "Duration",
+        "Feedback: Baseline / Spatial",
+        "Inspect six parts",
+        "Packed / Separated"
+      ],
+      "tradeoff": "DOM-only sequence. This is not the authored 3D motion core.",
+      "appliedFeedback": {
+        "revision": "applied-feedback-v1",
+        "name": "Part-face inspection",
+        "basis": [
+          "feedback-card",
+          "feedback-key"
+        ],
+        "ownership": "GSAP owns outer placement; direct response owns nested face transforms.",
+        "review": "New application proposal; retains the existing material ID and Saved status."
+      }
+    },
+    {
+      "role": "uiux-designer",
+      "reviewState": "proposal-only",
+      "publicationApproval": false,
+      "createdAt": "2026-10-07",
+      "id": "motion-theatre",
+      "name": "Authored section study",
+      "category": "Motion",
+      "recommendation": "preferred",
+      "description": "An actual Studio-exported sequence separates and recombines a sectional SVG object through the agreed adapter.",
+      "proposal": "動畫提案：把敘事姿態交給 Theatre；提供播放、暫停、重播及可直接閱讀的靜態視圖。\n\nRound 04：沿用真正的 Theatre 編排，加入構件厚度與逐件抽出；檢視時暫停編排，避免互動與時間軸互相搶控制。",
+      "demo": "theatre",
+      "sourceFiles": [
+        "src/motion/theatre/specimen.js",
+        "src/motion/theatre/motion.state.json",
+        "src/specimens/section-geometry.js",
+        "src/specimens/helpers.js",
+        "src/applied-feedback/controls.js",
+        "src/spatial-feedback/response.js",
+        "preview/applied.css"
+      ],
+      "thumbnail": "assets/previews/applied-motion-theatre.png",
+      "license": "Project-authored specimen capture; underlying font/icon notices retained with material",
+      "origin": "Original local specimen",
+      "sources": [
+        {
+          "title": "Theatre direct binding",
+          "url": "https://www.theatrejs.com/docs/latest/getting-started/with-three-js"
+        },
+        {
+          "title": "W3C: interaction animation controls",
+          "url": "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html"
+        }
+      ],
+      "assets": [
+        "assets/previews/applied-motion-theatre.png"
+      ],
+      "notices": [],
+      "fallback": "Readable static specimen and ordinary controls.",
+      "reducedMotion": "Authored playback disabled; manual poses and part selection remain available with direct feedback states.",
+      "integration": "Candidate only. A later owner decision is required before copying it into production.",
+      "dependency": "Existing Theatre Core / Studio 0.7.2 and application adapter",
+      "parameters": [
+        "Play",
+        "Pause",
+        "Seek",
+        "Reset",
+        "Feedback: Baseline / Spatial",
+        "Inspect nine sections",
+        "Authored play / seek"
+      ],
+      "tradeoff": "Website specimen only. It does not reproduce a client model or establish production authoring acceptance.",
+      "appliedFeedback": {
+        "revision": "applied-feedback-v1",
+        "name": "Authored section with local inspection",
+        "basis": [
+          "feedback-assembly"
+        ],
+        "ownership": "Existing genuine export/adapter owns outer groups; local inspection owns inner groups. No fabricated keyframes.",
+        "review": "New application proposal; retains the existing material ID and Saved status."
+      }
+    },
+    {
+      "role": "uiux-designer",
+      "reviewState": "proposal-only",
+      "publicationApproval": false,
+      "createdAt": "2026-10-07",
+      "id": "spatial-wirefield",
+      "name": "Parametric wire field",
+      "category": "Spatial",
+      "recommendation": "study",
+      "description": "A deterministic wave grid with genuine amplitude, representation and camera-step controls.",
+      "proposal": "空間提案：先展示可調規則與同一幾何的不同閱讀方式；採按需繪製，預覽關閉即釋放場景。\n\nRound 04：滑鼠點到的區段與編號按鈕共享選取；實際頂點局部抬起、法線重新計算，靜止後停止渲染。",
+      "demo": "wirefield",
+      "sourceFiles": [
+        "src/specimens/spatial.jsx",
+        "src/specimens/helpers.js",
+        "src/applied-feedback/controls.js",
+        "src/spatial-feedback/response.js",
+        "preview/applied.css"
+      ],
+      "thumbnail": "assets/previews/applied-spatial-wirefield.png",
+      "license": "Project-authored specimen capture; underlying font/icon notices retained with material",
+      "origin": "Original local specimen",
+      "sources": [
+        {
+          "title": "Fiber demand rendering",
+          "url": "https://r3f.docs.pmnd.rs/advanced/scaling-performance"
+        },
+        {
+          "title": "W3C: interaction animation controls",
+          "url": "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html"
+        }
+      ],
+      "assets": [
+        "assets/previews/applied-spatial-wirefield.png"
+      ],
+      "notices": [],
+      "fallback": "Readable static specimen and ordinary controls.",
+      "reducedMotion": "No automatic motion. Direct interaction feedback snaps to its target. Existing reveal/trace playback resolves to its complete state.",
+      "integration": "Candidate only. A later owner decision is required before copying it into production.",
+      "dependency": "Existing Fiber 9.8.1 / Three 0.186.1",
+      "parameters": [
+        "Amplitude",
+        "Surface / wireframe",
+        "Rotate",
+        "Reset",
+        "Feedback: Baseline / Spatial",
+        "Pick mesh band / numbered band",
+        "Baseline / Spatial"
+      ],
+      "tradeoff": "Unitless generated geometry, not structural simulation. One canvas per open specimen.",
+      "appliedFeedback": {
+        "revision": "applied-feedback-v1",
+        "name": "Picked field-band lift",
+        "basis": [
+          "feedback-assembly"
+        ],
+        "ownership": "CPU geometry buffers, bounds and raycasts agree. One response owns vertices; stepped camera remains independent.",
+        "review": "New application proposal; retains the existing material ID and Saved status."
+      }
+    },
+    {
+      "role": "uiux-designer",
+      "reviewState": "proposal-only",
+      "publicationApproval": false,
+      "createdAt": "2026-10-07",
+      "id": "spatial-hatch",
+      "name": "Technical hatch material",
+      "category": "Spatial",
+      "recommendation": "accent",
+      "description": "An original derivative-aware GLSL hatch over the same generated geometry.",
+      "proposal": "材質提案：用灰階線密度表達表面方向，橘色只標示參考線；保留一般表面模式作比較。\n\nRound 04：選取真實幾何區段後，抬升與 hatch 參考帶一起回應；線密度仍是可調材質參數，不是假裝的受力分析。",
+      "demo": "hatch",
+      "sourceFiles": [
+        "src/specimens/spatial.jsx",
+        "src/specimens/hatch.js",
+        "src/specimens/helpers.js",
+        "src/applied-feedback/controls.js",
+        "src/spatial-feedback/response.js",
+        "preview/applied.css"
+      ],
+      "thumbnail": "assets/previews/applied-spatial-hatch.png",
+      "license": "Project-authored specimen capture; underlying font/icon notices retained with material",
+      "origin": "Original local specimen",
+      "sources": [
+        {
+          "title": "Three ShaderMaterial",
+          "url": "https://threejs.org/docs/pages/ShaderMaterial.html"
+        },
+        {
+          "title": "W3C: interaction animation controls",
+          "url": "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html"
+        }
+      ],
+      "assets": [
+        "assets/previews/applied-spatial-hatch.png"
+      ],
+      "notices": [],
+      "fallback": "Readable static specimen and ordinary controls.",
+      "reducedMotion": "No automatic motion. Direct interaction feedback snaps to its target. Existing reveal/trace playback resolves to its complete state.",
+      "integration": "Candidate only. A later owner decision is required before copying it into production.",
+      "dependency": "Existing Three ShaderMaterial; no postprocessing",
+      "parameters": [
+        "Hatch density",
+        "Amplitude",
+        "Rotate",
+        "Feedback: Baseline / Spatial",
+        "Pick field band"
+      ],
+      "tradeoff": "Illustrative material only. No stress, heat or measured performance is encoded.",
+      "appliedFeedback": {
+        "revision": "applied-feedback-v1",
+        "name": "Material response to selected geometry",
+        "basis": [
+          "feedback-assembly"
+        ],
+        "ownership": "The same response owns CPU geometry and shader focus uniforms. No postprocessing or simulation package.",
+        "review": "New application proposal; retains the existing material ID and Saved status."
+      }
+    },
+    {
+      "role": "uiux-designer",
+      "reviewState": "proposal-only",
+      "publicationApproval": false,
+      "createdAt": "2026-10-07",
+      "id": "spatial-ascii",
+      "name": "ASCII height section",
+      "category": "Spatial",
+      "recommendation": "accent",
+      "description": "A real character-density projection of a small procedural height field.",
+      "proposal": "第二語言提案：只把幾何轉成 ASCII；正文、導覽與重要數據仍維持一般 HTML。\n\nRound 04：依真實高度值拆成低、中、高三個 ASCII 平面；可以隔離某段資料，字元會隨程序參數重新計算。",
+      "demo": "ascii",
+      "sourceFiles": [
+        "src/specimens/ascii.js",
+        "src/specimens/helpers.js",
+        "src/applied-feedback/controls.js",
+        "src/spatial-feedback/response.js",
+        "preview/applied.css"
+      ],
+      "thumbnail": "assets/previews/applied-spatial-ascii.png",
+      "license": "Project-authored specimen capture; underlying font/icon notices retained with material",
+      "origin": "Original local specimen",
+      "sources": [
+        {
+          "title": "W3C: interaction animation controls",
+          "url": "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html"
+        }
+      ],
+      "assets": [
+        "assets/previews/applied-spatial-ascii.png"
+      ],
+      "notices": [],
+      "fallback": "Readable static specimen and ordinary controls.",
+      "reducedMotion": "No automatic motion. Direct interaction feedback snaps to its target. Existing reveal/trace playback resolves to its complete state.",
+      "integration": "Candidate only. A later owner decision is required before copying it into production.",
+      "dependency": "Deterministic JavaScript / text",
+      "parameters": [
+        "Phase",
+        "Density",
+        "Reset",
+        "Feedback: Baseline / Spatial",
+        "Low / Middle / High",
+        "Slice separation"
+      ],
+      "tradeoff": "Optional secondary representation; the diagram has an equivalent description and is hidden from screen readers.",
+      "appliedFeedback": {
+        "revision": "applied-feedback-v1",
+        "name": "Height-range planes",
+        "basis": [
+          "feedback-card",
+          "feedback-type"
+        ],
+        "ownership": "Deterministic text slices of the existing height field; CSS perspective, not WebGL or professional analysis.",
+        "review": "New application proposal; retains the existing material ID and Saved status."
+      }
+    },
+    {
+      "role": "uiux-designer",
+      "reviewState": "proposal-only",
+      "publicationApproval": false,
+      "createdAt": "2026-10-07",
+      "id": "feedback-type",
+      "name": "Word planes / editorial depth",
+      "category": "Spatial feedback",
+      "recommendation": "study",
+      "description": "Word planes fan along different local axes while preserving a readable heading.",
+      "proposal": "文字不是整塊漂浮：把 FORM、SYSTEM、MAKE 視為不同厚度的字面；展開、聚焦與回復各有清楚的空間關係。",
+      "demo": "feedback",
+      "sourceFiles": [
+        "src/spatial-feedback/dom.js",
+        "src/spatial-feedback/response.js",
+        "preview/feedback.css"
+      ],
+      "thumbnail": "assets/previews/feedback-type.png",
+      "license": "Project-original specimen; no distribution license assigned",
+      "origin": "Original local specimen",
+      "sources": [
+        {
+          "title": "MDN: perspective and local vanishing points",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/perspective"
+        },
+        {
+          "title": "MDN: preserve-3d and flattening constraints",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/transform-style"
+        },
+        {
+          "title": "W3C: animation from interactions",
+          "url": "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html"
+        }
+      ],
+      "assets": [
+        "assets/previews/feedback-type.png"
+      ],
+      "notices": [],
+      "fallback": "Semantic HTML controls and readable output remain in the document. Perspective is decorative.",
+      "reducedMotion": "State changes apply immediately. No interpolated transforms, no pointer parallax, no autoplay.",
+      "integration": "Candidate only. A later owner decision is required before copying it into production.",
+      "variant": "type",
+      "collection": "spatial-feedback-v1",
+      "dependency": "CSS perspective / original interruptible response owner; no additional package",
+      "parameters": [
+        "Fan / focus / choose a word",
+        "Precise / elastic response",
+        "Perspective"
+      ],
+      "tradeoff": "Chapter headings, short anthology labels; keep body copy stationary. CSS transformed surfaces are 2.5D, with no mesh lighting or occlusion. This is an original UI specimen, not professional work."
+    },
+    {
+      "role": "uiux-designer",
+      "reviewState": "proposal-only",
+      "publicationApproval": false,
+      "createdAt": "2026-10-07",
+      "id": "feedback-glyph",
+      "name": "Identity mechanisms / three rules",
+      "category": "Spatial feedback",
+      "recommendation": "study",
+      "description": "A gimbal, network and interlock reuse five parts with three distinct motion rules.",
+      "proposal": "身份動態：FORM 用旋轉軸、SYSTEM 用節點深度、MAKE 用咬合與分離。三者有同一套材質語言，但不套相同動畫。",
+      "demo": "feedback",
+      "sourceFiles": [
+        "src/spatial-feedback/dom.js",
+        "src/spatial-feedback/response.js",
+        "preview/feedback.css"
+      ],
+      "thumbnail": "assets/previews/feedback-glyph.png",
+      "license": "Project-original specimen; no distribution license assigned",
+      "origin": "Original local specimen",
+      "sources": [
+        {
+          "title": "MDN: perspective and local vanishing points",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/perspective"
+        },
+        {
+          "title": "MDN: preserve-3d and flattening constraints",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/transform-style"
+        },
+        {
+          "title": "W3C: animation from interactions",
+          "url": "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html"
+        }
+      ],
+      "assets": [
+        "assets/previews/feedback-glyph.png"
+      ],
+      "notices": [],
+      "fallback": "Semantic HTML controls and readable output remain in the document. Perspective is decorative.",
+      "reducedMotion": "State changes apply immediately. No interpolated transforms, no pointer parallax, no autoplay.",
+      "integration": "Candidate only. A later owner decision is required before copying it into production.",
+      "variant": "glyph",
+      "collection": "spatial-feedback-v1",
+      "dependency": "CSS perspective / original interruptible response owner; no additional package",
+      "parameters": [
+        "Choose logic / open / close",
+        "Precise / elastic response",
+        "Perspective"
+      ],
+      "tradeoff": "Section marks and a brief owner-triggered identity study. CSS transformed surfaces are 2.5D, with no mesh lighting or occlusion. This is an original UI specimen, not professional work."
+    },
+    {
+      "role": "uiux-designer",
+      "reviewState": "proposal-only",
+      "publicationApproval": false,
+      "createdAt": "2026-10-07",
+      "id": "feedback-key",
+      "name": "Tactile key / press and release",
+      "category": "Spatial feedback",
+      "recommendation": "preferred",
+      "description": "A raised icon key compresses in depth and changes the actual adjacent representation.",
+      "proposal": "物件回饋：按下是壓縮、放開是回彈；功能狀態立即切換，不等待動畫結束。滑鼠、Enter、Space 都可操作。",
+      "demo": "feedback",
+      "sourceFiles": [
+        "src/spatial-feedback/dom.js",
+        "src/spatial-feedback/response.js",
+        "preview/feedback.css"
+      ],
+      "thumbnail": "assets/previews/feedback-key.png",
+      "license": "Original response code; Lucide icon under ISC",
+      "origin": "Original local specimen",
+      "sources": [
+        {
+          "title": "MDN: perspective and local vanishing points",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/perspective"
+        },
+        {
+          "title": "MDN: preserve-3d and flattening constraints",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/transform-style"
+        },
+        {
+          "title": "W3C: animation from interactions",
+          "url": "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html"
+        }
+      ],
+      "assets": [
+        "assets/previews/feedback-key.png"
+      ],
+      "notices": [
+        "licenses/icons-lucide.txt"
+      ],
+      "fallback": "Semantic HTML controls and readable output remain in the document. Perspective is decorative.",
+      "reducedMotion": "State changes apply immediately. No interpolated transforms, no pointer parallax, no autoplay.",
+      "integration": "Candidate only. A later owner decision is required before copying it into production.",
+      "variant": "key",
+      "collection": "spatial-feedback-v1",
+      "dependency": "CSS perspective / original interruptible response owner; no additional package",
+      "parameters": [
+        "Pointer down / cancel / keyboard / toggle",
+        "Precise / elastic response",
+        "Perspective"
+      ],
+      "tradeoff": "Scene tools and representation switches; one localized key, not every page button. CSS transformed surfaces are 2.5D, with no mesh lighting or occlusion. This is an original UI specimen, not professional work."
+    },
+    {
+      "role": "uiux-designer",
+      "reviewState": "proposal-only",
+      "publicationApproval": false,
+      "createdAt": "2026-10-07",
+      "id": "feedback-card",
+      "name": "Evidence card / separated layers",
+      "category": "Spatial feedback",
+      "recommendation": "preferred",
+      "description": "A generated drawing, its rule and its editorial label separate into three depth planes.",
+      "proposal": "卡片回饋：指向時有受限制的視差；點選後拆解規則、幾何與標籤。手機可直接按 Inspect layers，資訊不藏在 hover。",
+      "demo": "feedback",
+      "sourceFiles": [
+        "src/spatial-feedback/dom.js",
+        "src/spatial-feedback/response.js",
+        "preview/feedback.css"
+      ],
+      "thumbnail": "assets/previews/feedback-card.png",
+      "license": "Project-original specimen; no distribution license assigned",
+      "origin": "Original local specimen",
+      "sources": [
+        {
+          "title": "MDN: perspective and local vanishing points",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/perspective"
+        },
+        {
+          "title": "MDN: preserve-3d and flattening constraints",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/transform-style"
+        },
+        {
+          "title": "W3C: animation from interactions",
+          "url": "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html"
+        }
+      ],
+      "assets": [
+        "assets/previews/feedback-card.png"
+      ],
+      "notices": [],
+      "fallback": "Semantic HTML controls and readable output remain in the document. Perspective is decorative.",
+      "reducedMotion": "State changes apply immediately. No interpolated transforms, no pointer parallax, no autoplay.",
+      "integration": "Candidate only. A later owner decision is required before copying it into production.",
+      "variant": "card",
+      "collection": "spatial-feedback-v1",
+      "dependency": "CSS perspective / original interruptible response owner; no additional package",
+      "parameters": [
+        "Pointer tilt / tap / inspect / assemble",
+        "Precise / elastic response",
+        "Perspective"
+      ],
+      "tradeoff": "Case-study cover or Lab specimen; only use supplied approved media in production. CSS transformed surfaces are 2.5D, with no mesh lighting or occlusion. This is an original UI specimen, not professional work."
+    },
+    {
+      "role": "uiux-designer",
+      "reviewState": "proposal-only",
+      "publicationApproval": false,
+      "createdAt": "2026-10-07",
+      "id": "feedback-navigation",
+      "name": "Navigation / depth detents",
+      "category": "Spatial feedback",
+      "recommendation": "preferred",
+      "description": "Selected chapter plates move to the reading plane; nearby focus remains a smaller cue.",
+      "proposal": "導覽回饋：選中項目前進到閱讀平面，聚焦只是較小的抬升；文字內容立即切換，路徑不依賴動畫。",
+      "demo": "feedback",
+      "sourceFiles": [
+        "src/spatial-feedback/dom.js",
+        "src/spatial-feedback/response.js",
+        "preview/feedback.css"
+      ],
+      "thumbnail": "assets/previews/feedback-navigation.png",
+      "license": "Project-original specimen; no distribution license assigned",
+      "origin": "Original local specimen",
+      "sources": [
+        {
+          "title": "MDN: perspective and local vanishing points",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/perspective"
+        },
+        {
+          "title": "MDN: preserve-3d and flattening constraints",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/transform-style"
+        },
+        {
+          "title": "W3C: animation from interactions",
+          "url": "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html"
+        }
+      ],
+      "assets": [
+        "assets/previews/feedback-navigation.png"
+      ],
+      "notices": [],
+      "fallback": "Semantic HTML controls and readable output remain in the document. Perspective is decorative.",
+      "reducedMotion": "State changes apply immediately. No interpolated transforms, no pointer parallax, no autoplay.",
+      "integration": "Candidate only. A later owner decision is required before copying it into production.",
+      "variant": "navigation",
+      "collection": "spatial-feedback-v1",
+      "dependency": "CSS perspective / original interruptible response owner; no additional package",
+      "parameters": [
+        "Focus / select / next section",
+        "Precise / elastic response",
+        "Perspective"
+      ],
+      "tradeoff": "A local chapter switcher with normal buttons; eventual route links keep native semantics. CSS transformed surfaces are 2.5D, with no mesh lighting or occlusion. This is an original UI specimen, not professional work."
+    },
+    {
+      "role": "uiux-designer",
+      "reviewState": "proposal-only",
+      "publicationApproval": false,
+      "createdAt": "2026-10-07",
+      "id": "feedback-panel",
+      "name": "Disclosure / hinged covers",
+      "category": "Spatial feedback",
+      "recommendation": "study",
+      "description": "Two covers rotate about their outer edges while detail text opens in the normal document.",
+      "proposal": "面板回饋：開啟像打開構件外殼，而不是整個面板縮放。鉸鏈是裝飾，內容照一般文件閱讀與展開。",
+      "demo": "feedback",
+      "sourceFiles": [
+        "src/spatial-feedback/dom.js",
+        "src/spatial-feedback/response.js",
+        "preview/feedback.css"
+      ],
+      "thumbnail": "assets/previews/feedback-panel.png",
+      "license": "Project-original specimen; no distribution license assigned",
+      "origin": "Original local specimen",
+      "sources": [
+        {
+          "title": "MDN: perspective and local vanishing points",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/perspective"
+        },
+        {
+          "title": "MDN: preserve-3d and flattening constraints",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/transform-style"
+        },
+        {
+          "title": "W3C: animation from interactions",
+          "url": "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html"
+        }
+      ],
+      "assets": [
+        "assets/previews/feedback-panel.png"
+      ],
+      "notices": [],
+      "fallback": "Semantic HTML controls and readable output remain in the document. Perspective is decorative.",
+      "reducedMotion": "State changes apply immediately. No interpolated transforms, no pointer parallax, no autoplay.",
+      "integration": "Candidate only. A later owner decision is required before copying it into production.",
+      "variant": "panel",
+      "collection": "spatial-feedback-v1",
+      "dependency": "CSS perspective / original interruptible response owner; no additional package",
+      "parameters": [
+        "Open / close / expanded state",
+        "Precise / elastic response",
+        "Perspective"
+      ],
+      "tradeoff": "Method notes, technical annotations and optional metadata disclosure. CSS transformed surfaces are 2.5D, with no mesh lighting or occlusion. This is an original UI specimen, not professional work."
+    },
+    {
+      "role": "uiux-designer",
+      "reviewState": "proposal-only",
+      "publicationApproval": false,
+      "createdAt": "2026-10-07",
+      "id": "feedback-assembly",
+      "name": "Spatial score / curved ribs",
+      "category": "Spatial feedback",
+      "recommendation": "preferred",
+      "description": "Nine curved ribs gather, fan, hold and return through an authored camera and assembly score. Each rib can be picked and lifted for inspection.",
+      "proposal": "主提案：有節奏的收束、扇開、停留、回組；鏡頭與組裝交給 Theatre，個別構件的點選與檢視在獨立層級回饋。不是永遠自轉的展示模型。",
+      "demo": "assembly",
+      "sourceFiles": [
+        "src/spatial-feedback/assembly.jsx",
+        "src/spatial-feedback/geometry.js",
+        "preview/feedback.css",
+        "src/motion/theatre/spatial/binding.js",
+        "src/motion/theatre/spatial/motion.state.json",
+        "src/motion/theatre/spatial/motion.manifest.json"
+      ],
+      "thumbnail": "assets/previews/feedback-assembly.png",
+      "license": "Project-original specimen; no distribution license assigned",
+      "origin": "Original local specimen",
+      "sources": [
+        {
+          "title": "R3F: raycast events and propagation",
+          "url": "https://r3f.docs.pmnd.rs/api/events"
+        },
+        {
+          "title": "R3F: demand rendering and resource lifecycle",
+          "url": "https://r3f.docs.pmnd.rs/advanced/scaling-performance"
+        },
+        {
+          "title": "Theatre: Studio transactions and save export",
+          "url": "https://www.theatrejs.com/docs/latest/api/studio"
+        }
+      ],
+      "assets": [
+        "assets/previews/feedback-assembly.png"
+      ],
+      "notices": [],
+      "fallback": "Live static SVG projection and numbered selection controls, available without WebGL.",
+      "reducedMotion": "Playback disabled; manual timeline poses and selected-part state apply directly, with no decorative interpolation.",
+      "integration": "Candidate only. A later owner decision is required before copying it into production.",
+      "collection": "spatial-feedback-v1",
+      "dependency": "Existing R3F 9.8.1 / Three 0.186.1 / Theatre 0.7.2; unchanged application adapter",
+      "parameters": [
+        "Play / pause / seek",
+        "Nine raycast or numbered selections",
+        "Inspection turn",
+        "Surface / wire",
+        "Reset"
+      ],
+      "tradeoff": "True WebGL geometry, metal lighting and perspective; user-activated canvas. Generated unitless study, not an engineering or client model. No new package."
+    }
+  ]
+}

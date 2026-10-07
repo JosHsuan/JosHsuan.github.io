@@ -1,0 +1,258 @@
+{
+  "checkedAt": "2026-10-07T16:38:30.746Z",
+  "scope": "Seven spatial feedback studies; normal and reduced motion; actual controls and true WebGL assembly",
+  "results": [
+    {
+      "browser": "chromium-desktop",
+      "id": "feedback-type",
+      "reduced": false,
+      "passed": true
+    },
+    {
+      "browser": "chromium-desktop",
+      "id": "feedback-type",
+      "reduced": true,
+      "passed": true
+    },
+    {
+      "browser": "chromium-desktop",
+      "id": "feedback-glyph",
+      "reduced": false,
+      "passed": true
+    },
+    {
+      "browser": "chromium-desktop",
+      "id": "feedback-glyph",
+      "reduced": true,
+      "passed": true
+    },
+    {
+      "browser": "chromium-desktop",
+      "id": "feedback-key",
+      "reduced": false,
+      "passed": true
+    },
+    {
+      "browser": "chromium-desktop",
+      "id": "feedback-key",
+      "reduced": true,
+      "passed": true
+    },
+    {
+      "browser": "chromium-desktop",
+      "id": "feedback-card",
+      "reduced": false,
+      "passed": true
+    },
+    {
+      "browser": "chromium-desktop",
+      "id": "feedback-card",
+      "reduced": true,
+      "passed": true
+    },
+    {
+      "browser": "chromium-desktop",
+      "id": "feedback-navigation",
+      "reduced": false,
+      "passed": true
+    },
+    {
+      "browser": "chromium-desktop",
+      "id": "feedback-navigation",
+      "reduced": true,
+      "passed": true
+    },
+    {
+      "browser": "chromium-desktop",
+      "id": "feedback-panel",
+      "reduced": false,
+      "passed": true
+    },
+    {
+      "browser": "chromium-desktop",
+      "id": "feedback-panel",
+      "reduced": true,
+      "passed": true
+    },
+    {
+      "browser": "chromium-desktop",
+      "id": "feedback-assembly",
+      "reduced": false,
+      "passed": true
+    },
+    {
+      "browser": "chromium-desktop",
+      "id": "feedback-assembly",
+      "reduced": true,
+      "passed": true
+    },
+    {
+      "browser": "webkit-desktop",
+      "id": "feedback-type",
+      "reduced": false,
+      "passed": true
+    },
+    {
+      "browser": "webkit-desktop",
+      "id": "feedback-type",
+      "reduced": true,
+      "passed": true
+    },
+    {
+      "browser": "webkit-desktop",
+      "id": "feedback-glyph",
+      "reduced": false,
+      "passed": true
+    },
+    {
+      "browser": "webkit-desktop",
+      "id": "feedback-glyph",
+      "reduced": true,
+      "passed": true
+    },
+    {
+      "browser": "webkit-desktop",
+      "id": "feedback-key",
+      "reduced": false,
+      "passed": true
+    },
+    {
+      "browser": "webkit-desktop",
+      "id": "feedback-key",
+      "reduced": true,
+      "passed": true
+    },
+    {
+      "browser": "webkit-desktop",
+      "id": "feedback-card",
+      "reduced": false,
+      "passed": true
+    },
+    {
+      "browser": "webkit-desktop",
+      "id": "feedback-card",
+      "reduced": true,
+      "passed": true
+    },
+    {
+      "browser": "webkit-desktop",
+      "id": "feedback-navigation",
+      "reduced": false,
+      "passed": true
+    },
+    {
+      "browser": "webkit-desktop",
+      "id": "feedback-navigation",
+      "reduced": true,
+      "passed": true
+    },
+    {
+      "browser": "webkit-desktop",
+      "id": "feedback-panel",
+      "reduced": false,
+      "passed": true
+    },
+    {
+      "browser": "webkit-desktop",
+      "id": "feedback-panel",
+      "reduced": true,
+      "passed": true
+    },
+    {
+      "browser": "webkit-desktop",
+      "id": "feedback-assembly",
+      "reduced": false,
+      "passed": true
+    },
+    {
+      "browser": "webkit-desktop",
+      "id": "feedback-assembly",
+      "reduced": true,
+      "passed": true
+    },
+    {
+      "browser": "chromium-touch",
+      "id": "feedback-type",
+      "reduced": false,
+      "passed": true
+    },
+    {
+      "browser": "chromium-touch",
+      "id": "feedback-type",
+      "reduced": true,
+      "passed": true
+    },
+    {
+      "browser": "chromium-touch",
+      "id": "feedback-glyph",
+      "reduced": false,
+      "passed": true
+    },
+    {
+      "browser": "chromium-touch",
+      "id": "feedback-glyph",
+      "reduced": true,
+      "passed": true
+    },
+    {
+      "browser": "chromium-touch",
+      "id": "feedback-key",
+      "reduced": false,
+      "passed": true
+    },
+    {
+      "browser": "chromium-touch",
+      "id": "feedback-key",
+      "reduced": true,
+      "passed": true
+    },
+    {
+      "browser": "chromium-touch",
+      "id": "feedback-card",
+      "reduced": false,
+      "passed": true
+    },
+    {
+      "browser": "chromium-touch",
+      "id": "feedback-card",
+      "reduced": true,
+      "passed": true
+    },
+    {
+      "browser": "chromium-touch",
+      "id": "feedback-navigation",
+      "reduced": false,
+      "passed": true
+    },
+    {
+      "browser": "chromium-touch",
+      "id": "feedback-navigation",
+      "reduced": true,
+      "passed": true
+    },
+    {
+      "browser": "chromium-touch",
+      "id": "feedback-panel",
+      "reduced": false,
+      "passed": true
+    },
+    {
+      "browser": "chromium-touch",
+      "id": "feedback-panel",
+      "reduced": true,
+      "passed": true
+    },
+    {
+      "browser": "chromium-touch",
+      "id": "feedback-assembly",
+      "reduced": false,
+      "passed": true
+    },
+    {
+      "browser": "chromium-touch",
+      "id": "feedback-assembly",
+      "reduced": true,
+      "passed": true
+    }
+  ]
+}

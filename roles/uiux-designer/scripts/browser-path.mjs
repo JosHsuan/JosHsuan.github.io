@@ -1,0 +1,14 @@
+import { createRequire } from 'node:module';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { existsSync } from 'node:fs';
+const role = fileURLToPath(new URL('../', import.meta.url));
+const fromProject = createRequire(path.resolve(role, '../../package.json'));
+const { chromium } = fromProject('@playwright/test');
+const browserDirectory = path.dirname(path.dirname(chromium.executablePath()));
+const revision = path.basename(browserDirectory).match(/^chromium-(\d+)$/)?.[1];
+if (!revision) throw new Error('Cannot identify the pinned Chromium browser revision.');
+const platform = process.platform === 'win32' ? 'win64' : process.platform === 'darwin' ? `mac-${process.arch === 'arm64' ? 'arm64' : 'x64'}` : 'linux64';
+export const executablePath = path.join(path.dirname(browserDirectory), `chromium_headless_shell-${revision}`, `chrome-headless-shell-${platform}`, `chrome-headless-shell${process.platform === 'win32' ? '.exe' : ''}`);
+if (!existsSync(executablePath)) throw new Error('Install the pinned Playwright Chromium headless shell before preparing the UIUX browser profile.');
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) console.log(executablePath);

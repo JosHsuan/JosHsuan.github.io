@@ -1,0 +1,21 @@
+{
+  "checkedAt": "2026-10-07T16:40:34.319Z",
+  "browser": "Chromium headless shell / desktop",
+  "checks": [
+    "Actual canvas raycast click selects a visible rib",
+    "Canvas selection updates ordinary controls and reading",
+    "Actual complete Theatre playback returns to authored camera and compact pose",
+    "Real WebGL context loss falls back to selectable static projection",
+    "Renderer remount after context loss succeeds",
+    "Press followed by release outside the stable key hit region does not activate",
+    "OS reduced-motion preference disables narrative playback without a query flag",
+    "New proposal Save, notes, reload and actual JSON export preserve the chosen feedback study",
+    "Comparison shows two captured stills without live canvases",
+    "Closing the native detail dialog removes the live scene iframe",
+    "Collection has no horizontal overflow at 320px",
+    "Collection has no horizontal overflow at 390px",
+    "Collection has no horizontal overflow at 768px",
+    "Collection has no horizontal overflow at 1440px",
+    "No unhandled browser errors in resilience and review flows"
+  ]
+}

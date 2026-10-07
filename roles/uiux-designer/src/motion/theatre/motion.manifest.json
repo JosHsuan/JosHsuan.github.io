@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "role": "uiux-designer",
+  "projectId": "uiux.section-study.v1",
+  "sheetId": "Main",
+  "core": "0.7.2",
+  "studio": "0.7.2",
+  "stateRevision": "1b5274abd5e2756d862d174f93732665ce1a2cd20bc65a269385d68b2670ffe3",
+  "clips": {
+    "assembly": {
+      "start": 0,
+      "end": 2.4
+    }
+  },
+  "requiredBindings": [
+    "Pose.assemblyProgress"
+  ],
+  "authoredAt": "2026-10-07",
+  "provenance": "Sequenced and captured using the actual Studio property menu and transactions, then downloaded with createContentOfSaveFile."
+}

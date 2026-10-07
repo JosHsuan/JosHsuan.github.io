@@ -1,0 +1,42 @@
+{
+  "checkedAt": "2026-10-07T16:44:08.342Z",
+  "scope": "1 spatial feedback studies; normal and reduced motion; actual controls and true WebGL assembly",
+  "results": [
+    {
+      "browser": "chromium-desktop",
+      "id": "feedback-assembly",
+      "reduced": false,
+      "passed": true
+    },
+    {
+      "browser": "chromium-desktop",
+      "id": "feedback-assembly",
+      "reduced": true,
+      "passed": true
+    },
+    {
+      "browser": "webkit-desktop",
+      "id": "feedback-assembly",
+      "reduced": false,
+      "passed": true
+    },
+    {
+      "browser": "webkit-desktop",
+      "id": "feedback-assembly",
+      "reduced": true,
+      "passed": true
+    },
+    {
+      "browser": "chromium-touch",
+      "id": "feedback-assembly",
+      "reduced": false,
+      "passed": true
+    },
+    {
+      "browser": "chromium-touch",
+      "id": "feedback-assembly",
+      "reduced": true,
+      "passed": true
+    }
+  ]
+}
