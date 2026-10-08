@@ -1,3 +1,6 @@
 public/** -text
 *.json text eol=lf
 *.txt text eol=lf
+
+# Preserve the downloaded IBM OFL notice bytes pinned by manifest.json.
+public/licenses/ibm-plex-OFL.txt -text
