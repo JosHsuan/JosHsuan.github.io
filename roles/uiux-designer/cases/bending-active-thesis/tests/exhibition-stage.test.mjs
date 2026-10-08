@@ -122,3 +122,23 @@ test('invalid bounds/camera fail explicitly and source translation shifts only t
     assert.ok(stage.group.matrixWorld.elements.every(Number.isFinite));
   } finally {stage.dispose();}
 });
+
+test('Round 06 verified family bounds reframe existing set and lamps without allocating or mutating source data', () => {
+  const stage = createExhibitionStage({bounds}), smaller = {min: [3, -.2, -2], max: [3.8, .35, -1.2]};
+  const before = structuredClone(smaller), camera = cameraAt();
+  const children = [...stage.group.children], geometries = children.filter(c => c.isMesh).map(c => c.geometry);
+  try {
+    const original = stage.update({camera});
+    const updated = stage.update({camera, bounds: smaller});
+    assert.ok(updated.radius < original.radius / 2);
+    near(stage.group.position.x, 3.4); near(stage.group.position.y, -.2); near(stage.group.position.z, -1.6);
+    assert.deepEqual(stage.group.children, children);
+    assert.deepEqual(children.filter(c => c.isMesh).map(c => c.geometry), geometries);
+    assert.deepEqual(smaller, before);
+    assert.equal(updated.areaLights, 2); assert.equal(updated.extraShadowMaps, 0);
+    const gallery = stage.group.getObjectByName('editorial-continuous-gallery-not-source-base');
+    near(gallery.scale.x, updated.radius);
+    near(stage.update({camera, bounds}).radius, original.radius);
+    assert.throws(() => stage.update({camera, bounds: {min: [], max: []}}), RangeError);
+  } finally {stage.dispose();}
+});

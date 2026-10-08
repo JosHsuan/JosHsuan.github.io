@@ -99,8 +99,9 @@ function softenPractical(material) {
  * update() reads the final camera and writes only this group's objects.
  */
 export function createExhibitionStage({bounds} = {}) {
-  const layout = resolveSceneStage(bounds), radius = layout.radius;
-  const source = structuredClone(bounds), center = new T.Vector3().fromArray(layout.center);
+  const layout = resolveSceneStage(bounds);
+  let radius = layout.radius, source = structuredClone(bounds);
+  const center = new T.Vector3().fromArray(layout.center);
   const group = new T.Group();
   group.name = 'editorial-exhibition-not-source-geometry';
   group.userData = {role: 'editorial-stage', sourceGeometry: false};
@@ -128,11 +129,21 @@ export function createExhibitionStage({bounds} = {}) {
   let disposed = false;
   acquireLtc();
 
-  function update({direction = sampleSceneDirection(1, {reducedMotion: true}), camera, quality = 'full', reducedMotion = direction.reducedMotion, lightSweep = 0} = {}) {
+  function update({direction = sampleSceneDirection(1, {reducedMotion: true}), camera, quality = 'full', reducedMotion = direction.reducedMotion, lightSweep = 0, bounds: familyBounds} = {}) {
     if (disposed) throw Error('Exhibition stage has been disposed');
     if (!camera?.position || ![camera.position.x, camera.position.y, camera.position.z].every(Number.isFinite)) throw new RangeError('Expected a finite final camera position');
     const spec = direction.exhibition;
     if (!spec || spec.units !== 'source-radius') throw new RangeError('Expected the Round 03 exhibition score');
+    // Round 06: reframe the SAME set around a verified source-family envelope.
+    // Changing source representation never allocates another set or light rig.
+    if (familyBounds && ['min', 'max'].some(key => !Array.isArray(familyBounds[key]) || familyBounds[key].length !== 3 || familyBounds[key].some((value, axis) => value !== source[key][axis]))) {
+      const next = resolveSceneStage(familyBounds);
+      source = structuredClone(familyBounds); radius = next.radius; center.fromArray(next.center);
+      group.position.set(center.x, source.min[1], center.z);
+      backdrop.scale.setScalar(radius);
+      localTarget.y = (source.max[1] - source.min[1]) * .55;
+      sourceTarget.y = (source.max[1] - source.min[1]) * .5;
+    }
     const sourceFixed = direction.stage.lightFrame === 'source';
     const requestedOpacity = direction.stage.surfaceOpacity;
     if (requestedOpacity !== undefined && (typeof requestedOpacity !== 'number' || !Number.isFinite(requestedOpacity))) throw new RangeError('Expected finite stage surface opacity');

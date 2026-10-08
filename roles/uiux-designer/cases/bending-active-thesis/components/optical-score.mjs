@@ -32,6 +32,22 @@ export function axialFocusRange(pose, bounds) {
 }
 
 export function sampleOpticalScore(input, pose, {bounds}) {
+  if (input.chapterScene) {
+    // Round 06: source-fitted final camera already owns FOV. Focus is resolved
+    // from its actual axial depths; no lens multiplier may crop it after fitting.
+    const scene = input.chapterScene, reduced = input.reducedMotion === true;
+    const range = axialFocusRange(pose, bounds), optics = scene.optics;
+    return {
+      filmGaugeMm: 35, focalLengthMm: focalLengthForFov(pose.fov, input.aspect ?? pose.aspect, 35),
+      focusDistanceM: mix(range[0], range[1], clamp(optics.focusFraction, .16, .84)), focusRangeM: range,
+      apertureScale: reduced ? 0 : optics.apertureScale, maxBlurPx: reduced ? 0 : optics.maxBlurPx,
+      mistStrength: reduced ? 0 : optics.mistStrength, mistRadiusPx: optics.mistRadiusPx, mistThreshold: optics.mistThreshold,
+      asciiWeight: 0, veil: 0, ...scene.field, ...scene.layers,
+      fieldWeight: reduced ? 0 : scene.field.fieldWeight, foregroundMix: reduced ? 0 : scene.layers.foregroundMix,
+      chapter: scene.chapter, activeSeconds: scene.activeSeconds, opticalMode: reduced ? 'sharp-static' : 'autonomous-axial-depth',
+      source: 'verified active-source bounds; artistic chapter optics and editorial glyph field, not measured analysis',
+    };
+  }
   const reduced = input.reducedMotion === true;
   const u = clamp(input.stageU), visual = clamp(input.visualU ?? u);
   const coordinate = clamp(u * 7 - .5, 0, 6), a = Math.floor(coordinate), b = Math.min(6, a + 1), t = coordinate - a;
