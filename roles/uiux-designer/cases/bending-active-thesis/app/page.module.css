@@ -73,6 +73,27 @@
 .sourceNotes p{margin:1rem 0}
 .sourceLinks{display:flex;gap:1.3rem;flex-wrap:wrap}
 .sourceLinks a{padding:.65rem 0;color:var(--paper);font-family:var(--mono);font-size:.65rem}
+.chapterRail{position:fixed;right:1.25vw;top:38%;z-index:25;display:flex;flex-direction:column;gap:.4rem;font: .6rem/1 var(--mono);color:var(--muted)}
+.chapterRail a{position:relative;display:flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;text-decoration:none;border:1px solid transparent;background:#090d0d90;transition:color .18s,border-color .18s,background .18s}
+.chapterRail a[aria-current],.chapterRail a:hover,.chapterRail a:focus-visible{color:var(--accent);border-color:#ff94696b;background:#17211e}
+.railLabel{position:absolute;right:100%;text-transform:uppercase;padding:.7rem;background:#090d0de8;opacity:0;pointer-events:none;transition:opacity .18s}
+.chapterRail a:hover .railLabel,.chapterRail a:focus-visible .railLabel{opacity:1}
+.mediaFrame{display:block;position:relative;text-decoration:none;outline:1px solid transparent;outline-offset:5px;transition:outline-color .18s,box-shadow .18s}
+.mediaAction{position:absolute;right:.75rem;bottom:.75rem;padding:.6rem .8rem;background:#0d1514eb;color:#f1f2ec;font: .61rem/1.4 var(--mono);border:1px solid #b8c9bf70;transform:translateY(4px);opacity:0;transition:opacity .18s,transform .18s}
+.mediaFrame:hover,.mediaFrame:focus-visible{outline-color:var(--accent);box-shadow:0 0 25px #ff946920}
+.mediaFrame:hover .mediaAction,.mediaFrame:focus-visible .mediaAction{opacity:1;transform:translateY(0)}
+.layerCaption{font: .62rem/1.6 var(--mono)!important;color:var(--accent)!important}
+.chapter{scroll-margin-top:0}
+.chapterHeading,.openingCopy h1{transform:translateY(var(--heading-shift,0px))}
+.chapterLabel::after,.openingLabel::after{content:'';height:1px;width:clamp(20px,calc(60px * var(--attention,1)),60px);background:currentColor;opacity:calc(.35 + var(--energy,0) * .6)}
+.glyph{filter:drop-shadow(0 0 calc(var(--energy,0) * 7px) #ff946970);transition:color .18s}
+.glyph svg{transform:rotate(calc(var(--energy,0) * 7deg));transition:stroke-width .18s}
+.chapterLabel:hover .glyph,.openingLabel:hover .glyph{color:#fff1d6}
+.chapterLabel:hover .glyph svg,.openingLabel:hover .glyph svg{stroke-width:1.7}
+.copy>p,.closingCopy>p,.openingText{border-left:1px solid transparent;transition:border-color .18s,color .18s}
+@media(hover:hover) and (pointer:fine){.copy>p:hover,.closingCopy>p:hover,.openingText:hover{border-left-color:#ff94696b;color:var(--paper)}.methodSequence li:hover,.measurements>div:hover{border-color:var(--accent)}}
+.sourceLinks a:hover,.sourceNotes summary:hover{color:var(--accent)}
+:global(html[data-cinematic-static]) .chapterHeading,:global(html[data-cinematic-static]) .openingCopy h1,:global(html[data-cinematic-static]) .glyph svg{transform:none!important}
 .endnote{grid-column:1/-1;display:flex;justify-content:space-between;gap:1rem;align-self:end;color:var(--muted);border-top:1px solid #adbcb32c;padding-top:1rem;font-size:.58rem;letter-spacing:.055em;margin-top:3rem}
 :global(html[data-cinematic-ready]) .mediaFrame{transform:perspective(1400px) translate3d(0,var(--media-shift,0px),0) scale(var(--media-scale,1)) rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg))}
 :global(html[data-cinematic-ready]) .evidence{opacity:1}
@@ -116,7 +137,7 @@
   .chapterHeading,.pattern .chapterHeading,.validation .chapterHeading{font-size:clamp(2.7rem,7.2vw,4rem);margin-bottom:1.7rem}
   .copy>p{font-size:1rem;line-height:1.72;margin:1.15rem 0}
   .form .chapterInner{justify-content:flex-start;padding-top:6.4rem;padding-bottom:32svh;min-height:110svh}
-  .form .marginNote,.spatialNotation{display:none}
+  .spatialNotation{display:none}
   .copy .marginNote{font-size:.79rem;max-width:25rem;margin-top:2rem}
   .methodSequence{margin-top:1.65rem;max-width:32rem}
   .methodSequence li{font-size:.75rem}
@@ -176,3 +197,6 @@
   .mediaFrame,.glyph{transform:none!important}
   .sourceNotes{display:block}
 }
+@media(max-width:780px){.chapterRail{top:auto;left:1rem;right:1rem;bottom:.8rem;flex-direction:row;gap:0;background:#090d0df2;padding:.15rem;border:1px solid #b8c9bf38;backdrop-filter:blur(10px)}.chapterRail a{flex:1;min-width:0;min-height:40px}.railLabel{display:none}.mediaAction{opacity:1;transform:none;font-size:.54rem}.chapterInner{padding-bottom:8rem}}
+@media(prefers-reduced-motion:reduce){.chapterHeading,.openingCopy h1,.glyph svg{transform:none!important}}
+@media print{.chapterRail,.mediaAction,.layerCaption{display:none}}

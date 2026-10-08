@@ -20,7 +20,7 @@ function Heading({ number, label, lines, id, kind }) {
 
 function EvidenceImage({ item, className = '', kind = 'photo' }) {
   return <figure className={[styles.evidence, className].join(' ')} data-story-media data-media-kind={kind}>
-    <div className={styles.mediaFrame} data-parallax><img src={item.src} width={item.width} height={item.height} alt={item.alt} loading="lazy" /></div>
+    <a className={styles.mediaFrame} data-parallax href={item.source} target="_blank" rel="noreferrer" aria-label={`Inspect original source: ${item.figure}`}><img src={item.src} width={item.width} height={item.height} alt={item.alt} loading="lazy" /><span className={styles.mediaAction}>Inspect source <span aria-hidden="true">↗</span></span></a>
     <figcaption><span>{item.figure}</span><p>{item.caption}</p></figcaption>
   </figure>;
 }
@@ -33,9 +33,10 @@ export default function Page() {
   return <>
     <CinematicExperience />
     <a href="#main" className={styles.skip}>Skip to the study</a>
-    <header className={styles.masthead}>
+    <header className={styles.masthead} data-protect>
       <span className={styles.owner}>{review.owner}<span aria-hidden="true"> / </span><span className={styles.discipline}>RESEARCH</span></span>
     </header>
+    <nav className={styles.chapterRail} aria-label="Study chapters" data-protect>{['overview','form','system','pattern','make','validation','credits'].map((id,index)=><a key={id} href={`#${id}`} data-chapter-link={id}><span>{String(index+1).padStart(2,'0')}</span><span className={styles.railLabel}>{id}</span></a>)}</nav>
     <main id="main" className={styles.story} data-story-root>
       <section id="overview" className={[styles.chapter, styles.overview].join(' ')} data-story-chapter="overview" data-layout="left" aria-labelledby="project-title">
         <div className={styles.chapterInner}>
@@ -67,6 +68,7 @@ export default function Page() {
             <Heading number="02" label={story.system.label} lines={story.system.heading} id="system-heading" kind="system" />
             <Paragraphs paragraphs={story.system.paragraphs} />
             <ol className={styles.methodSequence}>{story.system.sequence.map((step, index) => <li key={step}><span>{String(index + 1).padStart(2, '0')}</span>{step}</li>)}</ol>
+            <p className={styles.layerCaption} data-layer-caption>Source geometry · original placement</p>
           </div>
           <EvidenceImage item={story.media.geometry} className={styles.geometryImage} kind="diagram" />
         </div>
@@ -78,6 +80,7 @@ export default function Page() {
             <Heading number="03" label={story.pattern.label} lines={story.pattern.heading} id="pattern-heading" kind="system" />
             <Paragraphs paragraphs={story.pattern.paragraphs} />
             <p className={styles.smallNote}>{story.pattern.note}</p>
+            <p className={styles.layerCaption} data-layer-caption>Source geometry · original placement</p>
           </div>
           <EvidenceImage item={story.media.library} className={styles.libraryImage} kind="diagram" />
         </div>
