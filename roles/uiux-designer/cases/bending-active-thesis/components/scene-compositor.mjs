@@ -128,6 +128,9 @@ float exclusion(vec2 uv){
     if(i>=rectCount)break;
     vec4 r=protectedRects[i];
     vec2 outside=max(max(r.xy-uv,uv-r.zw),vec2(0.0));
+    // Every core is fully excluded. Further rectangles cannot raise a product
+    // that is already zero, so avoid their distance/smoothstep work.
+    if(all(equal(outside,vec2(0.0))))return 0.0;
     allow*=smoothstep(0.0,1.0,length(outside/feather));
   }
   return allow;
@@ -156,6 +159,13 @@ float fieldCoverage(vec2 uv){
   return smoothstep(0.04,0.62,a+b);
 }
 void main(){
+  // Identical semantic mask for every optical/decorative operation at this
+  // pixel. In foreground mode its exact-zero cores finish as transparent black;
+  // skipping their gathers/field math preserves the premultiplied result.
+  float allowed=1.0;
+  if(foregroundMix>0.0001 && rectCount==0){gl_FragColor=vec4(0.0);return;}
+  if(mistStrength>0.0001 || asciiWeight>0.0001 || fieldWeight>0.0001 || foregroundMix>0.0001)allowed=exclusion(vUv);
+  if(foregroundMix>0.0001 && allowed==0.0){gl_FragColor=vec4(0.0);return;}
   vec4 base=texture2D(sceneColor,vUv);
   float rawSceneDepth=texture2D(sceneDepth,vUv).r;
   float depth=viewDepth(rawSceneDepth);
@@ -184,7 +194,7 @@ void main(){
   }
   if(mistStrength>0.0001){
     vec3 spread=texture2D(mistColor,vUv).rgb;
-    float strength=mistStrength*exclusion(vUv);
+    float strength=mistStrength*allowed;
     // Small direct attenuation plus redistributed highlight energy. Clear corners
     // stay transparent; only actual light within the finite kernel grows a halo.
     float haloAlpha=clamp(dot(spread,vec3(0.2126,0.7152,0.0722))*strength*0.35,0.0,0.38);
@@ -204,7 +214,7 @@ void main(){
     vec2 cellUv=fract(vUv*cssResolution/cellPx)-0.5;
     float glyphMask=glyph(cellUv,level);
     float coverage=step(rawDepth,0.999999)*source.a*step(0.01,luminance);
-    float weight=asciiWeight*glyphMask*coverage*exclusion(vUv);
+    float weight=asciiWeight*glyphMask*coverage*allowed;
     vec3 mixed=blendMode<0.5?asciiTint:color+(1.0-clamp(color,0.0,1.0))*asciiTint;
     color=mix(color,mixed,weight);
   }
@@ -227,7 +237,7 @@ void main(){
     // This is scene coverage (including the floor), not a fabricated object ID.
     float surfaceLuminance=max(0.0,dot(base.rgb,vec3(0.2126,0.7152,0.0722)));
     float surfaceCoverage=step(rawSceneDepth,0.999999)*base.a*smoothstep(0.015,0.10,surfaceLuminance);
-    float layerAlpha=fieldWeight*ink*grainPresence*fieldCoverage(vUv)*exclusion(vUv)*mix(1.0,fieldSurfaceGain,surfaceCoverage);
+    float layerAlpha=fieldWeight*ink*grainPresence*fieldCoverage(vUv)*allowed*mix(1.0,fieldSurfaceGain,surfaceCoverage);
     vec3 sourceInk=asciiTint*(0.55+0.45*density);
     vec3 boundedColor=clamp(color,0.0,1.0);
     vec3 screenBlend=boundedColor+(1.0-boundedColor)*sourceInk;
@@ -242,7 +252,6 @@ void main(){
   if(foregroundMix>0.0001){
     // A foreground Canvas may cross decorative frames, never essential cores.
     // Missing semantic masks fail closed; the caller must restore background z.
-    float allowed=exclusion(vUv);
     // Both endpoints preserve zero core alpha. The mix changes how strongly the
     // source crosses the soft OUTER rim, without fading text protection itself.
     alpha*=rectCount>0?mix(allowed*allowed,allowed,foregroundMix):0.0;

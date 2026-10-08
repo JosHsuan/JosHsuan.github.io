@@ -255,7 +255,7 @@ function World({input, stage, onReady, onFailure}) {
       gl.info.reset();
       d.compositor.render(scene, camera, optics, {width: size.width, height: size.height, dpr, samples: detail === 'full' && debug.samples !== 0 ? 2 : 0, protectedRects: debug.protectedRects ?? state.protectedRects ?? []});
       if (stage.current) stage.current.style.opacity = '1';
-      last.current = {mode:'autonomous-source-story',studyWeight,representation,playback,chapterScene,pose: {...pose, fov: camera.fov, focalLengthMm: optics.focalLengthMm}, optics, lights: direction, elements, bounds, detail, stageLayout, exhibition:exhibitionState, shadowUpdated,keyIntensity: d.lights.key.intensity};
+      last.current = {mode:'autonomous-source-story',renderedControllerFrame:state.controllerFrame??0,studyWeight,representation,playback,chapterScene,pose: {...pose, fov: camera.fov, focalLengthMm: optics.focalLengthMm}, optics, lights: direction, elements, bounds, detail, stageLayout, exhibition:exhibitionState, shadowUpdated,keyIntensity: d.lights.key.intensity};
       frames.current++;
       if (!d.ready) {d.ready = true; queueMicrotask(onReady);}
     } catch (error) {d.failed = true; console.error('Local scene rendering failed:', error.message); queueMicrotask(onFailure);}

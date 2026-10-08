@@ -80,6 +80,9 @@ test('actual WebGL depth focus, glyphs and black-mist radiance/alpha/masks', {sk
     ['/three.core.js', await readFile(path.join(root, 'node_modules/three/build/three.core.js'))],
     ['/compositor.mjs', await readFile(new URL('../components/scene-compositor.mjs', import.meta.url))],
   ]);
+  // Explicit diagnostic-only A/B: serve a saved baseline without touching the
+  // runtime module, scene controls, resolution or normal pixel assertions.
+  if (process.env.OPTICAL_BASELINE_COMPOSITOR) sources.set('/compositor-baseline.mjs', await readFile(process.env.OPTICAL_BASELINE_COMPOSITOR));
   const html = `<!doctype html><html><head><style>html,body{margin:0;background:#101314}canvas{display:block}</style><script type="importmap">{"imports":{"three":"/three.module.js"}}</script></head><body><script type="module">
   import * as T from 'three'; import {createSceneCompositor} from '/compositor.mjs';
   const gl=new T.WebGLRenderer({alpha:true,antialias:false,premultipliedAlpha:true}); gl.setSize(512,320); gl.setPixelRatio(1); gl.setClearColor(0,0); gl.toneMapping=T.ACESFilmicToneMapping; gl.outputColorSpace=T.SRGBColorSpace; document.body.append(gl.domElement);
@@ -95,7 +98,43 @@ test('actual WebGL depth focus, glyphs and black-mist radiance/alpha/masks', {sk
   const diff=(a,b,x0,x1)=>{let d=0;for(let y=70;y<250;y++)for(let x=x0;x<x1;x++){const i=(y*512+x)*4;d+=Math.abs(a[i]-b[i])+Math.abs(a[i+1]-b[i+1])+Math.abs(a[i+2]-b[i+2]);}return d;};
   function draw(overrides={},rects=[]){compositor.render(scene,camera,{...settings,overrides},{width:512,height:320,dpr:1,protectedRects:rects});return pixels();}
   let bright=null;
-  window.fixture={draw,light,compositor,run(){
+  window.fixture={draw,light,compositor,async compareBaseline(){
+    const {createSceneCompositor:createBaseline}=await import('/compositor-baseline.mjs');
+    const baseline=createBaseline(gl), reports=[];
+    const scenarios=[
+      {name:'plain',controls:{maxBlurPx:0}},
+      {name:'depth-focus',controls:{focusDistanceM:9}},
+      {name:'glyph-mask',controls:{maxBlurPx:0,asciiWeight:1},rects:[[0,0,.5,1]]},
+      {name:'mist-mask',controls:{mistStrength:.55,mistRadiusPx:32},rects:[[.25,.25,.75,.75]]},
+      {name:'field-background',controls:{maxBlurPx:0,fieldWeight:.55,fieldTime:4}},
+      {name:'foreground-core',controls:{fieldWeight:.55,fieldTime:4,foregroundMix:1},rects:[[.25,.25,.75,.75]]},
+      {name:'foreground-soft-rim',controls:{fieldWeight:.55,fieldTime:4,foregroundMix:.4,mistStrength:.3,asciiWeight:.3},rects:[[.25,.25,.75,.75]]},
+      {name:'foreground-missing-mask',controls:{foregroundMix:1,fieldWeight:.55,mistStrength:.3}},
+      {name:'foreground-full-mask',controls:{foregroundMix:1,fieldWeight:.55,mistStrength:.3},rects:[[0,0,1,1]]},
+      {name:'foreground-sixteen-cores',controls:{foregroundMix:.5,fieldWeight:.55,mistStrength:.3},rects:Array.from({length:16},(_,i)=>[(i%4)*.25,Math.floor(i/4)*.25,(i%4)*.25+.16,Math.floor(i/4)*.25+.16])},
+      {name:'light-sixteen-cores',samples:0,controls:{maxBlurPx:0,apertureScale:0,asciiWeight:0,mistStrength:0,foregroundMix:.5,fieldWeight:.3},rects:Array.from({length:16},(_,i)=>[(i%4)*.25,Math.floor(i/4)*.25,(i%4)*.25+.16,Math.floor(i/4)*.25+.16])},
+    ];
+    const render=(which,item)=>{which.render(scene,camera,{...settings,...item.controls},{width:512,height:320,dpr:1,samples:item.samples??2,protectedRects:item.rects??[]});return pixels();};
+    const hash=async bytes=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),v=>v.toString(16).padStart(2,'0')).join('');
+    try {
+      for(const item of scenarios){
+        const before=render(baseline,item),after=render(compositor,item);let maxByteDifference=0,changedChannels=0;
+        for(let i=0;i<before.length;i++){const d=Math.abs(before[i]-after[i]);maxByteDifference=Math.max(maxByteDifference,d);if(d)changedChannels++;}
+        reports.push({name:item.name,maxByteDifference,changedChannels,baselineSHA256:await hash(before),optimizedSHA256:await hash(after)});
+      }
+      // Explicit readback fences each timed fixture frame. This benchmark is
+      // diagnostic and never reachable through ordinary compositor.inspect().
+      const rounds=[];
+      for(const timed of [scenarios[9],scenarios[10]])for(let round=0;round<4;round++){
+        for(const [name,which] of round%2?[['optimized',compositor],['baseline',baseline]]:[['baseline',baseline],['optimized',compositor]]){
+          for(let i=0;i<3;i++)render(which,timed);
+          const started=performance.now();for(let i=0;i<12;i++)render(which,timed);
+          rounds.push({profile:timed.name,round,name,millisecondsPerFrame:(performance.now()-started)/12});
+        }
+      }
+      return {width:512,height:320,reports,rounds,readback:'explicit fixture fence; runtime inspection stays CPU-only'};
+    }finally{baseline.dispose();}
+  },run(){
     const near=draw({focusDistanceM:5}),far=draw({focusDistanceM:9});
     const clean=draw({maxBlurPx:0}),glyphs=draw({maxBlurPx:0,asciiWeight:1});
     const masked=draw({maxBlurPx:0,asciiWeight:1},[[0,0,.5,1]]);
@@ -201,6 +240,13 @@ test('actual WebGL depth focus, glyphs and black-mist radiance/alpha/masks', {sk
     assert.equal(field.diagnostics.passes, 2); assert.equal(field.diagnostics.outputTransformCount, 1);
     await writeFile(path.join(work, 'autonomous-field-fixture-' + engine + '.json'), JSON.stringify({verifiedAt:new Date().toISOString(),engine,field,errors}, null, 2) + '\n');
     console.log('Autonomous field WebGL evidence', JSON.stringify(field));
+    if (process.env.OPTICAL_BASELINE_COMPOSITOR) {
+      const comparison = await page.evaluate(() => window.fixture.compareBaseline());
+      assert.deepEqual(errors, [], 'Baseline comparison shader/browser errors');
+      for (const record of comparison.reports) assert.equal(record.maxByteDifference, 0, record.name + ': optimized display bytes differ');
+      await writeFile(path.join(work, 'optical-baseline-comparison-' + engine + '.json'), JSON.stringify({verifiedAt:new Date().toISOString(),engine,comparison,errors}, null, 2) + '\n');
+      console.log('Equivalent shader evidence', JSON.stringify(comparison));
+    }
     await page.evaluate(() => window.fixture.compositor.dispose());
   } finally {await browser.close(); await new Promise(resolve => server.close(resolve));}
 });

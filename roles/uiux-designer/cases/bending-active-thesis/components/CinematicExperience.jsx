@@ -59,7 +59,7 @@ export default function CinematicExperience() {
     // compensation back into anchors and cause drift on every ResizeObserver.
     const naturalY = element => {let y=0;for(let node=element;node;node=node.offsetParent)y+=node.offsetTop;return y;};
     const ease = value => {const t=Math.min(1,Math.max(0,value));return t*t*t*(10+t*(-15+6*t));};
-    let plan, offsets=[], frame=0, previous=0, resumed=true, seekPending=false, semanticSeekPending=false, seekOnScroll=false, initialHash=!!location.hash, historyNavigation=null;
+    let plan, offsets=[], frame=0, previous=0, controllerFrame=0, frameDelta=0, resumed=true, seekPending=false, semanticSeekPending=false, seekOnScroll=false, initialHash=!!location.hash, historyNavigation=null;
     let inspectionRevision=input.get().inspectionRevision??0, wasReduced=input.get().reduced;
     let preferenceKey='', pendingImpulse=0, touchY=null, pointerActive=false, latestScene=null, lastChapter=null;
     const previousRestoration=window.history.scrollRestoration;
@@ -95,6 +95,7 @@ export default function CinematicExperience() {
     const tick = now => {
       frame=0;if(document.hidden||!plan)return;
       const didResume=resumed,didSeek=semanticSeekPending,dt=previous?(now-previous)/1000:1/60;previous=now;
+      controllerFrame++;frameDelta=dt;
       let state=input.get();
       advanceReading(reading,scrollY,dt,{plan,reducedMotion:state.reduced,resumed,seek:seekPending});
       const readingScore=sampleReadingScore(reading,plan),u=readingScore.nativeU;
@@ -205,7 +206,7 @@ export default function CinematicExperience() {
       if(status.current)status.current.textContent=String(chapter.index+1).padStart(2,'0')+' / 07';
       const stageU=playbackScore.chapterWeights.reduce((sum,weight,index)=>sum+weight*(index+.5)/7,0);
       input.set({
-        u,...reading,...readingScore,readingStageU:readingScore.stageU,stageU,playback:playbackScore,chapterScene:latestScene,
+        controllerFrame,u,...reading,...readingScore,readingStageU:readingScore.stageU,stageU,playback:playbackScore,chapterScene:latestScene,
         editorial:{lightSweep:0,materialLift:0},pointer,modelHover,protectedRects,hidden:false,modelRecovering:recovering,
         inspection:{...inspection.value,lightMix:0},inspectionSettled:inspection.settled,
         inspectionActive:inspectionWeight>0,inspectionWeight,inspectionViewport,modelViewports,
@@ -255,7 +256,7 @@ export default function CinematicExperience() {
       if(state.reduced!==wasReduced){wasReduced=state.reduced;seekPending=true;schedule();}
       const key=[state.paused,state.systemReduced,state.sceneEnabled,state.sceneFailed,state.detail].join('/');if(key!==preferenceKey){preferenceKey=key;schedule();}
     });
-    window.__story={inspect:()=>({...reading,...sampleReadingScore(reading,plan),playback:sampleChapterPlayback(playback),chapterScene:latestScene,history:[...history],stops:plan.stops,scheduled:!!frame,inspectionActive:!!input.get().inspectionActive,inspectionWeight:input.get().inspectionWeight,modelViewports:input.get().modelViewports,modelEngaged:!!input.get().modelEngaged,modelRecovering:!!input.get().modelRecovering,sourceSelection:input.get().sourceSelection,choreography:[...choreography].map(([element,item])=>({kind:item.kind,firstVisibleAt:item.firstVisibleAt,phase:element.dataset.choreographyPhase,settled:item.last?.settled??false})),inspection:{target:{...inspection.target},value:{...inspection.value},lightMix:0,settled:inspection.settled}})};
+    window.__story={inspect:()=>({...reading,...sampleReadingScore(reading,plan),controllerFrame,frameDelta,readingPending:seekPending||resumed||Math.abs(reading.nativeDocY-scrollY)>.01,playback:sampleChapterPlayback(playback),chapterScene:latestScene,history:[...history],stops:plan.stops,scheduled:!!frame,inspectionActive:!!input.get().inspectionActive,inspectionWeight:input.get().inspectionWeight,modelViewports:input.get().modelViewports,modelEngaged:!!input.get().modelEngaged,modelRecovering:!!input.get().modelRecovering,sourceSelection:input.get().sourceSelection,choreography:[...choreography].map(([element,item])=>({kind:item.kind,firstVisibleAt:item.firstVisibleAt,phase:element.dataset.choreographyPhase,settled:item.last?.settled??false})),inspection:{target:{...inspection.target},value:{...inspection.value},lightMix:0,settled:inspection.settled}})};
     document.documentElement.setAttribute('data-cinematic-ready','');measure();if(location.hash)hash();
     return()=>{window.history.scrollRestoration=previousRestoration;cancelAnimationFrame(frame);resize.disconnect();unsubscribe();window.removeEventListener('scroll',scroll);window.removeEventListener('wheel',wheel);window.removeEventListener('touchstart',touchstart);window.removeEventListener('touchmove',touchmove);window.removeEventListener('touchend',touchend);window.removeEventListener('touchcancel',touchend);window.removeEventListener('thesis:representation',representation);window.removeEventListener('popstate',pop);document.removeEventListener('pointerdown',press);document.removeEventListener('pointerup',press);document.removeEventListener('pointercancel',press);window.removeEventListener('resize',resizeWindow);window.removeEventListener('pointermove',move);document.documentElement.removeEventListener('pointerleave',reset);window.removeEventListener('blur',reset);document.removeEventListener('visibilitychange',visibility);fine.removeEventListener('change',reset);document.removeEventListener('focusin',focus);document.removeEventListener('focusout',focusout);document.removeEventListener('click',anchor);window.removeEventListener('hashchange',hash);document.removeEventListener('keydown',keyboard);document.documentElement.removeAttribute('data-cinematic-ready');delete document.documentElement.dataset.activeChapter;delete document.documentElement.dataset.chapterBeat;root.style.removeProperty('--reading-shift');delete window.__story;};
   }, [input, inspection]);
