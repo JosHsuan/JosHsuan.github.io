@@ -38,6 +38,32 @@ function liveBounds(meta, elements) {
   };
 }
 
+// A representation may change every chapter beat. Reserve the wrapped height
+// of every approved description once, without letting those changes move the
+// native document or its reading stops. Only the current span is spoken.
+function prepareLayerCaptions(descriptions) {
+  const slots=[...document.querySelectorAll('[data-layer-caption]')].map(element=>{
+    const current=document.createElement('span');
+    current.dataset.layerCaptionCurrent='';current.textContent=element.textContent;
+    const variants=[...new Set([current.textContent,...descriptions])];
+    const sizing=variants.map(description=>{
+      const span=document.createElement('span');span.dataset.layerCaptionSizer='';
+      span.setAttribute('aria-hidden','true');span.textContent=description;return span;
+    });
+    element.replaceChildren(current,...sizing);element.dataset.layerCaptionSized='';
+    return {element,current};
+  });
+  return {
+    captions:slots.map(slot=>slot.current),
+    dispose(){slots.forEach(({element,current})=>{
+      // Failure may already have replaced the outer paragraph with its static
+      // message. Preserve that message; otherwise unwrap our latest caption.
+      if(current.parentNode===element)element.replaceChildren(document.createTextNode(current.textContent));
+      element.removeAttribute('data-layer-caption-sized');
+    });},
+  };
+}
+
 function World({input, stage, onReady, onFailure}) {
   const {gl, camera, scene, invalidate, size} = useThree();
   const root = useMemo(() => new T.Group(), []), data = useRef(null), frames = useRef(0), last = useRef(null), overrides = useRef({});
@@ -61,7 +87,7 @@ function World({input, stage, onReady, onFailure}) {
         disposeObject(gltf?.scene); disposeObject(diagrams?.scene); hdr?.dispose(); if (!cancelled) onFailure(); return;
       }
       const meta = results[2].value, rig = new T.Group(), previousEnvironment = scene.environment, previousFog = scene.fog, previousBackground = scene.background;
-      let environment = null, compositor = null, exhibition = null, disposed = false;
+      let environment = null, compositor = null, exhibition = null, captionSlots = null, disposed = false;
       const lights = {}, adapters = [], layers = [], diagramNodes = new Map();
       cleanup = () => {
         if (disposed) return; disposed = true;
@@ -69,6 +95,7 @@ function World({input, stage, onReady, onFailure}) {
         if (exhibition) {root.remove(exhibition.group); exhibition.dispose();}
         Object.values(lights).forEach(light => light.dispose?.());
         adapters.forEach(adapter => adapter.dispose()); compositor?.dispose();
+        captionSlots?.dispose();
         if (scene.environment === environment?.texture) scene.environment = previousEnvironment;
         scene.fog = previousFog; scene.background = previousBackground; environment?.dispose(); hdr.dispose(); data.current = null;
       };
@@ -126,7 +153,8 @@ function World({input, stage, onReady, onFailure}) {
         const ground = new T.Mesh(new T.PlaneGeometry(1, 1), groundMaterial); ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; ground.name = 'editorial-ground-not-source-base'; rig.add(ground);
         scene.environment = environment.texture; scene.fog = new T.FogExp2('#091217', .03);
         compositor = createSceneCompositor(gl); exhibition = createExhibitionStage({bounds:meta.bounds}); root.add(gltf.scene, diagrams.scene, rig, exhibition.group);
-        data.current = {meta,diagramMeta,diagramRoot:diagrams.scene,diagramNodes,families,inspectionBounds,previousBackground,studyBackground:new T.Color(),sourceRoot:gltf.scene,exhibition,layers,lights,ground,adapters,compositor,ready:false,failed:false,captions:[...document.querySelectorAll('[data-layer-caption]')],caption:null,visibleSource:[],presentationKey:null};
+        captionSlots=prepareLayerCaptions([...diagramMeta.representations.map(record=>record.description),sampleSourceSeparation(0).caption,sampleSourceSeparation(1).caption]);
+        data.current = {meta,diagramMeta,diagramRoot:diagrams.scene,diagramNodes,families,inspectionBounds,previousBackground,studyBackground:new T.Color(),sourceRoot:gltf.scene,exhibition,layers,lights,ground,adapters,compositor,ready:false,failed:false,captions:captionSlots.captions,caption:null,visibleSource:[],presentationKey:null};
         invalidate();
       } catch (error) {cleanup(); if (!cancelled) {console.error('Local source scene unavailable:', error.message); onFailure();}}
     }).catch(error => {cleanup(); if (!cancelled) {console.error('Local scene initialization failed:', error.message); onFailure();}});

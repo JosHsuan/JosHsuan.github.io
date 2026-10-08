@@ -83,6 +83,9 @@
 .mediaFrame:hover,.mediaFrame:focus-visible{outline-color:var(--accent);box-shadow:0 0 25px #ff946920}
 .mediaFrame:hover .mediaAction,.mediaFrame:focus-visible .mediaAction{opacity:1;transform:translateY(0)}
 .layerCaption{font: .62rem/1.6 var(--mono)!important;color:var(--accent)!important}
+.layerCaption:global([data-layer-caption-sized]){display:grid;grid-template-columns:minmax(0,1fr)}
+.layerCaption>:global([data-layer-caption-current]),.layerCaption>:global([data-layer-caption-sizer]){grid-area:1/1;min-width:0}
+.layerCaption>:global([data-layer-caption-sizer]){visibility:hidden;pointer-events:none;user-select:none}
 .chapter{scroll-margin-top:0}
 .chapterHeading,.openingCopy h1{transform:translateY(var(--heading-shift,0px))}
 .chapterLabel::after,.openingLabel::after{content:'';height:1px;width:clamp(20px,calc(60px * var(--attention,1)),60px);background:currentColor;opacity:calc(.35 + var(--energy,0) * .6)}

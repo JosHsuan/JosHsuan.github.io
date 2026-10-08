@@ -18,7 +18,10 @@ test('three source surfaces share one Canvas and preserve every fitted original 
  test.setTimeout(180000);const models=[],errors=[];page.on('request',r=>{if(/\.glb(?:\?|$)/.test(r.url()))models.push(r.url());});page.on('pageerror',e=>errors.push(e.message));await loadScene(page);await pause(page);const canvas=await page.locator('canvas').elementHandle();
  await expect(page.locator('[data-model-study]')).toHaveCount(3);await expect(page.locator('[data-model-study] input,[data-model-study] select,[data-model-study] [role="tab"],[data-model-study] [role="slider"]')).toHaveCount(0);
  expect(await page.evaluate(()=>window.__thesis.inspect().source)).toMatchObject({vertices:172789,triangles:227521,sourceObjects:51});
- for(const id of ['form','system','pattern']){await centerStudy(page,id);const count=id==='pattern'?3:4;const seen=new Set();for(let n=0;n<count;n++){await surface(page,id).press('Enter');await settle(page);const r=await page.evaluate(()=>window.__thesis.inspect().representation);seen.add(r.id);await fit(page);}expect(seen.size).toBe(count);}
+ const layout=()=>page.evaluate(()=>({document:document.documentElement.scrollHeight,captions:[...document.querySelectorAll('[data-layer-caption]')].map(el=>el.getBoundingClientRect().height)})),before=await layout();
+ for(const id of ['form','system','pattern']){await centerStudy(page,id);const count=id==='pattern'?3:4;const seen=new Set();
+  expect(await layout(),'Changing the source family must preserve native document layout.').toEqual(before);
+  for(let n=0;n<count;n++){await surface(page,id).press('Enter');await settle(page);const r=await page.evaluate(()=>window.__thesis.inspect().representation);seen.add(r.id);await fit(page);expect(await layout(),'Source representation captions must preserve native document layout.').toEqual(before);}expect(seen.size).toBe(count);}
  await expect(page.locator('canvas')).toHaveCount(1);expect(await page.evaluate(el=>document.querySelector('canvas')===el,canvas)).toBe(true);expect(models.filter(x=>x.includes('source-layers.glb'))).toHaveLength(1);expect(models.filter(x=>x.includes('source-diagrams.glb'))).toHaveLength(1);expect(errors).toEqual([]);await expectIdle(page);
 });
 test('actual object hover and click compare sources; empty space is not an invisible button',async({page,isMobile})=>{
