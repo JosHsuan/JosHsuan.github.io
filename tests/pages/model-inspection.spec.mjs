@@ -1,62 +1,68 @@
 import {test, expect} from '@playwright/test';
+import {PerspectiveCamera, Vector3} from 'three';
+import {INSPECTION_FRAMING_SUPPORT} from '../../roles/uiux-designer/cases/bending-active-thesis/components/inspection-framing-support.mjs';
 
-const RENDER_WAIT = 30000;
+const WAIT = 30000;
 const DEFAULT_STUDY = {azimuth: 30, elevation: 30, separation: 0, lightAzimuth: 0, preset: 'studio'};
-const dialogFor = page => page.locator('[data-model-dialog]');
+const study = page => page.locator('[data-model-study]');
+const surface = page => page.locator('[data-model-viewport]');
 
 async function frames(page, count = 2) {
-  await page.evaluate(async count => {
-    for (let index = 0; index < count; index += 1) await new Promise(requestAnimationFrame);
-  }, count);
+  await page.evaluate(async count => {for (let i = 0; i < count; i++) await new Promise(requestAnimationFrame);}, count);
 }
 
-async function settleStory(page) {
+async function settle(page) {
   await frames(page);
   await page.waitForFunction(() => {
-    const story = window.__story?.inspect();
-    return story && !story.inspectionActive && story.settled && !story.scheduled;
-  }, null, {timeout: RENDER_WAIT});
-  await frames(page);
-}
-
-async function settleStudy(page) {
-  await frames(page);
-  await page.waitForFunction(() => {
-    const story = window.__story?.inspect(), scene = window.__thesis?.inspect();
-    return story?.inspectionActive && story.inspection.settled && !story.scheduled && scene?.mode === 'inspection';
-  }, null, {timeout: RENDER_WAIT});
+    const value = window.__story?.inspect();
+    return value?.settled && value.inspection.settled && !value.scheduled;
+  }, null, {timeout: WAIT});
   await frames(page);
 }
 
 async function loadScene(page) {
   await page.goto('/');
-  await page.waitForFunction(() => window.__thesis?.inspect().ready && window.__story, null, {timeout: RENDER_WAIT});
+  await page.waitForFunction(() => window.__thesis?.inspect().ready && window.__story, null, {timeout: WAIT});
   await page.evaluate(() => document.fonts.ready);
-  await settleStory(page);
+  await settle(page);
 }
 
-async function openStudy(page, chapter = 'form', {ready = true} = {}) {
-  const trigger = page.locator(`[data-open-model-study="${chapter}"]`);
-  await trigger.scrollIntoViewIfNeeded();
-  await trigger.focus();
-  await settleStory(page);
-  const before = await page.evaluate(() => ({scrollY, overflow: document.body.style.overflow}));
-  await page.keyboard.press('Enter');
-  await expect(dialogFor(page)).toBeVisible();
-  await expect(dialogFor(page).getByRole('button', {name: 'Return to story'})).toBeFocused();
-  if (ready) await settleStudy(page);
-  return {trigger, before};
+async function centerStudy(page, {ready = true} = {}) {
+  await surface(page).scrollIntoViewIfNeeded();
+  await surface(page).evaluate(element => {
+    element.focus({preventScroll: true});
+    let y=0;for(let node=element;node;node=node.offsetParent)y+=node.offsetTop;
+    scrollTo({top:y-Math.max(112,(innerHeight-element.offsetHeight)*.34),behavior:'instant'});
+  });
+  await settle(page);
+  if (ready) {
+    await page.waitForFunction(() => window.__thesis?.inspect().studyWeight === 1, null, {timeout: WAIT});
+    await frames(page);
+  }
 }
 
-async function expectIdle(page) {
-  // The browser still services these observation frames; the application must
-  // not schedule its own response/render loop after its last meaningful input.
-  await frames(page);
-  const before = await page.evaluate(() => ({frames: window.__thesis.inspect().frames, scheduled: window.__story.inspect().scheduled}));
-  await frames(page, 8);
-  const after = await page.evaluate(() => ({frames: window.__thesis.inspect().frames, scheduled: window.__story.inspect().scheduled}));
-  expect(before.scheduled).toBe(false);
-  expect(after).toEqual(before);
+async function pressRange(page, name, key) {
+  await selectControls(page, name === 'Layer separation' ? 'Layers' : name === 'Light angle' ? 'Light' : 'View');
+  const range = study(page).getByRole('slider', {name, exact: true});
+  await range.evaluate(element => element.focus({preventScroll: true}));
+  await page.keyboard.press(key);
+  await settle(page);await centerStudy(page);
+}
+
+async function selectControls(page, tab) {
+  const button = study(page).getByRole('button', {name: tab, exact: true});
+  if (await button.getAttribute('aria-pressed') !== 'true') {
+    await button.click();
+    await centerStudy(page);
+  }
+}
+
+async function choose(page, name) {
+  if (['Front', 'Three-quarter', 'High'].includes(name)) await selectControls(page, 'View');
+  if (['Original placement', 'Separate layers'].includes(name)) await selectControls(page, 'Layers');
+  if (['Studio', 'Raking'].includes(name)) await selectControls(page, 'Light');
+  await study(page).getByRole('button', {name, exact: true}).click();
+  await centerStudy(page);
 }
 
 async function camera(page) {
@@ -66,285 +72,199 @@ async function camera(page) {
   });
 }
 
-async function expectReturn(page, {trigger, before}) {
-  await expect(dialogFor(page)).not.toBeVisible();
-  await expect(trigger).toBeFocused();
-  await settleStory(page);
-  const restored = await page.evaluate(() => ({scrollY, overflow: document.body.style.overflow, active: window.__story.inspect().inspectionActive}));
-  expect(Math.abs(restored.scrollY - before.scrollY)).toBeLessThan(0.5);
-  expect(restored.overflow).toBe(before.overflow);
-  expect(restored.active).toBe(false);
+function expectCameraEqual(actual, expected) {
+  for (const key of ['position', 'target']) actual[key].forEach((value, i) => expect(value).toBeCloseTo(expected[key][i], 7));
+  expect(actual.fov).toBeCloseTo(expected.fov, 8);
+  for (const axis of ['x', 'y']) expect(actual.viewOffsetNormalized[axis]).toBeCloseTo(expected.viewOffsetNormalized[axis], 7);
 }
 
-test('source inspection reuses the loaded Canvas and separates real layers without moving the comparison camera', async ({page}) => {
+async function expectSourceFit(page) {
+  const {pose, width, height} = await page.evaluate(() => ({pose: window.__thesis.inspect().pose, width: innerWidth, height: innerHeight}));
+  expect(pose.studyWeight).toBe(1);
+  expect(pose.framingSourceSHA256).toBe(INSPECTION_FRAMING_SUPPORT.sourceSHA256);
+  expect(pose.framingSupportPoints).toBe(514);
+  const view = new PerspectiveCamera(pose.fov, width / height, pose.near, pose.far);
+  view.position.fromArray(pose.position); view.up.fromArray(pose.up); view.lookAt(...pose.target);
+  view.setViewOffset(width, height, width * pose.viewOffsetNormalized.x, height * pose.viewOffsetNormalized.y, width, height);
+  view.updateProjectionMatrix(); view.updateMatrixWorld(true);
+  const point = new Vector3(), viewport = pose.viewport;
+  for (const vertex of INSPECTION_FRAMING_SUPPORT.points) {
+    point.fromArray(vertex).project(view);
+    const x = (point.x + 1) / 2, y = (1 - point.y) / 2;
+    expect((x - viewport.left) / viewport.width).toBeGreaterThanOrEqual(.03 - 1e-7);
+    expect((viewport.left + viewport.width - x) / viewport.width).toBeGreaterThanOrEqual(.03 - 1e-7);
+    expect((y - viewport.top) / viewport.height).toBeGreaterThanOrEqual(.03 - 1e-7);
+    expect((viewport.top + viewport.height - y) / viewport.height).toBeGreaterThanOrEqual(.03 - 1e-7);
+    expect(point.z).toBeGreaterThanOrEqual(-1); expect(point.z).toBeLessThanOrEqual(1);
+  }
+  const hintGap = await page.evaluate(() => {
+    const v = window.__thesis.inspect().pose.viewport;
+    return document.getElementById('model-study-help').getBoundingClientRect().top - (v.top + v.height) * innerHeight;
+  });
+  expect(hintGap).toBeGreaterThanOrEqual(7.99);
+}
+
+async function expectIdle(page) {
+  await settle(page);
+  const before = await page.evaluate(() => ({frames: window.__thesis.inspect().frames, scheduled: window.__story.inspect().scheduled}));
+  await frames(page, 8);
+  expect(await page.evaluate(() => ({frames: window.__thesis.inspect().frames, scheduled: window.__story.inspect().scheduled}))).toEqual(before);
+  expect(before.scheduled).toBe(false);
+}
+
+test('inline source uses one Canvas and one GLB, with exact layers and fitted source evidence', async ({page}) => {
   test.setTimeout(180000);
   const models = [], errors = [];
   page.on('request', request => {if (/\.glb(?:\?|$)/.test(request.url())) models.push(request.url());});
   page.on('pageerror', error => errors.push(error.message));
   await loadScene(page);
-  const canvas = await page.locator('canvas').elementHandle();
-  const entry = await openStudy(page);
+  const originalCanvas = await page.locator('canvas').elementHandle();
+  await centerStudy(page);
+  await expect(page.locator('dialog,[data-model-dialog]')).toHaveCount(0);
   const initial = await page.evaluate(() => window.__thesis.inspect());
-  const hintClearance = await page.evaluate(() => {const v=window.__thesis.inspect().pose.viewport;return document.getElementById('model-study-help').getBoundingClientRect().top-(v.top+v.height)*innerHeight;});
-  expect(hintClearance, 'the complete-source framing viewport excludes the gesture label').toBeGreaterThanOrEqual(7.99);
-  expect(initial.source).toMatchObject({vertices: 172789, triangles: 227521, sourceObjects: 51});
+  expect(initial.mode).toBe('continuous-story');
+  expect(initial.source).toMatchObject({revision: INSPECTION_FRAMING_SUPPORT.sourceSHA256, vertices: 172789, triangles: 227521, sourceObjects: 51});
   expect(initial.layers.map(layer => layer.id).sort()).toEqual(['base-lower', 'base-upper', 'shell']);
-  for (const layer of initial.layers) expect(layer.position, layer.id).toEqual(layer.restPosition);
-  expect(await page.evaluate(() => window.__story.inspect().inspection.value)).toEqual(DEFAULT_STUDY);
+  expect(await page.evaluate(() => window.__story.inspect().inspection.value)).toMatchObject(DEFAULT_STUDY);
+  await expectSourceFit(page);
+  await selectControls(page, 'Layers');
   const fixedCamera = await camera(page);
-  const range = dialogFor(page).getByRole('slider', {name: 'Layer separation'});
-  await range.focus();
-  await range.press('End');
-  await settleStudy(page);
-  expect(await range.inputValue()).toBe('1');
+  await pressRange(page, 'Layer separation', 'End');
   const separated = await page.evaluate(() => window.__thesis.inspect());
   expect(separated.elements.separationWeight).toBe(1);
   expect(separated.elements.caption).toContain('not a construction sequence');
   for (const layer of separated.layers) {
-    const verticalOffset = {shell: 0.24, 'base-upper': 0.09, 'base-lower': 0}[layer.id];
+    const offset = {shell: .24, 'base-upper': .09, 'base-lower': 0}[layer.id];
     expect(layer.position[0]).toBe(layer.restPosition[0]);
-    expect(layer.position[1] - layer.restPosition[1], layer.id).toBeCloseTo(verticalOffset, 12);
+    expect(layer.position[1] - layer.restPosition[1]).toBeCloseTo(offset, 12);
     expect(layer.position[2]).toBe(layer.restPosition[2]);
   }
-  expect(await camera(page), 'separation keeps the fixed comparison envelope').toEqual(fixedCamera);
-  await dialogFor(page).getByRole('button', {name: 'Original placement', exact: true}).click();
-  await settleStudy(page);
-  const returnedLayers = await page.evaluate(() => window.__thesis.inspect().layers);
-  for (const layer of returnedLayers) expect(layer.position, layer.id).toEqual(layer.restPosition);
-  await dialogFor(page).getByRole('button', {name: 'High', exact: true}).click();
-  await settleStudy(page);
-  expect(await camera(page)).not.toEqual(fixedCamera);
-  await dialogFor(page).getByRole('button', {name: 'Reset study'}).click();
-  await settleStudy(page);
-  expect(await page.evaluate(() => window.__story.inspect().inspection.value)).toEqual(DEFAULT_STUDY);
-  expect(await camera(page)).toEqual(fixedCamera);
-  await expectIdle(page);
-  await page.keyboard.press('Escape');
-  await expectReturn(page, entry);
-
-  // A second narrative entry must reset the study, not inherit the System
-  // chapter's authored display separation or create another loaded scene.
-  const nextEntry = await openStudy(page, 'system');
-  expect(await page.evaluate(() => window.__story.inspect().inspection.value)).toEqual(DEFAULT_STUDY);
+  expectCameraEqual(await camera(page), fixedCamera);
+  await choose(page, 'High');
+  await expectSourceFit(page);
+  expect(await page.evaluate(() => window.__thesis.inspect().pose.elevation)).toBe(65);
+  await choose(page, 'Reset study');
+  for (const layer of await page.evaluate(() => window.__thesis.inspect().layers)) expect(layer.position).toEqual(layer.restPosition);
   await expect(page.locator('canvas')).toHaveCount(1);
-  expect(await page.evaluate(original => document.querySelector('canvas') === original, canvas)).toBe(true);
-  expect(models).toHaveLength(1);
-  await dialogFor(page).getByRole('button', {name: 'Return to story'}).click();
-  await expectReturn(page, nextEntry);
-  expect(errors).toEqual([]);
-});
-
-test('opening during native response freezes the story and closing a moving study restores its remaining response without modal elapsed time', async ({page}) => {
-  test.setTimeout(180000);
-  await loadScene(page);
-  const trigger = page.locator('[data-open-model-study="form"]');
-  await trigger.scrollIntoViewIfNeeded();
-  await trigger.focus();
-  await settleStory(page);
-  const captured = await page.evaluate(() => new Promise((resolve, reject) => {
-    const initial = window.__story.inspect().nativeU, started = performance.now();
-    const sample = () => {
-      const story = window.__story.inspect();
-      if (!story.settled && Math.abs(story.nativeU - initial) > 0.001) {
-        const capture = {nativeU: story.nativeU, visualU: story.visualU, velocity: story.velocity, scrollY, overflow: document.body.style.overflow};
-        // Launch in the same observed frame so a slow software GPU cannot
-        // finish the story response between a protocol read and a click.
-        document.querySelector('[data-open-model-study="form"]').click();
-        return resolve(capture);
-      }
-      if (performance.now() - started > 30000) return reject(new Error('No moving native story response was observed.'));
-      requestAnimationFrame(sample);
-    };
-    requestAnimationFrame(sample);
-    scrollBy({top: Math.min(180, innerHeight * 0.2), behavior: 'instant'});
-  }));
-  await expect(dialogFor(page)).toBeVisible();
-  await settleStudy(page);
-  // Deliberately exceed the stale-frame boundary while the story is suspended.
-  await page.waitForTimeout(1100);
-  const frozen = await page.evaluate(() => window.__story.inspect());
-  expect(frozen.nativeU).toBe(captured.nativeU);
-  expect(frozen.visualU).toBe(captured.visualU);
-  expect(frozen.velocity).toBe(captured.velocity);
-  const restored = await page.evaluate(() => new Promise(resolve => {
-    const field = document.querySelector('[data-inspection-field="azimuth"]');
-    field.value = '100';
-    field.dispatchEvent(new Event('input', {bubbles: true}));
-    const movingStudy = window.__story.inspect().inspection;
-    document.querySelector('[data-return-study]').click();
-    const immediate = window.__story.inspect();
-    requestAnimationFrame(() => resolve({movingStudy, immediate, firstFrame: window.__story.inspect(), scrollY}));
-  }));
-  expect(restored.movingStudy.settled, 'the closing boundary really has pending manual response').toBe(false);
-  expect(restored.immediate.visualU).toBe(captured.visualU);
-  expect(restored.immediate.velocity).toBe(captured.velocity);
-  expect(restored.firstFrame.inspectionActive).toBe(false);
-  expect(Math.abs(restored.firstFrame.visualU - captured.nativeU), 'the first restored frame keeps the remaining story response').toBeGreaterThan(0.000001);
-  expect(Math.abs(restored.scrollY - captured.scrollY)).toBeLessThan(0.5);
-  await expectReturn(page, {trigger, before: captured});
+  expect(await page.evaluate(original => document.querySelector('canvas') === original, originalCanvas)).toBe(true);
+  expect(models).toHaveLength(1); expect(errors).toEqual([]);
   await expectIdle(page);
 });
 
-test('keyboard and surface drag change bounded views while source-fixed lights, preset-only updates and idle remain independent', async ({page, context, isMobile}) => {
+test('wheel scrolling keeps the shared story moving and reverse scrolling preserves inline choices', async ({page}) => {
   test.setTimeout(180000);
-  await loadScene(page);
-  await openStudy(page);
-  const surface = page.locator('[data-model-viewport]');
+  await loadScene(page); await centerStudy(page); await choose(page, 'High');
+  const before = await page.evaluate(() => ({scrollY, story: window.__story.inspect(), pose: window.__thesis.inspect().pose}));
+  const box = await surface(page).boundingBox();
+  await page.mouse.move(box.x + box.width * .5, box.y + box.height * .4);
+  await page.mouse.wheel(0, Math.round((await page.viewportSize()).height * .9));
+  await settle(page);
+  const after = await page.evaluate(() => ({scrollY, story: window.__story.inspect(), pose: window.__thesis.inspect().pose, overflow: document.body.style.overflow}));
+  expect(after.scrollY).toBeGreaterThan(before.scrollY + 200);
+  expect(after.story.visualDocY).toBeGreaterThan(before.story.visualDocY + 100);
+  expect(after.story.visualU).toBeGreaterThan(before.story.visualU);
+  expect(after.story.inspection.target).toEqual(before.story.inspection.target);
+  expect(after.pose.position).not.toEqual(before.pose.position);
+  expect(after.overflow).not.toBe('hidden');
+  await page.mouse.wheel(0, -Math.round((await page.viewportSize()).height * .9));
+  await settle(page); await centerStudy(page);
+  expect(await page.evaluate(() => window.__story.inspect().inspection.target)).toEqual(before.story.inspection.target);
+  expect(await page.evaluate(() => window.__thesis.inspect().pose.elevation)).toBe(65);
+  await expectSourceFit(page); await expectIdle(page);
+});
+
+test('keyboard and mouse change bounded views, touch scrolls, and source-fixed lighting remains causal', async ({page, context, isMobile}) => {
+  test.setTimeout(180000);
+  await loadScene(page); await centerStudy(page);
   const sourceLights = await page.evaluate(() => {
-    const scene = window.__thesis.inspect();
-    return {key: scene.lights.key.position, area: scene.lights.exhibition.key.position};
+    const scene = window.__thesis.inspect(); return {key: scene.lights.key.position, area: scene.lights.exhibition.key.position};
   });
-  await surface.focus();
-  await surface.press('ArrowRight');
-  await settleStudy(page);
+  await surface(page).focus(); await page.keyboard.press('ArrowRight'); await settle(page);
   expect(await page.evaluate(() => window.__story.inspect().inspection.value.azimuth)).toBe(35);
   expect(await page.evaluate(() => {
-    const scene = window.__thesis.inspect();
-    return {key: scene.lights.key.position, area: scene.lights.exhibition.key.position};
+    const scene = window.__thesis.inspect(); return {key: scene.lights.key.position, area: scene.lights.exhibition.key.position};
   })).toEqual(sourceLights);
-  const beforeGesture = await page.evaluate(() => ({view: window.__story.inspect().inspection.value.azimuth, scrollY}));
-  const rect = await surface.boundingBox(), start = {x: rect.x + rect.width * 0.4, y: rect.y + rect.height * 0.45};
+  const before = await page.evaluate(() => ({azimuth: window.__story.inspect().inspection.value.azimuth, scrollY}));
+  const box = await surface(page).boundingBox(), start = {x: box.x + box.width * .4, y: box.y + box.height * .6};
   if (isMobile) {
-    // Pixel's actual touch input reaches the Pointer Events path; the desktop
-    // profiles below use real mouse input rather than synthetic pointer events.
     const cdp = await context.newCDPSession(page);
     await cdp.send('Input.dispatchTouchEvent', {type: 'touchStart', touchPoints: [{...start, id: 1}]});
-    await cdp.send('Input.dispatchTouchEvent', {type: 'touchMove', touchPoints: [{x: start.x + 70, y: start.y - 20, id: 1}]});
-    await cdp.send('Input.dispatchTouchEvent', {type: 'touchEnd', touchPoints: []});
-    await cdp.detach();
+    for (let i = 1; i <= 6; i++) await cdp.send('Input.dispatchTouchEvent', {type: 'touchMove', touchPoints: [{x: start.x, y: start.y - i * 20, id: 1}]});
+    await cdp.send('Input.dispatchTouchEvent', {type: 'touchEnd', touchPoints: []}); await cdp.detach();
+    await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(before.scrollY + 30);
+    await settle(page);
+    expect(await page.evaluate(() => window.__story.inspect().inspection.value.azimuth)).toBe(before.azimuth);
+    await centerStudy(page);
   } else {
-    await page.mouse.move(start.x, start.y);
-    await page.mouse.down();
-    await page.mouse.move(start.x + 70, start.y - 20, {steps: 5});
-    await page.mouse.up();
+    await page.mouse.move(start.x, start.y); await page.mouse.down();
+    await page.mouse.move(start.x + 70, start.y - 20, {steps: 5}); await page.mouse.up(); await settle(page);
+    expect(await page.evaluate(() => window.__story.inspect().inspection.value.azimuth)).toBeGreaterThan(before.azimuth + 10);
+    expect(await page.evaluate(() => scrollY)).toBe(before.scrollY);
   }
-  await settleStudy(page);
-  const afterGesture = await page.evaluate(() => ({view: window.__story.inspect().inspection.value.azimuth, scrollY}));
-  expect(afterGesture.view).toBeGreaterThan(beforeGesture.view + 10);
-  expect(afterGesture.scrollY).toBe(beforeGesture.scrollY);
-  const angle = dialogFor(page).getByRole('slider', {name: 'View angle', exact: true});
-  await angle.focus(); await angle.press('End'); await settleStudy(page);
+  await pressRange(page, 'View angle', 'End');
+  await surface(page).focus(); await page.keyboard.press('ArrowRight'); await settle(page);
   expect(await page.evaluate(() => window.__story.inspect().inspection.value.azimuth)).toBe(100);
-  await surface.focus(); await surface.press('ArrowRight'); await settleStudy(page);
-  expect(await page.evaluate(() => window.__story.inspect().inspection.value.azimuth)).toBe(100);
-  await surface.press('Home'); await settleStudy(page);
-  const comparison = await camera(page);
-  const studio = await page.evaluate(() => window.__thesis.inspect());
-  expect(studio.exhibition.lightFrame).toBe('source');
+  await page.keyboard.press('Home'); await settle(page);
+  await choose(page, 'Raking');
+  const comparison = await camera(page), raking = await page.evaluate(() => window.__thesis.inspect());
+  expect(raking.exhibition.lightFrame).toBe('source');
+  expect(raking.lights.key.position).not.toEqual(sourceLights.key);
+  await pressRange(page, 'Light angle', 'End');
+  const rotated = await page.evaluate(() => window.__thesis.inspect());
+  expect(rotated.lights.key.position).not.toEqual(raking.lights.key.position);
+  expectCameraEqual(await camera(page), comparison);
   await expectIdle(page);
-  await dialogFor(page).getByRole('button', {name: 'Raking', exact: true}).click();
-  await settleStudy(page);
-  const raking = await page.evaluate(() => window.__thesis.inspect());
-  expect(raking.frames, 'a discrete light command wakes the settled scene').toBeGreaterThan(studio.frames);
-  expect(raking.lights.inspection.preset).toBe('raking');
-  expect(raking.keyIntensity, 'the actual bound key intensity changes').not.toBe(studio.keyIntensity);
-  expect(raking.lights.key.position).not.toEqual(studio.lights.key.position);
-  expect(await camera(page)).toEqual(comparison);
-  const lightAngle = dialogFor(page).getByRole('slider', {name: 'Light angle', exact: true});
-  await lightAngle.focus(); await lightAngle.press('End'); await settleStudy(page);
-  expect(await page.evaluate(() => window.__thesis.inspect().lights.inspection.azimuth)).toBe(70);
-  expect(await camera(page)).toEqual(comparison);
-  await dialogFor(page).getByRole('button', {name: 'Silhouette', exact: true}).click();
-  await settleStudy(page);
-  expect(await page.evaluate(() => window.__thesis.inspect().keyIntensity)).toBe(0);
-  await expect(lightAngle).toBeDisabled();
-  await expectIdle(page);
-  await page.keyboard.press('Escape');
 });
 
-test('initial Reduced and Pause retain explicit model controls with immediate values and Light preserves the chosen comparison', async ({page}) => {
+test('Reduced requires explicit Enable and preserves immediate source controls in Light detail', async ({page}) => {
   test.setTimeout(180000);
   const models = [];
   page.on('request', request => {if (/\.glb(?:\?|$)/.test(request.url())) models.push(request.url());});
-  await page.emulateMedia({reducedMotion: 'reduce'});
-  await page.goto('/');
-  await expect(page.getByRole('button', {name: 'Reduced motion'})).toBeVisible();
-  expect(models).toEqual([]);
-  const entry = await openStudy(page);
+  await page.emulateMedia({reducedMotion: 'reduce'}); await page.goto('/');
+  await expect(page.getByRole('button', {name: 'Reduced motion', exact: true})).toBeVisible();
+  await centerStudy(page, {ready: false});
+  expect(models).toHaveLength(0);
+  await study(page).getByRole('button', {name: 'Enable model', exact: true}).click();
+  await page.waitForFunction(() => window.__thesis?.inspect().ready, null, {timeout: WAIT});
+  await centerStudy(page);
   expect(models).toHaveLength(1);
-  const firstFrame = await page.evaluate(() => new Promise(resolve => {
-    const field = document.querySelector('[data-inspection-field="separation"]');
-    field.value = '1'; field.dispatchEvent(new Event('input', {bubbles: true}));
-    requestAnimationFrame(() => resolve(window.__story.inspect().inspection));
-  }));
-  expect(firstFrame.value.separation).toBe(1);
-  expect(firstFrame.settled).toBe(true);
-  await dialogFor(page).getByRole('button', {name: 'Front', exact: true}).click();
-  await settleStudy(page);
-  const manual = await page.evaluate(() => window.__thesis.inspect());
-  expect(manual.sourceVisible).toBe(true);
-  expect(manual.pose.azimuth).toBe(0);
-  expect(manual.pose.elevation).toBe(18);
-  expect(manual.elements.separationWeight).toBe(1);
-  expect(manual.compositor.apertureScale).toBe(0);
-  expect(manual.compositor.asciiWeight).toBe(0);
-  expect(manual.compositor.mist.enabled).toBe(false);
-  const chosenCamera = await camera(page);
-  await dialogFor(page).getByRole('combobox', {name: 'Study visual detail'}).selectOption('light');
-  await settleStudy(page);
+  await pressRange(page, 'Layer separation', 'End'); await choose(page, 'Front');
+  const manual = await page.evaluate(() => ({story: window.__story.inspect(), scene: window.__thesis.inspect()}));
+  expect(manual.story.inspection).toMatchObject({value: {separation: 1, azimuth: 0, elevation: 18}, settled: true});
+  expect(manual.scene.sourceVisible).toBe(true); expect(manual.scene.elements.separationWeight).toBe(1);
+  expect(manual.scene.compositor.apertureScale).toBe(0); expect(manual.scene.compositor.asciiWeight).toBe(0); expect(manual.scene.compositor.mist.enabled).toBe(false);
+  await study(page).getByRole('combobox', {name: 'Study visual detail'}).selectOption('light'); await centerStudy(page);
   const light = await page.evaluate(() => window.__thesis.inspect());
-  expect(light.detail).toBe('light');
-  expect(light.compositor.requestedSamples).toBe(0);
-  expect(light.elements.separationWeight).toBe(1);
-  expect(await camera(page)).toEqual(chosenCamera);
-  await expectIdle(page);
-  await page.keyboard.press('Escape');
-  await expectReturn(page, entry);
-  for (const layer of await page.evaluate(() => window.__thesis.inspect().layers)) expect(layer.position).toEqual(layer.restPosition);
-
-  await page.emulateMedia({reducedMotion: 'no-preference'});
-  await page.getByRole('button', {name: 'Pause motion'}).click();
-  await expect(page.getByRole('button', {name: 'Resume motion'})).toBeVisible();
-  const pausedEntry = await openStudy(page);
-  await dialogFor(page).getByRole('button', {name: 'Separate layers', exact: true}).click();
-  await settleStudy(page);
-  expect(await page.evaluate(() => window.__story.inspect().inspection)).toMatchObject({value: {separation: 1}, settled: true});
-  await expectIdle(page);
-  await page.keyboard.press('Escape');
-  await expectReturn(page, pausedEntry);
-  await expect(page.getByRole('button', {name: 'Resume motion'})).toBeVisible();
+  expect(light.detail).toBe('light'); expect(light.renderer.dpr).toBe(1); expect(light.compositor.requestedSamples).toBe(0);
+  expect(light.elements.separationWeight).toBe(1); expect(light.pose.azimuth).toBe(0); expect(light.pose.elevation).toBe(18);
+  await expectSourceFit(page); await expectIdle(page);
 });
 
-test('closing while source loading and losing a captured-drag context leave a usable fallback and unlocked reading', async ({page}) => {
+test('loading failure and context loss retain inline fallback, release drag and leave native reading unlocked', async ({page}) => {
   test.setTimeout(180000);
-  let releaseLoad;
-  const loadGate = new Promise(resolve => {releaseLoad = resolve;});
-  await page.route('**/source-layers.glb', async route => {await loadGate; await route.abort();});
+  await page.route('**/source-layers.glb', route => route.abort());
   await page.goto('/');
-  const loadingEntry = await openStudy(page, 'form', {ready: false});
-  await expect(dialogFor(page).locator('p[role="status"]')).toContainText('Loading');
-  await expect(dialogFor(page).getByRole('slider', {name: 'View angle', exact: true})).toBeDisabled();
-  await page.keyboard.press('Escape');
-  await expectReturn(page, loadingEntry);
-  releaseLoad();
-  await expect(page.getByRole('button', {name: 'Still background'})).toBeVisible({timeout: RENDER_WAIT});
-  await expect(dialogFor(page)).not.toBeVisible();
-  const failedEntry = await openStudy(page, 'form', {ready: false});
-  await expect(dialogFor(page).locator('p[role="status"]')).toContainText('Interactive model unavailable');
-  await expect(dialogFor(page).getByRole('slider', {name: 'View angle', exact: true})).toBeDisabled();
-  await expect.poll(() => dialogFor(page).locator('img').evaluate(image => image.complete && image.naturalWidth > 0), {timeout: RENDER_WAIT}).toBe(true);
-  await dialogFor(page).getByRole('button', {name: 'Return to story'}).click();
-  await expectReturn(page, failedEntry);
-  await page.unroute('**/source-layers.glb');
-
-  await loadScene(page);
-  const contextEntry = await openStudy(page);
-  const surface = page.locator('[data-model-viewport]');
-  await surface.evaluate(element => element.addEventListener('pointerdown', event => {element.dataset.testPointerId = String(event.pointerId);}, {once: true}));
-  const rect = await surface.boundingBox();
-  await page.mouse.move(rect.x + rect.width * 0.4, rect.y + rect.height * 0.4);
-  await page.mouse.down();
-  expect(await surface.evaluate(element => element.hasPointerCapture(Number(element.dataset.testPointerId)))).toBe(true);
+  await expect(page.getByRole('button', {name: 'Still background', exact: true})).toBeVisible({timeout: WAIT});
+  await centerStudy(page, {ready: false});
+  await expect(study(page).locator('p[role="status"]')).toContainText('Interactive model unavailable');
+  await expect(study(page).getByRole('slider', {name: 'View angle', exact: true})).toBeDisabled();
+  await expect.poll(() => study(page).locator('img').evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true);
+  const failedScroll = await page.evaluate(() => scrollY);
+  await page.mouse.wheel(0, 250); await settle(page);
+  expect(await page.evaluate(() => scrollY)).toBeGreaterThan(failedScroll + 100);
+  expect(await page.evaluate(() => document.body.style.overflow)).not.toBe('hidden');
+  await page.unroute('**/source-layers.glb'); await loadScene(page); await centerStudy(page);
+  await surface(page).evaluate(element => element.addEventListener('pointerdown', event => {element.dataset.testPointerId = String(event.pointerId);}, {once: true}));
+  const box = await surface(page).boundingBox();
+  await page.mouse.move(box.x + box.width * .4, box.y + box.height * .4); await page.mouse.down();
+  expect(await surface(page).evaluate(element => element.hasPointerCapture(Number(element.dataset.testPointerId)))).toBe(true);
   await page.evaluate(() => window.__thesis.loseContext());
-  await expect(dialogFor(page).locator('p[role="status"]')).toContainText('Interactive model unavailable', {timeout: RENDER_WAIT});
-  await expect.poll(() => surface.evaluate(element => element.hasPointerCapture(Number(element.dataset.testPointerId))), {message: 'failure releases the captured surface', timeout: RENDER_WAIT}).toBe(false);
-  const failedTarget = await page.evaluate(() => window.__story.inspect().inspection.target);
-  await page.mouse.move(rect.x + rect.width * 0.6, rect.y + rect.height * 0.3);
-  await page.mouse.up();
-  expect(await page.evaluate(() => window.__story.inspect().inspection.target), 'a failed model cannot continue invisible manipulation').toEqual(failedTarget);
-  await dialogFor(page).getByRole('button', {name: 'Return to story'}).click();
-  await expectReturn(page, contextEntry);
+  await expect(study(page).locator('p[role="status"]')).toContainText('Interactive model unavailable', {timeout: WAIT});
+  await expect.poll(() => surface(page).evaluate(element => element.hasPointerCapture(Number(element.dataset.testPointerId)))).toBe(false);
+  const target = await page.evaluate(() => window.__story.inspect().inspection.target);
+  await page.mouse.move(box.x + box.width * .6, box.y + box.height * .3); await page.mouse.up();
+  expect(await page.evaluate(() => window.__story.inspect().inspection.target)).toEqual(target);
   await expect(page.locator('[data-story-chapter]')).toHaveCount(7);
-  await expect(page.getByRole('button', {name: 'Still background'})).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
+  expect(await page.evaluate(() => document.body.style.overflow)).not.toBe('hidden');
 });

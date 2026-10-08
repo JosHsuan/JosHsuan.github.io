@@ -23,14 +23,15 @@ test('public model initializes with base layers and supports chapter navigation 
   expect(await page.evaluate(()=>window.__thesis.inspect().material)).toMatchObject({finish:'satin',roughness:.58,anisotropy:.35});
   expect(await page.evaluate(()=>window.__thesis.inspect().exhibition)).toMatchObject({sourceGeometry:false,areaLights:2,extraShadowMaps:0});
   await page.locator('[data-chapter-link="system"]').click();
-  // Native reading moves first; the damped playhead and rendered scene follow.
+  // Native document input drives one visible reading plane and scene score.
   // Linux software rendering can exceed the default five-second assertion budget.
   await expect(page.locator('[data-chapter-link="system"]')).toHaveAttribute('aria-current', 'location', {timeout:30000});
+  await page.evaluate(()=>{const element=document.getElementById('system');let y=0;for(let n=element;n;n=n.offsetParent)y+=n.offsetTop;scrollTo({top:y+element.offsetHeight*.5-innerHeight*.45,behavior:'instant'});});
   await page.waitForFunction(() => {
     const story = window.__story?.inspect(), scene = window.__thesis?.inspect();
     return story?.settled && story.chapterId === 'system' && scene?.elements?.separationWeight > .9;
   }, null, {timeout:30000});
-  await page.getByRole('combobox',{name:'Visual detail'}).selectOption('light');
+  await page.getByRole('combobox',{name:'Visual detail',exact:true}).selectOption('light');
   await expect.poll(()=>page.evaluate(()=>window.__thesis.inspect().detail)).toBe('light');
   expect(await page.evaluate(()=>window.__thesis.inspect().compositor.requestedSamples)).toBe(0);
   expect(await page.evaluate(()=>window.__thesis.inspect().compositor.mist.enabled)).toBe(false);
@@ -54,16 +55,13 @@ test('evidence inspection and method disclosure preserve native reading and keyb
   await expect(step).toContainText('desired surface geometry');
   const trigger=page.locator('[data-inspect-figure="0"]');
   await trigger.focus();await page.keyboard.press('Enter');
-  const dialog=page.getByRole('dialog',{name:'FIG. 3–04'});
-  await expect(dialog).toBeVisible();
-  await expect(dialog.getByRole('button',{name:'Close evidence inspector'})).toBeFocused();
-  await dialog.getByRole('button',{name:'Show source page'}).click();
-  await expect(dialog.locator('img')).toHaveAttribute('src','/assets/cinematic/source-p024.webp');
-  await dialog.getByRole('button',{name:'Next evidence'}).click();
-  await expect(page.getByRole('dialog')).toHaveAccessibleName('FIG. 3–05');
-  await page.getByRole('button',{name:'Previous evidence'}).click();
+  const comparison=page.getByRole('region',{name:'Original source for FIG. 3–04'});
+  await expect(comparison).toBeVisible();
+  await expect(comparison.locator('img')).toHaveAttribute('src','/assets/cinematic/source-p024.webp');
+  await expect(page.locator('dialog[open]')).toHaveCount(0);
+  await comparison.getByRole('button',{name:'Close source comparison'}).focus();
   await page.keyboard.press('Escape');
-  await expect(page.getByRole('dialog')).not.toBeVisible();
+  await expect(comparison).toHaveCount(0);
   await expect(trigger).toBeFocused();
   expect(await page.evaluate(()=>document.body.style.overflow)).not.toBe('hidden');
   expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
