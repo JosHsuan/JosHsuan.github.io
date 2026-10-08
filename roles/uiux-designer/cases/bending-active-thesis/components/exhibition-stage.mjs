@@ -123,6 +123,7 @@ export function createExhibitionStage({bounds} = {}) {
   const lights = {key: new T.RectAreaLight(), rim: new T.RectAreaLight()};
   for (const [id, light] of Object.entries(lights)) {light.name = `exhibition-area-${id}`; group.add(light);}
   const localTarget = new T.Vector3(0, (source.max[1] - source.min[1]) * .55, 0);
+  const sourceTarget = new T.Vector3(0, (source.max[1] - source.min[1]) * .5, 0);
   const up = new T.Vector3(0, 1, 0), lookMatrix = new T.Matrix4();
   let disposed = false;
   acquireLtc();
@@ -132,8 +133,10 @@ export function createExhibitionStage({bounds} = {}) {
     if (!camera?.position || ![camera.position.x, camera.position.y, camera.position.z].every(Number.isFinite)) throw new RangeError('Expected a finite final camera position');
     const spec = direction.exhibition;
     if (!spec || spec.units !== 'source-radius') throw new RangeError('Expected the Round 03 exhibition score');
+    const sourceFixed = direction.stage.lightFrame === 'source';
+    const surfaceVisible = direction.stage.surfaceVisible !== false;
     const full = quality !== 'light' && !reducedMotion;
-    const sweep = full && Number.isFinite(lightSweep) ? clamp(lightSweep, -1, 1) : 0;
+    const sweep = full && !sourceFixed && Number.isFinite(lightSweep) ? clamp(lightSweep, -1, 1) : 0;
     const x = camera.position.x - center.x, z = camera.position.z - center.z;
     // A view-conditioned editorial set, explicitly not a fixed architectural
     // location. No pitch/roll following: the floor remains the source Y datum.
@@ -141,22 +144,28 @@ export function createExhibitionStage({bounds} = {}) {
     for (const id of ['key', 'rim']) {
       const light = lights[id], score = spec[id];
       light.position.fromArray(score.position).multiplyScalar(radius);
+      if (sourceFixed) {
+        // The backdrop can still face the camera. Cancel only that set yaw for
+        // the lamp, preserving its real source-frame direction as the user orbits.
+        light.position.applyAxisAngle(up, -group.rotation.y).add(sourceTarget);
+      }
       light.position.x += sweep * radius * (id === 'key' ? .12 : -.08);
       light.width = score.size[0] * radius; light.height = score.size[1] * radius;
       light.color.fromArray(score.color); light.intensity = score.intensity * (1 + Math.abs(sweep) * .08);
-      light.quaternion.setFromRotationMatrix(lookMatrix.lookAt(light.position, localTarget, up));
+      light.quaternion.setFromRotationMatrix(lookMatrix.lookAt(light.position, sourceFixed ? sourceTarget : localTarget, up));
     }
+    backdrop.visible = surfaceVisible;
     backdrop.material.color.fromArray(spec.backdrop.color); backdrop.material.roughness = spec.backdrop.roughness;
     const portraitScale = Number.isFinite(camera.aspect) && camera.aspect < .8 ? .65 : 1;
     apertures.forEach((aperture, index) => {
       const side = index === 0 ? -1 : 1;
-      aperture.visible = full;
+      aperture.visible = full && surfaceVisible && spec.aperture.radiance > .0001;
       aperture.position.set(side * spec.aperture.spread * radius, radius * (index ? .92 : .78), -1.88 * radius);
       aperture.scale.set(radius * (index ? .13 : .09), radius * (index ? 1.22 : .94), 1);
       aperture.material.color.fromArray(spec.aperture.color).multiplyScalar(spec.aperture.radiance * (index ? 1 : .38) * portraitScale);
     });
     group.updateMatrixWorld(true);
-    return {owner: 'exhibition-stage', sourceGeometry: false, radius, meshDraws: full ? 3 : 1, areaLights: 2, extraShadowMaps: 0, lightSweep: sweep};
+    return {owner: 'exhibition-stage', sourceGeometry: false, radius, meshDraws: Number(backdrop.visible) + apertures.filter(value => value.visible).length, areaLights: 2, extraShadowMaps: 0, lightSweep: sweep, lightFrame: sourceFixed ? 'source' : 'camera'};
   }
 
   function dispose() {

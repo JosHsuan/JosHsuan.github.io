@@ -17,6 +17,15 @@ export function sampleElementPose(stageU, {reducedMotion = false} = {}) {
   if (Math.abs(slot - nearest) < 1e-12) slot = nearest;
   const from = Math.floor(slot), to = Math.min(6, from + 1), blend = slot - from;
   const separationWeight = reducedMotion ? 0 : SEPARATION[from] + (SEPARATION[to] - SEPARATION[from]) * blend;
+  return sampleSourceSeparation(separationWeight);
+}
+
+/** Exact shared source placement for story and manual inspection. A direct
+ * reduced-motion control may select any weight; only the story sampler above
+ * chooses its static whole-assembly composition. No hidden camera refit here. */
+export function sampleSourceSeparation(weight) {
+  if (typeof weight !== 'number' || !Number.isFinite(weight)) throw new TypeError('Source separation must be finite.');
+  const separationWeight = Math.max(0, Math.min(1, weight));
   const shellLift = 0.24 * separationWeight;
   const upperLift = 0.09 * separationWeight;
   return {
