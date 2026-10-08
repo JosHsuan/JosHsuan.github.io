@@ -19,3 +19,7 @@ Full source geometry and existing fallback/quality controls are retained. Model/
 ## Local verification — 8 October 2026
 
 The public build passed its 58-file artifact audit with all 15 allowlisted assets and no private inputs. All nine public browser tests passed across Chromium, WebKit and 390px mobile emulation, including source links, real shell/base loading, chapter navigation, Light mode and fallback reading. The 90 full-source projection checks remain unchanged after removing the private hull import. Root pnpm check passed (9 unit/controller tests and 63 audited output files), followed by 9 built-framework browser tests. Local Firefox assertions were not repeated after the previously recorded host launch failure; remote CI runs the framework Firefox project on Linux.
+
+## Linux CI synchronization follow-up
+
+The first completed public-case CI run passed eight of nine browser tests. Desktop Chromium reached the native SYSTEM chapter, but a traced GPU readback stalled a single evaluation for more than six seconds, exceeding the original five-second assertion limit. The smoke test now verifies native chapter selection, a settled visual playhead and actual rendered layer separation with a bounded 30-second wait. Continuous trace screenshots are disabled; DOM snapshots and source traces remain available. The scene implementation and separation threshold are unchanged. All nine local public browser tests passed again after this test-only correction; the new commit must pass Linux CI before deployment.

@@ -20,7 +20,13 @@ test('public model initializes with base layers and supports chapter navigation 
   await page.waitForFunction(()=>window.__thesis?.inspect().ready);
   expect(await page.evaluate(()=>window.__thesis.inspect().source)).toMatchObject({vertices:172789,triangles:227521,sourceObjects:51});
   await page.locator('[data-chapter-link="system"]').click();
-  await expect.poll(()=>page.evaluate(()=>window.__thesis.inspect().elements.separationWeight)).toBeGreaterThan(.9);
+  // Native reading moves first; the damped playhead and rendered scene follow.
+  // Linux software rendering can exceed the default five-second assertion budget.
+  await expect(page.locator('[data-chapter-link="system"]')).toHaveAttribute('aria-current', 'location', {timeout:30000});
+  await page.waitForFunction(() => {
+    const story = window.__story?.inspect(), scene = window.__thesis?.inspect();
+    return story?.settled && story.chapterId === 'system' && scene?.elements?.separationWeight > .9;
+  }, null, {timeout:30000});
   await page.getByRole('combobox',{name:'Visual detail'}).selectOption('light');
   await expect.poll(()=>page.evaluate(()=>window.__thesis.inspect().detail)).toBe('light');
   expect(await page.evaluate(()=>window.__thesis.inspect().compositor.requestedSamples)).toBe(0);
