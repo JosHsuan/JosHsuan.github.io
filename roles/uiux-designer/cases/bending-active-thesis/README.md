@@ -1,10 +1,20 @@
-# Bending-Active Thesis — local cinematic review
+# Bending-Active Thesis — cinematic case
 
 **Public release follow-up — 8 October 2026:** The owner now authorized GitHub Pages publication. The [public release package](release/README.md) supplies a reproducible, explicitly enumerated public build, separate from the historical local inputs described below. The canonical website is `https://joshsuan.github.io/`; use `pnpm build:pages` and `pnpm test:pages` from the repository root. The current camera no longer imports the private legacy shell hull. All previous verification remains dated evidence for that revision; public-release tests validate the publication artifact separately.
 
 Open [the local work page](http://127.0.0.1:4184/). It presents **Bending-Active Metal Panel Deformation**, the NCKU metal-panel thesis, separately from the later T3 bamboo project. This is an owner-authorized local case; the production portfolio and public snapshot remain empty.
 
-## Current round 02
+## Current round 03
+
+The owner requested a stronger material, deeper lighting and black-mist research, deliberate camera cropping/absence, richer information feedback and free scene design. The integrated result uses satin silver, two rectangular area lights and a continuous graphite exhibition sweep. Scene-linear highlights diffuse locally behind protected reading regions. The actual source geometry and narrative remain unchanged.
+
+FORM presents the complete source, SYSTEM separates its display layers, PATTERN uses a macro crop, MAKE/VALIDATION let documentary evidence take over while the model leaves the frame, and CREDITS returns to a quiet whole-object view. This replaces the round-02 scene dip. The stage is an editorial setting, not the prototype site.
+
+Heading lines, different glyph paths, method rows, evidence frames/captions and chapter plates sample one shared editorial score. Prose stays stationary and hit regions stay stable. Native method disclosures explain the existing workflow. Evidence inspection offers crop/original-page comparison, previous/next, Escape and focus return, while retaining normal source links without JavaScript. Pause and reduced motion stop the added transforms and dialog entrance.
+
+See [round-03 verification](ROUND_03_VERIFICATION.md), [shared direction](../../../experience-director/research/ROUND_03_DIRECTION.md), [material/optical research](../../../3d-artist/research/ROUND_03_MATERIAL_OPTICS.md), [scene/light research](../../../scene-designer/research/ROUND_03_STAGE_LIGHT.md) and [motion research](../../../motion-designer/research/ROUND_03_MOTION.md). Full adds two quarter-resolution diffusion passes; Light disables them. Both responsive fallback posters were captured from the actual new FORM scene.
+
+## Round 02 baseline (historical)
 
 Seven native-scroll chapters share one demand-rendered scene. Native reading and chapter navigation respond immediately, while an analytical damped response gives the scene acceleration, deceleration and unequal designed holds. One writer applies camera position, pointer composition and focal length. Actual rendered depth drives focus/defocus; focus can move while a camera pose holds. A restrained scene-only dip marks the SYSTEM/PATTERN transition.
 
@@ -57,7 +67,7 @@ Geometry verification independently compares all **172,789 vertices and 227,521 
 
 Model plus HDR is **8,495,096 raw bytes / 4,717,754 gzip body bytes**. Encoded delivery is 4.499 MiB, above the 2 MiB mobile target; raw size also exceeds the 5 MiB desktop target, and geometry exceeds the 150,000-triangle target. Gzip preserves geometry and does not reduce GPU/decoded memory. This local source-faithful review retains those overruns. Full is not certified for physical phones; Light and the poster provide reduced-cost reading.
 
-Year disagreement, incomplete media/assembly attribution, publication permission and CAD/physical-dimension differences remain unresolved source boundaries. The UIUX Saved export remains uncaptured. Firefox assertions, physical-device performance, structural validation and public release are not claimed.
+Year disagreement, incomplete media/assembly attribution and CAD/physical-dimension differences remain unresolved source boundaries. The UIUX Saved export remains uncaptured. Firefox assertions, physical-device performance and structural validation were not established by that historical local review. Public-release authorization and current verification are recorded separately above.
 
 ## Historical verification
 

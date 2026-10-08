@@ -35,3 +35,9 @@ The public build continues to copy enumerated files and checksum-approved assets
 Primary interaction references: [W3C animation from interactions](https://www.w3.org/WAI/WCAG21/Understanding/animation-from-interactions), [W3C reduced-motion technique](https://www.w3.org/WAI/WCAG22/Techniques/css/C39), and [MDN native dialog](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog). Their accessibility constraints inform the implementation; the visual choreography is original project direction.
 
 Specialist research and final verification records will describe implemented outcomes and any deviations from this initial contract. Historical round-02 results remain evidence for their original revision.
+
+## Integrated outcome
+
+Cross-role image review rejected the initial overbright/coarse finish and hard stage apron. The final satin-gray response uses lower HDR contribution and real broad area lights, while a continuous feathered sweep removes the competing stage silhouette. Desktop and 1024px SYSTEM composition was raised above its evidence strip. Source figures take priority during MAKE/VALIDATION while the model is fully absent; the former scene dip is no longer authored. CREDITS returns to the original rest assembly.
+
+Motion critique kept link/summary targets stationary while moving their inner contents. The evidence viewer supports crop/source-page comparison and native keyboard/focus behavior; it obeys Pause and live reduced motion. Caption plates preserve contrast. All source positions/normals/topology and the approved narrative remain unchanged. See the [final verification record](../../uiux-designer/cases/bending-active-thesis/ROUND_03_VERIFICATION.md) for numerical and visual evidence, public-build boundaries and device limitations.

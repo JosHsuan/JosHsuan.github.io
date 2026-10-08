@@ -1,16 +1,16 @@
 {
-  "schemaVersion": 3,
-  "role": "local-case-integration",
+  "schemaVersion": 4,
+  "role": "public-case-integration",
   "runtimeImportsFromOtherRoles": false,
   "copies": [
     {
       "kind": "Adapted shared-stage camera with combined source bounds",
       "localPath": "components/vendor/cinematic-plan.mjs",
       "sourcePath": "roles/animation-cinematographer/src/bending-active/cinematic-plan.mjs",
-      "sha256": "cdab0b598214e580e34116f4c2b9f154ed09a7c57f6ec37e3d57d378d8374c12",
+      "sha256": "dc6dbc064e0ec9a98a937471c2f65cb6f13904c81d2feeaae92bb6067eaa0c88",
       "byteIdentical": false,
       "sourceSHA256": "18a46d178734aa0d34553fc88c8d6f25fdbf605330a799119b8082b386df6712",
-      "adaptation": "Consume the shared response score without a second hold curve; revise mobile FORM placement. Historical shell hull is revision-gated and unused for current model. Public release removes the unused private hull dependency."
+      "adaptation": "Consume the shared response score without a second hold curve; revise mobile FORM placement. Historical shell hull is revision-gated and unused for current model. Public release removes the unused private hull dependency. Round 03 adds per-shot crop/absence intent and raises the desktop SYSTEM model above the evidence strip."
     },
     {
       "kind": "deterministic camera",
@@ -56,7 +56,7 @@
       "notice": "public/licenses/webgl-noise-MIT.txt"
     }
   ],
-  "revision": "round-02-source-layers-optical-story",
+  "revision": "round-03-exhibition-material-editorial",
   "currentRuntime": {
     "camera": "components/vendor/cinematic-plan.mjs",
     "material": "components/materials/cinematic-material.js",
@@ -66,21 +66,24 @@
     "elements": "components/element-score.mjs",
     "lightingAndStage": "components/scene-direction.mjs",
     "optics": "components/optical-score.mjs",
-    "compositor": "components/scene-compositor.mjs"
+    "compositor": "components/scene-compositor.mjs",
+    "editorial": "components/editorial-score.mjs",
+    "exhibition": "components/exhibition-stage.mjs",
+    "evidenceInspector": "components/EvidenceInspector.jsx"
   },
   "cinematicMaterial": {
     "owner": "3D Artist",
     "localPath": "components/materials/cinematic-material.js",
-    "sha256": "5bb33c8102dc91b6ddc2411bc0bcde17fc572342e19425dde576a9314967f979",
-    "derivedFrom": "Original role inspection-material.js studies",
+    "sha256": "ebc733481d581df83b5ecdc33b5cd1e8a0d4b42dcd45f76d77f0abea7ec2c653",
+    "derivedFrom": "Original role material studies, now source-local brushed satin physical metal with anisotropy",
     "newTextures": false
   },
-  "controllerHash": "c5d4dadcab39ceafc93c8d05e426da6f6ccb32a9a1b476125de5cb670f2100d5",
-  "sceneHash": "9b66f4196aa62467c32bf54c44054688b56e8e4691e61814eaa247f61b681cc2",
+  "controllerHash": "fb386123aba3077ea9efcc9fc1b8268de8e1c720213af8801f2f7a72e8aadc34",
+  "sceneHash": "fa4d5f122133e2672656f3b165ddee17514c854ddc632fb6b9a5834476427a5b",
   "poster": {
-    "path": "public/assets/cinematic/model-poster.webp",
-    "sha256": "ff4d3a91d3636d58ff9d94a3e9dc8e834c070b5f126c774092977113998f2f85",
-    "operation": "Final source shell plus base render at FORM with foreground hidden, sharp optics; prepared on D and explicitly handed off"
+    "path": "release/public/assets/cinematic/model-poster.webp",
+    "sha256": "931181ca2b0722d27f41bddbf60121c5d058d4297bd809aee9eb2fec68d377e7",
+    "operation": "Round 03 actual FORM scene-only capture, source geometry and procedural exhibition, sharp static optics; D-first preparation"
   },
   "modelSHA256": "ff112b90be104cca7e3705b5eee481ba3973d25e2f3d4a7350faa2f732cae47e",
   "legacyCopies": "Earlier camera/inspection/noise entries document the initial boxed viewer and are not loaded by the cinematic route.",
@@ -98,32 +101,36 @@
       "kind": "camera",
       "path": "components/vendor/cinematic-plan.mjs",
       "owner": "Animation Cinematographer",
-      "sha256": "cdab0b598214e580e34116f4c2b9f154ed09a7c57f6ec37e3d57d378d8374c12",
-      "previousSHA256": "6cf67cb2511979799b348bfdfe4f3cc5e6aa693586683b8306848e8fd6119e6f"
+      "sha256": "dc6dbc064e0ec9a98a937471c2f65cb6f13904c81d2feeaae92bb6067eaa0c88",
+      "previousSHA256": "cdab0b598214e580e34116f4c2b9f154ed09a7c57f6ec37e3d57d378d8374c12"
     },
     {
       "kind": "material",
       "path": "components/materials/cinematic-material.js",
       "owner": "3D Artist",
-      "sha256": "5bb33c8102dc91b6ddc2411bc0bcde17fc572342e19425dde576a9314967f979"
+      "sha256": "ebc733481d581df83b5ecdc33b5cd1e8a0d4b42dcd45f76d77f0abea7ec2c653",
+      "previousSHA256": "5bb33c8102dc91b6ddc2411bc0bcde17fc572342e19425dde576a9314967f979"
     },
     {
       "kind": "controller",
       "path": "components/CinematicExperience.jsx",
       "owner": "UIUX Designer / Motion Designer",
-      "sha256": "c5d4dadcab39ceafc93c8d05e426da6f6ccb32a9a1b476125de5cb670f2100d5"
+      "sha256": "fb386123aba3077ea9efcc9fc1b8268de8e1c720213af8801f2f7a72e8aadc34",
+      "previousSHA256": "c5d4dadcab39ceafc93c8d05e426da6f6ccb32a9a1b476125de5cb670f2100d5"
     },
     {
       "kind": "scene",
       "path": "components/CinematicScene.jsx",
       "owner": "Shared integration; one final property writer",
-      "sha256": "9b66f4196aa62467c32bf54c44054688b56e8e4691e61814eaa247f61b681cc2"
+      "sha256": "fa4d5f122133e2672656f3b165ddee17514c854ddc632fb6b9a5834476427a5b",
+      "previousSHA256": "9b66f4196aa62467c32bf54c44054688b56e8e4691e61814eaa247f61b681cc2"
     },
     {
       "kind": "response",
       "path": "components/story-response.mjs",
       "owner": "Motion Designer",
-      "sha256": "fee96f236fc0deae52d323645bd2c4f3339607e15f93fb7ccc8e35ae14eaa880"
+      "sha256": "8bb8666549b968036d9a9d10aee4fa32e026f1b04f878264beb905f73e51b8d5",
+      "previousSHA256": "fee96f236fc0deae52d323645bd2c4f3339607e15f93fb7ccc8e35ae14eaa880"
     },
     {
       "kind": "elements",
@@ -135,35 +142,74 @@
       "kind": "lightingAndStage",
       "path": "components/scene-direction.mjs",
       "owner": "Lighting Designer / Scene Designer",
-      "sha256": "6818a9e380ce068430e6f007807d351c6569db36f45f58f2d68a651ac899161c"
+      "sha256": "f9911315a84c51fcaece92e7541667e37b875b731069049623e20c7acda23452",
+      "previousSHA256": "6818a9e380ce068430e6f007807d351c6569db36f45f58f2d68a651ac899161c"
     },
     {
       "kind": "optics",
       "path": "components/optical-score.mjs",
       "owner": "Animation Cinematographer",
-      "sha256": "2a6e065f7d029b4e9856e9af6b6cb315d08798660c52cf1ee4f13522b13ae24a"
+      "sha256": "d248dddd37e75ee59387fa7ceb9d10c1e6df5736ec3d4d09b5a9413e40b389f2",
+      "previousSHA256": "2a6e065f7d029b4e9856e9af6b6cb315d08798660c52cf1ee4f13522b13ae24a"
     },
     {
       "kind": "compositor",
       "path": "components/scene-compositor.mjs",
       "owner": "3D Artist",
-      "sha256": "b44cb8905e44e65b77771777910ef7e6b55a7a801de4a593be0afc9cf05cba76"
+      "sha256": "e2265e5ab1a6669e63c1eee37c456cf977a1b72fa19b82c40a07df8abb13288b",
+      "previousSHA256": "b44cb8905e44e65b77771777910ef7e6b55a7a801de4a593be0afc9cf05cba76"
+    },
+    {
+      "kind": "editorial",
+      "path": "components/editorial-score.mjs",
+      "owner": "Motion Designer",
+      "sha256": "cab5e98e201d40d323172d2092aa6db6f6cf2dece4510caae144b8caf88ec8b1"
+    },
+    {
+      "kind": "exhibition",
+      "path": "components/exhibition-stage.mjs",
+      "owner": "Scene / Lighting Designer",
+      "sha256": "65c89f8fce506e42ebac529db5026b8df6f3cdbd3cfd4fdb7ada642701fd53da"
+    },
+    {
+      "kind": "evidenceInspector",
+      "path": "components/EvidenceInspector.jsx",
+      "owner": "UIUX Designer",
+      "sha256": "3c310d1d4576b8d1b112855ed4eb1d295c83eb648099349c31b1b211ecc15112"
+    },
+    {
+      "kind": "page",
+      "path": "app/page.jsx",
+      "owner": "UIUX Designer",
+      "sha256": "b0b456fdd23ed65f03632bbd05da14d05af63b534fcebb2daf9a67a9c4b36998"
+    },
+    {
+      "kind": "pageStyle",
+      "path": "app/page.module.css",
+      "owner": "UIUX Designer",
+      "sha256": "2af6e84f286778b6432de9a48561050321434e53ced42da2df6f40a53af17a36"
+    },
+    {
+      "kind": "inspectorStyle",
+      "path": "components/evidence-inspector.module.css",
+      "owner": "UIUX Designer",
+      "sha256": "192746dc8a0dfeac9c5598e20f25824bd0c67183617547c90655b92bfb6dbf8c"
     }
   ],
   "mobilePoster": {
-    "path": "public/assets/cinematic/model-poster-mobile.webp",
-    "sha256": "b1d1cc8ecffe1b3f4b699a33d7340993c1bc82fd3e7ccb23b179cab5ecd81ae0",
+    "path": "release/public/assets/cinematic/model-poster-mobile.webp",
+    "sha256": "b133e25443df7926f8b5b4fcf354765f371c3417e0662a0635b917f4546e8d24",
+    "operation": "Round 03 actual FORM scene-only capture, source geometry and procedural exhibition, sharp static optics; D-first preparation",
     "viewport": [
       390,
       844
-    ],
-    "operation": "Final source shell plus base render at FORM with foreground hidden, sharp optics; prepared on D and explicitly handed off"
+    ]
   },
   "previousModelSHA256": "c56dfda835e6538ad360f76967ba65603ff48d055228a7d400a2293554bbb058",
   "model": {
-    "path": "public/assets/source-layers.glb",
-    "metadata": "public/assets/source-layers.json",
-    "metadataSHA256": "18d6071f73e2b6f231c7b97f0899649b7eff529af57382c980b0b374b53fc607",
+    "path": "release/public/assets/source-layers.glb",
+    "metadata": "release/public/assets/source-layers.json",
+    "metadataSHA256": "355633399d5cb38d8b340fe96a53314dca6d1f88b87cbdb6b3167a5ad81610ea",
     "sourceRevision": "c12ca628488a4449ea587965410d7df6baa815b36397c8344e2e14a3f533b14c",
     "vertices": 172789,
     "triangles": 227521,
@@ -175,8 +221,9 @@
       "base-upper"
     ],
     "rawBytes": 6879848,
-    "gitIgnored": true,
-    "publishable": false
+    "gitIgnored": false,
+    "publishable": true,
+    "authority": "docs/decisions/0006-public-thesis-pages.md"
   },
   "quality": {
     "full": {
@@ -184,8 +231,17 @@
       "msaaSamples": 2,
       "resolveDepth": true,
       "keyShadowMap": 1024,
-      "observedDrawCalls": 8,
-      "observedSubmittedTriangles": 455046
+      "highlightDiffusion": true,
+      "diffusionPasses": 2,
+      "totalComposerPasses": 4,
+      "exhibitionMeshDraws": 3,
+      "exhibitionTriangles": 324,
+      "rectangularAreaLights": 2,
+      "extraShadowMaps": 0,
+      "observedAt": "FORM, 1440x1000, DPR1, source visible and mist enabled",
+      "observedDrawCalls": 12,
+      "observedSubmittedTriangles": 455372,
+      "observedPrograms": 7
     },
     "light": {
       "dprCap": 1,
@@ -193,7 +249,10 @@
       "shadow": false,
       "defocus": false,
       "ascii": false,
-      "geometryUnchanged": true
+      "geometryUnchanged": true,
+      "highlightDiffusion": false,
+      "exhibitionMeshDraws": 1,
+      "rectangularAreaLights": 2
     }
   },
   "transport": {
@@ -204,11 +263,148 @@
     "triangleTarget": 150000,
     "triangleTargetMet": false
   },
-  "workingEvidence": "D:/JosHsuan_Website/_work/bending-active-thesis/round-02",
-  "validationRecord": "ROUND_02_VERIFICATION.md",
+  "workingEvidence": "D:/JosHsuan_Website/_work/bending-active-thesis/round-03",
+  "validationRecord": "ROUND_03_VERIFICATION.md",
   "publicRelease": {
     "authority": "docs/decisions/0006-public-thesis-pages.md",
     "manifest": "release/manifest.json",
-    "runtimeChange": "Remove the unused private framing import; current combined-source framing remains identical across all 90 verified projections."
-  }
+    "runtimeChange": "Round 03 satin material, masked highlight diffusion, editorial stage, camera crop/absence and shared information feedback; approved story and source GLB unchanged."
+  },
+  "history": [
+    {
+      "revision": "round-02-source-layers-optical-story",
+      "reviewedAt": "2026-10-08",
+      "runtimeRecords": [
+        {
+          "kind": "camera",
+          "path": "components/vendor/cinematic-plan.mjs",
+          "owner": "Animation Cinematographer",
+          "sha256": "cdab0b598214e580e34116f4c2b9f154ed09a7c57f6ec37e3d57d378d8374c12",
+          "previousSHA256": "6cf67cb2511979799b348bfdfe4f3cc5e6aa693586683b8306848e8fd6119e6f"
+        },
+        {
+          "kind": "material",
+          "path": "components/materials/cinematic-material.js",
+          "owner": "3D Artist",
+          "sha256": "5bb33c8102dc91b6ddc2411bc0bcde17fc572342e19425dde576a9314967f979"
+        },
+        {
+          "kind": "controller",
+          "path": "components/CinematicExperience.jsx",
+          "owner": "UIUX Designer / Motion Designer",
+          "sha256": "c5d4dadcab39ceafc93c8d05e426da6f6ccb32a9a1b476125de5cb670f2100d5"
+        },
+        {
+          "kind": "scene",
+          "path": "components/CinematicScene.jsx",
+          "owner": "Shared integration; one final property writer",
+          "sha256": "9b66f4196aa62467c32bf54c44054688b56e8e4691e61814eaa247f61b681cc2"
+        },
+        {
+          "kind": "response",
+          "path": "components/story-response.mjs",
+          "owner": "Motion Designer",
+          "sha256": "fee96f236fc0deae52d323645bd2c4f3339607e15f93fb7ccc8e35ae14eaa880"
+        },
+        {
+          "kind": "elements",
+          "path": "components/element-score.mjs",
+          "owner": "3D Animation Designer",
+          "sha256": "17972f73086b6ad80743db9df9ce0d8c1cb410bfdf2be7a6458ea498163e448f"
+        },
+        {
+          "kind": "lightingAndStage",
+          "path": "components/scene-direction.mjs",
+          "owner": "Lighting Designer / Scene Designer",
+          "sha256": "6818a9e380ce068430e6f007807d351c6569db36f45f58f2d68a651ac899161c"
+        },
+        {
+          "kind": "optics",
+          "path": "components/optical-score.mjs",
+          "owner": "Animation Cinematographer",
+          "sha256": "2a6e065f7d029b4e9856e9af6b6cb315d08798660c52cf1ee4f13522b13ae24a"
+        },
+        {
+          "kind": "compositor",
+          "path": "components/scene-compositor.mjs",
+          "owner": "3D Artist",
+          "sha256": "b44cb8905e44e65b77771777910ef7e6b55a7a801de4a593be0afc9cf05cba76"
+        }
+      ],
+      "cinematicMaterial": {
+        "owner": "3D Artist",
+        "localPath": "components/materials/cinematic-material.js",
+        "sha256": "5bb33c8102dc91b6ddc2411bc0bcde17fc572342e19425dde576a9314967f979",
+        "derivedFrom": "Original role inspection-material.js studies",
+        "newTextures": false
+      },
+      "poster": {
+        "path": "public/assets/cinematic/model-poster.webp",
+        "sha256": "ff4d3a91d3636d58ff9d94a3e9dc8e834c070b5f126c774092977113998f2f85",
+        "operation": "Final source shell plus base render at FORM with foreground hidden, sharp optics; prepared on D and explicitly handed off"
+      },
+      "mobilePoster": {
+        "path": "public/assets/cinematic/model-poster-mobile.webp",
+        "sha256": "b1d1cc8ecffe1b3f4b699a33d7340993c1bc82fd3e7ccb23b179cab5ecd81ae0",
+        "viewport": [
+          390,
+          844
+        ],
+        "operation": "Final source shell plus base render at FORM with foreground hidden, sharp optics; prepared on D and explicitly handed off"
+      },
+      "controllerHash": "c5d4dadcab39ceafc93c8d05e426da6f6ccb32a9a1b476125de5cb670f2100d5",
+      "sceneHash": "9b66f4196aa62467c32bf54c44054688b56e8e4691e61814eaa247f61b681cc2",
+      "model": {
+        "path": "public/assets/source-layers.glb",
+        "metadata": "public/assets/source-layers.json",
+        "metadataSHA256": "18d6071f73e2b6f231c7b97f0899649b7eff529af57382c980b0b374b53fc607",
+        "sourceRevision": "c12ca628488a4449ea587965410d7df6baa815b36397c8344e2e14a3f533b14c",
+        "vertices": 172789,
+        "triangles": 227521,
+        "sourceObjects": 51,
+        "baseObjects": 50,
+        "layers": [
+          "shell",
+          "base-lower",
+          "base-upper"
+        ],
+        "rawBytes": 6879848,
+        "gitIgnored": true,
+        "publishable": false
+      },
+      "quality": {
+        "full": {
+          "dprCap": 1.25,
+          "msaaSamples": 2,
+          "resolveDepth": true,
+          "keyShadowMap": 1024,
+          "observedDrawCalls": 8,
+          "observedSubmittedTriangles": 455046
+        },
+        "light": {
+          "dprCap": 1,
+          "msaaSamples": 0,
+          "shadow": false,
+          "defocus": false,
+          "ascii": false,
+          "geometryUnchanged": true
+        }
+      },
+      "validationRecord": "ROUND_02_VERIFICATION.md"
+    }
+  ],
+  "posters": [
+    {
+      "path": "release/public/assets/cinematic/model-poster-mobile.webp",
+      "sha256": "b133e25443df7926f8b5b4fcf354765f371c3417e0662a0635b917f4546e8d24",
+      "operation": "Round 03 actual FORM scene-only capture, source geometry and procedural exhibition, sharp static optics; D-first preparation"
+    },
+    {
+      "path": "release/public/assets/cinematic/model-poster.webp",
+      "sha256": "931181ca2b0722d27f41bddbf60121c5d058d4297bd809aee9eb2fec68d377e7",
+      "operation": "Round 03 actual FORM scene-only capture, source geometry and procedural exhibition, sharp static optics; D-first preparation"
+    }
+  ],
+  "round03Authority": "roles/experience-director/research/ROUND_03_DIRECTION.md",
+  "runtimeHashConvention": "SHA-256 of committed Git blob bytes; historical entries preserve their original evidence convention."
 }

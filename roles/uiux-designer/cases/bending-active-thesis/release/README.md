@@ -16,7 +16,13 @@ The canonical site is `https://joshsuan.github.io/`. `/release.json` identifies 
 
 Full source geometry and existing fallback/quality controls are retained. Model/HDR transfer and triangle counts still exceed earlier mobile/source budgets. Physical phone performance is not certified. Original source attribution and year uncertainty remain visible; publication does not fabricate missing credits or engineering evidence.
 
-## Local verification — 8 October 2026
+## Round 03 — 8 October 2026
+
+The current release adds satin metal, a graphite exhibition sweep, area lighting, masked highlight diffusion, deliberate model exit/return, element-specific motion and native evidence inspection. The approved story and source GLB are unchanged. Two actual-scene fallback posters replace their preceding captures. See [round-03 verification](../ROUND_03_VERIFICATION.md) for current results and limits.
+
+CI now runs the portable case tests before building. The public artifact audit contains 59 files and the same 15 approved assets. The public browser matrix contains 18 tests across Chromium, WebKit and mobile Chromium; the original framework remains a separate root/subpath CI matrix. Deployment still requires a successful exact-commit push workflow and consumes its existing artifact.
+
+## First public release verification — historical, 8 October 2026
 
 The public build passed its 58-file artifact audit with all 15 allowlisted assets and no private inputs. All nine public browser tests passed across Chromium, WebKit and 390px mobile emulation, including source links, real shell/base loading, chapter navigation, Light mode and fallback reading. The 90 full-source projection checks remain unchanged after removing the private hull import. Root pnpm check passed (9 unit/controller tests and 63 audited output files), followed by 9 built-framework browser tests. Local Firefox assertions were not repeated after the previously recorded host launch failure; remote CI runs the framework Firefox project on Linux.
 
