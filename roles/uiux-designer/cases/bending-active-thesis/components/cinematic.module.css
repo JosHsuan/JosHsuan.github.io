@@ -19,3 +19,7 @@
 @media(max-width:780px){.readingTools{right:1.25rem;top:.7rem;gap:.7rem}.readingTools button{min-height:32px;padding:.5rem .7rem}.readingTools>span{display:none}.poster{object-position:61% 50%}.vignette{background:linear-gradient(transparent,#090d0d40)}.scrim{background:linear-gradient(180deg,#090d0ddb 0%,#090d0daa 35%,#090d0d30 66%,#090d0d45 100%)}.scrimLeft,.scrimRight{display:none}.scrimQuiet{background:#090d0d}}
 @media print{.backdrop,.readingTools,.progress{display:none}}
 @media(max-width:780px){.detailLabel{font-size:0;gap:0}.detailLabel select{font-size:.55rem;min-height:36px;padding:.35rem}.readingTools button{min-height:36px}}
+
+/* The fitted source slot is clear of prose; release its reading scrim while
+   preserving opaque document/control planes outside it. */
+.scrim{opacity:calc(1 - var(--study-weight,0) * .9)}

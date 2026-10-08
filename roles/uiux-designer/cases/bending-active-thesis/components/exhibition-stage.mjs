@@ -134,7 +134,10 @@ export function createExhibitionStage({bounds} = {}) {
     const spec = direction.exhibition;
     if (!spec || spec.units !== 'source-radius') throw new RangeError('Expected the Round 03 exhibition score');
     const sourceFixed = direction.stage.lightFrame === 'source';
-    const surfaceVisible = direction.stage.surfaceVisible !== false;
+    const requestedOpacity = direction.stage.surfaceOpacity;
+    if (requestedOpacity !== undefined && (typeof requestedOpacity !== 'number' || !Number.isFinite(requestedOpacity))) throw new RangeError('Expected finite stage surface opacity');
+    const surfaceOpacity = requestedOpacity === undefined ? Number(direction.stage.surfaceVisible !== false) : clamp(requestedOpacity, 0, 1);
+    const surfaceVisible = surfaceOpacity > .0001;
     const full = quality !== 'light' && !reducedMotion;
     const sweep = full && !sourceFixed && Number.isFinite(lightSweep) ? clamp(lightSweep, -1, 1) : 0;
     const x = camera.position.x - center.x, z = camera.position.z - center.z;
@@ -155,17 +158,19 @@ export function createExhibitionStage({bounds} = {}) {
       light.quaternion.setFromRotationMatrix(lookMatrix.lookAt(light.position, sourceFixed ? sourceTarget : localTarget, up));
     }
     backdrop.visible = surfaceVisible;
+    backdrop.material.opacity = surfaceOpacity;
     backdrop.material.color.fromArray(spec.backdrop.color); backdrop.material.roughness = spec.backdrop.roughness;
     const portraitScale = Number.isFinite(camera.aspect) && camera.aspect < .8 ? .65 : 1;
     apertures.forEach((aperture, index) => {
       const side = index === 0 ? -1 : 1;
       aperture.visible = full && surfaceVisible && spec.aperture.radiance > .0001;
+      aperture.material.opacity = .18 * surfaceOpacity;
       aperture.position.set(side * spec.aperture.spread * radius, radius * (index ? .92 : .78), -1.88 * radius);
       aperture.scale.set(radius * (index ? .13 : .09), radius * (index ? 1.22 : .94), 1);
       aperture.material.color.fromArray(spec.aperture.color).multiplyScalar(spec.aperture.radiance * (index ? 1 : .38) * portraitScale);
     });
     group.updateMatrixWorld(true);
-    return {owner: 'exhibition-stage', sourceGeometry: false, radius, meshDraws: Number(backdrop.visible) + apertures.filter(value => value.visible).length, areaLights: 2, extraShadowMaps: 0, lightSweep: sweep, lightFrame: sourceFixed ? 'source' : 'camera'};
+    return {owner: 'exhibition-stage', sourceGeometry: false, radius, meshDraws: Number(backdrop.visible) + apertures.filter(value => value.visible).length, areaLights: 2, extraShadowMaps: 0, lightSweep: sweep, lightFrame: sourceFixed ? 'source' : 'camera', surfaceOpacity};
   }
 
   function dispose() {

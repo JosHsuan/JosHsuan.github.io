@@ -22,20 +22,21 @@ function Glyph({ kind = 'form' }) {
 
 function Heading({ number, label, lines, id, kind }) {
   return <><div className={styles.chapterLabel}><Glyph kind={kind} /><span>{number} / {label}</span></div>
-    <h2 id={id} className={styles.chapterHeading} data-story-heading>{lines.map((line, index) => <span key={line} data-heading-line style={{'--line-index':index}} className={index === lines.length - 1 ? styles.headingLast : undefined}>{line}</span>)}</h2>
+    <h2 id={id} className={styles.chapterHeading} data-story-heading data-feedback-plane>{lines.map((line, index) => <span key={line} data-heading-line style={{'--line-index':index}} className={index === lines.length - 1 ? styles.headingLast : undefined}>{line}</span>)}</h2>
   </>;
 }
 
 function EvidenceImage({ item, className = '', kind = 'photo' }) {
   return <figure className={[styles.evidence, className].join(' ')} data-story-media data-media-kind={kind}>
     <div className={styles.figureIndex} aria-hidden="true"><span>Evidence / {String(evidence.indexOf(item)+1).padStart(2,'0')}</span><span>{kind === 'diagram' ? 'RESEARCH DRAWING' : 'PHYSICAL RECORD'}</span></div>
-    <a className={styles.mediaFrame} data-inspect-figure={evidence.indexOf(item)} href={item.source} target="_blank" rel="noreferrer" aria-label={`Inspect original source: ${item.figure}`}><span className={styles.mediaPlane} data-parallax><span className={styles.frameCorner} aria-hidden="true"/><img src={item.src} width={item.width} height={item.height} alt={item.alt} loading="lazy" /></span><span className={styles.mediaAction}>Inspect evidence <span aria-hidden="true">↗</span></span></a>
+    <a className={styles.mediaFrame} data-inspect-figure={evidence.indexOf(item)} href={item.source} target="_blank" rel="noreferrer" aria-label={`Inspect original source: ${item.figure}`}><span className={styles.mediaPlane} data-feedback-plane><span className={styles.frameCorner} aria-hidden="true"/><img src={item.src} width={item.width} height={item.height} alt={item.alt} loading="lazy" /></span><span className={styles.mediaAction}>Inspect evidence <span aria-hidden="true">↗</span></span></a>
     <figcaption data-editorial-caption><span>{item.figure}</span><p>{item.caption}</p></figcaption>
+    <div data-evidence-host={evidence.indexOf(item)} />
   </figure>;
 }
 
 function Paragraphs({ paragraphs }) {
-  return paragraphs.map((paragraph, index) => <p key={paragraph} data-editorial-copy style={{'--copy-index':index}}>{paragraph}</p>);
+  return paragraphs.map((paragraph, index) => <p key={paragraph} data-editorial-copy data-feedback-plane style={{'--copy-index':index}}>{paragraph}</p>);
 }
 
 export default function Page() {
@@ -47,46 +48,47 @@ export default function Page() {
       <span className={styles.owner}>{review.owner}<span aria-hidden="true"> / </span><span className={styles.discipline}>RESEARCH</span></span>
     </header>
     <nav className={styles.chapterRail} aria-label="Study chapters" data-protect data-story-navigation>{['overview','form','system','pattern','make','validation','credits'].map((id,index)=><a key={id} href={`#${id}`} data-chapter-link={id}><span>{String(index+1).padStart(2,'0')}</span><span className={styles.railLabel}>{id}</span></a>)}</nav>
-    <main id="main" className={styles.story} data-story-root>
-      <section id="overview" className={[styles.chapter, styles.overview].join(' ')} data-story-chapter="overview" data-layout="left" aria-labelledby="project-title">
+    <div className={styles.readingFrame} data-reading-frame><main id="main" tabIndex={-1} className={styles.story} data-story-root>
+      <section id="overview" className={[styles.chapter, styles.overview].join(' ')} tabIndex={-1} data-story-chapter="overview" data-layout="left" aria-labelledby="project-title">
         <div className={styles.chapterInner}>
           <div className={styles.openingCopy} data-story-panel>
             <div className={styles.openingLabel}><Glyph /><span>{story.overview.eyebrow}</span></div>
-            <h1 id="project-title" aria-label={review.title} data-story-heading><span data-heading-line style={{'--line-index':0}}>{review.hero.titleLines[0]}</span><span data-heading-line style={{'--line-index':1}}>{review.hero.titleLines[1]}</span></h1>
+            <h1 id="project-title" aria-label={review.title} data-story-heading data-feedback-plane><span data-heading-line style={{'--line-index':0}}>{review.hero.titleLines[0]}</span><span data-heading-line style={{'--line-index':1}}>{review.hero.titleLines[1]}</span></h1>
             <p className={styles.subtitle}>{review.hero.subtitle}</p>
-            <p className={styles.openingText}>{story.overview.introduction}</p>
+            <p className={styles.openingText} data-reading-copy data-feedback-plane>{story.overview.introduction}</p>
             <p className={styles.projectType}>{review.projectType}<span aria-hidden="true"> — </span>{review.institution}</p>
           </div>
           <div className={styles.scrollCue} aria-hidden="true"><span className={styles.scrollLine} />{story.overview.scrollCue}</div>
         </div>
       </section>
 
-      <section id="form" className={[styles.chapter, styles.form].join(' ')} data-story-chapter="form" data-layout="left" aria-labelledby="form-heading">
+      <section id="form" className={[styles.chapter, styles.form].join(' ')} tabIndex={-1} data-story-chapter="form" data-layout="left" aria-labelledby="form-heading">
         <div className={styles.chapterInner}>
           <div className={styles.copy} data-story-panel>
             <Heading number="01" label={story.form.label} lines={story.form.heading} id="form-heading" kind="form" />
             <Paragraphs paragraphs={story.form.paragraphs} />
             <p className={styles.marginNote}>{story.form.aside}</p>
-            <a className={styles.studyLink} href="/assets/cinematic/model-poster.webp" target="_blank" rel="noreferrer" data-open-model-study="form"><span>Explore the model</span><span aria-hidden="true">↗</span><small>View · layers · light</small></a>
+            <a className={styles.studyLink} href="#model-study"><span>Explore the surface</span><span aria-hidden="true">↓</span><small>Continue below to adjust the view and light</small></a>
           </div>
+          <div id="model-study" tabIndex={-1} className={styles.inlineStudy} data-model-study-host />
           <div className={styles.spatialNotation} aria-hidden="true"><span /><p>LOCAL OPENING<br />CONTINUOUS SURFACE</p></div>
         </div>
       </section>
 
-      <section id="system" className={[styles.chapter, styles.system].join(' ')} data-story-chapter="system" data-layout="left" aria-labelledby="system-heading">
+      <section id="system" className={[styles.chapter, styles.system].join(' ')} tabIndex={-1} data-story-chapter="system" data-layout="left" aria-labelledby="system-heading">
         <div className={styles.chapterInner}>
           <div className={styles.copy} data-story-panel>
             <Heading number="02" label={story.system.label} lines={story.system.heading} id="system-heading" kind="system" />
             <Paragraphs paragraphs={story.system.paragraphs} />
             <ol className={styles.methodSequence}>{story.system.sequence.map((step, index) => <li key={step} style={{'--step-index':index}}><details><summary><span>{String(index + 1).padStart(2, '0')}</span><span>{step}</span><span className={styles.stepArrow} aria-hidden="true">↗</span></summary><p>{methodNotes[index]}</p></details></li>)}</ol>
             <p className={styles.layerCaption} data-layer-caption>Source geometry · original placement</p>
-            <a className={styles.studyLink} href="/assets/cinematic/model-poster.webp" target="_blank" rel="noreferrer" data-open-model-study="system"><span>Compare source layers</span><span aria-hidden="true">↗</span><small>Original placement and display separation</small></a>
+
           </div>
           <EvidenceImage item={story.media.geometry} className={styles.geometryImage} kind="diagram" />
         </div>
       </section>
 
-      <section id="pattern" className={[styles.chapter, styles.pattern].join(' ')} data-story-chapter="pattern" data-layout="left" aria-labelledby="pattern-heading">
+      <section id="pattern" className={[styles.chapter, styles.pattern].join(' ')} tabIndex={-1} data-story-chapter="pattern" data-layout="left" aria-labelledby="pattern-heading">
         <div className={styles.chapterInner}>
           <div className={styles.copy} data-story-panel>
             <Heading number="03" label={story.pattern.label} lines={story.pattern.heading} id="pattern-heading" kind="system" />
@@ -98,7 +100,7 @@ export default function Page() {
         </div>
       </section>
 
-      <section id="make" className={[styles.chapter, styles.make].join(' ')} data-story-chapter="make" data-layout="right" aria-labelledby="make-heading">
+      <section id="make" className={[styles.chapter, styles.make].join(' ')} tabIndex={-1} data-story-chapter="make" data-layout="right" aria-labelledby="make-heading">
         <div className={styles.chapterInner}>
           <EvidenceImage item={story.media.connection} className={styles.connectionImage} />
           <div className={styles.copy} data-story-panel>
@@ -110,7 +112,7 @@ export default function Page() {
         </div>
       </section>
 
-      <section id="validation" className={[styles.chapter, styles.validation].join(' ')} data-story-chapter="validation" data-layout="left" aria-labelledby="validation-heading">
+      <section id="validation" className={[styles.chapter, styles.validation].join(' ')} tabIndex={-1} data-story-chapter="validation" data-layout="left" aria-labelledby="validation-heading">
         <div className={styles.chapterInner}>
           <div className={styles.copy} data-story-panel>
             <Heading number="05" label={story.validation.label} lines={story.validation.heading} id="validation-heading" kind="make" />
@@ -121,7 +123,7 @@ export default function Page() {
         </div>
       </section>
 
-      <section id="credits" className={[styles.chapter, styles.credits].join(' ')} data-story-chapter="credits" data-layout="left" aria-labelledby="credits-heading">
+      <section id="credits" className={[styles.chapter, styles.credits].join(' ')} tabIndex={-1} data-story-chapter="credits" data-layout="left" aria-labelledby="credits-heading">
         <div className={styles.chapterInner}>
           <div className={styles.closingCopy} data-story-panel>
             <Heading number="06" label={story.credits.label} lines={story.credits.heading} id="credits-heading" kind="form" />
@@ -138,6 +140,6 @@ export default function Page() {
           <footer className={styles.endnote}><span>{review.owner}</span><span>FORM / SYSTEM / MAKE</span></footer>
         </div>
       </section>
-    </main>
+    </main></div>
   </>;
 }

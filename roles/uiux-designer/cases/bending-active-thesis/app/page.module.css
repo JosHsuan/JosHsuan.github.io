@@ -255,3 +255,21 @@
 .studyLink{display:grid;grid-template-columns:1fr auto;gap:6px 20px;max-width:320px;margin:24px 0 0;padding:14px 16px;border:1px solid #a1b29870;background:#17201ac9;text-decoration:none;font-size:.8rem;min-height:64px;transition:border-color .2s,background .2s}
 .studyLink>span:nth-child(2){color:var(--accent);transition:transform .2s}.studyLink small{grid-column:1/-1;font:.53rem/1.5 var(--mono);color:#b9c3b7}
 .studyLink:hover,.studyLink:focus-visible{border-color:var(--accent);background:#243027}.studyLink:hover>span:nth-child(2){transform:translate(2px,-2px)}
+
+/* One measured reading plane, shared with the scene. Natural section anchors
+   remain in document flow; overflow clipping prevents transforms adding scroll. */
+.readingFrame{position:relative;z-index:2;overflow:clip}
+:global(html[data-cinematic-ready]) .story{transform:translate3d(0,var(--reading-shift,0px),0)}
+:global(html[data-cinematic-ready]) .chapterInner,:global(html[data-cinematic-ready]) .overview .chapterInner{position:relative}
+.inlineStudy{grid-column:7/13;min-width:0;align-self:center;scroll-margin-top:7rem}
+.form .chapterInner{padding-top:15svh;padding-bottom:18svh}
+.form .spatialNotation{display:none}
+:global(html[data-cinematic-ready]) .story [data-editorial-copy]{transform-origin:0 50%;transform:perspective(1100px) translate3d(0,var(--body-shift,0px),calc(var(--body-depth,0px) + var(--feedback-z,0px))) rotateX(calc(var(--body-rotate,0deg) + var(--feedback-x,0deg))) rotateY(calc(var(--body-y,0deg) + var(--feedback-y,0deg)))}
+:global(html[data-cinematic-ready]) .mediaPlane{transform:perspective(1200px) translate3d(0,var(--media-shift,0px),calc(var(--media-depth,0px) + var(--feedback-z,0px))) scale(var(--media-scale,1)) rotateX(calc(var(--media-rotate,0deg) + var(--feedback-x,0deg))) rotateY(calc(var(--media-y,0deg) + var(--feedback-y,0deg)))}
+:global(html[data-cinematic-ready]) .story [data-story-heading]{transform:perspective(1100px) translateZ(calc(var(--heading-z,0px) + var(--feedback-z,0px))) rotateX(calc(var(--heading-x,0deg) + var(--feedback-x,0deg))) rotateY(calc(var(--heading-y,0deg) + var(--feedback-y,0deg)));transform-origin:0 50%}
+@media(max-width:780px){.inlineStudy{width:100%;margin-top:1.5rem}.form .chapterInner{padding-top:6.4rem;padding-bottom:8rem}.story [data-editorial-copy]{transform-origin:50% 50%}}
+:global(html[data-cinematic-static]) .story,:global(html[data-cinematic-static]) .story [data-feedback-plane],:global(html[data-cinematic-static]) .story [data-editorial-copy]{transform:none!important}
+@media(prefers-reduced-motion:reduce){.story,.story [data-feedback-plane],.story [data-editorial-copy]{transform:none!important}}
+@media print{.readingFrame{overflow:visible}.story,.story [data-feedback-plane],.story [data-editorial-copy]{transform:none!important}}
+
+.chapter:focus,.story:focus,.inlineStudy:focus{outline:none}

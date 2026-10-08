@@ -69,3 +69,54 @@ export function sampleInspectionPose({bounds, aspect, azimuth, elevation, framin
     azimuth: az, elevation: el, viewport: {...viewport}, paddingFraction: PADDING, distance,
   };
 }
+
+/** Compose a bounded source study into the existing story camera. Weight is
+ * already authored/damped by the shared reading controller: no clock or easing
+ * lives here. storyPose.fov MUST be its effective optical FOV, including the
+ * story lens, so the final writer must not multiply this result by another lens.
+ * The fixed maximum-separation envelope fits fully at weight 1. Intermediate
+ * frames are intentional composition transitions, not full-source evidence.
+ */
+export function sampleInlineStudyPose({storyPose, weight = 0, ...studyInput} = {}) {
+  const w = Math.max(0, Math.min(1, Number.isFinite(weight) ? weight : 0));
+  const vector = value => Array.isArray(value) && value.length === 3 && value.every(Number.isFinite);
+  if (!storyPose || !vector(storyPose.position) || !vector(storyPose.target)
+    || !(storyPose.fov > 0 && storyPose.fov < 180)
+    || !Number.isFinite(storyPose.viewOffsetNormalized?.x) || !Number.isFinite(storyPose.viewOffsetNormalized?.y)) {
+    throw new RangeError('Inline study requires a finite resolved story pose and effective FOV.');
+  }
+  if (w === 0) return {...storyPose, studyWeight: 0};
+  const study = sampleInspectionPose(studyInput);
+  if (w === 1) return {...study, chapter:storyPose.chapter, owner: 'cinematic-composite', kind: 'continuous-inline-source-study', framingIntent: 'held-source-study', studyWeight: 1};
+  const mix = (a, b) => a + (b - a) * w;
+  const from = storyPose.position.map((value, i) => value - storyPose.target[i]);
+  const fromDistance = Math.hypot(...from);
+  if (!(fromDistance > 1e-8)) throw new RangeError('Story camera and target must differ.');
+  const fromAzimuth = Math.atan2(from[0], from[2]), toAzimuth = rad(study.azimuth);
+  // The shortest angular path avoids a camera crossing its target, unlike a
+  // Cartesian position lerp between opposed views. Elevation stays above ground.
+  const azimuthDelta = Math.atan2(Math.sin(toAzimuth - fromAzimuth), Math.cos(toAzimuth - fromAzimuth));
+  const azimuth = fromAzimuth + azimuthDelta * w;
+  const elevation = mix(Math.asin(Math.max(-1, Math.min(1, from[1] / fromDistance))), rad(study.elevation));
+  const back = [Math.sin(azimuth) * Math.cos(elevation), Math.sin(elevation), Math.cos(azimuth) * Math.cos(elevation)];
+  const target = storyPose.target.map((value, i) => mix(value, study.target[i]));
+  const distance = mix(fromDistance, study.distance);
+  const position = target.map((value, i) => value + back[i] * distance);
+  const corners = Array.from({length: 8}, (_, mask) => studyInput.bounds.min.map((value, i) => (mask & (1 << i) ? studyInput.bounds.max[i] : value)));
+  const depths = corners.map(point => dot(position.map((value, i) => value - point[i]), back));
+  const radius = Math.hypot(...studyInput.bounds.max.map((value, i) => value - studyInput.bounds.min[i])) / 2;
+  const viewOffsetNormalized = {x: mix(storyPose.viewOffsetNormalized.x, study.viewOffsetNormalized.x), y: mix(storyPose.viewOffsetNormalized.y, study.viewOffsetNormalized.y)};
+  // Interpolate projection scale rather than degrees; this keeps apparent size
+  // continuous while preserving the exact endpoint lens and viewport fit.
+  const fov = 2 * Math.atan(mix(Math.tan(rad(storyPose.fov) / 2), Math.tan(rad(study.fov) / 2))) * 180 / Math.PI;
+  return {...storyPose, position, target, up: [0, 1, 0], fov, aspect: study.aspect,
+    near: Math.max(radius * .0001, Math.min(...depths) * .08), far: Math.max(...depths) + radius * 2,
+    viewOffsetNormalized, compositionNDC: [-2 * viewOffsetNormalized.x, 2 * viewOffsetNormalized.y],
+    sourcePresence: 1, modelVisibility: 1, surfaceEmphasis: (storyPose.surfaceEmphasis ?? 0) * (1 - w),
+    owner: 'cinematic-composite', kind: 'continuous-inline-source-study', framingIntent: 'transition-crop',
+    cropIntent: 'continuous passage into the complete source study; intermediate crop permitted',
+    framingEvidence: study.framingEvidence, framingSupportPoints: study.framingSupportPoints,
+    framingSourceSHA256: study.framingSourceSHA256, studyWeight: w,
+    azimuth: azimuth * 180 / Math.PI, elevation: elevation * 180 / Math.PI, distance,
+  };
+}

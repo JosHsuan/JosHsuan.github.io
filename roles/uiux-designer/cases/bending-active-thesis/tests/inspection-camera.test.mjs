@@ -5,7 +5,8 @@ import {readFile, mkdir, writeFile} from 'node:fs/promises';
 import {dirname} from 'node:path';
 import {Matrix4, PerspectiveCamera, Vector3} from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
-import {sampleInspectionPose} from '../components/inspection-camera.mjs';
+import {sampleInspectionPose, sampleInlineStudyPose} from '../components/inspection-camera.mjs';
+import {sampleCinematicPose} from '../components/vendor/cinematic-plan.mjs';
 import {INSPECTION_FRAMING_SUPPORT} from '../components/inspection-framing-support.mjs';
 import {INSPECTION_VIEWS} from '../components/inspection-state.mjs';
 import {sampleSourceSeparation, SOURCE_LAYER_REVISION} from '../components/element-score.mjs';
@@ -62,6 +63,62 @@ test('measured framing rejects another source revision and preserves the current
   assert.throws(() => sampleInspectionPose({...input, framingSupport: {...INSPECTION_FRAMING_SUPPORT, points: [[NaN, 0, 0], ...INSPECTION_FRAMING_SUPPORT.points]}}), RangeError);
 });
 
+test('inline camera has exact reversible endpoints and no threshold camera takeover', () => {
+  for (const [width, height, viewport] of [[1440, 1000, desktop], [390, 844, mobile]]) {
+    const aspect = width / height;
+    const storyPose = sampleCinematicPose(2.5 / 7, aspect, {x: 0, y: 0}, {bounds, sharedStage: true});
+    const input = {storyPose, bounds, aspect, viewport, azimuth: 100, elevation: 70};
+    assert.deepEqual(sampleInlineStudyPose({...input, weight: 0}), {...storyPose, studyWeight: 0});
+    const end = sampleInlineStudyPose({...input, weight: 1}), study = sampleInspectionPose(input);
+    for (const key of ['position', 'target', 'up', 'fov', 'near', 'far', 'viewOffsetNormalized']) assert.deepEqual(end[key], study[key]);
+    const samples = Array.from({length: 101}, (_, i) => sampleInlineStudyPose({...input, weight: i / 100}));
+    const radius = Math.hypot(...bounds.max.map((v, i) => v - bounds.min[i])) / 2;
+    for (let i = 1; i < samples.length; i++) {
+      const a = samples[i - 1], b = samples[i];
+      assert(Math.hypot(...b.position.map((v, axis) => v - a.position[axis])) < radius * .16, 'Composition jumps at a weight threshold');
+      assert(b.near > 0 && b.far > b.near && b.position.every(Number.isFinite));
+      assert.deepEqual(b, sampleInlineStudyPose({...input, weight: i / 100}), 'Reverse scroll must resolve the same pose');
+      assert.equal(b.owner, 'cinematic-composite');
+    }
+    assert.equal(samples[50].framingIntent, 'transition-crop');
+    assert.equal(end.framingIntent, 'held-source-study');
+    assert.throws(() => sampleInlineStudyPose({...input, storyPose: {...storyPose, fov: NaN}, weight: .5}), RangeError);
+  }
+});
+
+test('inline composition respects the resolved optical lens and does not mutate its inputs', () => {
+  const storyPose = sampleCinematicPose(1.5 / 7, 1.44, {x: 0, y: 0}, {bounds, sharedStage: true});
+  storyPose.fov = 28; // A resolved long lens; the study must blend from this exact projection.
+  const input = {storyPose, bounds, aspect: 1.44, viewport: desktop, azimuth: 30, elevation: 30, weight: .5};
+  const original = structuredClone(input), pose = sampleInlineStudyPose(input);
+  const scale = Math.tan(pose.fov * Math.PI / 360);
+  assert(Math.abs(scale - (Math.tan(28 * Math.PI / 360) + Math.tan(36 * Math.PI / 360)) / 2) < 1e-12);
+  assert.deepEqual(input, original);
+});
+
+test('clipped inline slots enter continuously and transition depth stays valid', () => {
+  const supportBounds = {min: [0, 1, 2].map(i => Math.min(...INSPECTION_FRAMING_SUPPORT.points.map(point => point[i]))),
+    max: [0, 1, 2].map(i => Math.max(...INSPECTION_FRAMING_SUPPORT.points.map(point => point[i])))};
+  const point = new Vector3();
+  for (const [width, height] of [[1440, 1000], [1024, 900], [768, 1024], [390, 844], [844, 390]]) {
+    const storyPose = sampleCinematicPose(1.5 / 7, width / height, {x: 0, y: 0}, {bounds: supportBounds, sharedStage: true});
+    // A non-visible inline slot may be absent; weight zero must keep story framing.
+    assert.deepEqual(sampleInlineStudyPose({storyPose, weight: 0, viewport: null}).position, storyPose.position);
+    for (const [azimuth, elevation] of [[-40, 12], [-40, 70], [100, 12], [100, 70]]) {
+      for (let frame = 0; frame <= 20; frame++) {
+        const weight = frame / 20;
+        const viewport = {left: .04, top: .15, width: .92, height: .2 + .24 * weight};
+        const pose = sampleInlineStudyPose({storyPose, weight, bounds: supportBounds, aspect: width / height, azimuth, elevation, viewport, framingSupport: INSPECTION_FRAMING_SUPPORT});
+        const camera = cameraFor(pose, width, height);
+        for (const vertex of INSPECTION_FRAMING_SUPPORT.points) {
+          point.fromArray(vertex).project(camera);
+          assert(point.z >= -1 && point.z <= 1 && Number.isFinite(point.x) && Number.isFinite(point.y), 'Inline transition crosses source depth clipping planes');
+        }
+      }
+    }
+  }
+});
+
 test('all actual source vertices remain inside the inspection viewport at named views and control corners', async () => {
   const bytes = await readFile(new URL('../release/public/assets/source-layers.glb', import.meta.url));
   const metadata = JSON.parse(await readFile(new URL('../release/public/assets/source-layers.json', import.meta.url), 'utf8'));
@@ -98,7 +155,8 @@ test('all actual source vertices remain inside the inspection viewport at named 
     const viewports = [[1440, 1000, desktop], [1024, 900, desktop], [768, 1024, mobile], [390, 844, mobile], [844, 390, desktop]];
     const checks = [];
     for (const [width, height, viewport] of viewports) for (const view of views) {
-      const pose = sampleInspectionPose({bounds: envelope, aspect: width / height, ...view, viewport, framingSupport: INSPECTION_FRAMING_SUPPORT});
+      const storyPose = sampleCinematicPose(1.5 / 7, width / height, {x: 0, y: 0}, {bounds: envelope, sharedStage: true});
+      const pose = sampleInlineStudyPose({storyPose, weight: 1, bounds: envelope, aspect: width / height, ...view, viewport, framingSupport: INSPECTION_FRAMING_SUPPORT});
       const camera = cameraFor(pose, width, height), projection = new Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
       for (const separation of [0, .5, 1]) {
         const offsets = sampleSourceSeparation(separation).offsets;

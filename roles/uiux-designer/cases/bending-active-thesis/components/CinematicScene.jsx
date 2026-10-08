@@ -6,14 +6,14 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {HDRLoader} from 'three/addons/loaders/HDRLoader.js';
 import {sampleCinematicPose} from './vendor/cinematic-plan.mjs';
 import {createCinematicMaterial} from './materials/cinematic-material';
-import {sampleOpticalScore} from './optical-score.mjs';
+import {sampleOpticalScore, focalLengthForFov} from './optical-score.mjs';
 import {createSceneCompositor} from './scene-compositor.mjs';
-import {sampleSceneDirection, resolveSceneStage} from './scene-direction.mjs';
+import {resolveSceneStage} from './scene-direction.mjs';
 import {sampleElementPose, sampleSourceSeparation, SOURCE_LAYER_REVISION} from './element-score.mjs';
 import {createExhibitionStage} from './exhibition-stage.mjs';
-import {sampleInspectionPose} from './inspection-camera.mjs';
+import {sampleInlineStudyPose} from './inspection-camera.mjs';
 import {INSPECTION_FRAMING_SUPPORT} from './inspection-framing-support.mjs';
-import {sampleInspectionLighting} from './inspection-lighting.mjs';
+import {sampleContinuousLighting} from './inspection-lighting.mjs';
 
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 function disposeObject(object) {
@@ -113,29 +113,45 @@ function World({input, stage, onReady, onFailure}) {
       const debug = overrides.current, stageU = Number.isFinite(debug.stageU) ? clamp(debug.stageU, 0, 1) : state.stageU ?? state.u;
       const visualU = Number.isFinite(debug.visualU) ? clamp(debug.visualU, 0, 1) : state.visualU ?? state.u;
       const reduced = state.reduced, detail = state.detail === 'light' ? 'light' : 'full';
-      const inspecting=state.inspectionActive && state.inspection;
-      const elements = inspecting ? sampleSourceSeparation(state.inspection.separation) : sampleElementPose(stageU, {reducedMotion: reduced});
+      const studyWeight = state.inspection ? clamp(Number.isFinite(state.inspectionWeight) ? state.inspectionWeight : 0, 0, 1) : 0;
+      const storyElements = sampleElementPose(stageU, {reducedMotion: reduced});
+      const elements = sampleSourceSeparation(storyElements.separationWeight + ((state.inspection?.separation ?? 0) - storyElements.separationWeight) * studyWeight);
       // The single transform writer always applies a source-relative offset to rest.
       d.layers.forEach(layer => {const offset = elements.offsets[layer.id]; layer.node.position.set(layer.rest.x + offset[0], layer.rest.y + offset[1], layer.rest.z + offset[2]);});
       const bounds = liveBounds(d.meta, elements);
-      const direction = inspecting ? sampleInspectionLighting({preset:state.inspection.preset,azimuth:state.inspection.lightAzimuth}) : sampleSceneDirection(stageU, {reducedMotion: reduced});
-      const stageLayout = resolveSceneStage(inspecting ? d.meta.bounds : bounds, direction);
+      const direction = sampleContinuousLighting(stageU, {reducedMotion: reduced, studyWeight,
+        studyPreset: state.inspection?.preset ?? 'studio', studyMix: state.inspection?.lightMix, lightAzimuth: state.inspection?.lightAzimuth ?? 0});
+      // Lamps and the editorial floor keep the source's original reference frame;
+      // only shadow coverage expands to contain all allowed rigid layer offsets.
+      const stageLayout = resolveSceneStage(d.meta.bounds, direction);
+      const shadowEnvelope = resolveSceneStage(d.inspectionBounds, direction);
+      stageLayout.shadowHalfExtent = Math.max(stageLayout.shadowHalfExtent, shadowEnvelope.shadowHalfExtent);
       const pointer = Number.isFinite(debug.stageU) ? {x: 0, y: 0} : state.pointer;
       const storyPose = sampleCinematicPose(stageU, size.width / size.height, pointer, {bounds, modelRevision: d.meta.revision, reducedMotion: reduced, sharedStage: true});
-      const pose = inspecting ? sampleInspectionPose({bounds:d.inspectionBounds,framingSupport:INSPECTION_FRAMING_SUPPORT,aspect:size.width/size.height,azimuth:state.inspection.azimuth,elevation:state.inspection.elevation,viewport:state.inspectionViewport}) : storyPose;
-      const optics = sampleOpticalScore({stageU, visualU, energy: state.energy, dwellWeight: state.dwellWeight, aspect: size.width / size.height, reducedMotion: reduced}, storyPose, {bounds});
-      if (Number.isFinite(debug.focalLengthMm)) optics.focalLengthMm = clamp(debug.focalLengthMm, 10, 160);
+      const opticalInput = {stageU, visualU, energy: state.energy, dwellWeight: state.dwellWeight, aspect: size.width / size.height, reducedMotion: reduced};
+      const storyOptics = sampleOpticalScore(opticalInput, storyPose, {bounds});
+      if (Number.isFinite(debug.focalLengthMm)) storyOptics.focalLengthMm = clamp(debug.focalLengthMm, 10, 160);
+      const effectiveFov = 2 * Math.atan(.5 * storyOptics.filmGaugeMm / Math.max(1, size.width / size.height) / storyOptics.focalLengthMm) * 180 / Math.PI;
+      const pose = sampleInlineStudyPose({storyPose: {...storyPose, fov: effectiveFov}, weight: studyWeight,
+        bounds: d.inspectionBounds, framingSupport: INSPECTION_FRAMING_SUPPORT, aspect: size.width / size.height,
+        azimuth: state.inspection?.azimuth, elevation: state.inspection?.elevation, viewport: state.inspectionViewport});
+      const optics = studyWeight > 0 ? sampleOpticalScore(opticalInput, pose, {bounds}) : storyOptics;
+      optics.focalLengthMm = focalLengthForFov(pose.fov, size.width / size.height, optics.filmGaugeMm);
       const opticalOverrides = {...(debug.optical ?? {})};
-      if (detail === 'light' || reduced || inspecting) Object.assign(opticalOverrides, {apertureScale: 0, maxBlurPx: 0, asciiWeight: 0, veil: 0, mistStrength:0});
-      if(inspecting)optics.focalLengthMm=optics.filmGaugeMm/Math.max(1,size.width/size.height)/(2*Math.tan(pose.fov*Math.PI/360));
+      const opticalWeight = detail === 'light' || reduced ? 0 : 1 - studyWeight;
+      for (const key of ['apertureScale', 'maxBlurPx', 'asciiWeight', 'veil', 'mistStrength']) {
+        optics[key] *= opticalWeight;
+        if (Number.isFinite(opticalOverrides[key])) opticalOverrides[key] *= opticalWeight;
+      }
+      optics.studyWeight = studyWeight;
       optics.overrides = opticalOverrides;
       // One final camera write: the lens changes FOV, with no later competing FOV write.
       camera.position.fromArray(pose.position); camera.up.fromArray(pose.up); camera.aspect = size.width / size.height; camera.zoom = 1;
       camera.near = pose.near; camera.far = pose.far; camera.filmGauge = optics.filmGaugeMm; camera.setFocalLength(optics.focalLengthMm);
       camera.setViewOffset(size.width, size.height, size.width * pose.viewOffsetNormalized.x, size.height * pose.viewOffsetNormalized.y, size.width, size.height);
       camera.lookAt(...pose.target); camera.updateProjectionMatrix();
-      d.sourceRoot.visible = !!inspecting || reduced || (pose.sourcePresence ?? 1) > 0;
-      const exhibitionState = d.exhibition.update({direction,camera,quality:detail,reducedMotion:inspecting?false:reduced,lightSweep:inspecting?0:state.editorial?.lightSweep ?? 0});
+      d.sourceRoot.visible = studyWeight > 0 || reduced || (pose.sourcePresence ?? 1) > 0;
+      const exhibitionState = d.exhibition.update({direction,camera,quality:detail,reducedMotion:reduced,lightSweep:(state.editorial?.lightSweep ?? 0) * (1 - studyWeight)});
       scene.background=direction.backgroundColor?d.studyBackground.fromArray(direction.backgroundColor):d.previousBackground;
       const keyScale = Number.isFinite(debug.keyIntensityScale) ? clamp(debug.keyIntensityScale, 0, 5) : 1;
       for (const id of ['key', 'fill', 'rim']) {
@@ -149,7 +165,7 @@ function World({input, stage, onReady, onFailure}) {
       shadow.camera.near = .05; shadow.camera.far = Math.max(20, stageLayout.radius * 10); shadow.camera.updateProjectionMatrix();
       shadow.bias = direction.stage.shadow.bias; shadow.normalBias = direction.stage.shadow.normalBias;
       gl.shadowMap.enabled = detail === 'full'; d.lights.key.castShadow = detail === 'full' && direction.key.castShadow !== false;
-      const shadowKey=JSON.stringify([detail,!!inspecting,elements.separationWeight,direction.key.position,stageLayout.center,stageLayout.shadowHalfExtent,d.sourceRoot.visible]);
+      const shadowKey=JSON.stringify([detail,elements.separationWeight,direction.key.position,stageLayout.center,stageLayout.shadowHalfExtent,d.sourceRoot.visible]);
       const shadowUpdated=detail==='full'&&shadowKey!==d.shadowKey;
       gl.shadowMap.autoUpdate=false;gl.shadowMap.needsUpdate=shadowUpdated;d.shadowKey=shadowKey;
       scene.environmentIntensity = direction.environmentIntensity; scene.fog.color.fromArray(direction.haze.color); scene.fog.density = direction.haze.density;
@@ -161,8 +177,8 @@ function World({input, stage, onReady, onFailure}) {
       const dpr = detail === 'light' ? 1 : Math.min(devicePixelRatio || 1, 1.25); if (gl.getPixelRatio() !== dpr) gl.setPixelRatio(dpr);
       gl.info.reset();
       d.compositor.render(scene, camera, optics, {width: size.width, height: size.height, dpr, samples: detail === 'full' && debug.samples !== 0 ? 2 : 0, protectedRects: debug.protectedRects ?? state.protectedRects ?? []});
-      if (stage.current) stage.current.style.opacity = String(reduced && !inspecting ? .35 : 1);
-      last.current = {mode:inspecting?'inspection':'story',pose: {...pose, fov: camera.fov, focalLengthMm: optics.focalLengthMm}, optics, lights: direction, elements, bounds, detail, stageLayout, exhibition:exhibitionState, shadowUpdated,keyIntensity: d.lights.key.intensity};
+      if (stage.current) stage.current.style.opacity = String(reduced ? .35 + .65 * studyWeight : 1);
+      last.current = {mode:'continuous-story',studyWeight,pose: {...pose, fov: camera.fov, focalLengthMm: optics.focalLengthMm}, optics, lights: direction, elements, bounds, detail, stageLayout, exhibition:exhibitionState, shadowUpdated,keyIntensity: d.lights.key.intensity};
       frames.current++;
       if (!d.ready) {d.ready = true; queueMicrotask(onReady);}
     } catch (error) {d.failed = true; console.error('Local scene rendering failed:', error.message); queueMicrotask(onFailure);}

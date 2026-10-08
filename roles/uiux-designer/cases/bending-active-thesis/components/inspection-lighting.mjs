@@ -1,7 +1,7 @@
-/** Lighting / Scene Designer: source-fixed, user-operated reading studies.
+/** Lighting / Scene Designer: source-fixed reading studies and continuous score.
  * Original artistic lighting, not analysis, measured metal or optical validation.
- * No Three, source mutation, camera input, clock, story progress or reduced-motion
- * override: explicit user choices must work equally in Full, Light and Reduced.
+ * No Three, source mutation, camera input or clock. The standalone study preserves
+ * explicit choices; the Round 05 export composes them with caller-owned progress.
  */
 import {SCENE_ANCHORS, sampleSceneDirection} from './scene-direction.mjs';
 
@@ -55,4 +55,90 @@ export function sampleInspectionLighting({preset = 'studio', azimuth = 0} = {}) 
     backdrop: {color: [...dark], roughness: .93},
   };
   return direction;
+}
+
+// Round 05: the continuous page reuses the two useful surface-reading states.
+// Silhouette remains a historical standalone score, not an inline page mode:
+// changing an opaque background beneath reading content needs a separate design.
+export const CONTINUOUS_LIGHT_PRESETS = Object.freeze(['studio', 'raking']);
+const lightFields = ['key', 'fill', 'rim', 'hemisphere', 'environmentIntensity', 'groundColor', 'groundOpacity', 'haze', 'halo', 'contactOpacity', 'exhibition'];
+const interpolate = (a, b, t, field = '') => {
+  if (t === 0) return structuredClone(a);
+  if (t === 1) return structuredClone(b);
+  if (typeof a === 'number') return a + (b - a) * t;
+  if (field === 'position') {
+    // A straight chord between distant lamp directions can pass through the
+    // source. Blend unit directions and radial distance separately instead.
+    // This is geometry interpolation, not another easing or temporal response.
+    const ar = Math.hypot(...a), br = Math.hypot(...b);
+    const unit = a.map((value, i) => value / ar + (b[i] / br - value / ar) * t);
+    const length = Math.hypot(...unit), radius = ar + (br - ar) * t;
+    if (length < 1e-8) throw new RangeError('Authored lamp directions cannot be antipodal');
+    return unit.map(value => value / length * radius);
+  }
+  if (Array.isArray(a)) return a.map((value, index) => interpolate(value, b[index], t));
+  if (a && typeof a === 'object') return Object.fromEntries(Object.keys(a).map(key => [key, interpolate(a[key], b[key], t, key)]));
+  return a; // Shared metadata/booleans; continuous modes do not switch them.
+};
+const bounded = (value, low, high, name) => {
+  if (typeof value !== 'number' || !Number.isFinite(value)) throw new RangeError(`Expected finite ${name}`);
+  return clamp(value, low, high);
+};
+function surfaceStudy(direction, preset, azimuth = 0) {
+  const study = sampleInspectionLighting({preset, azimuth});
+  const result = structuredClone(direction);
+  for (const field of lightFields) result[field] = study[field];
+  return result;
+}
+
+const continuousAnchors = SCENE_ANCHORS.map((u, index) => {
+  let direction = sampleSceneDirection(u);
+  direction.backgroundColor = null;
+  direction.stage = {...direction.stage, lightFrame: 'source', surfaceOpacity: 1, surfaceVisible: true, baseEmphasis: 1};
+  // Match the shadow key/rim rays to the broad fixtures. Offsets stay relative
+  // to the original center even when verified source layers separate.
+  direction.key.position = direction.exhibition.key.position.map(value => value * 3);
+  direction.rim.position = direction.exhibition.rim.position.map(value => value * 3);
+  if (index >= 1 && index <= 3) direction = surfaceStudy(direction, index === 1 ? 'studio' : 'raking');
+  if (index === 4) {
+    for (const id of ['key', 'fill', 'rim']) direction[id].intensity *= .7;
+    for (const id of ['key', 'rim']) direction.exhibition[id].intensity *= .65;
+    direction.hemisphere.intensity *= .7;
+    direction.environmentIntensity *= .7;
+    direction.exhibition.aperture.radiance = 0;
+  }
+  return direction;
+});
+
+/**
+ * Round 05 complete source-frame story + inline study score. stageU and both
+ * weights have ALREADY been advanced/eased by the shared reading controller.
+ * No camera, clock, acceleration modulation or second damping is introduced.
+ * studyMix is 0 Studio / 1 Raking; pass the caller's damped numeric value to
+ * avoid a discontinuous string-preset change. The string is an endpoint fallback.
+ * Background stays null and all surfaces retain numeric opacity; no pale flash.
+ */
+export function sampleContinuousLighting(stageU, {
+  reducedMotion = false, studyWeight = 0, studyPreset = 'studio', studyMix,
+  lightAzimuth = 0,
+} = {}) {
+  const u = bounded(stageU, 0, 1, 'stageU');
+  const weight = bounded(studyWeight, 0, 1, 'study weight');
+  if (!CONTINUOUS_LIGHT_PRESETS.includes(studyPreset)) throw new RangeError('Continuous lighting supports Studio and Raking only');
+  const blend = bounded(studyMix === undefined ? (studyPreset === 'raking' ? 1 : 0) : studyMix, 0, 1, 'study mix');
+  const azimuth = bounded(lightAzimuth, -70, 70, 'lamp azimuth');
+  let slot = clamp((reducedMotion ? SCENE_ANCHORS[1] : u) * 7 - .5, 0, 6);
+  const nearest = Math.round(slot);
+  if (Math.abs(slot - nearest) < 1e-12) slot = nearest;
+  const from = Math.floor(slot), to = Math.min(6, from + 1);
+  const story = interpolate(continuousAnchors[from], continuousAnchors[to], slot - from);
+  let result = story;
+  if (weight > 0) {
+    const study = blend === 0 ? surfaceStudy(story, 'studio', azimuth) : blend === 1 ? surfaceStudy(story, 'raking', azimuth) : interpolate(surfaceStudy(story, 'studio', azimuth), surfaceStudy(story, 'raking', azimuth), blend);
+    result = interpolate(story, study, weight);
+  }
+  result.owner = 'continuous-lighting'; result.reducedMotion = reducedMotion;
+  result.transition = {from: continuousAnchors[from].transition.from, to: continuousAnchors[to].transition.to, weight: slot - from};
+  result.study = {weight, mix: blend, azimuth, measuredLighting: false};
+  return result;
 }
