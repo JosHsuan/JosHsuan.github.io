@@ -1,14 +1,16 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "role": "local-case-integration",
   "runtimeImportsFromOtherRoles": false,
   "copies": [
     {
-      "kind": "Cinematic camera with audited convex support",
+      "kind": "Adapted shared-stage camera with combined source bounds",
       "localPath": "components/vendor/cinematic-plan.mjs",
       "sourcePath": "roles/animation-cinematographer/src/bending-active/cinematic-plan.mjs",
-      "sha256": "18a46d178734aa0d34553fc88c8d6f25fdbf605330a799119b8082b386df6712",
-      "byteIdentical": true
+      "sha256": "6cf67cb2511979799b348bfdfe4f3cc5e6aa693586683b8306848e8fd6119e6f",
+      "byteIdentical": false,
+      "sourceSHA256": "18a46d178734aa0d34553fc88c8d6f25fdbf605330a799119b8082b386df6712",
+      "adaptation": "Consume the shared response score without a second hold curve; revise mobile FORM placement. Historical shell hull is revision-gated and unused for current model."
     },
     {
       "kind": "deterministic camera",
@@ -54,12 +56,17 @@
       "notice": "public/licenses/webgl-noise-MIT.txt"
     }
   ],
-  "revision": "cinematic-seven-chapter",
+  "revision": "round-02-source-layers-optical-story",
   "currentRuntime": {
     "camera": "components/vendor/cinematic-plan.mjs",
     "material": "components/materials/cinematic-material.js",
     "controller": "components/CinematicExperience.jsx",
-    "scene": "components/CinematicScene.jsx"
+    "scene": "components/CinematicScene.jsx",
+    "response": "components/story-response.mjs",
+    "elements": "components/element-score.mjs",
+    "lightingAndStage": "components/scene-direction.mjs",
+    "optics": "components/optical-score.mjs",
+    "compositor": "components/scene-compositor.mjs"
   },
   "cinematicMaterial": {
     "owner": "3D Artist",
@@ -68,20 +75,134 @@
     "derivedFrom": "Original role inspection-material.js studies",
     "newTextures": false
   },
-  "controllerHash": "6c018c2bc6441cd0a43b528582260e66170e39a1e7f01fef68a870b0a1f3a1c5",
-  "sceneHash": "727aecd0bf7cdbd74e0f313b76ea820919268dd72eb9549e1ad3329d61d48ce8",
+  "controllerHash": "c5d4dadcab39ceafc93c8d05e426da6f6ccb32a9a1b476125de5cb670f2100d5",
+  "sceneHash": "9b66f4196aa62467c32bf54c44054688b56e8e4691e61814eaa247f61b681cc2",
   "poster": {
     "path": "public/assets/cinematic/model-poster.webp",
-    "sha256": "e79bbbfddc6acaffb1e0064e6ab5da9063fe7ab3d555ff35bfc91c7a1fa39d52",
-    "operation": "Actual GLB camera render, foreground HTML hidden; prepared under D work root"
+    "sha256": "ff4d3a91d3636d58ff9d94a3e9dc8e834c070b5f126c774092977113998f2f85",
+    "operation": "Final source shell plus base render at FORM with foreground hidden, sharp optics; prepared on D and explicitly handed off"
   },
-  "modelSHA256": "c56dfda835e6538ad360f76967ba65603ff48d055228a7d400a2293554bbb058",
+  "modelSHA256": "ff112b90be104cca7e3705b5eee481ba3973d25e2f3d4a7350faa2f732cae47e",
   "legacyCopies": "Earlier camera/inspection/noise entries document the initial boxed viewer and are not loaded by the cinematic route.",
   "privateFramingData": {
     "localPath": "components/vendor/framing-hull.private.mjs",
     "sha256": "9e2238b630f79be4ec408ed0543b13437721c05c29872ce0abd67f0e8cfdeb36",
     "gitIgnored": true,
     "scope": "Explicit D-first local geometry derivative handoff",
-    "sampleEquivalenceCount": 435
-  }
+    "sampleEquivalenceCount": 435,
+    "currentUse": "Historical shell revision only; current combined source model uses conservative bounds."
+  },
+  "reviewedAt": "2026-10-08",
+  "runtimeRecords": [
+    {
+      "kind": "camera",
+      "path": "components/vendor/cinematic-plan.mjs",
+      "owner": "Animation Cinematographer",
+      "sha256": "6cf67cb2511979799b348bfdfe4f3cc5e6aa693586683b8306848e8fd6119e6f"
+    },
+    {
+      "kind": "material",
+      "path": "components/materials/cinematic-material.js",
+      "owner": "3D Artist",
+      "sha256": "5bb33c8102dc91b6ddc2411bc0bcde17fc572342e19425dde576a9314967f979"
+    },
+    {
+      "kind": "controller",
+      "path": "components/CinematicExperience.jsx",
+      "owner": "UIUX Designer / Motion Designer",
+      "sha256": "c5d4dadcab39ceafc93c8d05e426da6f6ccb32a9a1b476125de5cb670f2100d5"
+    },
+    {
+      "kind": "scene",
+      "path": "components/CinematicScene.jsx",
+      "owner": "Shared integration; one final property writer",
+      "sha256": "9b66f4196aa62467c32bf54c44054688b56e8e4691e61814eaa247f61b681cc2"
+    },
+    {
+      "kind": "response",
+      "path": "components/story-response.mjs",
+      "owner": "Motion Designer",
+      "sha256": "fee96f236fc0deae52d323645bd2c4f3339607e15f93fb7ccc8e35ae14eaa880"
+    },
+    {
+      "kind": "elements",
+      "path": "components/element-score.mjs",
+      "owner": "3D Animation Designer",
+      "sha256": "17972f73086b6ad80743db9df9ce0d8c1cb410bfdf2be7a6458ea498163e448f"
+    },
+    {
+      "kind": "lightingAndStage",
+      "path": "components/scene-direction.mjs",
+      "owner": "Lighting Designer / Scene Designer",
+      "sha256": "6818a9e380ce068430e6f007807d351c6569db36f45f58f2d68a651ac899161c"
+    },
+    {
+      "kind": "optics",
+      "path": "components/optical-score.mjs",
+      "owner": "Animation Cinematographer",
+      "sha256": "2a6e065f7d029b4e9856e9af6b6cb315d08798660c52cf1ee4f13522b13ae24a"
+    },
+    {
+      "kind": "compositor",
+      "path": "components/scene-compositor.mjs",
+      "owner": "3D Artist",
+      "sha256": "b44cb8905e44e65b77771777910ef7e6b55a7a801de4a593be0afc9cf05cba76"
+    }
+  ],
+  "mobilePoster": {
+    "path": "public/assets/cinematic/model-poster-mobile.webp",
+    "sha256": "b1d1cc8ecffe1b3f4b699a33d7340993c1bc82fd3e7ccb23b179cab5ecd81ae0",
+    "viewport": [
+      390,
+      844
+    ],
+    "operation": "Final source shell plus base render at FORM with foreground hidden, sharp optics; prepared on D and explicitly handed off"
+  },
+  "previousModelSHA256": "c56dfda835e6538ad360f76967ba65603ff48d055228a7d400a2293554bbb058",
+  "model": {
+    "path": "public/assets/source-layers.glb",
+    "metadata": "public/assets/source-layers.json",
+    "metadataSHA256": "18d6071f73e2b6f231c7b97f0899649b7eff529af57382c980b0b374b53fc607",
+    "sourceRevision": "c12ca628488a4449ea587965410d7df6baa815b36397c8344e2e14a3f533b14c",
+    "vertices": 172789,
+    "triangles": 227521,
+    "sourceObjects": 51,
+    "baseObjects": 50,
+    "layers": [
+      "shell",
+      "base-lower",
+      "base-upper"
+    ],
+    "rawBytes": 6879848,
+    "gitIgnored": true,
+    "publishable": false
+  },
+  "quality": {
+    "full": {
+      "dprCap": 1.25,
+      "msaaSamples": 2,
+      "resolveDepth": true,
+      "keyShadowMap": 1024,
+      "observedDrawCalls": 8,
+      "observedSubmittedTriangles": 455046
+    },
+    "light": {
+      "dprCap": 1,
+      "msaaSamples": 0,
+      "shadow": false,
+      "defocus": false,
+      "ascii": false,
+      "geometryUnchanged": true
+    }
+  },
+  "transport": {
+    "modelAndHDRRawBytes": 8495096,
+    "modelAndHDRGzipBodyBytes": 4717754,
+    "mobileTargetBytes": 2097152,
+    "mobileTargetMet": false,
+    "triangleTarget": 150000,
+    "triangleTargetMet": false
+  },
+  "workingEvidence": "D:/JosHsuan_Website/_work/bending-active-thesis/round-02",
+  "validationRecord": "ROUND_02_VERIFICATION.md"
 }

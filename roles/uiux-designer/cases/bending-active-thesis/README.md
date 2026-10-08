@@ -1,51 +1,62 @@
-# Bending-Active Thesis — cinematic local review
+# Bending-Active Thesis — local cinematic review
 
-Open [the local work page](http://127.0.0.1:4184/). It presents **Bending-Active Metal Panel Deformation**, the NCKU metal-panel thesis, separately from the later T3 bamboo motion-capture/XR project. The owner explicitly confirmed the local-page scope after the texture/shader request and subsequently requested a stronger continuous, layered experience.
+Open [the local work page](http://127.0.0.1:4184/). It presents **Bending-Active Metal Panel Deformation**, the NCKU metal-panel thesis, separately from the later T3 bamboo project. This is an owner-authorized local case; the production portfolio and public snapshot remain empty.
 
-One full-viewport background Canvas carries the actual Rhino-derived assembly through seven native-scroll chapters: overview, form, system, pattern, make, validation and credits. Text and source figures remain ordinary HTML. The camera holds and transitions around measured chapter positions, with one final writer; bounded pointer tilt is decoration only. The material moves between satin silver and restrained height-contour/focus emphasis. These are appearance choices, not calibrated finish, stress results or simulated bending.
+## Current round 02
 
-A continuous viewport scrim protects reading without section-edge seams. Documentary images remain opaque. The optional masthead motion control pauses camera travel and tilt. Initial reduced motion or Save-Data uses the actual rendered model poster without loading model/HDR assets. No JavaScript, failed assets, unavailable WebGL or context loss preserve the full story. Live reduced motion switches a running scene to a fixed pose. The renderer becomes idle after input settles.
+Seven native-scroll chapters share one demand-rendered scene. Native reading and chapter navigation respond immediately, while an analytical damped response gives the scene acceleration, deceleration and unequal designed holds. One writer applies camera position, pointer composition and focal length. Actual rendered depth drives focus/defocus; focus can move while a camera pose holds. A restrained scene-only dip marks the SYSTEM/PATTERN transition.
+
+The original source shell now includes **50 actual CAD base solids**, grouped into lower and upper source layers. SYSTEM/PATTERN separate these three display layers; the following chapters restore their exact placement. This is editorial separation, not a claimed fabrication sequence. No panels are inferred from disconnected triangles, no geometry is decimated, and no structural simulation is asserted. Neutral base colour and the metal finish are presentation choices.
+
+Authored key, fill, rim, hemisphere and environment light vary by chapter. A source-bounds-sized editorial ground receives the real key shadow; it does not replace the original base. Lighting affects rendered luminance, which together with actual scene depth controls the decorative ASCII overlay. Protected reading/media/control regions suppress that overlay. Source figures remain opaque and unfiltered. Text, icons, chapter links and source-image links have bounded scroll, hover and keyboard-focus feedback; no essential information depends on hover.
+
+Full detail uses DPR capped at 1.25, a resolved depth target with 2x MSAA, one shadow map and depth-aware effects. Light uses DPR 1, no MSAA/shadow/defocus/ASCII, and the same source geometry. Initial reduced motion or Save-Data uses a responsive actual-model poster without loading GLB/HDR. No JavaScript, failed assets, unavailable WebGL and context loss retain the HTML story. Live reduced motion and Pause motion use a fixed sharp scene. Rendering becomes idle after input settles.
 
 ## Build and reopen
 
-Use the root's exact Node 24.19.0 / pnpm 11.19.0 and committed dependencies; no renderer upgrade or second app installation is needed.
+Use Node **24.19.0**, pnpm **11.19.0** and the root's committed dependencies.
 
 ```powershell
 node node_modules/next/dist/bin/next build roles/uiux-designer/cases/bending-active-thesis --webpack
 node roles/uiux-designer/cases/bending-active-thesis/scripts/serve.mjs
 ```
 
-`open-preview.ps1` reuses a matching preview or starts it hidden. The server binds only `127.0.0.1:4184`, serves the case's `out/`, validates Host, permits GET/HEAD and sends `noindex`. Root build, public data, generated routes and deployment remain separate and empty.
+`open-preview.ps1` reuses a matching preview or starts it hidden. The server binds only `127.0.0.1:4184`, validates Host and resolved path containment, allows GET/HEAD, sends noindex and negotiates lossless gzip. Public deployment remains a separate manual workflow.
 
-Prepared narrative and source derivatives are ignored local artifacts. A new checkout needs an explicit authorized handoff; builds do not search source drives. New working material lives in `D:\JosHsuan_Website\_work\bending-active-thesis\cinematic-integration`: source copies, lossless rectangular crops, narrative JSON, actual-model poster, provenance and browser captures. The Geometry Engineer preparation script verifies original hashes before and after processing and explicitly copies sanitized prepared assets into this review. No source original was edited.
+Narrative, source figures, models, framing support data and posters are ignored local handoffs. A fresh checkout needs an explicitly authorized preparation handoff; normal builds do not search private drives. Earlier cinematic preparation remains under `D:/JosHsuan_Website/_work/bending-active-thesis/cinematic-integration`. Round 02 preparation, private source audit and verification captures are under `D:/JosHsuan_Website/_work/bending-active-thesis/round-02`. Original sources remain read-only. Only sanitized derivatives are handed to this case.
 
 ## Integration ownership
 
-| Role | Contribution |
+| Role | Current responsibility |
 | --- | --- |
-| Interactive Experience Director | Primary Lusion/Labs research, shared chapter/layer contract, coordination and independent actual-page visual review; isolated skills and story/browser MCP setup. |
-| UIUX Designer | Evidence-grounded English narrative, source figures, responsive foreground composition and native reading order. |
-| 3D Artist | Twelve separate texture/shader studies and a continuous UV-free metal adapter; original mesh, normals and PBR lighting retained. Bamboo imagery stays in its independent swatch. |
-| Animation Cinematographer | Geometry-based framing, reversible chapter transitions, bounded pointer composition and fixed reduced-motion pose; actual mesh projection/render checks. |
-| Geometry Engineer | Verified source revision/object selection, units/axis conversion, topology fidelity and faithful source-image preparation. |
+| Interactive Experience Director | Shared chapter/layer contract, source boundaries and cross-role visual acceptance. |
+| UIUX Designer | English narrative, source figures, reading order, responsive layout, source inspection and interaction feedback. |
+| 3D Artist | Original metal adapter and depth/luminance-driven compositor, ASCII masks and blend rules. |
+| Animation Cinematographer | Source framing, focal length, axial focus racks and reversible scene-only editing. |
+| Geometry Engineer | Exact source selection, units/axis conversion and independent vertex/normal/topology verification. |
+| 3D Animation Designer | Three source-derived display layers, explicit rest placement and reversible element offsets. |
+| Motion Designer | Shared analytical response, velocity, energy, holds and interruption rules. |
+| Lighting Designer | Chapter key/fill/rim/hemisphere/environment score and single-shadow ownership. |
+| Scene Designer | Source-sized ground, stage bounds, fog and quality/transport constraints. |
 
-`integration-manifest.json` records explicit camera/material/lighting handoffs. The case has no runtime dependency on other role desks or ports. Project-source records remain internal-only. Year disagreement, incomplete media/assembly attribution and the difference between physical dimensions and CAD bounds are preserved. Public release needs a separate approval; no commit, push or deployment occurs here. The original UIUX Saved export remains uncaptured and is not replaced with fabricated owner preferences.
+`integration-manifest.json` records the current code/asset hashes and ownership. The camera is now a documented adaptation, not a byte-identical copy of the earlier camera. Its former 446-point private shell hull is revision-gated and is **not used for the new shell-plus-base revision**, whose framing uses combined bounds. No runtime calls another role desk or MCP server. New role tools remain opt-in and isolated. The procedural score is not a fabricated Theatre export.
 
-The 446 real-mesh support points used for tighter FORM framing are a private derivative. They are prepared on D and explicitly handed off as Git-ignored `framing-hull.private.mjs` modules beside the role source and case camera copy. The maintained camera source imports that data without embedding it. Moving the data to the private handoff preserved all 435 sampled results exactly and did not recompute geometry.
-
-## Verification and limits
+## Verification
 
 ```powershell
-node roles/uiux-designer/cases/bending-active-thesis/scripts/capture-cinematic.mjs
-node roles/uiux-designer/cases/bending-active-thesis/scripts/verify-cinematic.mjs
-node roles/animation-cinematographer/research/bending-active/cinematic/cinematic-plan.test.mjs
-node roles/geometry-engineer/scripts/verify_model.mjs
+node --test roles/uiux-designer/cases/bending-active-thesis/tests/*.test.mjs
+node roles/uiux-designer/cases/bending-active-thesis/scripts/verify-round02.mjs
+node roles/uiux-designer/cases/bending-active-thesis/scripts/capture-round02.mjs
 ```
 
-Current captures and `verification/browser.json` are under the D-drive working root. The suite covers Chromium, WebKit and mobile emulation: native wheel/touch/keyboard, one persistent Canvas, seven measured chapters, reverse scrubbing, actual shader pixels, decorative pointer invariance, idle rendering, resource/program stability, manual/live reduced motion, no-JavaScript, Save-Data, asset/context failures and local server boundaries. The Director separately reviews intermediate chapter boundaries; still chapter screenshots alone are insufficient.
+Round 02 reports live under the D working root. The browser suite exercises Chromium, WebKit and mobile emulation: real wheel/touch response, chapter holds, reverse/jump interruption, stationary-pose focus, actual focal/light/defocus/ASCII pixels, protected masks, source inspection, keyboard navigation, quality modes, idle/resources, reduced motion and failure fallbacks. Optical browser fixtures additionally verify near/far focus on known depth planes. Final results are recorded in [ROUND_02_VERIFICATION.md](ROUND_02_VERIFICATION.md).
 
-On 8 October 2026, all **24 cinematic browser groups** passed against the rebuilt case artifact. Rendering stayed at one draw call, one shader program, one geometry and two renderer-reported textures during repeated chapter traversal. Nine camera tests include projection of every actual model vertex at five aspect ratios and pointer extremes. The Director closed the actual-page seam, diagram opacity, control overlap, framing and ending-contrast findings after viewing revised boundaries and fallback captures. Five source crops still match their prepared/handoff hashes and every original source hash remains unchanged. Root `pnpm check` passed (9 unit/controller tests, 63 audited output files); 9 root browser tests passed independently.
+Geometry verification independently compares all **172,789 vertices and 227,521 triangles** against the original cached CAD meshes, including all 50 base solids. Normals and triangle indices match exactly; maximum float32 position conversion error is 5.913e-8 m. Source hashes remain unchanged. Full mode submits 455,046 triangles in eight draw calls including the shadow pass, ground and compositor, rather than the prior one-call shell-only rendering.
 
-The model remains 84,626 vertices and 131,881 triangles, submitted in one draw call. Model plus HDR is 5,229,924 raw bytes, without a decoder or extra material textures. This exceeds the proposed 2 MiB mobile scene target; DPR 1.5 and demand rendering do not reduce payload. Automatic background loading is a scoped local immersive-preview exception to the root's user-activation default. The poster route supports constrained reading, but physical-device performance, Firefox assertions, remote CI and publication/engineering validation are not claimed.
+Model plus HDR is **8,495,096 raw bytes / 4,717,754 gzip body bytes**. Encoded delivery is 4.499 MiB, above the 2 MiB mobile target; raw size also exceeds the 5 MiB desktop target, and geometry exceeds the 150,000-triangle target. Gzip preserves geometry and does not reduce GPU/decoded memory. This local source-faithful review retains those overruns. Full is not certified for physical phones; Light and the poster provide reduced-cost reading.
 
-The former ModelViewer/Scene, old camera adapter, capture-viewer.mjs and verify.mjs describe the previous boxed-viewer revision and are retained as implementation history; their old 25-group result does not validate this page. Use the cinematic commands above. Procedural motion does not constitute an authored Theatre export; the root Theatre/Studio boundary is unchanged.
+Year disagreement, incomplete media/assembly attribution, publication permission and CAD/physical-dimension differences remain unresolved source boundaries. The UIUX Saved export remains uncaptured. Firefox assertions, physical-device performance, structural validation and public release are not claimed.
+
+## Historical verification
+
+The first cinematic revision passed 24 browser groups with a shell-only model (84,626 vertices, 131,881 triangles). Its `verify-cinematic.mjs`, `capture-cinematic.mjs` and nine original camera tests describe that prior revision. The older boxed ModelViewer/Scene and 25-group verifier are also preserved as history. Neither result validates round 02; use the current commands and final record above.
