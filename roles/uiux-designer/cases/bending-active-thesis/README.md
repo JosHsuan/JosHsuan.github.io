@@ -4,7 +4,15 @@
 
 Open [the local work page](http://127.0.0.1:4184/). It presents **Bending-Active Metal Panel Deformation**, the NCKU metal-panel thesis, separately from the later T3 bamboo project. This is an owner-authorized local case; the production portfolio and public snapshot remain empty.
 
-## Current round 03
+## Current round 04 — model study
+
+The [all-role Lusion review and plan](../../../experience-director/research/ROUND_04_PLAN.md) extends the authored story with optional model study from FORM and SYSTEM. Named views, bounded drag/keyboard controls, exact source-layer separation and Studio/Raking/Silhouette lighting share the existing Canvas, source model and renderer. Reset and Return preserve the reading position and keyboard focus. Manual study remains available under reduced motion, with immediate control response.
+
+Lighting stays fixed to the source as the camera orbits. The comparison uses the same satin material and exposure, with sharp optics. A fixed convex support set from the checksum-approved public GLB keeps the complete original-to-separated envelope inside the available viewport without fitting empty bounding-box corners. Preparation is explicit and D-first; normal builds never access that workspace. No new texture, model, dependency or inferred structural simulation is added.
+
+See [round-04 verification](ROUND_04_VERIFICATION.md) for current acceptance and limits. The story's seven chapters, exhibition, material and documentary evidence remain the round-03 baseline below.
+
+## Round 03 baseline
 
 The owner requested a stronger material, deeper lighting and black-mist research, deliberate camera cropping/absence, richer information feedback and free scene design. The integrated result uses satin silver, two rectangular area lights and a continuous graphite exhibition sweep. Scene-linear highlights diffuse locally behind protected reading regions. The actual source geometry and narrative remain unchanged.
 

@@ -16,9 +16,13 @@ The canonical site is `https://joshsuan.github.io/`. `/release.json` identifies 
 
 Full source geometry and existing fallback/quality controls are retained. Model/HDR transfer and triangle counts still exceed earlier mobile/source budgets. Physical phone performance is not certified. Original source attribution and year uncertainty remain visible; publication does not fabricate missing credits or engineering evidence.
 
-## Round 03 — 8 October 2026
+## Round 04 — 8 October 2026
 
-The current release adds satin metal, a graphite exhibition sweep, area lighting, masked highlight diffusion, deliberate model exit/return, element-specific motion and native evidence inspection. The approved story and source GLB are unchanged. Two actual-scene fallback posters replace their preceding captures. See [round-03 verification](../ROUND_03_VERIFICATION.md) for current results and limits.
+FORM and SYSTEM now offer an optional model study: view controls, source-layer separation and source-fixed Studio/Raking/Silhouette lighting. It reuses one Canvas and the approved GLB, returns to the same reading position and supports direct control under reduced motion. The explicit build allowlist adds the inspection modules and 514-point framing support derived from the existing public GLB; no source asset or narrative bytes change. See [round-04 verification](../ROUND_04_VERIFICATION.md) and the [all-role research/development plan](../../../../experience-director/research/ROUND_04_PLAN.md).
+
+## Round 03 — historical, 8 October 2026
+
+This release added satin metal, a graphite exhibition sweep, area lighting, masked highlight diffusion, deliberate model exit/return, element-specific motion and native evidence inspection. The approved story and source GLB were unchanged. Two actual-scene fallback posters replaced their preceding captures. See [round-03 verification](../ROUND_03_VERIFICATION.md) for the dated results and limits.
 
 CI now runs the portable case tests before building. The public artifact audit contains 59 files and the same 15 approved assets. The public browser matrix contains 18 tests across Chromium, WebKit and mobile Chromium; the original framework remains a separate root/subpath CI matrix. Deployment still requires a successful exact-commit push workflow and consumes its existing artifact.
 
