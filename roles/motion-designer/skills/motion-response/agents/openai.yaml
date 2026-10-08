@@ -1,0 +1,4 @@
+interface:
+  display_name: "Motion Designer"
+  short_description: "Shape coordinated motion response and editorial dwell"
+  default_prompt: "Use $motion-response to develop the Bending-Active local case within this role's contract."

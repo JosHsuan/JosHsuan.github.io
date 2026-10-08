@@ -1,0 +1,13 @@
+# 3D Animation Designer only. No inherited global MCP registrations.
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+web_search = "live"
+[history]
+persistence = "none"
+[mcp_servers.animation3d_review]
+command = "__NODE__"
+args = ["__ROLE_ROOT__/mcp/catalog-server.mjs"]
+cwd = "__ROLE_ROOT__"
+enabled_tools = ["animation3d_elements","animation3d_element","animation3d_contract"]
+startup_timeout_sec = 15
+tool_timeout_sec = 20

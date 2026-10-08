@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "role": "3d-animation-designer",
+  "displayName": "3D Animation Designer",
+  "activation": "codex-role.ps1",
+  "home": ".runtime/codex-home",
+  "skills": [
+    {
+      "name": "source-animation",
+      "path": "skills/source-animation",
+      "source": "Project-original scoped workflow informed by pinned primary research",
+      "license": "Project-original instructions; no upstream code copied"
+    }
+  ],
+  "mcp": [
+    {
+      "name": "animation3d_review",
+      "source": "mcp/catalog-server.mjs",
+      "access": "Closed read-only catalog and contract; no arbitrary paths, shell, network or mutations",
+      "verification": "verification/mcp-results.json"
+    }
+  ],
+  "researchReferences": [
+    {
+      "repository": "https://github.com/mcneel/rhino3dm",
+      "revision": "068baee9e853929139af486fc22a6da7c730fb2f",
+      "license": "MIT",
+      "use": "Source-inspection research; existing Geometry Engineer's pinned Python converter remains separate"
+    },
+    {
+      "repository": "https://github.com/donmccurdy/glTF-Transform",
+      "revision": "e3b4db4c61a9b84162b8ab41ce5bd93ea343ad54",
+      "version": "4.2.1",
+      "license": "MIT",
+      "use": "CLI/SDK candidate; not installed"
+    },
+    {
+      "repository": "https://github.com/mrdoob/three.js",
+      "revision": "9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8",
+      "version": "r186",
+      "license": "MIT",
+      "use": "Existing runtime scene graph; no copied code"
+    }
+  ]
+}

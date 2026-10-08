@@ -1,0 +1,20 @@
+[
+  {
+    "name": "animation3d_review",
+    "enabled": true,
+    "disabled_reason": null,
+    "transport": {
+      "type": "stdio",
+      "command": "C:/Users/JosHsuan/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node.exe",
+      "args": [
+        "C:/Users/JosHsuan/Documents/GitHub/JosHsuan.github.io/roles/3d-animation-designer/mcp/catalog-server.mjs"
+      ],
+      "env": null,
+      "env_vars": [],
+      "cwd": "C:/Users/JosHsuan/Documents/GitHub/JosHsuan.github.io/roles/3d-animation-designer"
+    },
+    "startup_timeout_sec": 15.0,
+    "tool_timeout_sec": 20.0,
+    "auth_status": "unsupported"
+  }
+]

@@ -1,0 +1,15 @@
+{
+  "verifiedAt": "2026-10-08T08:30:17.533Z",
+  "role": "3d-animation-designer",
+  "passed": true,
+  "checked": [
+    "real process initialize",
+    "three closed read-only tools",
+    "full current catalog returned",
+    "all elements returned exactly",
+    "current full contract returned",
+    "missing, unknown, typed, path and arbitrary-tool input rejected",
+    "unverified base remains explicitly pending"
+  ],
+  "scope": "Role tool protocol and fixed contract only; not source geometry conversion or rendered case acceptance."
+}

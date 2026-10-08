@@ -1,0 +1,20 @@
+{
+  "verifiedAt": "2026-10-08T08:31:07.141Z",
+  "passed": true,
+  "server": {
+    "name": "Playwright",
+    "version": "1.64.0-alpha-1790635538000"
+  },
+  "packageVersion": "0.0.83",
+  "checks": [
+    "real browser MCP initialize",
+    "configured tools available",
+    "existing actual thesis page read",
+    "native keyboard interaction exercised",
+    "resize exercised",
+    "capture written to D-drive work area",
+    "console tool exercised",
+    "browser closed"
+  ],
+  "limits": "Tool integration against the pre-existing case only. New response/geometry design has not been implemented or visually accepted."
+}

@@ -1,0 +1,15 @@
+{
+  "verifiedAt": "2026-10-08T08:30:17.416Z",
+  "role": "motion-designer",
+  "passed": true,
+  "checked": [
+    "real process initialize",
+    "three closed read-only tools",
+    "full current catalog returned",
+    "all chapters returned exactly",
+    "current full contract returned",
+    "missing, unknown, typed, path and arbitrary-tool input rejected",
+    "seven valid unequal designed holds"
+  ],
+  "scope": "Role tool protocol and fixed contract only; not source geometry conversion or rendered case acceptance."
+}

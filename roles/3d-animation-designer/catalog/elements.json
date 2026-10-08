@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "status": "role-contract-ready; source selection and case implementation pending",
+  "source": {
+    "knownReviewRevision": "c56dfda835e6538ad360f76967ba65603ff48d055228a7d400a2293554bbb058",
+    "sourceRevision": "c12ca628488a4449ea587965410d7df6baa815b36397c8344e2e14a3f533b14c",
+    "basis": "Existing sanitized local-review record, not a new source inspection",
+    "units": "metres",
+    "up": "Y"
+  },
+  "elements": [
+    {
+      "id": "shell",
+      "status": "existing derivative verified in previous round; revalidate current file before processing",
+      "sourceObjectId": "03aa204e-af4c-4e84-9007-ac16d19c1ecc",
+      "representation": "Intact mesh; 84626 vertices and 131881 triangles",
+      "allowed": "Rigid whole-object pose, real contour highlight, bounded reveal",
+      "limits": "No named fabrication groups in the existing derivative. Do not infer part order or bending."
+    },
+    {
+      "id": "base",
+      "status": "source inspection pending",
+      "sourceObjectId": null,
+      "representation": "Owner-requested source base; do not substitute a generated platform",
+      "allowed": "Only after Geometry Engineer identifies exact source object(s), coordinate relation, conversion and review revision",
+      "limits": "An editorial backdrop is not the source base. No base inclusion claim yet."
+    },
+    {
+      "id": "panels",
+      "status": "source mapping pending",
+      "sourceObjectId": null,
+      "representation": "Only defensible source groups or reviewed topology mapping",
+      "allowed": "Rigid separation and exact reassembly after mapping evidence",
+      "limits": "Connected components alone do not prove fabrication panels. Use truthful shell/base relationship if panel mapping is absent."
+    }
+  ]
+}

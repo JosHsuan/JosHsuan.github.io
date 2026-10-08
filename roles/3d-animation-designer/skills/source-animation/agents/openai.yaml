@@ -1,0 +1,4 @@
+interface:
+  display_name: "3D Animation Designer"
+  short_description: "Animate truthful source-derived project elements"
+  default_prompt: "Use $source-animation to develop the Bending-Active local case within this role's contract."

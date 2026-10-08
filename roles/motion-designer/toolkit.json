@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "role": "motion-designer",
+  "displayName": "Motion Designer",
+  "activation": "codex-role.ps1",
+  "home": ".runtime/codex-home",
+  "skills": [
+    {
+      "name": "motion-response",
+      "path": "skills/motion-response",
+      "source": "Project-original scoped workflow informed by pinned primary research",
+      "license": "Project-original instructions; no upstream code copied"
+    }
+  ],
+  "mcp": [
+    {
+      "name": "motion_review",
+      "source": "mcp/catalog-server.mjs",
+      "access": "Closed read-only catalog and contract; no arbitrary paths, shell, network or mutations",
+      "verification": "verification/mcp-results.json"
+    },
+    {
+      "name": "motion_browser",
+      "package": "@playwright/mcp",
+      "version": "0.0.83",
+      "revision": "f183dad4a52965583e3cc1d59b88cdc279e2e57d",
+      "source": "https://github.com/microsoft/playwright-mcp",
+      "license": "Apache-2.0",
+      "access": "Seven explicit browser tools, loopback origin, isolated profile, D-drive output",
+      "verification": "verification/browser-results.json"
+    }
+  ],
+  "researchReferences": [
+    {
+      "repository": "https://github.com/pmndrs/math",
+      "revision": "56e1c4d3855dedc436bdc18a011fcad001c4f237",
+      "license": "MIT",
+      "use": "Research only; no runtime migration"
+    },
+    {
+      "package": "maath",
+      "version": "0.10.8",
+      "license": "MIT",
+      "integrity": "sha512-tRvbDF0Pgqz+9XUa4jjfgAQ8/aPKmQdWXilFu2tMy4GWj4NOsx99HlULO4IeREfbO3a0sA145DZYyvXPkybm0g==",
+      "use": "Research candidate; not installed by this role"
+    },
+    {
+      "repository": "https://github.com/darkroomengineering/lenis",
+      "revision": "bc152f90d7c9b04ef372718350e2f616f3c706b2",
+      "license": "MIT",
+      "use": "Tradeoff research; not selected for this native-input case"
+    },
+    {
+      "package": "gsap",
+      "version": "3.15.0",
+      "license": "GSAP Standard License",
+      "integrity": "sha512-dMW4CWBTUK1AEEDeZc1g4xpPGIrSf9fJF960qbTZmN/QwZIWY5wgliS6JWl9/25fpTGJrMRtSjGtOmPnfjZB+A==",
+      "source": "https://gsap.com/docs/v3/Plugins/ScrollTrigger/",
+      "use": "Existing stack; avoid overlapping scrub ownership"
+    }
+  ]
+}

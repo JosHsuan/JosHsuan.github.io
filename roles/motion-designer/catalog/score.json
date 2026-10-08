@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "status": "role-contract-ready; case implementation pending",
+  "input": "native document scroll with measured chapter anchors",
+  "channels": {
+    "nativeU": "Immediate normalized semantic position",
+    "visualU": "Critical spring response, bounded to [0,1]",
+    "stageU": "Unequal chapter entry/hold/exit remapping",
+    "energy": "Bounded abs visual velocity; decays to zero",
+    "direction": "-1, 0, +1 from meaningful visual velocity",
+    "dwellWeight": "1 during the designed hold; ramps at its edges"
+  },
+  "response": {
+    "criticalOmega": 12.5,
+    "positionEpsilon": 0.00002,
+    "velocityEpsilon": 0.0001,
+    "maxLagChapters": 1.5,
+    "hidden": "Snap to current native target on resume; never replay hidden elapsed time"
+  },
+  "chapters": [
+    {
+      "id": "overview",
+      "hold": [
+        0.2,
+        0.72
+      ],
+      "beat": "Identity and silhouette",
+      "reaction": "Rim entry and restrained title rule; legibility remains immediate"
+    },
+    {
+      "id": "form",
+      "hold": [
+        0.16,
+        0.76
+      ],
+      "beat": "Read shell and actual base together",
+      "reaction": "Source geometry relation reveal; gentle lens change ends before long hold"
+    },
+    {
+      "id": "system",
+      "hold": [
+        0.26,
+        0.66
+      ],
+      "beat": "Examine geometry relationships",
+      "reaction": "Source-supported separation only; lens compression, scan-line emphasis"
+    },
+    {
+      "id": "pattern",
+      "hold": [
+        0.32,
+        0.72
+      ],
+      "beat": "Surface and opening detail",
+      "reaction": "Bounded focus transfer and derivative-driven ASCII accent"
+    },
+    {
+      "id": "make",
+      "hold": [
+        0.18,
+        0.8
+      ],
+      "beat": "Connect actual source geometry with photographic evidence",
+      "reaction": "Rejoin verified elements; media caption/frame response"
+    },
+    {
+      "id": "validation",
+      "hold": [
+        0.12,
+        0.84
+      ],
+      "beat": "Read physical evidence and limits",
+      "reaction": "Stable composition, restrained light response and image-hover inspection"
+    },
+    {
+      "id": "credits",
+      "hold": [
+        0.12,
+        1
+      ],
+      "beat": "Whole-source return and attribution",
+      "reaction": "Settle all decorative energy, retain complete object"
+    }
+  ]
+}
