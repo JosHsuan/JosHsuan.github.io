@@ -43,6 +43,11 @@ jobs:
           retention-days: 14
   public-case:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit, mobile-chromium]
     env:
       NEXT_TELEMETRY_DISABLED: '1'
     steps:
@@ -56,13 +61,14 @@ jobs:
         run: node --test roles/uiux-designer/cases/bending-active-thesis/tests/*.test.mjs
       - run: pnpm build:pages
       - run: pnpm exec playwright install --with-deps chromium webkit
-      - run: pnpm test:pages
+      - run: pnpm test:pages --project ${{ matrix.browser }}
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: public-case-browser-failures
+          name: public-case-browser-failures-${{ matrix.browser }}
           path: pages-test-results/
       - uses: actions/upload-artifact@v4
+        if: matrix.browser == 'chromium'
         with:
           name: static-export-pages
           path: .pages-workspace/out/

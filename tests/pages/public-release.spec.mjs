@@ -19,9 +19,15 @@ test('public model initializes with base layers and supports chapter navigation 
   const errors=[]; page.on('pageerror', error=>errors.push(error.message));
   await page.goto('/');
   await page.waitForFunction(()=>window.__thesis?.inspect().ready);
-  expect(await page.evaluate(()=>window.__thesis.inspect().source)).toMatchObject({vertices:172789,triangles:227521,sourceObjects:51});
-  expect(await page.evaluate(()=>window.__thesis.inspect().material)).toMatchObject({finish:'satin',roughness:.58,anisotropy:.35});
-  expect(await page.evaluate(()=>window.__thesis.inspect().exhibition)).toMatchObject({sourceGeometry:false,areaLights:2,extraShadowMaps:0});
+  const initial=await page.evaluate(()=>window.__thesis.inspect());
+  expect(initial.source).toMatchObject({vertices:172789,triangles:227521,sourceObjects:51});
+  expect(initial.material).toMatchObject({finish:'satin',roughness:.58,anisotropy:.35});
+  expect(initial.exhibition).toMatchObject({sourceGeometry:false,areaLights:2,extraShadowMaps:0});
+  expect(initial.detail).toBe('full');
+  // Verify Full initialization, then exercise native interaction in supported
+  // Light mode so software-rendered Full frames do not dominate input timing.
+  await page.getByRole('combobox',{name:'Visual detail',exact:true}).selectOption('light');
+  await expect.poll(()=>page.evaluate(()=>window.__thesis.inspect().detail)).toBe('light');
   await page.locator('[data-chapter-link="system"]').click();
   // Native document input drives one visible reading plane and scene score.
   // Linux software rendering can exceed the default five-second assertion budget.
@@ -31,8 +37,6 @@ test('public model initializes with base layers and supports chapter navigation 
     const story = window.__story?.inspect(), scene = window.__thesis?.inspect();
     return story?.settled && story.chapterId === 'system' && scene?.representation?.chapterId === 'system';
   }, null, {timeout:30000});
-  await page.getByRole('combobox',{name:'Visual detail',exact:true}).selectOption('light');
-  await expect.poll(()=>page.evaluate(()=>window.__thesis.inspect().detail)).toBe('light');
   expect(await page.evaluate(()=>window.__thesis.inspect().compositor.requestedSamples)).toBe(0);
   expect(await page.evaluate(()=>window.__thesis.inspect().compositor.mist.enabled)).toBe(false);
   await page.locator('[data-chapter-link="make"]').click();
