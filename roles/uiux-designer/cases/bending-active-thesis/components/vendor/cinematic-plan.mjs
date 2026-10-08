@@ -46,12 +46,12 @@ function minimumFit(bounds, target, az, el, fov, aspect, shift, support = null) 
   }));
 }
 
-function anchor(index, bounds, aspect, allowMeasuredHull) {
+function anchor(index, bounds, aspect, allowMeasuredHull, sharedStage = false) {
   const spec = definitions[index], half = mul(sub(bounds.max, bounds.min), 0.5), center = add(bounds.min, half), r = length(half);
   const mobile = clamp((1.1 - aspect) / 0.4);
   const focus = mixV(spec.focus, [0, 0, 0], mobile * 0.7), target = add(center, focus.map((v, i) => v * half[i]));
   const az = spec.az, el = mix(spec.el, index === 0 ? 36 : 42, mobile);
-  const fov = mix(spec.fov, 46, mobile), shift = mixV(spec.shift, [0.07, index === 1 ? -0.48 : -0.26], mobile);
+  const fov = mix(spec.fov, 46, mobile), shift = mixV(spec.shift, [0.07, index === 1 ? (sharedStage ? -0.40 : -0.48) : -0.26], mobile);
   const support = index === 1 && allowMeasuredHull ? THESIS_FRAMING_HULL : null;
   const fullDistance = minimumFit(bounds, target, az, el, fov, aspect, shift, support);
   // Small screens retain almost the full surface; mobile storytelling belongs to
@@ -93,8 +93,10 @@ export function sampleCinematicPose(value, aspect, pointer = { x: 0, y: 0 }, opt
   const revision = options.modelRevision ?? THESIS_MODEL_REVISION;
   const allowMeasuredHull = THESIS_FRAMING_HULL.length > 0 && revision === THESIS_MODEL_REVISION && ['min', 'max'].every(k => bounds[k].every((v, i) => Math.abs(v - THESIS_MODEL_BOUNDS[k][i]) < 1e-8));
   const u = clamp(value), chapter = cinematicChapter(u), reducedMotion = options.reducedMotion === true;
-  const blend = reducedMotion ? { a: 6, b: 6, t: 0 } : blendAt(u);
-  const a = anchor(blend.a, bounds, aspect, allowMeasuredHull), b = anchor(blend.b, bounds, aspect, allowMeasuredHull), t = blend.t;
+  const slot = clamp(u * 7 - .5, 0, 6), from = Math.floor(slot);
+  // The shared response has already authored the transition and hold curve.
+  const blend = reducedMotion ? { a: 6, b: 6, t: 0 } : options.sharedStage ? {a: from, b: Math.min(6, from + 1), t: slot - from} : blendAt(u);
+  const a = anchor(blend.a, bounds, aspect, allowMeasuredHull, options.sharedStage), b = anchor(blend.b, bounds, aspect, allowMeasuredHull, options.sharedStage), t = blend.t;
   const decoration = reducedMotion ? [0, 0] : [clamp(pointer?.x, -1, 1) * 1.25, clamp(pointer?.y, -1, 1) * 0.8];
   const az = mix(a.az, b.az, t) + decoration[0], el = mix(a.el, b.el, t) + decoration[1];
   const target = mixV(a.target, b.target, t), distance = mix(a.distance, b.distance, t), back = direction(az, el);

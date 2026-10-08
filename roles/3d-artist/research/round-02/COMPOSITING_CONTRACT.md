@@ -2,6 +2,8 @@
 
 Role: 3D Artist. Date: 8 October 2026, Europe/Berlin. Scope: the authorized local Bending-Active revision. This contract establishes the role before runtime integration; runtime captures and measured results must be recorded separately.
 
+Implementation status, later on 8 October: the contract is now integrated with the actual source shell/base through `CinematicScene.jsx`. The implemented flat control record and source/browser evidence are documented in [adapter checks](RUNTIME_ADAPTER_CHECKS.md). Actual image inspection justified two requested MSAA samples with depth resolution in Full detail; Light retains zero. Initial no-MSAA and memory recommendations below remain the original planning baseline, not a description of the final Full path. [Visual review](VISUAL_REVIEW.md) records this bounded change and its cost.
+
 ## Responsibility and influence graph
 
 The existing 3D Artist becomes responsible for compositing. Its material/shader responsibility already covers how surfaces become pixels; a separate Compositor would duplicate ownership. Cinema authors focus/edit intent, Lighting Designer the radiance, Scene Designer the spatial setting, Animation Designer verified object transforms, Motion Designer one response clock, UIUX protected HTML, and the Director their dependency graph.

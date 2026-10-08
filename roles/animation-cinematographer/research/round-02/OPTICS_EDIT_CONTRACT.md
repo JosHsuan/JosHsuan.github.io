@@ -70,3 +70,7 @@ Depth-aware gather is an image approximation. It can bleed at silhouette discont
 - Local `src/review/engine.jsx`: existing original HDR/depth gather implementation, not new case evidence.
 
 The role skill is original instruction text, not a copied upstream skill. No editor dependency, DCC server or new MCP server is needed for this extension; the existing opt-in Cinema tooling and actual browser testing cover its operations. Installed-source hash verification is shared in `roles/3d-artist/research/round-02/source-verification.json`.
+
+## Runtime handoff after role establishment
+
+The shared case adapter is now implemented as `components/optical-score.mjs` with flat fields rather than the proposed nested record. It derives the focal-length baseline from the actual source-framed pose and applies bounded chapter ratios; the initial millimetre ranges above remain design starting points. A scene-only dip is implemented, accurately labeled `scene-dip`; it is not a claim of a hard camera cut. Actual Chromium/WebKit depth-focus fixture evidence is recorded in [the adapter checks](../../../3d-artist/research/round-02/RUNTIME_ADAPTER_CHECKS.md). The adapter is integrated with the actual source shell/base and shared scene score. [Image review](../../../3d-artist/research/round-02/VISUAL_REVIEW.md) records seven chapters at four widths plus focused post-build checks; physical-device performance remains unverified, and the final page behavior matrix is recorded separately.

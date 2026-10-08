@@ -31,7 +31,7 @@ node roles/animation-cinematographer/scripts/verify-mcp.mjs
 
 - `cinema-shot-design`: scoped camera trajectory, time law, lens, shot scale and approximation guidance.
 - `cinema-interaction-review`: single-input validation, review exports and UIUX evidence handling.
-- `cinematic-editing`: shared-score focal length, actual depth focus, reading holds and reversible edit envelopes. The [round-02 optics/edit contract](research/round-02/OPTICS_EDIT_CONTRACT.md) extends this role's responsibility; it is preparation for the requested next case revision, not a claim that those effects are already integrated.
+- `cinematic-editing`: shared-score focal length, actual depth focus, reading holds and reversible edit envelopes. The [round-02 optics/edit contract](research/round-02/OPTICS_EDIT_CONTRACT.md) extends this role's responsibility. Its local Bending-Active case adapter is implemented; [adapter checks](../3d-artist/research/round-02/RUNTIME_ADAPTER_CHECKS.md) and [actual image review](../3d-artist/research/round-02/VISUAL_REVIEW.md) distinguish verified rendering from outstanding device/performance acceptance.
 - `playwright`: pinned OpenAI skill with original Apache notice and role display metadata. Its Bash/npx recipe is unavailable here; actual Node scripts and MCP calls are exercised instead.
 - `cinema_catalog`: three read-only local catalog tools, without arbitrary-file or shell access.
 - `cinema_browser`: Playwright MCP 0.0.83 with a headless ephemeral profile, loopback origin restriction, tool allowlist and role output directory.
