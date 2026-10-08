@@ -29,7 +29,7 @@ test('public model initializes with base layers and supports chapter navigation 
   await page.evaluate(()=>{const element=document.getElementById('system');let y=0;for(let n=element;n;n=n.offsetParent)y+=n.offsetTop;scrollTo({top:y+element.offsetHeight*.5-innerHeight*.45,behavior:'instant'});});
   await page.waitForFunction(() => {
     const story = window.__story?.inspect(), scene = window.__thesis?.inspect();
-    return story?.settled && story.chapterId === 'system' && scene?.elements?.separationWeight > .9;
+    return story?.settled && story.chapterId === 'system' && scene?.representation?.chapterId === 'system';
   }, null, {timeout:30000});
   await page.getByRole('combobox',{name:'Visual detail',exact:true}).selectOption('light');
   await expect.poll(()=>page.evaluate(()=>window.__thesis.inspect().detail)).toBe('light');
@@ -53,6 +53,7 @@ test('evidence inspection and method disclosure preserve native reading and keyb
   await step.locator('summary').click();
   await expect(step).toHaveAttribute('open','');
   await expect(step).toContainText('desired surface geometry');
+  await page.getByText('Compare with the original thesis figure',{exact:true}).click();
   const trigger=page.locator('[data-inspect-figure="0"]');
   await trigger.focus();await page.keyboard.press('Enter');
   const comparison=page.getByRole('region',{name:'Original source for FIG. 3–04'});
