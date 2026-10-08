@@ -9,6 +9,11 @@ $template=[IO.File]::ReadAllText((Join-Path $roleRoot 'config.template.toml'))
 $rendered=$template.Replace('__ROLE_ROOT__',$roleRoot.Replace('\','/')).Replace('__NODE__',$nodePath)
 [IO.File]::WriteAllText((Join-Path $runtimeHome 'config.toml'),$rendered,[Text.UTF8Encoding]::new($false))
 Get-ChildItem -LiteralPath (Join-Path $roleRoot 'skills/source-animation') -Force | ForEach-Object {Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $runtimeHome 'skills/source-animation') -Recurse -Force}
+foreach($resourceName in @('research','catalog')) {
+  $resourceDestination=Join-Path $runtimeHome $resourceName
+  New-Item -ItemType Directory -Force -Path $resourceDestination | Out-Null
+  Get-ChildItem -LiteralPath (Join-Path $roleRoot $resourceName) -Force | ForEach-Object {Copy-Item -LiteralPath $_.FullName -Destination $resourceDestination -Recurse -Force}
+}
 if($PrepareOnly){Write-Output 'Prepared 3D Animation Designer role home';exit 0}
 $priorRoleHome=$env:CODEX_HOME
 try{$env:CODEX_HOME=$runtimeHome;& codex --cd $roleRoot @CodexArgs;exit $LASTEXITCODE}

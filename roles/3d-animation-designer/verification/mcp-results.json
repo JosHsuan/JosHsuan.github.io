@@ -1,5 +1,5 @@
 {
-  "verifiedAt": "2026-10-08T08:30:17.533Z",
+  "verifiedAt": "2026-10-08T08:50:27.365Z",
   "role": "3d-animation-designer",
   "passed": true,
   "checked": [
@@ -9,7 +9,7 @@
     "all elements returned exactly",
     "current full contract returned",
     "missing, unknown, typed, path and arbitrary-tool input rejected",
-    "unverified base remains explicitly pending"
+    "current real base groups and source counts returned; unsupported fabrication-panel mapping remains explicit"
   ],
   "scope": "Role tool protocol and fixed contract only; not source geometry conversion or rendered case acceptance."
 }

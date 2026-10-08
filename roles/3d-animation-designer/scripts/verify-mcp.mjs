@@ -29,7 +29,13 @@ try {
  await assert.rejects(c.request('tools/call',{name:'shell',arguments:{}}));
  await assert.rejects(c.request('tools/call',{name:names[0],arguments:{path:'../../private'}}));
  checked.push('missing, unknown, typed, path and arbitrary-tool input rejected');
- assert.equal(expected.elements.find(e=>e.id==='base').sourceObjectId,null);assert(expected.elements.find(e=>e.id==='base').status.includes('pending'));checked.push('unverified base remains explicitly pending');
+ const lower=expected.elements.find(e=>e.id==='base-lower'),upper=expected.elements.find(e=>e.id==='base-upper');
+ assert.deepEqual(lower.sourceGroups,[78]);assert.equal(lower.sourceObjectCount,13);
+ assert.deepEqual(upper.sourceGroups,[77]);assert.equal(upper.sourceObjectCount,37);
+ assert.equal(expected.source.currentReviewRevision,'ff112b90be104cca7e3705b5eee481ba3973d25e2f3d4a7350faa2f732cae47e');
+ assert(expected.elements.find(e=>e.id==='panels').status.includes('unsupported'));
+ assert.equal(expected.elements.filter(e=>e.id!=='panels').reduce((sum,e)=>sum+e.triangles,0),expected.source.triangles);
+ checked.push('current real base groups and source counts returned; unsupported fabrication-panel mapping remains explicit');
  const result={verifiedAt:new Date().toISOString(),role:'3d-animation-designer',passed:true,checked,scope:'Role tool protocol and fixed contract only; not source geometry conversion or rendered case acceptance.'};
  await mkdir(new URL('../verification/',import.meta.url),{recursive:true});
  await writeFile(new URL('../verification/mcp-results.json',import.meta.url),JSON.stringify(result,null,2)+'\n');

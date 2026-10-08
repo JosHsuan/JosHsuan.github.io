@@ -1,37 +1,93 @@
 {
-  "schemaVersion": 1,
-  "status": "role-contract-ready; source selection and case implementation pending",
+  "schemaVersion": 2,
+  "status": "source-layer handoff inspected; pure display choreography verified; rendered integration pending",
   "source": {
-    "knownReviewRevision": "c56dfda835e6538ad360f76967ba65603ff48d055228a7d400a2293554bbb058",
+    "currentReviewRevision": "ff112b90be104cca7e3705b5eee481ba3973d25e2f3d4a7350faa2f732cae47e",
+    "previousShellOnlyRevision": "c56dfda835e6538ad360f76967ba65603ff48d055228a7d400a2293554bbb058",
     "sourceRevision": "c12ca628488a4449ea587965410d7df6baa815b36397c8344e2e14a3f533b14c",
-    "basis": "Existing sanitized local-review record, not a new source inspection",
+    "basis": "Geometry Engineer source-layers handoff metadata directly inspected on 2026-10-08; independent vertex verification belongs to Geometry Engineer",
     "units": "metres",
-    "up": "Y"
+    "up": "Y",
+    "vertices": 172789,
+    "triangles": 227521,
+    "bytes": 6879848,
+    "bounds": {
+      "min": [
+        -1.38373486328125,
+        -0.008087958335876465,
+        -1.6362088623046875
+      ],
+      "max": [
+        1.24108056640625,
+        0.7248569269180298,
+        1.7275496826171874
+      ]
+    },
+    "maximumDisplayY": 0.9648569269180298
   },
   "elements": [
     {
       "id": "shell",
-      "status": "existing derivative verified in previous round; revalidate current file before processing",
+      "status": "included in current source-layer derivative",
       "sourceObjectId": "03aa204e-af4c-4e84-9007-ac16d19c1ecc",
-      "representation": "Intact mesh; 84626 vertices and 131881 triangles",
-      "allowed": "Rigid whole-object pose, real contour highlight, bounded reveal",
-      "limits": "No named fabrication groups in the existing derivative. Do not infer part order or bending."
+      "sourceGroups": [],
+      "sourceObjectCount": 1,
+      "vertices": 84626,
+      "triangles": 131881,
+      "representation": "Intact source mesh",
+      "allowed": "Rigid source-relative Y offset up to +0.24 metres, contour emphasis and exact rest return",
+      "limits": "No named fabrication groups. No simulated bending or inferred panel fabrication order."
     },
     {
-      "id": "base",
-      "status": "source inspection pending",
-      "sourceObjectId": null,
-      "representation": "Owner-requested source base; do not substitute a generated platform",
-      "allowed": "Only after Geometry Engineer identifies exact source object(s), coordinate relation, conversion and review revision",
-      "limits": "An editorial backdrop is not the source base. No base inclusion claim yet."
+      "id": "base-lower",
+      "status": "included in current source-layer derivative",
+      "sourceGroups": [
+        78
+      ],
+      "sourceObjectCount": 13,
+      "vertices": 29030,
+      "triangles": 31688,
+      "cachedBrepFaces": 480,
+      "representation": "Original lower source solids, combined from cached Brep face meshes",
+      "allowed": "Remains at source-relative rest position throughout display separation",
+      "limits": "Retains source intersections; no alignment correction or replacement editorial platform."
+    },
+    {
+      "id": "base-upper",
+      "status": "included in current source-layer derivative",
+      "sourceGroups": [
+        77
+      ],
+      "sourceObjectCount": 37,
+      "vertices": 59133,
+      "triangles": 63952,
+      "cachedBrepFaces": 1055,
+      "representation": "Original upper source solids, combined from cached Brep face meshes",
+      "allowed": "Rigid source-relative Y offset up to +0.09 metres and exact rest return",
+      "limits": "Vertical separation is an explanatory display choice, not a construction sequence."
     },
     {
       "id": "panels",
-      "status": "source mapping pending",
+      "status": "unsupported without further source mapping",
       "sourceObjectId": null,
-      "representation": "Only defensible source groups or reviewed topology mapping",
-      "allowed": "Rigid separation and exact reassembly after mapping evidence",
-      "limits": "Connected components alone do not prove fabrication panels. Use truthful shell/base relationship if panel mapping is absent."
+      "representation": "No fabrication-panel split authored",
+      "allowed": "Retain intact shell and real base-layer relationship",
+      "limits": "Connected components alone do not prove fabrication panels; no invented panel groups or deformation."
     }
-  ]
+  ],
+  "display": {
+    "weights": [
+      0,
+      0,
+      1,
+      0.7,
+      0,
+      0,
+      0
+    ],
+    "chapterCentres": "(index + .5) / 7",
+    "caption": "Source layers · display separation, not a construction sequence",
+    "reducedMotion": "All source-relative offsets exactly zero"
+  },
+  "checkpoint": "research/ESTABLISHMENT_CHECKPOINT.md"
 }

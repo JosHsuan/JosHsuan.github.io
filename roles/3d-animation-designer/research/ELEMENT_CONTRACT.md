@@ -1,8 +1,8 @@
 # Source element animation contract — Round 02
 
-Status: role design established. Source base selection, topology mapping, prepared derivatives and case implementation are pending; no new geometry has been produced by this role.
+Status: the parent Geometry Engineer handoff now identifies the actual shell and two source base layers. The pure display-pose sampler and six focused checks are implemented; rendered integration remains separate. See [the current source handoff](ELEMENT_HANDOFF.md). This role did not author or replace the source geometry.
 
-Use [the closed element catalog](../catalog/elements.json) as the starting record. The shell record comes from the existing sanitized local case manifest. Read and verify the current asset before relying on the previous round's evidence. Geometry Engineer must identify the requested source base and its original placement; a procedural floor cannot fulfill that requirement.
+The [closed element catalog](../catalog/elements.json) now records the current source revision, exact layer IDs, permitted offsets and evidence limits. The earlier pending state remains a dated [establishment checkpoint](ESTABLISHMENT_CHECKPOINT.md). Read and verify the current asset before relying on the previous round's evidence. A procedural floor cannot fulfill the requested source-base requirement.
 
 ## Preparation and handoff
 
@@ -14,7 +14,7 @@ Each handoff should contain the model revision, source-relative element origins,
 
 ## Proposed animation API
 
-`sampleElementPose(stageU, { modelRevision, sourceElements })` returns poses for known IDs, plus a representation caption. `baseReveal` controls visibility/emphasis only after base selection; `panelIsolation` is permitted only when source mapping supports those panels; `assemblyRejoin` restores every selected element to its source-relative rest transform. The parent scene binding remains the final mesh-transform writer.
+The implemented `sampleElementPose(stageU, { reducedMotion })` returns offsets for the known `shell`, `base-lower` and `base-upper` IDs, the required model revision, separation weight, bounds padding and a representation caption. The parent must match the returned model revision before binding these offsets. Source panel splitting remains unsupported. The parent scene binding remains the final mesh-transform writer.
 
 Initial narrative: overview complete source silhouette; form source shell/base relationship; system defensible rigid separation or intact contour reveal; pattern real opening detail; make exact rejoin beside photographic evidence; validation stable geometry with clear limits; credits complete source object. Coordinate the displacement envelope with Cinema before camera framing and with Scene Designer before stage dimensions.
 
