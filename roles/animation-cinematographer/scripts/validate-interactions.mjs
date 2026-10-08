@@ -19,7 +19,10 @@ const baseline=await readJSON(path.join(root,'roles/3d-artist/verification/inter
 const revisions=await readJSON(path.join(root,'roles/3d-artist/verification/integration-boundary-revisions.json'));
 assert.equal(revisions.files.length,2);
 for(const revision of revisions.files){assert(['README.md','docs/architecture.md'].includes(revision.file));assert.equal(baseline.find(entry=>entry.file===revision.file)?.sha256,revision.previousSHA256);}
-for(const entry of baseline){const revision=revisions.files.find(item=>item.file===entry.file);assert.equal(await hash(path.join(root,entry.file)),revision?.reviewedSHA256??entry.sha256,`Protected file changed: ${entry.file}`);}
-checks.push(`${baseline.length-revisions.files.length} protected files unchanged; ${revisions.files.length} explicitly reviewed integration documents match pinned revisions`);
+const publication=await readJSON(path.join(root,'roles/3d-artist/verification/publication-boundary-revisions.json'));
+const allowedPublication=['README.md','docs/architecture.md','.github/workflows/ci.yml','.github/workflows/deploy-pages.yml','.gitignore','eslint.config.mjs','package.json','tsconfig.json'];
+for(const item of publication.files){assert(allowedPublication.includes(item.file));const prior=revisions.files.find(r=>r.file===item.file)?.reviewedSHA256??baseline.find(r=>r.file===item.file)?.sha256;assert.equal(item.previousSHA256,prior);}
+for(const entry of baseline){const revision=publication.files.find(item=>item.file===entry.file)??revisions.files.find(item=>item.file===entry.file);assert.equal(await hash(path.join(root,entry.file)),revision?.reviewedSHA256??entry.sha256,`Protected file changed: ${entry.file}`);}
+checks.push(`${baseline.length-publication.files.length} protected files unchanged; ${publication.files.length} explicit publication revisions match pinned hashes and the preserved prior baselines`);
 const files=[];async function walk(folder){for(const e of await readdir(folder,{withFileTypes:true})){const f=path.join(folder,e.name);if(e.isDirectory())await walk(f);else files.push(f);}}await walk(path.join(local,'src/review'));for(const file of files){const source=await readFile(file,'utf8');assert(!/from\s+['"]@theatre\//.test(source));assert(!source.includes('D:\\JosHsuan_Website'));}checks.push('Direct Theatre imports and private-path boundaries');
 await writeFile(path.join(local,'verification/interaction-validation.json'),JSON.stringify({verifiedAt:new Date().toISOString(),role:role.id,passed:true,checks},null,2)+'\n');console.log(JSON.stringify(checks,null,2));

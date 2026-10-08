@@ -7,10 +7,10 @@
       "kind": "Adapted shared-stage camera with combined source bounds",
       "localPath": "components/vendor/cinematic-plan.mjs",
       "sourcePath": "roles/animation-cinematographer/src/bending-active/cinematic-plan.mjs",
-      "sha256": "6cf67cb2511979799b348bfdfe4f3cc5e6aa693586683b8306848e8fd6119e6f",
+      "sha256": "cdab0b598214e580e34116f4c2b9f154ed09a7c57f6ec37e3d57d378d8374c12",
       "byteIdentical": false,
       "sourceSHA256": "18a46d178734aa0d34553fc88c8d6f25fdbf605330a799119b8082b386df6712",
-      "adaptation": "Consume the shared response score without a second hold curve; revise mobile FORM placement. Historical shell hull is revision-gated and unused for current model."
+      "adaptation": "Consume the shared response score without a second hold curve; revise mobile FORM placement. Historical shell hull is revision-gated and unused for current model. Public release removes the unused private hull dependency."
     },
     {
       "kind": "deterministic camera",
@@ -90,7 +90,7 @@
     "gitIgnored": true,
     "scope": "Explicit D-first local geometry derivative handoff",
     "sampleEquivalenceCount": 435,
-    "currentUse": "Historical shell revision only; current combined source model uses conservative bounds."
+    "currentUse": "Removed from current runtime; retained only as ignored historical local evidence."
   },
   "reviewedAt": "2026-10-08",
   "runtimeRecords": [
@@ -98,7 +98,8 @@
       "kind": "camera",
       "path": "components/vendor/cinematic-plan.mjs",
       "owner": "Animation Cinematographer",
-      "sha256": "6cf67cb2511979799b348bfdfe4f3cc5e6aa693586683b8306848e8fd6119e6f"
+      "sha256": "cdab0b598214e580e34116f4c2b9f154ed09a7c57f6ec37e3d57d378d8374c12",
+      "previousSHA256": "6cf67cb2511979799b348bfdfe4f3cc5e6aa693586683b8306848e8fd6119e6f"
     },
     {
       "kind": "material",
@@ -204,5 +205,10 @@
     "triangleTargetMet": false
   },
   "workingEvidence": "D:/JosHsuan_Website/_work/bending-active-thesis/round-02",
-  "validationRecord": "ROUND_02_VERIFICATION.md"
+  "validationRecord": "ROUND_02_VERIFICATION.md",
+  "publicRelease": {
+    "authority": "docs/decisions/0006-public-thesis-pages.md",
+    "manifest": "release/manifest.json",
+    "runtimeChange": "Remove the unused private framing import; current combined-source framing remains identical across all 90 verified projections."
+  }
 }

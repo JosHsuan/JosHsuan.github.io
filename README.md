@@ -1,6 +1,8 @@
-# Portfolio framework
+# Portfolio framework and Bending-Active presentation
 
-An empty Next.js portfolio framework with a documented external materials-preparation source. The maintained [architecture](docs/architecture.md) defines the software/content boundaries and subsequent discussion steps. No project copy, profile, CV, contact details, images, models or authored animation have been added to the site, and it has not been published.
+This repository contains the reusable empty Next.js portfolio framework and the completed Bending-Active presentation. On 8 October 2026 the owner authorized publishing that presentation to GitHub Pages. The explicit [public release](roles/uiux-designer/cases/bending-active-thesis/release/README.md) builds independently from its approved story/assets; the original framework and public-content arrays remain empty. [Decision 0006](docs/decisions/0006-public-thesis-pages.md) supersedes the earlier local-only boundary for this selected presentation.
+
+Build the published home page with `pnpm build:pages` and verify it with `pnpm test:pages`. Output is `.pages-workspace/out/`, previewed at `http://127.0.0.1:4186/`. The canonical public URL is `https://joshsuan.github.io/`. Earlier local-review sections below preserve research history; they do not revoke the explicit publication request.
 
 ## Source authority and language
 
@@ -88,4 +90,4 @@ Remove-Item Env:NEXT_PUBLIC_BASE_PATH
 pnpm build
 ```
 
-CI checks both paths. The publishing workflow accepts a successful CI `push` run from the default branch at the same commit and deploys its tested root artifact without rebuilding. Remote CI, Pages configuration and deployment have not been run. Confirm the actual hosting destination before publication; scaffold pages currently use `noindex`.
+CI checks both framework paths and the public case separately. The publishing workflow accepts a successful CI `push` run from the default branch at the same commit and deploys its tested `static-export-pages` case artifact without rebuilding. The public case has canonical/index metadata; the framework remains a noindex scaffold. GitHub Actions records and public `/release.json` identify the deployed result.

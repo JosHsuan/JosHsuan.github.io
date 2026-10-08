@@ -1,0 +1,55 @@
+{
+  "reviewedAt": "2026-10-08",
+  "authority": "docs/decisions/0006-public-thesis-pages.md",
+  "policy": "Explicit publication changes layered on the unchanged historical and local-integration baselines. All other protected files must match.",
+  "files": [
+    {
+      "file": ".github/workflows/ci.yml",
+      "previousSHA256": "9b196fa6edbd93795a614be7f2c96eda30765dc00d224c38b0c8b860e8e72a62",
+      "reviewedSHA256": "d5257bab9bd1be4352fc42cfece31f5f5e0649e2a9b28a60519cfedcc86b5c0b",
+      "reason": "Owner-authorized public case release and isolated GitHub Pages build; dependencies, source originals and framework routes unchanged."
+    },
+    {
+      "file": ".github/workflows/deploy-pages.yml",
+      "previousSHA256": "f17cc633d94d14de57fd67d382d09ecc5c54fbbdfa4453230e1dad0c6bbdae42",
+      "reviewedSHA256": "5cb8ed87d8b9da8503cdb8da5f14edfb2e90362a01b95d98b34126aff32cffa1",
+      "reason": "Owner-authorized public case release and isolated GitHub Pages build; dependencies, source originals and framework routes unchanged."
+    },
+    {
+      "file": ".gitignore",
+      "previousSHA256": "b2c0395dceaacd3664f3af239d579b8c5ccc924fb3f289529b665c1c9670b401",
+      "reviewedSHA256": "5643b7440d1f873f2ee087d62d7010ec386884cd25147c9f8e81725629342c1b",
+      "reason": "Owner-authorized public case release and isolated GitHub Pages build; dependencies, source originals and framework routes unchanged."
+    },
+    {
+      "file": "README.md",
+      "previousSHA256": "4b8f99d12b4d300f5043d8d6f37f6f6e19387423cb0926830760b27a47e97310",
+      "reviewedSHA256": "c97c5c532d8ac5c88620931b245869236f1956719ee2c42c6035c490f393314f",
+      "reason": "Owner-authorized public case release and isolated GitHub Pages build; dependencies, source originals and framework routes unchanged."
+    },
+    {
+      "file": "docs/architecture.md",
+      "previousSHA256": "ed46622b27c8878e4dfe52b22f57433750be51e0d7d4c37d5f83dae0ea3fe768",
+      "reviewedSHA256": "94d55092aa028cd684c621d9ed0a8a2ae47dd64215b4fb0af7d7e42ddd839e9f",
+      "reason": "Owner-authorized public case release and isolated GitHub Pages build; dependencies, source originals and framework routes unchanged."
+    },
+    {
+      "file": "eslint.config.mjs",
+      "previousSHA256": "b2a5435b8b31d4585dea90bfec3fa1bdb4f40251605d8cac855dbc3afec28e68",
+      "reviewedSHA256": "570a6a0194976c728dda245f0c655d32d29f203d9124a1fcd490ecd56cf31cda",
+      "reason": "Owner-authorized public case release and isolated GitHub Pages build; dependencies, source originals and framework routes unchanged."
+    },
+    {
+      "file": "package.json",
+      "previousSHA256": "08e1ef89f3ded38632dfe3abcaf1f89214bc64d43b84f3d2d00c92b7adc156bf",
+      "reviewedSHA256": "72c5aeb4e8bbd0285b7c83e0d31b5601157b211b0ab86718542d038d904ecd5c",
+      "reason": "Owner-authorized public case release and isolated GitHub Pages build; dependencies, source originals and framework routes unchanged."
+    },
+    {
+      "file": "tsconfig.json",
+      "previousSHA256": "1c3b245b633f618ff5108ad2409fa3f36055919e8299a90fa2e77b8f84e3684d",
+      "reviewedSHA256": "ea3978a33f8802fc331014c02bb1d4d08c1b9566e04ccd93786b2a04449fcd7c",
+      "reason": "Owner-authorized public case release and isolated GitHub Pages build; dependencies, source originals and framework routes unchanged."
+    }
+  ]
+}

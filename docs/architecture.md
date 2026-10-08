@@ -8,17 +8,19 @@
 |---|---|
 | Owner | JosHsuan Chao |
 | Audience | The owner, collaborating developers, and coding agents |
-| Revision | **2.4 — 8 October 2026; isolated role workspaces and cinematic local thesis review** |
+| Revision | **2.5 — 8 October 2026; explicit Bending-Active public release and Pages artifact pipeline** |
 | Language | English for project documentation and future website content; Traditional Chinese for discussion with the owner |
 | Scope | Portfolio, Research & Development, About/CV, Contact, and selected interactive project stories |
 | Delivery baseline | Next.js static export to GitHub Pages; no paid domain, paid storage, or continuously running backend required for the initial release |
-| Status | **Empty production portfolio framework. Isolated role research and the local thesis review are implemented; public content integration and deployment remain deferred.** |
+| Status | **Reusable framework remains empty. The completed Bending-Active case now has an owner-authorized public release and an independently tested Pages artifact.** |
 | Evidence | Existing repository implementation, inspected preparation records, and the original official-documentation/source register; evidence scope is recorded in Sections 12 and 22 |
 | Repository destination | `docs/architecture.md` is the maintained architecture; software implementation in the GitHub working folder takes precedence over older proposed layouts |
 | Design reference | `docs/WEBSITE_DESIGN_GUIDELINES.md` — supplied v1.0, preserved verbatim; presentation requirements for a later explicitly authorized implementation |
 | Materials preparation root | `D:\JosHsuan_Website\_private\portfolio-preparation` — designated source for all project, CV, and content preparation |
 
 ## Executive decision
+
+**Public thesis release — 8 October 2026:** The owner made the repository public and requested commits, push and GitHub Pages deployment. [Decision 0006](decisions/0006-public-thesis-pages.md) authorizes the completed Bending-Active presentation and required prepared derivatives. A checked-in release allowlist supplies a clean `.pages-workspace/out/` build, with no private-drive or ignored-input dependency. CI validates this public case separately from the unchanged empty framework; the manual deployment consumes its successful same-commit artifact. Earlier local-only restrictions below are historical for this selected release; unrelated materials remain private. The immersive background behavior is retained for this presentation with its documented fallbacks and performance limits.
 
 **Owner-authorized local thesis review — 7 October 2026:** The owner explicitly confirmed the Bending-Active Thesis local work page following further 3D Artist texture/shader research. [Decision 0004](decisions/0004-local-thesis-review.md) records the narrow private-source/local-derivative boundary. The [case workspace](../roles/uiux-designer/cases/bending-active-thesis/README.md) is a separate Next static review at port 4184 with sanitized local data, a verified CAD mesh and on-demand rendering. A scoped Geometry Engineer role fills the model-conversion gap. The production public snapshot, generated routes and publication gates remain unchanged; the ordinary build does not read private drives.
 

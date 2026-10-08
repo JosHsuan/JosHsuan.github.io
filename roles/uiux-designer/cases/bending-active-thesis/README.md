@@ -1,5 +1,7 @@
 # Bending-Active Thesis — local cinematic review
 
+**Public release follow-up — 8 October 2026:** The owner now authorized GitHub Pages publication. The [public release package](release/README.md) supplies a reproducible, explicitly enumerated public build, separate from the historical local inputs described below. The canonical website is `https://joshsuan.github.io/`; use `pnpm build:pages` and `pnpm test:pages` from the repository root. The current camera no longer imports the private legacy shell hull. All previous verification remains dated evidence for that revision; public-release tests validate the publication artifact separately.
+
 Open [the local work page](http://127.0.0.1:4184/). It presents **Bending-Active Metal Panel Deformation**, the NCKU metal-panel thesis, separately from the later T3 bamboo project. This is an owner-authorized local case; the production portfolio and public snapshot remain empty.
 
 ## Current round 02
