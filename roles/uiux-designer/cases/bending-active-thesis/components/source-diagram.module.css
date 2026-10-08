@@ -21,7 +21,9 @@
 .choices button:focus-visible { outline: 2px solid #ffa165; outline-offset: 3px; }
 .choices .follow { margin-left: auto; background: transparent; color: #aaa69f; }
 .choices button > span { display: inline-block; }
-.caption { min-height: 2.8em; max-width: 46rem; margin: .8rem 0 0; color: #bcb8b1; font: .68rem/1.6 var(--mono, monospace); }
+.caption { display: grid; grid-template-columns: minmax(0, 1fr); max-width: 46rem; margin: .8rem 0 0; color: #bcb8b1; font: .68rem/1.6 var(--mono, monospace); }
+.caption > span { grid-area: 1 / 1; min-width: 0; }
+.captionSizer { visibility: hidden; pointer-events: none; user-select: none; }
 .live { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 @media (max-width: 600px) { .frame { padding: .85rem; margin: 1.6rem 0; border-radius: 1.25rem; } .panel { border-radius: .65rem; } .choices { gap: .4rem; } .choices button { padding: .6rem .7rem; font-size: .7rem; } .choices .follow { margin-left: 0; } }
 @media (prefers-reduced-motion: reduce) { .trace, .node, .choices button { transition: none; } }

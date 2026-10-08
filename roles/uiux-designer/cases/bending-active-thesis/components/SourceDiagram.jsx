@@ -141,7 +141,11 @@ export default function SourceDiagram({kind = 'library', title, className = ''})
           onFocus={() => {if (validKind !== 'workflow') {hover.current = index; paint(index);}}} onClick={() => activate(index)}><span data-choreography="nav">{group.label}</span></button>)}
         <button type="button" className={styles.follow} onClick={() => {pinned.current = null; hover.current = null; restore();}}><span data-choreography="nav">Follow chapter</span></button>
       </div>
-      <p className={styles.caption} data-choreography="prose" data-diagram-caption>{available.groups[0].description}</p>
+      <p className={styles.caption} data-choreography="prose">
+        <span data-diagram-caption>{available.groups[0].description}</span>
+        {/* Every real variant contributes its wrapped height without duplicate speech. */}
+        {available.groups.map(group => <span key={group.id} className={styles.captionSizer} aria-hidden="true">{group.description}</span>)}
+      </p>
       <span className={styles.live} role="status" aria-live="polite" data-diagram-announcement/>
     </div>}
   </figure>;
