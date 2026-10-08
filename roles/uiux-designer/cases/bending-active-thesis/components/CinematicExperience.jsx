@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import {createStoryInput} from './story-input';
 import {cinematicProgressFromAnchors, cinematicChapter} from './vendor/cinematic-plan.mjs';
 import {createResponseState, advanceResponse, sampleResponseScore} from './story-response.mjs';
+import {sampleEditorialScore} from './editorial-score.mjs';
 import styles from './cinematic.module.css';
 
 const Scene = dynamic(() => import('./CinematicScene'), {ssr: false});
@@ -44,6 +45,7 @@ export default function CinematicExperience() {
     const decorations = [...document.querySelectorAll('[data-parallax]')];
     const protectedElements = [...document.querySelectorAll('[data-story-panel],[data-story-media],[data-protect]')];
     const links = [...document.querySelectorAll('[data-chapter-link]')];
+    const foreground = sections.map(section => ({lines:[...section.querySelectorAll('[data-heading-line]')], rows:[...section.querySelectorAll('ol > li')]}));
     const response = createResponseState(), history = [];
     let offsets = [], frame = 0, previous = 0, resumed = true, pointer = {x: 0, y: 0}, target = {x: 0, y: 0};
     const measure = () => {offsets = sections.map(el => el.getBoundingClientRect().top + scrollY); offsets.push(sections.at(-1).getBoundingClientRect().bottom + scrollY); schedule();};
@@ -69,10 +71,26 @@ export default function CinematicExperience() {
         const phase = (focus - offsets[index]) / (offsets[index + 1] - offsets[index]);
         const visibility = Math.min(1, Math.max(0, 1 - Math.abs(phase - .5) * 1.2));
         section.style.setProperty('--reveal', String(state.reduced ? 1 : visibility));
-        const visualPhase = response.visualU * 7 - index;
-        section.style.setProperty('--media-shift', `${state.reduced ? 0 : Math.max(-28, Math.min(28, (.5 - visualPhase) * 45))}px`);
-        section.style.setProperty('--media-scale', String(state.reduced ? 1 : .975 + visibility * .025));
-        section.style.setProperty('--heading-shift', `${state.reduced ? 0 : Math.max(-8, Math.min(8, (.5 - visualPhase) * 14))}px`);
+        const editorialInput = {visualU:response.visualU,nativeU:u,energy:response.energy,direction:response.direction,index,reducedMotion:state.reduced,light:state.detail === 'light'};
+        const editorial = sampleEditorialScore(editorialInput);
+        section.style.setProperty('--media-shift', `${editorial.mediaShift}px`);
+        section.style.setProperty('--media-scale', String(editorial.mediaScale));
+        section.style.setProperty('--heading-shift', `${editorial.headingShift}px`);
+        section.style.setProperty('--rule-progress', String(editorial.ruleProgress));
+        section.style.setProperty('--caption-shift', `${editorial.captionShift}px`);
+        section.style.setProperty('--glyph-spread', `${editorial.glyphSpread}px`);
+        section.style.setProperty('--glyph-rotate', `${editorial.glyphRotate}deg`);
+        foreground[index].lines.forEach((line, elementIndex, elements) => {
+          const value = sampleEditorialScore({...editorialInput,elementIndex,elementCount:elements.length});
+          line.style.setProperty('--line-offset', `${value.lineOffset}px`);
+          line.style.setProperty('--line-shift', `${value.headingShift}px`);
+          line.style.setProperty('--line-rotate', `${value.lineRotate}deg`);
+        });
+        foreground[index].rows.forEach((row, elementIndex, elements) => {
+          const value = sampleEditorialScore({...editorialInput,elementIndex,elementCount:elements.length});
+          row.style.setProperty('--method-shift', `${value.methodShift}px`);
+          row.style.setProperty('--method-progress', String(value.methodProgress));
+        });
         section.style.setProperty('--energy', String(state.reduced ? 0 : response.energy));
         section.style.setProperty('--attention', String(state.reduced ? 1 : visibility));
       });
@@ -80,7 +98,8 @@ export default function CinematicExperience() {
       if (progress.current) progress.current.style.transform = `scaleX(${Math.min(1, scrollY / Math.max(1, document.documentElement.scrollHeight - innerHeight))})`;
       if (status.current) status.current.textContent = `${String(chapter.index + 1).padStart(2, '0')} / 07`;
       const protectedRects = [...new Set([...protectedElements, ...document.querySelectorAll('[data-protect]')])].map(el => el.getBoundingClientRect()).filter(r => r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth).map(r => ({left:r.left-16, top:r.top-16, right:r.right+16, bottom:r.bottom+16}));
-      input.set({u, ...response, ...score, pointer, protectedRects, hidden: false});
+      const editorial = sampleEditorialScore({visualU:response.visualU,nativeU:u,energy:response.energy,direction:response.direction,index:chapter.index,reducedMotion:state.reduced,light:state.detail === 'light'});
+      input.set({u, ...response, ...score, editorial, pointer, protectedRects, hidden: false});
       history.push({time:now, nativeU:u, visualU:response.visualU, velocity:response.velocity, stageU:score.stageU, settled:response.settled}); if (history.length > 240) history.shift();
       if (moving || !response.settled) schedule(); else previous = 0;
     };
@@ -98,7 +117,7 @@ export default function CinematicExperience() {
     return () => {cancelAnimationFrame(frame); resize.disconnect(); unsubscribe(); window.removeEventListener('scroll', schedule); window.removeEventListener('resize', measure); window.removeEventListener('pointermove', move); document.documentElement.removeEventListener('pointerleave', reset); window.removeEventListener('blur', reset); document.removeEventListener('visibilitychange', visibility); fine.removeEventListener('change', reset); document.documentElement.removeAttribute('data-cinematic-ready'); delete document.documentElement.dataset.activeChapter; delete window.__story;};
   }, [input]);
   // Discrete preference changes also wake the DOM decoration controller once.
-  useEffect(() => {window.dispatchEvent(new Event('resize'));}, [still, systemReduced]);
+  useEffect(() => {window.dispatchEvent(new Event('resize'));}, [still, systemReduced, detail]);
   return <>
     <div className={styles.backdrop} aria-hidden="true" data-cinematic-background>
       <picture><source media="(max-width:780px)" srcSet="/assets/cinematic/model-poster-mobile.webp"/><img className={styles.poster} src="/assets/cinematic/model-poster.webp" alt="" fetchPriority="high" style={{opacity: ready ? 0 : .35}} /></picture>

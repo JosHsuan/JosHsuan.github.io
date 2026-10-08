@@ -31,9 +31,11 @@ await mkdir(work, {recursive: true});
 const sources = [
   'app/page.jsx', 'app/layout.jsx', 'app/globals.css', 'app/page.module.css',
   'components/CinematicExperience.jsx', 'components/CinematicScene.jsx',
+  'components/EvidenceInspector.jsx', 'components/evidence-inspector.module.css',
   'components/cinematic.module.css', 'components/story-input.js', 'components/story-response.mjs',
   'components/element-score.mjs', 'components/optical-score.mjs', 'components/scene-compositor.mjs',
   'components/scene-direction.mjs', 'components/vendor/cinematic-plan.mjs',
+  'components/exhibition-stage.mjs', 'components/editorial-score.mjs',
   'components/materials/cinematic-material.js', 'release/story.json',
 ];
 for (const relative of sources) {

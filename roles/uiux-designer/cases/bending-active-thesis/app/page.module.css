@@ -39,7 +39,7 @@
 .methodSequence li{font-size:.78rem;line-height:1.55;display:flex;gap:.7rem;border-top:1px solid #adbcb332;padding-top:.7rem;color:var(--paper)}
 .methodSequence li>span{color:var(--accent);letter-spacing:0;padding-top:.05rem}
 .evidence{grid-column:7/13;margin:0;position:relative;z-index:2;min-width:0;opacity:1}
-.mediaFrame{transform-origin:50% 50%;transform:perspective(1400px) translate3d(0,0,0);will-change:auto}
+.mediaPlane{display:block;transform-origin:50% 50%;transform:perspective(1400px) translate3d(0,0,0);will-change:auto}
 .mediaFrame img{display:block;width:100%;height:auto;max-width:100%;box-shadow:0 24px 90px #0004}
 .evidence figcaption{display:flex;align-items:flex-start;gap:1rem;margin:1.15rem 0 0;max-width:44rem;color:var(--muted)}
 .evidence figcaption>span{color:var(--accent);font-size:.55rem;white-space:nowrap;padding-top:.12rem}
@@ -95,9 +95,9 @@
 .sourceLinks a:hover,.sourceNotes summary:hover{color:var(--accent)}
 :global(html[data-cinematic-static]) .chapterHeading,:global(html[data-cinematic-static]) .openingCopy h1,:global(html[data-cinematic-static]) .glyph svg{transform:none!important}
 .endnote{grid-column:1/-1;display:flex;justify-content:space-between;gap:1rem;align-self:end;color:var(--muted);border-top:1px solid #adbcb32c;padding-top:1rem;font-size:.58rem;letter-spacing:.055em;margin-top:3rem}
-:global(html[data-cinematic-ready]) .mediaFrame{transform:perspective(1400px) translate3d(0,var(--media-shift,0px),0) scale(var(--media-scale,1)) rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg))}
+:global(html[data-cinematic-ready]) .mediaPlane{transform:perspective(1400px) translate3d(0,var(--media-shift,0px),0) scale(var(--media-scale,1)) rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg))}
 :global(html[data-cinematic-ready]) .evidence{opacity:1}
-:global(html[data-cinematic-static]) .mediaFrame,:global(html[data-cinematic-static]) .glyph{transform:none!important}
+:global(html[data-cinematic-static]) .mediaPlane,:global(html[data-cinematic-static]) .glyph{transform:none!important}
 :global(html[data-cinematic-static]) .evidence{opacity:1}
 @media(min-width:1800px){.chapterInner{padding-left:108px;padding-right:108px}.scrollCue{left:108px}}
 @media(max-width:1100px){
@@ -183,7 +183,7 @@
 @media(prefers-reduced-motion:reduce){
   .chapterInner,.overview .chapterInner{position:relative}
   .chapter{min-height:100svh}
-  .mediaFrame,.glyph,:global(html[data-cinematic-ready]) .mediaFrame{transform:none!important}
+  .mediaFrame,.glyph,:global(html[data-cinematic-ready]) .mediaPlane{transform:none!important}
   :global(html[data-cinematic-ready]) .evidence{opacity:1}
 }
 @media print{
@@ -194,9 +194,61 @@
   .openingCopy h1{font-size:5rem}
   .chapterHeading,.closingCopy .chapterHeading{font-size:3rem}
   .evidence{max-width:65%;margin:1.5rem auto;opacity:1!important}
-  .mediaFrame,.glyph{transform:none!important}
+  .mediaPlane,.glyph{transform:none!important}
   .sourceNotes{display:block}
 }
 @media(max-width:780px){.chapterRail{top:auto;left:1rem;right:1rem;bottom:.8rem;flex-direction:row;gap:0;background:#090d0df2;padding:.15rem;border:1px solid #b8c9bf38;backdrop-filter:blur(10px)}.chapterRail a{flex:1;min-width:0;min-height:40px}.railLabel{display:none}.mediaAction{opacity:1;transform:none;font-size:.54rem}.chapterInner{padding-bottom:8rem}}
 @media(prefers-reduced-motion:reduce){.chapterHeading,.openingCopy h1,.glyph svg{transform:none!important}}
 @media print{.chapterRail,.mediaAction,.layerCaption{display:none}}
+
+/* Round 03: the reading plane stays opaque; each decorative object has its own
+   depth response. Values are sampled from the shared editorial playhead. */
+.openingCopy h1>span:first-child{margin-top:0}
+.chapterHeading,.openingCopy h1{transform:none;perspective:900px}
+.chapterHeading [data-heading-line],.openingCopy [data-heading-line]{transform-origin:0 70%;transform:translate3d(var(--line-offset,0px),var(--line-shift,0px),0) rotateX(var(--line-rotate,0deg));backface-visibility:hidden}
+.headingLast{color:#d7d8ce}
+.chapterLabel,.openingLabel{position:relative}
+.chapterLabel::after,.openingLabel::after{width:74px;transform:scaleX(var(--rule-progress,1));transform-origin:left;opacity:.65}
+.glyph svg{overflow:visible;transform:none}
+.glyph svg>*{transform-box:fill-box;transform-origin:center;transition:stroke-width .18s}
+.glyph svg>*:nth-child(2n){transform:translateY(calc(var(--glyph-spread,0px) * -1)) rotate(var(--glyph-rotate,0deg))}
+.glyph svg>*:nth-child(2n+1){transform:translateY(var(--glyph-spread,0px))}
+.chapterLabel:hover .glyph svg>*:nth-child(2n),.openingLabel:hover .glyph svg>*:nth-child(2n){transform:translateY(-2.5px) rotate(-4deg)}
+.figureIndex{display:flex;justify-content:space-between;gap:1rem;margin:0 0 .75rem;font: .52rem/1.5 var(--mono);letter-spacing:.09em;color:#bac3ba;border-bottom:1px solid #bbcabc38;padding-bottom:.65rem}
+.figureIndex>span:first-child{color:var(--accent)}
+.frameCorner{position:absolute;inset:-7px;pointer-events:none;border-left:1px solid #b6bcb052;border-top:1px solid #b6bcb052;transform:translate(-2px,-2px);transition:transform .22s,border-color .22s}
+.mediaFrame:hover .frameCorner,.mediaFrame:focus-visible .frameCorner{transform:translate(-5px,-5px);border-color:var(--accent)}
+.mediaFrame:active .mediaAction{transform:translateY(1px) scale(.97)}
+.evidence figcaption{transform:translateY(var(--caption-shift,0px));padding:.7rem .8rem;background:#090d0dee;border-left:1px solid #ff946955}
+.methodSequence{gap:.6rem 1.3rem}
+.methodSequence li{display:block;padding:0;border:0;position:relative}
+.methodSequence li::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:#bdc7bc6b;transform:scaleX(var(--method-progress,1));transform-origin:left}
+.methodSequence summary{display:flex;align-items:baseline;gap:.7rem;list-style:none;cursor:pointer;padding:.85rem 0 .65rem;min-height:44px}
+.methodSequence summary::-webkit-details-marker{display:none}
+.methodSequence summary>span:first-child{font: .6rem/1.5 var(--mono);color:var(--accent)}
+.stepArrow{margin-left:auto;color:#859388;transform:rotate(0deg);transition:transform .22s,color .22s}
+.methodSequence details[open] .stepArrow{transform:rotate(90deg);color:var(--accent)}
+.methodSequence details[open]{padding-left:.6rem;border-left:1px solid var(--accent)}
+.methodSequence details p{font-size:.72rem;line-height:1.65;color:var(--muted);margin:.1rem 0 .85rem;max-width:20rem}
+.methodSequence summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.chapterRail a>span:first-child{transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.chapterRail a[aria-current]>span:first-child{transform:translateX(-3px)}
+.chapterRail a::after{content:'';position:absolute;right:3px;top:25%;height:50%;width:1px;background:var(--accent);transform:scaleY(0);transition:transform .25s}
+.chapterRail a[aria-current]::after{transform:scaleY(1)}
+.chapterRail a:active>span:first-child{transform:translateX(-1px) scale(.9)}
+:global(html[data-cinematic-static]) .chapter [data-heading-line],:global(html[data-cinematic-static]) .glyph svg>*,:global(html[data-cinematic-static]) .methodSequence li,:global(html[data-cinematic-static]) .evidence figcaption{transform:none!important}
+@media(max-width:780px){.figureIndex{font-size:.48rem}.methodSequence li{font-size:.75rem}.chapterRail a[aria-current]>span:first-child{transform:translateY(-2px)}.chapterRail a::after{left:25%;right:25%;top:auto;bottom:3px;width:50%;height:1px}.chapterRail a[aria-current]::after{transform:scaleX(1)}}
+@media(prefers-reduced-motion:reduce){.chapter [data-heading-line],.glyph svg>*,.methodSequence li,.evidence figcaption,.frameCorner,.chapterRail a>span:first-child{transform:none!important}.glyph svg>*,.frameCorner,.stepArrow,.chapterRail a::after,.chapterRail a>span:first-child{transition:none}}
+
+/* Stable anchors surround moving inner objects. */
+.methodSequence summary>span:nth-child(2){display:inline-block;transform:translateX(var(--method-shift,0px))}
+.glyph[data-glyph-kind="form"] svg>*:nth-child(2){transform:translateX(var(--glyph-spread,0px)) rotate(var(--glyph-rotate,0deg))}
+.glyph[data-glyph-kind="form"] svg>*:first-child{transform:translateX(calc(var(--glyph-spread,0px) * -.4))}
+.glyph[data-glyph-kind="system"] svg>path:nth-child(2){transform:rotate(calc(var(--glyph-rotate,0deg) * -1))}
+.glyph[data-glyph-kind="system"] svg>circle:nth-of-type(2n){transform:translate(var(--glyph-spread,0px),calc(var(--glyph-spread,0px) * -.5))}
+.glyph[data-glyph-kind="system"] svg>circle:nth-of-type(2n+1){transform:translate(calc(var(--glyph-spread,0px) * -.5),var(--glyph-spread,0px))}
+.glyph[data-glyph-kind="make"] svg>path:first-child{transform:translateY(calc(var(--glyph-spread,0px) * -.65))}
+.glyph[data-glyph-kind="make"] svg>path:nth-child(2){transform:translateY(var(--glyph-spread,0px))}
+:global(html[data-cinematic-static]) .methodSequence summary>span,:global(html[data-cinematic-static]) .frameCorner{transform:none!important;transition:none}
+@media(prefers-reduced-motion:reduce){.methodSequence summary>span{transform:none!important}}
+@media(min-width:781px){.geometryImage{align-self:end;margin-top:28svh}}

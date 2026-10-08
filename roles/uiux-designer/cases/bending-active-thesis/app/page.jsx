@@ -1,11 +1,19 @@
 import CinematicExperience from '../components/CinematicExperience';
+import EvidenceInspector from '../components/EvidenceInspector';
 import review from '../release/story.json';
 import styles from './page.module.css';
 
 const story = review.cinematic;
+const evidence = Object.values(story.media);
+const methodNotes = [
+  'Start with the desired surface geometry.',
+  'Miura representation describes the surface’s local angles.',
+  'A sampled function library relates opening dimensions and angle.',
+  'Paired edges describe how openings close and the panel bends.',
+];
 
 function Glyph({ kind = 'form' }) {
-  return <span className={styles.glyph} data-parallax aria-hidden="true"><svg viewBox="0 0 40 40" fill="none">
+  return <span className={styles.glyph} data-glyph-kind={kind} data-parallax aria-hidden="true"><svg viewBox="0 0 40 40" fill="none">
     {kind === 'form' && <><path d="M5 28 13 8l13 3 9 19-18 4Z" /><path d="m5 28 21-17M13 8l4 26m0 0 18-4" /></>}
     {kind === 'system' && <><path d="m9 9 22 4-3 19L9 25Z" /><path d="m9 9 19 23M9 25l22-12" /><circle cx="9" cy="9" r="3" /><circle cx="31" cy="13" r="3" /><circle cx="28" cy="32" r="3" /><circle cx="9" cy="25" r="3" /></>}
     {kind === 'make' && <><path d="m5 14 15-7 15 7-15 7Zm0 7 15 7 15-7M5 28l15 7 15-7" /><path d="M20 21v14" /></>}
@@ -14,24 +22,26 @@ function Glyph({ kind = 'form' }) {
 
 function Heading({ number, label, lines, id, kind }) {
   return <><div className={styles.chapterLabel}><Glyph kind={kind} /><span>{number} / {label}</span></div>
-    <h2 id={id} className={styles.chapterHeading} data-story-heading>{lines.map((line, index) => <span key={line} className={index === lines.length - 1 ? styles.headingLast : undefined}>{line}</span>)}</h2>
+    <h2 id={id} className={styles.chapterHeading} data-story-heading>{lines.map((line, index) => <span key={line} data-heading-line style={{'--line-index':index}} className={index === lines.length - 1 ? styles.headingLast : undefined}>{line}</span>)}</h2>
   </>;
 }
 
 function EvidenceImage({ item, className = '', kind = 'photo' }) {
   return <figure className={[styles.evidence, className].join(' ')} data-story-media data-media-kind={kind}>
-    <a className={styles.mediaFrame} data-parallax href={item.source} target="_blank" rel="noreferrer" aria-label={`Inspect original source: ${item.figure}`}><img src={item.src} width={item.width} height={item.height} alt={item.alt} loading="lazy" /><span className={styles.mediaAction}>Inspect source <span aria-hidden="true">↗</span></span></a>
-    <figcaption><span>{item.figure}</span><p>{item.caption}</p></figcaption>
+    <div className={styles.figureIndex} aria-hidden="true"><span>Evidence / {String(evidence.indexOf(item)+1).padStart(2,'0')}</span><span>{kind === 'diagram' ? 'RESEARCH DRAWING' : 'PHYSICAL RECORD'}</span></div>
+    <a className={styles.mediaFrame} data-inspect-figure={evidence.indexOf(item)} href={item.source} target="_blank" rel="noreferrer" aria-label={`Inspect original source: ${item.figure}`}><span className={styles.mediaPlane} data-parallax><span className={styles.frameCorner} aria-hidden="true"/><img src={item.src} width={item.width} height={item.height} alt={item.alt} loading="lazy" /></span><span className={styles.mediaAction}>Inspect evidence <span aria-hidden="true">↗</span></span></a>
+    <figcaption data-editorial-caption><span>{item.figure}</span><p>{item.caption}</p></figcaption>
   </figure>;
 }
 
 function Paragraphs({ paragraphs }) {
-  return paragraphs.map(paragraph => <p key={paragraph}>{paragraph}</p>);
+  return paragraphs.map((paragraph, index) => <p key={paragraph} data-editorial-copy style={{'--copy-index':index}}>{paragraph}</p>);
 }
 
 export default function Page() {
   return <>
     <CinematicExperience />
+    <EvidenceInspector items={evidence} />
     <a href="#main" className={styles.skip}>Skip to the study</a>
     <header className={styles.masthead} data-protect>
       <span className={styles.owner}>{review.owner}<span aria-hidden="true"> / </span><span className={styles.discipline}>RESEARCH</span></span>
@@ -42,7 +52,7 @@ export default function Page() {
         <div className={styles.chapterInner}>
           <div className={styles.openingCopy} data-story-panel>
             <div className={styles.openingLabel}><Glyph /><span>{story.overview.eyebrow}</span></div>
-            <h1 id="project-title" aria-label={review.title} data-story-heading>{review.hero.titleLines[0]}<span>{review.hero.titleLines[1]}</span></h1>
+            <h1 id="project-title" aria-label={review.title} data-story-heading><span data-heading-line style={{'--line-index':0}}>{review.hero.titleLines[0]}</span><span data-heading-line style={{'--line-index':1}}>{review.hero.titleLines[1]}</span></h1>
             <p className={styles.subtitle}>{review.hero.subtitle}</p>
             <p className={styles.openingText}>{story.overview.introduction}</p>
             <p className={styles.projectType}>{review.projectType}<span aria-hidden="true"> — </span>{review.institution}</p>
@@ -67,7 +77,7 @@ export default function Page() {
           <div className={styles.copy} data-story-panel>
             <Heading number="02" label={story.system.label} lines={story.system.heading} id="system-heading" kind="system" />
             <Paragraphs paragraphs={story.system.paragraphs} />
-            <ol className={styles.methodSequence}>{story.system.sequence.map((step, index) => <li key={step}><span>{String(index + 1).padStart(2, '0')}</span>{step}</li>)}</ol>
+            <ol className={styles.methodSequence}>{story.system.sequence.map((step, index) => <li key={step} style={{'--step-index':index}}><details><summary><span>{String(index + 1).padStart(2, '0')}</span><span>{step}</span><span className={styles.stepArrow} aria-hidden="true">↗</span></summary><p>{methodNotes[index]}</p></details></li>)}</ol>
             <p className={styles.layerCaption} data-layer-caption>Source geometry · original placement</p>
           </div>
           <EvidenceImage item={story.media.geometry} className={styles.geometryImage} kind="diagram" />
