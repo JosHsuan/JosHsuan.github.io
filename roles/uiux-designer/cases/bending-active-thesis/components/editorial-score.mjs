@@ -13,13 +13,15 @@ function finite(value, name) {
  * index is the chapter; elementIndex/count describe a heading-line or row group.
  * Translations are CSS pixels and rotations degrees. No opacity, clipping,
  * scroll mutation, clock, spring, camera pose or source-mesh transform is owned.
- * Bind transforms to inner planes; semantic anchors and long prose stay still.
+ * Bind transforms to inner planes. The shared pixel reading response moves the
+ * entire information layer; these spatial cues never substitute for that travel.
  */
 export function sampleEditorialScore({
   visualU,
   nativeU = visualU,
   energy = 0,
   direction = 0,
+  holdWeight = 0,
   index = 0,
   elementIndex = 0,
   elementCount = 1,
@@ -30,6 +32,7 @@ export function sampleEditorialScore({
   const native = clamp(finite(nativeU, 'Native progress'));
   const speed = clamp(finite(energy, 'Energy'));
   const signedDirection = Math.max(-1, Math.min(1, finite(direction, 'Direction')));
+  const readingHold = clamp(finite(holdWeight, 'Reading hold weight'));
   if (!Number.isInteger(index) || index < 0 || index >= RESPONSE_CHAPTERS.length) throw new RangeError('Chapter index must be an integer from 0 to 6.');
   if (!Number.isInteger(elementCount) || elementCount < 1 || !Number.isInteger(elementIndex) || elementIndex < 0 || elementIndex >= elementCount) throw new RangeError('Element index must belong to a nonempty group.');
 
@@ -51,6 +54,8 @@ export function sampleEditorialScore({
   // the same values once, regardless of which foreground element is sampled.
   const transitionWeight = reducedMotion || light ? 0 : clamp(1 - sampleResponseScore(visual).dwellWeight);
   const materialLift = speed * transitionWeight;
+  const flow = signedDirection * speed * (1 - readingHold) * amplitude;
+  const approach = (incoming - exit) * amplitude;
 
   return {
     chapterId: chapter.id,
@@ -59,20 +64,29 @@ export function sampleEditorialScore({
     entry,
     dwell,
     exit,
-    headingShift: (16 * incoming - 12 * exit) * amplitude,
-    lineOffset: fan * 8 * travel,
-    lineRotate: fan * 2.2 * travel,
-    // Deliberately stationary: a paragraph does not become another moving card.
-    bodyShift: 0,
-    ruleProgress: clamp(nativePhase),
-    mediaShift: (22 * incoming - 18 * exit) * amplitude,
-    mediaScale: 1 - 0.018 * (1 - dwell) * amplitude,
+    headingShift: (36 * incoming - 28 * exit) * amplitude,
+    lineOffset: fan * 20 * travel,
+    lineRotate: fan * 3.5 * travel,
+    headingRotateX: approach * 3 + flow * 1.2,
+    headingRotateY: -flow * 1.2,
+    headingZ: travel * -26 + Math.abs(flow) * 10,
+    bodyShift: (8 * incoming - 6 * exit) * amplitude,
+    bodyRotateX: approach * 0.6 + flow * 0.4,
+    bodyRotateY: -flow * 0.35,
+    bodyZ: travel * -10,
+    ruleProgress: clamp(visualPhase),
+    mediaShift: (42 * incoming - 34 * exit) * amplitude,
+    mediaScale: 1 - 0.035 * (1 - dwell) * amplitude,
+    mediaRotateX: approach * 1.5 + flow * 1.5,
+    mediaRotateY: -flow * 2,
+    mediaZ: travel * -48 + Math.abs(flow) * 12,
     captionShift: (-6 * incoming + 5 * exit) * amplitude,
     glyphSpread: 6 * travel + 2 * materialLift,
     glyphRotate: (incoming - exit) * 3 * amplitude,
     methodShift: (8 * incoming - 6 * exit) * amplitude,
     // A reading indicator, never a percentage of measured project completion.
-    methodProgress: clamp((nativePhase - rank * 0.45) / 0.45),
+    methodProgress: clamp((visualPhase - rank * 0.45) / 0.45),
+    holdWeight: readingHold,
     transitionWeight,
     lightSweep: signedDirection * materialLift,
     materialLift,

@@ -5,17 +5,18 @@ import {RESPONSE_CHAPTERS, createResponseState, advanceResponse, sampleResponseS
 
 const near = (actual, expected, tolerance = 1e-12) => assert(Math.abs(actual - expected) <= tolerance, `${actual} differs from ${expected}`);
 const at = (index, phase, options = {}) => sampleEditorialScore({visualU: (index + phase) / 7, index, ...options});
-const transforms = score => Object.fromEntries(['headingShift', 'lineOffset', 'lineRotate', 'bodyShift', 'mediaShift', 'mediaScale', 'captionShift', 'glyphSpread', 'glyphRotate', 'methodShift', 'lightSweep', 'materialLift'].map(key => [key, score[key]]));
-const rest = {headingShift: 0, lineOffset: 0, lineRotate: 0, bodyShift: 0, mediaShift: 0, mediaScale: 1, captionShift: 0, glyphSpread: 0, glyphRotate: 0, methodShift: 0, lightSweep: 0, materialLift: 0};
+const rest = {headingShift: 0, lineOffset: 0, lineRotate: 0, headingRotateX: 0, headingRotateY: 0, headingZ: 0, bodyShift: 0, bodyRotateX: 0, bodyRotateY: 0, bodyZ: 0, mediaShift: 0, mediaScale: 1, mediaRotateX: 0, mediaRotateY: 0, mediaZ: 0, captionShift: 0, glyphSpread: 0, glyphRotate: 0, methodShift: 0, lightSweep: 0, materialLift: 0};
+const transforms = score => Object.fromEntries(Object.keys(rest).map(key => [key, score[key]]));
 
-test('reading progress updates immediately despite delayed visual motion, and prose is stationary', () => {
+test('visible progress and prose choreography use the shared visual reading coordinate, with native semantics separate', () => {
   const before = at(2, -0.1, {nativeU: 2 / 7});
   const after = at(2, -0.1, {nativeU: 2.9 / 7});
-  near(after.ruleProgress, 0.9);
+  near(after.ruleProgress, 0);
   near(after.nativeProgress, 0.9);
-  assert.equal(after.methodProgress, 1);
-  assert.deepEqual(transforms(after), transforms(before), 'reading progress cannot introduce a second decorative response');
-  assert.equal(after.bodyShift, 0);
+  assert.equal(after.methodProgress, 0);
+  assert.deepEqual(transforms(after), transforms(before), 'raw scroll cannot bypass the shared visual reading response');
+  assert(after.bodyShift > 0, 'prose has a designed entry plane as well as shared whole-document travel');
+  near(at(2, 0.45).ruleProgress, 0.45);
   assert(!('opacity' in after) && !('visibility' in after) && !('clip' in after));
 });
 
@@ -33,12 +34,12 @@ test('heading and method groups enter sequentially and exit in reverse order', (
   assert(first.captionShift < 0 && first.mediaShift > 0, 'caption and evidence frame have distinct depth cues');
 });
 
-test('all foreground planes align for every complete authored hold, even while native input moves', () => {
+test('foreground planes align for complete chapter and reading holds, even while native input moves', () => {
   RESPONSE_CHAPTERS.forEach((chapter, index) => {
     for (const fraction of [0.001, 0.25, 0.75, 0.999]) {
       const phase = chapter.hold[0] + (chapter.hold[1] - chapter.hold[0]) * fraction;
       for (const elementIndex of [0, 1, 2]) {
-        const score = at(index, phase, {elementIndex, elementCount: 3, energy: 1, direction: 1});
+        const score = at(index, phase, {elementIndex, elementCount: 3, energy: 1, direction: 1, holdWeight: 1});
         near(score.entry, 1); near(score.exit, 0); near(score.dwell, 1);
         for (const [key, value] of Object.entries(rest)) near(score[key], value);
         assert.equal(sampleResponseScore((index + phase) / 7).dwellWeight, 1);
@@ -77,19 +78,20 @@ test('full and Light motion stay bounded for all chapters, group sizes, jumps an
   for (let index = 0; index < 7; index += 1) for (const elementCount of [1, 2, 7]) for (let elementIndex = 0; elementIndex < elementCount; elementIndex += 1) {
     for (let step = -1; step <= 71; step += 1) for (const light of [false, true]) {
       const score = sampleEditorialScore({visualU: step / 70, nativeU: 1 - step / 70, index, elementIndex, elementCount, energy: 1, direction: -1, light});
-      assert(Math.abs(score.headingShift) + Math.abs(score.lineOffset) <= 24);
-      assert(Math.abs(score.lineRotate) <= 1.1);
-      assert(Math.abs(score.mediaShift) <= 24 && score.mediaScale >= 0.982 && score.mediaScale <= 1);
+      assert(Math.abs(score.headingShift) + Math.abs(score.lineOffset) <= 46);
+      assert(Math.abs(score.lineRotate) <= 1.75);
+      assert(Math.abs(score.mediaShift) <= 42 && score.mediaScale >= 0.965 && score.mediaScale <= 1);
       assert(Math.abs(score.captionShift) <= 8 && Math.abs(score.methodShift) <= 8);
       assert(score.glyphSpread >= 0 && score.glyphSpread <= 8);
       for (const key of ['entry', 'exit', 'dwell', 'nativeProgress', 'ruleProgress', 'methodProgress', 'transitionWeight', 'materialLift']) assert(score[key] >= 0 && score[key] <= 1, key);
       for (const value of Object.values(score)) if (typeof value === 'number') assert(Number.isFinite(value));
-      assert.equal(score.bodyShift, 0);
+      assert(Math.abs(score.bodyShift) <= 8 && Math.abs(score.bodyRotateX) <= 1 && Math.abs(score.bodyRotateY) <= 0.35);
+      assert(Math.abs(score.mediaRotateX) <= 3 && Math.abs(score.mediaRotateY) <= 2);
     }
   }
 });
 
-test('reduced motion restores every inner plane immediately and Light reduces travel without delaying reading', () => {
+test('reduced motion restores inner planes and Light reduces depth without introducing another reading coordinate', () => {
   for (let index = 0; index < 7; index += 1) for (const phase of [-0.2, 0, 0.5, 0.9, 1.2]) {
     const reduced = at(index, phase, {elementIndex: 2, elementCount: 3, reducedMotion: true, energy: 1, direction: 1});
     for (const [key, value] of Object.entries(rest)) near(reduced[key], value);
@@ -131,7 +133,7 @@ test('a large shared-response jump reaches a stable foreground without starting 
 test('the shared hold table cannot be mutated and invalid inputs cannot produce broken CSS numbers', () => {
   assert(Object.isFrozen(RESPONSE_CHAPTERS) && Object.isFrozen(RESPONSE_CHAPTERS[0]) && Object.isFrozen(RESPONSE_CHAPTERS[0].hold));
   assert.throws(() => {RESPONSE_CHAPTERS[0].hold[0] = 0;});
-  for (const key of ['visualU', 'nativeU', 'energy', 'direction']) for (const value of [NaN, Infinity, '0.5']) assert.throws(() => sampleEditorialScore({visualU: 0.5, [key]: value}));
+  for (const key of ['visualU', 'nativeU', 'energy', 'direction', 'holdWeight']) for (const value of [NaN, Infinity, '0.5']) assert.throws(() => sampleEditorialScore({visualU: 0.5, [key]: value}));
   for (const index of [-1, 7, 0.5, '1']) assert.throws(() => sampleEditorialScore({visualU: 0.5, index}));
   for (const options of [{elementCount: 0}, {elementCount: 1.5}, {elementIndex: -1}, {elementIndex: 1}, {elementIndex: NaN}]) assert.throws(() => sampleEditorialScore({visualU: 0.5, ...options}));
 });
