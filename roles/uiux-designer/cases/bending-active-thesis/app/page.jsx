@@ -1,5 +1,5 @@
 import CinematicExperience from '../components/CinematicExperience';
-import review from '../content/review.json';
+import review from '../release/story.json';
 import styles from './page.module.css';
 
 const story = review.cinematic;
@@ -120,7 +120,6 @@ export default function Page() {
             <details className={styles.sourceNotes}>
               <summary>Source notes & credits</summary>
               <p>{review.credits.media}</p><p>{review.credits.sourceEdition} {review.yearNote}</p>
-              <p>Owner-authorized local review. Public release of the project and individual media remains pending.</p>
               <div className={styles.sourceLinks} aria-label="Original source pages">{Object.values(story.media).map(item => <a key={item.figure} href={item.source} target="_blank" rel="noreferrer">{item.figure} <span aria-hidden="true">↗</span></a>)}</div>
             </details>
           </div>

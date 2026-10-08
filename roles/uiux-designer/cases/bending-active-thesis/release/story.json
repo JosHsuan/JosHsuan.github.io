@@ -1,0 +1,168 @@
+{
+  "title": "Bending-Active Metal Panel Deformation",
+  "shortTitle": "Bending-Active",
+  "owner": "JosHsuan Chao",
+  "projectType": "Individual thesis",
+  "institution": "National Cheng Kung University",
+  "summary": "Connecting target geometry, opening patterns and elastic sheet behaviour.",
+  "hero": {
+    "category": "RESEARCH / MATERIAL SYSTEMS",
+    "series": "THESIS STUDY — 01",
+    "titleLines": [
+      "Bending",
+      "Active."
+    ],
+    "subtitle": "Metal Panel Deformation",
+    "closingLine": "GEOMETRY BECOMES A MATERIAL RULE."
+  },
+  "yearNote": "The thesis chapter is dated 2020; the portfolio index lists 2021.",
+  "credits": {
+    "research": "JosHsuan Chao",
+    "supervision": "Prof. Kane Yanagawa",
+    "assembly": "Collaborative; individual contributors are not fully identified in the reviewed source.",
+    "media": "Portfolio evidence credited to Chia-Hsuan Chao as printed. Individual image authorship remains to be confirmed.",
+    "sourceEdition": "Current role attribution follows the VerFacade portfolio chapter. Displayed source pages come from the earlier 2025 portfolio edition."
+  },
+  "cinematic": {
+    "revision": "layer-story-2026-10-08",
+    "chapterIds": [
+      "overview",
+      "form",
+      "system",
+      "pattern",
+      "make",
+      "validation",
+      "credits"
+    ],
+    "overview": {
+      "eyebrow": "FORM / SYSTEM / MAKE",
+      "introduction": "A research story about geometry, openings and the behaviour of a metal sheet.",
+      "scrollCue": "Scroll to follow the form"
+    },
+    "form": {
+      "label": "FORM",
+      "heading": [
+        "The shape begins",
+        "with an opening."
+      ],
+      "paragraphs": [
+        "A desired surface is only the beginning. This thesis asks how the geometry of a cut pattern can help a metal sheet take that form.",
+        "Miura folding represents the surface’s local angles. Those angles link the overall shape to a repeatable operation at the scale of one opening."
+      ],
+      "aside": "A relationship between design intent and material behaviour."
+    },
+    "system": {
+      "label": "SYSTEM",
+      "heading": [
+        "From angle",
+        "to pattern."
+      ],
+      "paragraphs": [
+        "I developed an individual thesis workflow connecting Miura representation, a regression-based opening library and dynamic physical simulation.",
+        "The opening values inform a reconstructed mesh. Paired edges then describe how the openings close and the panel bends."
+      ],
+      "sequence": [
+        "Target surface",
+        "Local angle",
+        "Opening pattern",
+        "Bending model"
+      ],
+      "footnote": "The source workflow, shown here as documentary evidence."
+    },
+    "pattern": {
+      "label": "SYSTEM / DETAIL",
+      "heading": [
+        "A local rule.",
+        "A different surface."
+      ],
+      "paragraphs": [
+        "The research relates opening length and width to bending angle through a sampled function library.",
+        "Arc, twist and saddle mock-ups explore how those local relationships accumulate into different surfaces."
+      ],
+      "note": "The original calibration data and some sampling details remain unresolved. This page does not invent a live predictor."
+    },
+    "make": {
+      "label": "MAKE",
+      "heading": [
+        "Sewn into",
+        "space."
+      ],
+      "paragraphs": [
+        "Pairs of holes and plastic ties close the patterned openings. Panel connections, including rivets, bring the separate sheets into a spatial prototype.",
+        "The joints remain visible: the method becomes part of the object’s expression."
+      ],
+      "measurements": [
+        {
+          "value": "16",
+          "label": "panels, reported"
+        },
+        {
+          "value": "3.3 × 2.6 × 0.7 m",
+          "label": "prototype, reported"
+        }
+      ],
+      "note": "Construction notes describe two workers over three days. These are source reports, not new measurements."
+    },
+    "validation": {
+      "label": "EVIDENCE",
+      "heading": [
+        "From simulation",
+        "to the made object."
+      ],
+      "paragraphs": [
+        "Simulation, 3D scans and physical mock-ups are brought together in the portfolio. The assembled installation makes the research tangible.",
+        "The browser shows the supplied final geometry. Its camera, shading and contour treatments explain the surface; they do not calculate a new equilibrium shape."
+      ],
+      "note": "The available evidence does not establish structural certification or universal prediction accuracy."
+    },
+    "credits": {
+      "label": "RESEARCH / REFLECTION",
+      "heading": [
+        "Intent,",
+        "translated."
+      ],
+      "summary": "Target geometry, local opening rules and physical prototyping become one connected design workflow.",
+      "contribution": "Individual thesis research by JosHsuan Chao, supervised by Prof. Kane Yanagawa at National Cheng Kung University.",
+      "collaboration": "Prototype assembly was collaborative. Individual fabrication tasks and image authorship are not fully identified in the reviewed source.",
+      "limitation": "Geometry inspection only. No structural analysis or fabrication validation runs in the browser."
+    },
+    "media": {
+      "geometry": {
+        "src": "/assets/cinematic/geometry-strip.webp",
+        "width": 1110,
+        "height": 300,
+        "figure": "FIG. 3–04",
+        "caption": "The source moves from Miura representation to openings and a bending-active surface.",
+        "alt": "Four views of the same research geometry: folded representation, openings, bending-active form and a source curvature visualization.",
+        "source": "/assets/cinematic/source-p024.webp"
+      },
+      "library": {
+        "src": "/assets/cinematic/function-library.webp",
+        "width": 710,
+        "height": 665,
+        "figure": "FIG. 3–05",
+        "caption": "Opening dimensions and angle in the source function library.",
+        "alt": "A source chart showing opening length and width against bending angle.",
+        "source": "/assets/cinematic/source-p025.webp"
+      },
+      "connection": {
+        "src": "/assets/cinematic/connection-detail.webp",
+        "width": 543,
+        "height": 1108,
+        "figure": "FIG. 3–13",
+        "caption": "A physical panel joint, with stitching and fasteners visible.",
+        "alt": "Close photograph of a metal panel seam, stitched openings and riveted connections.",
+        "source": "/assets/cinematic/source-p028.webp"
+      },
+      "prototype": {
+        "src": "/assets/cinematic/built-prototype.webp",
+        "width": 1110,
+        "height": 549,
+        "figure": "FIG. 3–15",
+        "caption": "The assembled installation, photographed on site.",
+        "alt": "The completed perforated metal-panel installation on a patterned base outdoors.",
+        "source": "/assets/cinematic/source-p029.webp"
+      }
+    }
+  }
+}

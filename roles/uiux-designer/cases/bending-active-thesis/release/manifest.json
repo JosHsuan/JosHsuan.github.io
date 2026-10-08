@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "id": "bending-active-thesis-public-v1",
+  "authorizedAt": "2026-10-08",
+  "authorization": "Owner explicitly requested committing, pushing and deploying the completed work to GitHub Pages after making the repository public.",
+  "origin": "https://joshsuan.github.io",
+  "storySHA256": "4df944efbfca4421457eb2205cdaad9d8c2990adc921c5e95415f9012f77ad32",
+  "assets": [
+    {
+      "path": "assets/cinematic/built-prototype.webp",
+      "bytes": 923156,
+      "sha256": "cd9cf4f33263860a27145971c3a55af54275bcec7e2676f1b770344d0e876716",
+      "source": "Owner-authorized prepared Bending-Active presentation derivative"
+    },
+    {
+      "path": "assets/cinematic/connection-detail.webp",
+      "bytes": 332778,
+      "sha256": "4883b0385c4b3ff4d1c51a3d04831632e0aaf4cff1ef88ada186651d373299e2",
+      "source": "Owner-authorized prepared Bending-Active presentation derivative"
+    },
+    {
+      "path": "assets/cinematic/function-library.webp",
+      "bytes": 111610,
+      "sha256": "6f8668574ca7d682bc5fb6e7277ede8c5906949042d61673a090a14c9c90c532",
+      "source": "Owner-authorized prepared Bending-Active presentation derivative"
+    },
+    {
+      "path": "assets/cinematic/geometry-strip.webp",
+      "bytes": 122874,
+      "sha256": "1b08a1548aadc898ae3de22fb7b053ef6c3541c970c72f538d9e718a39a06577",
+      "source": "Owner-authorized prepared Bending-Active presentation derivative"
+    },
+    {
+      "path": "assets/cinematic/model-poster-mobile.webp",
+      "bytes": 9874,
+      "sha256": "b1d1cc8ecffe1b3f4b699a33d7340993c1bc82fd3e7ccb23b179cab5ecd81ae0",
+      "source": "Owner-authorized prepared Bending-Active presentation derivative"
+    },
+    {
+      "path": "assets/cinematic/model-poster.webp",
+      "bytes": 27660,
+      "sha256": "ff4d3a91d3636d58ff9d94a3e9dc8e834c070b5f126c774092977113998f2f85",
+      "source": "Owner-authorized prepared Bending-Active presentation derivative"
+    },
+    {
+      "path": "assets/cinematic/source-p024.webp",
+      "bytes": 208288,
+      "sha256": "95c18b8998ab782bec92b80a7a50efb4dcd6ca86f24dadc2a761e85cdf0071b3",
+      "source": "Owner-authorized prepared Bending-Active presentation derivative"
+    },
+    {
+      "path": "assets/cinematic/source-p025.webp",
+      "bytes": 226360,
+      "sha256": "2347e11dae9da3087a649bde6a6df9018dd6a9973433c4f037f5587ae68015c2",
+      "source": "Owner-authorized prepared Bending-Active presentation derivative"
+    },
+    {
+      "path": "assets/cinematic/source-p028.webp",
+      "bytes": 263510,
+      "sha256": "02270fc65939d3474873accec89dd0de29ad5773641d4374dec6d3f6da34b373",
+      "source": "Owner-authorized prepared Bending-Active presentation derivative"
+    },
+    {
+      "path": "assets/cinematic/source-p029.webp",
+      "bytes": 351798,
+      "sha256": "b1ad775ea95735566cb99090e3d201ee5fb5209c46ad70bb49dafb928cb9dab5",
+      "source": "Owner-authorized prepared Bending-Active presentation derivative"
+    },
+    {
+      "path": "assets/source-layers.glb",
+      "bytes": 6879848,
+      "sha256": "ff112b90be104cca7e3705b5eee481ba3973d25e2f3d4a7350faa2f732cae47e",
+      "source": "Owner-authorized prepared Bending-Active presentation derivative"
+    },
+    {
+      "path": "assets/source-layers.json",
+      "bytes": 5471,
+      "sha256": "355633399d5cb38d8b340fe96a53314dca6d1f88b87cbdb6b3167a5ad81610ea",
+      "source": "Owner-authorized prepared Bending-Active presentation derivative"
+    },
+    {
+      "path": "assets/studio-small.hdr",
+      "bytes": 1615248,
+      "sha256": "e7cfda5f4e98e623db12b8bfd0184e048488e4855d9c83e2751fb44a32e80c45",
+      "source": "https://polyhaven.com/a/studio_small_09"
+    },
+    {
+      "path": "licenses/CC0-1.0.txt",
+      "bytes": 7048,
+      "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
+      "source": "Existing preserved license notice"
+    },
+    {
+      "path": "licenses/webgl-noise-MIT.txt",
+      "bytes": 1145,
+      "sha256": "bdafce1bb01517c9ae6c4f3620c01340790b5e9d039ae9e356347d1174250916",
+      "source": "Existing preserved license notice"
+    }
+  ],
+  "limits": [
+    "Source year disagreement and incomplete contributor/image attribution remain visible in the story.",
+    "Publication of this presentation does not approve unrelated source documents or private audit records.",
+    "Geometry and mobile transfer budgets remain above the earlier targets; no physical-phone performance certification."
+  ]
+}

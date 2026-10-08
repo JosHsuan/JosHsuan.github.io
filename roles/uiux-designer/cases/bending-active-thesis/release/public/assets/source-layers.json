@@ -1,0 +1,283 @@
+{
+  "schemaVersion": 2,
+  "revision": "ff112b90be104cca7e3705b5eee481ba3973d25e2f3d4a7350faa2f732cae47e",
+  "viewerUnits": "meters",
+  "upAxis": "Y",
+  "bounds": {
+    "min": [
+      -1.38373486328125,
+      -0.008087958335876465,
+      -1.6362088623046875
+    ],
+    "max": [
+      1.24108056640625,
+      0.7248569269180298,
+      1.7275496826171874
+    ]
+  },
+  "vertices": 172789,
+  "triangles": 227521,
+  "layers": [
+    {
+      "id": "shell",
+      "bounds": {
+        "min": [
+          -1.18810498046875,
+          0,
+          -1.5502127685546876
+        ],
+        "max": [
+          1.18810498046875,
+          0.7248569269180298,
+          1.5502127685546876
+        ]
+      },
+      "vertices": 84626,
+      "triangles": 131881,
+      "sourceObjects": [
+        {
+          "vertices": 84626,
+          "triangles": 131881
+        }
+      ]
+    },
+    {
+      "id": "base-lower",
+      "bounds": {
+        "min": [
+          -1.38373486328125,
+          -0.008087958335876465,
+          -1.6362088623046875
+        ],
+        "max": [
+          1.24108056640625,
+          0.0019120416641235352,
+          1.7275496826171874
+        ]
+      },
+      "vertices": 29030,
+      "triangles": 31688,
+      "sourceObjects": [
+        {
+          "vertices": 1913,
+          "triangles": 2018
+        },
+        {
+          "vertices": 1912,
+          "triangles": 2020
+        },
+        {
+          "vertices": 1993,
+          "triangles": 2182
+        },
+        {
+          "vertices": 1499,
+          "triangles": 1690
+        },
+        {
+          "vertices": 1604,
+          "triangles": 1772
+        },
+        {
+          "vertices": 1579,
+          "triangles": 1674
+        },
+        {
+          "vertices": 2967,
+          "triangles": 3308
+        },
+        {
+          "vertices": 2783,
+          "triangles": 3026
+        },
+        {
+          "vertices": 2806,
+          "triangles": 3020
+        },
+        {
+          "vertices": 3549,
+          "triangles": 4002
+        },
+        {
+          "vertices": 1601,
+          "triangles": 1710
+        },
+        {
+          "vertices": 2912,
+          "triangles": 3182
+        },
+        {
+          "vertices": 1912,
+          "triangles": 2084
+        }
+      ]
+    },
+    {
+      "id": "base-upper",
+      "bounds": {
+        "min": [
+          -1.37358935546875,
+          0.0019120416641235352,
+          -1.6261209716796876
+        ],
+        "max": [
+          1.23114990234375,
+          0.011912041664123536,
+          1.7175086669921875
+        ]
+      },
+      "vertices": 59133,
+      "triangles": 63952,
+      "sourceObjects": [
+        {
+          "vertices": 1322,
+          "triangles": 1404
+        },
+        {
+          "vertices": 1288,
+          "triangles": 1366
+        },
+        {
+          "vertices": 1344,
+          "triangles": 1434
+        },
+        {
+          "vertices": 1302,
+          "triangles": 1388
+        },
+        {
+          "vertices": 1204,
+          "triangles": 1276
+        },
+        {
+          "vertices": 1206,
+          "triangles": 1280
+        },
+        {
+          "vertices": 1308,
+          "triangles": 1388
+        },
+        {
+          "vertices": 1270,
+          "triangles": 1346
+        },
+        {
+          "vertices": 1269,
+          "triangles": 1346
+        },
+        {
+          "vertices": 1227,
+          "triangles": 1300
+        },
+        {
+          "vertices": 1307,
+          "triangles": 1382
+        },
+        {
+          "vertices": 1263,
+          "triangles": 1328
+        },
+        {
+          "vertices": 1282,
+          "triangles": 1396
+        },
+        {
+          "vertices": 1324,
+          "triangles": 1442
+        },
+        {
+          "vertices": 1288,
+          "triangles": 1368
+        },
+        {
+          "vertices": 1308,
+          "triangles": 1394
+        },
+        {
+          "vertices": 649,
+          "triangles": 678
+        },
+        {
+          "vertices": 2272,
+          "triangles": 2530
+        },
+        {
+          "vertices": 865,
+          "triangles": 950
+        },
+        {
+          "vertices": 3391,
+          "triangles": 3762
+        },
+        {
+          "vertices": 783,
+          "triangles": 834
+        },
+        {
+          "vertices": 3403,
+          "triangles": 3774
+        },
+        {
+          "vertices": 1706,
+          "triangles": 1800
+        },
+        {
+          "vertices": 3622,
+          "triangles": 3986
+        },
+        {
+          "vertices": 682,
+          "triangles": 712
+        },
+        {
+          "vertices": 2328,
+          "triangles": 2596
+        },
+        {
+          "vertices": 768,
+          "triangles": 824
+        },
+        {
+          "vertices": 3244,
+          "triangles": 3566
+        },
+        {
+          "vertices": 615,
+          "triangles": 658
+        },
+        {
+          "vertices": 2370,
+          "triangles": 2528
+        },
+        {
+          "vertices": 845,
+          "triangles": 906
+        },
+        {
+          "vertices": 3230,
+          "triangles": 3590
+        },
+        {
+          "vertices": 1644,
+          "triangles": 1852
+        },
+        {
+          "vertices": 1642,
+          "triangles": 1740
+        },
+        {
+          "vertices": 1720,
+          "triangles": 1780
+        },
+        {
+          "vertices": 575,
+          "triangles": 622
+        },
+        {
+          "vertices": 2267,
+          "triangles": 2426
+        }
+      ]
+    }
+  ]
+}
