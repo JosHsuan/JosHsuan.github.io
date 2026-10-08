@@ -8,6 +8,14 @@
   "globalConfigSHA256": "719e39d8c6bfee3e10b7964043b50183a64568cc21081476957ee71eec00bb4e",
   "skills": [
     {
+      "name": "cinematic-editing",
+      "path": "skills/cinematic-editing",
+      "source": "Original role workflow grounded in pinned Three camera/depth source and the existing cinema HDR focus study",
+      "license": "Project-original instructions",
+      "contract": "research/round-02/OPTICS_EDIT_CONTRACT.md",
+      "status": "Role extension prepared; round-02 case implementation pending"
+    },
+    {
       "name": "cinema-shot-design",
       "path": "skills/cinema-shot-design",
       "source": "Original role workflow informed by the available R3F fundamentals, animation and shaders skills, Three docs and camera experiments",
