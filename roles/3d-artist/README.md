@@ -43,6 +43,8 @@ The owner's actual UIUX Saved snapshot is unknown. Export discussion choices in 
 
 This opt-in launcher uses `.runtime/codex-home`, restores the parent environment, copies only this role's skills and registers `artist3d_catalog` / `artist3d_browser`. The new `artist3d-texture-shader` skill and `artist3d_get_material_recipe` catalog tool are explicitly scoped to this role. No credentials or global registrations are copied. A full session may need separate authentication. Configuration does not hot-load this desktop chat; real loader/MCP evidence is under verification.
 
+The scoped `layer-compositing` skill adds [round-02 scene-driven layer planning](research/round-02/COMPOSITING_CONTRACT.md): real color/depth influence, optical gather, geometry-derived ASCII, explicit blend operators and protected HTML. [Pinned-source verification](research/round-02/source-verification.json) checks the installed Three 0.186.1 modules against upstream. This role extension is prepared; the requested next case integration and its visual/performance evidence remain pending. No postprocessing dependency or additional MCP is introduced.
+
 [Animation Cinematographer](../animation-cinematographer/README.md) has independent port 4182, skills, MCP namespace, lockfile, runtime home and storage. Shared initial review source was copied deliberately; neither runtime imports the other role.
 
 ## Sources and scope

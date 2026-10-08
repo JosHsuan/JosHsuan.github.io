@@ -1,0 +1,60 @@
+{
+  "checkedDate": "2026-10-08",
+  "role": "3d-artist / animation-cinematographer",
+  "installedPackage": "three",
+  "version": "0.186.1",
+  "upstreamRevision": "9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8",
+  "license": "MIT; supplied package retains node_modules/three/LICENSE",
+  "evidenceScope": "Read-only installed source versus pinned public upstream; no source code vendored, runtime shader compilation or visual acceptance claimed.",
+  "files": [
+    {
+      "file": "src/cameras/PerspectiveCamera.js",
+      "installedSHA256": "1cc44938885f785649a978ecb6f57c444561381ddab24de19fc59b400009b111",
+      "upstreamUrl": "https://raw.githubusercontent.com/mrdoob/three.js/9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8/src/cameras/PerspectiveCamera.js",
+      "upstreamSHA256": "1cc44938885f785649a978ecb6f57c444561381ddab24de19fc59b400009b111",
+      "byteIdentical": true
+    },
+    {
+      "file": "src/textures/DepthTexture.js",
+      "installedSHA256": "45b9054043ee8ce46be8abcf86316242398e072c463271d716a86872902317c3",
+      "upstreamUrl": "https://raw.githubusercontent.com/mrdoob/three.js/9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8/src/textures/DepthTexture.js",
+      "upstreamSHA256": "45b9054043ee8ce46be8abcf86316242398e072c463271d716a86872902317c3",
+      "byteIdentical": true
+    },
+    {
+      "file": "examples/jsm/postprocessing/BokehPass.js",
+      "installedSHA256": "5b9b0bc5cee6e24b2417da95f40eb2d178943c2ffbacbc4c2993a89d0597bfb3",
+      "upstreamUrl": "https://raw.githubusercontent.com/mrdoob/three.js/9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8/examples/jsm/postprocessing/BokehPass.js",
+      "upstreamSHA256": "5b9b0bc5cee6e24b2417da95f40eb2d178943c2ffbacbc4c2993a89d0597bfb3",
+      "byteIdentical": true
+    },
+    {
+      "file": "examples/jsm/shaders/BokehShader.js",
+      "installedSHA256": "bd8525158e3574a803f2e2ce5d5e263349a80ee41bf789e71446b9caa256aa9a",
+      "upstreamUrl": "https://raw.githubusercontent.com/mrdoob/three.js/9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8/examples/jsm/shaders/BokehShader.js",
+      "upstreamSHA256": "bd8525158e3574a803f2e2ce5d5e263349a80ee41bf789e71446b9caa256aa9a",
+      "byteIdentical": true
+    },
+    {
+      "file": "examples/jsm/effects/AsciiEffect.js",
+      "installedSHA256": "192fd3d77b357999730cefa2e7c92b68cef167df0c1e9493d1ddf83b8e82a54a",
+      "upstreamUrl": "https://raw.githubusercontent.com/mrdoob/three.js/9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8/examples/jsm/effects/AsciiEffect.js",
+      "upstreamSHA256": "192fd3d77b357999730cefa2e7c92b68cef167df0c1e9493d1ddf83b8e82a54a",
+      "byteIdentical": true
+    },
+    {
+      "file": "examples/jsm/postprocessing/OutputPass.js",
+      "installedSHA256": "02e4a261af34de71338185e9e87f0cbe5cba9115608d984363e1269dec1d2272",
+      "upstreamUrl": "https://raw.githubusercontent.com/mrdoob/three.js/9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8/examples/jsm/postprocessing/OutputPass.js",
+      "upstreamSHA256": "02e4a261af34de71338185e9e87f0cbe5cba9115608d984363e1269dec1d2272",
+      "byteIdentical": true
+    },
+    {
+      "file": "LICENSE",
+      "installedSHA256": "8b378ebe60e2fe500158cb0ac71cb5e8b7d92953c2abcc63a0eb90499653b5bc",
+      "upstreamUrl": "https://raw.githubusercontent.com/mrdoob/three.js/9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8/LICENSE",
+      "upstreamSHA256": "8b378ebe60e2fe500158cb0ac71cb5e8b7d92953c2abcc63a0eb90499653b5bc",
+      "byteIdentical": true
+    }
+  ]
+}

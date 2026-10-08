@@ -8,6 +8,15 @@
   "globalConfigSHA256": "719e39d8c6bfee3e10b7964043b50183a64568cc21081476957ee71eec00bb4e",
   "skills": [
     {
+      "name": "layer-compositing",
+      "path": "skills/layer-compositing",
+      "source": "Original role workflow grounded in pinned Three depth/ASCII/output code and the W3C compositing specification",
+      "license": "Project-original instructions",
+      "contract": "research/round-02/COMPOSITING_CONTRACT.md",
+      "verification": "research/round-02/source-verification.json",
+      "status": "Role extension prepared; round-02 case implementation pending"
+    },
+    {
       "name": "artist3d-studies",
       "path": "skills/artist3d-studies",
       "source": "Original role workflow, informed by the available r3f-fundamentals, r3f-shaders, r3f-animation skills and primary docs",
