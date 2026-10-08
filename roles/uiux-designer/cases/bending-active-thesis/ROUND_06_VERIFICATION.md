@@ -1,6 +1,6 @@
 # Round 06 — Autonomous source chapters: verification
 
-Date: 8 October 2026. Local integrated acceptance complete; exact-head Linux CI and Pages deployment are separate final gates.
+Date: 8–9 October 2026. Local integrated acceptance and CI repair evidence are recorded below; exact-head Linux CI and Pages deployment remain separate final gates.
 
 ## Delivered scope
 
@@ -19,8 +19,8 @@ Node **24.19.0**, pnpm **11.19.0** and the committed lockfile were used. No root
 | Portable case suite | **126 passed, two conditional browser fixtures skipped, zero failed**. Covers shared playback, chapter score, choreography, source framing, light, optics, mask packing and source data. |
 | Actual source projection | **825 configurations** using original public GLB vertices; minimum verified viewport margin **3.003295%** after the final lens, chapter cue and bounded user orbit. |
 | Scoped ESLint, including normally ignored role files | Zero errors; two expected `next/no-img-element` warnings for static exported source/fallback images. |
-| Public build | Passed: **80 output files, 36 approved assets**, no private inputs. Original AI/PSD/3DM, SQL, sourcemaps and native source/audit records excluded. |
-| Final integrated browser matrix | **All 48 scenarios accepted**: the complete 48-case run passed 46; after two test-only fixes, all nine affected scenario/project combinations passed. Chromium, WebKit and mobile Chromium (390 × 844), 16 scenarios each. |
+| Public build | Passed: **80 local Windows output files (78 in Linux CI), 36 approved assets**, no private inputs. Original AI/PSD/3DM, SQL, sourcemaps and native source/audit records excluded. |
+| Final integrated browser matrix | **All 48 scenarios accepted on Build 4**: 24 public-page/source-artwork cases passed, followed by 24/24 final model/motion cases (5.5 minutes). Chromium, WebKit and mobile Chromium (390 × 844), 16 scenarios each. |
 | Optical shader fixture | **8/8 Chromium and 8/8 WebKit** after final light/field tune; no shader, console or page errors. Reading-core and missing-mask alpha exactly zero. No extra render pass or Canvas. |
 | Source-native SVG fixture | Three earlier browser fixture groups passed; final built-page matrix additionally covers vectors, labels, keyboard selections and static fetch-failure fallbacks. |
 | Responsive static reading | 28 checks: seven chapters at 360, 390, 768 and 1024 px; no horizontal overflow or page errors, no Canvas under initial Reduced. |
@@ -29,7 +29,21 @@ The integrated matrix checks every source variant/count/fit, real mesh hover/cli
 
 Earlier failing intermediate runs exposed a pointer-active R3F wrapper and an overly broad photo-filter selector. The wrapper subtree is now pointer-inert, leaving actual source hit surfaces reachable; the photo filter now applies only inside its presentation frame. Final acceptance uses the rebuilt artifact with both fixes and the final lighting tune.
 
-The first complete final matrix passed 46/48 cases. One WebKit failure was a test-only PNG decoder using unavailable `OffscreenCanvas`; a detached test canvas preserves the same pixel comparison. The other was locator auto-scroll starting the reading response after Playwright had checked stability: trace evidence showed 109.263 px of summary motion during a click, greater than its 44 px height. Explicit scroll-then-settle before the unchanged mouse click produces stable pointerdown/up/click events on the summary and an open native details element. The final helper asserts that open state and preserves all media/focus/feedback assertions. No runtime workaround or weaker threshold was introduced; all nine affected scenario/project combinations passed again across the three projects.
+The earlier complete local matrix passed 46/48 cases. One WebKit failure was a test-only PNG decoder using unavailable `OffscreenCanvas`; a detached test canvas preserves the same pixel comparison. The other was locator auto-scroll starting the reading response after Playwright had checked stability: trace evidence showed 109.263 px of summary motion during a click, greater than its 44 px height. Explicit scroll-then-settle before the unchanged mouse click produces stable pointerdown/up/click events on the summary and an open native details element. The final helper asserts that open state and preserves all media/focus/feedback assertions. No runtime workaround or weaker threshold was introduced; all nine affected scenario/project combinations passed again across the three projects. The later Build 4 matrix retains these corrections.
+
+## Linux CI findings and repair
+
+The first Linux push run, `37849553405`, passed the root and subpath framework jobs (12 browser checks each, including Firefox). Its public-case job finished 39/48 browser scenarios after 33.8 minutes. A cancellation request overlapped the completed failure/artifact-upload steps, so the overall run is cancelled, not an accepted publication run. Its nine failure traces and log are retained in the private verification folder.
+
+The traces exposed a real mobile layout defect: changing an autonomous source caption moved a downstream reading stop by 16 CSS pixels. Captions now reserve the largest intrinsic height of every actual description at the current width, keeping all text visible while removing that source of hold/history drift. Browser coverage selects every caption and verifies both figure and document height remain constant.
+
+Desktop traces also showed very slow software-rendered frames: three Light RAFs took about 7.8 seconds, and Full inspection calls queued behind rendering for 8–15 seconds. The shared browser helper now waits for a matching native-reading snapshot and its completed renderer frame instead of six blind RAFs. History starts in supported Light mode, media scrolling targets its stable outer anchor, and the public smoke test verifies Full initialization before switching to Light for navigation. Every original support point remains projected, with mathematically equivalent extrema assertions avoiding thousands of trace events. All three browser projects remain required, on independent CI runners; publication still requires the entire exact-SHA push run to pass.
+
+The short damping-shape browser sample uses Playwright's controlled clock for 160 ms, retaining the full viewport, actual document scrolling, DOM transforms, Canvas and unchanged lag/velocity assertions. It then resumes real time before all hold, navigation and autonomous-playback checks. This separates the time-shape contract from a software renderer that can complete the entire response before the first observed frame; it is not a 60 fps performance claim. Source hit tests select a mesh interior and confirm hover before dragging, avoiding a moving boundary pixel between hit sampling and pointerdown.
+
+The compositor computes its semantic exclusion mask once per fragment and exits early for exactly transparent foreground cores. An explicit opt-in baseline comparison checked 11 scenes per browser at 512 × 320: Chromium and WebKit produced identical RGBA bytes and hashes in every pair. In interleaved fixture timings, Chromium Full/Light median rendering fell from 27.01/20.44 ms to 18.61/11.59 ms; WebKit fell from 3.71/2.75 ms to 2.54/2.29 ms. These isolated measurements are not an end-to-end Linux or physical-device performance claim. Resolution, material settings, optical strengths and all original fixture assertions are unchanged.
+
+Build 4 rebuilt successfully with 80 local files and 36 pinned assets. The 24 public-page/source-artwork scenarios passed, including every caption variant's invariant height. After source-hit sampling was corrected, the final model/motion group passed 24/24 across all three projects. The portable suite remains 126 passed / two conditional fixture skips; final browser-source ESLint is clean. All 29 current runtime hashes and 36 public asset byte/hash records were rechecked against committed Git blobs. The exact final push CI and deployed identity must still be verified separately.
 
 ## Actual visual review
 

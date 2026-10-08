@@ -20,7 +20,7 @@ Full source geometry and existing fallback/quality controls are retained. Model/
 
 IBM Plex, rounded shadowboxes, semantic entrances and orange-photo reveal accompany source-native vector diagrams and direct 3D interaction. Seven actual CAD representations join the unchanged assembly model. A single shared clock drives chapter camera/light/focus loops, diagram emphasis and an independent pointer-responsive ASCII field. Essential reading cores remain transparent to the foreground Canvas. Pause, Reduced, native reading and static SVG/model fallbacks remain supported.
 
-The manifest now enumerates 36 assets: the earlier 15, three fonts and their license, the source-representation GLB/JSON, and 15 diagram SVG/JSON/PNG derivatives. The 80-file artifact excludes original AI/PSD/CAD inputs and private audits. `/release.json` includes the commit, diagram revision and IBM Plex identity. Source topology/colors and existing story bytes are preserved. See [Round 06 verification](../ROUND_06_VERIFICATION.md) for browser acceptance and remaining performance/source limits.
+The manifest now enumerates 36 assets: the earlier 15, three fonts and their license, the source-representation GLB/JSON, and 15 diagram SVG/JSON/PNG derivatives. The artifact (80 local Windows files; 78 in Linux CI) excludes original AI/PSD/CAD inputs and private audits. `/release.json` includes the commit, diagram revision and IBM Plex identity. Source topology/colors and existing story bytes are preserved. See [Round 06 verification](../ROUND_06_VERIFICATION.md) for browser acceptance and remaining performance/source limits.
 
 ## Round 05 — continuous interaction, 8 October 2026
 

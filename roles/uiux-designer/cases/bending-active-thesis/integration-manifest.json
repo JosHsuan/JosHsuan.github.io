@@ -100,8 +100,8 @@
     "derivedFrom": "Original role material studies, now source-local brushed satin physical metal with anisotropy",
     "newTextures": false
   },
-  "controllerHash": "b31302d3335322769ee1ae3b0d7d45d5a3b6251b5777db5e6b86387b712606ae",
-  "sceneHash": "57351ca5365dded4d6b60191a351743c28862cc514ec3ccdde36172c3e75fb91",
+  "controllerHash": "9e34ca204f9bed80d6c07ee18f2b715023f269b25d07232d02d8459867c3fd33",
+  "sceneHash": "d816b9b40a4458fabb26e772bd02cdf3b03d1ebc50d400f35407fbf829c7ce19",
   "poster": {
     "path": "release/public/assets/cinematic/model-poster.webp",
     "sha256": "931181ca2b0722d27f41bddbf60121c5d058d4297bd809aee9eb2fec68d377e7",
@@ -117,7 +117,7 @@
     "sampleEquivalenceCount": 435,
     "currentUse": "Removed from current runtime; retained only as ignored historical local evidence."
   },
-  "reviewedAt": "2026-10-08",
+  "reviewedAt": "2026-10-09",
   "runtimeRecords": [
     {
       "kind": "camera",
@@ -135,15 +135,15 @@
       "kind": "controller",
       "path": "components/CinematicExperience.jsx",
       "owner": "UIUX Designer / Motion Designer",
-      "sha256": "b31302d3335322769ee1ae3b0d7d45d5a3b6251b5777db5e6b86387b712606ae",
-      "previousSHA256": "df74a29a78dee3305b4b390230a79b4fb57a772a6d6fac3ee236bc38639b7547"
+      "sha256": "9e34ca204f9bed80d6c07ee18f2b715023f269b25d07232d02d8459867c3fd33",
+      "previousSHA256": "b31302d3335322769ee1ae3b0d7d45d5a3b6251b5777db5e6b86387b712606ae"
     },
     {
       "kind": "scene",
       "path": "components/CinematicScene.jsx",
       "owner": "Shared integration; one final property writer",
-      "sha256": "57351ca5365dded4d6b60191a351743c28862cc514ec3ccdde36172c3e75fb91",
-      "previousSHA256": "ad48b63170e3122e8b5804bc68242e571a0b854cde0444b664e0fbeb7adfc2d1"
+      "sha256": "d816b9b40a4458fabb26e772bd02cdf3b03d1ebc50d400f35407fbf829c7ce19",
+      "previousSHA256": "57351ca5365dded4d6b60191a351743c28862cc514ec3ccdde36172c3e75fb91"
     },
     {
       "kind": "response",
@@ -174,8 +174,8 @@
       "kind": "compositor",
       "path": "components/scene-compositor.mjs",
       "owner": "3D Artist",
-      "sha256": "18f1aa706d2083ae238084893843f5bb0613c660544ad690a39e33223b7df160",
-      "previousSHA256": "e2265e5ab1a6669e63c1eee37c456cf977a1b72fa19b82c40a07df8abb13288b"
+      "sha256": "72884b9ec1cc291150c9cb88ec89a10ad59d78ff70bfc4946fe0c38a12c34bd7",
+      "previousSHA256": "18f1aa706d2083ae238084893843f5bb0613c660544ad690a39e33223b7df160"
     },
     {
       "kind": "exhibition",
@@ -285,13 +285,15 @@
       "kind": "sourceDiagram",
       "path": "components/SourceDiagram.jsx",
       "owner": "Information Designer / UIUX Designer",
-      "sha256": "ce4486587f4712616ea765932f3caab571db974b990307714d3598c58adb9125"
+      "sha256": "c00f98c92c826c7ff624e4b41814ca6badd5f85faa8f75ccf05f2ff8f180423f",
+      "previousSHA256": "ce4486587f4712616ea765932f3caab571db974b990307714d3598c58adb9125"
     },
     {
       "kind": "sourceDiagramStyle",
       "path": "components/source-diagram.module.css",
       "owner": "Shared integration",
-      "sha256": "7e470f6aa567bf97a4714cb35fb63b3db123667ada1a2c99540ac9a15b00e02e"
+      "sha256": "2a101ced53d11f6d60a70bb1e0d5fe6a57931d63a0bba8e030731a8e71c7f672",
+      "previousSHA256": "7e470f6aa567bf97a4714cb35fb63b3db123667ada1a2c99540ac9a15b00e02e"
     },
     {
       "kind": "input",
@@ -361,7 +363,29 @@
       "rectangularAreaLights": 2,
       "asciiNote": "Independent evolving decorative field at 0.6 of Full weight; source geometry remains unchanged."
     },
-    "measurementNote": "Autonomous playback intentionally renders while active. Pause/Reduced/hidden states stop authored time; no physical-phone GPU timing claim."
+    "measurementNote": "Autonomous playback intentionally renders while active. Pause/Reduced/hidden states stop authored time; no physical-phone GPU timing claim.",
+    "equivalentMaskOptimization": {
+      "pixels": "11 baseline pairs each in Chromium and WebKit: exact RGBA equality at 512x320.",
+      "fixtureMedianMilliseconds": {
+        "chromiumFull": [
+          27.01,
+          18.61
+        ],
+        "chromiumLight": [
+          20.44,
+          11.59
+        ],
+        "webkitFull": [
+          3.71,
+          2.54
+        ],
+        "webkitLight": [
+          2.75,
+          2.29
+        ]
+      },
+      "scope": "Interleaved synthetic fixture; resolution and visual controls unchanged. Not a physical-device or full-page performance certification."
+    }
   },
   "transport": {
     "modelAndHDRRawBytes": 8495096,
@@ -386,7 +410,8 @@
     "runtimeChange": "Round 06 adds autonomous chapter playback, matched original-source representations, interactive source-native SVG diagrams, direct source hit interaction, IBM Plex and rounded semantic shadowboxes. One Canvas and one final camera writer preserve native reading, static fallbacks and the unchanged approved story.",
     "storySHA256": "4df944efbfca4421457eb2205cdaad9d8c2990adc921c5e95415f9012f77ad32",
     "approvedAssets": 36,
-    "artifactFiles": 80
+    "artifactFiles": 80,
+    "artifactFileCountContext": "80 in the Windows local build; 78 in the first Linux CI build. Both audits verify the same 36 approved public assets."
   },
   "history": [
     {
@@ -1672,7 +1697,8 @@
     "holds": "Measured heading/prose/figure reading stops with continuous monotone shoulders; multiple stops for long phone content",
     "localFeedback": "One-shot semantic entrances with bounded anticipation/overshoot, plus bounded text/image perspective and focus feedback in the shared controller tick.",
     "nativeSemantics": "Natural-position seeks for initial hashes, focus, keyboard paging, exact per-entry history and resume",
-    "evidence": "Inline original-page comparison without modal or body scroll lock"
+    "evidence": "Inline original-page comparison without modal or body scroll lock",
+    "captionStability": "Intrinsic CSS grid height reserves every actual source-caption variant at the current width; no fixed-height clipping or per-frame measurement."
   },
   "round06Authority": "roles/experience-director/research/ROUND_06_DIRECTION.md",
   "sourceRepresentations": {
