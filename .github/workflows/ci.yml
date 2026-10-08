@@ -52,6 +52,8 @@ jobs:
           node-version-file: .node-version
       - uses: pnpm/action-setup@v4
       - run: pnpm install --frozen-lockfile
+      - name: Verify case response, source transforms, materials and stage
+        run: node --test roles/uiux-designer/cases/bending-active-thesis/tests/*.test.mjs
       - run: pnpm build:pages
       - run: pnpm exec playwright install --with-deps chromium webkit
       - run: pnpm test:pages

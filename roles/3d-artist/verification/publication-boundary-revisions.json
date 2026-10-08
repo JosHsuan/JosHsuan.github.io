@@ -6,8 +6,15 @@
     {
       "file": ".github/workflows/ci.yml",
       "previousSHA256": "9b196fa6edbd93795a614be7f2c96eda30765dc00d224c38b0c8b860e8e72a62",
-      "reviewedSHA256": "d5257bab9bd1be4352fc42cfece31f5f5e0649e2a9b28a60519cfedcc86b5c0b",
-      "reason": "Owner-authorized public case release and isolated GitHub Pages build; dependencies, source originals and framework routes unchanged."
+      "reviewedSHA256": "6993d2f88698bcff68ce0bfd30a417640af83165cb5e9f663e0042a34784d255",
+      "reason": "Owner-authorized round-three public case; adds portable response, source-transform, optical, material and stage tests to the public CI gate.",
+      "reviewHistory": [
+        {
+          "reviewedAt": "2026-10-08",
+          "sha256": "d5257bab9bd1be4352fc42cfece31f5f5e0649e2a9b28a60519cfedcc86b5c0b",
+          "reason": "Owner-authorized public case release and isolated GitHub Pages build; dependencies, source originals and framework routes unchanged."
+        }
+      ]
     },
     {
       "file": ".github/workflows/deploy-pages.yml",
