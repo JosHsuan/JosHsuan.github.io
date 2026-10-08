@@ -17,4 +17,6 @@ Machine results are in ignored verification/mcp-results.json and verification/co
 
 The first browser test found the existing preview stopped (connection refused). The existing static out/ artifact was then served with its unchanged loopback-only server; both tool tests passed on the retry. This did not build or revise the case.
 
-This milestone proves role/tool operation. It does not prove the proposed lighting, base staging, optics, ASCII influence or damped motion is in the case. The owner's latest request shifted work to categorised commits/push, so no new runtime implementation or final round-02 visual acceptance is claimed.
+This historical establishment milestone proves role/tool operation; at that point the owner shifted work to categorised commits/push before runtime implementation. The subsequent implemented case and its final acceptance are recorded in [Round 02 verification](../../uiux-designer/cases/bending-active-thesis/ROUND_02_VERIFICATION.md), separately from these tool checks.
+
+The final integration audit found that the isolated skill's relative research/catalog links did not initially resolve. The launcher now copies only those reviewed resources alongside the skill. The installed CLI/config verification was rerun: all three prepared links resolve and match the original resource hashes, exactly two role MCPs and one skill remain, no authentication is copied, and global configuration retains the SHA-256 above. This repair did not require another browser or GPU run.

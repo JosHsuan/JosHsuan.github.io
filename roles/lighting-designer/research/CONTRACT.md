@@ -11,3 +11,11 @@ Light-to-layer influence: project key direction and actual subject centre for a 
 Reduced motion selects one stable balanced rig; light changes stop when the visual clock settles or the document is hidden. Re-render shadow/contact only for an actual light/model change. Browser captures and model-derived work go under D:/JosHsuan_Website/_work/bending-active-thesis/round-02/lighting-designer. Source originals remain read-only.
 
 Acceptance: inspect seven dwells and transitions on actual shell+base; preserve folds under highlights, avoid clipped white planes/black base, keep text contrast, verify real luminance-to-ASCII response, and verify no idle light ticking. The catalog and MCP test alone do not prove visual acceptance.
+
+## Runtime handoff — Round 02
+
+The case's `components/scene-direction.mjs` now implements a pure `sampleSceneDirection(stageU, {reducedMotion})` score. Seven anchors are `(chapterIndex + 0.5) / 7`, shared with Motion Designer. It interpolates once between authored chapter rigs because `stageU` already contains the response and unequal dwell mapping. Key/rim/environment/contact values retain the catalog endpoints. A weak opposite directional fill uses the catalog fill intensity, with a hemisphere at 65% of that value to preserve readable back-facing metal; neither adds a shadow map.
+
+All sampled colours are linear RGB arrays for Three.js `Color.fromArray`; do not apply a second sRGB conversion. Key/fill/rim positions are metre offsets from the current combined source centre. The scene binding translates both light positions and targets consistently and remains the sole writer. Reduced motion selects the balanced credits rig and removes the decorative halo.
+
+Six case unit-test groups verify real catalog endpoints, interpolation without a second ease, numeric continuity, finite bounded values, reduced-motion invariance, source-bound placement and explicit invalid-input rejection. The subsequent integrated 28-group browser run and 28-image review verify real metal/base lighting, contact and luminance-to-ASCII influence; see the case's ROUND_02_VERIFICATION.md. The sampled halo/contactOpacity channels remain reserved and unbound; actual contact comes from the key shadow, source base and editorial ground.

@@ -17,6 +17,9 @@ try{
  $skillSource=Join-Path $roleRoot 'skills/lighting-direction/SKILL.md'
  $skillLoaded=Join-Path $env:CODEX_HOME 'skills/lighting-direction/SKILL.md'
  if((Get-FileHash -LiteralPath $skillSource).Hash -ne (Get-FileHash -LiteralPath $skillLoaded).Hash){throw 'Role skill copy mismatch'}
+ $references=[regex]::Matches([IO.File]::ReadAllText($skillLoaded),'\]\((\.\./[^)]+)\)')
+ if($references.Count -ne 3){throw 'Expected the three reviewed skill resource links'}
+ foreach($reference in $references){$relative=$reference.Groups[1].Value; $loadedReference=[IO.Path]::GetFullPath((Join-Path (Split-Path -Parent $skillLoaded) $relative)); $sourceReference=[IO.Path]::GetFullPath((Join-Path (Split-Path -Parent $skillSource) $relative)); if(!(Test-Path -LiteralPath $loadedReference -PathType Leaf)){throw "Unresolved prepared skill link: $relative"}; if((Get-FileHash -LiteralPath $loadedReference).Hash -ne (Get-FileHash -LiteralPath $sourceReference).Hash){throw "Prepared skill resource differs: $relative"}}
  if(Test-Path -LiteralPath (Join-Path $env:CODEX_HOME 'auth.json')){throw 'Authentication must not be copied'}
  New-Item -ItemType Directory -Force -Path (Join-Path $roleRoot 'verification')|Out-Null
  [IO.File]::WriteAllText((Join-Path $roleRoot 'verification/config-loader.json'),($servers|ConvertTo-Json -Depth 12),[Text.UTF8Encoding]::new($false))
