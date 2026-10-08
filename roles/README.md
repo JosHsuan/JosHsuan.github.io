@@ -12,6 +12,7 @@ These workspaces preserve the successive research, specialist tooling and local 
 | [Scene Designer](scene-designer/README.md) | Source-relative base staging, ground, haze and negative space | Integrated at 4184; isolated role tools |
 | [Motion Designer](motion-designer/README.md) | Shared analytical damping and seven unequal visual holds | Integrated at 4184; isolated role tools |
 | [3D Animation Designer](3d-animation-designer/README.md) | Verified shell/base layer separation and exact rest-pose rejoin | Integrated at 4184; closed source catalog |
+| [Information Designer](information-designer/README.md) | Source diagram meaning, vector interaction and evidence-preserving 3D explanation | Integrated public case |
 | [Interactive Experience Director](experience-director/README.md) | Cross-role direction, layer/story contract and rendered acceptance | Reviews the integrated case |
 | [Bending-Active Thesis case](uiux-designer/cases/bending-active-thesis/README.md) | Seven-chapter cinematic integration of the specialists' work | `http://127.0.0.1:4184/` |
 
