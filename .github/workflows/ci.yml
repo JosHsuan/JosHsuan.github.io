@@ -41,3 +41,28 @@ jobs:
           path: out/
           include-hidden-files: true
           retention-days: 14
+  public-case:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:pages
+      - run: pnpm exec playwright install --with-deps chromium webkit
+      - run: pnpm test:pages
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: public-case-browser-failures
+          path: pages-test-results/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: static-export-pages
+          path: .pages-workspace/out/
+          include-hidden-files: true
+          retention-days: 14

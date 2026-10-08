@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       validation_run_id:
-        description: Successful CI run ID for this exact commit (root export)
+        description: Successful CI run ID for this exact commit (public case export)
         required: true
         type: string
 permissions:
@@ -34,7 +34,7 @@ jobs:
           jq -e --arg sha "$EXPECTED_SHA" --arg branch "$EXPECTED_BRANCH" '.conclusion == "success" and .head_sha == $sha and .head_branch == $branch and .event == "push" and .path == ".github/workflows/ci.yml"' run.json
       - uses: actions/download-artifact@v4
         with:
-          name: static-export-root
+          name: static-export-pages
           path: out
           run-id: ${{ inputs.validation_run_id }}
           github-token: ${{ github.token }}

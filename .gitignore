@@ -9,3 +9,5 @@ playwright-report/
 src/app/(entries)/
 *.log
 .DS_Store
+.pages-workspace/
+pages-test-results/

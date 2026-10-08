@@ -4,7 +4,10 @@
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.19.0",
-  "engines": { "node": "24.x", "pnpm": "11.19.0" },
+  "engines": {
+    "node": "24.x",
+    "pnpm": "11.19.0"
+  },
   "scripts": {
     "dev": "pnpm content:export && next dev --webpack --hostname 127.0.0.1",
     "content:validate": "tsx scripts/validate-content.ts",
@@ -17,7 +20,10 @@
     "audit:build": "tsx scripts/audit-build.ts",
     "preview": "tsx scripts/serve-export.ts",
     "test:e2e": "playwright test",
-    "check": "pnpm content:validate && pnpm lint && pnpm typecheck && pnpm test && pnpm build"
+    "check": "pnpm content:validate && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "build:pages": "node scripts/build-pages.mjs",
+    "audit:pages": "node scripts/audit-pages.mjs",
+    "test:pages": "playwright test --config playwright.pages.config.mjs"
   },
   "dependencies": {
     "@gsap/react": "2.1.2",

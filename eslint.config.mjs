@@ -5,7 +5,7 @@ import nextTypescript from 'eslint-config-next/typescript';
 export default defineConfig([
   ...nextVitals,
   ...nextTypescript,
-  globalIgnores(['.next/**', 'out/**', 'roles/**', 'next-env.d.ts', 'src/app/(entries)/**', 'playwright-report/**', 'test-results/**']),
+  globalIgnores(['.next/**', '.pages-workspace/**', 'pages-test-results/**', 'out/**', 'roles/**', 'next-env.d.ts', 'src/app/(entries)/**', 'playwright-report/**', 'test-results/**']),
   {
     files: ['src/**/*.{ts,tsx}'],
     ignores: ['src/motion/theatre/**', 'src/dev/**'],
