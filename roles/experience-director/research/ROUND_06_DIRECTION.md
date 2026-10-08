@@ -1,6 +1,6 @@
 # Round 06 — Autonomous chapters and source-led explanation
 
-Date: 8 October 2026. Status: implementation and integrated acceptance in progress.
+Date: 8 October 2026. Status: implementation and local integrated acceptance complete; exact-head CI and publication are recorded by the release workflow.
 
 The owner selected IBM Plex, authorized relevant original artwork/CAD exploration, requested interactive diagrams, rounded shadowboxes, expressive entrances, orange inverted photos, autonomous chapter motion, fluid layer mixing and direct model interaction, then requested commits, push and GitHub Pages deployment. This supersedes the unresolved Saved-font recovery in Round 05. It does not redefine what the thesis measured.
 

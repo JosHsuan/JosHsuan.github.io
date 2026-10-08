@@ -1,6 +1,6 @@
 # Public Bending-Active release
 
-The owner authorized GitHub Pages publication on 8 October 2026 after making the repository public. [Decision 0006](../../../../../docs/decisions/0006-public-thesis-pages.md) records the boundary. `story.json` contains only the visible presentation; `manifest.json` enumerates 15 approved assets and their exact checksums. This directory is intentionally public. Original CAD, unrelated media and private preparation/audit records are excluded.
+The owner authorized GitHub Pages publication on 8 October 2026 after making the repository public. [Decision 0006](../../../../../docs/decisions/0006-public-thesis-pages.md) records the boundary. `story.json` contains only the visible presentation; `manifest.json` enumerates 36 approved assets and their exact checksums. This directory is intentionally public. Original CAD, unrelated media and private preparation/audit records are excluded.
 
 Run from the repository root using Node 24.19.0 and pnpm 11.19.0:
 
@@ -15,6 +15,12 @@ The disposable artifact is `.pages-workspace/out/`, previewed at `http://127.0.0
 The canonical site is `https://joshsuan.github.io/`. `/release.json` identifies the deployed commit. CI validates the original framework and public case; deployment consumes the successful same-commit `static-export-pages` artifact without rebuilding.
 
 Full source geometry and existing fallback/quality controls are retained. Model/HDR transfer and triangle counts still exceed earlier mobile/source budgets. Physical phone performance is not certified. Original source attribution and year uncertainty remain visible; publication does not fabricate missing credits or engineering evidence.
+
+## Round 06 — autonomous source chapters, 8 October 2026
+
+IBM Plex, rounded shadowboxes, semantic entrances and orange-photo reveal accompany source-native vector diagrams and direct 3D interaction. Seven actual CAD representations join the unchanged assembly model. A single shared clock drives chapter camera/light/focus loops, diagram emphasis and an independent pointer-responsive ASCII field. Essential reading cores remain transparent to the foreground Canvas. Pause, Reduced, native reading and static SVG/model fallbacks remain supported.
+
+The manifest now enumerates 36 assets: the earlier 15, three fonts and their license, the source-representation GLB/JSON, and 15 diagram SVG/JSON/PNG derivatives. The 80-file artifact excludes original AI/PSD/CAD inputs and private audits. `/release.json` includes the commit, diagram revision and IBM Plex identity. Source topology/colors and existing story bytes are preserved. See [Round 06 verification](../ROUND_06_VERIFICATION.md) for browser acceptance and remaining performance/source limits.
 
 ## Round 05 — continuous interaction, 8 October 2026
 

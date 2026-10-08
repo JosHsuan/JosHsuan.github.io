@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 6,
+  "schemaVersion": 7,
   "role": "public-case-integration",
   "runtimeImportsFromOtherRoles": false,
   "copies": [
@@ -42,7 +42,7 @@
     }
   ],
   "rootDependencyChanges": false,
-  "ownerSavedPreferences": "Actual original-browser Saved typography not recovered; pending source evidence. No font is claimed as owner-selected.",
+  "ownerSavedPreferences": "Owner explicitly selected IBM Plex in Round 06, superseding the earlier uncaptured Saved typography evidence. No recovery of the old browser Saved data is claimed.",
   "externalSources": [
     {
       "url": "https://polyhaven.com/a/studio_small_09",
@@ -54,11 +54,16 @@
       "url": "https://github.com/stegu/webgl-noise/tree/22434e04d7753f7e949e8d724ab3da2864c17a0f",
       "license": "MIT",
       "notice": "public/licenses/webgl-noise-MIT.txt"
+    },
+    {
+      "url": "https://github.com/IBM/plex/tree/763c36ef9117782905ae010056dfbe8fd2653a25",
+      "license": "OFL-1.1",
+      "notice": "release/public/licenses/ibm-plex-OFL.txt"
     }
   ],
-  "revision": "round-05-continuous-reading-inline-study",
+  "revision": "round-06-autonomous-source-chapters",
   "currentRuntime": {
-    "camera": "components/vendor/cinematic-plan.mjs",
+    "camera": "components/source-scene-score.mjs",
     "material": "components/materials/cinematic-material.js",
     "controller": "components/CinematicExperience.jsx",
     "scene": "components/CinematicScene.jsx",
@@ -67,20 +72,26 @@
     "lightingAndStage": "components/scene-direction.mjs",
     "optics": "components/optical-score.mjs",
     "compositor": "components/scene-compositor.mjs",
-    "editorial": "components/editorial-score.mjs",
     "exhibition": "components/exhibition-stage.mjs",
     "evidenceInspector": "components/EvidenceInspector.jsx",
     "modelInspector": "components/ModelInspector.jsx",
     "modelInspectorStyle": "components/model-inspector.module.css",
     "inspectionState": "components/inspection-state.mjs",
-    "inspectionCamera": "components/inspection-camera.mjs",
     "inspectionSupport": "components/inspection-framing-support.mjs",
     "inspectionLighting": "components/inspection-lighting.mjs",
     "globalStyle": "app/globals.css",
     "page": "app/page.jsx",
     "pageStyle": "app/page.module.css",
     "inspectorStyle": "components/evidence-inspector.module.css",
-    "backgroundStyle": "components/cinematic.module.css"
+    "backgroundStyle": "components/cinematic.module.css",
+    "baseCamera": "components/vendor/cinematic-plan.mjs",
+    "playback": "components/chapter-playback.mjs",
+    "chapterScene": "components/chapter-scene-score.mjs",
+    "choreography": "components/element-choreography.mjs",
+    "sourceDiagram": "components/SourceDiagram.jsx",
+    "sourceDiagramStyle": "components/source-diagram.module.css",
+    "input": "components/story-input.js",
+    "layout": "app/layout.jsx"
   },
   "cinematicMaterial": {
     "owner": "3D Artist",
@@ -89,8 +100,8 @@
     "derivedFrom": "Original role material studies, now source-local brushed satin physical metal with anisotropy",
     "newTextures": false
   },
-  "controllerHash": "df74a29a78dee3305b4b390230a79b4fb57a772a6d6fac3ee236bc38639b7547",
-  "sceneHash": "ad48b63170e3122e8b5804bc68242e571a0b854cde0444b664e0fbeb7adfc2d1",
+  "controllerHash": "b31302d3335322769ee1ae3b0d7d45d5a3b6251b5777db5e6b86387b712606ae",
+  "sceneHash": "57351ca5365dded4d6b60191a351743c28862cc514ec3ccdde36172c3e75fb91",
   "poster": {
     "path": "release/public/assets/cinematic/model-poster.webp",
     "sha256": "931181ca2b0722d27f41bddbf60121c5d058d4297bd809aee9eb2fec68d377e7",
@@ -110,9 +121,9 @@
   "runtimeRecords": [
     {
       "kind": "camera",
-      "path": "components/vendor/cinematic-plan.mjs",
-      "owner": "Animation Cinematographer",
-      "sha256": "dc6dbc064e0ec9a98a937471c2f65cb6f13904c81d2feeaae92bb6067eaa0c88"
+      "path": "components/source-scene-score.mjs",
+      "owner": "Geometry Engineer / Animation Cinematographer",
+      "sha256": "f37d83ba04b7af125573061f6fcd3a53dbdf349ef4ed87b023476a9629fdbab4"
     },
     {
       "kind": "material",
@@ -124,22 +135,21 @@
       "kind": "controller",
       "path": "components/CinematicExperience.jsx",
       "owner": "UIUX Designer / Motion Designer",
-      "sha256": "df74a29a78dee3305b4b390230a79b4fb57a772a6d6fac3ee236bc38639b7547",
-      "previousSHA256": "15f8ddc51be5d523fc591644b41016c142a37e0ab45c8926b87558d85ff26791"
+      "sha256": "b31302d3335322769ee1ae3b0d7d45d5a3b6251b5777db5e6b86387b712606ae",
+      "previousSHA256": "df74a29a78dee3305b4b390230a79b4fb57a772a6d6fac3ee236bc38639b7547"
     },
     {
       "kind": "scene",
       "path": "components/CinematicScene.jsx",
       "owner": "Shared integration; one final property writer",
-      "sha256": "ad48b63170e3122e8b5804bc68242e571a0b854cde0444b664e0fbeb7adfc2d1",
-      "previousSHA256": "7079198ba5b7d45cc0bf1ef8f6097b6e4768aaf378fbcbbeab921e63e49c91bf"
+      "sha256": "57351ca5365dded4d6b60191a351743c28862cc514ec3ccdde36172c3e75fb91",
+      "previousSHA256": "ad48b63170e3122e8b5804bc68242e571a0b854cde0444b664e0fbeb7adfc2d1"
     },
     {
       "kind": "response",
       "path": "components/story-response.mjs",
       "owner": "Motion Designer",
-      "sha256": "682a0799f7ab9ff937ebbda3dfe398f398dfdf3f00cbba0fa710be80db969de3",
-      "previousSHA256": "8bb8666549b968036d9a9d10aee4fa32e026f1b04f878264beb905f73e51b8d5"
+      "sha256": "682a0799f7ab9ff937ebbda3dfe398f398dfdf3f00cbba0fa710be80db969de3"
     },
     {
       "kind": "elements",
@@ -157,61 +167,48 @@
       "kind": "optics",
       "path": "components/optical-score.mjs",
       "owner": "Animation Cinematographer",
-      "sha256": "d248dddd37e75ee59387fa7ceb9d10c1e6df5736ec3d4d09b5a9413e40b389f2"
+      "sha256": "aee155ff163e02bd13ef067517ca84e1d5f989a57ed1283c449b5d5f4d4ef1de",
+      "previousSHA256": "d248dddd37e75ee59387fa7ceb9d10c1e6df5736ec3d4d09b5a9413e40b389f2"
     },
     {
       "kind": "compositor",
       "path": "components/scene-compositor.mjs",
       "owner": "3D Artist",
-      "sha256": "e2265e5ab1a6669e63c1eee37c456cf977a1b72fa19b82c40a07df8abb13288b"
-    },
-    {
-      "kind": "editorial",
-      "path": "components/editorial-score.mjs",
-      "owner": "Motion Designer",
-      "sha256": "965754c96ae6f48e0c95292999bf1ea130be65ca7a3f1b67b5b1488a39f7694d",
-      "previousSHA256": "cab5e98e201d40d323172d2092aa6db6f6cf2dece4510caae144b8caf88ec8b1"
+      "sha256": "18f1aa706d2083ae238084893843f5bb0613c660544ad690a39e33223b7df160",
+      "previousSHA256": "e2265e5ab1a6669e63c1eee37c456cf977a1b72fa19b82c40a07df8abb13288b"
     },
     {
       "kind": "exhibition",
       "path": "components/exhibition-stage.mjs",
       "owner": "Scene / Lighting Designer",
-      "sha256": "909544b4b63f2e7bf073abe2ea587997e7af4c6133db390489ae545d977530b9",
-      "previousSHA256": "9cf547e25c4d14c05bbbaf7304944b1f988845d98da5332790ad3008880353d7"
+      "sha256": "5d841044733ac5ef358b7c6dd69e70cba0afb1f7e182e53fffe8eeeaea26e5b0",
+      "previousSHA256": "909544b4b63f2e7bf073abe2ea587997e7af4c6133db390489ae545d977530b9"
     },
     {
       "kind": "evidenceInspector",
       "path": "components/EvidenceInspector.jsx",
       "owner": "UIUX Designer",
-      "sha256": "f011f01a71585e31d7f16ce7e40547dab6ba35807ac17387fc167d6e6994c80e",
-      "previousSHA256": "3c310d1d4576b8d1b112855ed4eb1d295c83eb648099349c31b1b211ecc15112"
+      "sha256": "f011f01a71585e31d7f16ce7e40547dab6ba35807ac17387fc167d6e6994c80e"
     },
     {
       "kind": "modelInspector",
       "path": "components/ModelInspector.jsx",
       "owner": "UIUX Designer",
-      "sha256": "02a715e80579c1b2cdf8dc20e72d2879a7168b6bf4dc1a90d38ee9b36d8e552c",
-      "previousSHA256": "97c39f8efb0233b64b34eb0ace3c4b37195cbd635a47518bae710cd8b07dc8e9"
+      "sha256": "f92d9735fea6d3c593d8cba02e1193aafb82bf843c0cc5fce3c87c1cdb6f2cac",
+      "previousSHA256": "02a715e80579c1b2cdf8dc20e72d2879a7168b6bf4dc1a90d38ee9b36d8e552c"
     },
     {
       "kind": "modelInspectorStyle",
       "path": "components/model-inspector.module.css",
       "owner": "UIUX Designer",
-      "sha256": "e0ad56c85d0b8e50f8ad1875307c9893654547bdb91df6faddb6b0f564954e26",
-      "previousSHA256": "1508142e51dbe4a32ed9e1a75318d974240bd64318a24068d581c7dd5778cf40"
+      "sha256": "fce1a23ec240f52496ced1eb2f130c31e16dfb2a67b861f3d6f74639bb4ee16b",
+      "previousSHA256": "e0ad56c85d0b8e50f8ad1875307c9893654547bdb91df6faddb6b0f564954e26"
     },
     {
       "kind": "inspectionState",
       "path": "components/inspection-state.mjs",
       "owner": "Motion Designer / 3D Animation Designer",
       "sha256": "b9687f49777c6ff212892705fa5c48a9e546b21b617a3dd9a7e5fc1885b10993"
-    },
-    {
-      "kind": "inspectionCamera",
-      "path": "components/inspection-camera.mjs",
-      "owner": "Animation Cinematographer",
-      "sha256": "84566dfcd170a82f6a55038a2b6870e602f36dd7b195da04844fd3940e157994",
-      "previousSHA256": "f2dad988f2ca88e9ef0c1540ff3bb7e53062ea497a680587bc75a345e233c583"
     },
     {
       "kind": "inspectionSupport",
@@ -223,41 +220,90 @@
       "kind": "inspectionLighting",
       "path": "components/inspection-lighting.mjs",
       "owner": "Lighting Designer / Scene Designer",
-      "sha256": "1d4ebb49f24c42d27ac9799a897cc8f0463c48a5b2dc6078f73b723b796c7677",
-      "previousSHA256": "3aaaaf8d92737b8414248f4cd23fcfe79f7cdebb9cebb33c6e4aaa4a5987b8fd"
+      "sha256": "1d4ebb49f24c42d27ac9799a897cc8f0463c48a5b2dc6078f73b723b796c7677"
     },
     {
       "kind": "globalStyle",
       "path": "app/globals.css",
       "owner": "UIUX Designer",
-      "sha256": "41e1341cd0607f0a1afd557e7b617d70fccbb5bf2cc8bdca7d4fc6abe65e47f0"
+      "sha256": "4d5df3b74758153313d0f36204020a01a29414c125ef67e010bfae8cc7f1f0c6",
+      "previousSHA256": "41e1341cd0607f0a1afd557e7b617d70fccbb5bf2cc8bdca7d4fc6abe65e47f0"
     },
     {
       "kind": "page",
       "path": "app/page.jsx",
       "owner": "UIUX Designer",
-      "sha256": "352644d5c1e56d3ad8536bf8a3c2a0ba94554a6d2274a6d39bb0ffe8d22af9e8",
-      "previousSHA256": "109763e8d1585abce440c8e84c4e04faa1137a8cdaaf857c1974004ab3f046fa"
+      "sha256": "45289457a76c1fb649fbacfc50785cac6320db774dc24d16852f7a59cc7a7ab8",
+      "previousSHA256": "352644d5c1e56d3ad8536bf8a3c2a0ba94554a6d2274a6d39bb0ffe8d22af9e8"
     },
     {
       "kind": "pageStyle",
       "path": "app/page.module.css",
       "owner": "UIUX Designer",
-      "sha256": "b701c2d70616e3193d44773238bc21904c666335a052400b3387234b94d35796",
-      "previousSHA256": "0c7485dd6b8b7388e3a01c2a9f1ed70672578fb2f663494f046cf58feb453f6c"
+      "sha256": "2de76241d681d8184d63777d022c5bf97131e48f692f3fcb11232dbc3144872a",
+      "previousSHA256": "b701c2d70616e3193d44773238bc21904c666335a052400b3387234b94d35796"
     },
     {
       "kind": "inspectorStyle",
       "path": "components/evidence-inspector.module.css",
       "owner": "UIUX Designer",
-      "sha256": "ab84773bb6adde951b8eb5bfe9949ace63a66d798c1fb1e825e5cf23536f61c4",
-      "previousSHA256": "192746dc8a0dfeac9c5598e20f25824bd0c67183617547c90655b92bfb6dbf8c"
+      "sha256": "088cdb36828ae541c2aa68a7d5acb7638724410e8a6b08bd2cf0e9ffd4b20ae2",
+      "previousSHA256": "ab84773bb6adde951b8eb5bfe9949ace63a66d798c1fb1e825e5cf23536f61c4"
     },
     {
       "kind": "backgroundStyle",
       "path": "components/cinematic.module.css",
       "owner": "UIUX Designer / Shared integration",
-      "sha256": "55df7aff3cd24a4514777c60e1ca361b7021ed830e46b22d70f1f8d155d87b22"
+      "sha256": "3fc9ff1db7253a6b6bd9550b6c69e76e638287f25ce9694e6fd7312ba491aec9",
+      "previousSHA256": "55df7aff3cd24a4514777c60e1ca361b7021ed830e46b22d70f1f8d155d87b22"
+    },
+    {
+      "kind": "baseCamera",
+      "path": "components/vendor/cinematic-plan.mjs",
+      "owner": "Animation Cinematographer",
+      "sha256": "dc6dbc064e0ec9a98a937471c2f65cb6f13904c81d2feeaae92bb6067eaa0c88"
+    },
+    {
+      "kind": "playback",
+      "path": "components/chapter-playback.mjs",
+      "owner": "Motion Designer",
+      "sha256": "4f73bf094d28ce339bbddddd2c51868e53bb36963590e4cd885061418ecca918"
+    },
+    {
+      "kind": "chapterScene",
+      "path": "components/chapter-scene-score.mjs",
+      "owner": "Scene Designer / Lighting Designer",
+      "sha256": "8d475975781bef45493c3eb8988c8df1b652f5a3ea954b3dd5f855b935da3d05"
+    },
+    {
+      "kind": "choreography",
+      "path": "components/element-choreography.mjs",
+      "owner": "Motion Designer",
+      "sha256": "61406681f5b6206f625b4b6b966aa8206129c15ec8a7b170a4396adda42bc19b"
+    },
+    {
+      "kind": "sourceDiagram",
+      "path": "components/SourceDiagram.jsx",
+      "owner": "Information Designer / UIUX Designer",
+      "sha256": "ce4486587f4712616ea765932f3caab571db974b990307714d3598c58adb9125"
+    },
+    {
+      "kind": "sourceDiagramStyle",
+      "path": "components/source-diagram.module.css",
+      "owner": "Shared integration",
+      "sha256": "7e470f6aa567bf97a4714cb35fb63b3db123667ada1a2c99540ac9a15b00e02e"
+    },
+    {
+      "kind": "input",
+      "path": "components/story-input.js",
+      "owner": "Shared integration",
+      "sha256": "6759f44b39f524dcc1efea73931e622dbb571fca93be5a3b2db7bc6529693866"
+    },
+    {
+      "kind": "layout",
+      "path": "app/layout.jsx",
+      "owner": "Shared integration",
+      "sha256": "4282e9e59219b6d8a22b912bbcb6c3a816530a514c100e52779581298d3ce366"
     }
   ],
   "mobilePoster": {
@@ -308,13 +354,14 @@
       "msaaSamples": 0,
       "shadow": false,
       "defocus": false,
-      "ascii": false,
+      "ascii": true,
       "geometryUnchanged": true,
       "highlightDiffusion": false,
       "exhibitionMeshDraws": 1,
-      "rectangularAreaLights": 2
+      "rectangularAreaLights": 2,
+      "asciiNote": "Independent evolving decorative field at 0.6 of Full weight; source geometry remains unchanged."
     },
-    "measurementNote": "Previous renderer counters remain in revision history; Round 05 claims visual/browser acceptance, not new GPU timings."
+    "measurementNote": "Autonomous playback intentionally renders while active. Pause/Reduced/hidden states stop authored time; no physical-phone GPU timing claim."
   },
   "transport": {
     "modelAndHDRRawBytes": 8495096,
@@ -322,15 +369,24 @@
     "mobileTargetBytes": 2097152,
     "mobileTargetMet": false,
     "triangleTarget": 150000,
-    "triangleTargetMet": false
+    "triangleTargetMet": false,
+    "sourceDiagramModelRawBytes": 3467136,
+    "sourceDiagramModelGzipBytes": 3067420,
+    "vectorAndContextRawBytes": 4955732,
+    "vectorAndContextGzipEstimateBytes": 2384952,
+    "fontRawBytes": 343088,
+    "allAllowlistedAssetsRawBytes": 20062019,
+    "measurementNote": "Original assembly/HDR delivery measurement is historical. New GLB gzip and per-file derivative gzip sizes are offline compression measurements, not measured network transfer or simultaneous page requests. Added source fidelity raises the existing mobile budget overrun; physical phones are not certified."
   },
-  "workingEvidence": "roles/uiux-designer/cases/bending-active-thesis/verification/round05 (git-ignored local validation)",
-  "validationRecord": "ROUND_05_VERIFICATION.md",
+  "workingEvidence": "D:/JosHsuan_Website/_work/bending-active-thesis/round-06 (private source audit, preparation and verification; not a build input)",
+  "validationRecord": "ROUND_06_VERIFICATION.md",
   "publicRelease": {
     "authority": "docs/decisions/0006-public-thesis-pages.md",
     "manifest": "release/manifest.json",
-    "runtimeChange": "Round 05 continuous reading spring and content stops drive DOM, camera, source layers and source-fixed light. FORM model controls and source evidence are inline. Native focus, keyboard, hash and history positions remain reachable; existing public story, source geometry, materials and asset allowlist are unchanged.",
-    "storySHA256": "4df944efbfca4421457eb2205cdaad9d8c2990adc921c5e95415f9012f77ad32"
+    "runtimeChange": "Round 06 adds autonomous chapter playback, matched original-source representations, interactive source-native SVG diagrams, direct source hit interaction, IBM Plex and rounded semantic shadowboxes. One Canvas and one final camera writer preserve native reading, static fallbacks and the unchanged approved story.",
+    "storySHA256": "4df944efbfca4421457eb2205cdaad9d8c2990adc921c5e95415f9012f77ad32",
+    "approvedAssets": 36,
+    "artifactFiles": 80
   },
   "history": [
     {
@@ -1141,6 +1197,414 @@
           "limit": "Frame counters, not GPU timings; program count includes retained variants"
         }
       }
+    },
+    {
+      "schemaVersion": 6,
+      "role": "public-case-integration",
+      "runtimeImportsFromOtherRoles": false,
+      "copies": [
+        {
+          "kind": "Adapted shared-stage camera with combined source bounds",
+          "localPath": "components/vendor/cinematic-plan.mjs",
+          "sourcePath": "roles/animation-cinematographer/src/bending-active/cinematic-plan.mjs",
+          "sha256": "dc6dbc064e0ec9a98a937471c2f65cb6f13904c81d2feeaae92bb6067eaa0c88",
+          "byteIdentical": false,
+          "sourceSHA256": "18a46d178734aa0d34553fc88c8d6f25fdbf605330a799119b8082b386df6712",
+          "adaptation": "Consume the shared response score without a second hold curve; revise mobile FORM placement. Historical shell hull is revision-gated and unused for current model. Public release removes the unused private hull dependency. Round 03 adds per-shot crop/absence intent and raises the desktop SYSTEM model above the evidence strip."
+        },
+        {
+          "kind": "deterministic camera",
+          "localPath": "components/vendor/camera-plan.mjs",
+          "sourcePath": "roles/animation-cinematographer/src/bending-active/camera-plan.mjs",
+          "sha256": "024ccc9692d591e532e15fbcd964a95898376244b229b2a6de6f0c705e6a7a71",
+          "byteIdentical": true
+        },
+        {
+          "kind": "WebGL material adapter",
+          "localPath": "components/materials/inspection-material.js",
+          "sourcePath": "roles/3d-artist/src/materials/inspection-material.js",
+          "sha256": "600d1f7ef56a7cfe9feb26a23a16aa8fdadfca9b3022f08987adc416b01022d5",
+          "byteIdentical": true
+        },
+        {
+          "kind": "MIT noise wrapper",
+          "localPath": "components/materials/vendor/noise2D.js",
+          "sourcePath": "roles/3d-artist/src/materials/vendor/noise2D.js",
+          "sha256": "abe417c75af6356959ac26e88d6d635f7815cc102a2bc5a11de3fa85b62e07e7",
+          "byteIdentical": true
+        },
+        {
+          "kind": "CC0 lighting",
+          "localPath": "public/assets/studio-small.hdr",
+          "sourcePath": "roles/3d-artist/assets/studio_small_09_1k.hdr",
+          "sha256": "e7cfda5f4e98e623db12b8bfd0184e048488e4855d9c83e2751fb44a32e80c45",
+          "byteIdentical": true
+        }
+      ],
+      "rootDependencyChanges": false,
+      "ownerSavedPreferences": "Actual original-browser Saved typography not recovered; pending source evidence. No font is claimed as owner-selected.",
+      "externalSources": [
+        {
+          "url": "https://polyhaven.com/a/studio_small_09",
+          "author": "Sergej Majboroda",
+          "license": "CC0-1.0",
+          "local": "public/assets/studio-small.hdr"
+        },
+        {
+          "url": "https://github.com/stegu/webgl-noise/tree/22434e04d7753f7e949e8d724ab3da2864c17a0f",
+          "license": "MIT",
+          "notice": "public/licenses/webgl-noise-MIT.txt"
+        }
+      ],
+      "revision": "round-05-continuous-reading-inline-study",
+      "currentRuntime": {
+        "camera": "components/vendor/cinematic-plan.mjs",
+        "material": "components/materials/cinematic-material.js",
+        "controller": "components/CinematicExperience.jsx",
+        "scene": "components/CinematicScene.jsx",
+        "response": "components/story-response.mjs",
+        "elements": "components/element-score.mjs",
+        "lightingAndStage": "components/scene-direction.mjs",
+        "optics": "components/optical-score.mjs",
+        "compositor": "components/scene-compositor.mjs",
+        "editorial": "components/editorial-score.mjs",
+        "exhibition": "components/exhibition-stage.mjs",
+        "evidenceInspector": "components/EvidenceInspector.jsx",
+        "modelInspector": "components/ModelInspector.jsx",
+        "modelInspectorStyle": "components/model-inspector.module.css",
+        "inspectionState": "components/inspection-state.mjs",
+        "inspectionCamera": "components/inspection-camera.mjs",
+        "inspectionSupport": "components/inspection-framing-support.mjs",
+        "inspectionLighting": "components/inspection-lighting.mjs",
+        "globalStyle": "app/globals.css",
+        "page": "app/page.jsx",
+        "pageStyle": "app/page.module.css",
+        "inspectorStyle": "components/evidence-inspector.module.css",
+        "backgroundStyle": "components/cinematic.module.css"
+      },
+      "cinematicMaterial": {
+        "owner": "3D Artist",
+        "localPath": "components/materials/cinematic-material.js",
+        "sha256": "ebc733481d581df83b5ecdc33b5cd1e8a0d4b42dcd45f76d77f0abea7ec2c653",
+        "derivedFrom": "Original role material studies, now source-local brushed satin physical metal with anisotropy",
+        "newTextures": false
+      },
+      "controllerHash": "df74a29a78dee3305b4b390230a79b4fb57a772a6d6fac3ee236bc38639b7547",
+      "sceneHash": "ad48b63170e3122e8b5804bc68242e571a0b854cde0444b664e0fbeb7adfc2d1",
+      "poster": {
+        "path": "release/public/assets/cinematic/model-poster.webp",
+        "sha256": "931181ca2b0722d27f41bddbf60121c5d058d4297bd809aee9eb2fec68d377e7",
+        "operation": "Round 03 actual FORM scene-only capture, source geometry and procedural exhibition, sharp static optics; D-first preparation"
+      },
+      "modelSHA256": "ff112b90be104cca7e3705b5eee481ba3973d25e2f3d4a7350faa2f732cae47e",
+      "legacyCopies": "Earlier camera/inspection/noise entries document the initial boxed viewer and are not loaded by the cinematic route.",
+      "privateFramingData": {
+        "localPath": "components/vendor/framing-hull.private.mjs",
+        "sha256": "9e2238b630f79be4ec408ed0543b13437721c05c29872ce0abd67f0e8cfdeb36",
+        "gitIgnored": true,
+        "scope": "Explicit D-first local geometry derivative handoff",
+        "sampleEquivalenceCount": 435,
+        "currentUse": "Removed from current runtime; retained only as ignored historical local evidence."
+      },
+      "reviewedAt": "2026-10-08",
+      "runtimeRecords": [
+        {
+          "kind": "camera",
+          "path": "components/vendor/cinematic-plan.mjs",
+          "owner": "Animation Cinematographer",
+          "sha256": "dc6dbc064e0ec9a98a937471c2f65cb6f13904c81d2feeaae92bb6067eaa0c88"
+        },
+        {
+          "kind": "material",
+          "path": "components/materials/cinematic-material.js",
+          "owner": "3D Artist",
+          "sha256": "ebc733481d581df83b5ecdc33b5cd1e8a0d4b42dcd45f76d77f0abea7ec2c653"
+        },
+        {
+          "kind": "controller",
+          "path": "components/CinematicExperience.jsx",
+          "owner": "UIUX Designer / Motion Designer",
+          "sha256": "df74a29a78dee3305b4b390230a79b4fb57a772a6d6fac3ee236bc38639b7547",
+          "previousSHA256": "15f8ddc51be5d523fc591644b41016c142a37e0ab45c8926b87558d85ff26791"
+        },
+        {
+          "kind": "scene",
+          "path": "components/CinematicScene.jsx",
+          "owner": "Shared integration; one final property writer",
+          "sha256": "ad48b63170e3122e8b5804bc68242e571a0b854cde0444b664e0fbeb7adfc2d1",
+          "previousSHA256": "7079198ba5b7d45cc0bf1ef8f6097b6e4768aaf378fbcbbeab921e63e49c91bf"
+        },
+        {
+          "kind": "response",
+          "path": "components/story-response.mjs",
+          "owner": "Motion Designer",
+          "sha256": "682a0799f7ab9ff937ebbda3dfe398f398dfdf3f00cbba0fa710be80db969de3",
+          "previousSHA256": "8bb8666549b968036d9a9d10aee4fa32e026f1b04f878264beb905f73e51b8d5"
+        },
+        {
+          "kind": "elements",
+          "path": "components/element-score.mjs",
+          "owner": "3D Animation Designer",
+          "sha256": "f9bcdc80e2b1d6d2883babb8472035743de1276f52390dfc1a67a6fa5cb56e04"
+        },
+        {
+          "kind": "lightingAndStage",
+          "path": "components/scene-direction.mjs",
+          "owner": "Lighting Designer / Scene Designer",
+          "sha256": "f9911315a84c51fcaece92e7541667e37b875b731069049623e20c7acda23452"
+        },
+        {
+          "kind": "optics",
+          "path": "components/optical-score.mjs",
+          "owner": "Animation Cinematographer",
+          "sha256": "d248dddd37e75ee59387fa7ceb9d10c1e6df5736ec3d4d09b5a9413e40b389f2"
+        },
+        {
+          "kind": "compositor",
+          "path": "components/scene-compositor.mjs",
+          "owner": "3D Artist",
+          "sha256": "e2265e5ab1a6669e63c1eee37c456cf977a1b72fa19b82c40a07df8abb13288b"
+        },
+        {
+          "kind": "editorial",
+          "path": "components/editorial-score.mjs",
+          "owner": "Motion Designer",
+          "sha256": "965754c96ae6f48e0c95292999bf1ea130be65ca7a3f1b67b5b1488a39f7694d",
+          "previousSHA256": "cab5e98e201d40d323172d2092aa6db6f6cf2dece4510caae144b8caf88ec8b1"
+        },
+        {
+          "kind": "exhibition",
+          "path": "components/exhibition-stage.mjs",
+          "owner": "Scene / Lighting Designer",
+          "sha256": "909544b4b63f2e7bf073abe2ea587997e7af4c6133db390489ae545d977530b9",
+          "previousSHA256": "9cf547e25c4d14c05bbbaf7304944b1f988845d98da5332790ad3008880353d7"
+        },
+        {
+          "kind": "evidenceInspector",
+          "path": "components/EvidenceInspector.jsx",
+          "owner": "UIUX Designer",
+          "sha256": "f011f01a71585e31d7f16ce7e40547dab6ba35807ac17387fc167d6e6994c80e",
+          "previousSHA256": "3c310d1d4576b8d1b112855ed4eb1d295c83eb648099349c31b1b211ecc15112"
+        },
+        {
+          "kind": "modelInspector",
+          "path": "components/ModelInspector.jsx",
+          "owner": "UIUX Designer",
+          "sha256": "02a715e80579c1b2cdf8dc20e72d2879a7168b6bf4dc1a90d38ee9b36d8e552c",
+          "previousSHA256": "97c39f8efb0233b64b34eb0ace3c4b37195cbd635a47518bae710cd8b07dc8e9"
+        },
+        {
+          "kind": "modelInspectorStyle",
+          "path": "components/model-inspector.module.css",
+          "owner": "UIUX Designer",
+          "sha256": "e0ad56c85d0b8e50f8ad1875307c9893654547bdb91df6faddb6b0f564954e26",
+          "previousSHA256": "1508142e51dbe4a32ed9e1a75318d974240bd64318a24068d581c7dd5778cf40"
+        },
+        {
+          "kind": "inspectionState",
+          "path": "components/inspection-state.mjs",
+          "owner": "Motion Designer / 3D Animation Designer",
+          "sha256": "b9687f49777c6ff212892705fa5c48a9e546b21b617a3dd9a7e5fc1885b10993"
+        },
+        {
+          "kind": "inspectionCamera",
+          "path": "components/inspection-camera.mjs",
+          "owner": "Animation Cinematographer",
+          "sha256": "84566dfcd170a82f6a55038a2b6870e602f36dd7b195da04844fd3940e157994",
+          "previousSHA256": "f2dad988f2ca88e9ef0c1540ff3bb7e53062ea497a680587bc75a345e233c583"
+        },
+        {
+          "kind": "inspectionSupport",
+          "path": "components/inspection-framing-support.mjs",
+          "owner": "Geometry Engineer / Animation Cinematographer",
+          "sha256": "84e5c828e4a788577d6ca8a29eb539332b284763a2087a48a44abc2bca96c53a"
+        },
+        {
+          "kind": "inspectionLighting",
+          "path": "components/inspection-lighting.mjs",
+          "owner": "Lighting Designer / Scene Designer",
+          "sha256": "1d4ebb49f24c42d27ac9799a897cc8f0463c48a5b2dc6078f73b723b796c7677",
+          "previousSHA256": "3aaaaf8d92737b8414248f4cd23fcfe79f7cdebb9cebb33c6e4aaa4a5987b8fd"
+        },
+        {
+          "kind": "globalStyle",
+          "path": "app/globals.css",
+          "owner": "UIUX Designer",
+          "sha256": "41e1341cd0607f0a1afd557e7b617d70fccbb5bf2cc8bdca7d4fc6abe65e47f0"
+        },
+        {
+          "kind": "page",
+          "path": "app/page.jsx",
+          "owner": "UIUX Designer",
+          "sha256": "352644d5c1e56d3ad8536bf8a3c2a0ba94554a6d2274a6d39bb0ffe8d22af9e8",
+          "previousSHA256": "109763e8d1585abce440c8e84c4e04faa1137a8cdaaf857c1974004ab3f046fa"
+        },
+        {
+          "kind": "pageStyle",
+          "path": "app/page.module.css",
+          "owner": "UIUX Designer",
+          "sha256": "b701c2d70616e3193d44773238bc21904c666335a052400b3387234b94d35796",
+          "previousSHA256": "0c7485dd6b8b7388e3a01c2a9f1ed70672578fb2f663494f046cf58feb453f6c"
+        },
+        {
+          "kind": "inspectorStyle",
+          "path": "components/evidence-inspector.module.css",
+          "owner": "UIUX Designer",
+          "sha256": "ab84773bb6adde951b8eb5bfe9949ace63a66d798c1fb1e825e5cf23536f61c4",
+          "previousSHA256": "192746dc8a0dfeac9c5598e20f25824bd0c67183617547c90655b92bfb6dbf8c"
+        },
+        {
+          "kind": "backgroundStyle",
+          "path": "components/cinematic.module.css",
+          "owner": "UIUX Designer / Shared integration",
+          "sha256": "55df7aff3cd24a4514777c60e1ca361b7021ed830e46b22d70f1f8d155d87b22"
+        }
+      ],
+      "mobilePoster": {
+        "path": "release/public/assets/cinematic/model-poster-mobile.webp",
+        "sha256": "b133e25443df7926f8b5b4fcf354765f371c3417e0662a0635b917f4546e8d24",
+        "operation": "Round 03 actual FORM scene-only capture, source geometry and procedural exhibition, sharp static optics; D-first preparation",
+        "viewport": [
+          390,
+          844
+        ]
+      },
+      "previousModelSHA256": "c56dfda835e6538ad360f76967ba65603ff48d055228a7d400a2293554bbb058",
+      "model": {
+        "path": "release/public/assets/source-layers.glb",
+        "metadata": "release/public/assets/source-layers.json",
+        "metadataSHA256": "355633399d5cb38d8b340fe96a53314dca6d1f88b87cbdb6b3167a5ad81610ea",
+        "sourceRevision": "c12ca628488a4449ea587965410d7df6baa815b36397c8344e2e14a3f533b14c",
+        "vertices": 172789,
+        "triangles": 227521,
+        "sourceObjects": 51,
+        "baseObjects": 50,
+        "layers": [
+          "shell",
+          "base-lower",
+          "base-upper"
+        ],
+        "rawBytes": 6879848,
+        "gitIgnored": false,
+        "publishable": true,
+        "authority": "docs/decisions/0006-public-thesis-pages.md"
+      },
+      "quality": {
+        "full": {
+          "dprCap": 1.25,
+          "msaaSamples": 2,
+          "resolveDepth": true,
+          "keyShadowMap": 1024,
+          "highlightDiffusion": true,
+          "diffusionPasses": 2,
+          "totalComposerPasses": 4,
+          "exhibitionMeshDraws": 3,
+          "exhibitionTriangles": 324,
+          "rectangularAreaLights": 2,
+          "extraShadowMaps": 0
+        },
+        "light": {
+          "dprCap": 1,
+          "msaaSamples": 0,
+          "shadow": false,
+          "defocus": false,
+          "ascii": false,
+          "geometryUnchanged": true,
+          "highlightDiffusion": false,
+          "exhibitionMeshDraws": 1,
+          "rectangularAreaLights": 2
+        },
+        "measurementNote": "Previous renderer counters remain in revision history; Round 05 claims visual/browser acceptance, not new GPU timings."
+      },
+      "transport": {
+        "modelAndHDRRawBytes": 8495096,
+        "modelAndHDRGzipBodyBytes": 4717754,
+        "mobileTargetBytes": 2097152,
+        "mobileTargetMet": false,
+        "triangleTarget": 150000,
+        "triangleTargetMet": false
+      },
+      "workingEvidence": "roles/uiux-designer/cases/bending-active-thesis/verification/round05 (git-ignored local validation)",
+      "validationRecord": "ROUND_05_VERIFICATION.md",
+      "publicRelease": {
+        "authority": "docs/decisions/0006-public-thesis-pages.md",
+        "manifest": "release/manifest.json",
+        "runtimeChange": "Round 05 continuous reading spring and content stops drive DOM, camera, source layers and source-fixed light. FORM model controls and source evidence are inline. Native focus, keyboard, hash and history positions remain reachable; existing public story, source geometry, materials and asset allowlist are unchanged.",
+        "storySHA256": "4df944efbfca4421457eb2205cdaad9d8c2990adc921c5e95415f9012f77ad32"
+      },
+      "posters": [
+        {
+          "path": "release/public/assets/cinematic/model-poster-mobile.webp",
+          "sha256": "b133e25443df7926f8b5b4fcf354765f371c3417e0662a0635b917f4546e8d24",
+          "operation": "Round 03 actual FORM scene-only capture, source geometry and procedural exhibition, sharp static optics; D-first preparation"
+        },
+        {
+          "path": "release/public/assets/cinematic/model-poster.webp",
+          "sha256": "931181ca2b0722d27f41bddbf60121c5d058d4297bd809aee9eb2fec68d377e7",
+          "operation": "Round 03 actual FORM scene-only capture, source geometry and procedural exhibition, sharp static optics; D-first preparation"
+        }
+      ],
+      "round03Authority": "roles/experience-director/research/ROUND_03_DIRECTION.md",
+      "runtimeHashConvention": "SHA-256 of committed Git blob bytes; historical entries preserve their original evidence convention.",
+      "round04Authority": "roles/experience-director/research/ROUND_04_PLAN.md",
+      "inspection": {
+        "entries": [
+          "FORM inline study"
+        ],
+        "canvasInstances": 1,
+        "secondaryAnimationLoops": 0,
+        "separation": "Shared rigid source-relative offsets; no inferred fabrication sequence",
+        "lighting": [
+          "studio",
+          "raking"
+        ],
+        "materialAndExposure": "Same existing satin PBR and exposure for all light comparisons",
+        "effects": {
+          "strategy": "Optical strength fades continuously with study influence",
+          "atFullStudy": {
+            "depthOfField": false,
+            "ascii": false,
+            "blackMist": false
+          }
+        },
+        "camera": {
+          "verticalFov": 36,
+          "fixedEnvelope": "Original and maximum separation for the full manual range",
+          "framingPoints": 514,
+          "paddingFraction": 0.03,
+          "sourceSHA256": "ff112b90be104cca7e3705b5eee481ba3973d25e2f3d4a7350faa2f732cae47e",
+          "generatedBy": "scripts/prepare-inspection-framing.mjs",
+          "preparation": "D-first, explicitly reads only the approved public release GLB and metadata",
+          "tests": {
+            "actualSourceCases": 105,
+            "projectedVertices": 18142845
+          },
+          "framingContract": "Full fixed-envelope support at study weight 1; intentional crop during continuous entry/exit",
+          "transition": "Shortest-path direction and projection-scale FOV interpolation from the authored story pose",
+          "slot": "Measured viewport-clear rectangle clipped around fixed navigation and the study hint"
+        },
+        "reducedMotion": "Explicit manual activation remains available; numeric responses become immediate",
+        "shadows": "Existing 1024 map updates only when source placement or light state changes; camera-only study orbit reuses it",
+        "input": "Mouse/keyboard bounded view input; native touch pan; retained choices across reverse scrolling"
+      },
+      "round05Authority": "roles/experience-director/research/ROUND_05_DIRECTION.md",
+      "typography": {
+        "status": "awaiting-original-saved-evidence",
+        "sourceKey": "uiux-material-review-v1",
+        "exportName": "uiux-discussion-choices.json",
+        "fontChanges": false,
+        "automatedFixturesExcluded": true
+      },
+      "continuousReading": {
+        "coordinate": "CSS pixels in natural document flow",
+        "spring": "one analytical critical reading response",
+        "oneWriter": true,
+        "perFrameReactState": false,
+        "holds": "Measured heading/prose/figure reading stops with continuous monotone shoulders; multiple stops for long phone content",
+        "localFeedback": "Bounded text/image perspective and focus feedback in the existing controller tick",
+        "nativeSemantics": "Natural-position seeks for initial hashes, focus, keyboard paging, exact per-entry history and resume",
+        "evidence": "Inline original-page comparison without modal or body scroll lock"
+      }
     }
   ],
   "posters": [
@@ -1160,51 +1624,45 @@
   "round04Authority": "roles/experience-director/research/ROUND_04_PLAN.md",
   "inspection": {
     "entries": [
-      "FORM inline study"
+      "FORM actual-source surface",
+      "SYSTEM actual-source surface",
+      "PATTERN actual-source surface"
     ],
     "canvasInstances": 1,
     "secondaryAnimationLoops": 0,
-    "separation": "Shared rigid source-relative offsets; no inferred fabrication sequence",
-    "lighting": [
-      "studio",
-      "raking"
-    ],
-    "materialAndExposure": "Same existing satin PBR and exposure for all light comparisons",
-    "effects": {
-      "strategy": "Optical strength fades continuously with study influence",
-      "atFullStudy": {
-        "depthOfField": false,
-        "ascii": false,
-        "blackMist": false
-      }
-    },
+    "modelParameterPanel": false,
+    "input": "Actual source mesh raycast for hover/click/drag; Enter compares, arrows turn, Escape/blur returns, native touch pan remains available. Chapter leave releases engagement.",
+    "representationPolicy": "Four original representations in FORM/SYSTEM, three original experiments in PATTERN; matched family envelope, no topology morph or new analysis.",
+    "manualSelectionPinActiveSeconds": 8,
     "camera": {
-      "verticalFov": 36,
-      "fixedEnvelope": "Original and maximum separation for the full manual range",
-      "framingPoints": 514,
       "paddingFraction": 0.03,
-      "sourceSHA256": "ff112b90be104cca7e3705b5eee481ba3973d25e2f3d4a7350faa2f732cae47e",
-      "generatedBy": "scripts/prepare-inspection-framing.mjs",
-      "preparation": "D-first, explicitly reads only the approved public release GLB and metadata",
-      "tests": {
-        "actualSourceCases": 105,
-        "projectedVertices": 18142845
-      },
-      "framingContract": "Full fixed-envelope support at study weight 1; intentional crop during continuous entry/exit",
-      "transition": "Shortest-path direction and projection-scale FOV interpolation from the authored story pose",
-      "slot": "Measured viewport-clear rectangle clipped around fixed navigation and the study hint"
+      "fitOrder": "Resolve chapter cues, pointer/manual orbit and final lens before fitting verified family support.",
+      "fixedEnvelope": "Exact convex source supports unioned per family; all source transforms identity.",
+      "actualSourceProjectionCases": 825,
+      "minimumVerifiedMarginPercent": 3.003295,
+      "framingContract": "Full source fit at study weight 1; deliberate crop/absence during authored passage."
     },
-    "reducedMotion": "Explicit manual activation remains available; numeric responses become immediate",
-    "shadows": "Existing 1024 map updates only when source placement or light state changes; camera-only study orbit reuses it",
-    "input": "Mouse/keyboard bounded view input; native touch pan; retained choices across reverse scrolling"
+    "effects": "Full study reduces source optical strength to 20%; independent field and foreground composition continue with essential-core protection. Light disables depth blur/mist; Pause holds and Reduced uses a static beat.",
+    "reducedMotion": "Poster first; explicit model activation permits immediate deliberate source comparison.",
+    "lighting": "Original source-frame preset plus chapter-weighted minimum environment .32 / fill .20 / hemisphere .15; cached shadow key stays fixed during loops."
   },
   "round05Authority": "roles/experience-director/research/ROUND_05_DIRECTION.md",
   "typography": {
-    "status": "awaiting-original-saved-evidence",
-    "sourceKey": "uiux-material-review-v1",
-    "exportName": "uiux-discussion-choices.json",
-    "fontChanges": false,
-    "automatedFixturesExcluded": true
+    "status": "owner-selected-implemented",
+    "families": [
+      "IBM Plex Sans variable",
+      "IBM Plex Mono Regular",
+      "IBM Plex Serif Italic"
+    ],
+    "license": "SIL Open Font License 1.1",
+    "licensePath": "release/public/licenses/ibm-plex-OFL.txt",
+    "selfHosted": true,
+    "oldSavedRecoveryRequired": false,
+    "sourceRevisions": {
+      "sansAndMonoGoogleFonts": "5e8a3ba899557829a76cfdac30fa512bda91d7ca",
+      "serifAndLicenseIBMplex": "763c36ef9117782905ae010056dfbe8fd2653a25"
+    },
+    "processing": "Sans/Mono format conversion only; no outline edits. Exact bytes pinned by release manifest."
   },
   "continuousReading": {
     "coordinate": "CSS pixels in natural document flow",
@@ -1212,8 +1670,96 @@
     "oneWriter": true,
     "perFrameReactState": false,
     "holds": "Measured heading/prose/figure reading stops with continuous monotone shoulders; multiple stops for long phone content",
-    "localFeedback": "Bounded text/image perspective and focus feedback in the existing controller tick",
+    "localFeedback": "One-shot semantic entrances with bounded anticipation/overshoot, plus bounded text/image perspective and focus feedback in the shared controller tick.",
     "nativeSemantics": "Natural-position seeks for initial hashes, focus, keyboard paging, exact per-entry history and resume",
     "evidence": "Inline original-page comparison without modal or body scroll lock"
+  },
+  "round06Authority": "roles/experience-director/research/ROUND_06_DIRECTION.md",
+  "sourceRepresentations": {
+    "path": "release/public/assets/thesis/source-diagrams.glb",
+    "metadata": "release/public/assets/thesis/source-diagrams.json",
+    "sha256": "13fbd10da48e6aa71fe6bfb8c7711741293833f7bba33611f394f9b1543e505a",
+    "geometryTreatment": "Original positions, normals and indices; rigid CAD display-row translations removed, millimetres to metres and positive-determinant Z-up to Y-up rotation applied once. No decimation, remeshing, surface simulation or new curvature calculation.",
+    "axisMapping": "(x,y,z) -> (x,z,-y)",
+    "unitScale": 0.001,
+    "vertices": 129747,
+    "triangles": 240792,
+    "maximumActiveVariantTriangles": 106879,
+    "variants": [
+      {
+        "id": "origami",
+        "vertices": 490,
+        "triangles": 672,
+        "supportPoints": 113,
+        "vertexColors": 0
+      },
+      {
+        "id": "opening",
+        "vertices": 1771,
+        "triangles": 2688,
+        "supportPoints": 133,
+        "vertexColors": 0
+      },
+      {
+        "id": "bending",
+        "vertices": 57526,
+        "triangles": 106879,
+        "supportPoints": 442,
+        "vertexColors": 0
+      },
+      {
+        "id": "curvature",
+        "vertices": 57526,
+        "triangles": 106879,
+        "supportPoints": 442,
+        "vertexColors": 57526
+      },
+      {
+        "id": "experiment-a",
+        "vertices": 3344,
+        "triangles": 6310,
+        "supportPoints": 218,
+        "vertexColors": 0
+      },
+      {
+        "id": "experiment-b",
+        "vertices": 3331,
+        "triangles": 6297,
+        "supportPoints": 129,
+        "vertexColors": 0
+      },
+      {
+        "id": "experiment-c",
+        "vertices": 5759,
+        "triangles": 11067,
+        "supportPoints": 140,
+        "vertexColors": 0
+      }
+    ],
+    "limits": [
+      "The authored color view preserves source vertex colors; the scalar field, units and legend are unavailable.",
+      "Experiments A/B/C are selected original studies; correspondence to named artwork TYPE rows is not established.",
+      "Source face edges are polygon edges, not inferred fabrication seams or crease labels."
+    ]
+  },
+  "sourceDiagrams": {
+    "source": "Authorized original Illustrator vectors and related context images; PSD inspected for source coverage. Full originals remain private.",
+    "representations": [
+      "Miura: three authored groups",
+      "Library: eleven original curves",
+      "Workflow: four source comparison groups"
+    ],
+    "publishedDerivativeFiles": 15,
+    "staticFallbacks": true,
+    "newScientificClaims": false,
+    "workflowSelection": "Deliberate input requests source selection; presented-source event synchronizes highlights without an event feedback loop."
+  },
+  "autonomousPlayback": {
+    "clock": "One active elapsed-time clock with seven retained chapter phases and blended weight snapshots.",
+    "scroll": "Selects chapter and contributes consumed tempo impulse; no wheel is required to advance camera/light/focus/field or diagram emphasis.",
+    "engagement": "Deliberate manipulation and recovery hold authored playback; ordinary hover does not.",
+    "visibility": "Hidden/resume gaps are discarded.",
+    "field": "Independent coherent field with pointer interference; depth/luminance reduces bright-surface overprint, essential DOM core alpha remains zero.",
+    "perFrameReactState": false
   }
 }

@@ -2,15 +2,21 @@
 
 **Public release follow-up — 8 October 2026:** The owner now authorized GitHub Pages publication. The [public release package](release/README.md) supplies a reproducible, explicitly enumerated public build, separate from the historical local inputs described below. The canonical website is `https://joshsuan.github.io/`; use `pnpm build:pages` and `pnpm test:pages` from the repository root. The current camera no longer imports the private legacy shell hull. All previous verification remains dated evidence for that revision; public-release tests validate the publication artifact separately.
 
-Open [the local work page](http://127.0.0.1:4184/). It presents **Bending-Active Metal Panel Deformation**, the NCKU metal-panel thesis, separately from the later T3 bamboo project. This is an owner-authorized local case; the production portfolio and public snapshot remain empty.
+Open [the local work page](http://127.0.0.1:4184/). It presents **Bending-Active Metal Panel Deformation**, the NCKU metal-panel thesis, separately from the later T3 bamboo project. The same case now also has an owner-authorized public release; the reusable portfolio framework and content arrays remain empty.
 
-## Current round 05 — continuous page
+## Current round 06 — autonomous source chapters
 
-The [owner correction and cross-role direction](../../../experience-director/research/ROUND_05_DIRECTION.md) replaces the separate model-study mode with a continuous document. One pixel-space response moves the whole information plane, with measured content stops and bounded text/image perspective. The source camera, layer separation, lighting and editorial channels consume the same visible reading progress.
+The owner's explicit IBM Plex selection and [cross-role direction](../../../experience-director/research/ROUND_06_DIRECTION.md) now drive the published case. Plex Sans, Mono and Serif Italic are self-hosted under the included OFL. Rounded shadowboxes, bounded anticipation/overshoot entrances and orange-inverted photographs provide the information treatment; hover/focus and the source reader reveal unchanged originals.
 
-FORM contains compact View/Layers/Light controls in its natural layout; their influence fades as the slot leaves the viewport and choices survive reverse scrolling. Original source-image comparison opens beside each figure. Neither interaction locks the document or opens a modal. Full source framing is verified at study weight 1; transitions may deliberately crop. Source-fixed Studio/Raking light continues through the story without a separate backdrop switch.
+Each of seven chapters has a closed camera/light/focus score driven by one active clock. Scroll selects chapter passages and contributes tempo, while a stationary chapter continues playing. The independent ASCII field evolves and responds to the pointer. The single Canvas can pass above decorative planes, with transparent, softly feathered protection over essential reading cores. Pause, Reduced, visibility resume and deliberate manipulation retain stable reading.
 
-Keyboard focus, hashes, history and Reduced/Pause retain native reading semantics. Source geometry, story and approved public assets are unchanged. Actual owner Saved typography is still being recovered; the current fonts must not be presented as verified owner preferences. See [Round 05 verification](ROUND_05_VERIFICATION.md).
+FORM and SYSTEM compare four original CAD representations; PATTERN presents three source experiments. Direct hits on the actual geometry invite hover, click and bounded drag, with keyboard and native-touch equivalents. There is no model parameter panel. Original Illustrator paths, labels, clips and context images form the Miura, workflow and eleven-curve library diagrams. Workflow choices coordinate the corresponding actual source representation. Static SVG and original-page comparisons remain available.
+
+All original geometry, authored vertex colors and the existing story keep their evidence limits. No topology morph, structural solver, new curvature calculation or inferred experiment classification is introduced. New assets are enumerated by the public release manifest; full AI/PSD/CAD originals remain private. See [Round 06 verification](ROUND_06_VERIFICATION.md) for results, transfer costs and device limitations.
+
+## Round 05 — historical continuous page
+
+Round 05 introduced the analytical reading response, measured content stops, inline FORM controls and inline original-image comparison. Its source camera and source-fixed light consumed the visible reading progress. Round 06 replaces the parameter controls with direct geometry interaction and adds independent chapter playback. The earlier Saved-font blocker is resolved by the owner's explicit IBM Plex choice. See [Round 05 verification](ROUND_05_VERIFICATION.md).
 
 ## Round 04 — historical model study
 
@@ -62,6 +68,7 @@ Narrative, source figures, models, framing support data and posters are ignored 
 | 3D Artist | Original metal adapter and depth/luminance-driven compositor, ASCII masks and blend rules. |
 | Animation Cinematographer | Source framing, focal length, axial focus racks and reversible scene-only editing. |
 | Geometry Engineer | Exact source selection, units/axis conversion and independent vertex/normal/topology verification. |
+| Information Designer | Source-native diagram semantics, readable vector grouping and source-to-model comparison. |
 | 3D Animation Designer | Three source-derived display layers, explicit rest placement and reversible element offsets. |
 | Motion Designer | Shared analytical response, velocity, energy, holds and interruption rules. |
 | Lighting Designer | Chapter key/fill/rim/hemisphere/environment score and single-shadow ownership. |
