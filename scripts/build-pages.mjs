@@ -36,6 +36,9 @@ const sources = [
   'components/element-score.mjs', 'components/optical-score.mjs', 'components/scene-compositor.mjs',
   'components/scene-direction.mjs', 'components/vendor/cinematic-plan.mjs',
   'components/exhibition-stage.mjs', 'components/editorial-score.mjs',
+  'components/ModelInspector.jsx', 'components/model-inspector.module.css',
+  'components/inspection-state.mjs', 'components/inspection-camera.mjs', 'components/inspection-lighting.mjs',
+  'components/inspection-framing-support.mjs',
   'components/materials/cinematic-material.js', 'release/story.json',
 ];
 for (const relative of sources) {

@@ -1,0 +1,27 @@
+.dialog{position:fixed;inset:0;width:100%;height:100dvh;max-width:none;max-height:none;margin:0;padding:28px 40px 32px;border:0;background:transparent;color:var(--paper);overflow:hidden;grid-template-columns:minmax(0,1fr) 310px;grid-template-rows:auto minmax(0,1fr);gap:24px 32px}
+.dialog[open]{display:grid}.dialog::backdrop{background:transparent}
+.header{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:20px}
+.eyebrow{font: .57rem/1.5 var(--mono);letter-spacing:.13em;color:var(--accent)}
+.header h2{font-size:clamp(2rem,3.5vw,3.5rem);font-weight:400;letter-spacing:-.065em;margin:.3rem 0 0}
+.dialog[data-light-study=silhouette] .header{color:#111b1a}.dialog[data-light-study=silhouette] .eyebrow,.dialog[data-light-study=silhouette] .crosshair{color:#3d2920}.dialog[data-light-study=silhouette] .surface{border-color:#15271f50}
+.dialog button,.dialog select{min-height:44px;padding:.65rem .8rem;background:#0c1313;border:1px solid #899b8e65;font: .66rem/1.35 var(--mono);color:var(--paper)}
+.dialog button:hover{border-color:var(--accent)}.dialog button[aria-pressed=true]{background:#29322a;color:#f4d0b3;border-color:#ff9469a6}
+.header button{min-width:150px}.header button span{margin-left:1rem;color:var(--accent)}
+.surface{position:relative;min-width:0;min-height:0;touch-action:none;cursor:grab;border:1px solid #9faf9a21;border-radius:2px;outline-offset:-3px}
+.surface:active{cursor:grabbing}.surface:focus-visible{outline:1px solid var(--accent)}
+.gesture{position:absolute;left:16px;bottom:10px;font:.57rem/1.7 var(--mono);color:#d0d7cf;background:#090d0de0;padding:8px 10px;pointer-events:none}.gesture span{display:block;color:#9aa79e;font-size:.52rem}
+.crosshair{position:absolute;left:14px;top:8px;color:#ff9469a6;font:1.2rem var(--mono);pointer-events:none}
+.controls{align-self:stretch;overflow-y:auto;overscroll-behavior:contain;padding:20px 22px;background:#0b1010f5;border:1px solid #80927d4a;scrollbar-width:thin}
+.controls fieldset{min-width:0;border:0;border-bottom:1px solid #88998640;padding:0 0 18px;margin:0 0 20px}
+.controls legend{padding:0;margin-bottom:12px;color:#a6bba5;font:.61rem/1.5 var(--mono);letter-spacing:.08em}
+.choices{display:flex;gap:5px;margin-bottom:12px}.choices button{flex:1;padding:.6rem .25rem;font-size:.6rem}
+.range{display:block;margin:12px 0 0}.range>span{display:flex;justify-content:space-between;gap:10px;font-size:.72rem;color:#d3d7d0}.range output{font:.64rem/1.4 var(--mono);color:var(--accent)}
+.range input{width:100%;min-height:34px;margin:1px 0 0;accent-color:#b5c8a7;cursor:ew-resize}
+.endpoints{display:flex;justify-content:space-between;gap:4px}.endpoints button{font-size:.54rem;padding:.5rem;background:transparent;flex:1}
+.note{font-size:.67rem;line-height:1.65;color:#acb8ae;margin:.75rem 0 0}
+.footer{display:flex;justify-content:space-between;gap:10px;align-items:center}.footer label{display:flex;gap:8px;align-items:center;font:.55rem var(--mono)}.footer select{padding:.5rem}
+.disclaimer{font:.55rem/1.7 var(--mono);color:#9caaa0;margin:20px 0 0}
+.fallback{position:absolute;inset:0;display:grid;place-items:center}.fallback img{width:100%;height:100%;object-fit:contain;opacity:.7}.fallback p{position:absolute;max-width:80%;background:#090d0dee;padding:12px;font-size:.8rem;text-align:center}
+@media(max-width:780px){.dialog{padding:16px 16px 12px;gap:14px;grid-template-columns:1fr;grid-template-rows:auto minmax(210px,42dvh) minmax(0,1fr)}.header{gap:10px}.header h2{font-size:2rem}.eyebrow{font-size:.47rem}.header button{min-width:0;padding:.65rem;font-size:.55rem}.header button span{margin-left:.3rem}.surface{grid-row:2}.controls{grid-row:3;padding:16px}.controls fieldset{margin-bottom:14px;padding-bottom:14px}.choices button{font-size:.62rem}.gesture{font-size:.5rem;left:8px;bottom:2px;padding:5px 7px}.gesture span{display:none}.controls legend{margin-bottom:8px}.range{margin-top:7px}.disclaimer{margin-top:12px}}
+@media(max-height:560px) and (min-width:781px){.dialog{padding:12px 24px;gap:10px 20px}.header h2{font-size:1.8rem}}
+@media print{.dialog{display:none!important}}

@@ -252,3 +252,6 @@
 :global(html[data-cinematic-static]) .methodSequence summary>span,:global(html[data-cinematic-static]) .frameCorner{transform:none!important;transition:none}
 @media(prefers-reduced-motion:reduce){.methodSequence summary>span{transform:none!important}}
 @media(min-width:781px){.geometryImage{align-self:end;margin-top:28svh}}
+.studyLink{display:grid;grid-template-columns:1fr auto;gap:6px 20px;max-width:320px;margin:24px 0 0;padding:14px 16px;border:1px solid #a1b29870;background:#17201ac9;text-decoration:none;font-size:.8rem;min-height:64px;transition:border-color .2s,background .2s}
+.studyLink>span:nth-child(2){color:var(--accent);transition:transform .2s}.studyLink small{grid-column:1/-1;font:.53rem/1.5 var(--mono);color:#b9c3b7}
+.studyLink:hover,.studyLink:focus-visible{border-color:var(--accent);background:#243027}.studyLink:hover>span:nth-child(2){transform:translate(2px,-2px)}

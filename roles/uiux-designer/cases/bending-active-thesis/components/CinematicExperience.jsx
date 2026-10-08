@@ -5,6 +5,8 @@ import {createStoryInput} from './story-input';
 import {cinematicProgressFromAnchors, cinematicChapter} from './vendor/cinematic-plan.mjs';
 import {createResponseState, advanceResponse, sampleResponseScore} from './story-response.mjs';
 import {sampleEditorialScore} from './editorial-score.mjs';
+import {createInspectionState, advanceInspection} from './inspection-state.mjs';
+import ModelInspector from './ModelInspector';
 import styles from './cinematic.module.css';
 
 const Scene = dynamic(() => import('./CinematicScene'), {ssr: false});
@@ -17,6 +19,8 @@ class SceneBoundary extends Component {
 
 export default function CinematicExperience() {
   const input = useMemo(createStoryInput, []);
+  const inspection = useMemo(createInspectionState, []);
+  const activateStudy = useCallback(() => setEnabled(true), []);
   const [enabled, setEnabled] = useState(false), [ready, setReady] = useState(false), [failed, setFailed] = useState(false);
   const [still, setStill] = useState(false), [systemReduced, setSystemReduced] = useState(false), [hydrated, setHydrated] = useState(false);
   const [detail, setDetail] = useState('full');
@@ -48,11 +52,18 @@ export default function CinematicExperience() {
     const foreground = sections.map(section => ({lines:[...section.querySelectorAll('[data-heading-line]')], rows:[...section.querySelectorAll('ol > li')]}));
     const response = createResponseState(), history = [];
     let offsets = [], frame = 0, previous = 0, resumed = true, pointer = {x: 0, y: 0}, target = {x: 0, y: 0};
+    let inspectionRevision = input.get().inspectionRevision ?? 0, inspectionActive = false;
     const measure = () => {offsets = sections.map(el => el.getBoundingClientRect().top + scrollY); offsets.push(sections.at(-1).getBoundingClientRect().bottom + scrollY); schedule();};
     const tick = now => {
       frame = 0;
       if (document.hidden) return;
       const state = input.get(), dt = previous ? (now - previous) / 1000 : 1 / 60; previous = now;
+      if (state.inspectionActive) {
+        advanceInspection(inspection, dt, {reducedMotion:state.reduced, resumed}); resumed = false;
+        input.set({inspection:{...inspection.value},inspectionSettled:inspection.settled,pointer:{x:0,y:0},hidden:false});
+        if (!inspection.settled) schedule(); else previous = 0;
+        return;
+      }
       const decorate = fine.matches && !state.reduced;
       const next = decorate ? target : {x: 0, y: 0}, alpha = 1 - Math.exp(-10 * dt);
       pointer = {x: pointer.x + (next.x - pointer.x) * alpha, y: pointer.y + (next.y - pointer.y) * alpha};
@@ -104,18 +115,23 @@ export default function CinematicExperience() {
       if (moving || !response.settled) schedule(); else previous = 0;
     };
     function schedule() {if (!frame && !document.hidden) frame = requestAnimationFrame(tick);}
-    const move = e => {if (e.pointerType !== 'mouse' || !fine.matches || input.get().reduced) return; target = {x: Math.min(1, Math.max(-1, e.clientX / innerWidth * 2 - 1)), y: Math.min(1, Math.max(-1, e.clientY / innerHeight * 2 - 1))}; schedule();};
+    const move = e => {if (e.pointerType !== 'mouse' || !fine.matches || input.get().reduced || input.get().inspectionActive) return; target = {x: Math.min(1, Math.max(-1, e.clientX / innerWidth * 2 - 1)), y: Math.min(1, Math.max(-1, e.clientY / innerHeight * 2 - 1))}; schedule();};
     const reset = () => {target = {x: 0, y: 0}; schedule();};
     const visibility = () => {input.set({hidden: document.hidden}); if (document.hidden) {cancelAnimationFrame(frame); frame = 0; previous = 0; target = {x: 0, y: 0};} else {pointer = {x: 0, y: 0}; resumed = true; measure();}};
     const resize = new ResizeObserver(measure); [...sections, ...protectedElements].forEach(el => resize.observe(el));
     window.addEventListener('scroll', schedule, {passive: true}); window.addEventListener('resize', measure);
     window.addEventListener('pointermove', move, {passive: true}); document.documentElement.addEventListener('pointerleave', reset);
     window.addEventListener('blur', reset); document.addEventListener('visibilitychange', visibility); fine.addEventListener('change', reset);
-    const unsubscribe = input.subscribe(() => {if (input.get().reduced && (pointer.x || pointer.y)) schedule();});
-    window.__story = {inspect: () => ({...response, ...sampleResponseScore(response.visualU), history:[...history], scheduled:!!frame})};
+    const unsubscribe = input.subscribe(() => {
+      const state=input.get();
+      if (!!state.inspectionActive !== inspectionActive) {inspectionActive=!!state.inspectionActive;previous=0;pointer={x:0,y:0};target={x:0,y:0};schedule();}
+      if ((state.inspectionRevision??0)!==inspectionRevision) {inspectionRevision=state.inspectionRevision??0;schedule();}
+      if (state.reduced && (pointer.x || pointer.y || state.inspectionActive && !inspection.settled)) schedule();
+    });
+    window.__story = {inspect: () => ({...response, ...sampleResponseScore(response.visualU), history:[...history], scheduled:!!frame,inspectionActive:!!input.get().inspectionActive,inspection:{target:{...inspection.target},value:{...inspection.value},settled:inspection.settled}})};
     document.documentElement.setAttribute('data-cinematic-ready', ''); measure();
     return () => {cancelAnimationFrame(frame); resize.disconnect(); unsubscribe(); window.removeEventListener('scroll', schedule); window.removeEventListener('resize', measure); window.removeEventListener('pointermove', move); document.documentElement.removeEventListener('pointerleave', reset); window.removeEventListener('blur', reset); document.removeEventListener('visibilitychange', visibility); fine.removeEventListener('change', reset); document.documentElement.removeAttribute('data-cinematic-ready'); delete document.documentElement.dataset.activeChapter; delete window.__story;};
-  }, [input]);
+  }, [input, inspection]);
   // Discrete preference changes also wake the DOM decoration controller once.
   useEffect(() => {window.dispatchEvent(new Event('resize'));}, [still, systemReduced, detail]);
   return <>
@@ -124,14 +140,15 @@ export default function CinematicExperience() {
       <div className={styles.stage} ref={stage} style={{visibility: ready ? 'visible' : 'hidden'}}>
         {enabled && !failed && <SceneBoundary onFailure={onFailure}><Scene input={input} stage={stage} onReady={onReady} onFailure={onFailure} /></SceneBoundary>}
       </div>
-      <div className={styles.vignette} />
-      <div className={styles.scrim} ref={scrim}><div className={styles.scrimLeft} /><div className={styles.scrimRight} /><div className={styles.scrimQuiet} /></div>
+      <div className={styles.vignette} data-cinematic-vignette />
+      <div className={styles.scrim} ref={scrim} data-cinematic-scrim><div className={styles.scrimLeft} /><div className={styles.scrimRight} /><div className={styles.scrimQuiet} /></div>
     </div>
-    {hydrated && <div className={styles.readingTools} data-protect>
+    {hydrated && <div className={styles.readingTools} data-protect data-reading-tools>
       <span ref={status} aria-hidden="true">01 / 07</span>
       <label className={styles.detailLabel}>Visual detail<select aria-label="Visual detail" value={detail} onChange={event => setDetail(event.target.value)}><option value="full">Full</option><option value="light">Light</option></select></label>
       <button type="button" aria-pressed={still || systemReduced || !enabled || failed} disabled={systemReduced || failed} onClick={() => {if (!enabled) {setEnabled(true); setStill(false);} else setStill(value => !value);}}>{failed ? 'Still background' : systemReduced ? 'Reduced motion' : !enabled ? 'Enable 3D' : still ? 'Resume motion' : 'Pause motion'}</button>
     </div>}
+    <ModelInspector input={input} inspection={inspection} activate={activateStudy} ready={ready} failed={failed} detail={detail} setDetail={setDetail}/>
     <div className={styles.progress} aria-hidden="true"><span ref={progress} /></div>
   </>;
 }

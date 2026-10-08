@@ -9,8 +9,11 @@ import {createCinematicMaterial} from './materials/cinematic-material';
 import {sampleOpticalScore} from './optical-score.mjs';
 import {createSceneCompositor} from './scene-compositor.mjs';
 import {sampleSceneDirection, resolveSceneStage} from './scene-direction.mjs';
-import {sampleElementPose, SOURCE_LAYER_REVISION} from './element-score.mjs';
+import {sampleElementPose, sampleSourceSeparation, SOURCE_LAYER_REVISION} from './element-score.mjs';
 import {createExhibitionStage} from './exhibition-stage.mjs';
+import {sampleInspectionPose} from './inspection-camera.mjs';
+import {INSPECTION_FRAMING_SUPPORT} from './inspection-framing-support.mjs';
+import {sampleInspectionLighting} from './inspection-lighting.mjs';
 
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 function disposeObject(object) {
@@ -44,7 +47,7 @@ function World({input, stage, onReady, onFailure}) {
       if (cancelled || results.some(result => result.status === 'rejected')) {
         disposeObject(gltf?.scene); hdr?.dispose(); if (!cancelled) onFailure(); return;
       }
-      const meta = results[2].value, rig = new T.Group(), previousEnvironment = scene.environment, previousFog = scene.fog;
+      const meta = results[2].value, rig = new T.Group(), previousEnvironment = scene.environment, previousFog = scene.fog, previousBackground = scene.background;
       let environment = null, compositor = null, exhibition = null, disposed = false;
       const lights = {}, adapters = [], layers = [];
       cleanup = () => {
@@ -54,7 +57,7 @@ function World({input, stage, onReady, onFailure}) {
         Object.values(lights).forEach(light => light.dispose?.());
         adapters.forEach(adapter => adapter.dispose()); compositor?.dispose();
         if (scene.environment === environment?.texture) scene.environment = previousEnvironment;
-        scene.fog = previousFog; environment?.dispose(); hdr.dispose(); data.current = null;
+        scene.fog = previousFog; scene.background = previousBackground; environment?.dispose(); hdr.dispose(); data.current = null;
       };
       try {
         if (meta.revision !== SOURCE_LAYER_REVISION || meta.viewerUnits !== 'meters' || meta.upAxis !== 'Y' || meta.layers.length !== 3) throw Error('Unexpected source-layer revision or coordinate system.');
@@ -82,7 +85,9 @@ function World({input, stage, onReady, onFailure}) {
         const ground = new T.Mesh(new T.PlaneGeometry(1, 1), groundMaterial); ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; ground.name = 'editorial-ground-not-source-base'; rig.add(ground);
         scene.environment = environment.texture; scene.fog = new T.FogExp2('#091217', .03);
         compositor = createSceneCompositor(gl); exhibition = createExhibitionStage({bounds:meta.bounds}); root.add(gltf.scene, rig, exhibition.group);
-        data.current = {meta, sourceRoot:gltf.scene, exhibition, layers, lights, ground, adapters, compositor, ready: false, failed: false, captions: [...document.querySelectorAll('[data-layer-caption]')], caption: null};
+        const maxBounds=liveBounds(meta,sampleSourceSeparation(1));
+        const inspectionBounds={min:meta.bounds.min.map((v,i)=>Math.min(v,maxBounds.min[i])),max:meta.bounds.max.map((v,i)=>Math.max(v,maxBounds.max[i]))};
+        data.current = {meta, inspectionBounds, previousBackground, studyBackground:new T.Color(), sourceRoot:gltf.scene, exhibition, layers, lights, ground, adapters, compositor, ready: false, failed: false, captions: [...document.querySelectorAll('[data-layer-caption]')], caption: null};
         invalidate();
       } catch (error) {cleanup(); if (!cancelled) {console.error('Local source scene unavailable:', error.message); onFailure();}}
     }).catch(error => {cleanup(); if (!cancelled) {console.error('Local scene initialization failed:', error.message); onFailure();}});
@@ -108,24 +113,30 @@ function World({input, stage, onReady, onFailure}) {
       const debug = overrides.current, stageU = Number.isFinite(debug.stageU) ? clamp(debug.stageU, 0, 1) : state.stageU ?? state.u;
       const visualU = Number.isFinite(debug.visualU) ? clamp(debug.visualU, 0, 1) : state.visualU ?? state.u;
       const reduced = state.reduced, detail = state.detail === 'light' ? 'light' : 'full';
-      const elements = sampleElementPose(stageU, {reducedMotion: reduced});
+      const inspecting=state.inspectionActive && state.inspection;
+      const elements = inspecting ? sampleSourceSeparation(state.inspection.separation) : sampleElementPose(stageU, {reducedMotion: reduced});
       // The single transform writer always applies a source-relative offset to rest.
       d.layers.forEach(layer => {const offset = elements.offsets[layer.id]; layer.node.position.set(layer.rest.x + offset[0], layer.rest.y + offset[1], layer.rest.z + offset[2]);});
-      const bounds = liveBounds(d.meta, elements), direction = sampleSceneDirection(stageU, {reducedMotion: reduced}), stageLayout = resolveSceneStage(bounds, direction);
+      const bounds = liveBounds(d.meta, elements);
+      const direction = inspecting ? sampleInspectionLighting({preset:state.inspection.preset,azimuth:state.inspection.lightAzimuth}) : sampleSceneDirection(stageU, {reducedMotion: reduced});
+      const stageLayout = resolveSceneStage(inspecting ? d.meta.bounds : bounds, direction);
       const pointer = Number.isFinite(debug.stageU) ? {x: 0, y: 0} : state.pointer;
-      const pose = sampleCinematicPose(stageU, size.width / size.height, pointer, {bounds, modelRevision: d.meta.revision, reducedMotion: reduced, sharedStage: true});
-      const optics = sampleOpticalScore({stageU, visualU, energy: state.energy, dwellWeight: state.dwellWeight, aspect: size.width / size.height, reducedMotion: reduced}, pose, {bounds});
+      const storyPose = sampleCinematicPose(stageU, size.width / size.height, pointer, {bounds, modelRevision: d.meta.revision, reducedMotion: reduced, sharedStage: true});
+      const pose = inspecting ? sampleInspectionPose({bounds:d.inspectionBounds,framingSupport:INSPECTION_FRAMING_SUPPORT,aspect:size.width/size.height,azimuth:state.inspection.azimuth,elevation:state.inspection.elevation,viewport:state.inspectionViewport}) : storyPose;
+      const optics = sampleOpticalScore({stageU, visualU, energy: state.energy, dwellWeight: state.dwellWeight, aspect: size.width / size.height, reducedMotion: reduced}, storyPose, {bounds});
       if (Number.isFinite(debug.focalLengthMm)) optics.focalLengthMm = clamp(debug.focalLengthMm, 10, 160);
       const opticalOverrides = {...(debug.optical ?? {})};
-      if (detail === 'light' || reduced) Object.assign(opticalOverrides, {apertureScale: 0, maxBlurPx: 0, asciiWeight: 0, veil: 0, mistStrength:0});
+      if (detail === 'light' || reduced || inspecting) Object.assign(opticalOverrides, {apertureScale: 0, maxBlurPx: 0, asciiWeight: 0, veil: 0, mistStrength:0});
+      if(inspecting)optics.focalLengthMm=optics.filmGaugeMm/Math.max(1,size.width/size.height)/(2*Math.tan(pose.fov*Math.PI/360));
       optics.overrides = opticalOverrides;
       // One final camera write: the lens changes FOV, with no later competing FOV write.
       camera.position.fromArray(pose.position); camera.up.fromArray(pose.up); camera.aspect = size.width / size.height; camera.zoom = 1;
       camera.near = pose.near; camera.far = pose.far; camera.filmGauge = optics.filmGaugeMm; camera.setFocalLength(optics.focalLengthMm);
       camera.setViewOffset(size.width, size.height, size.width * pose.viewOffsetNormalized.x, size.height * pose.viewOffsetNormalized.y, size.width, size.height);
       camera.lookAt(...pose.target); camera.updateProjectionMatrix();
-      d.sourceRoot.visible = reduced || (pose.sourcePresence ?? 1) > 0;
-      const exhibitionState = d.exhibition.update({direction,camera,quality:detail,reducedMotion:reduced,lightSweep:state.editorial?.lightSweep ?? 0});
+      d.sourceRoot.visible = !!inspecting || reduced || (pose.sourcePresence ?? 1) > 0;
+      const exhibitionState = d.exhibition.update({direction,camera,quality:detail,reducedMotion:inspecting?false:reduced,lightSweep:inspecting?0:state.editorial?.lightSweep ?? 0});
+      scene.background=direction.backgroundColor?d.studyBackground.fromArray(direction.backgroundColor):d.previousBackground;
       const keyScale = Number.isFinite(debug.keyIntensityScale) ? clamp(debug.keyIntensityScale, 0, 5) : 1;
       for (const id of ['key', 'fill', 'rim']) {
         const light = d.lights[id], spec = direction[id];
@@ -137,7 +148,10 @@ function World({input, stage, onReady, onFailure}) {
       shadow.camera.left = shadow.camera.bottom = -extent; shadow.camera.right = shadow.camera.top = extent;
       shadow.camera.near = .05; shadow.camera.far = Math.max(20, stageLayout.radius * 10); shadow.camera.updateProjectionMatrix();
       shadow.bias = direction.stage.shadow.bias; shadow.normalBias = direction.stage.shadow.normalBias;
-      gl.shadowMap.enabled = detail === 'full'; d.lights.key.castShadow = detail === 'full'; gl.shadowMap.needsUpdate = detail === 'full';
+      gl.shadowMap.enabled = detail === 'full'; d.lights.key.castShadow = detail === 'full' && direction.key.castShadow !== false;
+      const shadowKey=JSON.stringify([detail,!!inspecting,elements.separationWeight,direction.key.position,stageLayout.center,stageLayout.shadowHalfExtent,d.sourceRoot.visible]);
+      const shadowUpdated=detail==='full'&&shadowKey!==d.shadowKey;
+      gl.shadowMap.autoUpdate=false;gl.shadowMap.needsUpdate=shadowUpdated;d.shadowKey=shadowKey;
       scene.environmentIntensity = direction.environmentIntensity; scene.fog.color.fromArray(direction.haze.color); scene.fog.density = direction.haze.density;
       d.ground.position.fromArray(stageLayout.groundPosition); d.ground.scale.set(...stageLayout.groundSize, 1); d.ground.material.color.fromArray(direction.groundColor); d.ground.material.opacity = direction.groundOpacity;
       d.ground.visible = !direction.stage.exhibitionOwnsFloor;
@@ -147,8 +161,8 @@ function World({input, stage, onReady, onFailure}) {
       const dpr = detail === 'light' ? 1 : Math.min(devicePixelRatio || 1, 1.25); if (gl.getPixelRatio() !== dpr) gl.setPixelRatio(dpr);
       gl.info.reset();
       d.compositor.render(scene, camera, optics, {width: size.width, height: size.height, dpr, samples: detail === 'full' && debug.samples !== 0 ? 2 : 0, protectedRects: debug.protectedRects ?? state.protectedRects ?? []});
-      if (stage.current) stage.current.style.opacity = String(reduced ? .35 : 1);
-      last.current = {pose: {...pose, fov: camera.fov, focalLengthMm: optics.focalLengthMm}, optics, lights: direction, elements, bounds, detail, stageLayout, exhibition:exhibitionState, keyIntensity: d.lights.key.intensity};
+      if (stage.current) stage.current.style.opacity = String(reduced && !inspecting ? .35 : 1);
+      last.current = {mode:inspecting?'inspection':'story',pose: {...pose, fov: camera.fov, focalLengthMm: optics.focalLengthMm}, optics, lights: direction, elements, bounds, detail, stageLayout, exhibition:exhibitionState, shadowUpdated,keyIntensity: d.lights.key.intensity};
       frames.current++;
       if (!d.ready) {d.ready = true; queueMicrotask(onReady);}
     } catch (error) {d.failed = true; console.error('Local scene rendering failed:', error.message); queueMicrotask(onFailure);}

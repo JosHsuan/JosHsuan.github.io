@@ -43,10 +43,10 @@ export default function Page() {
     <CinematicExperience />
     <EvidenceInspector items={evidence} />
     <a href="#main" className={styles.skip}>Skip to the study</a>
-    <header className={styles.masthead} data-protect>
+    <header className={styles.masthead} data-protect data-page-masthead>
       <span className={styles.owner}>{review.owner}<span aria-hidden="true"> / </span><span className={styles.discipline}>RESEARCH</span></span>
     </header>
-    <nav className={styles.chapterRail} aria-label="Study chapters" data-protect>{['overview','form','system','pattern','make','validation','credits'].map((id,index)=><a key={id} href={`#${id}`} data-chapter-link={id}><span>{String(index+1).padStart(2,'0')}</span><span className={styles.railLabel}>{id}</span></a>)}</nav>
+    <nav className={styles.chapterRail} aria-label="Study chapters" data-protect data-story-navigation>{['overview','form','system','pattern','make','validation','credits'].map((id,index)=><a key={id} href={`#${id}`} data-chapter-link={id}><span>{String(index+1).padStart(2,'0')}</span><span className={styles.railLabel}>{id}</span></a>)}</nav>
     <main id="main" className={styles.story} data-story-root>
       <section id="overview" className={[styles.chapter, styles.overview].join(' ')} data-story-chapter="overview" data-layout="left" aria-labelledby="project-title">
         <div className={styles.chapterInner}>
@@ -67,6 +67,7 @@ export default function Page() {
             <Heading number="01" label={story.form.label} lines={story.form.heading} id="form-heading" kind="form" />
             <Paragraphs paragraphs={story.form.paragraphs} />
             <p className={styles.marginNote}>{story.form.aside}</p>
+            <a className={styles.studyLink} href="/assets/cinematic/model-poster.webp" target="_blank" rel="noreferrer" data-open-model-study="form"><span>Explore the model</span><span aria-hidden="true">↗</span><small>View · layers · light</small></a>
           </div>
           <div className={styles.spatialNotation} aria-hidden="true"><span /><p>LOCAL OPENING<br />CONTINUOUS SURFACE</p></div>
         </div>
@@ -79,6 +80,7 @@ export default function Page() {
             <Paragraphs paragraphs={story.system.paragraphs} />
             <ol className={styles.methodSequence}>{story.system.sequence.map((step, index) => <li key={step} style={{'--step-index':index}}><details><summary><span>{String(index + 1).padStart(2, '0')}</span><span>{step}</span><span className={styles.stepArrow} aria-hidden="true">↗</span></summary><p>{methodNotes[index]}</p></details></li>)}</ol>
             <p className={styles.layerCaption} data-layer-caption>Source geometry · original placement</p>
+            <a className={styles.studyLink} href="/assets/cinematic/model-poster.webp" target="_blank" rel="noreferrer" data-open-model-study="system"><span>Compare source layers</span><span aria-hidden="true">↗</span><small>Original placement and display separation</small></a>
           </div>
           <EvidenceImage item={story.media.geometry} className={styles.geometryImage} kind="diagram" />
         </div>
