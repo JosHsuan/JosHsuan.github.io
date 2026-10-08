@@ -95,6 +95,132 @@
       "bytes": 1145,
       "sha256": "bdafce1bb01517c9ae6c4f3620c01340790b5e9d039ae9e356347d1174250916",
       "source": "Existing preserved license notice"
+    },
+    {
+      "path": "assets/fonts/ibm-plex-sans-variable.woff2",
+      "bytes": 230108,
+      "sha256": "ae4c9e3027b5b4453bd0b87ef1015e19d2e1ab9047b2dbbbfe17cd4f2b72fbc6",
+      "source": "IBM Plex, SIL Open Font License 1.1; owner-selected type family. See typography provenance in Round 06 direction."
+    },
+    {
+      "path": "assets/fonts/ibm-plex-mono-regular.woff2",
+      "bytes": 39128,
+      "sha256": "7221189d2813dafe998d43ef063ace70d729d63444d077f165902eb77f299fcc",
+      "source": "IBM Plex, SIL Open Font License 1.1; owner-selected type family. See typography provenance in Round 06 direction."
+    },
+    {
+      "path": "assets/fonts/ibm-plex-serif-italic.woff2",
+      "bytes": 73852,
+      "sha256": "ba5feed9ebae36e3b6ae3486052c90f4f42a294fa67a7c9415985175d19c4c82",
+      "source": "IBM Plex, SIL Open Font License 1.1; owner-selected type family. See typography provenance in Round 06 direction."
+    },
+    {
+      "path": "licenses/ibm-plex-OFL.txt",
+      "bytes": 4456,
+      "sha256": "7e6b2818edbd8f6a01ae80641cc8f16a51080d08fb4e532be3a0b6f74adb07da",
+      "source": "IBM Plex, SIL Open Font License 1.1; owner-selected type family. See typography provenance in Round 06 direction."
+    },
+    {
+      "path": "assets/thesis/source-diagrams.glb",
+      "bytes": 3467136,
+      "sha256": "13fbd10da48e6aa71fe6bfb8c7711741293833f7bba33611f394f9b1543e505a",
+      "source": "Owner-authorized original CAD representations and shape experiments; verified unchanged source geometry, sanitized coordinate transforms and camera hulls."
+    },
+    {
+      "path": "assets/thesis/source-diagrams.json",
+      "bytes": 208057,
+      "sha256": "b2cddb846c2b8b92dc77364e126ae90d15b47a779857b7e6539c098c9ac1546e",
+      "source": "Owner-authorized original CAD representations and shape experiments; verified unchanged source geometry, sanitized coordinate transforms and camera hulls."
+    },
+    {
+      "path": "assets/diagrams/library.json",
+      "bytes": 731424,
+      "sha256": "2f52607547c6b6cbfc144771e6c3de3c8586e64f815d4961d379be3a94aa9e52",
+      "source": "Owner-authorized Illustrator source drawing derivative; original paths/labels and required embedded context, with private metadata excluded."
+    },
+    {
+      "path": "assets/diagrams/library.svg",
+      "bytes": 677728,
+      "sha256": "395060b45c80ecaad8401901b5818c629b9ac75da0242aa91ce11279d3d91c2c",
+      "source": "Owner-authorized Illustrator source drawing derivative; original paths/labels and required embedded context, with private metadata excluded."
+    },
+    {
+      "path": "assets/diagrams/miura-context-1530.png",
+      "bytes": 82971,
+      "sha256": "fd3e4fba9512186395efcee8dc7557ad778f98ec15e4933a7fe8428baf9d9f3e",
+      "source": "Owner-authorized Illustrator source drawing derivative; original paths/labels and required embedded context, with private metadata excluded."
+    },
+    {
+      "path": "assets/diagrams/miura.json",
+      "bytes": 162766,
+      "sha256": "3a1e9a639c92cd0823502f88686b2701d6c2a38575854396e7ef0cc002a6bc25",
+      "source": "Owner-authorized Illustrator source drawing derivative; original paths/labels and required embedded context, with private metadata excluded."
+    },
+    {
+      "path": "assets/diagrams/miura.svg",
+      "bytes": 227326,
+      "sha256": "f7a8d3ade63c014d11f6f6236808eef778759f31d5a86df2786f9216191dbbb4",
+      "source": "Owner-authorized Illustrator source drawing derivative; original paths/labels and required embedded context, with private metadata excluded."
+    },
+    {
+      "path": "assets/diagrams/workflow-context-8378.png",
+      "bytes": 82971,
+      "sha256": "fd3e4fba9512186395efcee8dc7557ad778f98ec15e4933a7fe8428baf9d9f3e",
+      "source": "Owner-authorized Illustrator source drawing derivative; original paths/labels and required embedded context, with private metadata excluded."
+    },
+    {
+      "path": "assets/diagrams/workflow-context-8379.png",
+      "bytes": 69488,
+      "sha256": "c0c4561998778530c424bd9b9e69a8912524d46d19e49fc10f68a0d166bf2652",
+      "source": "Owner-authorized Illustrator source drawing derivative; original paths/labels and required embedded context, with private metadata excluded."
+    },
+    {
+      "path": "assets/diagrams/workflow-context-8382.png",
+      "bytes": 164044,
+      "sha256": "4f190c3a57562184e7468a2a6265314b3b3a296908e1d9734d4b7c6a3b772a21",
+      "source": "Owner-authorized Illustrator source drawing derivative; original paths/labels and required embedded context, with private metadata excluded."
+    },
+    {
+      "path": "assets/diagrams/workflow-context-8383.png",
+      "bytes": 16490,
+      "sha256": "e29a4382a4a040ce8edc56aecfc6f39e209675fb210794fd13294e1b0d8241b5",
+      "source": "Owner-authorized Illustrator source drawing derivative; original paths/labels and required embedded context, with private metadata excluded."
+    },
+    {
+      "path": "assets/diagrams/workflow-context-8384.png",
+      "bytes": 39964,
+      "sha256": "35cae46ee521ab46e785b1d22583bfc314f3a8e897882f52c4fced2709b9e896",
+      "source": "Owner-authorized Illustrator source drawing derivative; original paths/labels and required embedded context, with private metadata excluded."
+    },
+    {
+      "path": "assets/diagrams/workflow-context-8385.png",
+      "bytes": 24005,
+      "sha256": "22478102ae26a7b024787701c924712ee308ca2501ade0713826635cd06b54c9",
+      "source": "Owner-authorized Illustrator source drawing derivative; original paths/labels and required embedded context, with private metadata excluded."
+    },
+    {
+      "path": "assets/diagrams/workflow-context-8386.png",
+      "bytes": 81857,
+      "sha256": "a8bb28e4455ae0ca4056d77835dd964a03138c2ce1483769ab8ec26858d62fe9",
+      "source": "Owner-authorized Illustrator source drawing derivative; original paths/labels and required embedded context, with private metadata excluded."
+    },
+    {
+      "path": "assets/diagrams/workflow-context-8387.png",
+      "bytes": 227046,
+      "sha256": "d80aae755de876741485c086f2efd6d4462ea89e5fefdcfdfe79e920c3a75c7f",
+      "source": "Owner-authorized Illustrator source drawing derivative; original paths/labels and required embedded context, with private metadata excluded."
+    },
+    {
+      "path": "assets/diagrams/workflow.json",
+      "bytes": 666555,
+      "sha256": "787d9cb5ade52e662f7b004bf4405f17ccb63c0ad24c00a095e108be3233858a",
+      "source": "Owner-authorized Illustrator source drawing derivative; original paths/labels and required embedded context, with private metadata excluded."
+    },
+    {
+      "path": "assets/diagrams/workflow.svg",
+      "bytes": 1701097,
+      "sha256": "f57cea2e41531d3172bad08a11d2229d20663c20952d84ab853a317dc52a23ad",
+      "source": "Owner-authorized Illustrator source drawing derivative; original paths/labels and required embedded context, with private metadata excluded."
     }
   ],
   "limits": [
