@@ -1,5 +1,6 @@
 /** Lighting Designer + Scene Designer: an original editorial score.
- * Authored from roles/{lighting-designer,scene-designer}/catalog/chapters.json.
+ * Round 03 supersedes the historical Round 02 catalog's intensity endpoints.
+ * Rationale: roles/scene-designer/research/ROUND_03_STAGE_LIGHT.md.
  * This module samples values only: no Three.js, DOM, timers or property writes.
  * Input is Motion Designer's already-eased stageU, with chapter holds at
  * (index + 0.5) / 7. Do not pass raw native scroll or apply another hold curve.
@@ -13,22 +14,32 @@ const srgbChannelToLinear = value => value <= 0.04045 ? value / 12.92 : ((value 
 const rgb = hex => [1, 3, 5].map(offset => srgbChannelToLinear(parseInt(hex.slice(offset, offset + 2), 16) / 255));
 const clamp = value => Math.max(0, Math.min(1, value));
 
-// Key/rim positions, intensities, environment and contact values follow the
-// reviewed role catalog. A weak opposite fill opens the back-facing shell while
-// the hemisphere provides a quiet ambient floor; neither casts another shadow.
+// Directional lights retain one contact-shadow owner. Broad area lights in the
+// exhibition module now shape the metal; the busy source HDR is only a low fill.
 const authored = [
-  {key: [-3, 3.8, 2.6], keyI: 3.8, rim: [3, 1.5, -2], rimI: 2, tint: '#b5d0e2', fillI: .30, env: .75, contact: .34, halo: .15, base: .70, ground: .25, groundTint: '#141b1e', haze: .037, side: 1},
-  {key: [-2.5, 4.5, 3], keyI: 4.4, rim: [2, 2, -3.5], rimI: 2.2, tint: '#c2d5dd', fillI: .45, env: .90, contact: .38, halo: .10, base: .85, ground: .32, groundTint: '#172024', haze: .030, side: 1},
-  {key: [-4, 2, 1], keyI: 3, rim: [3, 2.8, -1], rimI: 3.1, tint: '#a9cfe1', fillI: .26, env: .65, contact: .28, halo: .20, base: .45, ground: .18, groundTint: '#101d25', haze: .044, side: 1},
-  {key: [-4.5, 1.3, 1.7], keyI: 4.6, rim: [2.5, 1, -3], rimI: 2.5, tint: '#d0e8ed', fillI: .20, env: .55, contact: .24, halo: .26, base: .35, ground: .12, groundTint: '#10191d', haze: .048, side: 1},
-  {key: [3.3, 3.8, 1.5], keyI: 4.2, rim: [-3, 2, -2], rimI: 1.8, tint: '#e0c3a0', fillI: .40, env: .80, contact: .46, halo: .12, base: 1, ground: .42, groundTint: '#272019', haze: .032, side: -1},
-  {key: [-1, 4, 4], keyI: 3.6, rim: [3, 2, -3], rimI: 1.4, tint: '#c4d2d6', fillI: .48, env: .85, contact: .40, halo: .08, base: .80, ground: .35, groundTint: '#192024', haze: .028, side: 1},
-  {key: [-3, 4, 3], keyI: 3.5, rim: [3, 2, -3], rimI: 1.6, tint: '#bdd1d7', fillI: .40, env: .82, contact: .38, halo: .08, base: .80, ground: .30, groundTint: '#141b1e', haze: .030, side: 0},
+  {key: [-3, 3.8, 2.6], keyI: 1.15, rim: [3, 1.5, -2], rimI: .55, tint: '#c8dce8', fillI: .10, env: .19, contact: .34, halo: 0, base: .85, ground: .45, groundTint: '#15191b', haze: .060, side: 1},
+  {key: [-2.5, 4.5, 3], keyI: 1.35, rim: [2, 2, -3.5], rimI: .65, tint: '#d3e1e8', fillI: .15, env: .24, contact: .38, halo: 0, base: 1, ground: .55, groundTint: '#191d1f', haze: .042, side: 1},
+  {key: [-4, 2, 1], keyI: .85, rim: [3, 2.8, -1], rimI: .85, tint: '#afcce0', fillI: .09, env: .17, contact: .28, halo: 0, base: .80, ground: .40, groundTint: '#121a20', haze: .068, side: 1},
+  {key: [-4.5, 1.3, 1.7], keyI: .95, rim: [2.5, 1, -3], rimI: .90, tint: '#cfdfeb', fillI: .08, env: .16, contact: .24, halo: 0, base: .70, ground: .32, groundTint: '#12171c', haze: .076, side: 1},
+  {key: [3.3, 3.8, 1.5], keyI: 1.25, rim: [-3, 2, -2], rimI: .45, tint: '#e8d5bd', fillI: .17, env: .25, contact: .46, halo: 0, base: 1, ground: .60, groundTint: '#1b1b1b', haze: .038, side: -1},
+  {key: [-1, 4, 4], keyI: 1.4, rim: [3, 2, -3], rimI: .40, tint: '#d9e1e4', fillI: .18, env: .28, contact: .40, halo: 0, base: 1, ground: .58, groundTint: '#1a1d1f', haze: .033, side: 1},
+  {key: [-3, 4, 3], keyI: 1.10, rim: [3, 2, -3], rimI: .55, tint: '#cbdde4', fillI: .14, env: .22, contact: .38, halo: 0, base: .95, ground: .48, groundTint: '#15191b', haze: .048, side: 0},
 ].map(value => ({...value, rimColor: rgb(value.tint), groundColor: rgb(value.groundTint)}));
+// Position and size use the ORIGINAL combined source radius, not animated shell
+// separation. Positive Z is toward the camera in an editorial horizontal frame.
+const exhibition = [
+  {key: [-1.15, 1.35, 1.15], size: [2.10, 1.35], keyI: 3.8, rim: [1.20, .90, -.80], rimSize: [.38, 1.70], rimI: 6.0, keyTint: '#fff0da', practical: 1.9, spread: 1.55, wall: '#151e24'},
+  {key: [-.85, 1.65, 1.30], size: [2.50, 1.65], keyI: 4.2, rim: [1.15, 1.10, -.95], rimSize: [.40, 1.85], rimI: 5.2, keyTint: '#fff5e7', practical: 1.6, spread: 1.80, wall: '#1c2327'},
+  {key: [-1.45, 1.10, .65], size: [1.75, 1.50], keyI: 3.6, rim: [1.05, 1.15, -.85], rimSize: [.35, 1.90], rimI: 7.5, keyTint: '#e7f0f6', practical: 2.0, spread: 1.60, wall: '#101c28'},
+  {key: [-1.65, .65, .80], size: [1.15, 1.80], keyI: 4.0, rim: [1.20, .80, -.80], rimSize: [.26, 1.65], rimI: 8.0, keyTint: '#e9edf5', practical: 2.2, spread: 1.45, wall: '#131c29'},
+  {key: [.95, 1.55, 1.35], size: [2.60, 1.75], keyI: 4.6, rim: [-1.20, .95, -.95], rimSize: [.60, 1.60], rimI: 3.5, keyTint: '#ffebd2', practical: .75, spread: 1.95, wall: '#23211e'},
+  {key: [-.60, 1.75, 1.20], size: [2.80, 1.80], keyI: 4.8, rim: [1.15, 1.10, -.85], rimSize: [.70, 1.65], rimI: 3.8, keyTint: '#fff7ed', practical: .60, spread: 2.05, wall: '#1d2327'},
+  {key: [-1.05, 1.40, 1.30], size: [2.30, 1.50], keyI: 4.2, rim: [1.20, 1.00, -.85], rimSize: [.45, 1.80], rimI: 4.8, keyTint: '#fff1df', practical: 1.35, spread: 1.80, wall: '#141d23'},
+].map(value => ({...value, keyColor: rgb(value.keyTint), wallColor: rgb(value.wall)}));
 const keyColor = rgb('#fff2df');
 const fillColor = rgb('#bfdaef');
 const hemisphereGround = rgb('#161b20');
-const backdropColor = rgb('#091217');
+const backdropColor = rgb('#060b0f');
 
 function blendAt(stageU) {
   const slot = Math.max(0, Math.min(6, stageU * 7 - 0.5));
@@ -52,6 +63,7 @@ export function sampleSceneDirection(stageU, {reducedMotion = false} = {}) {
   const keyPosition = mixVector(a.key, b.key, t), fillIntensity = mix(a.fillI, b.fillI, t);
   const color = mixVector(a.rimColor, b.rimColor, t);
   const groundColor = mixVector(a.groundColor, b.groundColor, t);
+  const ea = exhibition[from], eb = exhibition[to];
   return {
     owner: 'scene-direction', colorSpace: 'linear-srgb', reducedMotion,
     transition: {from: SCENE_CHAPTERS[from], to: SCENE_CHAPTERS[to], weight: t},
@@ -64,9 +76,17 @@ export function sampleSceneDirection(stageU, {reducedMotion = false} = {}) {
     contactOpacity: mix(a.contact, b.contact, t),
     haze: {type: 'exp2', color: [...backdropColor], density: mix(a.haze, b.haze, t)},
     halo: {color: [...color], opacity: reducedMotion ? 0 : mix(a.halo, b.halo, t), blend: 'screen'},
+    exhibition: {
+      owner: 'exhibition-stage', units: 'source-radius', authoredSetting: true,
+      key: {position: mixVector(ea.key, eb.key, t), size: mixVector(ea.size, eb.size, t), color: mixVector(ea.keyColor, eb.keyColor, t), intensity: mix(ea.keyI, eb.keyI, t)},
+      rim: {position: mixVector(ea.rim, eb.rim, t), size: mixVector(ea.rimSize, eb.rimSize, t), color: [...color], intensity: mix(ea.rimI, eb.rimI, t)},
+      aperture: {radiance: mix(ea.practical, eb.practical, t), spread: mix(ea.spread, eb.spread, t), color: [...color]},
+      backdrop: {color: mixVector(ea.wallColor, eb.wallColor, t), roughness: .93},
+    },
     stage: {
       baseEmphasis: mix(a.base, b.base, t), subjectSide: mix(a.side, b.side, t),
       groundYPolicy: 'combined-bounds-min-minus-offset', groundOffsetM: .004,
+      exhibitionOwnsFloor: true,
       groundExtentMultiplier: 3.2, groundRoughness: .92, sourceBaseRequired: true,
       shadow: {mapSize: 1024, bias: -.00008, normalBias: .008, boundsMargin: 1.3},
     },

@@ -17,9 +17,37 @@ export function normalizeProtectedRects(rectangles = [], width, height, paddingP
 
 const vertex = /* glsl */`varying vec2 vUv;
 void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}`;
+// Two small separable gathers. The first extracts real scene radiance; the second
+// spreads that extracted light. No CSS filter, full-frame gray lift or time input.
+const mistFragment = /* glsl */`
+uniform sampler2D sourceColor;
+uniform vec2 stepUv;
+uniform float threshold;
+uniform float prefilter;
+varying vec2 vUv;
+vec3 extractLight(vec2 uv){
+  vec4 sampleColor=texture2D(sourceColor,clamp(uv,vec2(0.0),vec2(1.0)));
+  vec3 radiance=sampleColor.rgb;
+  if(prefilter>0.5){
+    float luminance=max(0.0,dot(radiance,vec3(0.2126,0.7152,0.0722)));
+    float soft=smoothstep(threshold*0.55,threshold*1.35,luminance);
+    radiance*=sampleColor.a*soft;
+  }
+  return radiance;
+}
+void main(){
+  vec3 spread=extractLight(vUv)*0.227027027;
+  spread+=(extractLight(vUv+stepUv)+extractLight(vUv-stepUv))*0.194594595;
+  spread+=(extractLight(vUv+stepUv*2.0)+extractLight(vUv-stepUv*2.0))*0.121621622;
+  spread+=(extractLight(vUv+stepUv*3.0)+extractLight(vUv-stepUv*3.0))*0.054054054;
+  spread+=(extractLight(vUv+stepUv*4.0)+extractLight(vUv-stepUv*4.0))*0.016216216;
+  gl_FragColor=vec4(spread,1.0);
+}`;
 const fragment = /* glsl */`
 uniform sampler2D sceneColor;
 uniform sampler2D sceneDepth;
+uniform sampler2D mistColor;
+uniform float mistStrength;
 uniform vec2 resolution;
 uniform vec2 cssResolution;
 uniform float nearPlane;
@@ -88,6 +116,16 @@ void main(){
     color=premult/max(alphaSum,0.00001);
     alpha=alphaSum/weights;
   }
+  if(mistStrength>0.0001){
+    vec3 spread=texture2D(mistColor,vUv).rgb;
+    float strength=mistStrength*exclusion(vUv);
+    // Small direct attenuation plus redistributed highlight energy. Clear corners
+    // stay transparent; only actual light within the finite kernel grows a halo.
+    float haloAlpha=clamp(dot(spread,vec3(0.2126,0.7152,0.0722))*strength*0.35,0.0,0.38);
+    float expandedAlpha=alpha+(1.0-alpha)*haloAlpha;
+    color=(color*alpha*(1.0-strength*0.055)+spread*strength)/max(expandedAlpha,0.00001);
+    alpha=expandedAlpha;
+  }
   color*=1.0-veil;
   if(asciiWeight>0.0001){
     vec2 cell=floor(vUv*cssResolution/cellPx);
@@ -113,8 +151,14 @@ void main(){
 export function createSceneCompositor(gl) {
   const target = new T.WebGLRenderTarget(1, 1, {type: T.HalfFloatType, depthTexture: new T.DepthTexture(1, 1, T.UnsignedIntType), samples: 0});
   target.texture.name = 'thesis-linear-color'; target.depthTexture.name = 'thesis-scene-depth';
+  const mistA = new T.WebGLRenderTarget(1, 1, {type: T.HalfFloatType, depthBuffer: false});
+  const mistB = new T.WebGLRenderTarget(1, 1, {type: T.HalfFloatType, depthBuffer: false});
+  mistA.texture.name = 'thesis-mist-horizontal'; mistB.texture.name = 'thesis-mist-vertical';
+  const mistUniforms = {sourceColor: {value: target.texture}, stepUv: {value: new T.Vector2()}, threshold: {value: .65}, prefilter: {value: 1}};
+  const mistMaterial = new T.ShaderMaterial({uniforms: mistUniforms, vertexShader: vertex, fragmentShader: mistFragment, depthWrite: false, depthTest: false, blending: T.NoBlending, toneMapped: false});
   const uniforms = {
     sceneColor: {value: target.texture}, sceneDepth: {value: target.depthTexture}, resolution: {value: new T.Vector2(1, 1)}, cssResolution: {value: new T.Vector2(1, 1)},
+    mistColor: {value: mistB.texture}, mistStrength: {value: 0},
     nearPlane: {value: .01}, farPlane: {value: 100}, focusDistance: {value: 4}, aperture: {value: 0}, maxBlur: {value: 0},
     asciiWeight: {value: 0}, cellPx: {value: 11}, asciiTint: {value: new T.Vector3(.38, .75, .69)}, blendMode: {value: 1}, veil: {value: 0},
     rectCount: {value: 0}, protectedRects: {value: Array.from({length: MAX_RECTS}, () => new T.Vector4())},
@@ -123,7 +167,7 @@ export function createSceneCompositor(gl) {
   const geometry = new T.PlaneGeometry(2, 2), quad = new T.Mesh(geometry, material), outputScene = new T.Scene(), outputCamera = new T.Camera();
   quad.frustumCulled = false; outputScene.add(quad);
   const viewport = new T.Vector4(), scissor = new T.Vector4(), clear = new T.Color();
-  let frames = 0, disposed = false, report = null, checked = false;
+  let frames = 0, disposed = false, report = null, checked = false, mistAllocated = false;
 
   return {
     render(scene, camera, score, {width, height, dpr = 1, samples = 2, protectedRects = []}) {
@@ -135,6 +179,11 @@ export function createSceneCompositor(gl) {
       if (target.samples !== sampleCount) {target.dispose(); target.samples = sampleCount; target.resolveDepthBuffer = true; checked = false;}
       if (target.width !== w || target.height !== h) {target.setSize(w, h); checked = false;}
       const controls = {...score, ...(score.overrides ?? {})};
+      const mistStrength = clamp(controls.mistStrength, 0, .8), mistRadiusPx = clamp(controls.mistRadiusPx ?? 24, 4, 56);
+      const mistEnabled = mistStrength > .0001;
+      const mistWidth = Math.max(1, Math.ceil(w / 4)), mistHeight = Math.max(1, Math.ceil(h / 4));
+      if (mistEnabled && (mistA.width !== mistWidth || mistA.height !== mistHeight)) {mistA.setSize(mistWidth, mistHeight); mistB.setSize(mistWidth, mistHeight);}
+      uniforms.mistStrength.value = mistStrength; mistUniforms.threshold.value = clamp(controls.mistThreshold ?? .65, .05, 4);
       const masks = normalizeProtectedRects(protectedRects, width, height);
       uniforms.resolution.value.set(w, h); uniforms.cssResolution.value.set(width, height);
       uniforms.nearPlane.value = camera.near; uniforms.farPlane.value = camera.far;
@@ -156,19 +205,30 @@ export function createSceneCompositor(gl) {
         gl.setClearColor(0x000000, 0); gl.clear();
         // Three omits tone mapping/output encoding for ordinary offscreen targets.
         gl.render(scene, camera);
+        if (mistEnabled) {
+          quad.material = mistMaterial;
+          mistUniforms.sourceColor.value = target.texture; mistUniforms.prefilter.value = 1; mistUniforms.stepUv.value.set(mistRadiusPx / width / 4, 0);
+          gl.setRenderTarget(mistA); gl.clear(); gl.render(outputScene, outputCamera);
+          mistUniforms.sourceColor.value = mistA.texture; mistUniforms.prefilter.value = 0; mistUniforms.stepUv.value.set(0, mistRadiusPx / height / 4);
+          gl.setRenderTarget(mistB); gl.clear(); gl.render(outputScene, outputCamera);
+          mistAllocated = true;
+        }
+        quad.material = material;
         gl.setRenderTarget(null); gl.setViewport(0, 0, width, height); gl.clear(); gl.render(outputScene, outputCamera);
       } finally {
+        quad.material = material;
         gl.setClearColor(clear, oldClearAlpha); gl.setRenderTarget(oldTarget); gl.setViewport(viewport); gl.setScissor(scissor); gl.setScissorTest(oldScissor); gl.autoClear = oldAutoClear;
       }
       frames++;
-      report = {frames, width: w, height: h, dpr: actualDpr, color: 'RGBA16F linear', depth: 'unsigned-int perspective', requestedSamples: sampleCount, depthResolve: true, approximateTargetBytes: w * h * 12 * (sampleCount + 1),
-        passes: 2, maximumColorTaps: 17, outputTransformCount: 1, alpha: 'premultiplied display output; source alpha preserved',
+      report = {frames, width: w, height: h, dpr: actualDpr, color: 'RGBA16F linear', depth: 'unsigned-int perspective', requestedSamples: sampleCount, depthResolve: true, approximateTargetBytes: w * h * 12 * (sampleCount + 1) + (mistAllocated ? mistA.width * mistA.height * 16 : 0),
+        passes: mistEnabled ? 4 : 2, maximumColorTaps: 17, outputTransformCount: 1, alpha: 'premultiplied display output; bounded highlight halo may expand source coverage',
+        mist: {enabled: mistEnabled, strength: mistStrength, radiusCssPx: mistRadiusPx, threshold: mistUniforms.threshold.value, resolution: mistEnabled ? [mistWidth, mistHeight] : null, gatherTapsPerAxis: 9, source: 'pre-DOF linear scene highlight radiance', operator: 'masked direct attenuation plus additive radiance spread'},
         focusDistanceM: uniforms.focusDistance.value, apertureScale: uniforms.aperture.value, maxBlurPx: uniforms.maxBlur.value,
         asciiWeight: uniforms.asciiWeight.value, asciiCellPx: uniforms.cellPx.value, asciiBlend: uniforms.blendMode.value ? 'screen-limited' : 'normal',
         asciiSource: 'pre-DOF rendered scene luminance and depth; includes source base and scene ground', veil: uniforms.veil.value,
         maskMode: masks.mode, protectedRectCount: masks.rects.length, protectedInputCount: masks.inputCount};
     },
     inspect() {return report ? {...report, disposed} : {frames, disposed};},
-    dispose() {if (disposed) return; disposed = true; target.dispose(); material.dispose(); geometry.dispose(); outputScene.remove(quad);},
+    dispose() {if (disposed) return; disposed = true; target.dispose(); mistA.dispose(); mistB.dispose(); mistMaterial.dispose(); material.dispose(); geometry.dispose(); outputScene.remove(quad);},
   };
 }

@@ -4,7 +4,6 @@ import {readFile} from 'node:fs/promises';
 import {SCENE_ANCHORS, SCENE_CHAPTERS, sampleSceneDirection, resolveSceneStage} from '../components/scene-direction.mjs';
 
 const lighting = JSON.parse(await readFile(new URL('../../../../lighting-designer/catalog/chapters.json', import.meta.url)));
-const scenes = JSON.parse(await readFile(new URL('../../../../scene-designer/catalog/chapters.json', import.meta.url)));
 const near = (actual, expected, tolerance = 1e-10) => assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} differs from ${expected}`);
 function numericLeaves(value, output = []) {
   if (typeof value === 'number') output.push(value);
@@ -12,15 +11,24 @@ function numericLeaves(value, output = []) {
   return output;
 }
 
-test('all seven shared plateau coordinates reproduce the approved rig and stage endpoints', () => {
+test('Round 03, 2026-10-08: broad-light staging supersedes catalog energy while retaining source-frame directions', () => {
+  const current = [
+    [1.15, .55, .19, .85, .45], [1.35, .65, .24, 1, .55], [.85, .85, .17, .80, .40],
+    [.95, .90, .16, .70, .32], [1.25, .45, .25, 1, .60], [1.4, .40, .28, 1, .58], [1.10, .55, .22, .95, .48],
+  ];
   SCENE_CHAPTERS.forEach((id, index) => {
     const sample = sampleSceneDirection(SCENE_ANCHORS[index]);
-    const rig = lighting.chapters.find(chapter => chapter.id === id), stage = scenes.chapters.find(chapter => chapter.id === id);
+    const rig = lighting.chapters.find(chapter => chapter.id === id);
     assert.deepEqual(sample.key.position, rig.key.position);
     assert.deepEqual(sample.rim.position, rig.rim.position);
-    near(sample.key.intensity, rig.key.intensity); near(sample.rim.intensity, rig.rim.intensity);
-    near(sample.environmentIntensity, rig.environmentIntensity); near(sample.contactOpacity, rig.contactOpacity);
-    near(sample.stage.baseEmphasis, stage.baseEmphasis); near(sample.groundOpacity, stage.groundOpacity);
+    const [key, rim, env, base, ground] = current[index];
+    near(sample.key.intensity, key); near(sample.rim.intensity, rim);
+    near(sample.environmentIntensity, env); near(sample.contactOpacity, rig.contactOpacity);
+    near(sample.stage.baseEmphasis, base); near(sample.groundOpacity, ground);
+    assert.ok(sample.environmentIntensity < rig.environmentIntensity * .4);
+    assert.equal(sample.exhibition.authoredSetting, true);
+    assert.ok(sample.exhibition.key.size[0] >= 1 && sample.exhibition.key.size[1] >= 1);
+    assert.ok(sample.exhibition.key.intensity > 3 && sample.exhibition.rim.intensity > 3);
     assert.equal(sample.transition.from, id);
   });
 });
@@ -33,6 +41,8 @@ test('light interpolation consumes the existing visual curve once without additi
       a.key.position.forEach((value, axis) => near(s.key.position[axis], value + (b.key.position[axis] - value) * t));
       near(s.key.intensity, a.key.intensity + (b.key.intensity - a.key.intensity) * t);
       near(s.haze.density, a.haze.density + (b.haze.density - a.haze.density) * t);
+      near(s.exhibition.key.intensity, a.exhibition.key.intensity + (b.exhibition.key.intensity - a.exhibition.key.intensity) * t);
+      near(s.exhibition.aperture.spread, a.exhibition.aperture.spread + (b.exhibition.aperture.spread - a.exhibition.aperture.spread) * t);
       s.rim.color.forEach((value, channel) => assert.ok(value >= Math.min(a.rim.color[channel], b.rim.color[channel]) - 1e-12 && value <= Math.max(a.rim.color[channel], b.rim.color[channel]) + 1e-12));
     }
   }
@@ -49,7 +59,7 @@ test('numeric visual channels are continuous through every chapter anchor and bo
     const score = sampleSceneDirection(step / 1000);
     assert.ok(numericLeaves(score).every(Number.isFinite));
     for (const opacity of [score.groundOpacity, score.contactOpacity, score.halo.opacity]) assert.ok(opacity >= 0 && opacity <= 1);
-    assert.ok(score.key.position[1] > 1 && score.haze.density < .05);
+    assert.ok(score.key.position[1] > 1 && score.haze.density < .08);
     assert.equal(score.key.castShadow, true); assert.equal(score.fill.castShadow, false); assert.equal(score.rim.castShadow, false);
   }
 });
@@ -58,7 +68,8 @@ test('reduced motion gives one invariant complete-source lighting state with no 
   const expected = sampleSceneDirection(0, {reducedMotion: true});
   for (const u of [-1, .1, .5, .9, 2]) assert.deepEqual(sampleSceneDirection(u, {reducedMotion: true}), expected);
   assert.equal(expected.transition.from, 'credits'); assert.equal(expected.halo.opacity, 0);
-  assert.equal(expected.stage.sourceBaseRequired, true); assert.ok(expected.environmentIntensity > .8);
+  assert.equal(expected.stage.sourceBaseRequired, true); near(expected.environmentIntensity, .22);
+  assert.ok(expected.exhibition.key.intensity > 4);
 });
 
 test('real combined bounds set ground below the lowest source point and lights share a translated target', () => {

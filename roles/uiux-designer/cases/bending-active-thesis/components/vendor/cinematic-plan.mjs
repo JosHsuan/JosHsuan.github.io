@@ -31,6 +31,17 @@ const definitions = [
   { az: 40, el: 20, d: 3.15, fov: 38, focus: [0, 0, 0], shift: [0.32, -0.08], full: false, dim: 0.16, surface: 0, purpose: 'Re-establish result behind prototype evidence' },
   { az: 58, el: 25, d: 2.85, fov: 38, focus: [0, 0, 0], shift: [0, 0.12], full: true, dim: 0.78, surface: 0, purpose: 'Complete model and ending hold' },
 ];
+// Round 03 is an editorial camera score, not a requirement to display the complete
+// object at every scroll position. Only the shared case opts into these new shots.
+const exhibitionDefinitions = [
+  {az: 64, el: 17, d: 1.7, fov: 35, focus: [.10, .10, 0], shift: [.52, -.06], mobileShift: [.28, -.20], full: false, dim: 1, surface: 0, purpose: 'Close satin-metal opening; deliberate edge crop'},
+  {az: 30, el: 28, d: 2.35, fov: 38, focus: [0, 0, 0], shift: [.34, -.04], mobileShift: [.07, -.40], full: true, dim: 1, surface: 0, purpose: 'Complete source assembly as the spatial reference'},
+  {az: -8, el: 30, d: 2.05, desktopD: 3.55, fov: 36, focus: [.05, .28, .12], shift: [.55, -.02], desktopShift: [.50, .44], mobileShift: [.32, -.28], full: false, dim: 1, surface: .25, purpose: 'Separated silhouette above method evidence; macro reserved for the next shot'},
+  {az: -36, el: 18, d: 1.32, fov: 34, focus: [.20, .20, .12], shift: [-.42, .08], mobileShift: [-.55, -.30], full: false, dim: 1, surface: .5, purpose: 'Macro inspection; surface continues beyond the frame'},
+  {az: -54, el: 17, d: 2.3, fov: 38, focus: [0, 0, 0], shift: [-3.8, -.12], mobileShift: [-3.8, -.2], full: false, dim: 0, surface: 0, purpose: 'Source departs completely; construction photograph owns the frame'},
+  {az: 22, el: 24, d: 2.8, fov: 38, focus: [0, 0, 0], shift: [3.8, .10], mobileShift: [3.8, -.2], full: false, dim: 0, surface: 0, purpose: 'Source remains absent while the built-object evidence is read'},
+  {az: 64, el: 23, d: 2.85, fov: 38, focus: [0, 0, 0], shift: [.05, .08], mobileShift: [0, -.26], full: true, dim: 1, surface: 0, purpose: 'Quiet complete silhouette returns for attribution'},
+];
 
 function validateBounds(b) {
   if (!b || !['min', 'max'].every(k => Array.isArray(b[k]) && b[k].length === 3 && b[k].every(Number.isFinite)) || b.min.some((v, i) => v > b.max[i]) || length(sub(b.max, b.min)) === 0) throw new RangeError('Expected nonempty finite Y-up model bounds');
@@ -46,17 +57,25 @@ function minimumFit(bounds, target, az, el, fov, aspect, shift, support = null) 
 }
 
 function anchor(index, bounds, aspect, allowMeasuredHull, sharedStage = false) {
-  const spec = definitions[index], half = mul(sub(bounds.max, bounds.min), 0.5), center = add(bounds.min, half), r = length(half);
+  const spec = (sharedStage ? exhibitionDefinitions : definitions)[index], half = mul(sub(bounds.max, bounds.min), 0.5), center = add(bounds.min, half), r = length(half);
   const mobile = clamp((1.1 - aspect) / 0.4);
+  // Landscape tablets also need room for the method image below the source.
+  // Portrait ratios (including 768/1024) keep their existing close composition.
+  const desktop = clamp((aspect - .95) / .18);
   const focus = mixV(spec.focus, [0, 0, 0], mobile * 0.7), target = add(center, focus.map((v, i) => v * half[i]));
   const az = spec.az, el = mix(spec.el, index === 0 ? 36 : 42, mobile);
-  const fov = mix(spec.fov, 46, mobile), shift = mixV(spec.shift, [0.07, index === 1 ? (sharedStage ? -0.40 : -0.48) : -0.26], mobile);
+  const desktopShift = spec.desktopShift ? mixV(spec.shift, spec.desktopShift, desktop) : spec.shift;
+  const fov = mix(spec.fov, 46, mobile), shift = mixV(desktopShift, spec.mobileShift ?? [0.07, index === 1 ? -0.48 : -0.26], mobile);
   const support = index === 1 && allowMeasuredHull ? THESIS_FRAMING_HULL : null;
-  const fullDistance = minimumFit(bounds, target, az, el, fov, aspect, shift, support);
+  // Off-frame editorial shifts must not enter the full-fit denominator. They are
+  // intentional screen translations, not a reason to push the source to infinity.
+  const fittingShift = shift.map(value => clamp(value, -.72, .72));
+  const fullDistance = minimumFit(bounds, target, az, el, fov, aspect, fittingShift, support);
   // Small screens retain almost the full surface; mobile storytelling belongs to
   // clear chapter layers rather than making a shallow model fill a tall viewport.
-  const mobileFit = spec.full ? 1 : index === 0 ? 0.68 : 0.88;
-  let distance = mix(r * spec.d, fullDistance * mobileFit, mobile);
+  const mobileFit = spec.full ? 1 : sharedStage ? (index === 0 ? .58 : index === 3 ? .5 : .7) : index === 0 ? .68 : .88;
+  const distanceRatio = spec.desktopD ? mix(spec.d, spec.desktopD, desktop) : spec.d;
+  let distance = mix(r * distanceRatio, fullDistance * mobileFit, mobile);
   if (spec.full) distance = Math.max(distance, fullDistance);
   if (index === 1 && allowMeasuredHull) {
     // Keep this revision a controlled enlargement of the reviewed FORM framing.
@@ -102,15 +121,20 @@ export function sampleCinematicPose(value, aspect, pointer = { x: 0, y: 0 }, opt
   const position = add(target, mul(back, distance)), shift = mixV(a.shift, b.shift, t), fov = mix(a.fov, b.fov, t);
   const r = length(sub(bounds.max, bounds.min)) / 2;
   const depths = corners(bounds).map(point => dot(sub(position, point), back));
+  const sourcePresence = reducedMotion || !options.sharedStage ? 1 : slot >= 4 - 1e-9 && slot <= 5 + 1e-9 ? 0 : 1;
+  const atHold = Math.abs(slot - Math.round(slot)) < 1e-8;
+  const framingIntent = sourcePresence === 0 ? 'evidence-absence' : reducedMotion || atHold && [1, 6].includes(Math.round(slot)) ? 'held-source' : atHold && slot === 0 ? 'hero-crop' : 'transition-crop';
+  const currentDefinitions = options.sharedStage ? exhibitionDefinitions : definitions;
   return {
     position, target, up: [0, 1, 0], fov, aspect,
     near: Math.max(r * 0.0001, Math.min(...depths) * 0.08), far: Math.max(...depths) + r * 2,
     compositionNDC: shift, viewOffsetNormalized: { x: -shift[0] / 2, y: shift[1] / 2 },
     progress: u, chapter, transition: { from: CINEMATIC_CHAPTERS[blend.a], to: CINEMATIC_CHAPTERS[blend.b], blend: t },
-    modelVisibility: reducedMotion ? 0.32 : mix(a.dim, b.dim, t), surfaceEmphasis: reducedMotion ? 0 : mix(a.surface, b.surface, t),
+    modelVisibility: reducedMotion ? 0.32 : options.sharedStage ? sourcePresence : mix(a.dim, b.dim, t), sourcePresence, framingIntent,
+    surfaceEmphasis: reducedMotion ? 0 : mix(a.surface, b.surface, t),
     pointerDegrees: decoration, owner: 'cinematic-composite', kind: reducedMotion ? 'fixed-reduced-motion' : 'procedural-native-scroll',
-    cropIntent: reducedMotion ? 'whole model' : definitions[chapter.index].full ? 'whole model at chapter hold' : 'intentional sculptural crop or background framing',
-    purpose: definitions[chapter.index].purpose,
+    cropIntent: sourcePresence === 0 ? 'intentional source absence; scene remains' : reducedMotion ? 'whole model' : currentDefinitions[chapter.index].full ? 'whole model at chapter hold' : 'intentional sculptural crop or background framing',
+    purpose: currentDefinitions[reducedMotion ? 6 : chapter.index].purpose,
     modelRevision: revision, framingEvidence: allowMeasuredHull ? 'audited-real-mesh-convex-support' : 'conservative-bounding-box',
   };
 }

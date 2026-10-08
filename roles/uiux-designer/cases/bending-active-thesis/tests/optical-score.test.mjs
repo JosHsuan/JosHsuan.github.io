@@ -4,7 +4,7 @@ import {PerspectiveCamera} from 'three';
 import {axialFocusRange, focalLengthForFov, sampleOpticalScore} from '../components/optical-score.mjs';
 import {normalizeProtectedRects} from '../components/scene-compositor.mjs';
 import {createServer} from 'node:http';
-import {readFile, mkdir} from 'node:fs/promises';
+import {readFile, mkdir, writeFile} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
@@ -38,7 +38,7 @@ test('stationary SYSTEM hold racks real focus while camera and focal length stay
 test('lens selection changes independently of a fixed pose and evidence holds stay sharp', () => {
   assert.notEqual(score(1).focalLengthMm, score(3).focalLengthMm);
   for (const i of [1, 5, 6]) {assert.equal(score(i).maxBlurPx, 0); assert.equal(score(i).asciiWeight, 0);}
-  assert.ok(score(3).asciiWeight > .2);
+  assert.ok(score(3).asciiWeight >= .15 && score(3).asciiWeight <= .28);
 });
 
 test('reduced motion removes optical and glyph motion; sampling is deterministic and reversible', () => {
@@ -66,7 +66,7 @@ test('protected rectangle overflow uses an enclosing reading mask instead of dro
   for (const r of rects) {assert.ok(result.rects[0][0] <= r[0]); assert.ok(result.rects[0][2] >= r[2]); assert.ok(result.rects[0][1] <= r[1]); assert.ok(result.rects[0][3] >= r[3]);}
 });
 
-test('actual WebGL depth focus, scene-derived glyphs, alpha and protected masks', {skip: process.env.OPTICAL_BROWSER !== '1'}, async () => {
+test('actual WebGL depth focus, glyphs and black-mist radiance/alpha/masks', {skip: process.env.OPTICAL_BROWSER !== '1'}, async () => {
   const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../..');
   const require = createRequire(path.join(root, 'package.json'));
   const engine = process.env.OPTICAL_ENGINE === 'webkit' ? 'webkit' : 'chromium';
@@ -90,6 +90,7 @@ test('actual WebGL depth focus, scene-derived glyphs, alpha and protected masks'
   function gradient(p,x0,x1){let d=0,n=0;for(let y=90;y<230;y++)for(let x=x0;x<x1;x++){const i=(y*512+x)*4;d+=Math.abs(p[i]-p[i+4]);n++;}return d/n;}
   const diff=(a,b,x0,x1)=>{let d=0;for(let y=70;y<250;y++)for(let x=x0;x<x1;x++){const i=(y*512+x)*4;d+=Math.abs(a[i]-b[i])+Math.abs(a[i+1]-b[i+1])+Math.abs(a[i+2]-b[i+2]);}return d;};
   function draw(overrides={},rects=[]){compositor.render(scene,camera,{...settings,overrides},{width:512,height:320,dpr:1,protectedRects:rects});return pixels();}
+  let bright=null;
   window.fixture={draw,light,compositor,run(){
     const near=draw({focusDistanceM:5}),far=draw({focusDistanceM:9});
     const clean=draw({maxBlurPx:0}),glyphs=draw({maxBlurPx:0,asciiWeight:1});
@@ -97,6 +98,28 @@ test('actual WebGL depth focus, scene-derived glyphs, alpha and protected masks'
     light.intensity=.05; const darkClean=draw({maxBlurPx:0}),darkGlyphs=draw({maxBlurPx:0,asciiWeight:1}); light.intensity=2;
     const result={near:{front:gradient(near,132,219),back:gradient(near,292,379)},far:{front:gradient(far,132,219),back:gradient(far,292,379)},glyphDifference:diff(clean,glyphs,100,410),protectedDifference:diff(clean,masked,100,235),unprotectedDifference:diff(clean,masked,285,410),darkGlyphDifference:diff(darkClean,darkGlyphs,100,410),cornerAlpha:near[3],subjectAlpha:near[(160*512+177)*4+3],diagnostics:compositor.inspect()};
     draw({focusDistanceM:5,asciiWeight:.45});return result;
+  },runMist(){
+    front.visible=back.visible=false;
+    bright=new T.Mesh(new T.PlaneGeometry(.12,.9),new T.MeshBasicMaterial({color:new T.Color(4,3,2)}));scene.add(bright);
+    scene.background=new T.Color(0,0,0);
+    const controls={maxBlurPx:0,asciiWeight:0,mistStrength:.55,mistRadiusPx:32,mistThreshold:.65};
+    const clean=draw({...controls,mistStrength:0});
+    const off=window.fixture.compositor.inspect();
+    gl.render(scene,camera);const direct=pixels();
+    let displayDifference=0;for(let y=145;y<175;y++)for(let x=254;x<258;x++)for(let c=0;c<3;c++){const i=(y*512+x)*4+c;displayDifference=Math.max(displayDifference,Math.abs(clean[i]-direct[i]));}
+    const mist=draw(controls),on=window.fixture.compositor.inspect();
+    const masked=draw(controls,[[0,0,1,1]]);
+    const haloDifference=diff(clean,mist,264,283);
+    let farBlackMaximum=0;for(let y=0;y<80;y++)for(let x=0;x<80;x++)for(let c=0;c<3;c++)farBlackMaximum=Math.max(farBlackMaximum,mist[(y*512+x)*4+c]);
+    bright.material.color.setRGB(.03,.03,.03);
+    const dimClean=draw({...controls,mistStrength:0}),dimMist=draw(controls);
+    const dimHaloDifference=diff(dimClean,dimMist,264,283);
+    bright.material.color.setRGB(4,3,2);scene.background=null;
+    const transparentClean=draw({...controls,mistStrength:0}),transparentMist=draw(controls);
+    let haloAlphaBefore=0,haloAlphaAfter=0;for(let y=145;y<175;y++)for(let x=264;x<283;x++){const i=(y*512+x)*4+3;haloAlphaBefore=Math.max(haloAlphaBefore,transparentClean[i]);haloAlphaAfter=Math.max(haloAlphaAfter,transparentMist[i]);}
+    return {haloDifference,dimHaloDifference,farBlackMaximum,protectedDifference:diff(clean,masked,100,410),displayDifference,haloAlphaBefore,haloAlphaAfter,cornerAlpha:transparentMist[3],coreAlpha:transparentMist[(160*512+256)*4+3],off,on};
+  },endMist(){
+    scene.remove(bright);bright.geometry.dispose();bright.material.dispose();bright=null;front.visible=back.visible=true;scene.background=null;
   }};
   </script></body></html>`;
   const server = createServer((req, res) => {const source = sources.get(req.url); res.writeHead(200, {'Content-Type': source ? 'text/javascript' : 'text/html'}); res.end(source ?? html);});
@@ -113,9 +136,31 @@ test('actual WebGL depth focus, scene-derived glyphs, alpha and protected masks'
     assert.ok(result.glyphDifference > 10000); assert.equal(result.protectedDifference, 0); assert.ok(result.unprotectedDifference > 1000);
     assert.notEqual(result.darkGlyphDifference, result.glyphDifference, 'Glyph result must respond to actual light/radiance');
     assert.equal(result.cornerAlpha, 0); assert.equal(result.subjectAlpha, 255);
-    const work = 'D:/JosHsuan_Website/_work/bending-active-thesis/round-02/verification';
+    const work = 'D:/JosHsuan_Website/_work/bending-active-thesis/round-03/verification';
     await mkdir(work, {recursive: true}); await page.screenshot({path: path.join(work, 'optical-fixture-' + engine + '.png')});
+    const mist = await page.evaluate(() => window.fixture.runMist());
+    assert.deepEqual(errors, [], 'Mist shader compilation and browser errors');
+    assert.ok(mist.haloDifference > 10000, JSON.stringify(mist));
+    assert.equal(mist.dimHaloDifference, 0, 'Below-threshold source does not create a highlight halo');
+    assert.equal(mist.farBlackMaximum, 0, 'No unrelated black lift');
+    assert.equal(mist.protectedDifference, 0, 'Diffusion never enters a protected rectangle');
+    assert.ok(mist.displayDifference <= 1, 'No-effect output matches direct one-transform rendering');
+    assert.equal(mist.haloAlphaBefore, 0); assert.ok(mist.haloAlphaAfter > 0, 'Real highlight scatter grows coverage');
+    assert.equal(mist.cornerAlpha, 0); assert.equal(mist.coreAlpha, 255);
+    assert.equal(mist.off.passes, 2); assert.equal(mist.on.passes, 4); assert.equal(mist.on.outputTransformCount, 1);
+    assert.deepEqual(mist.on.mist.resolution, [128, 80]);
+    // Publish this last offscreen/composited frame before the browser screenshot.
+    // WebKit may otherwise capture its preceding presentation surface even while
+    // synchronous readPixels above already contains the correct new frame.
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => {
+      window.fixture.draw({maxBlurPx: 0, asciiWeight: 0, mistStrength: .55, mistRadiusPx: 32, mistThreshold: .65});
+      requestAnimationFrame(resolve);
+    })));
+    await page.screenshot({path: path.join(work, 'optical-mist-fixture-' + engine + '.png')});
     console.log('Optical WebGL evidence', JSON.stringify(result));
+    console.log('Black-mist WebGL evidence', JSON.stringify(mist));
+    await writeFile(path.join(work, 'optical-fixture-' + engine + '.json'), JSON.stringify({verifiedAt: new Date().toISOString(),engine,threeVersion: JSON.parse(await readFile(path.join(root, 'node_modules/three/package.json'), 'utf8')).version,errors,optical: result,mist,scope: 'Actual 512x320 synthetic WebGL optical fixture; no physical-phone performance or source-material appearance claim'}, null, 2) + '\n');
+    await page.evaluate(() => window.fixture.endMist());
     await page.evaluate(() => window.fixture.compositor.dispose());
   } finally {await browser.close(); await new Promise(resolve => server.close(resolve));}
 });

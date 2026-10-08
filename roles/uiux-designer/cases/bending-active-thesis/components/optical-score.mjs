@@ -5,13 +5,13 @@ const smooth = n => {const t = clamp(n); return t * t * t * (10 + t * (-15 + 6 *
 const names = ['overview', 'form', 'system', 'pattern', 'make', 'validation', 'credits'];
 // Lens is relative to the geometry-framed camera; full-object/mobile fits survive.
 const anchors = [
-  {lens: 1.12, focus: .28, aperture: 31, blur: 5, ascii: 0},
-  {lens: .96, focus: .5, aperture: 0, blur: 0, ascii: 0},
-  {lens: 1.05, focus: .44, aperture: 38, blur: 5, ascii: .12},
-  {lens: 1.13, focus: .32, aperture: 43, blur: 6, ascii: .28},
-  {lens: .97, focus: .54, aperture: 21, blur: 3, ascii: .025},
-  {lens: .94, focus: .5, aperture: 0, blur: 0, ascii: 0},
-  {lens: .96, focus: .5, aperture: 0, blur: 0, ascii: 0},
+  {lens: 1.08, focus: .36, aperture: 18, blur: 3, ascii: 0, mist: .34, radius: 26},
+  {lens: .96, focus: .5, aperture: 0, blur: 0, ascii: 0, mist: .18, radius: 18},
+  {lens: 1.05, focus: .44, aperture: 27, blur: 4, ascii: .09, mist: .30, radius: 24},
+  {lens: 1.16, focus: .37, aperture: 35, blur: 5, ascii: .20, mist: .42, radius: 30},
+  {lens: 1.02, focus: .54, aperture: 0, blur: 0, ascii: 0, mist: .20, radius: 26},
+  {lens: .98, focus: .5, aperture: 0, blur: 0, ascii: 0, mist: .16, radius: 22},
+  {lens: .96, focus: .5, aperture: 0, blur: 0, ascii: 0, mist: .25, radius: 28},
 ];
 
 export function focalLengthForFov(fov, aspect, filmGaugeMm = 35) {
@@ -46,9 +46,9 @@ export function sampleOpticalScore(input, pose, {bounds}) {
   const mobile = clamp((1.1 - aspect) / .5);
   const focalBase = focalLengthForFov(pose.fov, aspect);
   const lensRatio = reduced ? 1 : mix(value('lens'), 1 + (value('lens') - 1) * .3, mobile);
-  // Deterministic scene-only dip at the SYSTEM/PATTERN boundary, never a text fade.
-  const cutDistance = Math.abs(coordinate - 2.5);
-  const veil = reduced ? 0 : .2 * smooth(1 - cutDistance / .28);
+  // The camera's continuous off-frame passage now performs the editorial exit.
+  // Keep the old flat veil control for diagnostics, but no authored black flash.
+  const veil = 0;
   return {
     filmGaugeMm: 35,
     focalLengthMm: focalBase * lensRatio,
@@ -60,10 +60,13 @@ export function sampleOpticalScore(input, pose, {bounds}) {
     asciiCellPx: mix(11, 9, mobile),
     asciiBlend: 'screen-limited',
     asciiTint: [0.38, 0.75, 0.69], // linear RGB decorative tint
+    mistStrength: reduced ? 0 : value('mist') * mix(1, .8, mobile),
+    mistRadiusPx: value('radius') * mix(1, .8, mobile),
+    mistThreshold: .65,
     veil,
     chapter: names[local], stageU: u, visualU: visual,
     opticalMode: reduced ? 'sharp-static' : 'axial-depth-gather',
-    editKind: veil > .0001 ? 'scene-dip' : 'none',
+    editKind: pose.sourcePresence === 0 ? 'source-absence' : pose.framingIntent === 'transition-crop' ? 'continuous-off-frame' : 'held-composition',
     source: 'source-bounds axial planes; artistic optics, not lens calibration',
   };
 }
