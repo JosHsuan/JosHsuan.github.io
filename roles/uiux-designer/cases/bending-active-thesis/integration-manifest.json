@@ -101,7 +101,7 @@
     "newTextures": false
   },
   "controllerHash": "9e34ca204f9bed80d6c07ee18f2b715023f269b25d07232d02d8459867c3fd33",
-  "sceneHash": "d816b9b40a4458fabb26e772bd02cdf3b03d1ebc50d400f35407fbf829c7ce19",
+  "sceneHash": "4ae4116c0bd63d53c7ba478052d81ecb3f35d04ef0718ddf06b23c49e24fa129",
   "poster": {
     "path": "release/public/assets/cinematic/model-poster.webp",
     "sha256": "931181ca2b0722d27f41bddbf60121c5d058d4297bd809aee9eb2fec68d377e7",
@@ -142,8 +142,8 @@
       "kind": "scene",
       "path": "components/CinematicScene.jsx",
       "owner": "Shared integration; one final property writer",
-      "sha256": "d816b9b40a4458fabb26e772bd02cdf3b03d1ebc50d400f35407fbf829c7ce19",
-      "previousSHA256": "57351ca5365dded4d6b60191a351743c28862cc514ec3ccdde36172c3e75fb91"
+      "sha256": "4ae4116c0bd63d53c7ba478052d81ecb3f35d04ef0718ddf06b23c49e24fa129",
+      "previousSHA256": "d816b9b40a4458fabb26e772bd02cdf3b03d1ebc50d400f35407fbf829c7ce19"
     },
     {
       "kind": "response",
@@ -240,8 +240,8 @@
       "kind": "pageStyle",
       "path": "app/page.module.css",
       "owner": "UIUX Designer",
-      "sha256": "2de76241d681d8184d63777d022c5bf97131e48f692f3fcb11232dbc3144872a",
-      "previousSHA256": "b701c2d70616e3193d44773238bc21904c666335a052400b3387234b94d35796"
+      "sha256": "2c0e8a11c459a828e8b4bd5a45089ce4c07eaac2f53ae3893eab6cebef77d3a3",
+      "previousSHA256": "2de76241d681d8184d63777d022c5bf97131e48f692f3fcb11232dbc3144872a"
     },
     {
       "kind": "inspectorStyle",
@@ -1698,7 +1698,7 @@
     "localFeedback": "One-shot semantic entrances with bounded anticipation/overshoot, plus bounded text/image perspective and focus feedback in the shared controller tick.",
     "nativeSemantics": "Natural-position seeks for initial hashes, focus, keyboard paging, exact per-entry history and resume",
     "evidence": "Inline original-page comparison without modal or body scroll lock",
-    "captionStability": "Intrinsic CSS grid height reserves every actual source-caption variant at the current width; no fixed-height clipping or per-frame measurement."
+    "captionStability": "Intrinsic CSS grids reserve every actual source-diagram and model-description variant at the current width. Model descriptions come directly from approved metadata and existing source-layer captions. No fixed-height clipping or per-frame DOM allocation/measurement."
   },
   "round06Authority": "roles/experience-director/research/ROUND_06_DIRECTION.md",
   "sourceRepresentations": {
