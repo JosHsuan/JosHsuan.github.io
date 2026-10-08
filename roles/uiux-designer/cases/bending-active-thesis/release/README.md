@@ -16,7 +16,13 @@ The canonical site is `https://joshsuan.github.io/`. `/release.json` identifies 
 
 Full source geometry and existing fallback/quality controls are retained. Model/HDR transfer and triangle counts still exceed earlier mobile/source budgets. Physical phone performance is not certified. Original source attribution and year uncertainty remain visible; publication does not fabricate missing credits or engineering evidence.
 
-## Round 04 — 8 October 2026
+## Round 05 — continuous interaction, 8 October 2026
+
+The same public asset allowlist now supports one continuous reading experience. Whole-page damping and measured reading stops coordinate the DOM, source camera, layers and source-fixed light. Model controls live in FORM; evidence sources expand beside their figures. Both former modal interactions are removed. View/layer/light choices survive scrolling, while Reduced and failure fallbacks retain the natural document. Source and story bytes remain unchanged.
+
+Actual owner Saved typography remains unresolved and is explicitly excluded from completion claims. See [Round 05 verification](../ROUND_05_VERIFICATION.md) and the [cross-role direction](../../../../experience-director/research/ROUND_05_DIRECTION.md).
+
+## Round 04 — historical, 8 October 2026
 
 FORM and SYSTEM now offer an optional model study: view controls, source-layer separation and source-fixed Studio/Raking/Silhouette lighting. It reuses one Canvas and the approved GLB, returns to the same reading position and supports direct control under reduced motion. The explicit build allowlist adds the inspection modules and 514-point framing support derived from the existing public GLB; no source asset or narrative bytes change. See [round-04 verification](../ROUND_04_VERIFICATION.md) and the [all-role research/development plan](../../../../experience-director/research/ROUND_04_PLAN.md).
 

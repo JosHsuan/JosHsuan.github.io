@@ -4,7 +4,15 @@
 
 Open [the local work page](http://127.0.0.1:4184/). It presents **Bending-Active Metal Panel Deformation**, the NCKU metal-panel thesis, separately from the later T3 bamboo project. This is an owner-authorized local case; the production portfolio and public snapshot remain empty.
 
-## Current round 04 — model study
+## Current round 05 — continuous page
+
+The [owner correction and cross-role direction](../../../experience-director/research/ROUND_05_DIRECTION.md) replaces the separate model-study mode with a continuous document. One pixel-space response moves the whole information plane, with measured content stops and bounded text/image perspective. The source camera, layer separation, lighting and editorial channels consume the same visible reading progress.
+
+FORM contains compact View/Layers/Light controls in its natural layout; their influence fades as the slot leaves the viewport and choices survive reverse scrolling. Original source-image comparison opens beside each figure. Neither interaction locks the document or opens a modal. Full source framing is verified at study weight 1; transitions may deliberately crop. Source-fixed Studio/Raking light continues through the story without a separate backdrop switch.
+
+Keyboard focus, hashes, history and Reduced/Pause retain native reading semantics. Source geometry, story and approved public assets are unchanged. Actual owner Saved typography is still being recovered; the current fonts must not be presented as verified owner preferences. See [Round 05 verification](ROUND_05_VERIFICATION.md).
+
+## Round 04 — historical model study
 
 The [all-role Lusion review and plan](../../../experience-director/research/ROUND_04_PLAN.md) extends the authored story with optional model study from FORM and SYSTEM. Named views, bounded drag/keyboard controls, exact source-layer separation and Studio/Raking/Silhouette lighting share the existing Canvas, source model and renderer. Reset and Return preserve the reading position and keyboard focus. Manual study remains available under reduced motion, with immediate control response.
 
