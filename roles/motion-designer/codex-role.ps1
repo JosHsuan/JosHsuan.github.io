@@ -14,6 +14,11 @@ New-Item -ItemType Directory -Force -Path $browserOutput | Out-Null
 $rendered=$rendered.Replace('__CHROMIUM__',$chromiumPath).Replace('__BROWSER_OUTPUT__',$browserOutput)
 [IO.File]::WriteAllText((Join-Path $runtimeHome 'config.toml'),$rendered,[Text.UTF8Encoding]::new($false))
 Get-ChildItem -LiteralPath (Join-Path $roleRoot 'skills/motion-response') -Force | ForEach-Object {Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $runtimeHome 'skills/motion-response') -Recurse -Force}
+foreach($resourceName in @('research','catalog')) {
+  $resourceDestination=Join-Path $runtimeHome $resourceName
+  New-Item -ItemType Directory -Force -Path $resourceDestination | Out-Null
+  Get-ChildItem -LiteralPath (Join-Path $roleRoot $resourceName) -Force | ForEach-Object {Copy-Item -LiteralPath $_.FullName -Destination $resourceDestination -Recurse -Force}
+}
 if($PrepareOnly){Write-Output 'Prepared Motion Designer role home';exit 0}
 $priorRoleHome=$env:CODEX_HOME
 try{$env:CODEX_HOME=$runtimeHome;& codex --cd $roleRoot @CodexArgs;exit $LASTEXITCODE}

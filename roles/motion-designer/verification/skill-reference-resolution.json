@@ -1,0 +1,14 @@
+{
+  "verifiedAt": "2026-10-08T09:23:36.5517129Z",
+  "result": {
+    "role": "motion-designer",
+    "skillReferences": [
+      "../../research/RESPONSE_CONTRACT.md",
+      "../../research/SOURCES.md"
+    ],
+    "sourceCopyHashesMatch": true,
+    "isolatedCredentialFileExists": false
+  },
+  "globalConfigSHA256": "F2AFD101645967225DD475D65CD77FA1A49EAD1C55FBF0AEA1EC3FB43F801CC2",
+  "globalConfigUnchanged": true
+}
