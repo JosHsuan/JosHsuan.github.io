@@ -8,7 +8,7 @@ const MAX_LAG = 1.5 / 7;
 // genuinely stale one-second gap seeks; explicit visibility resume always seeks.
 const MAX_FRAME_GAP = 1;
 const ENERGY_SPEED = 0.6;
-const CHAPTERS = [
+const CHAPTERS = Object.freeze([
   {id: 'overview', hold: [0.2, 0.72]},
   {id: 'form', hold: [0.16, 0.76]},
   {id: 'system', hold: [0.26, 0.66]},
@@ -16,7 +16,10 @@ const CHAPTERS = [
   {id: 'make', hold: [0.18, 0.8]},
   {id: 'validation', hold: [0.12, 0.84]},
   {id: 'credits', hold: [0.12, 1]},
-];
+].map(chapter => Object.freeze({...chapter, hold: Object.freeze(chapter.hold)})));
+// Foreground choreography shares these exact hold boundaries with the stage.
+// Export an immutable score, not a second mutable timeline or response state.
+export {CHAPTERS as RESPONSE_CHAPTERS};
 
 const clamp = value => Math.min(1, Math.max(0, value));
 const smoother = value => {const t = clamp(value); return t * t * t * (10 + t * (-15 + 6 * t));};
