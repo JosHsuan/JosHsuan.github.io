@@ -1,0 +1,15 @@
+# Scene direction contract
+
+The actual supplied shell and source base are the subject. Geometry Engineer identifies the base by original object IDs/layers/bounds and hands off a normalized derivative. Never replace that source base with a generic plinth and claim item 7 is complete. A separate ground/contact plane is labelled editorial presentation, not a source object. Maintain source-relative transforms and record combined bounds for camera fitting.
+
+Use one restrained dark studio-like field, no invented architectural location or project facts. Graphite ground and soft depth haze give scale/contact cues; restrained warm/cool light articulates material. Scene direction does not invent people, dimensions, fasteners, fabrication sequence or structural simulation. Source imagery is the evidence for construction and validation.
+
+Composition uses real combined shell/base bounds plus current verified part transforms. Reserve negative space for opaque readable HTML. MAKE reverses composition; other sections hold a consistent subject side. Scene Designer supplies the bounds/stage to Cinematographer, never writes the camera itself. Disable automatic camera fitting/recentering in helpers that would compete with the camera owner.
+
+The source base remains represented in opening, fabrication and ending poses. During source-supported rigid-part isolation the ground and base establish the retained coordinate frame. 3D Animation Designer owns isolated part transforms and labels editorial decomposition. Do not split a connected shell into invented panel topology to meet a visual storyboard.
+
+Decorative influence derives from actual subject projection/depth/luminance. Haze and ASCII may sit behind HTML and respond to the scene, with protected media/prose. They cannot occlude controls or impersonate analysis data. Ground contact and depth separation must also make sense with decoration disabled.
+
+Reduced motion uses a stable complete model/base or accurate poster. Work copies, renders and geometry processing belong under D:/JosHsuan_Website/_work/bending-active-thesis/round-02/scene-designer; only explicit sanitized review derivatives enter ignored runtime assets. Original CAD/evidence stays unchanged.
+
+Acceptance: actual source base present; shell/base transforms match provenance; broad and narrow aspect compositions retain key contact cues; nothing invented is presented as project evidence; no extra camera owner, Canvas or permanent render loop. Role/tool verification is not final case acceptance.

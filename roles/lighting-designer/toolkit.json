@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "role": "lighting-designer",
+  "displayName": "Lighting Designer",
+  "activation": "codex-role.ps1",
+  "home": ".runtime/codex-home",
+  "reviewOrigin": "http://127.0.0.1:4184",
+  "workOutput": "D:/JosHsuan_Website/_work/bending-active-thesis/round-02/lighting-designer",
+  "verified": "2026-10-08",
+  "globalConfigSHA256": "f2afd101645967225dd475d65cd77fa1a49ead1c55fbf0aea1ec3fb43f801cc2",
+  "skills": [
+    {
+      "name": "lighting-direction",
+      "path": "skills/lighting-direction",
+      "source": "Original scoped project workflow",
+      "license": "Project-original instructions"
+    }
+  ],
+  "mcp": [
+    {
+      "name": "lighting_catalog",
+      "source": "mcp/catalog-server.mjs",
+      "access": "Closed read-only seven chapter catalog and fixed direction contract; no paths/shell/network/mutations",
+      "verification": "verification/mcp-results.json"
+    },
+    {
+      "name": "lighting_browser",
+      "package": "@playwright/mcp",
+      "version": "0.0.83",
+      "repository": "https://github.com/microsoft/playwright-mcp",
+      "revision": "f183dad4a52965583e3cc1d59b88cdc279e2e57d",
+      "license": "Apache-2.0",
+      "access": "Explicit loopback origin, seven enabled tools, isolated profile, D-drive working output; origin restriction is not an OS sandbox",
+      "verification": "verification/mcp-results.json"
+    }
+  ],
+  "researchReferences": [
+    {
+      "repository": "https://github.com/mrdoob/three.js",
+      "revision": "5f0b8eef9b4667eeb3b8853fa2020f836fefc917",
+      "license": "MIT",
+      "use": "Primary source research only; runtime remains the existing pinned three 0.186.1"
+    },
+    {
+      "repository": "https://github.com/pmndrs/drei",
+      "revision": "bf6f4addf47467d3885de272d94ca5127f6ef68f",
+      "license": "MIT",
+      "use": "Primary Stage/Environment/ContactShadows research only; existing root 10.7.9 unchanged"
+    },
+    {
+      "repository": "https://github.com/pmndrs/react-three-fiber",
+      "revision": "d604b18bbda025d9ca682efb322cc76b99350e52",
+      "license": "MIT",
+      "use": "Primary demand-rendering and ownership reference; no source copied"
+    }
+  ],
+  "activationEvidence": "Actual installed CLI loaded exactly two MCP entries; one original skill copied byte-identically into role home, no copied auth.json. No desktop hot-loading claim.",
+  "installation": "Role-only frozen lockfile through exact pnpm 11.19.0; root dependencies and global configuration unchanged."
+}

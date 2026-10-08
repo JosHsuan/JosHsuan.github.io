@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lighting Designer — lighting-designer"
+  short_description: "Direct chapter lighting and cross-layer readability"
+  default_prompt: "Use $lighting-direction to refine and verify the Bending-Active chapter direction."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Scene Designer — scene-designer"
+  short_description: "Stage real project geometry and readable layers"
+  default_prompt: "Use $scene-direction to refine and verify the Bending-Active chapter direction."

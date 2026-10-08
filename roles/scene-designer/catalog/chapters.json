@@ -1,0 +1,176 @@
+{
+  "schemaVersion": 1,
+  "role": "scene-designer",
+  "displayName": "Scene Designer",
+  "status": "original-editorial-direction-not-physical-measurement",
+  "chapters": [
+    {
+      "id": "overview",
+      "intent": "A continuous graphite cyclorama frames the real shell and source base.",
+      "baseEmphasis": 0.7,
+      "groundOpacity": 0.25,
+      "subjectSide": "right",
+      "assemblyState": "assembled",
+      "ground": {
+        "type": "presentation-plane",
+        "yPolicy": "combined verified source minY - small display epsilon",
+        "roughness": 0.92,
+        "color": "#141b1e",
+        "sourceClaim": false
+      },
+      "backdrop": {
+        "type": "graphite-gradient",
+        "color": "#091217",
+        "authoredFor": "editorial presentation only"
+      },
+      "limits": [
+        "No invented building site, people, structural supports, or original fabrication sequence.",
+        "Source base bounds and IDs come from the Geometry Engineer; keep shell/base transform identical."
+      ]
+    },
+    {
+      "id": "form",
+      "intent": "A stable ground datum makes the shell/base relationship understandable.",
+      "baseEmphasis": 0.85,
+      "groundOpacity": 0.32,
+      "subjectSide": "right",
+      "assemblyState": "assembled",
+      "ground": {
+        "type": "presentation-plane",
+        "yPolicy": "combined verified source minY - small display epsilon",
+        "roughness": 0.92,
+        "color": "#141b1e",
+        "sourceClaim": false
+      },
+      "backdrop": {
+        "type": "graphite-gradient",
+        "color": "#091217",
+        "authoredFor": "editorial presentation only"
+      },
+      "limits": [
+        "No invented building site, people, structural supports, or original fabrication sequence.",
+        "Source base bounds and IDs come from the Geometry Engineer; keep shell/base transform identical."
+      ]
+    },
+    {
+      "id": "system",
+      "intent": "Recede staging so the documented process is the foreground.",
+      "baseEmphasis": 0.45,
+      "groundOpacity": 0.18,
+      "subjectSide": "right",
+      "assemblyState": "editorial-isolation-if-provenance-available",
+      "ground": {
+        "type": "presentation-plane",
+        "yPolicy": "combined verified source minY - small display epsilon",
+        "roughness": 0.92,
+        "color": "#141b1e",
+        "sourceClaim": false
+      },
+      "backdrop": {
+        "type": "graphite-gradient",
+        "color": "#091217",
+        "authoredFor": "editorial presentation only"
+      },
+      "limits": [
+        "No invented building site, people, structural supports, or original fabrication sequence.",
+        "Source base bounds and IDs come from the Geometry Engineer; keep shell/base transform identical."
+      ]
+    },
+    {
+      "id": "pattern",
+      "intent": "Close study sits in dark negative space; no inferred material thickness.",
+      "baseEmphasis": 0.35,
+      "groundOpacity": 0.12,
+      "subjectSide": "right",
+      "assemblyState": "source-parts-only",
+      "ground": {
+        "type": "presentation-plane",
+        "yPolicy": "combined verified source minY - small display epsilon",
+        "roughness": 0.92,
+        "color": "#141b1e",
+        "sourceClaim": false
+      },
+      "backdrop": {
+        "type": "graphite-gradient",
+        "color": "#091217",
+        "authoredFor": "editorial presentation only"
+      },
+      "limits": [
+        "No invented building site, people, structural supports, or original fabrication sequence.",
+        "Source base bounds and IDs come from the Geometry Engineer; keep shell/base transform identical."
+      ]
+    },
+    {
+      "id": "make",
+      "intent": "Reverse composition reveals the actual base and the assembly relationship.",
+      "baseEmphasis": 1,
+      "groundOpacity": 0.42,
+      "subjectSide": "left",
+      "assemblyState": "rejoin",
+      "ground": {
+        "type": "presentation-plane",
+        "yPolicy": "combined verified source minY - small display epsilon",
+        "roughness": 0.92,
+        "color": "#141b1e",
+        "sourceClaim": false
+      },
+      "backdrop": {
+        "type": "graphite-gradient",
+        "color": "#091217",
+        "authoredFor": "editorial presentation only"
+      },
+      "limits": [
+        "No invented building site, people, structural supports, or original fabrication sequence.",
+        "Source base bounds and IDs come from the Geometry Engineer; keep shell/base transform identical."
+      ]
+    },
+    {
+      "id": "validation",
+      "intent": "Hold the complete object; photographs remain the physical evidence.",
+      "baseEmphasis": 0.8,
+      "groundOpacity": 0.35,
+      "subjectSide": "right",
+      "assemblyState": "assembled",
+      "ground": {
+        "type": "presentation-plane",
+        "yPolicy": "combined verified source minY - small display epsilon",
+        "roughness": 0.92,
+        "color": "#141b1e",
+        "sourceClaim": false
+      },
+      "backdrop": {
+        "type": "graphite-gradient",
+        "color": "#091217",
+        "authoredFor": "editorial presentation only"
+      },
+      "limits": [
+        "No invented building site, people, structural supports, or original fabrication sequence.",
+        "Source base bounds and IDs come from the Geometry Engineer; keep shell/base transform identical."
+      ]
+    },
+    {
+      "id": "credits",
+      "intent": "Return to the whole model and base as a quiet end composition.",
+      "baseEmphasis": 0.8,
+      "groundOpacity": 0.3,
+      "subjectSide": "center",
+      "assemblyState": "assembled",
+      "ground": {
+        "type": "presentation-plane",
+        "yPolicy": "combined verified source minY - small display epsilon",
+        "roughness": 0.92,
+        "color": "#141b1e",
+        "sourceClaim": false
+      },
+      "backdrop": {
+        "type": "graphite-gradient",
+        "color": "#091217",
+        "authoredFor": "editorial presentation only"
+      },
+      "limits": [
+        "No invented building site, people, structural supports, or original fabrication sequence.",
+        "Source base bounds and IDs come from the Geometry Engineer; keep shell/base transform identical."
+      ]
+    }
+  ]
+}
