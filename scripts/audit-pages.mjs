@@ -20,7 +20,7 @@ export async function auditPages() {
   await walk(out);
   for (const file of files) {
     const relative = path.relative(out, file).replaceAll('\\', '/');
-    assert(!/\.(3dm|sql|map|private\.[^/]+)$|(^|\/)(content|research|verification|node_modules)\//i.test(relative), 'Private/editor artifact: ' + relative);
+    assert(!/\.(3dm|psd|psb|ai|sql|map|private\.[^/]+)$|(^|\/)(content|research|verification|node_modules)\//i.test(relative), 'Private/editor artifact: ' + relative);
     const bytes = await readFile(file);
     if (relative.startsWith('assets/') || relative.startsWith('licenses/')) {
       const asset = expected.get(relative); assert(asset, 'Unapproved asset: ' + relative);

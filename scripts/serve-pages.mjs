@@ -3,7 +3,7 @@ import {readFile, realpath} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 const root = fileURLToPath(new URL('../.pages-workspace/out/', import.meta.url));
-const mime = {'.html':'text/html; charset=utf-8','.js':'text/javascript','.css':'text/css','.json':'application/json','.txt':'text/plain','.xml':'application/xml','.webp':'image/webp','.glb':'model/gltf-binary','.hdr':'application/octet-stream'};
+const mime = {'.html':'text/html; charset=utf-8','.js':'text/javascript','.css':'text/css','.json':'application/json','.txt':'text/plain','.xml':'application/xml','.webp':'image/webp','.svg':'image/svg+xml','.png':'image/png','.woff2':'font/woff2','.glb':'model/gltf-binary','.hdr':'application/octet-stream'};
 createServer(async (request, response) => {
   if (request.headers.host !== '127.0.0.1:4186' || !['GET','HEAD'].includes(request.method)) {response.writeHead(403).end(); return;}
   try {

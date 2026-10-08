@@ -6,3 +6,5 @@
 .inspector img{display:block;width:100%;height:auto}
 .inspector>a{display:inline-block;margin-top:1rem;font:.65rem var(--mono);padding:.5rem 0}
 @media(max-width:780px){.inspector{padding:.65rem}.inspector header{gap:.5rem}}
+
+.inspector{border-radius:20px;box-shadow:0 20px 50px #0005,inset 0 1px #ffffff14}.inspector button{border-radius:12px}.inspector img{border-radius:12px}.inspector>a{border-radius:8px}

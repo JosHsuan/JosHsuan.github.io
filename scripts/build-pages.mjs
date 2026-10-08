@@ -36,6 +36,8 @@ const sources = [
   'components/element-score.mjs', 'components/optical-score.mjs', 'components/scene-compositor.mjs',
   'components/scene-direction.mjs', 'components/vendor/cinematic-plan.mjs',
   'components/exhibition-stage.mjs', 'components/editorial-score.mjs',
+  'components/source-scene-score.mjs', 'components/chapter-playback.mjs', 'components/chapter-scene-score.mjs', 'components/element-choreography.mjs',
+  'components/SourceDiagram.jsx', 'components/source-diagram.module.css',
   'components/ModelInspector.jsx', 'components/model-inspector.module.css',
   'components/inspection-state.mjs', 'components/inspection-camera.mjs', 'components/inspection-lighting.mjs',
   'components/inspection-framing-support.mjs',
@@ -55,7 +57,7 @@ await writeFile(path.join(work, 'public/.nojekyll'), '');
 await writeFile(path.join(work, 'public/robots.txt'), `User-agent: *\nAllow: /\nSitemap: ${manifest.origin}/sitemap.xml\n`);
 await writeFile(path.join(work, 'public/sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${manifest.origin}/</loc></url></urlset>\n`);
 const commit = process.env.GITHUB_SHA || execFileSync('git', ['rev-parse', 'HEAD'], {cwd: root, encoding: 'utf8'}).trim();
-await writeFile(path.join(work, 'public/release.json'), JSON.stringify({release: manifest.id, commit, modelRevision: 'ff112b90be104cca7e3705b5eee481ba3973d25e2f3d4a7350faa2f732cae47e'}) + '\n');
+await writeFile(path.join(work, 'public/release.json'), JSON.stringify({release: manifest.id, commit, modelRevision: 'ff112b90be104cca7e3705b5eee481ba3973d25e2f3d4a7350faa2f732cae47e', diagramRevision: manifest.assets.find(asset => asset.path === 'assets/thesis/source-diagrams.glb').sha256, typography: 'IBM Plex'}) + '\n');
 const result = spawnSync(process.execPath, [path.join(root, 'node_modules/next/dist/bin/next'), 'build', work, '--webpack'], {cwd: root, stdio: 'inherit', env: {...process.env, THESIS_PUBLIC_RELEASE: '1', NEXT_PUBLIC_BASE_PATH: '', NEXT_TELEMETRY_DISABLED: '1'}});
 if (result.error) throw result.error;
 assert.equal(result.status, 0, 'Public static build failed');

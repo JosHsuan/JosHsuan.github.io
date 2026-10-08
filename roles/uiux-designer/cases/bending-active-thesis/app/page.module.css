@@ -15,7 +15,7 @@
 .glyph svg{display:block;width:100%;height:100%;stroke:currentColor;stroke-width:1.2;stroke-linejoin:round;stroke-linecap:round}
 .chapterHeading{font-weight:400;font-size:clamp(2.7rem,4.6vw,5.4rem);line-height:.99;letter-spacing:-.065em;margin:0 0 2.4rem;color:var(--paper);max-width:42rem}
 .chapterHeading>span{display:block}
-.headingLast{font-family:Georgia,'Times New Roman',serif;font-style:italic;letter-spacing:-.06em}
+.headingLast{font-family:var(--serif);font-style:italic;letter-spacing:-.06em}
 .overview{min-height:135svh}
 .openingCopy{grid-column:1/8;align-self:center;max-width:53rem;position:relative;z-index:3;padding-bottom:5svh}
 .openingLabel{display:flex;align-items:center;gap:.85rem;color:var(--accent);margin-bottom:2.4rem}
@@ -273,3 +273,59 @@
 @media print{.readingFrame{overflow:visible}.story,.story [data-feedback-plane],.story [data-editorial-copy]{transform:none!important}}
 
 .chapter:focus,.story:focus,.inlineStudy:focus{outline:none}
+
+/* Round 06 — Plex typography, rounded shadowboxes and source-led diagrams. */
+.openingCopy h1{font-weight:430;font-stretch:85%;letter-spacing:-.065em;line-height:.87;font-size:clamp(5.5rem,10.9vw,11.8rem)}
+.chapterHeading{font-weight:450;letter-spacing:-.055em;line-height:1.03}
+.headingLast{font-weight:400;letter-spacing:-.065em}
+.skip,.studyLink,.mediaAction,.sourceLinks a,.sourceNotes summary,.methodSequence summary{border-radius:12px}
+.chapterRail{border-radius:28px;padding:6px;background:#0b1212c2;border:1px solid #acbba52e;box-shadow:0 12px 32px #0005,inset 0 1px #ffffff0d;backdrop-filter:blur(16px)}
+.chapterRail a{border-radius:50%;background:transparent}
+.railLabel{border-radius:12px;margin-right:8px}
+.chapterRail a::after{right:6px;border-radius:2px}
+.copy,.closingCopy{padding:clamp(18px,2vw,32px);border:1px solid #afc6b524;border-radius:28px;background:linear-gradient(145deg,#13201dbc,#0b121274);box-shadow:0 30px 70px #0003,inset 0 1px #d9e8d815;perspective:1100px}
+.copy>p,.closingCopy>p{border-radius:4px}
+.openingCopy{perspective:1100px}
+.chapterInner{row-gap:3rem}
+.form .chapterInner,.system .chapterInner,.pattern .chapterInner{padding-bottom:8rem}
+.diagramWide{grid-column:2/12;min-width:0;width:100%;margin-top:2rem;align-self:start}
+.sourceComparison{border:1px solid #b4c7b733;border-radius:18px;padding:12px 18px;background:#0c1614a8;margin-top:18px;max-width:800px}
+.sourceComparison>summary{min-height:44px;align-content:center;cursor:pointer;font:.66rem/1.6 var(--mono);color:var(--muted)}
+.sourceComparison>.evidence{margin:18px 0 4px;width:100%;max-width:100%}
+.mediaFrame,.mediaPlane,.mediaFrame img{border-radius:24px}
+.mediaFrame{perspective:1200px;isolation:isolate;padding:9px;background:linear-gradient(145deg,#7591823a,#101815);border:1px solid #d9e8d548;box-shadow:0 28px 60px #0006,inset 0 1px #ffffff25}
+.mediaPlane{overflow:hidden;border-radius:16px;box-shadow:0 12px 34px #0005}
+.mediaFrame img{border-radius:16px;transition:filter .6s cubic-bezier(.2,.75,.25,1)}
+.evidence[data-media-kind="photo"] .mediaPlane{background:#ff9360}
+.evidence[data-media-kind="photo"] .mediaFrame img{filter:grayscale(1) invert(1) contrast(.82);mix-blend-mode:multiply}
+.evidence[data-media-kind="photo"] .mediaFrame:is(:hover,:focus-visible,:focus-within) img{filter:none;mix-blend-mode:normal}
+.mediaAction{z-index:2;background:#14211fe8;border-radius:12px;box-shadow:0 8px 22px #0004}
+.frameCorner{inset:0;border:1px solid #f8e6d11a;border-radius:16px;transform:none}
+.mediaFrame:hover .frameCorner,.mediaFrame:focus-visible .frameCorner{transform:none;border-color:#ff946999}
+.evidence figcaption{border:1px solid #c4d2ba26;border-left-color:#ff946970;border-radius:14px;background:#0c1512ed;padding:14px 16px;box-shadow:0 12px 28px #0002}
+.figureIndex{border-bottom:0;padding:8px 12px;margin-bottom:10px;border-radius:12px;background:#11201c8c}
+.methodSequence details{padding:0 10px;border:1px solid #afc5b432;border-radius:14px;background:#12221b82;box-shadow:inset 0 1px #ffffff08}
+.methodSequence li::before{display:none}
+.methodSequence details[open]{padding:0 10px;border:1px solid #ff946977}
+.methodSequence summary{align-items:center}
+.measurements>div{border:1px solid #b5c2b63d;border-radius:16px;padding:14px 18px;background:#17241ba3;box-shadow:0 10px 24px #0003}
+.sourceNotes{border:1px solid #afc6b52b;border-radius:16px;padding:8px 16px}
+.sourceLinks a{padding:9px 12px;background:#14241c;min-height:44px;align-content:center}
+.story [data-choreography="heading"]{transform:var(--choreo-transform,none)!important;translate:none!important;rotate:none!important;scale:none!important;transform-origin:0 65%}
+.story [data-choreography="diagram"]{transform:perspective(1100px) rotateX(var(--choreo-rx,0deg)) rotateY(var(--choreo-ry,0deg))}
+.story [data-choreography="photo"]{transform:perspective(1200px) rotateX(calc(var(--choreo-rx,0deg) + var(--feedback-x,0deg))) rotateY(calc(var(--choreo-ry,0deg) + var(--feedback-y,0deg)))}
+@media(max-width:1100px){.diagramWide{grid-column:1/-1}.copy{padding:22px}.openingCopy h1{font-size:11.5vw}}
+@media(max-width:780px){.copy,.closingCopy{padding:22px 20px;border-radius:24px;width:100%;max-width:none}.chapterInner{padding-left:1.1rem;padding-right:1.1rem;gap:2rem}.openingCopy{padding-inline:6px}.openingCopy h1{font-size:16.1vw;line-height:.9;letter-spacing:-.065em}.chapterHeading,.pattern .chapterHeading,.validation .chapterHeading{font-size:clamp(2.4rem,10vw,3.8rem)}.diagramWide{margin-top:0}.inlineStudy{margin-top:0}.chapterRail{padding:5px;border-radius:28px}.chapterRail a{min-height:40px}.chapterRail a::after{border-radius:2px}.mediaFrame{padding:7px;border-radius:22px}.mediaPlane,.mediaFrame img{border-radius:16px}.form .chapterInner,.system .chapterInner,.pattern .chapterInner{padding-bottom:7rem}.sourceComparison{padding:10px 14px}.evidence figcaption{flex-direction:column;gap:6px}.figureIndex{font-size:.46rem}.sourceLinks{gap:10px}}
+@media(prefers-reduced-motion:reduce){.story [data-choreography]{transform:none!important}}
+@media print{.copy,.closingCopy{box-shadow:none;background:transparent}.evidence[data-media-kind="photo"] .mediaFrame img{filter:none;mix-blend-mode:normal}.story [data-choreography]{transform:none!important}}
+
+:global(html[data-cinematic-ready]) .story [data-choreography]:not([data-choreography="heading"]){transform:perspective(1100px) rotateX(calc(var(--choreo-rx,0deg) + var(--feedback-x,0deg))) rotateY(calc(var(--choreo-ry,0deg) + var(--feedback-y,0deg)))}
+:global(html[data-cinematic-static]) .story [data-choreography]{transform:none!important;filter:none!important}
+@media(prefers-reduced-motion:reduce){.story [data-choreography]{transform:none!important;filter:none!important}}
+
+/* Keep the source object beside its explanation while the diagram is read. */
+@media(min-width:1000px){.form .inlineStudy,.system .inlineStudy,.pattern .inlineStudy{grid-column:7/13;grid-row:1/3;position:sticky;top:112px;align-self:start;margin-top:0}.form .diagramWide,.system .diagramWide,.pattern .diagramWide{grid-column:1/7;grid-row:2;margin-top:0}.form .copy,.system .copy,.pattern .copy{grid-column:1/7;grid-row:1;max-width:none}.diagramWide>figure{margin-top:0}.chapterInner{align-items:start}.overview .chapterInner,.make .chapterInner,.validation .chapterInner,.credits .chapterInner{align-items:center}}
+@media(min-width:1000px) and (max-height:760px){.form .inlineStudy,.system .inlineStudy,.pattern .inlineStudy{top:96px}}
+@media print{.form .inlineStudy,.system .inlineStudy,.pattern .inlineStudy{position:static}}
+
+.openingCopy [data-heading-line],.chapterHeading [data-heading-line]{width:fit-content;max-width:100%}.subtitle,.projectType{width:fit-content}
