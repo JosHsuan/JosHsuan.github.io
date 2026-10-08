@@ -1,27 +1,34 @@
 import {test,expect} from '@playwright/test';
-import {pause,expectIdle,settle} from './case-helpers.mjs';
+import {settle,scenarioTimeout} from './case-helpers.mjs';
 const WAIT=30000;
 async function load(page,path='/'){await page.goto(path);await page.getByRole('combobox',{name:'Visual detail',exact:true}).selectOption('light');await page.waitForFunction(()=>window.__thesis?.inspect().ready&&window.__story,null,{timeout:WAIT});await page.evaluate(()=>document.fonts.ready);await settle(page);}
-async function phase(page,id,value){await page.evaluate(({id,value})=>{const el=document.getElementById(id);let y=0;for(let n=el;n;n=n.offsetParent)y+=n.offsetTop;scrollTo({top:y+el.offsetHeight*value-innerHeight*.45,behavior:'instant'});},{id,value});await settle(page);}
+async function phase(page,id,value,settleAfter=settle){await page.evaluate(({id,value})=>{const el=document.getElementById(id);let y=0;for(let n=el;n;n=n.offsetParent)y+=n.offsetTop;scrollTo({top:y+el.offsetHeight*value-innerHeight*.45,behavior:'instant'});},{id,value});await settleAfter(page);}
 // Locator auto-scroll may finish before the authored reading plane settles.
 // Click the visible, settled summary instead of a stale pre-response coordinate.
 async function openSourceFigure(page){const summary=page.getByText('Compare with the original thesis figure',{exact:true});await summary.scrollIntoViewIfNeeded();await settle(page);await summary.click();await expect(summary.locator('..')).toHaveAttribute('open','');await settle(page);}
 
+// Each fastForward fires a due RAF once. A 500ms controller step exercises the
+// real heavy-frame response without entering its intentional >1s stale policy
+// or rendering dozens of intermediate software-GPU frames with runFor.
+async function settleClock(page){
+ let candidate=null,last=null;
+ for(let step=0;step<12;step++){
+  await page.clock.fastForward(500);
+  last=await page.evaluate(()=>{
+   const story=window.__story.inspect(),scene=window.__thesis.inspect();
+   return {current:Math.abs(story.nativeDocY-scrollY)<.01&&!story.readingPending&&story.settled&&story.inspection.settled,signature:[scrollY,story.visualDocY,document.documentElement.scrollHeight,story.inspection.value.azimuth,story.inspection.value.elevation].join('/'),native:story.nativeDocY,visual:story.visualDocY,frameDelta:story.frameDelta,controllerFrame:story.controllerFrame,renderedControllerFrame:scene.renderedControllerFrame,ready:scene.ready};
+  });
+  if(!last.current)candidate=null;
+  else {
+   if(candidate?.signature!==last.signature)candidate={signature:last.signature,frame:last.controllerFrame};
+   if(last.ready&&last.renderedControllerFrame>=candidate.frame)return;
+  }
+ }
+ throw Error('Controlled controller/render did not settle: '+JSON.stringify(last));
+}
 
-test('whole reading plane shares model progress, damping, content stops and reversible native travel',async({page})=>{
- test.setTimeout(180000);
- // Install before navigation so every application RAF uses the same clock.
- // Loading and native chapter navigation still advance in real time.
- await page.clock.install({time:new Date('2026-01-01T00:00:00Z')});await load(page);
- // Use the supported Light renderer for frame-sensitive DOM sampling. Full
- // initialization and optics are covered by public smoke and optical fixtures.
- const canvas=await page.locator('canvas').elementHandle();await phase(page,'system',.35);
- const realtimeFrameDelta=await page.evaluate(()=>window.__story.inspect().frameDelta);let samples=[];
+async function sampleMoving(page){
  try {
-  // A future pause point avoids a protocol race with Date.now(). pauseAt fires
-  // overdue callbacks once; runFor then advances only this 160ms motion sample.
-  // The built page, native scroll, DOM and Canvas remain active at full size.
-  await page.clock.pauseAt(new Date('2026-01-01T01:00:00Z'));
   await page.evaluate(()=>{
    const sample={values:[],raf:0};window.__motionTimingSample=sample;
    scrollBy({top:160,behavior:'instant'});
@@ -32,28 +39,54 @@ test('whole reading plane shares model progress, damping, content stops and reve
    };
    sample.raf=requestAnimationFrame(tick);
   });
-  // No locator action, RAF promise or settle wait may block a paused clock.
   await page.clock.runFor(160);
-  samples=await page.evaluate(()=>window.__motionTimingSample.values);
+  return await page.evaluate(()=>window.__motionTimingSample.values);
  } finally {
-  try {await page.evaluate(()=>{const sample=window.__motionTimingSample;if(sample)cancelAnimationFrame(sample.raf);delete window.__motionTimingSample;});}
-  finally {await page.clock.resume();}
+  await page.evaluate(()=>{const sample=window.__motionTimingSample;if(sample)cancelAnimationFrame(sample.raf);delete window.__motionTimingSample;});
  }
- await settle(page);
- const moving=samples.find(s=>s.shift>5&&!s.settled);expect(moving,JSON.stringify({realtimeFrameDelta,samples})).toBeTruthy();expect(Math.abs(moving.velocity)).toBeGreaterThan(1);expect(Number.isFinite(moving.acceleration)).toBe(true);
- for(const s of samples){expect(Number.isFinite(s.rule)).toBe(true);expect(s.sceneVisualU).toBe(s.visualU);expect(Math.abs((s.top+s.visual)-(samples[0].top+samples[0].visual))).toBeLessThan(.1);}
- const stop=await page.evaluate(()=>{const s=window.__story.inspect();return s.stops.find(stop=>stop.y>s.visualDocY+200);});expect(stop).toBeTruthy();
- await page.evaluate(y=>scrollTo({top:y,behavior:'instant'}),stop.start-40);await settle(page);
- await page.evaluate(y=>scrollTo({top:y,behavior:'instant'}),stop.holdStart+2);await settle(page);
- const before=await page.evaluate(()=>window.__story.inspect());expect(before.holdWeight,JSON.stringify({native:before.nativeDocY,visual:before.visualDocY,bypass:before.bypassHoldId,seek:before.seekUntilInput,hold:before.holdId,stop})).toBeGreaterThan(.99);
- await page.evaluate(y=>scrollTo({top:y,behavior:'instant'}),stop.holdEnd-2);await settle(page);
- const after=await page.evaluate(()=>window.__story.inspect());expect(after.nativeDocY).toBeGreaterThan(before.nativeDocY);expect(after.holdId).toBe(before.holdId);expect(after.holdWeight).toBeGreaterThan(.99);expect(Math.abs(after.stops.find(item=>item.id===stop.id).y-stop.y),'Autonomous content must not move the authored reading stop.').toBeLessThan(.1);expect(Math.abs(after.visualDocY-before.visualDocY)).toBeLessThan(.1);
- for(const id of ['pattern','make','system']){await phase(page,id,.5);expect(await page.evaluate(original=>document.querySelector('canvas')===original,canvas)).toBe(true);}
- const autonomous=await page.evaluate(async()=>{const before=window.__thesis.inspect(),time=window.__story.inspect().playback.activeSeconds;for(let i=0;i<12;i++)await new Promise(requestAnimationFrame);const after=window.__thesis.inspect();return{time,afterTime:window.__story.inspect().playback.activeSeconds,beforeField:before.compositor.field.time,afterField:after.compositor.field.time,beforePose:before.pose.position,afterPose:after.pose.position,frames:[before.frames,after.frames]};});expect(autonomous.afterTime).toBeGreaterThan(autonomous.time);expect(autonomous.afterField).toBeGreaterThan(autonomous.beforeField);expect(autonomous.afterPose).not.toEqual(autonomous.beforePose);expect(autonomous.frames[1]).toBeGreaterThan(autonomous.frames[0]);await pause(page);await expectIdle(page);
+}
+
+test('whole reading plane shares model progress, damping, content stops and reversible native travel',async({page})=>{
+ test.setTimeout(scenarioTimeout(180000));
+ // Install before navigation so every application RAF uses the same clock.
+ // Loading and the initial chapter placement still advance in real time.
+ await page.clock.install({time:new Date('2026-01-01T00:00:00Z')});await load(page);
+ // Use the supported Light renderer for frame-sensitive DOM sampling. Full
+ // initialization and optics are covered by public smoke and optical fixtures.
+ const canvas=await page.locator('canvas').elementHandle();await phase(page,'system',.35);
+ const realtimeFrameDelta=await page.evaluate(()=>window.__story.inspect().frameDelta);
+ try {
+  // A future pause point avoids a protocol race with Date.now(). pauseAt fires
+  // overdue callbacks once. runFor is confined to the 160ms shape sample; the
+  // remaining contracts use single-RAF steps, including the actual pause UI.
+  // The built page, native scroll, DOM and Canvas remain active at full size.
+  await page.clock.pauseAt(new Date('2026-01-01T01:00:00Z'));
+  const samples=await sampleMoving(page);await settleClock(page);
+  const moving=samples.find(s=>s.shift>5&&!s.settled);expect(moving,JSON.stringify({realtimeFrameDelta,samples})).toBeTruthy();expect(Math.abs(moving.velocity)).toBeGreaterThan(1);expect(Number.isFinite(moving.acceleration)).toBe(true);
+  for(const s of samples){expect(Number.isFinite(s.rule)).toBe(true);expect(s.sceneVisualU).toBe(s.visualU);expect(Math.abs((s.top+s.visual)-(samples[0].top+samples[0].visual))).toBeLessThan(.1);}
+  const stop=await page.evaluate(()=>{const s=window.__story.inspect();return s.stops.find(stop=>stop.y>s.visualDocY+200);});expect(stop).toBeTruthy();
+  await page.evaluate(y=>scrollTo({top:y,behavior:'instant'}),stop.start-40);await settleClock(page);
+  await page.evaluate(y=>scrollTo({top:y,behavior:'instant'}),stop.holdStart+2);await settleClock(page);
+  const before=await page.evaluate(()=>window.__story.inspect());expect(before.holdWeight,JSON.stringify({native:before.nativeDocY,visual:before.visualDocY,bypass:before.bypassHoldId,seek:before.seekUntilInput,hold:before.holdId,stop})).toBeGreaterThan(.99);
+  await page.evaluate(y=>scrollTo({top:y,behavior:'instant'}),stop.holdEnd-2);await settleClock(page);
+  const after=await page.evaluate(()=>window.__story.inspect());expect(after.nativeDocY).toBeGreaterThan(before.nativeDocY);expect(after.holdId).toBe(before.holdId);expect(after.holdWeight).toBeGreaterThan(.99);expect(Math.abs(after.stops.find(item=>item.id===stop.id).y-stop.y),'Autonomous content must not move the authored reading stop.').toBeLessThan(.1);expect(Math.abs(after.visualDocY-before.visualDocY)).toBeLessThan(.1);
+  for(const id of ['pattern','make','system']){await phase(page,id,.5,settleClock);expect(await page.evaluate(original=>document.querySelector('canvas')===original,canvas)).toBe(true);}
+  const snapshot=()=>page.evaluate(()=>{const story=window.__story.inspect(),scene=window.__thesis.inspect();return {time:story.playback.activeSeconds,field:scene.compositor.field.time,pose:scene.pose.position,frames:scene.frames};});
+  const autonomousBefore=await snapshot();for(let step=0;step<3;step++)await page.clock.fastForward(500);const autonomousAfter=await snapshot();
+  expect(autonomousAfter.time).toBeGreaterThan(autonomousBefore.time);expect(autonomousAfter.field).toBeGreaterThan(autonomousBefore.field);expect(autonomousAfter.pose).not.toEqual(autonomousBefore.pose);expect(autonomousAfter.frames).toBeGreaterThan(autonomousBefore.frames);
+  // Trigger the real button handler without actionability waiting on a paused
+  // clock. Native pointer/focus activation remains covered by the next tests.
+  await page.getByRole('button',{name:'Pause motion',exact:true}).dispatchEvent('click');await settleClock(page);
+  expect(await page.evaluate(()=>window.__story.inspect().scheduled)).toBe(false);
+  const frozen=await snapshot();for(let step=0;step<8;step++)await page.clock.fastForward(500);const idle=await snapshot();
+  expect(idle).toEqual(frozen);
+ } finally {
+  await page.clock.resume();
+ }
 });
 
 test('text and images respond in perspective; focus, hashes, Pause and Reduced keep content reachable',async({page,isMobile})=>{
- test.setTimeout(180000);await load(page);await phase(page,'system',.45);await openSourceFigure(page);
+ test.setTimeout(scenarioTimeout(180000));await load(page);await phase(page,'system',.45);await openSourceFigure(page);
  const source=page.locator('[data-inspect-figure="0"]'),media=source.locator('[data-feedback-plane]');await expect(media).toBeVisible();await source.scrollIntoViewIfNeeded();await settle(page);
  if(!isMobile){await media.hover({position:{x:15,y:15}});await settle(page);expect(Math.abs(await media.evaluate(el=>parseFloat(getComputedStyle(el).getPropertyValue('--feedback-x'))))).toBeGreaterThan(.3);await page.mouse.move(1,1);await settle(page);}
  await source.focus();await settle(page);const focus=await source.boundingBox();expect(focus.y+focus.height).toBeGreaterThan(90);expect(focus.y).toBeLessThan(await page.evaluate(()=>innerHeight));
@@ -66,7 +99,7 @@ test('text and images respond in perspective; focus, hashes, Pause and Reduced k
 });
 
 test('initial fragments, keyboard focus and browser history preserve exact native reading positions',async({page})=>{
- test.setTimeout(180000);await load(page,'/#system');await expect(page.locator('[data-model-study]').first()).toBeAttached();
+ test.setTimeout(scenarioTimeout(180000));await load(page,'/#system');await expect(page.locator('[data-model-study]').first()).toBeAttached();
  await expect(page.locator('[data-chapter-link="system"]')).toHaveAttribute('aria-current','location');
  const heading=await page.locator('#system [data-story-heading]').boundingBox();expect(heading.y+heading.height).toBeGreaterThan(100);expect(heading.y).toBeLessThan(await page.evaluate(()=>innerHeight));
  const make=page.locator('[data-chapter-link="make"]');await make.focus();await page.keyboard.press('Enter');await settle(page);await expect(page.locator('#make')).toBeFocused();

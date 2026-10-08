@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-import {WAIT,loadScene,settle,frames,pause} from './case-helpers.mjs';
+import {WAIT,scenarioTimeout,loadScene,settle,frames,pause} from './case-helpers.mjs';
 
 test('IBM Plex, rounded shadowboxes and orange photos retain an accessible original',async({page,isMobile})=>{
  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');await page.evaluate(()=>document.fonts.ready);
@@ -12,7 +12,7 @@ test('IBM Plex, rounded shadowboxes and orange photos retain an accessible origi
 });
 
 test('original SVG paths support accessible curve and workflow selections with static failure fallbacks',async({page})=>{
- test.setTimeout(120000);await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');
+ test.setTimeout(scenarioTimeout(120000));await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');
  for(const [kind,count]of [['miura',3],['library',11],['workflow',4]]){const diagram=page.locator(`[data-source-diagram="${kind}"]`);await diagram.scrollIntoViewIfNeeded();await expect(diagram.locator('svg')).toBeVisible({timeout:WAIT});expect(await diagram.locator('svg path').count()).toBeGreaterThan(10);const buttons=diagram.locator('button[data-diagram-index]');await expect(buttons).toHaveCount(count);await buttons.last().focus();await page.keyboard.press('Enter');await expect(buttons.last()).toHaveAttribute('aria-pressed','true');await expect(diagram.locator('[data-diagram-caption]')).not.toBeEmpty();
   // Every authored caption must fit without changing the reading stop plan.
   // Selection shares the same paint path as autonomous presentation changes.
@@ -24,16 +24,24 @@ test('original SVG paths support accessible curve and workflow selections with s
 });
 
 test('zero-wheel chapter loops advance field and diagram selections while Pause holds the shared clock',async({page})=>{
- test.setTimeout(120000);await loadScene(page);await page.locator('[data-source-diagram="workflow"]').scrollIntoViewIfNeeded();await settle(page);await page.mouse.move(10,130);await frames(page,4);
- const first=await page.evaluate(()=>({time:window.__story.inspect().playback.activeSeconds,field:window.__thesis.inspect().compositor.field.time,phase:document.querySelector('[data-source-diagram="workflow"]').style.getPropertyValue('--diagram-phase'),y:scrollY}));
- await page.waitForFunction(before=>{const story=window.__story.inspect(),scene=window.__thesis.inspect();return story.playback.activeSeconds>before.time&&scene.compositor.field.time>before.field&&document.querySelector('[data-source-diagram="workflow"]').style.getPropertyValue('--diagram-phase')!==before.phase;},first,{timeout:WAIT});const second=await page.evaluate(()=>({time:window.__story.inspect().playback.activeSeconds,field:window.__thesis.inspect().compositor.field.time,phase:document.querySelector('[data-source-diagram="workflow"]').style.getPropertyValue('--diagram-phase'),y:scrollY,foreground:window.__thesis.inspect().compositor.foreground}));expect(second.y).toBe(first.y);expect(second.time).toBeGreaterThan(first.time);expect(second.field).toBeGreaterThan(first.field);expect(second.phase).not.toBe(first.phase);expect(second.foreground.missingMasks).toBe(false);
+ test.setTimeout(scenarioTimeout(120000));await page.clock.install({time:new Date('2026-01-01T00:00:00Z')});await loadScene(page);await page.locator('[data-source-diagram="workflow"]').scrollIntoViewIfNeeded();await settle(page);await page.mouse.move(10,130);await frames(page,4);
+ // Fixed sub-stale intervals verify autonomous behavior even when one software
+ // GPU frame takes more than a real second. The actual DOM and Canvas still run.
+ let first,second;
+ try{
+  await page.clock.pauseAt(new Date('2026-01-01T01:00:00Z'));
+  first=await page.evaluate(()=>({time:window.__story.inspect().playback.activeSeconds,field:window.__thesis.inspect().compositor.field.time,phase:document.querySelector('[data-source-diagram="workflow"]').style.getPropertyValue('--diagram-phase'),y:scrollY}));
+  for(let i=0;i<3;i++)await page.clock.fastForward(500);
+  second=await page.evaluate(()=>({time:window.__story.inspect().playback.activeSeconds,field:window.__thesis.inspect().compositor.field.time,phase:document.querySelector('[data-source-diagram="workflow"]').style.getPropertyValue('--diagram-phase'),y:scrollY,foreground:window.__thesis.inspect().compositor.foreground}));
+ }finally{await page.clock.resume();}
+ expect(second.y).toBe(first.y);expect(second.time).toBeGreaterThan(first.time);expect(second.field).toBeGreaterThan(first.field);expect(second.phase).not.toBe(first.phase);expect(second.foreground.missingMasks).toBe(false);
  const workflow=page.locator('[data-source-diagram="workflow"]');await workflow.locator('button[data-diagram-index="2"]').click();await settle(page);expect(await page.evaluate(()=>window.__story.inspect().sourceSelection?.chapterId)).toBe('system');
  await page.getByRole('button',{name:'Pause motion',exact:true}).click();await settle(page);const frozen=await page.evaluate(()=>window.__story.inspect().playback.activeSeconds);await frames(page,10);expect(await page.evaluate(()=>window.__story.inspect().playback.activeSeconds)).toBe(frozen);
 });
 
 
 test('foreground Canvas preserves the rendered pixels of essential reading cores',async({page})=>{
- test.setTimeout(120000);await loadScene(page);await pause(page);
+ test.setTimeout(scenarioTimeout(120000));await loadScene(page);await pause(page);
  const heading=page.locator('[data-source-diagram="workflow"] figcaption[data-protect]');await heading.scrollIntoViewIfNeeded();await settle(page);await frames(page,4);
  // Force one final renderer frame after DOM settlement; the GPU is demand-driven.
  const beforeFrame=await page.evaluate(()=>window.__thesis.inspect().frames);await page.evaluate(()=>window.__thesis.setOverrides({}));await page.waitForFunction(n=>window.__thesis.inspect().frames>n,beforeFrame);await frames(page,2);

@@ -1,4 +1,5 @@
 import {test, expect} from '@playwright/test';
+import {WAIT, scenarioTimeout} from './case-helpers.mjs';
 
 test('published story, canonical metadata and every linked asset work without JavaScript', async ({browser}) => {
   const context = await browser.newContext({javaScriptEnabled:false});
@@ -15,7 +16,7 @@ test('published story, canonical metadata and every linked asset work without Ja
 });
 
 test('public model initializes with base layers and supports chapter navigation and Light mode', async ({page}) => {
-  test.setTimeout(90000);
+  test.setTimeout(scenarioTimeout(120000));
   const errors=[]; page.on('pageerror', error=>errors.push(error.message));
   await page.goto('/');
   await page.waitForFunction(()=>window.__thesis?.inspect().ready);
@@ -27,7 +28,7 @@ test('public model initializes with base layers and supports chapter navigation 
   // Verify Full initialization, then exercise native interaction in supported
   // Light mode so software-rendered Full frames do not dominate input timing.
   await page.getByRole('combobox',{name:'Visual detail',exact:true}).selectOption('light');
-  await expect.poll(()=>page.evaluate(()=>window.__thesis.inspect().detail)).toBe('light');
+  await expect.poll(()=>page.evaluate(()=>window.__thesis.inspect().detail),{timeout:WAIT}).toBe('light');
   await page.locator('[data-chapter-link="system"]').click();
   // Native document input drives one visible reading plane and scene score.
   // Linux software rendering can exceed the default five-second assertion budget.

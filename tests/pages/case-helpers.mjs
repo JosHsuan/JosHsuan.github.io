@@ -1,5 +1,8 @@
 import {expect} from '@playwright/test';
 export const WAIT = 45000;
+// Functional assertions keep their precision; shared Linux software-GPU runners
+// need a larger wall-clock budget than a local hardware-rendered browser.
+export const scenarioTimeout = milliseconds => process.env.CI ? milliseconds * 2 : milliseconds;
 export const surface = (page, chapter='form') => page.locator(`[data-model-viewport][data-study-chapter="${chapter}"]`);
 export async function frames(page,count=3){await page.evaluate(async n=>{for(let i=0;i<n;i++)await new Promise(requestAnimationFrame);},count);}
 export async function settle(page){
