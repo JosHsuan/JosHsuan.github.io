@@ -111,10 +111,10 @@ export default function SourceDiagram({kind = 'library', title, className = ''})
     data-diagram-count={available?.groups.length ?? (validKind === 'library' ? 11 : validKind === 'miura' ? 3 : 4)}
     onKeyDown={event => {if (event.key === 'Escape') {pinned.current = null; hover.current = null; restore();}}}
     onBlur={event => {if (!event.currentTarget.contains(event.relatedTarget)) {hover.current = null; restore();}}}>
-    <figcaption className={styles.heading} data-protect>
-      <span className={styles.eyebrow} data-choreography="caption">Source study</span>
-      <h3 id={`${id}-title`} data-choreography="heading">{heading}</h3>
-      <p data-choreography="prose">{HINTS[validKind]}</p>
+    <figcaption className={styles.heading} data-protect data-choreography="caption">
+      <span className={styles.eyebrow}>Source study</span>
+      <h3 id={`${id}-title`}>{heading}</h3>
+      <p>{HINTS[validKind]}</p>
     </figcaption>
     <div className={styles.hitRegion} style={{aspectRatio: RATIOS[validKind]}}>
       <div className={styles.panel} data-choreography="diagram" data-protect>

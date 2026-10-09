@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import {sampleChapterScene, applyChapterLighting} from '../components/chapter-scene-score.mjs';
 import {sampleContinuousLighting} from '../components/inspection-lighting.mjs';
 import {sampleOpticalScore, focalLengthForFov} from '../components/optical-score.mjs';
-import {normalizeProtectedRects, sampleSemanticMask} from '../components/scene-compositor.mjs';
 
 const playback = (index, phase = .2, time = 4) => ({chapterWeights: Array.from({length: 7}, (_, i) => Number(i === index)), phases: Array(7).fill(phase), activeSeconds: time});
 const near = (a, b, epsilon = 1e-9) => assert.ok(Math.abs(a - b) < epsilon, `${a} differs from ${b}`);
@@ -95,18 +94,6 @@ test('Round 06 source-study fill blends continuously without rewriting presets, 
   assert.deepEqual(study.key.target, base.key.target);
   assert.deepEqual(applyChapterLighting(base, sampleChapterScene(playback(4, 0))).environmentIntensity, base.environmentIntensity);
   assert.deepEqual(base, before);
-});
-
-test('semantic core is wholly excluded while the outer feather has circular rather than square corners', () => {
-  const rects = normalizeProtectedRects([{left: 100, top: 100, right: 300, bottom: 300}], 400, 400, 0).rects;
-  for (const uv of [[.25, .25], [.5, .5], [.75, .75], [.25, .75], [.75, .25]]) assert.equal(sampleSemanticMask(uv, rects, 400, 400, 40), 0);
-  const side = sampleSemanticMask([.8, .5], rects, 400, 400, 40);
-  const diagonal = sampleSemanticMask([.75 + .05 / Math.sqrt(2), .75 + .05 / Math.sqrt(2)], rects, 400, 400, 40);
-  near(side, diagonal); near(side, .5);
-  const fartherCorner = sampleSemanticMask([.8, .8], rects, 400, 400, 40);
-  assert.ok(fartherCorner > side && fartherCorner < 1);
-  near(sampleSemanticMask([.85, .5], rects, 400, 400, 40), 1);
-  assert.equal(sampleSemanticMask([.5, .5], [[0, 0, 1, 1]], 400, 400), 0);
 });
 
 test('invalid playback fails explicitly and pure samples never share mutable field arrays', () => {

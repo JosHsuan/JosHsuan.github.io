@@ -1,4 +1,5 @@
-.frame { --diagram-phase: 0; --diagram-energy: 0; margin: 2.5rem 0; padding: clamp(.9rem, 2.2vw, 1.5rem); border: 1px solid #ffffff19; border-radius: 1.65rem; background: #17191cf0; box-shadow: 0 20px 65px #0004, inset 0 1px 0 #ffffff08; color: #ece8e0; isolation: isolate; }
+.frame { --diagram-phase: 0; --diagram-energy: 0; position: relative; margin: 2.5rem 0; padding: clamp(.9rem, 2.2vw, 1.5rem); border: 1px solid #c6d0ca40; border-radius: 1.65rem; background: linear-gradient(145deg,#20282bf5,#141d20f2); box-shadow: 0 16px 36px #0003, inset 0 1px 0 #ffffff0c; color: #ece8e0; isolation: isolate; }
+.frame::before { content: ''; position: absolute; top: 0; left: 26px; right: 26px; height: 1px; pointer-events: none; background: linear-gradient(90deg,transparent,rgb(var(--scene-rim-rgb,200 214 201) / calc(.22 + var(--scene-rim-strength,0) * .2)) var(--scene-rim-x,50%),transparent); }
 .heading { max-width: 42rem; margin-bottom: 1.2rem; }
 .eyebrow { color: #b7b1a7; font: .65rem/1.4 var(--mono, monospace); letter-spacing: .14em; text-transform: uppercase; }
 .heading h3 { margin: .45rem 0; font: 400 clamp(1.25rem, 2.2vw, 1.9rem)/1.14 var(--sans, sans-serif); letter-spacing: -.025em; }

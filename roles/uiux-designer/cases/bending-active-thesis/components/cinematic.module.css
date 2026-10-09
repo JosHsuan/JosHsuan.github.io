@@ -1,14 +1,10 @@
 .backdrop{position:fixed;inset:0;z-index:0;pointer-events:none;background:#090d0d;overflow:hidden}
 .poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:65% 50%}
-.stage{position:fixed;inset:0;opacity:1;z-index:var(--scene-z,1);pointer-events:none;overflow:hidden;background:transparent}
+.stage{position:fixed;inset:0;opacity:1;z-index:1;pointer-events:none;overflow:hidden;background:transparent}
 .stage canvas{display:block;pointer-events:none!important}
 .vignette{position:absolute;inset:0;background:radial-gradient(ellipse at 62% 50%,transparent 38%,#070a0a48 100%)}
-.scrim,.scrimLeft,.scrimRight,.scrimQuiet{position:absolute;inset:0}
-.scrimLeft{background:linear-gradient(90deg,#090d0df5 0%,#090d0dea 25%,#090d0dc7 38%,#090d0d6b 49%,transparent 72%);opacity:calc(1 - var(--reverse,0))}
-.scrimRight{background:linear-gradient(90deg,transparent 5%,#090d0d30 25%,#090d0d8c 46%,#090d0ded 67%,#090d0df5 100%);opacity:var(--reverse,0)}
-.scrimQuiet{background:linear-gradient(90deg,#090d0d 0%,#090d0d 45%,transparent 85%);opacity:var(--reading-dim,0)}
 .readingTools{position:fixed;z-index:40;right:4vw;top:1rem;display:flex;align-items:center;gap:1rem;color:#c5d0c7;font-family:var(--mono);font-size:.55rem;letter-spacing:.07em}
-.readingTools button{font:inherit;color:inherit;border:1px solid #becdc238;background:#0b1112c9;padding:.75rem .95rem;min-height:40px;cursor:pointer;border-radius:12px;backdrop-filter:blur(12px)}
+.readingTools button{font:inherit;color:inherit;border:1px solid #becdc25c;background:#172020f5;padding:.75rem .95rem;min-height:40px;cursor:pointer;border-radius:12px}
 .readingTools button:hover{border-color:#cadfa695;color:#e7efd8}
 .readingTools button:focus-visible{outline:2px solid #cadfa6;outline-offset:4px}
 .readingTools button:disabled{cursor:default;opacity:.75}
@@ -16,13 +12,9 @@
 .detailLabel select{font:inherit;min-height:40px;padding:.6rem;background:#0b1112ed;border-color:#becdc238}
 .progress{position:fixed;bottom:0;left:0;right:0;height:2px;z-index:45;background:#b9cba41b;pointer-events:none}
 .progress span{display:block;width:100%;height:100%;background:#bdd79b;transform-origin:left;transform:scaleX(0)}
-@media(max-width:780px){.readingTools{right:1.25rem;top:.7rem;gap:.7rem}.readingTools button{min-height:32px;padding:.5rem .7rem}.readingTools>span{display:none}.poster{object-position:61% 50%}.vignette{background:linear-gradient(transparent,#090d0d40)}.scrim{background:linear-gradient(180deg,#090d0ddb 0%,#090d0daa 35%,#090d0d30 66%,#090d0d45 100%)}.scrimLeft,.scrimRight{display:none}.scrimQuiet{background:#090d0d}}
+@media(max-width:780px){.readingTools{right:1.25rem;top:.7rem;gap:.7rem}.readingTools button{min-height:32px;padding:.5rem .7rem}.readingTools>span{display:none}.poster{object-position:61% 50%}.vignette{background:linear-gradient(transparent,#090d0d40)}}
 @media print{.backdrop,.readingTools,.progress{display:none}}
 @media(max-width:780px){.detailLabel{font-size:0;gap:0}.detailLabel select{font-size:.55rem;min-height:36px;padding:.35rem}.readingTools button{min-height:36px}}
-
-/* The fitted source slot is clear of prose; release its reading scrim while
-   preserving opaque document/control planes outside it. */
-.scrim{opacity:calc(1 - var(--study-weight,0) * .9)}
 
 .readingTools{gap:10px}.readingTools button,.detailLabel select{border-radius:12px;box-shadow:0 6px 18px #0003,inset 0 1px #ffffff10}.stage canvas{background:transparent}.progress,.progress span{border-radius:2px}@media print{.stage{display:none}}
 

@@ -32,3 +32,10 @@ html[data-cinematic-static] [data-choreography]{transform:none!important;filter:
 @media(prefers-reduced-motion:reduce){[data-choreography]{transform:none!important;filter:none!important}}
 
 span[data-choreography="nav"],span[data-choreography="caption"]{display:inline-block}
+
+/* A completed entrance does not need a permanent 3D/filter layer. Preserve
+   deliberate feedback and the small navigation cues; flatten only resting work. */
+html[data-cinematic-ready] [data-choreography-phase="settled"]{translate:none!important;rotate:none!important;scale:none!important;filter:none!important}
+html[data-cinematic-ready] [data-choreography-phase="settled"]:not([data-feedback-plane]):not([data-choreography="nav"]),
+html[data-cinematic-ready] [data-feedback-plane]:not([data-choreography]):not([data-feedback-active]),
+html[data-cinematic-ready] [data-feedback-plane][data-choreography-phase="settled"]:not([data-feedback-active]){transform:none!important}

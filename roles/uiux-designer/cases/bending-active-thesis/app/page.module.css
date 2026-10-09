@@ -200,7 +200,7 @@
   .mediaPlane,.glyph{transform:none!important}
   .sourceNotes{display:block}
 }
-@media(max-width:780px){.chapterRail{top:auto;left:1rem;right:1rem;bottom:.8rem;flex-direction:row;gap:0;background:#090d0df2;padding:.15rem;border:1px solid #b8c9bf38;backdrop-filter:blur(10px)}.chapterRail a{flex:1;min-width:0;min-height:40px}.railLabel{display:none}.mediaAction{opacity:1;transform:none;font-size:.54rem}.chapterInner{padding-bottom:8rem}}
+@media(max-width:780px){.chapterRail{top:auto;left:1rem;right:1rem;bottom:.8rem;flex-direction:row;gap:0;background:#090d0df2;padding:.15rem;border:1px solid #b8c9bf38}.chapterRail a{flex:1;min-width:0;min-height:40px}.railLabel{display:none}.mediaAction{opacity:1;transform:none;font-size:.54rem}.chapterInner{padding-bottom:8rem}}
 @media(prefers-reduced-motion:reduce){.chapterHeading,.openingCopy h1,.glyph svg{transform:none!important}}
 @media print{.chapterRail,.mediaAction,.layerCaption{display:none}}
 
@@ -262,7 +262,7 @@
 /* One measured reading plane, shared with the scene. Natural section anchors
    remain in document flow; overflow clipping prevents transforms adding scroll. */
 .readingFrame{position:relative;z-index:2;overflow:clip}
-:global(html[data-cinematic-ready]) .story{transform:translate3d(0,var(--reading-shift,0px),0)}
+:global(html[data-cinematic-ready]) .story{transform:translateY(var(--reading-shift,0px))}
 :global(html[data-cinematic-ready]) .chapterInner,:global(html[data-cinematic-ready]) .overview .chapterInner{position:relative}
 .inlineStudy{grid-column:7/13;min-width:0;align-self:center;scroll-margin-top:7rem}
 .form .chapterInner{padding-top:15svh;padding-bottom:18svh}
@@ -282,17 +282,17 @@
 .chapterHeading{font-weight:450;letter-spacing:-.055em;line-height:1.03}
 .headingLast{font-weight:400;letter-spacing:-.065em}
 .skip,.studyLink,.mediaAction,.sourceLinks a,.sourceNotes summary,.methodSequence summary{border-radius:12px}
-.chapterRail{border-radius:28px;padding:6px;background:#0b1212c2;border:1px solid #acbba52e;box-shadow:0 12px 32px #0005,inset 0 1px #ffffff0d;backdrop-filter:blur(16px)}
+.chapterRail{border-radius:28px;padding:6px;background:#15201ff5;border:1px solid #acbba557;box-shadow:0 12px 32px #0004,inset 0 1px #ffffff14}
 .chapterRail a{border-radius:50%;background:transparent}
 .railLabel{border-radius:12px;margin-right:8px}
 .chapterRail a::after{right:6px;border-radius:2px}
-.copy,.closingCopy{padding:clamp(18px,2vw,32px);border:1px solid #afc6b524;border-radius:28px;background:linear-gradient(145deg,#13201dbc,#0b121274);box-shadow:0 30px 70px #0003,inset 0 1px #d9e8d815;perspective:1100px}
+.copy,.closingCopy{padding:clamp(18px,2vw,32px);border:1px solid #aec0b54a;border-radius:28px;background:linear-gradient(145deg,#1b2627f5,#111a1bef);box-shadow:0 18px 42px #0003,inset 0 1px #d9e8d815;perspective:1100px}
 .copy>p,.closingCopy>p{border-radius:4px}
 .openingCopy{perspective:1100px}
 .chapterInner{row-gap:3rem}
 .form .chapterInner,.system .chapterInner,.pattern .chapterInner{padding-bottom:8rem}
 .diagramWide{grid-column:2/12;min-width:0;width:100%;margin-top:2rem;align-self:start}
-.sourceComparison{border:1px solid #b4c7b733;border-radius:18px;padding:12px 18px;background:#0c1614a8;margin-top:18px;max-width:800px}
+.sourceComparison{border:1px solid #b4c7b747;border-radius:18px;padding:12px 18px;background:#172020f2;margin-top:18px;max-width:800px}
 .sourceComparison>summary{min-height:44px;align-content:center;cursor:pointer;font:.66rem/1.6 var(--mono);color:var(--muted)}
 .sourceComparison>.evidence{margin:18px 0 4px;width:100%;max-width:100%}
 .mediaFrame,.mediaPlane,.mediaFrame img{border-radius:24px}
@@ -306,7 +306,7 @@
 .frameCorner{inset:0;border:1px solid #f8e6d11a;border-radius:16px;transform:none}
 .mediaFrame:hover .frameCorner,.mediaFrame:focus-visible .frameCorner{transform:none;border-color:#ff946999}
 .evidence figcaption{border:1px solid #c4d2ba26;border-left-color:#ff946970;border-radius:14px;background:#0c1512ed;padding:14px 16px;box-shadow:0 12px 28px #0002}
-.figureIndex{border-bottom:0;padding:8px 12px;margin-bottom:10px;border-radius:12px;background:#11201c8c}
+.figureIndex{border-bottom:0;padding:8px 12px;margin-bottom:10px;border-radius:12px;background:#172321f2}
 .methodSequence details{padding:0 10px;border:1px solid #afc5b432;border-radius:14px;background:#12221b82;box-shadow:inset 0 1px #ffffff08}
 .methodSequence li::before{display:none}
 .methodSequence details[open]{padding:0 10px;border:1px solid #ff946977}
@@ -332,3 +332,16 @@
 @media print{.form .inlineStudy,.system .inlineStudy,.pattern .inlineStudy{position:static}}
 
 .openingCopy [data-heading-line],.chapterHeading [data-heading-line]{width:fit-content;max-width:100%}.subtitle,.projectType{width:fit-content}
+
+/* Round 07: stable material planes replace GPU cutouts. Thin shared-light rims
+   connect the rear scene to the document; the fixed core owns text contrast.
+   Pseudo-elements preserve natural heights, source slots and reading stops. */
+.openingCopy{margin:-24px -28px;padding:24px 28px calc(5svh + 24px);max-width:calc(53rem + 56px);outline:1px solid #aec0b54a;border-radius:32px;background:linear-gradient(145deg,#1b2627f5,#111a1bef);box-shadow:0 18px 42px #0003,inset 0 1px #d9e8d815}
+.copy::before,.closingCopy::before,.openingCopy::after{content:'';position:absolute;left:28px;right:28px;top:0;height:1px;pointer-events:none;background:linear-gradient(90deg,transparent,rgb(var(--scene-rim-rgb,200 214 201) / calc(.22 + var(--scene-rim-strength,0) * .2)) var(--scene-rim-x,50%),transparent)}
+.openingCopy::after{top:0;left:32px;right:32px}
+.copy,.closingCopy{border-top-color:rgb(var(--scene-rim-rgb,200 214 201) / calc(.2 + var(--scene-rim-strength,0) * .12))}
+.mediaFrame{border-top-color:rgb(var(--scene-rim-rgb,200 214 201) / calc(.32 + var(--scene-rim-strength,0) * .15))}
+.endnote{position:relative;isolation:isolate}
+.endnote::before{content:'';position:absolute;inset:-10px -12px;z-index:-1;pointer-events:none;background:#14201ff2;border:1px solid #aec0b54a;border-radius:14px}
+@media(max-width:780px){.openingCopy{margin:-18px -6px;padding:18px 30px;max-width:calc(38rem + 12px);border-radius:26px;box-shadow:inset 0 1px #d9e8d815}.openingCopy::after{top:0;left:24px;right:24px}}
+@media print{.openingCopy::after,.copy::before,.closingCopy::before,.endnote::before{display:none}.openingCopy,.copy,.closingCopy{background:transparent;border-color:transparent;box-shadow:none;outline:none}}

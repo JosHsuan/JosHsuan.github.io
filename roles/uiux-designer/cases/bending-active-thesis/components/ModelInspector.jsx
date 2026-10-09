@@ -10,7 +10,6 @@ const STUDIES = [
   {id: 'system', title: 'Read the source.', labels: SOURCE_LABELS},
   {id: 'pattern', title: 'Compare the experiments.', labels: ['Experiment A', 'Experiment B', 'Experiment C']},
 ];
-const clamp = value => Math.max(-1, Math.min(1, value));
 
 export default function ModelInspector({input, inspection, activate, ready, failed}) {
   const surfaces = useRef(new Map()), press = useRef(null), pinned = useRef(false);
@@ -44,22 +43,16 @@ export default function ModelInspector({input, inspection, activate, ready, fail
     const cancel = () => {cancelPress(); clearHover();};
     const visibility = () => {if (document.hidden) cancel();};
     window.addEventListener('blur', cancel);
+    window.addEventListener('pagehide', cancel);
     document.addEventListener('visibilitychange', visibility);
-    return () => {window.removeEventListener('blur', cancel); document.removeEventListener('visibilitychange', visibility); cancel();};
+    document.addEventListener('freeze', cancel);
+    return () => {window.removeEventListener('blur', cancel); window.removeEventListener('pagehide', cancel); document.removeEventListener('visibilitychange', visibility); document.removeEventListener('freeze', cancel); cancel();};
   }, [cancelPress, clearHover]);
 
   function hit(event, chapterId) {
     if (!ready || typeof window.__thesis?.hitTest !== 'function') return false;
     const result = window.__thesis.hitTest(event.clientX, event.clientY);
     return !!result && result.source === true && (!result.chapterId || result.chapterId === chapterId);
-  }
-  function hover(event, chapterId) {
-    if (event.pointerType === 'touch') return;
-    const surface = event.currentTarget, found = hit(event, chapterId);
-    surface.toggleAttribute('data-model-hit', found);
-    if (found) surface.dataset.modelHit = 'true';
-    const rect = surface.getBoundingClientRect();
-    publish({modelHover: {x: clamp((event.clientX - rect.left) / Math.max(1, rect.width) * 2 - 1), y: clamp((event.clientY - rect.top) / Math.max(1, rect.height) * 2 - 1), strength: found ? 1 : 0, chapterId}});
   }
   function choose(study, surface) {
     if (!ready) return;
@@ -85,15 +78,17 @@ export default function ModelInspector({input, inspection, activate, ready, fail
     surface.dataset.modelDragging = 'true';
     publish({modelEngaged: true, modelRecovering: false, modelInteractionChapter: study.id});
   }
-  function move(event, study) {
+  function move(event) {
     const current = press.current;
-    if (!current || current.id !== event.pointerId) {hover(event, study.id); return;}
+    // The existing chapter RAF samples hover once for the latest pointer. Only
+    // an explicit press needs an immediate exact raycast between rendered frames.
+    if (!current || current.id !== event.pointerId) return;
     if (!ready) {cancelPress(); return;}
     const dx = event.clientX - current.x, dy = event.clientY - current.y;
     current.moved ||= Math.hypot(dx, dy) > (current.touch ? 10 : 4);
     if (current.touch || !current.moved) return;
     setInspectionTarget(inspection, {azimuth: current.azimuth + dx * .23, elevation: current.elevation - dy * .18});
-    publish({modelEngaged: true, modelRecovering: false, modelInteractionChapter: study.id});
+    publish({modelEngaged: true, modelRecovering: false, modelInteractionChapter: current.study.id});
   }
   function end(event, cancelled = false) {
     const current = press.current;
@@ -125,13 +120,13 @@ export default function ModelInspector({input, inspection, activate, ready, fail
 
   return hosts.map(study => createPortal(<div className={styles.study} data-model-study data-study-chapter={study.id} aria-labelledby={`model-study-title-${study.id}`}>
     <header className={styles.header} data-protect>
-      <div><span className={styles.eyebrow} data-choreography="caption">SOURCE / COMPARISON</span><h3 id={`model-study-title-${study.id}`} data-choreography="heading">{study.title}</h3></div>
+      <div className={styles.headerText} data-choreography="caption"><span className={styles.eyebrow}>SOURCE / COMPARISON</span><h3 id={`model-study-title-${study.id}`}>{study.title}</h3></div>
       {!ready && !failed && <button type="button" onClick={activate}><span data-choreography="nav">Enable model</span></button>}
     </header>
     <div ref={element => {if (element) surfaces.current.set(study.id, element); else surfaces.current.delete(study.id);}} className={styles.surface}
       role="button" aria-label={`Explore ${study.id === 'pattern' ? 'source experiments' : 'source representations'} in ${study.id}`} aria-describedby={`model-study-help-${study.id} model-source-label-${study.id}`} aria-disabled={!ready} tabIndex={ready ? 0 : -1}
       data-model-viewport data-study-chapter={study.id} data-source-count={study.labels.length}
-      onPointerDown={event => begin(event, study)} onPointerMove={event => move(event, study)} onPointerUp={event => end(event)} onPointerCancel={event => end(event, true)}
+      onPointerDown={event => begin(event, study)} onPointerMove={move} onPointerUp={event => end(event)} onPointerCancel={event => end(event, true)}
       onLostPointerCapture={event => {if (press.current?.id === event.pointerId) cancelPress();}} onPointerLeave={() => {if (!press.current) clearHover();}}
       onKeyDown={event => key(event, study)} onBlur={() => {if (pinned.current || press.current) cancelPress(); clearHover();}}
       onClick={event => {if (event.detail === 0) choose(study, event.currentTarget);}}>
@@ -140,9 +135,9 @@ export default function ModelInspector({input, inspection, activate, ready, fail
         <p role="status">{failed ? 'Interactive geometry unavailable. Continue with the source evidence.' : 'Enable the model to explore the supplied geometry.'}</p>
       </div>}
     </div>
-    <footer className={styles.caption} data-protect>
-      <p id={`model-source-label-${study.id}`} data-source-label data-study-chapter={study.id} data-choreography="caption">{ready ? 'Source geometry' : 'Assembly reference'}</p>
-      <p id={`model-study-help-${study.id}`} className={styles.gesture} data-choreography="caption">{ready ? <><span className={styles.mouseHint}>Click to compare · drag to turn</span><span className={styles.touchHint}>Tap the object to compare · scroll to continue</span><span className={styles.keyboardHint}>Enter compares · arrows turn · Escape returns</span></> : 'Source evidence remains available below.'}</p>
+    <footer className={styles.caption} data-protect data-choreography="caption">
+      <p id={`model-source-label-${study.id}`} data-source-label data-study-chapter={study.id}>{ready ? 'Source geometry' : 'Assembly reference'}</p>
+      <p id={`model-study-help-${study.id}`} className={styles.gesture}>{ready ? <><span className={styles.mouseHint}>Click to compare · drag to turn</span><span className={styles.touchHint}>Tap the object to compare · scroll to continue</span><span className={styles.keyboardHint}>Enter compares · arrows turn · Escape returns</span></> : 'Source evidence remains available below.'}</p>
     </footer>
     <p className={styles.announcement} role="status" aria-live="polite" aria-atomic="true" data-source-announcement/>
   </div>, study.host, study.id));

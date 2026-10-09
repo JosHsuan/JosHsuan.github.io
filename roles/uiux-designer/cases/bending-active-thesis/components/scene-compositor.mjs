@@ -1,50 +1,6 @@
 import * as T from 'three';
 
-const MAX_RECTS = 16;
 const clamp = (n, lo = 0, hi = 1) => Math.min(hi, Math.max(lo, Number.isFinite(n) ? n : lo));
-
-/** UV arrays use bottom-left origin. Client rect objects use CSS px, top-left origin. */
-export function normalizeProtectedRects(rectangles = [], width, height, paddingPx = 16) {
-  const px = paddingPx / width, py = paddingPx / height;
-  const normalized = rectangles.map(r => Array.isArray(r) ? r : [r.left / width, 1 - r.bottom / height, r.right / width, 1 - r.top / height])
-    .filter(r => r.length === 4 && r.every(Number.isFinite) && r[2] > r[0] && r[3] > r[1] && r[2] >= 0 && r[0] <= 1 && r[3] >= 0 && r[1] <= 1)
-    .map(r => [clamp(r[0] - px), clamp(r[1] - py), clamp(r[2] + px), clamp(r[3] + py)]);
-  if (normalized.length <= MAX_RECTS) return {rects: normalized, mode: 'individual', inputCount: normalized.length};
-  // Keep all essential cores without turning distant masthead/footer regions
-  // into one viewport-sized exclusion. Greedy minimum-added-area pair unions
-  // preserve open margins, using the same fixed shader/uniform budget.
-  const rects = normalized.map(rect => [...rect]);
-  const area = rect => (rect[2] - rect[0]) * (rect[3] - rect[1]);
-  while (rects.length > MAX_RECTS) {
-    let best = null;
-    for (let a = 0; a < rects.length; a++) for (let b = a + 1; b < rects.length; b++) {
-      const x = rects[a], y = rects[b];
-      const union = [Math.min(x[0], y[0]), Math.min(x[1], y[1]), Math.max(x[2], y[2]), Math.max(x[3], y[3])];
-      const overlap = Math.max(0, Math.min(x[2], y[2]) - Math.max(x[0], y[0])) * Math.max(0, Math.min(x[3], y[3]) - Math.max(x[1], y[1]));
-      const cost = area(union) - area(x) - area(y) + overlap;
-      if (!best || cost < best.cost) best = {a, b, union, cost};
-    }
-    rects[best.a] = best.union; rects.splice(best.b, 1);
-  }
-  return {rects, mode: 'packed-reading-regions', inputCount: normalized.length};
-}
-
-/** Same CSS-distance outer falloff as the shader. Every core pixel stays zero;
- * circular corner contours extend OUTSIDE the core rather than rounding it away.
- * This is a semantic exclusion mask, not an inferred source/object silhouette.
- */
-export function sampleSemanticMask(uv, rects, width, height, featherPx = 40) {
-  if (![width, height].every(v => Number.isFinite(v) && v > 0) || !Array.isArray(uv) || uv.length !== 2 || !uv.every(Number.isFinite)) throw new RangeError('Finite UV and positive mask dimensions required');
-  const feather = clamp(featherPx, 1, 160);
-  let allow = 1;
-  for (const r of rects) {
-    const dx = Math.max(r[0] - uv[0], uv[0] - r[2], 0) * width;
-    const dy = Math.max(r[1] - uv[1], uv[1] - r[3], 0) * height;
-    const t = clamp(Math.hypot(dx, dy) / feather);
-    allow *= t * t * (3 - 2 * t);
-  }
-  return allow;
-}
 
 const vertex = /* glsl */`varying vec2 vUv;
 void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}`;
@@ -100,10 +56,9 @@ uniform vec4 fieldEnvelope;
 uniform vec2 fieldPointer;
 uniform float fieldPointerStrength;
 uniform vec4 fieldBlendMix;
-uniform float semanticFeatherPx;
-uniform float foregroundMix;
-uniform int rectCount;
-uniform vec4 protectedRects[16];
+uniform sampler2D cellData;
+uniform vec2 cellResolution;
+uniform vec2 fieldDrift;
 varying vec2 vUv;
 
 float viewDepth(float z){return nearPlane*farPlane/(farPlane-z*(farPlane-nearPlane));}
@@ -121,57 +76,27 @@ float glyph(vec2 p,float level){
   if(level<5.5)return max(stroke(abs(abs(p.x)-0.16),0.04)*step(abs(p.y),0.36),stroke(abs(abs(p.y)-0.15),0.04)*step(abs(p.x),0.34));
   return max(stroke(abs(length(p)-0.29),0.05),max(stroke(length(p),0.12),stroke(abs(p.y+0.14),0.045)*step(0.0,p.x)*step(p.x,0.34)));
 }
-float exclusion(vec2 uv){
-  float allow=1.0;
-  vec2 feather=vec2(semanticFeatherPx)/cssResolution;
-  for(int i=0;i<16;i++){
-    if(i>=rectCount)break;
-    vec4 r=protectedRects[i];
-    vec2 outside=max(max(r.xy-uv,uv-r.zw),vec2(0.0));
-    // Every core is fully excluded. Further rectangles cannot raise a product
-    // that is already zero, so avoid their distance/smoothstep work.
-    if(all(equal(outside,vec2(0.0))))return 0.0;
-    allow*=smoothstep(0.0,1.0,length(outside/feather));
-  }
-  return allow;
-}
 vec3 softLight(vec3 backdrop,vec3 source){
   vec3 d=mix(((16.0*backdrop-12.0)*backdrop+4.0)*backdrop,sqrt(max(backdrop,vec3(0.0))),step(vec3(0.25),backdrop));
   return mix(backdrop-(1.0-2.0*source)*backdrop*(1.0-backdrop),backdrop+(2.0*source-1.0)*(d-backdrop),step(vec3(0.5),source));
-}
-float evolvingField(vec2 uv){
-  // Two coherent moving contour families; no per-frame random seed or noise.
-  vec2 q=(uv-fieldEnvelope.xy)/max(fieldEnvelope.zw,vec2(0.05));
-  vec2 pointerDelta=(uv-fieldPointer)*vec2(cssResolution.x/cssResolution.y,1.0);
-  float influence=exp(-dot(pointerDelta,pointerDelta)*38.0)*fieldPointerStrength;
-  q+=vec2(-pointerDelta.y,pointerDelta.x)*influence*2.8;
-  q+=fieldFlow*fieldTime;
-  float ribbon=sin(q.x*5.1+sin(q.y*2.2-fieldTime*0.28)*1.3+fieldTime*0.43);
-  float contour=cos(length(q+vec2(0.28*sin(fieldTime*0.19),0.0))*7.8-fieldTime*0.55);
-  return clamp(0.5+0.29*ribbon+0.21*contour,0.0,1.0);
 }
 float fieldCoverage(vec2 uv){
   vec2 q=(uv-fieldEnvelope.xy)/max(fieldEnvelope.zw,vec2(0.05));
   // Soft overlapping lobes avoid a square video frame or a cutout at mesh depth.
   float a=exp(-dot(q,q)*1.6);
-  vec2 second=q-vec2(0.65*sin(fieldTime*0.13),0.52);
+  vec2 second=q-vec2(fieldDrift.y,0.52);
   float b=exp(-dot(second,second)*2.7)*0.6;
   return smoothstep(0.04,0.62,a+b);
 }
 void main(){
-  // Identical semantic mask for every optical/decorative operation at this
-  // pixel. In foreground mode its exact-zero cores finish as transparent black;
-  // skipping their gathers/field math preserves the premultiplied result.
-  float allowed=1.0;
-  if(foregroundMix>0.0001 && rectCount==0){gl_FragColor=vec4(0.0);return;}
-  if(mistStrength>0.0001 || asciiWeight>0.0001 || fieldWeight>0.0001 || foregroundMix>0.0001)allowed=exclusion(vUv);
-  if(foregroundMix>0.0001 && allowed==0.0){gl_FragColor=vec4(0.0);return;}
   vec4 base=texture2D(sceneColor,vUv);
   float rawSceneDepth=texture2D(sceneDepth,vUv).r;
   float depth=viewDepth(rawSceneDepth);
   float radius=min(maxBlur,abs(depth-focusDistance)/max(depth,nearPlane)*aperture);
   vec3 color=base.rgb;
   float alpha=base.a;
+  // Keep the gather even on a depth-clear background: resolved MSAA fringe
+  // texels may share that depth and contribute the authored silhouette diffusion.
   if(radius>0.08 && base.a>0.001){
     vec3 premult=base.rgb*base.a;
     float alphaSum=base.a;
@@ -194,7 +119,7 @@ void main(){
   }
   if(mistStrength>0.0001){
     vec3 spread=texture2D(mistColor,vUv).rgb;
-    float strength=mistStrength*allowed;
+    float strength=mistStrength;
     // Small direct attenuation plus redistributed highlight energy. Clear corners
     // stay transparent; only actual light within the finite kernel grows a halo.
     float haloAlpha=clamp(dot(spread,vec3(0.2126,0.7152,0.0722))*strength*0.35,0.0,0.38);
@@ -203,41 +128,26 @@ void main(){
     alpha=expandedAlpha;
   }
   color*=1.0-veil;
+  vec2 cell=floor(vUv*cssResolution/cellPx);
+  vec4 cellSample=vec4(0.0);
+  if(asciiWeight>0.0001 || fieldWeight>0.0001)cellSample=texture2D(cellData,(cell+0.5)/cellResolution);
   if(asciiWeight>0.0001){
-    vec2 cell=floor(vUv*cssResolution/cellPx);
-    vec2 sampleUv=clamp((cell+0.5)*cellPx/cssResolution,vec2(0.0),vec2(1.0));
-    vec4 source=texture2D(sceneColor,sampleUv);
-    float rawDepth=texture2D(sceneDepth,sampleUv).r;
-    float luminance=max(0.0,dot(source.rgb,vec3(0.2126,0.7152,0.0722)));
-    float density=pow(luminance/(1.0+luminance),0.45);
-    float level=min(6.0,floor(density*7.0));
-    vec2 cellUv=fract(vUv*cssResolution/cellPx)-0.5;
-    float glyphMask=glyph(cellUv,level);
-    float coverage=step(rawDepth,0.999999)*source.a*step(0.01,luminance);
-    float weight=asciiWeight*glyphMask*coverage*allowed;
+    float glyphMask=glyph(fract(vUv*cssResolution/cellPx)-0.5,cellSample.r);
+    float weight=asciiWeight*glyphMask*cellSample.g;
     vec3 mixed=blendMode<0.5?asciiTint:color+(1.0-clamp(color,0.0,1.0))*asciiTint;
     color=mix(color,mixed,weight);
   }
   if(fieldWeight>0.0001){
     vec2 grid=vUv*cssResolution/cellPx;
-    vec2 cell=floor(grid);
-    vec2 sampleUv=clamp((cell+0.5)*cellPx/cssResolution,vec2(0.0),vec2(1.0));
-    vec4 source=texture2D(sceneColor,sampleUv);
-    float rawDepth=texture2D(sceneDepth,sampleUv).r;
-    float lum=max(0.0,dot(source.rgb,vec3(0.2126,0.7152,0.0722)));
-    float sourceDensity=pow(lum/(1.0+lum),0.45);
-    float subject=step(rawDepth,0.999999)*source.a;
-    float field=evolvingField(sampleUv);
-    float density=mix(field,sourceDensity,fieldSceneMix*subject);
-    float level=min(6.0,floor(density*7.0));
-    float ink=glyph(fract(grid)-0.5,level);
+    float density=cellSample.a;
+    float ink=glyph(fract(grid)-0.5,cellSample.b);
     float grainPresence=smoothstep(0.18,0.46,density);
     // Keep the independent field in clear background. Quiet it over actual
     // depth-bearing surfaces so source metal/colours remain the primary signal.
     // This is scene coverage (including the floor), not a fabricated object ID.
     float surfaceLuminance=max(0.0,dot(base.rgb,vec3(0.2126,0.7152,0.0722)));
     float surfaceCoverage=step(rawSceneDepth,0.999999)*base.a*smoothstep(0.015,0.10,surfaceLuminance);
-    float layerAlpha=fieldWeight*ink*grainPresence*fieldCoverage(vUv)*allowed*mix(1.0,fieldSurfaceGain,surfaceCoverage);
+    float layerAlpha=fieldWeight*ink*grainPresence*fieldCoverage(vUv)*mix(1.0,fieldSurfaceGain,surfaceCoverage);
     vec3 sourceInk=asciiTint*(0.55+0.45*density);
     vec3 boundedColor=clamp(color,0.0,1.0);
     vec3 screenBlend=boundedColor+(1.0-boundedColor)*sourceInk;
@@ -249,17 +159,47 @@ void main(){
     color=(inkWithBackdrop*layerAlpha+color*alpha*(1.0-layerAlpha))/max(combinedAlpha,0.00001);
     alpha=combinedAlpha;
   }
-  if(foregroundMix>0.0001){
-    // A foreground Canvas may cross decorative frames, never essential cores.
-    // Missing semantic masks fail closed; the caller must restore background z.
-    // Both endpoints preserve zero core alpha. The mix changes how strongly the
-    // source crosses the soft OUTER rim, without fading text protection itself.
-    alpha*=rectCount>0?mix(allowed*allowed,allowed,foregroundMix):0.0;
-  }
   gl_FragColor=vec4(color,alpha);
   #include <tonemapping_fragment>
   #include <colorspace_fragment>
   #include <premultiplied_alpha_fragment>
+}`;
+
+// One radiance/depth/contour sample per CSS glyph cell. Integer glyph levels
+// survive the half-float target exactly; only smooth density is quantized.
+const cellFragment = /* glsl */`
+uniform sampler2D sceneColor;
+uniform sampler2D sceneDepth;
+uniform vec2 cssResolution;
+uniform float cellPx;
+uniform float fieldTime;
+uniform float fieldSceneMix;
+uniform vec2 fieldFlow;
+uniform vec4 fieldEnvelope;
+uniform vec2 fieldPointer;
+uniform float fieldPointerStrength;
+uniform vec2 fieldDrift;
+float evolvingField(vec2 uv){
+  // Two coherent moving contour families; no per-frame random seed or noise.
+  vec2 q=(uv-fieldEnvelope.xy)/max(fieldEnvelope.zw,vec2(0.05));
+  vec2 pointerDelta=(uv-fieldPointer)*vec2(cssResolution.x/cssResolution.y,1.0);
+  float influence=exp(-dot(pointerDelta,pointerDelta)*38.0)*fieldPointerStrength;
+  q+=vec2(-pointerDelta.y,pointerDelta.x)*influence*2.8;
+  q+=fieldFlow*fieldTime;
+  float ribbon=sin(q.x*5.1+sin(q.y*2.2-fieldTime*0.28)*1.3+fieldTime*0.43);
+  float contour=cos(length(q+vec2(fieldDrift.x,0.0))*7.8-fieldTime*0.55);
+  return clamp(0.5+0.29*ribbon+0.21*contour,0.0,1.0);
+}
+
+void main(){
+  vec2 uv=clamp(gl_FragCoord.xy*cellPx/cssResolution,vec2(0.0),vec2(1.0));
+  vec4 source=texture2D(sceneColor,uv);
+  float rawDepth=texture2D(sceneDepth,uv).r;
+  float luminance=max(0.0,dot(source.rgb,vec3(0.2126,0.7152,0.0722)));
+  float sourceDensity=pow(luminance/(1.0+luminance),0.45);
+  float subject=step(rawDepth,0.999999)*source.a;
+  float density=mix(evolvingField(uv),sourceDensity,fieldSceneMix*subject);
+  gl_FragColor=vec4(min(6.0,floor(sourceDensity*7.0)),subject*step(0.01,luminance),min(6.0,floor(density*7.0)),density);
 }`;
 
 export function createSceneCompositor(gl) {
@@ -267,6 +207,8 @@ export function createSceneCompositor(gl) {
   target.texture.name = 'thesis-linear-color'; target.depthTexture.name = 'thesis-scene-depth';
   const mistA = new T.WebGLRenderTarget(1, 1, {type: T.HalfFloatType, depthBuffer: false});
   const mistB = new T.WebGLRenderTarget(1, 1, {type: T.HalfFloatType, depthBuffer: false});
+  const cellTarget = new T.WebGLRenderTarget(1, 1, {type:T.HalfFloatType,depthBuffer:false,minFilter:T.NearestFilter,magFilter:T.NearestFilter});
+  cellTarget.texture.name='thesis-cell-radiance-contours';
   mistA.texture.name = 'thesis-mist-horizontal'; mistB.texture.name = 'thesis-mist-vertical';
   const mistUniforms = {sourceColor: {value: target.texture}, stepUv: {value: new T.Vector2()}, threshold: {value: .65}, prefilter: {value: 1}};
   const mistMaterial = new T.ShaderMaterial({uniforms: mistUniforms, vertexShader: vertex, fragmentShader: mistFragment, depthWrite: false, depthTest: false, blending: T.NoBlending, toneMapped: false});
@@ -277,24 +219,26 @@ export function createSceneCompositor(gl) {
     asciiWeight: {value: 0}, cellPx: {value: 11}, asciiTint: {value: new T.Vector3(.38, .75, .69)}, blendMode: {value: 1}, veil: {value: 0},
     fieldTime: {value: 0}, fieldWeight: {value: 0}, fieldSceneMix: {value: .4}, fieldSurfaceGain: {value: .24}, fieldFlow: {value: new T.Vector2(.035, -.018)},
     fieldEnvelope: {value: new T.Vector4(.65, .5, .5, .6)}, fieldPointer: {value: new T.Vector2(.5, .5)}, fieldPointerStrength: {value: 0},
-    fieldBlendMix: {value: new T.Vector4(0, 0, 1, 0)}, semanticFeatherPx: {value: 8}, foregroundMix: {value: 0},
-    rectCount: {value: 0}, protectedRects: {value: Array.from({length: MAX_RECTS}, () => new T.Vector4())},
+    fieldBlendMix: {value: new T.Vector4(0, 0, 1, 0)},
+    cellData:{value:cellTarget.texture},cellResolution:{value:new T.Vector2(1,1)},fieldDrift:{value:new T.Vector2()},
   };
+  const cellMaterial = new T.ShaderMaterial({uniforms,vertexShader:vertex,fragmentShader:cellFragment,depthWrite:false,depthTest:false,blending:T.NoBlending,toneMapped:false});
   const material = new T.ShaderMaterial({uniforms, vertexShader: vertex, fragmentShader: fragment, depthWrite: false, depthTest: false, blending: T.NoBlending, premultipliedAlpha: true, toneMapped: true});
   const geometry = new T.PlaneGeometry(2, 2), quad = new T.Mesh(geometry, material), outputScene = new T.Scene(), outputCamera = new T.Camera();
   quad.frustumCulled = false; outputScene.add(quad);
   const viewport = new T.Vector4(), scissor = new T.Vector4(), clear = new T.Color();
-  let frames = 0, disposed = false, report = null, checked = false, mistAllocated = false, frameControls = {};
+  let frames = 0, disposed = false, report = null, checked = false, mistAllocated = false, cellAllocated = false, frameControls = {};
 
   return {
     // Optional caller-owned per-frame values; render score/overrides take priority.
     // No timer, frame scheduling or shader recompilation is owned here.
     setFrame(controls = {}) {if (disposed) throw new Error('Compositor already disposed.'); frameControls = {...controls};},
-    render(scene, camera, score, {width, height, dpr = 1, samples = 2, protectedRects = []}) {
+    render(scene, camera, score, {width, height, dpr = 1, requestedDpr = dpr, samples = 2}) {
       if (disposed) throw new Error('Compositor already disposed.');
       if (!(width > 0 && height > 0)) return;
       if (gl.capabilities.reversedDepthBuffer || gl.capabilities.logarithmicDepthBuffer || camera.isOrthographicCamera) throw new Error('This optical pass requires ordinary perspective depth.');
-      const actualDpr = clamp(dpr, .5, 1.25), w = Math.max(1, Math.round(width * actualDpr)), h = Math.max(1, Math.round(height * actualDpr));
+      const actualDpr = Number.isFinite(dpr) && dpr > 0 ? Math.min(dpr, 1.25) : 1, w = Math.max(1, Math.floor(width * actualDpr)), h = Math.max(1, Math.floor(height * actualDpr));
+      const opticalDensityScale = actualDpr / clamp(requestedDpr, actualDpr, 1.25);
       const sampleCount = Math.min(gl.capabilities.maxSamples, samples > 0 ? 2 : 0);
       if (target.samples !== sampleCount) {target.dispose(); target.samples = sampleCount; target.resolveDepthBuffer = true; checked = false;}
       if (target.width !== w || target.height !== h) {target.setSize(w, h); checked = false;}
@@ -303,13 +247,13 @@ export function createSceneCompositor(gl) {
       const mistEnabled = mistStrength > .0001;
       const mistWidth = Math.max(1, Math.ceil(w / 4)), mistHeight = Math.max(1, Math.ceil(h / 4));
       if (mistEnabled && (mistA.width !== mistWidth || mistA.height !== mistHeight)) {mistA.setSize(mistWidth, mistHeight); mistB.setSize(mistWidth, mistHeight);}
+      if (!mistEnabled && mistAllocated) {mistA.setSize(1,1);mistB.setSize(1,1);mistAllocated=false;}
       uniforms.mistStrength.value = mistStrength; mistUniforms.threshold.value = clamp(controls.mistThreshold ?? .65, .05, 4);
-      const masks = normalizeProtectedRects(protectedRects, width, height);
       uniforms.resolution.value.set(w, h); uniforms.cssResolution.value.set(width, height);
       uniforms.nearPlane.value = camera.near; uniforms.farPlane.value = camera.far;
       uniforms.focusDistance.value = clamp(controls.focusDistanceM, camera.near, camera.far);
-      uniforms.aperture.value = clamp(controls.apertureScale, 0, 120);
-      uniforms.maxBlur.value = clamp(controls.maxBlurPx, 0, 12);
+      uniforms.aperture.value = clamp(controls.apertureScale, 0, 120) * opticalDensityScale;
+      uniforms.maxBlur.value = clamp(controls.maxBlurPx, 0, 12) * opticalDensityScale;
       uniforms.asciiWeight.value = clamp(controls.asciiWeight, 0, 1);
       uniforms.cellPx.value = clamp(controls.asciiCellPx, 6, 28);
       uniforms.asciiTint.value.fromArray(controls.asciiTint ?? [.38, .75, .69]);
@@ -317,6 +261,7 @@ export function createSceneCompositor(gl) {
       uniforms.veil.value = clamp(controls.veil, 0, .65);
       const vector = (value, fallback, count) => Array.isArray(value) && value.length === count && value.every(Number.isFinite) ? value : fallback;
       uniforms.fieldTime.value = clamp(controls.fieldTime, 0, 1000000);
+      uniforms.fieldDrift.value.set(.28*Math.sin(uniforms.fieldTime.value*.19),.65*Math.sin(uniforms.fieldTime.value*.13));
       uniforms.fieldWeight.value = clamp(controls.fieldWeight, 0, .65);
       uniforms.fieldSceneMix.value = clamp(controls.fieldSceneMix ?? .4);
       uniforms.fieldSurfaceGain.value = clamp(controls.fieldSurfaceGain ?? .24);
@@ -327,10 +272,13 @@ export function createSceneCompositor(gl) {
       const blend = vector(controls.fieldBlendMix, [0, 0, 1, 0], 4).map(v => clamp(v));
       const blendTotal = blend.reduce((sum, v) => sum + v, 0);
       uniforms.fieldBlendMix.value.fromArray(blendTotal > 0 ? blend.map(v => v / blendTotal) : [0, 0, 1, 0]);
-      uniforms.semanticFeatherPx.value = clamp(controls.semanticFeatherPx ?? 8, 1, 160);
-      uniforms.foregroundMix.value = clamp(controls.foregroundMix);
-      uniforms.rectCount.value = masks.rects.length;
-      masks.rects.forEach((r, i) => uniforms.protectedRects.value[i].fromArray(r));
+      const cellsEnabled=uniforms.asciiWeight.value>.0001 || uniforms.fieldWeight.value>.0001;
+      // Allocate for the smallest supported CSS cell once per viewport size;
+      // continuously changing authored cell size must not reallocate targets.
+      const cellWidth=Math.max(1,Math.ceil(width/6)),cellHeight=Math.max(1,Math.ceil(height/6));
+      if(cellsEnabled&&(cellTarget.width!==cellWidth||cellTarget.height!==cellHeight))cellTarget.setSize(cellWidth,cellHeight);
+      if(!cellsEnabled&&cellAllocated){cellTarget.setSize(1,1);cellAllocated=false;}
+      uniforms.cellResolution.value.set(cellTarget.width,cellTarget.height);
       const oldTarget = gl.getRenderTarget(), oldAutoClear = gl.autoClear, oldScissor = gl.getScissorTest(), oldClearAlpha = gl.getClearAlpha();
       gl.getViewport(viewport); gl.getScissor(scissor); gl.getClearColor(clear);
       try {
@@ -339,6 +287,7 @@ export function createSceneCompositor(gl) {
         gl.setClearColor(0x000000, 0); gl.clear();
         // Three omits tone mapping/output encoding for ordinary offscreen targets.
         gl.render(scene, camera);
+        if(cellsEnabled){quad.material=cellMaterial;gl.setRenderTarget(cellTarget);gl.clear();gl.render(outputScene,outputCamera);cellAllocated=true;}
         if (mistEnabled) {
           quad.material = mistMaterial;
           mistUniforms.sourceColor.value = target.texture; mistUniforms.prefilter.value = 1; mistUniforms.stepUv.value.set(mistRadiusPx / width / 4, 0);
@@ -354,17 +303,16 @@ export function createSceneCompositor(gl) {
         gl.setClearColor(clear, oldClearAlpha); gl.setRenderTarget(oldTarget); gl.setViewport(viewport); gl.setScissor(scissor); gl.setScissorTest(oldScissor); gl.autoClear = oldAutoClear;
       }
       frames++;
-      report = {frames, width: w, height: h, dpr: actualDpr, color: 'RGBA16F linear', depth: 'unsigned-int perspective', requestedSamples: sampleCount, depthResolve: true, approximateTargetBytes: w * h * 12 * (sampleCount + 1) + (mistAllocated ? mistA.width * mistA.height * 16 : 0),
-        passes: mistEnabled ? 4 : 2, maximumColorTaps: 17, outputTransformCount: 1, alpha: 'premultiplied display output; bounded highlight halo may expand source coverage',
-        mist: {enabled: mistEnabled, strength: mistStrength, radiusCssPx: mistRadiusPx, threshold: mistUniforms.threshold.value, resolution: mistEnabled ? [mistWidth, mistHeight] : null, gatherTapsPerAxis: 9, source: 'pre-DOF linear scene highlight radiance', operator: 'masked direct attenuation plus additive radiance spread'},
-        focusDistanceM: uniforms.focusDistance.value, apertureScale: uniforms.aperture.value, maxBlurPx: uniforms.maxBlur.value,
+      report = {frames, width: w, height: h, dpr: actualDpr, color: 'RGBA16F linear', depth: 'unsigned-int perspective', requestedSamples: sampleCount, depthResolve: true, approximateTargetBytes: w * h * 12 * (sampleCount + 1) + (mistAllocated ? mistA.width * mistA.height * 16 : 0) + (cellAllocated ? cellTarget.width * cellTarget.height * 8 : 0),
+        passes: 2 + (mistEnabled ? 2 : 0) + Number(cellsEnabled), maximumColorTaps: 17, outputTransformCount: 1, alpha: 'premultiplied display output; bounded highlight halo may expand source coverage',
+        mist: {enabled: mistEnabled, strength: mistStrength, radiusCssPx: mistRadiusPx, threshold: mistUniforms.threshold.value, resolution: mistEnabled ? [mistWidth, mistHeight] : null, gatherTapsPerAxis: 9, source: 'pre-DOF linear scene highlight radiance', operator: 'direct attenuation plus additive radiance spread'},
+        requestedDpr, opticalDensityScale, backgroundDefocus:'preserve full gather, including opaque-background MSAA fringe diffusion', focusDistanceM: uniforms.focusDistance.value, apertureScale: uniforms.aperture.value, maxBlurPx: uniforms.maxBlur.value,
         asciiWeight: uniforms.asciiWeight.value, asciiCellPx: uniforms.cellPx.value, asciiBlend: uniforms.blendMode.value ? 'screen-limited' : 'normal',
         asciiSource: 'pre-DOF rendered scene luminance and depth; includes source base and scene ground', veil: uniforms.veil.value,
-        field: {weight: uniforms.fieldWeight.value, time: uniforms.fieldTime.value, sceneMix: uniforms.fieldSceneMix.value, surfaceGain: uniforms.fieldSurfaceGain.value, pointerStrength: uniforms.fieldPointerStrength.value, blendMix: uniforms.fieldBlendMix.value.toArray(), source: 'authored evolving contours/ribbons plus scene luminance/depth; not analysis data', extraPasses: 0},
-        foreground: {requested: uniforms.foregroundMix.value > .0001, ready: masks.rects.length > 0, missingMasks: uniforms.foregroundMix.value > .0001 && masks.rects.length === 0, corePolicy: 'all scene/effect alpha zero; missing masks fail closed'}, semanticFeatherPx: uniforms.semanticFeatherPx.value,
-        maskMode: masks.mode, protectedRectCount: masks.rects.length, protectedInputCount: masks.inputCount};
+        field: {weight: uniforms.fieldWeight.value, time: uniforms.fieldTime.value, sceneMix: uniforms.fieldSceneMix.value, surfaceGain: uniforms.fieldSurfaceGain.value, pointerStrength: uniforms.fieldPointerStrength.value, blendMix: uniforms.fieldBlendMix.value.toArray(), source: 'authored evolving contours/ribbons plus scene luminance/depth; not analysis data', extraPasses: Number(cellsEnabled), cellResolution:cellsEnabled?[cellTarget.width,cellTarget.height]:null, sampling:'one radiance/depth/contour calculation per CSS glyph cell; integer glyph levels in RGBA16F'},
+        layering: {position:'rear', semanticMask:false, readingOwner:'DOM reading planes'}, retainedMistBytes:mistAllocated?mistA.width*mistA.height*16:0};
     },
     inspect() {return report ? {...report, disposed} : {frames, disposed};},
-    dispose() {if (disposed) return; disposed = true; target.dispose(); mistA.dispose(); mistB.dispose(); mistMaterial.dispose(); material.dispose(); geometry.dispose(); outputScene.remove(quad);},
+    dispose() {if (disposed) return; disposed = true; target.dispose(); mistA.dispose(); mistB.dispose(); mistMaterial.dispose(); cellTarget.dispose(); cellMaterial.dispose(); material.dispose(); geometry.dispose(); outputScene.remove(quad);},
   };
 }
