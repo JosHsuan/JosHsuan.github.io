@@ -15,20 +15,19 @@ test('published story, canonical metadata and every linked asset work without Ja
   await context.close();
 });
 
-test('public model initializes with base layers and supports chapter navigation and Light mode', async ({page}) => {
+test('public model initializes with base layers and supports chapter navigation and Light mode', async ({page,isMobile}) => {
   test.setTimeout(scenarioTimeout(120000));
   const errors=[]; page.on('pageerror', error=>errors.push(error.message));
   await page.goto('/');
   await page.waitForFunction(()=>window.__thesis?.inspect().ready);
-  // The mobile opening surface is naturally below its heading. Exercise the
-  // visible source surface before asserting a completed Full/Light render.
+  // Exercise a held source chapter before asserting its Full/Light policy.
   await centerStudy(page,'form');
   const initial=await page.evaluate(()=>window.__thesis.inspect());
   expect(initial.source).toMatchObject({vertices:172789,triangles:227521,sourceObjects:51});
   expect(initial.material).toMatchObject({finish:'satin',roughness:.58,anisotropy:.35});
   expect(initial.exhibition).toMatchObject({sourceGeometry:false,areaLights:2,extraShadowMaps:0});
   expect(initial.detail).toBe('full');
-  expect(initial.compositor.requestedSamples).toBe(2);
+  expect(initial.compositor.requestedSamples).toBe(isMobile?0:2);
   expect(initial.renderSuspended).toBe(false);
   // Verify Full initialization, then exercise native interaction in supported
   // Light mode so software-rendered Full frames do not dominate input timing.

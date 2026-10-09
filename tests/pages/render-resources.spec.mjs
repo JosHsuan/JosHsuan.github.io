@@ -13,12 +13,16 @@ async function readResources(page) {
       memory: scene.memory, programs: scene.renderer.programs,
       source: scene.source, diagrams: scene.diagramSource, budget: scene.renderBudget,
       logicalSurface:stage?{width:stage.offsetWidth,height:stage.offsetHeight}:null,
-      compositor: scene.compositor ?? null, canvases: document.querySelectorAll('canvas').length};
+      compositor: scene.compositor ?? null, canvases: document.querySelectorAll('[data-cinematic-stage] canvas').length};
   });
 }
 
 async function profile(page, viewport, detail) {
-  const frame = await page.evaluate(() => window.__thesis.inspect().frames);
+  const before = await page.evaluate(() => {
+    const stage=document.querySelector('[data-cinematic-stage]');
+    return {frame:window.__thesis.inspect().frames,coarse:matchMedia('(pointer:coarse)').matches,width:stage.offsetWidth,height:stage.offsetHeight};
+  });
+  const frame=before.frame;
   await page.setViewportSize(viewport);
   await page.getByRole('combobox', {name: 'Visual detail', exact: true}).selectOption(detail);
   await page.waitForFunction(({detail, frame}) => {
@@ -29,9 +33,12 @@ async function profile(page, viewport, detail) {
   }, {detail, frame}, {timeout: RESOURCE_WAIT});
   const value = await readResources(page);
   expect(value.canvases).toBe(1);
-  const width=viewport.width<=780?viewport.width-36:Math.min(viewport.width*.48,720);
+  const width=viewport.width;
   expect(value.logicalSurface.width).toBeCloseTo(Math.round(width),0);
-  expect(value.logicalSurface.height).toBeCloseTo(Math.round(viewport.width<=780?width:width/1.2),0);
+  // Coarse devices retain their logical height while browser chrome changes
+  // only the available height. A width/orientation change refreshes both axes.
+  const expectedHeight=before.coarse&&before.width===viewport.width?before.height:viewport.height;
+  expect(value.logicalSurface.height).toBeCloseTo(expectedHeight,0);
   expect(value.budget.viewportWidth).toBe(value.logicalSurface.width);
   expect(value.budget.viewportHeight).toBe(value.logicalSurface.height);
   expect(value.budget.pixels).toBe(value.budget.width * value.budget.height);
@@ -69,16 +76,16 @@ test('quality and 4K resize cycles retain source data and bounded stable renderi
   await page.getByRole('combobox', {name: 'Visual detail', exact: true}).selectOption('light');
   await page.waitForFunction(() => window.__thesis?.inspect().ready && document.fonts.status === 'loaded', null, {timeout: RESOURCE_WAIT});
   await page.getByRole('button', {name: 'Pause motion', exact: true}).click();
-  const canvas = await page.locator('canvas').elementHandle(), source = await readResources(page);
+  const canvas = await page.locator('[data-cinematic-stage] canvas').elementHandle(), source = await readResources(page);
   expect(source.source).toMatchObject({vertices: 172789, triangles: 227521, sourceObjects: 51});
   expect(source.diagrams.representations).toHaveLength(7);
   const round = async () => {
     for (const [viewport, detail] of [[{width: 1440, height: 1000}, 'full'], [{width: 1440, height: 2560}, 'full'], [{width: 3840, height: 2160}, 'full'], [originalViewport, 'light']]) {
       const value = await profile(page, viewport, detail);
       expect(value.source).toEqual(source.source); expect(value.diagrams).toEqual(source.diagrams);
-      if (viewport.width === 3840) expect(value.logicalSurface).toEqual({width:720,height:600});
+      if (viewport.width === 3840) expect(value.logicalSurface).toEqual({width:3840,height:2160});
     }
-    // Normal 4K layout intentionally keeps a small Canvas. Exercise the native
+    // The fullviewport layout uses a bounded drawing buffer. Exercise the native
     // budget boundary separately with deliberately oversized fixture dimensions,
     // including a wide-new-width / tall-old-height intermediate assignment.
     for(const dimensions of [{width:1440,height:2560},{width:3840,height:2160}]){
@@ -109,7 +116,7 @@ test('quality and 4K resize cycles retain source data and bounded stable renderi
   // these resource counts are neither byte-accurate VRAM nor device capacity.
   const warm = await round();
   expect(await round()).toEqual(warm); expect(await round()).toEqual(warm);
-  expect(await page.evaluate(element => document.querySelector('canvas') === element, canvas)).toBe(true);
+  expect(await page.evaluate(element => document.querySelector('[data-cinematic-stage] canvas') === element, canvas)).toBe(true);
   const assignments = await page.evaluate(element => window.__recordedCanvasSizes(element), canvas);
   expect(assignments.length).toBeGreaterThan(20);
   const oversized = assignments.filter(value => value.pixels > Math.max(...Object.values(RENDER_PIXEL_BUDGET)));
@@ -121,7 +128,7 @@ test('quality and 4K resize cycles retain source data and bounded stable renderi
   expect(errors).toEqual([]);
 });
 
-test('paused Full scroll docking transforms one Canvas without reallocating its backing storage',async({page})=>{
+test('paused Full chapter holds and transitions preserve one Canvas without reallocating its backing storage',async({page})=>{
   test.setTimeout(scenarioTimeout(120000));
   await page.addInitScript(()=>{
     const counts={canvasWrites:0,textures:0,renderbuffers:0};window.__dockingAllocations=counts;
@@ -138,7 +145,7 @@ test('paused Full scroll docking transforms one Canvas without reallocating its 
   await page.goto('/',{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>window.__thesis?.inspect().ready&&document.fonts.status==='loaded',null,{timeout:RESOURCE_WAIT});
   await pause(page);
-  const canvas=await page.locator('canvas').elementHandle();
+  const canvas=await page.locator('[data-cinematic-stage] canvas').elementHandle();
   const capture=()=>page.evaluate(()=>{
     const scene=window.__thesis.inspect(),story=window.__story.inspect(),stage=document.querySelector('[data-cinematic-stage]');
     return{counts:{...window.__dockingAllocations},budget:scene.renderBudget,memory:scene.memory,frames:scene.frames,
@@ -169,14 +176,15 @@ test('paused Full scroll docking transforms one Canvas without reallocating its 
   for(const value of records){
     expect(value.counts).toEqual(before.counts);
     expect(value.budget).toEqual(before.budget);
-    expect(value.samples).toBe(2);
+    expect(value.samples).toBe(before.samples);
   }
   expect(after.frames).toBeGreaterThan(before.frames);
   expect(after.memory).toEqual(before.memory);
-  expect(new Set(records.map(value=>value.transform)).size).toBeGreaterThan(2);
-  expect(Math.max(...records.map(value=>value.placement.scale))-Math.min(...records.map(value=>value.placement.scale))).toBeGreaterThan(.01);
-  expect(await page.evaluate(element=>document.querySelector('canvas')===element,canvas)).toBe(true);
-  await expect(page.locator('canvas')).toHaveCount(1);expect(errors).toEqual([]);
+  expect(records.every(value=>value.placement.scale===1)).toBe(true);
+  expect(records.some(value=>value.placement.mode==='hold')).toBe(true);
+  expect(records.filter(value=>value.placement.mode==='hold').every(value=>value.placement.x===0&&value.placement.y===0)).toBe(true);
+  expect(await page.evaluate(element=>document.querySelector('[data-cinematic-stage] canvas')===element,canvas)).toBe(true);
+  await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);expect(errors).toEqual([]);
 });
 
 test('assets completing after synthetic pagehide wait before constructing scene GPU resources', async ({page}) => {

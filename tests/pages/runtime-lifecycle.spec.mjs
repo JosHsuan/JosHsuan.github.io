@@ -37,7 +37,7 @@ test('overlapping page-cache and freeze signals stop work until the last reason 
   await settle(page);
   await expect.poll(() => page.evaluate(() => window.__story.inspect().playback.activeSeconds), {timeout: WAIT}).toBeGreaterThan(held.time);
   expect(await page.evaluate(() => ({y: scrollY, chapter: window.__story.inspect().playback.chapterId}))).toEqual({y: held.y, chapter: 'system'});
-  await expect(page.locator('canvas')).toHaveCount(1); expect(errors).toEqual([]);
+  await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1); expect(errors).toEqual([]);
 });
 
 test('lifecycle suspension releases a held source gesture and preserves explicit Pause on return', async ({page, isMobile}) => {

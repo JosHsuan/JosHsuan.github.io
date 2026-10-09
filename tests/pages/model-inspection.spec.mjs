@@ -1,33 +1,50 @@
 import {test,expect} from '@playwright/test';
 import {readFileSync} from 'node:fs';
 import {PerspectiveCamera,Vector3} from 'three';
+import {viewportStageSourceViewport} from '../../roles/uiux-designer/cases/bending-active-thesis/components/source-scene-score.mjs';
 import {WAIT,scenarioTimeout,surface,frames,settle,loadScene,centerStudy,hitPoint,pause,expectIdle} from './case-helpers.mjs';
 const catalog=JSON.parse(readFileSync(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/public/assets/thesis/source-diagrams.json',import.meta.url),'utf8'));
 async function fit(page){
- const {pose,representation,width,height,display,renderSuspended,canvasPlacement}=await page.evaluate(()=>{const canvas=document.querySelector('canvas'),r=canvas.getBoundingClientRect();return {...window.__thesis.inspect(),width:canvas.clientWidth,height:canvas.clientHeight,display:{width:r.width,height:r.height}};});
+ const {pose,representation,width,height,display,renderSuspended,canvasPlacement}=await page.evaluate(()=>{const canvas=document.querySelector('[data-cinematic-stage] canvas'),r=canvas.getBoundingClientRect();return {...window.__thesis.inspect(),width:canvas.clientWidth,height:canvas.clientHeight,display:{left:r.left,top:r.top,width:r.width,height:r.height}};});
  expect(renderSuspended).toBe(false);expect(canvasPlacement.visible).toBe(true);expect(width).toBeGreaterThan(0);expect(height).toBeGreaterThan(0);
  expect(display.width/display.height).toBeCloseTo(width/height,5);expect(pose.aspect).toBeCloseTo(width/height,5);
- expect(pose).toMatchObject({compositionSpace:'canvas-local',viewport:{left:.06,top:.06,width:.88,height:.88}});
+ expect(pose).toMatchObject({compositionSpace:'viewport-stage',viewport:viewportStageSourceViewport(width/height,width)});
  const item=catalog.representations.find(x=>x.id===representation.id);expect(item).toBeTruthy();
  expect(representation.vertices).toBe(item.vertices);expect(representation.triangles).toBe(item.triangles);expect(representation.assetRevision).toBe(catalog.revision);
  const camera=new PerspectiveCamera(pose.fov,width/height,pose.near,pose.far);camera.position.fromArray(pose.position);camera.up.fromArray(pose.up);camera.lookAt(...pose.target);camera.setViewOffset(width,height,width*pose.viewOffsetNormalized.x,height*pose.viewOffsetNormalized.y,width,height);camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
- const viewport=pose.viewport,p=new Vector3(),margin=[Infinity,Infinity,Infinity,Infinity];let near=Infinity,far=-Infinity;
+ const viewport=pose.viewport,p=new Vector3(),margin=[Infinity,Infinity,Infinity,Infinity],extent={left:Infinity,right:-Infinity,top:Infinity,bottom:-Infinity};let near=Infinity,far=-Infinity;
  // Projection uses the stable Canvas aspect, not the page viewport. Uniform
  // DOM scale preserves that aspect and actual pointer mapping. Every support
  // point is still projected. Assert the six extrema once instead
  // of generating thousands of identical Playwright assertion/trace events.
- for(const v of item.framingSupport.points){p.fromArray(v).project(camera);const x=(p.x+1)/2,y=(1-p.y)/2;const gaps=[(x-viewport.left)/viewport.width,(viewport.left+viewport.width-x)/viewport.width,(y-viewport.top)/viewport.height,(viewport.top+viewport.height-y)/viewport.height];for(let i=0;i<4;i++)margin[i]=Math.min(margin[i],gaps[i]);near=Math.min(near,p.z);far=Math.max(far,p.z);}
+ for(const v of item.framingSupport.points){p.fromArray(v).project(camera);const x=(p.x+1)/2,y=(1-p.y)/2;const gaps=[(x-viewport.left)/viewport.width,(viewport.left+viewport.width-x)/viewport.width,(y-viewport.top)/viewport.height,(viewport.top+viewport.height-y)/viewport.height];for(let i=0;i<4;i++)margin[i]=Math.min(margin[i],gaps[i]);near=Math.min(near,p.z);far=Math.max(far,p.z);extent.left=Math.min(extent.left,x);extent.right=Math.max(extent.right,x);extent.top=Math.min(extent.top,y);extent.bottom=Math.max(extent.bottom,y);}
  for(const gap of margin)expect(gap).toBeGreaterThanOrEqual(.0299);expect(near).toBeGreaterThan(-1);expect(far).toBeLessThan(1);
+ return {left:display.left+extent.left*display.width,right:display.left+extent.right*display.width,top:display.top+extent.top*display.height,bottom:display.top+extent.bottom*display.height};
 }
-test('three source surfaces share one Canvas and preserve every fitted original representation',async({page})=>{
- test.setTimeout(scenarioTimeout(180000));const models=[],errors=[];page.on('request',r=>{if(/\.glb(?:\?|$)/.test(r.url()))models.push(r.url());});page.on('pageerror',e=>errors.push(e.message));await loadScene(page);await pause(page);const canvas=await page.locator('canvas').elementHandle();
+
+test('tablet source fits beside the reading copy and clear of fixed navigation',async({page})=>{
+ test.setTimeout(scenarioTimeout(180000));await page.setViewportSize({width:820,height:1180});await loadScene(page);await pause(page);
+ for(const chapter of ['form','system','pattern']) {
+  await centerStudy(page,chapter);await page.mouse.move(4,100);
+  const layout=await page.evaluate(id=>{const copy=document.querySelector(`#${id} [data-story-panel]`).getBoundingClientRect(),rail=document.querySelector('[data-story-navigation]').getBoundingClientRect();return {copyRight:copy.right,railLeft:rail.left};},chapter);
+  const count=chapter==='pattern'?3:4;
+  for(let index=0;index<count;index++) {
+   await surface(page,chapter).press('Enter');await settle(page);
+   const projected=await fit(page);
+   expect(projected.left,`${chapter}: source must be exposed beside the real reading card`).toBeGreaterThanOrEqual(layout.copyRight+4);
+   expect(projected.right,`${chapter}: complete source must clear the permanent rail`).toBeLessThanOrEqual(layout.railLeft-4);
+  }
+ }
+});
+test('three source surfaces share one WebGL Canvas and preserve every fitted original representation',async({page})=>{
+ test.setTimeout(scenarioTimeout(180000));const models=[],errors=[];page.on('request',r=>{if(/\.glb(?:\?|$)/.test(r.url()))models.push(r.url());});page.on('pageerror',e=>errors.push(e.message));await loadScene(page);await pause(page);const canvas=await page.locator('[data-cinematic-stage] canvas').elementHandle();
  await expect(page.locator('[data-model-study]')).toHaveCount(3);await expect(page.locator('[data-model-study] input,[data-model-study] select,[data-model-study] [role="tab"],[data-model-study] [role="slider"]')).toHaveCount(0);
  expect(await page.evaluate(()=>window.__thesis.inspect().source)).toMatchObject({vertices:172789,triangles:227521,sourceObjects:51});
  const layout=()=>page.evaluate(()=>({document:document.documentElement.scrollHeight,captions:[...document.querySelectorAll('[data-layer-caption]')].map(el=>el.getBoundingClientRect().height)})),before=await layout();
  for(const id of ['form','system','pattern']){await centerStudy(page,id);const count=id==='pattern'?3:4;const seen=new Set();
   expect(await layout(),'Changing the source family must preserve native document layout.').toEqual(before);
   for(let n=0;n<count;n++){await surface(page,id).press('Enter');await settle(page);const r=await page.evaluate(()=>window.__thesis.inspect().representation);seen.add(r.id);await fit(page);expect(await layout(),'Source representation captions must preserve native document layout.').toEqual(before);}expect(seen.size).toBe(count);}
- await expect(page.locator('canvas')).toHaveCount(1);expect(await page.evaluate(el=>document.querySelector('canvas')===el,canvas)).toBe(true);expect(models.filter(x=>x.includes('source-layers.glb'))).toHaveLength(1);expect(models.filter(x=>x.includes('source-diagrams.glb'))).toHaveLength(1);expect(errors).toEqual([]);await expectIdle(page);
+ await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);await expect(page.locator('canvas[data-ascii-field]')).toHaveCount(1);await expect(page.locator('canvas')).toHaveCount(2);expect(await page.evaluate(el=>document.querySelector('[data-cinematic-stage] canvas')===el,canvas)).toBe(true);expect(models.filter(x=>x.includes('source-layers.glb'))).toHaveLength(1);expect(models.filter(x=>x.includes('source-diagrams.glb'))).toHaveLength(1);expect(errors).toEqual([]);await expectIdle(page);
 });
 test('actual object hover and click compare sources; empty space is not an invisible button',async({page,isMobile})=>{
  test.setTimeout(scenarioTimeout(120000));await loadScene(page);await pause(page);await centerStudy(page);const p=await hitPoint(page),before=await page.evaluate(()=>window.__thesis.inspect().representation.id);
@@ -47,5 +64,13 @@ test('Reduced requires activation and keeps deliberate comparison accessible wit
  test.setTimeout(scenarioTimeout(120000));const models=[];page.on('request',r=>{if(/\.glb(?:\?|$)/.test(r.url()))models.push(r.url());});await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');await centerStudy(page,'form',{ready:false});expect(models).toHaveLength(0);await page.locator('[data-model-study][data-study-chapter="form"]').getByRole('button',{name:'Enable model'}).click();await page.waitForFunction(()=>window.__thesis?.inspect().ready,null,{timeout:WAIT});await centerStudy(page);await surface(page).press('Enter');await settle(page);await fit(page);await page.getByRole('combobox',{name:'Visual detail',exact:true}).selectOption('light');await settle(page);expect(await page.evaluate(()=>window.__thesis.inspect().compositor.requestedSamples)).toBe(0);await expectIdle(page);
 });
 test('load failure and context loss preserve fallback reading and release source gestures',async({page})=>{
- test.setTimeout(scenarioTimeout(150000));await page.route('**/source-layers.glb',r=>r.abort());await page.goto('/');await expect(page.getByRole('button',{name:'Still background',exact:true})).toBeVisible({timeout:WAIT});await centerStudy(page,'form',{ready:false});await expect(page.locator('[data-model-study][data-study-chapter="form"]')).toContainText('Interactive geometry unavailable');await expect(surface(page)).toHaveAttribute('aria-disabled','true');await page.unroute('**/source-layers.glb');await loadScene(page);await centerStudy(page);const p=await hitPoint(page);await page.mouse.move(p.x,p.y);await page.mouse.down();await page.evaluate(()=>window.__thesis.loseContext());await expect(surface(page)).toHaveAttribute('aria-disabled','true',{timeout:WAIT});await page.mouse.up();await expect(page.locator('[data-story-chapter]')).toHaveCount(7);expect(await page.evaluate(()=>document.body.style.overflow)).not.toBe('hidden');expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
+ test.setTimeout(scenarioTimeout(150000));await page.route('**/source-layers.glb',r=>r.abort());await page.goto('/');await expect(page.getByRole('button',{name:'Still background',exact:true})).toBeVisible({timeout:WAIT});await centerStudy(page,'form',{ready:false});await expect(page.locator('[data-model-study][data-study-chapter="form"]')).toContainText('Interactive geometry unavailable');await expect(surface(page)).toHaveAttribute('aria-disabled','true');
+ await page.unroute('**/source-layers.glb');await page.goto('/');
+ // An intentional failed renderer leaves the same recovery record as an
+ // interrupted process. Reload stays readable until the visitor chooses 3D.
+ await expect(page.getByRole('button',{name:'Enable 3D',exact:true})).toBeVisible({timeout:WAIT});
+ expect(await page.evaluate(()=>window.__thesis?.inspect().ready??false)).toBe(false);
+ await page.getByRole('combobox',{name:'Visual detail',exact:true}).selectOption('light');
+ await page.getByRole('button',{name:'Enable 3D',exact:true}).click();await page.waitForFunction(()=>window.__thesis?.inspect().ready,null,{timeout:WAIT});
+ await page.evaluate(()=>document.fonts.ready);await settle(page);await centerStudy(page);const p=await hitPoint(page);await page.mouse.move(p.x,p.y);await page.mouse.down();await page.evaluate(()=>window.__thesis.loseContext());await expect(surface(page)).toHaveAttribute('aria-disabled','true',{timeout:WAIT});await page.mouse.up();await expect(page.locator('[data-story-chapter]')).toHaveCount(7);expect(await page.evaluate(()=>document.body.style.overflow)).not.toBe('hidden');expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
 });

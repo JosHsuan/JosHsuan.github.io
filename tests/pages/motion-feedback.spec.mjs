@@ -53,7 +53,7 @@ test('whole reading plane shares model progress, damping, content stops and reve
  await page.clock.install({time:new Date('2026-01-01T00:00:00Z')});await load(page);
  // Use the supported Light renderer for frame-sensitive DOM sampling. Full
  // initialization and optics are covered by public smoke and optical fixtures.
- const canvas=await page.locator('canvas').elementHandle();await phase(page,'system',.35);
+ const canvas=await page.locator('[data-cinematic-stage] canvas').elementHandle();await phase(page,'system',.35);
  const realtimeFrameDelta=await page.evaluate(()=>window.__story.inspect().frameDelta);
  try {
   // A future pause point avoids a protocol race with Date.now(). pauseAt fires
@@ -70,7 +70,7 @@ test('whole reading plane shares model progress, damping, content stops and reve
   const before=await page.evaluate(()=>window.__story.inspect());expect(before.holdWeight,JSON.stringify({native:before.nativeDocY,visual:before.visualDocY,bypass:before.bypassHoldId,seek:before.seekUntilInput,hold:before.holdId,stop})).toBeGreaterThan(.99);
   await page.evaluate(y=>scrollTo({top:y,behavior:'instant'}),stop.holdEnd-2);await settleClock(page);
   const after=await page.evaluate(()=>window.__story.inspect());expect(after.nativeDocY).toBeGreaterThan(before.nativeDocY);expect(after.holdId).toBe(before.holdId);expect(after.holdWeight).toBeGreaterThan(.99);expect(Math.abs(after.stops.find(item=>item.id===stop.id).y-stop.y),'Autonomous content must not move the authored reading stop.').toBeLessThan(.1);expect(Math.abs(after.visualDocY-before.visualDocY)).toBeLessThan(.1);
-  for(const id of ['pattern','make','system']){await phase(page,id,.5,settleClock);expect(await page.evaluate(original=>document.querySelector('canvas')===original,canvas)).toBe(true);}
+  for(const id of ['pattern','make','system']){await phase(page,id,.5,settleClock);expect(await page.evaluate(original=>document.querySelector('[data-cinematic-stage] canvas')===original,canvas)).toBe(true);}
   await page.locator('[data-model-viewport][data-study-chapter="system"]').evaluate(el=>{let y=0;for(let n=el;n;n=n.offsetParent)y+=n.offsetTop;scrollTo({top:y-Math.max(112,(innerHeight-el.offsetHeight)*.34),behavior:"instant"});});await settleClock(page);
   const snapshot=()=>page.evaluate(()=>{const story=window.__story.inspect(),scene=window.__thesis.inspect();return {time:story.playback.activeSeconds,field:scene.compositor.field.time,pose:scene.pose.position,frames:scene.frames};});
   const autonomousBefore=await snapshot();for(let step=0;step<3;step++)await page.clock.fastForward(500);const autonomousAfter=await snapshot();

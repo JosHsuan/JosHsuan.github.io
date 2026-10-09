@@ -77,7 +77,7 @@ test('actual WebGL rear-layer depth focus, cell glyphs and black-mist radiance/a
   const pixels=()=>{const p=new Uint8Array(512*320*4);gl.getContext().readPixels(0,0,512,320,gl.getContext().RGBA,gl.getContext().UNSIGNED_BYTE,p);return p;};
   function gradient(p,x0,x1){let d=0,n=0;for(let y=90;y<230;y++)for(let x=x0;x<x1;x++){const i=(y*512+x)*4;d+=Math.abs(p[i]-p[i+4]);n++;}return d/n;}
   const diff=(a,b,x0,x1)=>{let d=0;for(let y=70;y<250;y++)for(let x=x0;x<x1;x++){const i=(y*512+x)*4;d+=Math.abs(a[i]-b[i])+Math.abs(a[i+1]-b[i+1])+Math.abs(a[i+2]-b[i+2]);}return d;};
-  function draw(overrides={},rects=[]){compositor.render(scene,camera,{...settings,overrides},{width:512,height:320,dpr:1,protectedRects:rects});return pixels();}
+  function draw(overrides={},rects=[],options={}){compositor.render(scene,camera,{...settings,overrides},{width:512,height:320,dpr:1,protectedRects:rects,...options});return pixels();}
   let bright=null;
   window.fixture={draw,light,compositor,resources(){
     draw({maxBlurPx:9,asciiWeight:0,fieldWeight:.3,mistStrength:.3});
@@ -154,6 +154,20 @@ test('actual WebGL rear-layer depth focus, cell glyphs and black-mist radiance/a
     return {haloDifference,dimHaloDifference,farBlackMaximum,obsoleteMaskDifference:diff(mist,masked,100,410),displayDifference,haloAlphaBefore,haloAlphaAfter,cornerAlpha:transparentMist[3],coreAlpha:transparentMist[(160*512+256)*4+3],off,on};
   },endMist(){
     scene.remove(bright);bright.geometry.dispose();bright.material.dispose();bright=null;front.visible=back.visible=true;scene.background=null;
+  },runSeparatedField(){
+    const options={independentField:true};
+    const controls={maxBlurPx:0,apertureScale:0,asciiWeight:0,mistStrength:0,fieldWeight:.55,fieldTime:0,fieldEnvelope:[.5,.5,.45,.48],fieldSurfaceGain:.24};
+    scene.background=null;front.visible=back.visible=false;
+    const empty=draw(controls,[],options);
+    let emptyMaximum=0;for(const value of empty)emptyMaximum=Math.max(emptyMaximum,value);
+    front.visible=back.visible=true;
+    const clean=draw({...controls,fieldWeight:0},[],options),source=draw(controls,[],options);
+    const decorativeChange=draw({...controls,fieldTime:4,fieldPointerUv:[.5,.5],fieldPointerStrength:1},[],options);
+    let addedOutsideCoverage=0;for(let i=3;i<clean.length;i+=4)if(clean[i]===0&&source[i]>0)addedOutsideCoverage++;
+    light.intensity=.05;
+    const dimClean=draw({...controls,fieldWeight:0},[],options),dimSource=draw(controls,[],options);
+    light.intensity=2;
+    return {emptyMaximum,addedOutsideCoverage,sourceDifference:diff(clean,source,100,410),dimSourceDifference:diff(dimClean,dimSource,100,410),decorativeDifference:diff(source,decorativeChange,0,512),diagnostics:compositor.inspect()};
   },runField(){
     front.visible=back.visible=false;
     const controls={maxBlurPx:0,asciiWeight:0,mistStrength:0,fieldWeight:.55,fieldTime:0,fieldEnvelope:[.5,.5,.45,.48],fieldSceneMix:.35,semanticFeatherPx:36};
@@ -231,6 +245,17 @@ test('actual WebGL rear-layer depth focus, cell glyphs and black-mist radiance/a
     assert.equal(field.diagnostics.passes, 2); assert.equal(field.diagnostics.layering.position, 'rear'); assert.equal(field.diagnostics.layering.semanticMask, false); assert.equal(field.diagnostics.outputTransformCount, 1);
     await writeFile(path.join(work, 'autonomous-field-fixture-' + engine + '.json'), JSON.stringify({verifiedAt:new Date().toISOString(),engine,field,errors}, null, 2) + '\n');
     console.log('Autonomous field WebGL evidence', JSON.stringify(field));
+    const separated=await page.evaluate(()=>window.fixture.runSeparatedField());
+    assert.deepEqual(errors,[],'Separated source-field shader compilation and browser errors');
+    assert.equal(separated.emptyMaximum,0,'The GL surface remains wholly transparent without scene geometry');
+    assert.equal(separated.addedOutsideCoverage,0,'Source-derived glyphs never fill pixels outside actual scene coverage');
+    assert.ok(separated.sourceDifference>1000,'Retained GL glyph response remains visible on real scene radiance');
+    assert.notEqual(separated.dimSourceDifference,separated.sourceDifference,'Retained glyph response changes with actual lighting');
+    assert.equal(separated.decorativeDifference,0,'Independent contour time and pointer motion are owned by the separate page field');
+    assert.equal(separated.diagnostics.field.mode,'source-only');
+    assert.equal(separated.diagnostics.layering.independentField,true);
+    assert.equal(separated.diagnostics.outputTransformCount,1);
+    await writeFile(path.join(work,'separated-field-fixture-'+engine+'.json'),JSON.stringify({engine,separated,errors},null,2)+'\n');
     const resources=await page.evaluate(()=>window.fixture.resources());
     assert.ok(resources.full.retainedMistBytes>0);assert.equal(resources.light.retainedMistBytes,0);
     assert.equal(resources.fullTextures-resources.lightTextures,2,'Disabled mist releases both retained target textures');

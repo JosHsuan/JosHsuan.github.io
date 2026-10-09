@@ -30,7 +30,7 @@ test('zero-wheel chapter loops advance field and diagram selections while Pause 
  // Fixed sub-stale intervals verify autonomous behavior even when one software
  // GPU frame takes more than a real second. The actual DOM and Canvas still run.
  let first,second;
- const sample=()=>page.evaluate(()=>({time:window.__story.inspect().playback.activeSeconds,field:window.__thesis.inspect().compositor.field.time,selection:document.querySelector('[data-source-diagram="workflow"]').dataset.diagramSelection,y:scrollY,layering:window.__thesis.inspect().compositor.layering}));
+ const sample=()=>page.evaluate(()=>({time:window.__story.inspect().playback.activeSeconds,field:window.__story.inspect().pageField.fieldTime,draws:window.__story.inspect().pageField.draws,selection:document.querySelector('[data-source-diagram="workflow"]').dataset.diagramSelection,y:scrollY,layering:window.__thesis.inspect().compositor.layering}));
  try{
   await page.clock.pauseAt(new Date('2026-01-01T01:00:00Z'));
   first=await sample();
@@ -38,7 +38,7 @@ test('zero-wheel chapter loops advance field and diagram selections while Pause 
   // unused phase variable. Actual DOM, source presentation and Canvas run.
   for(let i=0;i<24;i++){await page.clock.fastForward(500);second=await sample();if(second.selection&&second.selection!==first.selection)break;}
  }finally{await page.clock.resume();}
- expect(second.y).toBe(first.y);expect(second.time).toBeGreaterThan(first.time);expect(second.field).toBeGreaterThan(first.field);expect(second.selection).toBeTruthy();expect(second.selection).not.toBe(first.selection);expect(second.layering).toMatchObject({position:'rear',semanticMask:false});
+ expect(second.y).toBe(first.y);expect(second.time).toBeGreaterThan(first.time);expect(second.field).toBeGreaterThan(first.field);expect(second.draws).toBeGreaterThan(first.draws);expect(second.selection).toBeTruthy();expect(second.selection).not.toBe(first.selection);expect(second.layering).toMatchObject({position:'rear',semanticMask:false,independentField:true});
  const workflow=page.locator('[data-source-diagram="workflow"]'),choice=workflow.locator('button[data-diagram-index="2"]');
  // The SVG controls sit below the source surface. Finish their native focus
  // relocation and the reading response before the real pointer click, rather
@@ -49,40 +49,43 @@ test('zero-wheel chapter loops advance field and diagram selections while Pause 
  await page.getByRole('button',{name:'Pause motion',exact:true}).click();await settle(page);const frozen=await page.evaluate(()=>window.__story.inspect().playback.activeSeconds);await frames(page,10);expect(await page.evaluate(()=>window.__story.inspect().playback.activeSeconds)).toBe(frozen);
 });
 
-test('visible workflow follows the shared clock while the absent Canvas renders zero frames',async({page})=>{
+test('viewport source holds while information scrolls and workflow follows its presented shared phase',async({page})=>{
  test.setTimeout(scenarioTimeout(150000));
- // Desktop intentionally keeps the source sticky beside this SVG. Use the
- // narrow stacked layout to exercise the real source-offscreen reading state.
+ // The narrow stacked layout moves the original HTML source slot away. The
+ // viewport scene must retain its own chapter hold while the SVG is read.
  await page.setViewportSize({width:390,height:844});await page.clock.install({time:new Date('2026-01-01T00:00:00Z')});await loadScene(page);await centerStudy(page,'system');
  const workflow=page.locator('[data-source-diagram="workflow"]'),svg=workflow.locator('svg');
  await expect(workflow).toHaveAttribute('data-source-presented','true');
+ const before=await page.evaluate(()=>({y:scrollY,viewport:window.__thesis.inspect().pose.viewport,surface:window.__story.inspect().canvasSurface}));
  await svg.scrollIntoViewIfNeeded();await settle(page);
  await svg.evaluate(el=>{const r=el.getBoundingClientRect();scrollBy({top:r.top+r.height/2-innerHeight/2,behavior:'instant'});});await settle(page);await page.mouse.move(10,130);
- await page.waitForFunction(()=>window.__story.inspect().canvasPlacement?.visible===false&&window.__thesis.inspect().renderSuspended,null,{timeout:WAIT});
- await expect(svg).toBeInViewport();await expect(workflow).not.toHaveAttribute('data-source-presented','true');
- const sample=()=>page.evaluate(()=>{const root=document.querySelector('[data-source-diagram="workflow"]'),scene=window.__thesis.inspect(),story=window.__story.inspect();return {time:story.playback.activeSeconds,frames:scene.frames,visible:story.canvasPlacement.visible,suspended:scene.renderSuspended,selection:root.dataset.diagramSelection,index:Number(root.dataset.autonomousIndex),pressed:Number(root.querySelector('button[aria-pressed="true"]').dataset.diagramIndex),y:scrollY};});
+ await expect(svg).toBeInViewport();await expect(workflow).toHaveAttribute('data-source-presented','true');
+ const after=await page.evaluate(()=>({y:scrollY,viewport:window.__thesis.inspect().pose.viewport,surface:window.__story.inspect().canvasSurface,placement:window.__story.inspect().canvasPlacement}));
+ expect(Math.abs(after.y-before.y)).toBeGreaterThan(100);expect(after.viewport).toEqual(before.viewport);expect(after.surface).toEqual(before.surface);
+ expect(after.placement).toMatchObject({chapter:'system',mode:'hold',x:0,y:0,scale:1,visible:true});
+ const sample=()=>page.evaluate(()=>{const root=document.querySelector('[data-source-diagram="workflow"]'),scene=window.__thesis.inspect(),story=window.__story.inspect();return {time:story.playback.activeSeconds,frames:scene.frames,visible:story.canvasPlacement.visible,suspended:scene.renderSuspended,selection:root.dataset.diagramSelection,index:scene.representation.index,pressed:Number(root.querySelector('button[aria-pressed="true"]').dataset.diagramIndex),y:scrollY};});
  let first,second;
  try{
   await page.clock.pauseAt(new Date('2026-01-01T01:00:00Z'));first=await sample();
   for(let i=0;i<24;i++){
    await page.clock.fastForward(500);second=await sample();
-   expect(second.frames).toBe(first.frames);expect(second.visible).toBe(false);expect(second.suspended).toBe(true);expect(second.y).toBe(first.y);
+   expect(second.visible).toBe(true);expect(second.suspended).toBe(false);expect(second.y).toBe(first.y);
    expect(second.selection).toBe(['origami','opening','bending','colours'][second.index]);expect(second.pressed).toBe(second.index);
    if(second.selection!==first.selection)break;
   }
  }finally{await page.clock.resume();}
- expect(second.time).toBeGreaterThan(first.time);expect(second.selection).not.toBe(first.selection);await expect(svg).toBeInViewport();
- // Returning to the source again follows the actual rendered representation.
+ expect(second.time).toBeGreaterThan(first.time);expect(second.frames).toBeGreaterThan(first.frames);expect(second.selection).not.toBe(first.selection);await expect(svg).toBeInViewport();
+ // Returning to the information slot does not become a second camera owner.
  await centerStudy(page,'system');await expect(workflow).toHaveAttribute('data-source-presented','true');
  expect(await page.evaluate(()=>{const scene=window.__thesis.inspect();return document.querySelector('[data-source-diagram="workflow"]').dataset.diagramSelection===['origami','opening','bending','colours'][scene.representation.index];})).toBe(true);
 });
 
 
-test('rear scene keeps reading surfaces legible over actual, white and black backdrops',async({page})=>{
+test('rear scene keeps reading surfaces legible over actual, white and black backdrops',async({page,isMobile})=>{
  test.setTimeout(scenarioTimeout(180000));await loadScene(page);await centerStudy(page,'system');await page.getByRole('combobox',{name:'Visual detail',exact:true}).selectOption('full');await settle(page);await pause(page);
- expect(await page.evaluate(()=>({detail:window.__thesis.inspect().detail,samples:window.__thesis.inspect().compositor.requestedSamples,mist:window.__thesis.inspect().compositor.mist.enabled,suspended:window.__thesis.inspect().renderSuspended}))).toEqual({detail:'full',samples:2,mist:true,suspended:false});
- const layers=await page.evaluate(()=>({canvases:document.querySelectorAll('canvas').length,stage:Number(getComputedStyle(document.querySelector('[data-cinematic-stage]')).zIndex),reading:Number(getComputedStyle(document.querySelector('[data-reading-frame]')).zIndex),scrim:!!document.querySelector('[data-cinematic-scrim]'),rects:window.__thesis.inspect().protectedRects,layering:window.__thesis.inspect().compositor.layering}));
- expect(layers.canvases).toBe(1);expect(layers.stage).toBeLessThan(layers.reading);expect(layers.scrim).toBe(false);expect(layers.rects).toBeUndefined();expect(layers.layering).toMatchObject({position:'rear',semanticMask:false});
+ expect(await page.evaluate(()=>({detail:window.__thesis.inspect().detail,samples:window.__thesis.inspect().compositor.requestedSamples,mist:window.__thesis.inspect().compositor.mist.enabled,suspended:window.__thesis.inspect().renderSuspended}))).toEqual({detail:'full',samples:isMobile?0:2,mist:true,suspended:false});
+ const layers=await page.evaluate(()=>({canvases:document.querySelectorAll('canvas').length,glCanvases:document.querySelectorAll('[data-cinematic-stage] canvas').length,asciiCanvases:document.querySelectorAll('canvas[data-ascii-field]').length,stage:Number(getComputedStyle(document.querySelector('[data-cinematic-stage]')).zIndex),reading:Number(getComputedStyle(document.querySelector('[data-reading-frame]')).zIndex),scrim:!!document.querySelector('[data-cinematic-scrim]'),rects:window.__thesis.inspect().protectedRects,layering:window.__thesis.inspect().compositor.layering}));
+ expect(layers.canvases).toBe(2);expect(layers.glCanvases).toBe(1);expect(layers.asciiCanvases).toBe(1);expect(layers.stage).toBeLessThan(layers.reading);expect(layers.scrim).toBe(false);expect(layers.rects).toBeUndefined();expect(layers.layering).toMatchObject({position:'rear',semanticMask:false,independentField:true});
  for(const selector of ['#overview h1','#system [data-editorial-copy]:first-of-type','[data-source-diagram="workflow"] figcaption','[data-model-study][data-study-chapter="system"] footer']){
   const target=page.locator(selector);await target.scrollIntoViewIfNeeded();await settle(page);
   // Read in the document's unobscured center, away from fixed masthead/tools.

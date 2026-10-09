@@ -111,6 +111,27 @@ test('pause and deliberate engagement freeze the pose; navigation and semantic s
   assert(state.activeSeconds > moving.activeSeconds);
 });
 
+test('engagement resolves a retargeted or in-flight chapter before freezing its presented pose', () => {
+  const retargeted = createChapterPlayback('system');
+  advanceChapterPlayback(retargeted, .2, {chapter: 'form', engaged: true});
+  let score = sampleChapterPlayback(retargeted);
+  assert.equal(score.chapterId, 'form');
+  assert.deepEqual(score.chapterWeights, [0, 1, 0, 0, 0, 0, 0]);
+  assert.equal(score.blend, 1); assert.equal(score.activeSeconds, 0); assert.equal(score.needsFrame, false);
+
+  const inflight = createChapterPlayback('form');
+  advanceChapterPlayback(inflight, .2, {chapter: 'system'});
+  const before = sampleChapterPlayback(inflight);
+  assert(before.chapterWeights[1] > before.chapterWeights[2], 'the old chapter still dominates before engagement');
+  advanceChapterPlayback(inflight, .5, {chapter: 'system', engaged: true});
+  score = sampleChapterPlayback(inflight);
+  assert.deepEqual(score.chapterWeights, [0, 0, 1, 0, 0, 0, 0]);
+  assert.equal(score.blend, 1); assert.equal(score.activeSeconds, before.activeSeconds); assert.equal(score.needsFrame, false);
+  const held = structuredClone(inflight);
+  advanceChapterPlayback(inflight, .8, {chapter: 'system', engaged: true});
+  assert.deepEqual(inflight, held, 'settled same-chapter engagement changes no pose or clock bookkeeping');
+});
+
 test('hidden, resumed and stale gaps discard elapsed time while ordinary heavy frames integrate exactly', () => {
   const state = createChapterPlayback();
   advance(state, .5, {impulse: 0});
