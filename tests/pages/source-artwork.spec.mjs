@@ -1,5 +1,6 @@
 import {test,expect} from '@playwright/test';
 import {WAIT,scenarioTimeout,loadScene,settle,frames,pause} from './case-helpers.mjs';
+import {renderedTextContrast} from './reading-contrast.mjs';
 
 test('IBM Plex, rounded shadowboxes and orange photos retain an accessible original',async({page,isMobile})=>{
  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');await page.evaluate(()=>document.fonts.ready);
@@ -24,28 +25,40 @@ test('original SVG paths support accessible curve and workflow selections with s
 });
 
 test('zero-wheel chapter loops advance field and diagram selections while Pause holds the shared clock',async({page})=>{
- test.setTimeout(scenarioTimeout(120000));await page.clock.install({time:new Date('2026-01-01T00:00:00Z')});await loadScene(page);await page.locator('[data-source-diagram="workflow"]').scrollIntoViewIfNeeded();await settle(page);await page.mouse.move(10,130);await frames(page,4);
+ test.setTimeout(scenarioTimeout(180000));await page.clock.install({time:new Date('2026-01-01T00:00:00Z')});await loadScene(page);await page.locator('[data-chapter-link="system"]').click();await settle(page);await page.mouse.move(10,130);await frames(page,4);
  // Fixed sub-stale intervals verify autonomous behavior even when one software
  // GPU frame takes more than a real second. The actual DOM and Canvas still run.
  let first,second;
+ const sample=()=>page.evaluate(()=>({time:window.__story.inspect().playback.activeSeconds,field:window.__thesis.inspect().compositor.field.time,selection:document.querySelector('[data-source-diagram="workflow"]').dataset.diagramSelection,y:scrollY,layering:window.__thesis.inspect().compositor.layering}));
  try{
   await page.clock.pauseAt(new Date('2026-01-01T01:00:00Z'));
-  first=await page.evaluate(()=>({time:window.__story.inspect().playback.activeSeconds,field:window.__thesis.inspect().compositor.field.time,phase:document.querySelector('[data-source-diagram="workflow"]').style.getPropertyValue('--diagram-phase'),y:scrollY}));
-  for(let i=0;i<3;i++)await page.clock.fastForward(500);
-  second=await page.evaluate(()=>({time:window.__story.inspect().playback.activeSeconds,field:window.__thesis.inspect().compositor.field.time,phase:document.querySelector('[data-source-diagram="workflow"]').style.getPropertyValue('--diagram-phase'),y:scrollY,foreground:window.__thesis.inspect().compositor.foreground}));
+  first=await sample();
+  // Cross a real source beat; verify the visible SVG selection rather than an
+  // unused phase variable. Actual DOM, source presentation and Canvas run.
+  for(let i=0;i<24;i++){await page.clock.fastForward(500);second=await sample();if(second.selection&&second.selection!==first.selection)break;}
  }finally{await page.clock.resume();}
- expect(second.y).toBe(first.y);expect(second.time).toBeGreaterThan(first.time);expect(second.field).toBeGreaterThan(first.field);expect(second.phase).not.toBe(first.phase);expect(second.foreground.missingMasks).toBe(false);
+ expect(second.y).toBe(first.y);expect(second.time).toBeGreaterThan(first.time);expect(second.field).toBeGreaterThan(first.field);expect(second.selection).toBeTruthy();expect(second.selection).not.toBe(first.selection);expect(second.layering).toMatchObject({position:'rear',semanticMask:false});
  const workflow=page.locator('[data-source-diagram="workflow"]');await workflow.locator('button[data-diagram-index="2"]').click();await settle(page);expect(await page.evaluate(()=>window.__story.inspect().sourceSelection?.chapterId)).toBe('system');
  await page.getByRole('button',{name:'Pause motion',exact:true}).click();await settle(page);const frozen=await page.evaluate(()=>window.__story.inspect().playback.activeSeconds);await frames(page,10);expect(await page.evaluate(()=>window.__story.inspect().playback.activeSeconds)).toBe(frozen);
 });
 
 
-test('foreground Canvas preserves the rendered pixels of essential reading cores',async({page})=>{
- test.setTimeout(scenarioTimeout(120000));await loadScene(page);await pause(page);
- const heading=page.locator('[data-source-diagram="workflow"] figcaption[data-protect]');await heading.scrollIntoViewIfNeeded();await settle(page);await frames(page,4);
- // Force one final renderer frame after DOM settlement; the GPU is demand-driven.
- const beforeFrame=await page.evaluate(()=>window.__thesis.inspect().frames);await page.evaluate(()=>window.__thesis.setOverrides({}));await page.waitForFunction(n=>window.__thesis.inspect().frames>n,beforeFrame);await frames(page,2);
- const before=await heading.screenshot();await page.locator('[data-cinematic-stage]').evaluate(el=>{el.style.visibility='hidden';});const after=await heading.screenshot();await page.locator('[data-cinematic-stage]').evaluate(el=>{el.style.visibility='visible';});
- // A detached test-only canvas decodes pixels in WebKit, which lacks OffscreenCanvas here.
- const diff=await page.evaluate(async([a,b])=>{const decode=async text=>{const image=await createImageBitmap(await(await fetch('data:image/png;base64,'+text)).blob());const canvas=document.createElement('canvas');canvas.width=image.width;canvas.height=image.height;const context=canvas.getContext('2d');context.drawImage(image,0,0);return context.getImageData(0,0,image.width,image.height).data;};const x=await decode(a),y=await decode(b);let changed=0;for(let i=0;i<x.length;i+=4)if(Math.max(Math.abs(x[i]-y[i]),Math.abs(x[i+1]-y[i+1]),Math.abs(x[i+2]-y[i+2]))>10)changed++;return changed/(x.length/4);},[before.toString('base64'),after.toString('base64')]);expect(diff).toBeLessThan(.005);
+test('rear scene keeps reading surfaces legible over actual, white and black backdrops',async({page})=>{
+ test.setTimeout(scenarioTimeout(180000));await loadScene(page);await page.getByRole('combobox',{name:'Visual detail',exact:true}).selectOption('full');await settle(page);await pause(page);
+ const layers=await page.evaluate(()=>({canvases:document.querySelectorAll('canvas').length,stage:Number(getComputedStyle(document.querySelector('[data-cinematic-stage]')).zIndex),reading:Number(getComputedStyle(document.querySelector('[data-reading-frame]')).zIndex),scrim:!!document.querySelector('[data-cinematic-scrim]'),rects:window.__thesis.inspect().protectedRects,layering:window.__thesis.inspect().compositor.layering}));
+ expect(layers.canvases).toBe(1);expect(layers.stage).toBeLessThan(layers.reading);expect(layers.scrim).toBe(false);expect(layers.rects).toBeUndefined();expect(layers.layering).toMatchObject({position:'rear',semanticMask:false});
+ for(const selector of ['#overview h1','#system [data-editorial-copy]:first-of-type','[data-source-diagram="workflow"] figcaption','[data-model-study][data-study-chapter="system"] footer']){
+  const target=page.locator(selector);await target.scrollIntoViewIfNeeded();await settle(page);
+  // Read in the document's unobscured center, away from fixed masthead/tools.
+  await target.evaluate(el=>{const r=el.getBoundingClientRect();scrollBy({top:r.top+r.height/2-innerHeight/2,behavior:'instant'});});await settle(page);
+  const stage=page.locator('[data-cinematic-stage]'),original=await stage.evaluate(el=>el.style.cssText);
+  try{
+   for(const backdrop of [null,'#ffffff','#000000']){
+    await stage.evaluate((el,color)=>{el.style.background=color??'transparent';el.querySelector('canvas').style.visibility=color?'hidden':'visible';},backdrop);
+    const measurements=await renderedTextContrast(page,target);expect(measurements.length).toBeGreaterThan(0);
+    for(const value of measurements)expect(value.ratio,`${selector}: ${value.text}, backdrop ${backdrop??'scene'}`).toBeGreaterThanOrEqual(value.required);
+   }
+  }finally{await stage.evaluate((el,css)=>{el.style.cssText=css;el.querySelector('canvas').style.visibility='';},original);}
+ }
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
 });

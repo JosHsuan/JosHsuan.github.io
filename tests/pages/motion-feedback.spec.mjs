@@ -88,7 +88,10 @@ test('whole reading plane shares model progress, damping, content stops and reve
 test('text and images respond in perspective; focus, hashes, Pause and Reduced keep content reachable',async({page,isMobile})=>{
  test.setTimeout(scenarioTimeout(180000));await load(page);await phase(page,'system',.45);await openSourceFigure(page);
  const source=page.locator('[data-inspect-figure="0"]'),media=source.locator('[data-feedback-plane]');await expect(media).toBeVisible();await source.scrollIntoViewIfNeeded();await settle(page);
- if(!isMobile){await media.hover({position:{x:15,y:15}});await settle(page);expect(Math.abs(await media.evaluate(el=>parseFloat(getComputedStyle(el).getPropertyValue('--feedback-x'))))).toBeGreaterThan(.3);await page.mouse.move(1,1);await settle(page);}
+ if(!isMobile){await media.hover({position:{x:15,y:15}});await settle(page);expect(Math.abs(await media.evaluate(el=>parseFloat(getComputedStyle(el).getPropertyValue('--feedback-x'))))).toBeGreaterThan(.3);expect(await media.evaluate(el=>getComputedStyle(el).transform)).not.toBe('none');await page.mouse.move(1,1);await settle(page);}
+ await page.waitForFunction(()=>document.querySelector('[data-inspect-figure="0"] [data-feedback-plane]')?.dataset.choreographyPhase==='settled');
+ // Reading settles independently of the final few hover-return frames.
+ await expect.poll(()=>media.evaluate(el=>getComputedStyle(el).transform)).toBe('none');
  await source.focus();await settle(page);const focus=await source.boundingBox();expect(focus.y+focus.height).toBeGreaterThan(90);expect(focus.y).toBeLessThan(await page.evaluate(()=>innerHeight));
  await source.press('Enter');await expect(page.locator('[data-source-comparison]')).toBeVisible();expect(await page.evaluate(()=>document.body.style.overflow)).not.toBe('hidden');await page.getByRole('button',{name:'Close source comparison'}).click();await expect(source).toBeFocused();
  for(const id of ['make','credits','form']){await page.locator(`[data-chapter-link="${id}"]`).click();await settle(page);expect(await page.evaluate(()=>window.__story.inspect().readingShiftY)).toBe(0);await expect(page.locator(`[data-chapter-link="${id}"]`)).toHaveAttribute('aria-current','location');}
