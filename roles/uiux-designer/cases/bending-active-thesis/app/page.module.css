@@ -356,6 +356,8 @@
 .overview .openingDetails{grid-row:2;align-self:start}
 .overview .chapterInner{row-gap:1.5rem}
 .openingDetails .openingText{margin-bottom:1.3rem}
+/* Keep the fixed side rail clear of source hints and evidence at tablet widths. */
+@media(min-width:781px) and (max-width:1100px){.chapterInner{padding-right:94px}}
 @media(max-width:780px){
  .sceneAnchor{aspect-ratio:1;flex:none;width:100%;max-width:560px;align-self:center}
  .sceneAnchor img{border-radius:20px}
