@@ -67,14 +67,14 @@ function prepareLayerCaptions(descriptions) {
   };
 }
 
-function World({input, stage, onReady, onFailure, runtime}) {
+function World({input, onReady, onFailure, runtime}) {
   const {gl, camera, scene, invalidate, size} = useThree();
   const root = useMemo(() => new T.Group(), []), data = useRef(null), frames = useRef(0), last = useRef(null), overrides = useRef({});
   const initialization=useRef({phase:'loading',gpuInitializationAttempts:0});
   useEffect(() => input.subscribe(() => {
     const state=input.get();
-    if(state.hidden||state.paused||state.systemReduced||state.modelEngaged||state.modelRecovering)runtime.pressure.suspend('inactive');
-    if (!state.hidden) invalidate();
+    if(state.hidden||state.canvasPlacement?.visible===false||state.paused||state.systemReduced||state.modelEngaged||state.modelRecovering)runtime.pressure.suspend('inactive');
+    if (!state.hidden && (state.canvasPlacement?.visible!==false || !data.current?.ready)) invalidate();
   }), [input, invalidate, runtime]);
   useEffect(()=>{runtime.pressure.suspend('viewport-change');},[size.width,size.height,runtime]);
   useEffect(() => {
@@ -187,7 +187,8 @@ function World({input, stage, onReady, onFailure, runtime}) {
         return {ready: !!d?.ready, frames: frames.current, initialization:{...initialization.current}, ...input.get(), ...last.current,
           source: d ? {revision: d.meta.revision, vertices: d.meta.vertices, triangles: d.meta.triangles, sourceObjects: d.meta.layers.reduce((sum, layer) => sum + layer.sourceObjects.length, 0)} : null,
           layers: d?.layers.map(layer => ({id: layer.id, position: layer.node.position.toArray(), restPosition: layer.rest.toArray(), visible: layer.node.visible, triangles: layer.record.triangles})),
-          material: d?.adapters[0]?.inspect(), compositor: d?.compositor.inspect(), sourceVisible:(d?.visibleSource.length ?? 0)>0,
+          material: d?.adapters[0]?.inspect(), compositor: d?.compositor.inspect(), sourceVisible:input.get().canvasPlacement?.visible!==false&&(d?.visibleSource.length ?? 0)>0,
+          renderSuspended:input.get().hidden||input.get().canvasPlacement?.visible===false,
           diagramSource:d?{revision:d.diagramMeta.revision,bytes:d.diagramMeta.bytes,representations:d.diagramMeta.representations.map(record=>({id:record.id,vertices:record.vertices,triangles:record.triangles,vertexColors:record.vertexColors}))}:null,
           renderBudget: d?.renderBudget ?? null,
           renderPressure: runtime.pressure.inspect(), rendererBudget:runtime.budget?.inspect() ?? null,
@@ -196,7 +197,7 @@ function World({input, stage, onReady, onFailure, runtime}) {
       setOverrides: (values = {}) => {overrides.current = {...values}; if (!input.get().hidden) invalidate();},
       hitTest: (clientX,clientY) => {
         const d=data.current,r=last.current?.representation;
-        if (!d?.ready || !r || !['form','system','pattern'].includes(r.chapterId) || !Number.isFinite(clientX+clientY)) return null;
+        if (!d?.ready || !r || input.get().canvasPlacement?.visible===false || !['form','system','pattern'].includes(r.chapterId) || !Number.isFinite(clientX+clientY)) return null;
         const rect=gl.domElement.getBoundingClientRect(),x=(clientX-rect.left)/rect.width,y=(clientY-rect.top)/rect.height;
         if (x<0||x>1||y<0||y>1) return null;
         ray.setFromCamera(rayPoint.set(x*2-1,1-y*2),camera);
@@ -212,7 +213,7 @@ function World({input, stage, onReady, onFailure, runtime}) {
   }, [camera, gl, input, invalidate, onFailure, root, scene, runtime]);
 
   useFrame(() => {
-    const d = data.current, state = input.get(); if (!d || d.failed || state.hidden) return;
+    const d = data.current, state = input.get(); if (!d || d.failed || state.hidden || (d.ready&&state.canvasPlacement?.visible===false)) return;
     try {
       const debug = overrides.current, aspect=size.width/size.height;
       // Explicit Pause freezes the shared chapter phase. Only the OS preference
@@ -225,7 +226,7 @@ function World({input, stage, onReady, onFailure, runtime}) {
       const selected=resolveSourceSelection(playback,debug.sourceSelection ?? state.sourceSelection,chapterScene);
       const viewports=debug.modelViewports ?? state.modelViewports;
       const slot=viewports?.[selected.chapterId] ?? {viewport:state.inspectionViewport,weight:selected.chapterId==='form'?(state.inspectionWeight??0):0};
-      const studyWeight=clamp(slot.weight??0,0,1), family=d.families[selected.family];
+      const studyWeight=state.canvasLocal?Number(['form','system','pattern'].includes(selected.chapterId)):clamp(slot.weight??0,0,1), family=d.families[selected.family];
       const stageU=playback.chapterWeights.reduce((sum,w,i)=>sum+w*(i+.5)/7,0)/playback.chapterWeights.reduce((a,b)=>a+b,0);
       const visualU=Number.isFinite(debug.visualU)?clamp(debug.visualU,0,1):(state.visualU??stageU);
       const storyElements = sampleElementPose(stageU, {reducedMotion: reduced});
@@ -239,7 +240,7 @@ function World({input, stage, onReady, onFailure, runtime}) {
       const stageLayout = resolveSceneStage(family.bounds, direction);
       const pointer = Number.isFinite(debug.stageU) ? {x: 0, y: 0} : state.pointer;
       const pose=sampleSourceScenePose({playback,chapterScene,families:d.families,selection:selected,aspect,viewport:slot.viewport,weight:studyWeight,
-        inspection:state.inspection,interactionChapter:state.modelInteractionChapter,pointer,reducedMotion:reduced});
+        inspection:state.inspection,interactionChapter:state.modelInteractionChapter,pointer,reducedMotion:reduced,canvasLocal:!!state.canvasLocal});
       const opticalInput={stageU,visualU,energy:state.energy,dwellWeight:state.dwellWeight,aspect,reducedMotion:reduced,chapterScene};
       const optics=sampleOpticalScore(opticalInput,pose,{bounds});
       optics.focalLengthMm=Number.isFinite(debug.focalLengthMm)?clamp(debug.focalLengthMm,10,160):focalLengthForFov(pose.fov,aspect,optics.filmGaugeMm);
@@ -319,9 +320,9 @@ function World({input, stage, onReady, onFailure, runtime}) {
       for(const program of gl.info.programs??[])if(!d.seenPrograms.has(program)){
         d.seenPrograms.add(program);runtime.pressure.suspend('shader-warmup');
       }
-      if (stage.current) stage.current.style.opacity = '1';
       last.current = {mode:'autonomous-source-story',renderedControllerFrame:state.controllerFrame??0,studyWeight,representation,playback,chapterScene,pose: {...pose, fov: camera.fov, focalLengthMm: optics.focalLengthMm}, optics, lights: direction, elements, bounds, detail, stageLayout, exhibition:exhibitionState, shadowUpdated,keyIntensity: d.lights.key.intensity};
       frames.current++;
+      input.markPresented(state.controllerFrame??0,selected.chapterId);
       if (!d.ready) {d.ready = true; initialization.current.phase='ready'; queueMicrotask(onReady);}
     } catch (error) {d.failed = true; console.error('Local scene rendering failed:', error.message); queueMicrotask(onFailure);}
   }, 1);
@@ -339,5 +340,5 @@ export default function CinematicScene({onFailure,...props}) {
   // The discrete WebGL capability result gates hydration, never per-frame state.
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {let probe; try {probe = document.createElement('canvas').getContext('webgl2'); if (!probe) {onFailure(); return;} probe.getExtension('WEBGL_lose_context')?.loseContext(); setSupported(true);} catch {onFailure();}}, [onFailure]);
-  return supported ? <Canvas frameloop="demand" dpr={1} camera={{position: [4, 3, 6], fov: 38}} gl={rendererFactory} onCreated={({gl}) => {gl.toneMapping = T.ACESFilmicToneMapping; gl.toneMappingExposure = 1; gl.outputColorSpace = T.SRGBColorSpace; gl.setClearColor(0x090d0d, 0); gl.shadowMap.type = T.PCFShadowMap; gl.info.autoReset = false;}}><World {...props} runtime={runtime} onFailure={onFailure}/></Canvas> : null;
+  return supported ? <Canvas frameloop="demand" resize={{scroll:false,offsetSize:true,debounce:0}} dpr={1} camera={{position: [4, 3, 6], fov: 38}} gl={rendererFactory} onCreated={({gl}) => {gl.toneMapping = T.ACESFilmicToneMapping; gl.toneMappingExposure = 1; gl.outputColorSpace = T.SRGBColorSpace; gl.setClearColor(0x090d0d, 0); gl.shadowMap.type = T.PCFShadowMap; gl.info.autoReset = false;}}><World {...props} runtime={runtime} onFailure={onFailure}/></Canvas> : null;
 }

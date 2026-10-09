@@ -51,9 +51,17 @@ export default function SourceDiagram({kind = 'library', title, className = ''})
     }
   }
 
-  function restore() {
+  function automaticIndex() {
     const root = frame.current;
-    paint(pinned.current ?? hover.current ?? (validKind === 'workflow' ? presented.current : Number(root?.dataset.autonomousIndex ?? 0)));
+    // A visible source owns its matching workflow highlight. When the bounded
+    // Canvas leaves, the existing controller's chapter phase keeps the readable
+    // SVG alive without requesting a WebGL frame or starting another clock.
+    return validKind === 'workflow' && root?.dataset.sourcePresented === 'true'
+      ? presented.current : Number(root?.dataset.autonomousIndex ?? 0);
+  }
+
+  function restore() {
+    paint(pinned.current ?? hover.current ?? automaticIndex());
   }
 
   function activate(index) {
@@ -85,19 +93,21 @@ export default function SourceDiagram({kind = 'library', title, className = ''})
     const root = frame.current;
     const update = () => {
       if (pinned.current !== null || hover.current !== null) return;
-      paint(validKind === 'workflow' ? presented.current : Number(root.dataset.autonomousIndex ?? 0));
+      paint(automaticIndex());
     };
     update();
     const observer = new MutationObserver(update);
-    observer.observe(root, {attributes: true, attributeFilter: ['data-autonomous-index']});
+    observer.observe(root, {attributes: true, attributeFilter: ['data-autonomous-index', 'data-source-presented']});
     const followPresentation = event => {
       if (validKind !== 'workflow' || event.detail?.chapterId !== 'system') return;
       const index = data.groups.findIndex(group => group.representation === event.detail.index);
       if (index < 0) return;
       presented.current = index;
       if (event.detail.pinned === false) {pinned.current = null; hover.current = null;}
-      // Actual displayed source has priority; no representation request is sent.
-      paint(index);
+      // Actual displayed source has priority while its surface is presented.
+      // Offscreen warm-up events must not replace the shared-phase SVG state.
+      if (root.dataset.sourcePresented === 'true') paint(index);
+      else update();
     };
     window.addEventListener('thesis:representation-presented', followPresentation);
     // Source loading changes no outer geometry, but a new core may need measuring.

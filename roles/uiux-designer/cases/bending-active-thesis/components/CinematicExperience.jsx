@@ -10,7 +10,8 @@ import {sampleChapterScene} from './chapter-scene-score.mjs';
 import {createInspectionState, advanceInspection, setInspectionTarget, INSPECTION_DEFAULTS} from './inspection-state.mjs';
 import {createFrameScheduler} from './runtime-scheduler.mjs';
 import {createDOMPublisher} from './dom-publisher.mjs';
-import {resolveSourceViewport} from './source-viewport.mjs';
+import {createCanvasMotion, advanceCanvasMotion} from './canvas-motion.mjs';
+import {CANVAS_LOCAL_SOURCE_VIEWPORT} from './source-scene-score.mjs';
 import ModelInspector from './ModelInspector';
 import styles from './cinematic.module.css';
 
@@ -50,6 +51,7 @@ export default function CinematicExperience() {
     return () => {document.documentElement.removeAttribute('data-cinematic-static');delete document.documentElement.dataset.motionPaused;};
   }, [input, systemReduced, still, enabled, failed]);
   useEffect(() => {input.set({detail});}, [input, detail]);
+  useEffect(() => {document.documentElement.toggleAttribute('data-canvas-available',ready&&!failed);return()=>document.documentElement.removeAttribute('data-canvas-available');},[ready,failed]);
   useEffect(() => {
     const root = document.querySelector('[data-story-root]');
     const sections = [...document.querySelectorAll('[data-story-chapter]')];
@@ -57,12 +59,13 @@ export default function CinematicExperience() {
     const fine = matchMedia('(hover: hover) and (pointer: fine)');
     const links = [...document.querySelectorAll('[data-chapter-link]')];
     const planeMap = new Map(), publisher = createDOMPublisher();
-    let planes=[], modelSlots=[], diagrams=[];
+    let planes=[], modelSlots=[], diagrams=[], canvasAnchors=[];
     const reading = createReadingState(scrollY), playback = createChapterPlayback(), history = [], choreography = new Map();
     // offsetTop follows untransformed layout; rect + scrollY would feed our own
     // compensation back into anchors and cause drift on every ResizeObserver.
     const naturalY = element => {let y=0;for(let node=element;node;node=node.offsetParent)y+=node.offsetTop;return y;};
-    let canvasFrame={left:0,top:0,width:innerWidth,height:innerHeight};
+    let canvasSurface={width:1,height:1},canvasPlacement=null,canvasWasVisible=false,canvasActivation=-1,canvasAwaitingPaint=false;
+    const canvasMotion=createCanvasMotion();
     let plan, offsets=[], previous=0, controllerFrame=0, frameDelta=0, resumed=true, seekPending=false, semanticSeekPending=false, seekOnScroll=false, initialHash=!!location.hash, historyNavigation=null;
     let inspectionRevision=input.get().inspectionRevision??0, wasReduced=input.get().reduced;
     let preferenceKey='', pendingImpulse=0, touchY=null, pointerActive=false, latestScene=null, lastChapter=null;
@@ -79,8 +82,7 @@ export default function CinematicExperience() {
     scheduler.suspend('visibility',document.hidden);
     const measure = () => {
       if(disposed||(scheduler.suspended&&plan))return;
-      const frame=stage.current?.getBoundingClientRect();
-      canvasFrame=frame?.width&&frame?.height?{left:frame.left,top:frame.top,width:frame.width,height:frame.height}:{left:0,top:0,width:innerWidth,height:innerHeight};
+      canvasSurface={width:stage.current?.offsetWidth||1,height:stage.current?.offsetHeight||1};
       // Discrete resize/source hydration refreshes collections. No document-wide
       // selector walk is needed while a settled chapter keeps playing.
       planes=[...document.querySelectorAll('[data-feedback-plane]')].map(element=>{
@@ -89,6 +91,14 @@ export default function CinematicExperience() {
       });
       for(const element of planeMap.keys())if(!element.isConnected)planeMap.delete(element);
       modelSlots=[...document.querySelectorAll('[data-model-viewport]')];
+      // These anchors have no local transforms. Cache their natural positions;
+      // the existing reading response supplies their screen Y without a forced
+      // layout after every DOM style publication.
+      canvasAnchors=[...modelSlots,...document.querySelectorAll('[data-canvas-anchor]')].map(element=>{
+        const r=element.getBoundingClientRect();
+        const host=element.closest('[data-model-study-host]');
+        return {element,id:element.dataset.studyChapter??element.dataset.canvasAnchor,top:naturalY(element),left:r.left,width:r.width,height:r.height,sticky:!!host&&getComputedStyle(host).position==='sticky'};
+      });
       diagrams=[...document.querySelectorAll('[data-source-diagram]')].map(element=>({element,index:Math.max(0,sections.indexOf(element.closest('[data-story-chapter]')))}));
       for(const element of choreography.keys())if(!element.isConnected)choreography.delete(element);
       offsets=sections.map(naturalY);offsets.push(naturalY(sections.at(-1))+sections.at(-1).offsetHeight);
@@ -180,17 +190,31 @@ export default function CinematicExperience() {
         moving=moving||!item.response.settled;
       });
 
-      // Slots are clear natural reading positions. Only their visible clipped
-      // subrect is sent to the sole camera resolver, after foreground transforms.
+      // The outer Canvas travels through document anchors. The camera composes
+      // only inside its fixed local aperture, never chasing these screen rects.
       const modelViewports={};
       let inspectionWeight=0,inspectionViewport=state.inspectionViewport;
-      const slotRects=new Map();
-      modelSlots.forEach(slot=>{
-        const id=slot.dataset.studyChapter,r=slot.getBoundingClientRect();slotRects.set(slot,r);
-        const {weight,viewport}=resolveSourceViewport(r,{width:innerWidth,height:innerHeight},canvasFrame);
-        if(id)modelViewports[id]={viewport,weight};
-        if(id===chapter.id){inspectionWeight=weight;inspectionViewport=viewport;}
+      const slotRects=new Map(),anchorRects=new Map();
+      const canvasChapter=sections[playbackScore.chapterWeights.indexOf(Math.max(...playbackScore.chapterWeights))].id;
+      canvasAnchors.forEach(anchor=>{
+        const top=anchor.top-reading.visualDocY,r=anchor.sticky&&anchor.id===canvasChapter?anchor.element.getBoundingClientRect():{left:anchor.left,top,width:anchor.width,height:anchor.height,right:anchor.left+anchor.width,bottom:top+anchor.height};
+        slotRects.set(anchor.element,r);anchorRects.set(anchor.id,r);
       });
+      canvasPlacement=advanceCanvasMotion(canvasMotion,dt,{chapter:canvasChapter,rect:anchorRects.get(canvasChapter)??null,viewport:{width:innerWidth,height:innerHeight},surface:canvasSurface,reducedMotion:state.reduced,seek:didSeek||didResume});
+      const canvasActive=canvasPlacement.visible&&state.sceneEnabled&&!state.sceneFailed;
+      if(canvasActive&&!canvasWasVisible)canvasActivation=controllerFrame;
+      canvasWasVisible=canvasActive;
+      const presented=input.getPresentation();
+      canvasAwaitingPaint=canvasActive&&(presented.controllerFrame<canvasActivation||presented.chapterId!==canvasChapter);
+      publisher.style(stage.current,'transform',`translate3d(${canvasPlacement.x}px,${canvasPlacement.y}px,0) scale(${canvasPlacement.scale})`);
+      publisher.style(stage.current,'opacity',canvasAwaitingPaint?0:canvasPlacement.opacity);
+      publisher.attribute(stage.current,'data-canvas-mode',canvasPlacement.mode);
+      moving=moving||!canvasPlacement.settled||canvasAwaitingPaint;
+      for(const id of ['form','system','pattern']){
+        const weight=canvasPlacement.visible&&id===canvasChapter?1:0;
+        modelViewports[id]={viewport:CANVAS_LOCAL_SOURCE_VIEWPORT,weight};
+        if(id===chapter.id){inspectionWeight=weight;inspectionViewport=CANVAS_LOCAL_SOURCE_VIEWPORT;}
+      }
       // Moving pointers are checked each delivered frame; a stationary pointer
       // still notices a moving source leaving it within 100 ms, without a
       // full mesh intersection on every autonomous frame. Press stays exact.
@@ -206,14 +230,17 @@ export default function CinematicExperience() {
         modelHover={x:Math.min(1,Math.max(-1,(pointerClient.x-r.left)/Math.max(1,r.width)*2-1)),y:Math.min(1,Math.max(-1,(pointerClient.y-r.top)/Math.max(1,r.height)*2-1)),strength:found?1:0,chapterId:pointerSurface.dataset.studyChapter};
       }
       pointerMoved=false;
-      latestScene=sampleChapterScene(playbackScore,{reducedMotion:!!state.systemReduced,quality:state.detail,aspect:innerWidth/Math.max(1,innerHeight),pointer:{...pointer,active:decorate&&pointerActive,strength:modelHover.strength||.35}});
+      const fieldUv=[(pointerClient.x-canvasPlacement.x)/(canvasSurface.width*canvasPlacement.scale),1-(pointerClient.y-canvasPlacement.y)/(canvasSurface.height*canvasPlacement.scale)];
+      const fieldActive=decorate&&pointerActive&&canvasPlacement.visible&&fieldUv.every(value=>value>=0&&value<=1);
+      latestScene=sampleChapterScene(playbackScore,{reducedMotion:!!state.systemReduced,quality:state.detail,aspect:canvasSurface.width/canvasSurface.height,pointer:{...pointer,uv:fieldUv,active:fieldActive,strength:modelHover.strength||.35}});
       diagrams.forEach(({element:diagram,index})=>{
         const count=Math.max(1,Number(diagram.dataset.diagramCount)||4),phase=playbackScore.phases[index];
         // The discrete index owns source highlighting. The old continuously
         // written phase/energy custom properties were not consumed by CSS.
         publisher.attribute(diagram,'data-autonomous-index',Math.floor(phase*count)%count);
+        publisher.attribute(diagram,'data-source-presented',index===2&&canvasChapter==='system'&&canvasPlacement.visible&&!canvasAwaitingPaint&&state.sceneEnabled&&!state.sceneFailed?'true':null);
       });
-      // Constant rear Canvas; readable DOM cores need no geometry mask. A small
+      // Contained rear Canvas; readable DOM cores need no geometry mask. A small
       // quantized rim shares the existing scene light/field and pointer clock.
       const tint=latestScene.field.asciiTint,neutral=[200,214,201];
       publisher.style(root,'--scene-rim-rgb',neutral.map((v,i)=>Math.round(v*.88+tint[i]*255*.12)).join(' '));
@@ -227,6 +254,7 @@ export default function CinematicExperience() {
         editorial:{lightSweep:0,materialLift:0},pointer,modelHover,hidden:false,modelRecovering:recovering,
         inspection:{...inspection.value,lightMix:0},inspectionSettled:inspection.settled,
         inspectionActive:inspectionWeight>0,inspectionWeight,inspectionViewport,modelViewports,
+        canvasLocal:true,canvasPlacement:{...canvasPlacement},canvasSurface,
       });
       history.push({time:now,...reading,...readingScore,playback:{chapterId:playbackScore.chapterId,activeSeconds:playbackScore.activeSeconds,loopPhase:playbackScore.loopPhase,tempo:playbackScore.tempo,needsFrame:playbackScore.needsFrame}});
       if(history.length>240)history.shift();
@@ -295,7 +323,7 @@ export default function CinematicExperience() {
       if(state.reduced!==wasReduced){wasReduced=state.reduced;seekPending=true;schedule();}
       const key=[state.paused,state.systemReduced,state.sceneEnabled,state.sceneFailed,state.detail].join('/');if(key!==preferenceKey){preferenceKey=key;schedule();}
     });
-    window.__story={inspect:()=>({...reading,...sampleReadingScore(reading,plan),controllerFrame,frameDelta,readingPending:seekPending||resumed||Math.abs(reading.nativeDocY-scrollY)>.01,playback:sampleChapterPlayback(playback),chapterScene:latestScene,history:[...history],stops:plan.stops,scheduled:scheduler.inspect().scheduled,lifecycle:scheduler.inspect(),domPublication:publisher.inspect(),inspectionActive:!!input.get().inspectionActive,inspectionWeight:input.get().inspectionWeight,modelViewports:input.get().modelViewports,modelEngaged:!!input.get().modelEngaged,modelRecovering:!!input.get().modelRecovering,sourceSelection:input.get().sourceSelection,choreography:[...choreography].map(([element,item])=>({kind:item.kind,firstVisibleAt:item.firstVisibleAt,phase:element.dataset.choreographyPhase,settled:item.last?.settled??false})),inspection:{target:{...inspection.target},value:{...inspection.value},lightMix:0,settled:inspection.settled}})};
+    window.__story={inspect:()=>({...reading,...sampleReadingScore(reading,plan),controllerFrame,frameDelta,readingPending:seekPending||resumed||Math.abs(reading.nativeDocY-scrollY)>.01,playback:sampleChapterPlayback(playback),chapterScene:latestScene,canvasPlacement:canvasPlacement?{...canvasPlacement}:null,canvasSurface,canvasAwaitingPaint,history:[...history],stops:plan.stops,scheduled:scheduler.inspect().scheduled,lifecycle:scheduler.inspect(),domPublication:publisher.inspect(),inspectionActive:!!input.get().inspectionActive,inspectionWeight:input.get().inspectionWeight,modelViewports:input.get().modelViewports,modelEngaged:!!input.get().modelEngaged,modelRecovering:!!input.get().modelRecovering,sourceSelection:input.get().sourceSelection,choreography:[...choreography].map(([element,item])=>({kind:item.kind,firstVisibleAt:item.firstVisibleAt,phase:element.dataset.choreographyPhase,settled:item.last?.settled??false})),inspection:{target:{...inspection.target},value:{...inspection.value},lightMix:0,settled:inspection.settled}})};
     input.set({hidden:scheduler.suspended});document.documentElement.setAttribute('data-cinematic-ready','');measure();if(location.hash)hash();
     return()=>{disposed=true;window.history.scrollRestoration=previousRestoration;scheduler.dispose();window.removeEventListener('pagehide',pagehide);window.removeEventListener('pageshow',pageshow);document.removeEventListener('freeze',freeze);document.removeEventListener('resume',resume);resize.disconnect();unsubscribe();window.removeEventListener('scroll',scroll);window.removeEventListener('wheel',wheel);window.removeEventListener('touchstart',touchstart);window.removeEventListener('touchmove',touchmove);window.removeEventListener('touchend',touchend);window.removeEventListener('touchcancel',touchend);window.removeEventListener('thesis:representation',representation);window.removeEventListener('popstate',pop);document.removeEventListener('pointerdown',press);document.removeEventListener('pointerup',press);document.removeEventListener('pointercancel',press);window.removeEventListener('resize',resizeWindow);window.removeEventListener('pointermove',move);document.documentElement.removeEventListener('pointerleave',reset);window.removeEventListener('blur',reset);document.removeEventListener('visibilitychange',visibility);fine.removeEventListener('change',reset);document.removeEventListener('focusin',focus);document.removeEventListener('focusout',focusout);document.removeEventListener('click',anchor);window.removeEventListener('hashchange',hash);document.removeEventListener('keydown',keyboard);document.documentElement.removeAttribute('data-cinematic-ready');delete document.documentElement.dataset.activeChapter;delete document.documentElement.dataset.chapterBeat;root.style.removeProperty('--reading-shift');delete window.__story;};
   }, [input, inspection]);
@@ -303,11 +331,11 @@ export default function CinematicExperience() {
   useEffect(() => {window.dispatchEvent(new Event('resize'));}, [still, systemReduced, detail, enabled, failed, ready]);
   return <>
     <div className={styles.backdrop} aria-hidden="true" data-cinematic-background>
-      <picture><source media="(max-width:780px)" srcSet="/assets/cinematic/model-poster-mobile.webp"/><img className={styles.poster} src="/assets/cinematic/model-poster.webp" alt="" fetchPriority="high" style={{opacity: ready ? 0 : .35}} /></picture>
+
       <div className={styles.vignette} data-cinematic-vignette />
     </div>
     <div className={styles.stage} ref={stage} style={{visibility: ready ? 'visible' : 'hidden'}} aria-hidden="true" data-cinematic-stage>
-      {enabled && !failed && <SceneBoundary onFailure={onFailure}><Scene input={input} stage={stage} onReady={onReady} onFailure={onFailure} /></SceneBoundary>}
+      {enabled && !failed && <SceneBoundary onFailure={onFailure}><Scene input={input} onReady={onReady} onFailure={onFailure} /></SceneBoundary>}
     </div>
     {hydrated && <div className={styles.readingTools} data-protect data-reading-tools>
       <span ref={status} aria-hidden="true" data-choreography="nav">01 / 07</span>

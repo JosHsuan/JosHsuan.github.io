@@ -7,6 +7,9 @@ import {sampleCinematicPose, CINEMATIC_CHAPTERS} from './vendor/cinematic-plan.m
 export const SOURCE_DIAGRAM_REVISION = '13fbd10da48e6aa71fe6bfb8c7711741293833f7bba33611f394f9b1543e505a';
 export const REPRESENTATION_IDS = Object.freeze(['origami', 'opening', 'bending', 'curvature']);
 export const EXPERIMENT_IDS = Object.freeze(['experiment-a', 'experiment-b', 'experiment-c']);
+// The moving DOM surface owns page composition. Its camera fits within this
+// stable local aperture and never follows a second, page-space source slot.
+export const CANVAS_LOCAL_SOURCE_VIEWPORT = Object.freeze({left:.06,top:.06,width:.88,height:.88});
 const clamp = (n, a = 0, b = 1) => Math.max(a, Math.min(b, Number.isFinite(n) ? n : a));
 const rad = n => n * Math.PI / 180;
 const dot = (a, b) => a.reduce((sum, v, i) => sum + v * b[i], 0);
@@ -94,14 +97,15 @@ export function fitSourcePose({bounds, points, aspect, azimuth=30, elevation=30,
  * slots blend into a support-fitted shot; intermediate crops are intentional.
  * User angles are bounded offsets, not a second camera or independent clock.
  */
-export function sampleSourceScenePose({playback,chapterScene,families,selection,aspect,viewport,weight=0,inspection,interactionChapter,pointer={x:0,y:0},reducedMotion=false}) {
+export function sampleSourceScenePose({playback,chapterScene,families,selection,aspect,viewport,weight=0,inspection,interactionChapter,pointer={x:0,y:0},reducedMotion=false,canvasLocal=false}) {
   const raw=playback?.chapterWeights ?? [1,0,0,0,0,0,0], total=raw.reduce((a,b)=>a+b,0), weights=raw.map(v=>v/total);
   const poses=weights.map((w,i)=>w>0?sampleCinematicPose((i+.5)/7,aspect,reducedMotion?{x:0,y:0}:pointer,
     {bounds:families[i===1||i===2?'representation':i===3?'experiment':'assembly'].bounds,sharedStage:true,reducedMotion:false}):null);
   const scalar=read=>poses.reduce((sum,p,i)=>sum+(p?read(p)*weights[i]:0),0);
   const vec=read=>[0,1,2].map(c=>scalar(p=>read(p)[c]));
   const polar=p=>{const v=p.position.map((n,i)=>n-p.target[i]),d=Math.hypot(...v);return {az:Math.atan2(v[0],v[2])*180/Math.PI,el:Math.asin(v[1]/d)*180/Math.PI,d};};
-  const cue=chapterScene?.camera ?? {}, w=clamp(weight), family=families[selection.family];
+  const localStudy=['form','system','pattern'].includes(selection.chapterId);
+  const cue=chapterScene?.camera ?? {}, w=canvasLocal?Number(localStudy):clamp(weight), family=families[selection.family];
   const controlled=interactionChapter===selection.chapterId;
   const userAz=controlled?clamp(inspection?.azimuth??30,-40,100)-30:0;
   const userEl=controlled?clamp(inspection?.elevation??30,12,70)-30:0;
@@ -115,7 +119,19 @@ export function sampleSourceScenePose({playback,chapterScene,families,selection,
     viewOffsetNormalized:shift,sourcePresence:presence,modelVisibility:presence,surfaceEmphasis:scalar(p=>p.surfaceEmphasis??0),
     owner:'cinematic-composite',framingIntent:presence?'autonomous-authored-shot':'evidence-absence'};
   let pose=story;
-  if(w>0) {
+  if(canvasLocal) {
+    const fit=fitSourcePose({...family,aspect,azimuth,elevation,fov,viewport:CANVAS_LOCAL_SOURCE_VIEWPORT,distanceScale:cue.distanceScale??1});
+    // The opening retains a restrained sculptural crop inside its own frame.
+    // All complete source studies and the ending hold retain their exact fit.
+    // Inactive evidence chapters retain absence even though their local camera
+    // is ready for re-entry; fitting does not itself make a source present.
+    const opening=selection.chapterId==='overview'&&!reducedMotion;
+    const localDistance=fit.distance*(opening ? .88 : 1);
+    pose={...story,...fit,distance:localDistance,position:fit.target.map((v,i)=>v+back[i]*localDistance),
+      sourcePresence:presence,modelVisibility:presence,surfaceEmphasis:story.surfaceEmphasis,
+      compositionSpace:'canvas-local',
+      framingIntent:!presence?'evidence-absence':opening?'canvas-local-hero-crop':localStudy?'held-source-study':'held-source'};
+  } else if(w>0) {
     const fit=fitSourcePose({...family,aspect,azimuth,elevation,fov,viewport,distanceScale:cue.distanceScale??1});
     const mixedTarget=target.map((v,i)=>v+(fit.target[i]-v)*w), mixedDistance=distance+(fit.distance-distance)*w;
     pose={...story,...fit,target:mixedTarget,position:mixedTarget.map((v,i)=>v+back[i]*mixedDistance),distance:mixedDistance,

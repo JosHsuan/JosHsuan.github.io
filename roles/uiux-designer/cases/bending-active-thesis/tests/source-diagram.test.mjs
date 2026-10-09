@@ -66,7 +66,7 @@ test('actual SVG/React rendering, keyboard selection, autonomous highlights and 
     await page.waitForSelector('[data-source-diagram="workflow"] button');
     await page.evaluate(() => {window.selectionEvents = []; window.addEventListener('thesis:representation', event => window.selectionEvents.push(event.detail));});
     const workflow = page.locator('[data-source-diagram="workflow"]');
-    await workflow.evaluate(node => node.dataset.autonomousIndex = '3');
+    await workflow.evaluate(node => {node.dataset.sourcePresented = 'true';node.dataset.autonomousIndex = '3';});
     assert.equal(await workflow.getAttribute('data-diagram-selection'), 'origami', 'independent phase never disagrees with actual source');
     await page.evaluate(() => window.dispatchEvent(new CustomEvent('thesis:representation-presented', {detail: {chapterId: 'system', index: 3, pinned: false}})));
     await page.waitForFunction(() => document.querySelector('[data-source-diagram="workflow"]').dataset.diagramSelection === 'colours');
@@ -80,6 +80,15 @@ test('actual SVG/React rendering, keyboard selection, autonomous highlights and 
     assert.equal(await workflow.getAttribute('data-diagram-selection'), 'colours', 'return follows actual source');
     await page.evaluate(() => window.dispatchEvent(new CustomEvent('thesis:representation-presented', {detail: {chapterId: 'system', index: 0, pinned: false}})));
     assert.equal(await workflow.getAttribute('data-diagram-selection'), 'origami');
+    await workflow.evaluate(node => {delete node.dataset.sourcePresented;node.dataset.autonomousIndex = '1';});
+    await page.waitForFunction(() => document.querySelector('[data-source-diagram="workflow"]').dataset.diagramSelection === 'opening');
+    await page.evaluate(() => window.dispatchEvent(new CustomEvent('thesis:representation-presented', {detail: {chapterId: 'system', index: 3, pinned: false}})));
+    assert.equal(await workflow.getAttribute('data-diagram-selection'), 'opening', 'an offscreen render does not replace the shared-phase workflow');
+    await workflow.evaluate(node => node.dataset.autonomousIndex = '2');
+    await page.waitForFunction(() => document.querySelector('[data-source-diagram="workflow"]').dataset.diagramSelection === 'bending');
+    await workflow.evaluate(node => node.dataset.sourcePresented = 'true');
+    await page.waitForFunction(() => document.querySelector('[data-source-diagram="workflow"]').dataset.diagramSelection === 'colours');
+    assert.deepEqual(await page.evaluate(() => window.selectionEvents), [{chapterId: 'system', index: 2}], 'autonomous visibility changes emit no selection requests');
     const library = page.locator('[data-source-diagram="library"]');
     await library.locator('button[data-diagram-index="10"]').focus();
     assert.equal(await library.getAttribute('data-diagram-selection'), 'trace-11');

@@ -1,6 +1,7 @@
 .backdrop{position:fixed;inset:0;z-index:0;pointer-events:none;background:#090d0d;overflow:hidden}
 .poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:65% 50%}
-.stage{position:fixed;inset:0;opacity:1;z-index:1;pointer-events:none;overflow:hidden;background:transparent}
+.stage{position:fixed;left:0;top:0;width:min(48vw,720px);aspect-ratio:6/5;opacity:0;z-index:1;pointer-events:none;overflow:hidden;background:#0c1212;border-radius:24px;transform-origin:0 0;box-shadow:0 16px 36px #0003,inset 0 0 0 1px #c4d4c740}
+.stage::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:inset 0 0 0 1px #c4d4c740}
 .stage canvas{display:block;pointer-events:none!important}
 .vignette{position:absolute;inset:0;background:radial-gradient(ellipse at 62% 50%,transparent 38%,#070a0a48 100%)}
 .readingTools{position:fixed;z-index:40;right:4vw;top:1rem;display:flex;align-items:center;gap:1rem;color:#c5d0c7;font-family:var(--mono);font-size:.55rem;letter-spacing:.07em}
@@ -20,8 +21,6 @@
 
 .stage,.stage *{pointer-events:none!important}
 
-/* Touch browser chrome changes the visible height during scrolling. Keep the
-   expensive drawing surface at the large viewport height; reading and source
-   fitting still clip to the currently visible client area. Orientation and
-   actual window-size changes remain real resizes. Desktop sizing is unchanged. */
-@media(hover:none) and (pointer:coarse){.stage{bottom:auto;height:100vh;height:100lvh}}
+/* Only a real width/breakpoint change resizes the backing surface. Its outer
+   travel and uniform scale do not change layout dimensions or GPU targets. */
+@media(max-width:780px){.stage{width:calc(100vw - 36px);aspect-ratio:1;border-radius:20px;box-shadow:inset 0 0 0 1px #c4d4c740}}
