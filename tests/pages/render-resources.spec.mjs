@@ -1,5 +1,5 @@
 import {test, expect} from '@playwright/test';
-import {scenarioTimeout, frames} from './case-helpers.mjs';
+import {scenarioTimeout, frames, pause, settle, centerStudy} from './case-helpers.mjs';
 import {RENDER_PIXEL_BUDGET} from '../../roles/uiux-designer/cases/bending-active-thesis/components/render-budget.mjs';
 
 const RESOURCE_WAIT = 20000;
@@ -8,9 +8,11 @@ const binaryAssets = /\/(?:source-layers\.glb|studio-small\.hdr|source-diagrams\
 async function readResources(page) {
   return page.evaluate(() => {
     const scene = window.__thesis.inspect();
+    const stage=document.querySelector('[data-cinematic-stage]');
     return {ready: scene.ready, frames: scene.frames, initialization: scene.initialization,
       memory: scene.memory, programs: scene.renderer.programs,
       source: scene.source, diagrams: scene.diagramSource, budget: scene.renderBudget,
+      logicalSurface:stage?{width:stage.offsetWidth,height:stage.offsetHeight}:null,
       compositor: scene.compositor ?? null, canvases: document.querySelectorAll('canvas').length};
   });
 }
@@ -19,13 +21,19 @@ async function profile(page, viewport, detail) {
   const frame = await page.evaluate(() => window.__thesis.inspect().frames);
   await page.setViewportSize(viewport);
   await page.getByRole('combobox', {name: 'Visual detail', exact: true}).selectOption(detail);
-  await page.waitForFunction(({viewport, detail, frame}) => {
+  await page.waitForFunction(({detail, frame}) => {
     const scene = window.__thesis?.inspect(), story = window.__story?.inspect(), budget = scene?.renderBudget;
-    return scene?.ready && scene.frames > frame && budget?.viewportWidth === viewport.width && budget.viewportHeight === viewport.height
-      && budget.detail === detail && story?.settled && !story.readingPending;
-  }, {viewport, detail, frame}, {timeout: RESOURCE_WAIT});
+    const stage=document.querySelector('[data-cinematic-stage]');
+    return scene?.ready && scene.frames > frame && budget?.viewportWidth === stage?.offsetWidth && budget.viewportHeight === stage?.offsetHeight
+      && budget.detail === detail && story?.settled && story.canvasPlacement?.settled && !story.readingPending;
+  }, {detail, frame}, {timeout: RESOURCE_WAIT});
   const value = await readResources(page);
   expect(value.canvases).toBe(1);
+  const width=viewport.width<=780?viewport.width-36:Math.min(viewport.width*.48,720);
+  expect(value.logicalSurface.width).toBeCloseTo(Math.round(width),0);
+  expect(value.logicalSurface.height).toBeCloseTo(Math.round(viewport.width<=780?width:width/1.2),0);
+  expect(value.budget.viewportWidth).toBe(value.logicalSurface.width);
+  expect(value.budget.viewportHeight).toBe(value.logicalSurface.height);
   expect(value.budget.pixels).toBe(value.budget.width * value.budget.height);
   expect(value.budget.pixels).toBeLessThanOrEqual(value.budget.pixelBudget);
   expect(value.compositor).toMatchObject({width: value.budget.width, height: value.budget.height, dpr: value.budget.dpr});
@@ -68,8 +76,31 @@ test('quality and 4K resize cycles retain source data and bounded stable renderi
     for (const [viewport, detail] of [[{width: 1440, height: 1000}, 'full'], [{width: 1440, height: 2560}, 'full'], [{width: 3840, height: 2160}, 'full'], [originalViewport, 'light']]) {
       const value = await profile(page, viewport, detail);
       expect(value.source).toEqual(source.source); expect(value.diagrams).toEqual(source.diagrams);
-      if (viewport.width === 3840) expect(value.budget.bounded).toBe(true);
+      if (viewport.width === 3840) expect(value.logicalSurface).toEqual({width:720,height:600});
     }
+    // Normal 4K layout intentionally keeps a small Canvas. Exercise the native
+    // budget boundary separately with deliberately oversized fixture dimensions,
+    // including a wide-new-width / tall-old-height intermediate assignment.
+    for(const dimensions of [{width:1440,height:2560},{width:3840,height:2160}]){
+      await page.locator('[data-cinematic-stage]').evaluate((element,value)=>{
+        element.style.width=value.width+'px';element.style.height=value.height+'px';
+      },dimensions);
+      await page.waitForFunction(expected=>{
+        const budget=window.__thesis.inspect().renderBudget;
+        return budget.viewportWidth===expected.width&&budget.viewportHeight===expected.height;
+      },dimensions,{timeout:RESOURCE_WAIT});
+      await settle(page);
+      const oversized=await readResources(page);
+      expect(oversized.budget.bounded).toBe(true);
+      expect(oversized.budget.pixels).toBeLessThanOrEqual(oversized.budget.pixelBudget);
+      expect(oversized.source).toEqual(source.source);expect(oversized.diagrams).toEqual(source.diagrams);
+    }
+    await page.locator('[data-cinematic-stage]').evaluate(element=>{element.style.removeProperty('width');element.style.removeProperty('height');});
+    await page.waitForFunction(()=>{
+      const stage=document.querySelector('[data-cinematic-stage]'),budget=window.__thesis.inspect().renderBudget;
+      return budget.viewportWidth===stage.offsetWidth&&budget.viewportHeight===stage.offsetHeight;
+    },null,{timeout:RESOURCE_WAIT});
+    await settle(page);
     const value = await readResources(page);
     return {memory: value.memory, programs: value.programs, width: value.compositor.width, height: value.compositor.height};
   };
@@ -88,6 +119,64 @@ test('quality and 4K resize cycles retain source data and bounded stable renderi
   expect(requests.filter(path => path.endsWith('source-diagrams.glb'))).toHaveLength(1);
   expect(requests.filter(path => path.endsWith('studio-small.hdr'))).toHaveLength(1);
   expect(errors).toEqual([]);
+});
+
+test('paused Full scroll docking transforms one Canvas without reallocating its backing storage',async({page})=>{
+  test.setTimeout(scenarioTimeout(120000));
+  await page.addInitScript(()=>{
+    const counts={canvasWrites:0,textures:0,renderbuffers:0};window.__dockingAllocations=counts;
+    for(const axis of ['width','height']){
+      const descriptor=Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype,axis);
+      Object.defineProperty(HTMLCanvasElement.prototype,axis,{...descriptor,set(value){counts.canvasWrites++;descriptor.set.call(this,value);}});
+    }
+    for(const name of ['texStorage2D','renderbufferStorage','renderbufferStorageMultisample']){
+      const original=WebGL2RenderingContext.prototype[name];
+      WebGL2RenderingContext.prototype[name]=function(...args){counts[name==='texStorage2D'?'textures':'renderbuffers']++;return original.apply(this,args);};
+    }
+  });
+  const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  await page.goto('/',{waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>window.__thesis?.inspect().ready&&document.fonts.status==='loaded',null,{timeout:RESOURCE_WAIT});
+  await pause(page);
+  const canvas=await page.locator('canvas').elementHandle();
+  const capture=()=>page.evaluate(()=>{
+    const scene=window.__thesis.inspect(),story=window.__story.inspect(),stage=document.querySelector('[data-cinematic-stage]');
+    return{counts:{...window.__dockingAllocations},budget:scene.renderBudget,memory:scene.memory,frames:scene.frames,
+      samples:scene.compositor.requestedSamples,placement:story.canvasPlacement,scroll:scrollY,transform:stage.style.transform};
+  });
+  const route=async()=>{
+    const records=[];
+    for(const chapter of ['form','system','pattern']){
+      await centerStudy(page,chapter);records.push(await capture());
+      const start=await page.evaluate(()=>({y:scrollY,travel:Math.min(240,innerHeight*.35)}));
+      // All phone studies share one centered frame. Visit two distinct clipped
+      // positions within each study, rather than counting the same center and
+      // edge repeatedly across three different chapters.
+      for(const fraction of [.5,1]){
+        await page.evaluate(({y,travel,fraction})=>window.scrollTo({top:y+travel*fraction,behavior:'instant'}),{...start,fraction});
+        await settle(page);records.push(await capture());
+      }
+      await centerStudy(page,chapter);records.push(await capture());
+    }
+    return records;
+  };
+  // Warm precisely the source/material route before counting native storage.
+  // Pausing freezes optical time and density relief; scrolling still drives the
+  // actual controller and local Canvas docking, with no diagnostic pose override.
+  await route();
+  const before=await capture(),records=await route(),after=await capture();
+  await test.info().attach('scroll-docking-allocation-records',{body:JSON.stringify({before,records,after}),contentType:'application/json'});
+  for(const value of records){
+    expect(value.counts).toEqual(before.counts);
+    expect(value.budget).toEqual(before.budget);
+    expect(value.samples).toBe(2);
+  }
+  expect(after.frames).toBeGreaterThan(before.frames);
+  expect(after.memory).toEqual(before.memory);
+  expect(new Set(records.map(value=>value.transform)).size).toBeGreaterThan(2);
+  expect(Math.max(...records.map(value=>value.placement.scale))-Math.min(...records.map(value=>value.placement.scale))).toBeGreaterThan(.01);
+  expect(await page.evaluate(element=>document.querySelector('canvas')===element,canvas)).toBe(true);
+  await expect(page.locator('canvas')).toHaveCount(1);expect(errors).toEqual([]);
 });
 
 test('assets completing after synthetic pagehide wait before constructing scene GPU resources', async ({page}) => {

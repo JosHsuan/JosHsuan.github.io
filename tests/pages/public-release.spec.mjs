@@ -1,5 +1,5 @@
 import {test, expect} from '@playwright/test';
-import {WAIT, scenarioTimeout} from './case-helpers.mjs';
+import {WAIT, scenarioTimeout, centerStudy, frames, settle} from './case-helpers.mjs';
 
 test('published story, canonical metadata and every linked asset work without JavaScript', async ({browser}) => {
   const context = await browser.newContext({javaScriptEnabled:false});
@@ -20,11 +20,16 @@ test('public model initializes with base layers and supports chapter navigation 
   const errors=[]; page.on('pageerror', error=>errors.push(error.message));
   await page.goto('/');
   await page.waitForFunction(()=>window.__thesis?.inspect().ready);
+  // The mobile opening surface is naturally below its heading. Exercise the
+  // visible source surface before asserting a completed Full/Light render.
+  await centerStudy(page,'form');
   const initial=await page.evaluate(()=>window.__thesis.inspect());
   expect(initial.source).toMatchObject({vertices:172789,triangles:227521,sourceObjects:51});
   expect(initial.material).toMatchObject({finish:'satin',roughness:.58,anisotropy:.35});
   expect(initial.exhibition).toMatchObject({sourceGeometry:false,areaLights:2,extraShadowMaps:0});
   expect(initial.detail).toBe('full');
+  expect(initial.compositor.requestedSamples).toBe(2);
+  expect(initial.renderSuspended).toBe(false);
   // Verify Full initialization, then exercise native interaction in supported
   // Light mode so software-rendered Full frames do not dominate input timing.
   await page.getByRole('combobox',{name:'Visual detail',exact:true}).selectOption('light');
@@ -33,7 +38,7 @@ test('public model initializes with base layers and supports chapter navigation 
   // Native document input drives one visible reading plane and scene score.
   // Linux software rendering can exceed the default five-second assertion budget.
   await expect(page.locator('[data-chapter-link="system"]')).toHaveAttribute('aria-current', 'location', {timeout:30000});
-  await page.evaluate(()=>{const element=document.getElementById('system');let y=0;for(let n=element;n;n=n.offsetParent)y+=n.offsetTop;scrollTo({top:y+element.offsetHeight*.5-innerHeight*.45,behavior:'instant'});});
+  await centerStudy(page,'system');
   await page.waitForFunction(() => {
     const story = window.__story?.inspect(), scene = window.__thesis?.inspect();
     return story?.settled && story.chapterId === 'system' && scene?.representation?.chapterId === 'system';
@@ -41,9 +46,16 @@ test('public model initializes with base layers and supports chapter navigation 
   expect(await page.evaluate(()=>window.__thesis.inspect().compositor.requestedSamples)).toBe(0);
   expect(await page.evaluate(()=>window.__thesis.inspect().compositor.mist.enabled)).toBe(false);
   await page.locator('[data-chapter-link="make"]').click();
-  await page.waitForFunction(()=>window.__story?.inspect().settled && window.__thesis?.inspect().pose.framingIntent === 'evidence-absence' && !window.__thesis.inspect().sourceVisible,null,{timeout:30000});
+  await settle(page);
+  await page.waitForFunction(()=>{const story=window.__story?.inspect(),scene=window.__thesis?.inspect();return story?.settled&&story.chapterId==='make'&&story.canvasPlacement?.settled&&story.canvasPlacement.visible===false&&scene?.renderSuspended&&!scene.sourceVisible;},null,{timeout:30000});
+  // An absent surface deliberately retains its previous rendered pose. Prove
+  // that the live Canvas is suspended instead of requiring an invisible frame.
+  const resting=await page.evaluate(()=>window.__thesis.inspect().frames);await frames(page,8);
+  expect(await page.evaluate(()=>window.__thesis.inspect().frames)).toBe(resting);
   await page.locator('[data-chapter-link="form"]').click();
-  await page.waitForFunction(()=>window.__story?.inspect().settled && window.__thesis?.inspect().pose.chapter.id === 'form' && window.__thesis.inspect().sourceVisible,null,{timeout:30000});
+  await centerStudy(page,'form');
+  await page.waitForFunction(()=>{const story=window.__story?.inspect(),scene=window.__thesis?.inspect();return story?.settled&&scene?.pose.chapter.id==='form'&&scene.sourceVisible&&!scene.renderSuspended&&scene.canvasPlacement?.visible;},null,{timeout:30000});
+  expect(await page.evaluate(()=>window.__thesis.inspect().frames)).toBeGreaterThan(resting);
   await page.getByRole('button',{name:'Pause motion'}).click();
   await expect(page.getByRole('button',{name:'Resume motion'})).toBeVisible();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);

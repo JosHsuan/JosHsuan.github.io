@@ -4,12 +4,17 @@ import {PerspectiveCamera,Vector3} from 'three';
 import {WAIT,scenarioTimeout,surface,frames,settle,loadScene,centerStudy,hitPoint,pause,expectIdle} from './case-helpers.mjs';
 const catalog=JSON.parse(readFileSync(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/public/assets/thesis/source-diagrams.json',import.meta.url),'utf8'));
 async function fit(page){
- const {pose,representation,width,height}=await page.evaluate(()=>({...window.__thesis.inspect(),width:innerWidth,height:innerHeight}));
+ const {pose,representation,width,height,display,renderSuspended,canvasPlacement}=await page.evaluate(()=>{const canvas=document.querySelector('canvas'),r=canvas.getBoundingClientRect();return {...window.__thesis.inspect(),width:canvas.clientWidth,height:canvas.clientHeight,display:{width:r.width,height:r.height}};});
+ expect(renderSuspended).toBe(false);expect(canvasPlacement.visible).toBe(true);expect(width).toBeGreaterThan(0);expect(height).toBeGreaterThan(0);
+ expect(display.width/display.height).toBeCloseTo(width/height,5);expect(pose.aspect).toBeCloseTo(width/height,5);
+ expect(pose).toMatchObject({compositionSpace:'canvas-local',viewport:{left:.06,top:.06,width:.88,height:.88}});
  const item=catalog.representations.find(x=>x.id===representation.id);expect(item).toBeTruthy();
  expect(representation.vertices).toBe(item.vertices);expect(representation.triangles).toBe(item.triangles);expect(representation.assetRevision).toBe(catalog.revision);
  const camera=new PerspectiveCamera(pose.fov,width/height,pose.near,pose.far);camera.position.fromArray(pose.position);camera.up.fromArray(pose.up);camera.lookAt(...pose.target);camera.setViewOffset(width,height,width*pose.viewOffsetNormalized.x,height*pose.viewOffsetNormalized.y,width,height);camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
  const viewport=pose.viewport,p=new Vector3(),margin=[Infinity,Infinity,Infinity,Infinity];let near=Infinity,far=-Infinity;
- // Every support point is still projected. Assert the six extrema once instead
+ // Projection uses the stable Canvas aspect, not the page viewport. Uniform
+ // DOM scale preserves that aspect and actual pointer mapping. Every support
+ // point is still projected. Assert the six extrema once instead
  // of generating thousands of identical Playwright assertion/trace events.
  for(const v of item.framingSupport.points){p.fromArray(v).project(camera);const x=(p.x+1)/2,y=(1-p.y)/2;const gaps=[(x-viewport.left)/viewport.width,(viewport.left+viewport.width-x)/viewport.width,(y-viewport.top)/viewport.height,(viewport.top+viewport.height-y)/viewport.height];for(let i=0;i<4;i++)margin[i]=Math.min(margin[i],gaps[i]);near=Math.min(near,p.z);far=Math.max(far,p.z);}
  for(const gap of margin)expect(gap).toBeGreaterThanOrEqual(.0299);expect(near).toBeGreaterThan(-1);expect(far).toBeLessThan(1);

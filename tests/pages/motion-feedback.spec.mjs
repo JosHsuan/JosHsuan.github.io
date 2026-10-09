@@ -16,12 +16,12 @@ async function settleClock(page){
   await page.clock.fastForward(500);
   last=await page.evaluate(()=>{
    const story=window.__story.inspect(),scene=window.__thesis.inspect();
-   return {current:Math.abs(story.nativeDocY-scrollY)<.01&&!story.readingPending&&story.settled&&story.inspection.settled,signature:[scrollY,story.visualDocY,document.documentElement.scrollHeight,story.inspection.value.azimuth,story.inspection.value.elevation].join('/'),native:story.nativeDocY,visual:story.visualDocY,frameDelta:story.frameDelta,controllerFrame:story.controllerFrame,renderedControllerFrame:scene.renderedControllerFrame,ready:scene.ready};
+   return {current:Math.abs(story.nativeDocY-scrollY)<.01&&!story.readingPending&&story.settled&&story.inspection.settled&&story.canvasPlacement.settled&&!story.canvasAwaitingPaint,signature:[scrollY,story.visualDocY,document.documentElement.scrollHeight,story.inspection.value.azimuth,story.inspection.value.elevation,story.canvasPlacement.x,story.canvasPlacement.y,story.canvasPlacement.scale].join('/'),native:story.nativeDocY,visual:story.visualDocY,frameDelta:story.frameDelta,controllerFrame:story.controllerFrame,renderedControllerFrame:scene.renderedControllerFrame,ready:scene.ready,renderSuspended:scene.renderSuspended};
   });
   if(!last.current)candidate=null;
   else {
    if(candidate?.signature!==last.signature)candidate={signature:last.signature,frame:last.controllerFrame};
-   if(last.ready&&last.renderedControllerFrame>=candidate.frame)return;
+   if(last.ready&&(last.renderSuspended||last.renderedControllerFrame>=candidate.frame))return;
   }
  }
  throw Error('Controlled controller/render did not settle: '+JSON.stringify(last));
@@ -59,7 +59,7 @@ test('whole reading plane shares model progress, damping, content stops and reve
   // A future pause point avoids a protocol race with Date.now(). pauseAt fires
   // overdue callbacks once. runFor is confined to the 160ms shape sample; the
   // remaining contracts use single-RAF steps, including the actual pause UI.
-  // The built page, native scroll, DOM and Canvas remain active at full size.
+  // The built page, native scroll, DOM and bounded Canvas remain active when visible.
   await page.clock.pauseAt(new Date('2026-01-01T01:00:00Z'));
   const samples=await sampleMoving(page);await settleClock(page);
   const moving=samples.find(s=>s.shift>5&&!s.settled);expect(moving,JSON.stringify({realtimeFrameDelta,samples})).toBeTruthy();expect(Math.abs(moving.velocity)).toBeGreaterThan(1);expect(Number.isFinite(moving.acceleration)).toBe(true);
@@ -71,6 +71,7 @@ test('whole reading plane shares model progress, damping, content stops and reve
   await page.evaluate(y=>scrollTo({top:y,behavior:'instant'}),stop.holdEnd-2);await settleClock(page);
   const after=await page.evaluate(()=>window.__story.inspect());expect(after.nativeDocY).toBeGreaterThan(before.nativeDocY);expect(after.holdId).toBe(before.holdId);expect(after.holdWeight).toBeGreaterThan(.99);expect(Math.abs(after.stops.find(item=>item.id===stop.id).y-stop.y),'Autonomous content must not move the authored reading stop.').toBeLessThan(.1);expect(Math.abs(after.visualDocY-before.visualDocY)).toBeLessThan(.1);
   for(const id of ['pattern','make','system']){await phase(page,id,.5,settleClock);expect(await page.evaluate(original=>document.querySelector('canvas')===original,canvas)).toBe(true);}
+  await page.locator('[data-model-viewport][data-study-chapter="system"]').evaluate(el=>{let y=0;for(let n=el;n;n=n.offsetParent)y+=n.offsetTop;scrollTo({top:y-Math.max(112,(innerHeight-el.offsetHeight)*.34),behavior:"instant"});});await settleClock(page);
   const snapshot=()=>page.evaluate(()=>{const story=window.__story.inspect(),scene=window.__thesis.inspect();return {time:story.playback.activeSeconds,field:scene.compositor.field.time,pose:scene.pose.position,frames:scene.frames};});
   const autonomousBefore=await snapshot();for(let step=0;step<3;step++)await page.clock.fastForward(500);const autonomousAfter=await snapshot();
   expect(autonomousAfter.time).toBeGreaterThan(autonomousBefore.time);expect(autonomousAfter.field).toBeGreaterThan(autonomousBefore.field);expect(autonomousAfter.pose).not.toEqual(autonomousBefore.pose);expect(autonomousAfter.frames).toBeGreaterThan(autonomousBefore.frames);

@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-import {WAIT,scenarioTimeout,loadScene,settle,frames,pause} from './case-helpers.mjs';
+import {WAIT,scenarioTimeout,loadScene,settle,frames,pause,centerStudy} from './case-helpers.mjs';
 import {renderedTextContrast} from './reading-contrast.mjs';
 
 test('IBM Plex, rounded shadowboxes and orange photos retain an accessible original',async({page,isMobile})=>{
@@ -25,7 +25,8 @@ test('original SVG paths support accessible curve and workflow selections with s
 });
 
 test('zero-wheel chapter loops advance field and diagram selections while Pause holds the shared clock',async({page})=>{
- test.setTimeout(scenarioTimeout(180000));await page.clock.install({time:new Date('2026-01-01T00:00:00Z')});await loadScene(page);await page.locator('[data-chapter-link="system"]').click();await settle(page);await page.mouse.move(10,130);await frames(page,4);
+ test.setTimeout(scenarioTimeout(180000));await page.clock.install({time:new Date('2026-01-01T00:00:00Z')});await loadScene(page);await page.locator('[data-chapter-link="system"]').click();await centerStudy(page,'system');await page.mouse.move(10,130);await frames(page,4);
+ expect(await page.evaluate(()=>({visible:window.__story.inspect().canvasPlacement.visible,suspended:window.__thesis.inspect().renderSuspended}))).toEqual({visible:true,suspended:false});
  // Fixed sub-stale intervals verify autonomous behavior even when one software
  // GPU frame takes more than a real second. The actual DOM and Canvas still run.
  let first,second;
@@ -38,13 +39,48 @@ test('zero-wheel chapter loops advance field and diagram selections while Pause 
   for(let i=0;i<24;i++){await page.clock.fastForward(500);second=await sample();if(second.selection&&second.selection!==first.selection)break;}
  }finally{await page.clock.resume();}
  expect(second.y).toBe(first.y);expect(second.time).toBeGreaterThan(first.time);expect(second.field).toBeGreaterThan(first.field);expect(second.selection).toBeTruthy();expect(second.selection).not.toBe(first.selection);expect(second.layering).toMatchObject({position:'rear',semanticMask:false});
- const workflow=page.locator('[data-source-diagram="workflow"]');await workflow.locator('button[data-diagram-index="2"]').click();await settle(page);expect(await page.evaluate(()=>window.__story.inspect().sourceSelection?.chapterId)).toBe('system');
+ const workflow=page.locator('[data-source-diagram="workflow"]'),choice=workflow.locator('button[data-diagram-index="2"]');
+ // The SVG controls sit below the source surface. Finish their native focus
+ // relocation and the reading response before the real pointer click, rather
+ // than clicking while Playwright's autoscroll and the document are settling.
+ await choice.focus();await settle(page);await choice.click();await settle(page);
+ await expect(choice).toHaveAttribute('aria-pressed','true');
+ expect(await page.evaluate(()=>window.__story.inspect().sourceSelection)).toMatchObject({chapterId:'system',index:2});
  await page.getByRole('button',{name:'Pause motion',exact:true}).click();await settle(page);const frozen=await page.evaluate(()=>window.__story.inspect().playback.activeSeconds);await frames(page,10);expect(await page.evaluate(()=>window.__story.inspect().playback.activeSeconds)).toBe(frozen);
+});
+
+test('visible workflow follows the shared clock while the absent Canvas renders zero frames',async({page})=>{
+ test.setTimeout(scenarioTimeout(150000));
+ // Desktop intentionally keeps the source sticky beside this SVG. Use the
+ // narrow stacked layout to exercise the real source-offscreen reading state.
+ await page.setViewportSize({width:390,height:844});await page.clock.install({time:new Date('2026-01-01T00:00:00Z')});await loadScene(page);await centerStudy(page,'system');
+ const workflow=page.locator('[data-source-diagram="workflow"]'),svg=workflow.locator('svg');
+ await expect(workflow).toHaveAttribute('data-source-presented','true');
+ await svg.scrollIntoViewIfNeeded();await settle(page);
+ await svg.evaluate(el=>{const r=el.getBoundingClientRect();scrollBy({top:r.top+r.height/2-innerHeight/2,behavior:'instant'});});await settle(page);await page.mouse.move(10,130);
+ await page.waitForFunction(()=>window.__story.inspect().canvasPlacement?.visible===false&&window.__thesis.inspect().renderSuspended,null,{timeout:WAIT});
+ await expect(svg).toBeInViewport();await expect(workflow).not.toHaveAttribute('data-source-presented','true');
+ const sample=()=>page.evaluate(()=>{const root=document.querySelector('[data-source-diagram="workflow"]'),scene=window.__thesis.inspect(),story=window.__story.inspect();return {time:story.playback.activeSeconds,frames:scene.frames,visible:story.canvasPlacement.visible,suspended:scene.renderSuspended,selection:root.dataset.diagramSelection,index:Number(root.dataset.autonomousIndex),pressed:Number(root.querySelector('button[aria-pressed="true"]').dataset.diagramIndex),y:scrollY};});
+ let first,second;
+ try{
+  await page.clock.pauseAt(new Date('2026-01-01T01:00:00Z'));first=await sample();
+  for(let i=0;i<24;i++){
+   await page.clock.fastForward(500);second=await sample();
+   expect(second.frames).toBe(first.frames);expect(second.visible).toBe(false);expect(second.suspended).toBe(true);expect(second.y).toBe(first.y);
+   expect(second.selection).toBe(['origami','opening','bending','colours'][second.index]);expect(second.pressed).toBe(second.index);
+   if(second.selection!==first.selection)break;
+  }
+ }finally{await page.clock.resume();}
+ expect(second.time).toBeGreaterThan(first.time);expect(second.selection).not.toBe(first.selection);await expect(svg).toBeInViewport();
+ // Returning to the source again follows the actual rendered representation.
+ await centerStudy(page,'system');await expect(workflow).toHaveAttribute('data-source-presented','true');
+ expect(await page.evaluate(()=>{const scene=window.__thesis.inspect();return document.querySelector('[data-source-diagram="workflow"]').dataset.diagramSelection===['origami','opening','bending','colours'][scene.representation.index];})).toBe(true);
 });
 
 
 test('rear scene keeps reading surfaces legible over actual, white and black backdrops',async({page})=>{
- test.setTimeout(scenarioTimeout(180000));await loadScene(page);await page.getByRole('combobox',{name:'Visual detail',exact:true}).selectOption('full');await settle(page);await pause(page);
+ test.setTimeout(scenarioTimeout(180000));await loadScene(page);await centerStudy(page,'system');await page.getByRole('combobox',{name:'Visual detail',exact:true}).selectOption('full');await settle(page);await pause(page);
+ expect(await page.evaluate(()=>({detail:window.__thesis.inspect().detail,samples:window.__thesis.inspect().compositor.requestedSamples,mist:window.__thesis.inspect().compositor.mist.enabled,suspended:window.__thesis.inspect().renderSuspended}))).toEqual({detail:'full',samples:2,mist:true,suspended:false});
  const layers=await page.evaluate(()=>({canvases:document.querySelectorAll('canvas').length,stage:Number(getComputedStyle(document.querySelector('[data-cinematic-stage]')).zIndex),reading:Number(getComputedStyle(document.querySelector('[data-reading-frame]')).zIndex),scrim:!!document.querySelector('[data-cinematic-scrim]'),rects:window.__thesis.inspect().protectedRects,layering:window.__thesis.inspect().compositor.layering}));
  expect(layers.canvases).toBe(1);expect(layers.stage).toBeLessThan(layers.reading);expect(layers.scrim).toBe(false);expect(layers.rects).toBeUndefined();expect(layers.layering).toMatchObject({position:'rear',semanticMask:false});
  for(const selector of ['#overview h1','#system [data-editorial-copy]:first-of-type','[data-source-diagram="workflow"] figcaption','[data-model-study][data-study-chapter="system"] footer']){

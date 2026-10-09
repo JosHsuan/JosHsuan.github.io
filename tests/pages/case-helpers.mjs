@@ -11,15 +11,15 @@ export async function settle(page){
   const timer=setTimeout(()=>{cancelAnimationFrame(raf);reject(Error('Controller/render did not settle: '+JSON.stringify(last)));},timeout);
   const sample=()=>{
    const story=window.__story?.inspect(),scene=window.__thesis?.inspect();
-   last={native:story?.nativeDocY,scroll:scrollY,settled:story?.settled,inspectionSettled:story?.inspection?.settled,pending:story?.readingPending,controllerFrame:story?.controllerFrame,renderedControllerFrame:scene?.renderedControllerFrame,frameDelta:story?.frameDelta};
-   const current=story&&Math.abs(story.nativeDocY-scrollY)<.01&&!story.readingPending&&story.settled&&story.inspection.settled;
+   last={native:story?.nativeDocY,scroll:scrollY,settled:story?.settled,inspectionSettled:story?.inspection?.settled,canvasSettled:story?.canvasPlacement?.settled,canvasVisible:story?.canvasPlacement?.visible,pending:story?.readingPending,controllerFrame:story?.controllerFrame,renderedControllerFrame:scene?.renderedControllerFrame,frameDelta:story?.frameDelta};
+   const current=story&&Math.abs(story.nativeDocY-scrollY)<.01&&!story.readingPending&&story.settled&&story.inspection.settled&&story.canvasPlacement?.settled!==false&&!story.canvasAwaitingPaint;
    if(!current)candidate=null;
    else {
-    const signature=[scrollY,story.visualDocY,document.documentElement.scrollHeight,story.inspection.value.azimuth,story.inspection.value.elevation].join('/');
+    const signature=[scrollY,story.visualDocY,document.documentElement.scrollHeight,story.inspection.value.azimuth,story.inspection.value.elevation,story.canvasPlacement?.x,story.canvasPlacement?.y,story.canvasPlacement?.scale].join('/');
     if(candidate?.signature!==signature)candidate={signature,frame:story.controllerFrame};
     // Wait for the actual render of this settled controller state, rather than
     // six arbitrary RAFs. Static/no-WebGL content has no renderer to await.
-    if(!scene?.ready||scene.renderedControllerFrame>=candidate.frame){clearTimeout(timer);resolve();return;}
+    if(!scene?.ready||story.canvasPlacement?.visible===false||scene.renderedControllerFrame>=candidate.frame){clearTimeout(timer);resolve();return;}
    }
    raf=requestAnimationFrame(sample);
   };
