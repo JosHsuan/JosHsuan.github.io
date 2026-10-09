@@ -4,7 +4,7 @@ This repository contains the reusable empty Next.js portfolio framework and the 
 
 Build the published home page with `pnpm build:pages` and verify it with `pnpm test:pages`. Output is `.pages-workspace/out/`, previewed at `http://127.0.0.1:4186/`. The canonical public URL is `https://joshsuan.github.io/`. Earlier local-review sections below preserve research history; they do not revoke the explicit publication request.
 
-Current [Round 09](roles/uiux-designer/cases/bending-active-thesis/ROUND_09_VERIFICATION.md) implements a bounded Canvas that moves with reading and chapter transitions. One retained scene composes locally; moving the surface does not resize its backing storage, and absent chapters stop GPU submissions. The approved materials, lighting, source geometry and information layers remain. [Decision 0007](docs/decisions/0007-moving-thesis-canvas.md) records this placement change. Actual affected-iPhone stability remains unverified. The published case is maintained separately from the empty framework.
+Current [Round 10](roles/uiux-designer/cases/bending-active-thesis/ROUND_10_VERIFICATION.md) restores the Round 08 viewport composition with borderless chapter holds and an independent full-page ASCII layer. Scene and information triggers are separate; one controller supplies their shared clock. Mobile attachment budgets and interrupted-session recovery address sustained-rendering risk without shrinking the scene into a card. [Decision 0008](docs/decisions/0008-viewport-thesis-holds.md) supersedes Round 09 placement. Physical iPhone crash resolution remains unverified.
 
 ## Source authority and language
 

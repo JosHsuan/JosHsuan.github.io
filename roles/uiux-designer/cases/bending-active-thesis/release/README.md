@@ -16,7 +16,11 @@ The canonical site is `https://joshsuan.github.io/`. `/release.json` identifies 
 
 Full source geometry and existing fallback/quality controls are retained. Model/HDR transfer and triangle counts still exceed earlier mobile/source budgets. Physical phone performance is not certified. Original source attribution and year uncertainty remain visible; publication does not fabricate missing credits or engineering evidence.
 
-## Round 09 — moving contained Canvas, 9 October 2026
+## Round 10 — viewport holds and independent ASCII, 9 October 2026
+
+The public case restores the earlier viewport composition, separate scene/information triggers and a borderless held scene. A bounded 2D decorative layer keeps ASCII visible across the page, sharing the existing clock. Touch/iOS rendering reduces attachment cost and preserves a manual recovery path after a known failure or recent interrupted session. All 36 asset hashes and story bytes remain unchanged. See [Round 10 verification](../ROUND_10_VERIFICATION.md); physical iPhone crash resolution remains unverified.
+
+## Historical Round 09 — moving contained Canvas, 9 October 2026
 
 The public scene now uses a bounded surface that travels with reading and chapter transitions. Scroll-only transforms leave its backing allocations unchanged; the source camera fits locally, and absent chapters submit no scene frames. The workflow diagram continues with the existing chapter clock while its source Canvas is absent. All 36 asset checksums and story bytes remain unchanged. [Round 09 verification](../ROUND_09_VERIFICATION.md) records functional, visual and matched performance evidence; physical iPhone stability remains unverified.
 

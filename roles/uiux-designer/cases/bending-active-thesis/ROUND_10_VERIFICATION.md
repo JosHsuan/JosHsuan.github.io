@@ -1,0 +1,48 @@
+# Round 10 — Restored viewport composition and independent chapter holds
+
+Date: 9 October 2026. Visual reference: Round 08 `ed598100a3149f328a7906bca3b01e1a807d0a4c`. Starting software revision: Round 09 `d9607503aa5e61b4ca6c12c6d222abd8d225de55`.
+
+## Owner request and evidence
+
+The owner rejected the small framed Round 09 presentation and requested the earlier cinematic scale, independently triggered scene and information layers, chapter-long screen holds, boundary transitions, independent page-wide ASCII, cross-role discussion and another categorized commit/push/Pages release. [Decision 0008](../../../../docs/decisions/0008-viewport-thesis-holds.md) supersedes Round 09's visible card and information-anchor docking.
+
+The owner also supplied Safari repeated-page-failure screenshots and identified an iPhone 14 Pro Max that fails after the site has been open for a while. The iOS version and failure log remain unknown. This work addresses specific sustained-rendering risks; it does not claim a reproduced or conclusively fixed whole-process crash.
+
+Three delegated reviewers covered all twelve existing professional roles and exchanged critique. Their [direction](../../../experience-director/research/ROUND_10_DIRECTION.md), [scene review](../../../3d-artist/research/ROUND_10_SCENE_DIRECTION.md) and [runtime review](../../../software-architect/research/ROUND_10_RUNTIME_REVIEW.md) distinguish source constraints, actual visual evidence, implementation decisions and physical-device limits.
+
+## Implemented behavior
+
+- A borderless, viewport-sized scene restores the original opening/closing camera and uses fixed authored source regions. Exact source support retains its 3% fitting margin; information rectangles no longer shrink or crop the scene.
+- Independent scene and information probes share one controller clock. The scene holds exactly at x=0/y=0/scale=1 through its chapter interval, then translates/fades at entry and exit. Native information scrolling, source diagrams, accessibility and navigation retain their own semantics.
+- One bounded 2D page field retains the analytic glyphs, contour evolution and pointer response. It remains visible above the scene and below readable HTML while MAKE/VALIDATION stop GL submissions. Reviewed display copper `#e07b3b` at gain 0.65 restores the earlier orange field without overpowering source detail. GL retains genuine scene-radiance/depth response; the independent overlay does not claim depth attenuation.
+- Exact visible mesh hits work through delegated input; keyboard controls remain in document flow. Engagement completes a pending requested chapter before freezing, and an unacknowledged/hidden scene cannot receive hits. Native focus loss releases keyboard ownership without cancelling a pointer press on visible geometry outside the old document control.
+- Touch/iOS Full/Light caps are 520k/360k pixels, zero MSAA and 512px contact shadows. Full materials, lights and mist remain. Drawing height stays stable through same-width browser-chrome changes. There is one retained GL context, no capability-probe context, and no second animation scheduler.
+- Known scene failure remains manual for the tab session; a recent unfinished lease also suppresses automatic startup. Explicit activation remains available after reload. Ordinary reading survives unavailable storage, model/context failure and optional 2D allocation/drawing failure.
+
+All 36 approved assets and the story bytes remain unchanged. The public build has no private-drive dependency. The empty framework, generated entries and unrelated private materials remain separate.
+
+## Verification
+
+The exact Round 08 `static-export-pages` CI artifact was downloaded and its ZIP SHA-256 verified as `2f402215af8651a2e1e4f580189b677fada11447035cc3ecda9375098f865990`; its `/release.json` identifies `ed59810`. Reference and candidate are served locally to avoid public-versus-local transfer differences in visual comparison.
+
+Initial screenshots exposed a WebKit capture artifact: the screenshot could show the preceding presentation surface even though the renderer diagnostics described the current source. Re-publishing the same state inside RAF and waiting two presentation frames produced the correct source. Those synchronized captures, rather than stale screenshots, establish visual comparison. The restored overview again deliberately extends beyond the screen. Source camera support calculations remain independent evidence from raster presentation.
+
+The portable suite passes 177 tests, with two conditional browser fixtures skipped. It includes 270 new viewport-support configurations (minimum margin 3.007406%), 15 complete ending-shot configurations, historical 825 exact-public-vertex configurations and 300 local-camera regression configurations. A final cadence regression verifies that accelerated chapter animation cannot bypass the field's wall-time ceiling: 61 controller samples over one second produce 31 draws at both normal and 2.4x animation speed. The controller supplies its existing RAF timestamp; the layer creates no clock or scheduler. The actual optical GPU fixture passes all six tests separately in Chromium and WebKit, including real depth focus, black-mist radiance/alpha, source-only glyph response and bounded resource changes. `pnpm check` passes, including the unchanged 63-file empty-framework audit. The public export audit passes with 80 files and 36 approved assets.
+
+The initial full local Pages run passed 88 of 90 scenarios. One WebKit idle assertion sampled before the final queued renderer frame; its corrected helper now waits for the latest controller acknowledgment and an empty renderer queue while retaining exact zero-frame/time/field-draw assertions. One mobile test still expected desktop MSAA 2 and was corrected to the explicit touch policy 0. A subsequent 33-case focused run exposed native blur cancelling real out-of-slot source clicks in Chromium and mobile Chromium; that ownership bug was fixed. The final affected interaction run passes all 21 scenarios across Chromium, WebKit and mobile Chromium, including a real mesh hit at least six CSS pixels outside the old slot, pending-chapter keyboard engagement, invisible-hit rejection, holds, reversals, touch pan and zero-work pause.
+
+Final responsive checks pass six further browser scenarios across those engines. They cycle all 11 source variants at 820×1180 and project their original support through the actual camera, requiring the source-fit margin and four CSS pixels clear of the reading card and permanent rail. They also verify that all seven navigation links remain fully visible, reachable and at least 44×44px after a phone rotates to 844×390, then activate CREDITS through the last link.
+
+Twenty final synchronized captures cover OVERVIEW, FORM, SYSTEM, PATTERN and MAKE at 1440×1000, 820×1180, 430×932 and 932×430. Cross-role pixel review accepts the restored opening crop, complete source studies, restrained copper field and deliberate evidence-phase absence. That review caught and corrected the portrait-tablet aperture mismatch and the short-landscape rail clipping; mathematical fitting alone had not detected either layout error. Same-SHA CI remains the full publication gate.
+
+A 229.4-second Windows headless WebKit 26.6 run uses a 430×932 touch viewport at device DPR 3, default Full, real elapsed time and the built public artifact. It completes three seven-chapter cycles, sustained opening playback, a ten-second pause and fifteen seconds of MAKE absence with no page errors or crashes. Exactly one WebGL Canvas is created, and MSAA stays zero. After source/shader warmup, counts plateau at 14 uploaded geometries, 11 textures and 10 programs; the final cycle and subsequent holds add no storage allocations. The page field allocates its 400,760-pixel backing and atlas once.
+
+The slow headless environment activates the existing pressure response: the drawing surface moves from 518,829 to 129,320 pixels at the 0.5 density floor, while the CSS composition remains full-size. Estimated compositor attachments fall from 6,839,292 to 1,771,504 bytes. The measured opening hold delivers 277 frames over 30.012 seconds (9.23 fps), so this is resource/lifecycle evidence, not proof of smooth physical-phone playback. The ten-second pause adds exactly zero controller, GL or field frames and zero active time. During the fifteen-second absent scene, GL remains at frame 1,144 while the independent field advances by 81 draws. This validates separation and inactivity without claiming a physical Safari diagnosis.
+
+Private raw captures, optical fixtures, browser traces, profiles and publication records are under `D:/JosHsuan_Website/_work/bending-active-thesis/round-10/verification`. They are evidence outputs, not build inputs.
+
+## Limits and publication
+
+Attachment estimates exclude source buffers, PMREM, browser surfaces, decoded images and driver/process overhead. Stable resource counts do not prove absence of a driver leak. Windows Playwright WebKit and synthetic lifecycle/context-loss signals do not certify physical iPhone operation. A sustained check on the owner's iPhone 14 Pro Max remains necessary before claiming the reported Safari failure is resolved.
+
+The authorized release requires categorized commits, a push with all five CI jobs successful at the same SHA, deployment of that run's tested Pages artifact without rebuilding, and a live release/asset check. Exact run IDs and release SHA belong in the private publication record and final task report rather than a self-referential commit in this document.
