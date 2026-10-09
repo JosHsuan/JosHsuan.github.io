@@ -4,7 +4,7 @@ This repository contains the reusable empty Next.js portfolio framework and the 
 
 Build the published home page with `pnpm build:pages` and verify it with `pnpm test:pages`. Output is `.pages-workspace/out/`, previewed at `http://127.0.0.1:4186/`. The canonical public URL is `https://joshsuan.github.io/`. Earlier local-review sections below preserve research history; they do not revoke the explicit publication request.
 
-Current [Round 08](roles/uiux-designer/cases/bending-active-thesis/ROUND_08_VERIFICATION.md) addresses touch-browser viewport allocation churn after the owner confirmed desktop browsing works but Safari still sometimes crashes. It preserves the Round 07 material/motion direction and desktop sizing. Actual affected-device stability remains an open verification requirement. The published case is maintained separately from the empty framework.
+Current [Round 09](roles/uiux-designer/cases/bending-active-thesis/ROUND_09_VERIFICATION.md) implements a bounded Canvas that moves with reading and chapter transitions. One retained scene composes locally; moving the surface does not resize its backing storage, and absent chapters stop GPU submissions. The approved materials, lighting, source geometry and information layers remain. [Decision 0007](docs/decisions/0007-moving-thesis-canvas.md) records this placement change. Actual affected-iPhone stability remains unverified. The published case is maintained separately from the empty framework.
 
 ## Source authority and language
 

@@ -1,12 +1,14 @@
 # Bending-Active Thesis — cinematic case
 
+**Current Round 09 — 9 October 2026:** One bounded Canvas moves through chapter anchors using translation and uniform scale, while the camera composes inside a fixed local aperture. Source chapters retain direct interaction; MAKE/VALIDATION let the renderer rest while visible information follows the shared clock. The existing materials, lights, optics, geometry and 36 approved assets remain. See [Round 09 verification](ROUND_09_VERIFICATION.md) and [decision 0007](../../../../docs/decisions/0007-moving-thesis-canvas.md) for measured performance, review and device limits.
+
 **Round 08 mobile follow-up — 9 October 2026:** The owner reports desktop success and less frequent but continuing Safari crashes. Touch-browser drawing height is now stable across browser-chrome changes, with source fitting normalized to the actual Canvas and clipped to the visible reading area. Full effects and desktop sizing remain intact. See [Round 08 verification](ROUND_08_VERIFICATION.md); physical-device resolution remains unverified.
 
 **Public release follow-up — 8 October 2026:** The owner now authorized GitHub Pages publication. The [public release package](release/README.md) supplies a reproducible, explicitly enumerated public build, separate from the historical local inputs described below. The canonical website is `https://joshsuan.github.io/`; use `pnpm build:pages` and `pnpm test:pages` from the repository root. The current camera no longer imports the private legacy shell hull. All previous verification remains dated evidence for that revision; public-release tests validate the publication artifact separately.
 
 Open [the local work page](http://127.0.0.1:4184/). It presents **Bending-Active Metal Panel Deformation**, the NCKU metal-panel thesis, separately from the later T3 bamboo project. The same case now also has an owner-authorized public release; the reusable portfolio framework and content arrays remain empty.
 
-## Current round 07 — bounded rendering and clear reading layers
+## Round 07 — historical bounded rendering and clear reading layers
 
 The single Canvas stays behind the document. Rounded graphite reading surfaces own contrast; shared chapter-light color and thin pointer-responsive rims connect them to the scene. Full-page foreground masks and GPU semantic cutouts are removed. Clear source apertures retain the actual models and their direct interaction. The existing materials, source geometry, camera/light score, entrances, black-mist diffusion and autonomous ASCII field remain.
 

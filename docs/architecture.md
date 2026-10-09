@@ -8,7 +8,7 @@
 |---|---|
 | Owner | JosHsuan Chao |
 | Audience | The owner, collaborating developers, and coding agents |
-| Revision | **2.5 — 8 October 2026; explicit Bending-Active public release and Pages artifact pipeline** |
+| Revision | **2.6 — 9 October 2026; moving contained Canvas for the public Bending-Active case** |
 | Language | English for project documentation and future website content; Traditional Chinese for discussion with the owner |
 | Scope | Portfolio, Research & Development, About/CV, Contact, and selected interactive project stories |
 | Delivery baseline | Next.js static export to GitHub Pages; no paid domain, paid storage, or continuously running backend required for the initial release |
@@ -19,6 +19,8 @@
 | Materials preparation root | `D:\JosHsuan_Website\_private\portfolio-preparation` — designated source for all project, CV, and content preparation |
 
 ## Executive decision
+
+**Moving contained Canvas — 9 October 2026:** The owner approves the visual direction and requests lower rendering load through a Canvas that participates in scrolling and chapter transitions. [Decision 0007](decisions/0007-moving-thesis-canvas.md) supersedes permanent fullscreen placement for this case: the existing controller moves one bounded surface by translation and uniform scale; the camera fits source geometry in local coordinates. Scroll transforms preserve backing dimensions, absent chapters stop GPU submissions, and information layers retain the shared chapter clock. [Round 09 verification](../roles/uiux-designer/cases/bending-active-thesis/ROUND_09_VERIFICATION.md) records measured results and physical-device limits. The authorized same-commit Pages publication gate is unchanged.
 
 **Public thesis release — 8 October 2026:** The owner made the repository public and requested commits, push and GitHub Pages deployment. [Decision 0006](decisions/0006-public-thesis-pages.md) authorizes the completed Bending-Active presentation and required prepared derivatives. A checked-in release allowlist supplies a clean `.pages-workspace/out/` build, with no private-drive or ignored-input dependency. CI validates this public case separately from the unchanged empty framework; the manual deployment consumes its successful same-commit artifact. Earlier local-only restrictions below are historical for this selected release; unrelated materials remain private. The immersive background behavior is retained for this presentation with its documented fallbacks and performance limits.
 
