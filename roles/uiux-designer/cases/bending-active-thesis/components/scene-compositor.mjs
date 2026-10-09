@@ -51,6 +51,7 @@ uniform float fieldTime;
 uniform float fieldWeight;
 uniform float fieldSceneMix;
 uniform float fieldSurfaceGain;
+uniform float fieldSourceOnly;
 uniform vec2 fieldFlow;
 uniform vec4 fieldEnvelope;
 uniform vec2 fieldPointer;
@@ -147,7 +148,11 @@ void main(){
     // This is scene coverage (including the floor), not a fabricated object ID.
     float surfaceLuminance=max(0.0,dot(base.rgb,vec3(0.2126,0.7152,0.0722)));
     float surfaceCoverage=step(rawSceneDepth,0.999999)*base.a*smoothstep(0.015,0.10,surfaceLuminance);
-    float layerAlpha=fieldWeight*ink*grainPresence*fieldCoverage(vUv)*mix(1.0,fieldSurfaceGain,surfaceCoverage);
+    // A separate page field may own independent contour pixels. In that mode this
+    // pass adds only radiance-derived glyphs on actual scene coverage; it never
+    // paints an independent contour into the transparent presentation surface.
+    float coverageGain=fieldSourceOnly>0.5?surfaceCoverage*fieldSurfaceGain:mix(1.0,fieldSurfaceGain,surfaceCoverage);
+    float layerAlpha=fieldWeight*ink*grainPresence*fieldCoverage(vUv)*coverageGain;
     vec3 sourceInk=asciiTint*(0.55+0.45*density);
     vec3 boundedColor=clamp(color,0.0,1.0);
     vec3 screenBlend=boundedColor+(1.0-boundedColor)*sourceInk;
@@ -174,6 +179,7 @@ uniform vec2 cssResolution;
 uniform float cellPx;
 uniform float fieldTime;
 uniform float fieldSceneMix;
+uniform float fieldSourceOnly;
 uniform vec2 fieldFlow;
 uniform vec4 fieldEnvelope;
 uniform vec2 fieldPointer;
@@ -198,7 +204,7 @@ void main(){
   float luminance=max(0.0,dot(source.rgb,vec3(0.2126,0.7152,0.0722)));
   float sourceDensity=pow(luminance/(1.0+luminance),0.45);
   float subject=step(rawDepth,0.999999)*source.a;
-  float density=mix(evolvingField(uv),sourceDensity,fieldSceneMix*subject);
+  float density=fieldSourceOnly>0.5?sourceDensity:mix(evolvingField(uv),sourceDensity,fieldSceneMix*subject);
   gl_FragColor=vec4(min(6.0,floor(sourceDensity*7.0)),subject*step(0.01,luminance),min(6.0,floor(density*7.0)),density);
 }`;
 
@@ -217,7 +223,7 @@ export function createSceneCompositor(gl) {
     mistColor: {value: mistB.texture}, mistStrength: {value: 0},
     nearPlane: {value: .01}, farPlane: {value: 100}, focusDistance: {value: 4}, aperture: {value: 0}, maxBlur: {value: 0},
     asciiWeight: {value: 0}, cellPx: {value: 11}, asciiTint: {value: new T.Vector3(.38, .75, .69)}, blendMode: {value: 1}, veil: {value: 0},
-    fieldTime: {value: 0}, fieldWeight: {value: 0}, fieldSceneMix: {value: .4}, fieldSurfaceGain: {value: .24}, fieldFlow: {value: new T.Vector2(.035, -.018)},
+    fieldTime: {value: 0}, fieldWeight: {value: 0}, fieldSceneMix: {value: .4}, fieldSurfaceGain: {value: .24}, fieldSourceOnly:{value:0}, fieldFlow: {value: new T.Vector2(.035, -.018)},
     fieldEnvelope: {value: new T.Vector4(.65, .5, .5, .6)}, fieldPointer: {value: new T.Vector2(.5, .5)}, fieldPointerStrength: {value: 0},
     fieldBlendMix: {value: new T.Vector4(0, 0, 1, 0)},
     cellData:{value:cellTarget.texture},cellResolution:{value:new T.Vector2(1,1)},fieldDrift:{value:new T.Vector2()},
@@ -233,7 +239,7 @@ export function createSceneCompositor(gl) {
     // Optional caller-owned per-frame values; render score/overrides take priority.
     // No timer, frame scheduling or shader recompilation is owned here.
     setFrame(controls = {}) {if (disposed) throw new Error('Compositor already disposed.'); frameControls = {...controls};},
-    render(scene, camera, score, {width, height, dpr = 1, requestedDpr = dpr, samples = 2}) {
+    render(scene, camera, score, {width, height, dpr = 1, requestedDpr = dpr, samples = 2, independentField = false}) {
       if (disposed) throw new Error('Compositor already disposed.');
       if (!(width > 0 && height > 0)) return;
       if (gl.capabilities.reversedDepthBuffer || gl.capabilities.logarithmicDepthBuffer || camera.isOrthographicCamera) throw new Error('This optical pass requires ordinary perspective depth.');
@@ -261,7 +267,10 @@ export function createSceneCompositor(gl) {
       uniforms.veil.value = clamp(controls.veil, 0, .65);
       const vector = (value, fallback, count) => Array.isArray(value) && value.length === count && value.every(Number.isFinite) ? value : fallback;
       uniforms.fieldTime.value = clamp(controls.fieldTime, 0, 1000000);
-      uniforms.fieldDrift.value.set(.28*Math.sin(uniforms.fieldTime.value*.19),.65*Math.sin(uniforms.fieldTime.value*.13));
+      uniforms.fieldSourceOnly.value = Number(independentField);
+      // The independent layer owns decorative field time and pointer flow.
+      // Source response evolves through real source/camera/light changes only.
+      uniforms.fieldDrift.value.set(independentField?0:.28*Math.sin(uniforms.fieldTime.value*.19),independentField?0:.65*Math.sin(uniforms.fieldTime.value*.13));
       uniforms.fieldWeight.value = clamp(controls.fieldWeight, 0, .65);
       uniforms.fieldSceneMix.value = clamp(controls.fieldSceneMix ?? .4);
       uniforms.fieldSurfaceGain.value = clamp(controls.fieldSurfaceGain ?? .24);
@@ -309,8 +318,8 @@ export function createSceneCompositor(gl) {
         requestedDpr, opticalDensityScale, backgroundDefocus:'preserve full gather, including opaque-background MSAA fringe diffusion', focusDistanceM: uniforms.focusDistance.value, apertureScale: uniforms.aperture.value, maxBlurPx: uniforms.maxBlur.value,
         asciiWeight: uniforms.asciiWeight.value, asciiCellPx: uniforms.cellPx.value, asciiBlend: uniforms.blendMode.value ? 'screen-limited' : 'normal',
         asciiSource: 'pre-DOF rendered scene luminance and depth; includes source base and scene ground', veil: uniforms.veil.value,
-        field: {weight: uniforms.fieldWeight.value, time: uniforms.fieldTime.value, sceneMix: uniforms.fieldSceneMix.value, surfaceGain: uniforms.fieldSurfaceGain.value, pointerStrength: uniforms.fieldPointerStrength.value, blendMix: uniforms.fieldBlendMix.value.toArray(), source: 'authored evolving contours/ribbons plus scene luminance/depth; not analysis data', extraPasses: Number(cellsEnabled), cellResolution:cellsEnabled?[cellTarget.width,cellTarget.height]:null, sampling:'one radiance/depth/contour calculation per CSS glyph cell; integer glyph levels in RGBA16F'},
-        layering: {position:'rear', semanticMask:false, readingOwner:'DOM reading planes'}, retainedMistBytes:mistAllocated?mistA.width*mistA.height*16:0};
+        field: {weight: uniforms.fieldWeight.value, time: uniforms.fieldTime.value, sceneMix: independentField?1:uniforms.fieldSceneMix.value, surfaceGain: uniforms.fieldSurfaceGain.value, pointerStrength: independentField?0:uniforms.fieldPointerStrength.value, blendMix: uniforms.fieldBlendMix.value.toArray(), mode:independentField?'source-only':'combined', source: independentField?'rendered scene luminance/depth on actual scene coverage; independent decorative page field composed separately':'authored evolving contours/ribbons plus scene luminance/depth; not analysis data', extraPasses: Number(cellsEnabled), cellResolution:cellsEnabled?[cellTarget.width,cellTarget.height]:null, sampling:independentField?'one radiance/depth calculation per CSS glyph cell; no independent contour':'one radiance/depth/contour calculation per CSS glyph cell; integer glyph levels in RGBA16F'},
+        layering: {position:'rear', semanticMask:false, readingOwner:'DOM reading planes', independentField}, retainedMistBytes:mistAllocated?mistA.width*mistA.height*16:0};
     },
     inspect() {return report ? {...report, disposed} : {frames, disposed};},
     dispose() {if (disposed) return; disposed = true; target.dispose(); mistA.dispose(); mistB.dispose(); mistMaterial.dispose(); cellTarget.dispose(); cellMaterial.dispose(); material.dispose(); geometry.dispose(); outputScene.remove(quad);},

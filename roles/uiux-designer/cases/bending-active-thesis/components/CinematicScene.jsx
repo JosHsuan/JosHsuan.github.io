@@ -1,7 +1,7 @@
 'use client';
 /* eslint-disable react-hooks/immutability -- Three resources have one imperative
  * World frame owner; these are not React state or render-time mutations. */
-import {useEffect, useMemo, useRef, useState} from 'react';
+import {useEffect, useMemo, useRef} from 'react';
 import {Canvas, useFrame, useThree} from '@react-three/fiber';
 import * as T from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
@@ -19,6 +19,7 @@ import {SOURCE_DIAGRAM_REVISION, prepareSourceFamilies, resolveSourceSelection, 
 import {createRendererBudget} from './renderer-budget.mjs';
 import {createRenderPressure} from './render-pressure.mjs';
 import {waitForSceneVisibility} from './scene-visibility.mjs';
+import {resolveRenderProfile} from './render-profile.mjs';
 
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 async function loadSourceDiagrams(signal, manager) {
@@ -68,7 +69,7 @@ function prepareLayerCaptions(descriptions) {
 }
 
 function World({input, onReady, onFailure, runtime}) {
-  const {gl, camera, scene, invalidate, size} = useThree();
+  const {gl, camera, scene, invalidate, size, get} = useThree();
   const root = useMemo(() => new T.Group(), []), data = useRef(null), frames = useRef(0), last = useRef(null), overrides = useRef({});
   const initialization=useRef({phase:'loading',gpuInitializationAttempts:0});
   useEffect(() => input.subscribe(() => {
@@ -171,7 +172,7 @@ function World({input, onReady, onFailure, runtime}) {
           const light = new T.DirectionalLight(); lights[id] = light; rig.add(light, light.target);
         }
         lights.hemisphere = new T.HemisphereLight(); rig.add(lights.hemisphere);
-        lights.key.castShadow = true; lights.key.shadow.mapSize.set(1024, 1024);
+        lights.key.castShadow = true; lights.key.shadow.mapSize.set(runtime.profile.shadowMapSize, runtime.profile.shadowMapSize);
         const groundMaterial = new T.MeshStandardMaterial({color: '#172024', roughness: .92, metalness: .02, transparent: true, opacity: .3, depthWrite: true});
         const ground = new T.Mesh(new T.PlaneGeometry(1, 1), groundMaterial); ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; ground.name = 'editorial-ground-not-source-base'; rig.add(ground);
         scene.environment = environment.texture; scene.fog = new T.FogExp2('#091217', .03);
@@ -184,7 +185,7 @@ function World({input, onReady, onFailure, runtime}) {
     const diagnostics = {
       inspect: () => {
         const d = data.current;
-        return {ready: !!d?.ready, frames: frames.current, initialization:{...initialization.current}, ...input.get(), ...last.current,
+        return {ready: !!d?.ready, frames: frames.current, rendererPendingFrames:get().internal.frames, initialization:{...initialization.current}, ...input.get(), ...last.current,
           source: d ? {revision: d.meta.revision, vertices: d.meta.vertices, triangles: d.meta.triangles, sourceObjects: d.meta.layers.reduce((sum, layer) => sum + layer.sourceObjects.length, 0)} : null,
           layers: d?.layers.map(layer => ({id: layer.id, position: layer.node.position.toArray(), restPosition: layer.rest.toArray(), visible: layer.node.visible, triangles: layer.record.triangles})),
           material: d?.adapters[0]?.inspect(), compositor: d?.compositor.inspect(), sourceVisible:input.get().canvasPlacement?.visible!==false&&(d?.visibleSource.length ?? 0)>0,
@@ -197,7 +198,7 @@ function World({input, onReady, onFailure, runtime}) {
       setOverrides: (values = {}) => {overrides.current = {...values}; if (!input.get().hidden) invalidate();},
       hitTest: (clientX,clientY) => {
         const d=data.current,r=last.current?.representation;
-        if (!d?.ready || !r || input.get().canvasPlacement?.visible===false || !['form','system','pattern'].includes(r.chapterId) || !Number.isFinite(clientX+clientY)) return null;
+        if (!d?.ready || !r || !input.get().canvasPresented || input.get().canvasPlacement?.visible===false || !['form','system','pattern'].includes(r.chapterId) || !Number.isFinite(clientX+clientY)) return null;
         const rect=gl.domElement.getBoundingClientRect(),x=(clientX-rect.left)/rect.width,y=(clientY-rect.top)/rect.height;
         if (x<0||x>1||y<0||y>1) return null;
         ray.setFromCamera(rayPoint.set(x*2-1,1-y*2),camera);
@@ -210,7 +211,7 @@ function World({input, onReady, onFailure, runtime}) {
     };
     window.__thesis = diagnostics;
     return () => {cancelled = true; abort.abort(); gl.domElement.removeEventListener('webglcontextlost', lose); cleanup(); if (window.__thesis === diagnostics) delete window.__thesis;};
-  }, [camera, gl, input, invalidate, onFailure, root, scene, runtime]);
+  }, [camera, gl, input, invalidate, onFailure, root, scene, runtime, get]);
 
   useFrame(() => {
     const d = data.current, state = input.get(); if (!d || d.failed || state.hidden || (d.ready&&state.canvasPlacement?.visible===false)) return;
@@ -226,7 +227,7 @@ function World({input, onReady, onFailure, runtime}) {
       const selected=resolveSourceSelection(playback,debug.sourceSelection ?? state.sourceSelection,chapterScene);
       const viewports=debug.modelViewports ?? state.modelViewports;
       const slot=viewports?.[selected.chapterId] ?? {viewport:state.inspectionViewport,weight:selected.chapterId==='form'?(state.inspectionWeight??0):0};
-      const studyWeight=state.canvasLocal?Number(['form','system','pattern'].includes(selected.chapterId)):clamp(slot.weight??0,0,1), family=d.families[selected.family];
+      const studyWeight=state.compositionMode==='viewport-stage'?Number(['form','system','pattern'].includes(selected.chapterId)):clamp(slot.weight??0,0,1), family=d.families[selected.family];
       const stageU=playback.chapterWeights.reduce((sum,w,i)=>sum+w*(i+.5)/7,0)/playback.chapterWeights.reduce((a,b)=>a+b,0);
       const visualU=Number.isFinite(debug.visualU)?clamp(debug.visualU,0,1):(state.visualU??stageU);
       const storyElements = sampleElementPose(stageU, {reducedMotion: reduced});
@@ -239,8 +240,8 @@ function World({input, onReady, onFailure, runtime}) {
       // shadow coverage. No model rescaling and no floor following a loop offset.
       const stageLayout = resolveSceneStage(family.bounds, direction);
       const pointer = Number.isFinite(debug.stageU) ? {x: 0, y: 0} : state.pointer;
-      const pose=sampleSourceScenePose({playback,chapterScene,families:d.families,selection:selected,aspect,viewport:slot.viewport,weight:studyWeight,
-        inspection:state.inspection,interactionChapter:state.modelInteractionChapter,pointer,reducedMotion:reduced,canvasLocal:!!state.canvasLocal});
+      const pose=sampleSourceScenePose({playback,chapterScene,families:d.families,selection:selected,aspect,viewportWidth:size.width,viewport:slot.viewport,weight:studyWeight,
+        inspection:state.inspection,interactionChapter:state.modelInteractionChapter,pointer,reducedMotion:reduced,compositionMode:state.compositionMode,canvasLocal:!!state.canvasLocal});
       const opticalInput={stageU,visualU,energy:state.energy,dwellWeight:state.dwellWeight,aspect,reducedMotion:reduced,chapterScene};
       const optics=sampleOpticalScore(opticalInput,pose,{bounds});
       optics.focalLengthMm=Number.isFinite(debug.focalLengthMm)?clamp(debug.focalLengthMm,10,160):focalLengthForFov(pose.fov,aspect,optics.filmGaugeMm);
@@ -262,7 +263,7 @@ function World({input, onReady, onFailure, runtime}) {
       for(const [id,value] of d.diagramNodes) value.nodes.forEach(node=>{node.visible=id===selected.id && present;});
       d.visibleSource=present?(entry?[entry.mesh]:d.layers.map(layer=>layer.node)):[];
       const exhibitionState = d.exhibition.update({direction,camera,bounds:family.bounds,quality:detail,reducedMotion:reduced,lightSweep:0});
-      scene.background=direction.backgroundColor?d.studyBackground.fromArray(direction.backgroundColor):d.previousBackground;
+      scene.background=state.independentAscii?null:direction.backgroundColor?d.studyBackground.fromArray(direction.backgroundColor):d.previousBackground;
       const keyScale = Number.isFinite(debug.keyIntensityScale) ? clamp(debug.keyIntensityScale, 0, 5) : 1;
       for (const id of ['key', 'fill', 'rim']) {
         const light = d.lights[id], spec = direction[id];
@@ -313,7 +314,7 @@ function World({input, onReady, onFailure, runtime}) {
       d.renderBudget=runtime.budget.sync(size.width,size.height);
       const dpr=d.renderBudget.dpr;
       gl.info.reset();
-      d.compositor.render(scene, camera, optics, {width: size.width, height: size.height, dpr, requestedDpr:d.renderBudget.requestedDpr, samples: detail === 'full' && debug.samples !== 0 ? 2 : 0});
+      d.compositor.render(scene, camera, optics, {width: size.width, height: size.height, dpr, requestedDpr:d.renderBudget.requestedDpr, samples: detail === 'full' && debug.samples !== 0 ? runtime.profile.maxSamples : 0,independentField:!!state.independentAscii});
       // Selection can name an absent source. Observe actual compiled programs,
       // including Full/Light variants, and discard the following delivery gap.
       d.seenPrograms ??= new WeakSet();
@@ -329,16 +330,14 @@ function World({input, onReady, onFailure, runtime}) {
   return <primitive object={root} dispose={null} />;
 }
 export default function CinematicScene({onFailure,...props}) {
-  const [supported, setSupported] = useState(false);
-  const runtime=useMemo(()=>({pressure:createRenderPressure(),budget:null}),[]);
+  const runtime=useMemo(()=>({pressure:createRenderPressure(),budget:null,profile:resolveRenderProfile({coarsePointer:matchMedia('(pointer:coarse)').matches,userAgent:navigator.userAgent,platform:navigator.platform,maxTouchPoints:navigator.maxTouchPoints})}),[]);
   const input=props.input;
   const rendererFactory=useMemo(()=>defaults=>{
     const renderer=new T.WebGLRenderer({...defaults,antialias:false,alpha:true,powerPreference:'default'});
-    runtime.budget=createRendererBudget(renderer,()=>({detail:input.get().detail==='light'?'light':'full',deviceDpr:devicePixelRatio||1,densityScale:runtime.pressure.inspect().scale}));
+    runtime.budget=createRendererBudget(renderer,()=>{const detail=input.get().detail==='light'?'light':'full';return {detail,deviceDpr:devicePixelRatio||1,densityScale:runtime.pressure.inspect().scale,pixelBudget:runtime.profile.pixelBudgets[detail]};});
     return renderer;
   },[input,runtime]);
-  // The discrete WebGL capability result gates hydration, never per-frame state.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => {let probe; try {probe = document.createElement('canvas').getContext('webgl2'); if (!probe) {onFailure(); return;} probe.getExtension('WEBGL_lose_context')?.loseContext(); setSupported(true);} catch {onFailure();}}, [onFailure]);
-  return supported ? <Canvas frameloop="demand" resize={{scroll:false,offsetSize:true,debounce:0}} dpr={1} camera={{position: [4, 3, 6], fov: 38}} gl={rendererFactory} onCreated={({gl}) => {gl.toneMapping = T.ACESFilmicToneMapping; gl.toneMappingExposure = 1; gl.outputColorSpace = T.SRGBColorSpace; gl.setClearColor(0x090d0d, 0); gl.shadowMap.type = T.PCFShadowMap; gl.info.autoReset = false;}}><World {...props} runtime={runtime} onFailure={onFailure}/></Canvas> : null;
+  // Construct only the retained renderer. A throwaway capability context can
+  // coexist with it until browser cleanup; SceneBoundary owns startup failure.
+  return <Canvas frameloop="demand" resize={{scroll:false,offsetSize:true,debounce:0}} dpr={1} camera={{position: [4, 3, 6], fov: 38}} gl={rendererFactory} onCreated={({gl}) => {gl.toneMapping = T.ACESFilmicToneMapping; gl.toneMappingExposure = 1; gl.outputColorSpace = T.SRGBColorSpace; gl.setClearColor(0x090d0d, 0); gl.shadowMap.type = T.PCFShadowMap; gl.info.autoReset = false;}}><World {...props} runtime={runtime} onFailure={onFailure}/></Canvas>;
 }

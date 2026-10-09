@@ -10,6 +10,20 @@ export const EXPERIMENT_IDS = Object.freeze(['experiment-a', 'experiment-b', 'ex
 // The moving DOM surface owns page composition. Its camera fits within this
 // stable local aperture and never follows a second, page-space source slot.
 export const CANVAS_LOCAL_SOURCE_VIEWPORT = Object.freeze({left:.06,top:.06,width:.88,height:.88});
+// Round 10 restores the viewport-composed study footprint. These authored
+// apertures are stable for the chapter hold; no scrolling DOM slot owns them.
+const VIEWPORT_STAGE_DESKTOP = Object.freeze({left:.51,top:.20,width:.43,height:.52});
+const VIEWPORT_STAGE_COMPACT = Object.freeze({left:.51,top:.20,width:.41,height:.52});
+const VIEWPORT_STAGE_PORTRAIT = Object.freeze({left:.045,top:.205,width:.91,height:.43});
+export function viewportStageSourceViewport(aspect, viewportWidth) {
+  if (!(aspect>0) || !Number.isFinite(aspect)) throw RangeError('Finite positive stage aspect required');
+  if (viewportWidth!==undefined&&(!(viewportWidth>0)||!Number.isFinite(viewportWidth))) throw RangeError('Finite positive stage width required');
+  // The authored reading layout stacks at 780 CSS px. A tall tablet may still
+  // have two columns, so portrait aspect alone must not center its source
+  // behind the left reading plane. This is viewport policy, not DOM tracking.
+  const stacked=viewportWidth===undefined?aspect<1:viewportWidth<=780;
+  return stacked ? VIEWPORT_STAGE_PORTRAIT : viewportWidth<=1100 ? VIEWPORT_STAGE_COMPACT : VIEWPORT_STAGE_DESKTOP;
+}
 const clamp = (n, a = 0, b = 1) => Math.max(a, Math.min(b, Number.isFinite(n) ? n : a));
 const rad = n => n * Math.PI / 180;
 const dot = (a, b) => a.reduce((sum, v, i) => sum + v * b[i], 0);
@@ -97,7 +111,7 @@ export function fitSourcePose({bounds, points, aspect, azimuth=30, elevation=30,
  * slots blend into a support-fitted shot; intermediate crops are intentional.
  * User angles are bounded offsets, not a second camera or independent clock.
  */
-export function sampleSourceScenePose({playback,chapterScene,families,selection,aspect,viewport,weight=0,inspection,interactionChapter,pointer={x:0,y:0},reducedMotion=false,canvasLocal=false}) {
+export function sampleSourceScenePose({playback,chapterScene,families,selection,aspect,viewport,viewportWidth,weight=0,inspection,interactionChapter,pointer={x:0,y:0},reducedMotion=false,canvasLocal=false,compositionMode}) {
   const raw=playback?.chapterWeights ?? [1,0,0,0,0,0,0], total=raw.reduce((a,b)=>a+b,0), weights=raw.map(v=>v/total);
   const poses=weights.map((w,i)=>w>0?sampleCinematicPose((i+.5)/7,aspect,reducedMotion?{x:0,y:0}:pointer,
     {bounds:families[i===1||i===2?'representation':i===3?'experiment':'assembly'].bounds,sharedStage:true,reducedMotion:false}):null);
@@ -105,7 +119,8 @@ export function sampleSourceScenePose({playback,chapterScene,families,selection,
   const vec=read=>[0,1,2].map(c=>scalar(p=>read(p)[c]));
   const polar=p=>{const v=p.position.map((n,i)=>n-p.target[i]),d=Math.hypot(...v);return {az:Math.atan2(v[0],v[2])*180/Math.PI,el:Math.asin(v[1]/d)*180/Math.PI,d};};
   const localStudy=['form','system','pattern'].includes(selection.chapterId);
-  const cue=chapterScene?.camera ?? {}, w=canvasLocal?Number(localStudy):clamp(weight), family=families[selection.family];
+  const viewportStage=compositionMode==='viewport-stage';
+  const cue=chapterScene?.camera ?? {}, w=canvasLocal||viewportStage?Number(localStudy):clamp(weight), family=families[selection.family];
   const controlled=interactionChapter===selection.chapterId;
   const userAz=controlled?clamp(inspection?.azimuth??30,-40,100)-30:0;
   const userEl=controlled?clamp(inspection?.elevation??30,12,70)-30:0;
@@ -119,7 +134,7 @@ export function sampleSourceScenePose({playback,chapterScene,families,selection,
     viewOffsetNormalized:shift,sourcePresence:presence,modelVisibility:presence,surfaceEmphasis:scalar(p=>p.surfaceEmphasis??0),
     owner:'cinematic-composite',framingIntent:presence?'autonomous-authored-shot':'evidence-absence'};
   let pose=story;
-  if(canvasLocal) {
+  if(canvasLocal&&!viewportStage) {
     const fit=fitSourcePose({...family,aspect,azimuth,elevation,fov,viewport:CANVAS_LOCAL_SOURCE_VIEWPORT,distanceScale:cue.distanceScale??1});
     // The opening retains a restrained sculptural crop inside its own frame.
     // All complete source studies and the ending hold retain their exact fit.
@@ -132,7 +147,7 @@ export function sampleSourceScenePose({playback,chapterScene,families,selection,
       compositionSpace:'canvas-local',
       framingIntent:!presence?'evidence-absence':opening?'canvas-local-hero-crop':localStudy?'held-source-study':'held-source'};
   } else if(w>0) {
-    const fit=fitSourcePose({...family,aspect,azimuth,elevation,fov,viewport,distanceScale:cue.distanceScale??1});
+    const fit=fitSourcePose({...family,aspect,azimuth,elevation,fov,viewport:viewportStage?viewportStageSourceViewport(aspect,viewportWidth):viewport,distanceScale:cue.distanceScale??1});
     const mixedTarget=target.map((v,i)=>v+(fit.target[i]-v)*w), mixedDistance=distance+(fit.distance-distance)*w;
     pose={...story,...fit,target:mixedTarget,position:mixedTarget.map((v,i)=>v+back[i]*mixedDistance),distance:mixedDistance,
       viewOffsetNormalized:{x:shift.x+(fit.viewOffsetNormalized.x-shift.x)*w,y:shift.y+(fit.viewOffsetNormalized.y-shift.y)*w},
@@ -140,7 +155,7 @@ export function sampleSourceScenePose({playback,chapterScene,families,selection,
   }
   const radius=Math.hypot(...family.bounds.max.map((v,i)=>v-family.bounds.min[i]))/2;
   const depths=corners(family.bounds).map(p=>dot(pose.position.map((v,i)=>v-p[i]),back));
-  return {...pose,near:Math.max(radius*.0001,Math.min(...depths)*.08),far:Math.max(...depths)+radius*2,
+  return {...pose,...(viewportStage?{compositionSpace:'viewport-stage'}:{}),near:Math.max(radius*.0001,Math.min(...depths)*.08),far:Math.max(...depths)+radius*2,
     compositionNDC:[-2*pose.viewOffsetNormalized.x,2*pose.viewOffsetNormalized.y],chapter:{id:selection.chapterId,index:selection.chapterIndex},
     chapterWeights:weights,studyWeight:w,sourceGeometryRevision:family.revision,fitBounds:family.bounds,
     kind:reducedMotion?'static-source-chapter':'autonomous-source-chapter'};

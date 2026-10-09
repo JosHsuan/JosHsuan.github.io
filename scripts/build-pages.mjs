@@ -36,6 +36,7 @@ const sources = [
   'components/render-budget.mjs', 'components/runtime-scheduler.mjs', 'components/dom-publisher.mjs', 'components/scene-visibility.mjs',
   'components/renderer-budget.mjs', 'components/render-pressure.mjs',
   'components/canvas-motion.mjs',
+  'components/page-field-renderer.mjs', 'components/render-profile.mjs', 'components/scene-recovery.mjs',
   'components/element-score.mjs', 'components/optical-score.mjs', 'components/scene-compositor.mjs',
   'components/scene-direction.mjs', 'components/vendor/cinematic-plan.mjs',
   'components/exhibition-stage.mjs', 'components/editorial-score.mjs',

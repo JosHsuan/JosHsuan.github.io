@@ -69,9 +69,12 @@ export function advanceChapterPlayback(state, dt, {
   state.engaged = !!engaged;
   state.needsFrame = !(paused || reducedMotion || hidden || engaged);
 
-  // A navigation action remains usable while motion is disabled. Seeking the
-  // current chapter also completes a pending passage without rewinding time.
-  if (seek || reducedMotion || (paused && changed)) {
+  // A navigation action remains usable while motion is disabled. An explicit
+  // inspection can request a chapter different from the reading/scene probe,
+  // so finish its pending passage before freezing. Otherwise the reveal waits
+  // for a chapter that frozen old weights can never render. A settled same-
+  // chapter engagement keeps its existing pose and time unchanged.
+  if (seek || reducedMotion || (paused && changed) || (engaged && state.transitionElapsed < TRANSITION_SECONDS)) {
     state.chapterWeights = oneHot(index);
     state.fromWeights = oneHot(index);
     state.fromIndex = index;

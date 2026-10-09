@@ -69,9 +69,8 @@ export default function ModelInspector({input, inspection, activate, ready, fail
     const announcement = parent?.querySelector('[data-source-announcement]');
     if (announcement) announcement.textContent = `${study.labels[index]}. Comparison selected. Escape returns to the chapter.`;
   }
-  function begin(event, study) {
+  function begin(event, study, surface = event.currentTarget) {
     if (!ready || event.button !== 0 || event.isPrimary === false || press.current || !hit(event, study.id)) return;
-    const surface = event.currentTarget;
     press.current = {id: event.pointerId, surface, study, x: event.clientX, y: event.clientY, at: event.timeStamp, moved: false, touch: event.pointerType === 'touch', azimuth: inspection.value.azimuth, elevation: inspection.value.elevation};
     if (event.pointerType === 'touch') return; // Native pan and selection remain available.
     surface.setPointerCapture(event.pointerId);
@@ -118,6 +117,22 @@ export default function ModelInspector({input, inspection, activate, ready, fail
     }
   }
 
+  // A held scene may extend beyond its document controls. Route only exact
+  // visible mesh hits through the same gesture owner; ordinary links and text
+  // keep their native interaction and touch scrolling is never prevented.
+  useEffect(() => {
+    const down=event=>{
+      if(event.target.closest?.('button,a,select,input,summary,[data-protect],[data-feedback-plane]'))return;
+      const result=window.__thesis?.hitTest?.(event.clientX,event.clientY);
+      const study=hosts.find(value=>value.id===result?.chapterId),surface=surfaces.current.get(study?.id);
+      if(study&&surface)begin(event,study,surface);
+    };
+    const up=event=>end(event),cancel=event=>end(event,true);
+    document.addEventListener('pointerdown',down);document.addEventListener('pointermove',move);
+    document.addEventListener('pointerup',up);document.addEventListener('pointercancel',cancel);
+    return()=>{document.removeEventListener('pointerdown',down);document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',up);document.removeEventListener('pointercancel',cancel);};
+  });
+
   return hosts.map(study => createPortal(<div className={styles.study} data-model-study data-study-chapter={study.id} aria-labelledby={`model-study-title-${study.id}`}>
     <header className={styles.header} data-protect>
       <div className={styles.headerText} data-choreography="caption"><span className={styles.eyebrow}>SOURCE / COMPARISON</span><h3 id={`model-study-title-${study.id}`}>{study.title}</h3></div>
@@ -126,9 +141,14 @@ export default function ModelInspector({input, inspection, activate, ready, fail
     <div ref={element => {if (element) surfaces.current.set(study.id, element); else surfaces.current.delete(study.id);}} className={styles.surface}
       role="button" aria-label={`Explore ${study.id === 'pattern' ? 'source experiments' : 'source representations'} in ${study.id}`} aria-describedby={`model-study-help-${study.id} model-source-label-${study.id}`} aria-disabled={!ready} tabIndex={ready ? 0 : -1}
       data-model-viewport data-study-chapter={study.id} data-source-count={study.labels.length}
-      onPointerDown={event => begin(event, study)} onPointerMove={move} onPointerUp={event => end(event)} onPointerCancel={event => end(event, true)}
       onLostPointerCapture={event => {if (press.current?.id === event.pointerId) cancelPress();}} onPointerLeave={() => {if (!press.current) clearHover();}}
-      onKeyDown={event => key(event, study)} onBlur={() => {if (pinned.current || press.current) cancelPress(); clearHover();}}
+      onKeyDown={event => key(event, study)} onBlur={() => {
+        // A visible mesh can receive a press outside this semantic control.
+        // Its native focus loss releases keyboard ownership, not the active
+        // pointer gesture owned by pointerup/cancel and window lifecycle.
+        if (pinned.current) {pinned.current = false; if (!press.current) returnView();}
+        clearHover();
+      }}
       onClick={event => {if (event.detail === 0) choose(study, event.currentTarget);}}>
       {!ready && <div className={styles.fallback}>
         <picture><source media="(max-width:780px)" srcSet="/assets/cinematic/model-poster-mobile.webp"/><img src="/assets/cinematic/model-poster.webp" alt="Reference view of the original metal-panel assembly and its base"/></picture>

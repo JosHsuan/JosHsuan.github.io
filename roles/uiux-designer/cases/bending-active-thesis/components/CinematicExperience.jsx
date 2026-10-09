@@ -11,7 +11,9 @@ import {createInspectionState, advanceInspection, setInspectionTarget, INSPECTIO
 import {createFrameScheduler} from './runtime-scheduler.mjs';
 import {createDOMPublisher} from './dom-publisher.mjs';
 import {createCanvasMotion, advanceCanvasMotion} from './canvas-motion.mjs';
-import {CANVAS_LOCAL_SOURCE_VIEWPORT} from './source-scene-score.mjs';
+import {viewportStageSourceViewport} from './source-scene-score.mjs';
+import {createPageFieldRenderer} from './page-field-renderer.mjs';
+import {createSceneRecovery} from './scene-recovery.mjs';
 import ModelInspector from './ModelInspector';
 import styles from './cinematic.module.css';
 
@@ -30,8 +32,8 @@ export default function CinematicExperience() {
   const [still, setStill] = useState(false), [systemReduced, setSystemReduced] = useState(false), [hydrated, setHydrated] = useState(false);
   const [detail, setDetail] = useState('full');
   const activateStudy = useCallback(() => setEnabled(true), []);
-  const stage = useRef(null), progress = useRef(null), status = useRef(null);
-  const onReady = useCallback(() => setReady(true), []), onFailure = useCallback(() => {setFailed(true); setReady(false); document.querySelectorAll('[data-layer-caption]').forEach(element => {element.textContent='Source geometry · static view';});}, []);
+  const stage = useRef(null), fieldCanvas=useRef(null), recovery=useRef(null), progress = useRef(null), status = useRef(null);
+  const onReady = useCallback(() => setReady(true), []), onFailure = useCallback(() => {recovery.current?.fail();setFailed(true); setReady(false); document.querySelectorAll('[data-layer-caption]').forEach(element => {element.textContent='Source geometry · static view';});}, []);
   useEffect(() => {
     const reduced = matchMedia('(prefers-reduced-motion: reduce)');
     const update = () => setSystemReduced(reduced.matches);
@@ -39,10 +41,20 @@ export default function CinematicExperience() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     update(); setHydrated(true);
     // Respect the explicit data-saving request. Every story layer still works.
-    if (!navigator.connection?.saveData && !reduced.matches) setEnabled(true);
+    let storage;try{storage=sessionStorage;}catch{storage=null;}
+    recovery.current=createSceneRecovery(storage);
+    document.documentElement.toggleAttribute('data-scene-recovery',recovery.current.recovery);
+    if (!navigator.connection?.saveData && !reduced.matches && !recovery.current.recovery) setEnabled(true);
     reduced.addEventListener('change', update);
     return () => reduced.removeEventListener('change', update);
   }, []);
+  useEffect(()=>{
+    if(!enabled||failed)return;
+    recovery.current?.begin();
+    const end=()=>recovery.current?.end(),begin=()=>recovery.current?.begin();
+    window.addEventListener('pagehide',end);window.addEventListener('pageshow',begin);
+    return()=>{window.removeEventListener('pagehide',end);window.removeEventListener('pageshow',begin);};
+  },[enabled,failed]);
   useEffect(() => {
     const reduce = systemReduced || still || !enabled || failed;
     input.set({reduced: reduce, systemReduced, paused: still, sceneEnabled: enabled, sceneFailed: failed});
@@ -59,12 +71,13 @@ export default function CinematicExperience() {
     const fine = matchMedia('(hover: hover) and (pointer: fine)');
     const links = [...document.querySelectorAll('[data-chapter-link]')];
     const planeMap = new Map(), publisher = createDOMPublisher();
-    let planes=[], modelSlots=[], diagrams=[], canvasAnchors=[];
+    const pageField=createPageFieldRenderer(fieldCanvas.current);
+    let planes=[], diagrams=[];
     const reading = createReadingState(scrollY), playback = createChapterPlayback(), history = [], choreography = new Map();
     // offsetTop follows untransformed layout; rect + scrollY would feed our own
     // compensation back into anchors and cause drift on every ResizeObserver.
     const naturalY = element => {let y=0;for(let node=element;node;node=node.offsetParent)y+=node.offsetTop;return y;};
-    let canvasSurface={width:1,height:1},canvasPlacement=null,canvasWasVisible=false,canvasActivation=-1,canvasAwaitingPaint=false;
+    let canvasSurface={width:1,height:1},canvasPlacement=null,canvasWasVisible=false,canvasActivation=-1,canvasAwaitingPaint=false,stableWidth=0;
     const canvasMotion=createCanvasMotion();
     let plan, offsets=[], previous=0, controllerFrame=0, frameDelta=0, resumed=true, seekPending=false, semanticSeekPending=false, seekOnScroll=false, initialHash=!!location.hash, historyNavigation=null;
     let inspectionRevision=input.get().inspectionRevision??0, wasReduced=input.get().reduced;
@@ -82,6 +95,12 @@ export default function CinematicExperience() {
     scheduler.suspend('visibility',document.hidden);
     const measure = () => {
       if(disposed||(scheduler.suspended&&plan))return;
+      // Mobile browser bars change available height frequently. Preserve the
+      // drawing surface until width/orientation changes instead of reallocating
+      // all GPU attachments as chrome slides in and out.
+      if(stage.current&&(!matchMedia('(pointer:coarse)').matches||stableWidth!==innerWidth)){
+        stableWidth=innerWidth;stage.current.style.setProperty('--scene-height',innerHeight+'px');
+      }
       canvasSurface={width:stage.current?.offsetWidth||1,height:stage.current?.offsetHeight||1};
       // Discrete resize/source hydration refreshes collections. No document-wide
       // selector walk is needed while a settled chapter keeps playing.
@@ -90,15 +109,6 @@ export default function CinematicExperience() {
         return planeMap.get(element);
       });
       for(const element of planeMap.keys())if(!element.isConnected)planeMap.delete(element);
-      modelSlots=[...document.querySelectorAll('[data-model-viewport]')];
-      // These anchors have no local transforms. Cache their natural positions;
-      // the existing reading response supplies their screen Y without a forced
-      // layout after every DOM style publication.
-      canvasAnchors=[...modelSlots,...document.querySelectorAll('[data-canvas-anchor]')].map(element=>{
-        const r=element.getBoundingClientRect();
-        const host=element.closest('[data-model-study-host]');
-        return {element,id:element.dataset.studyChapter??element.dataset.canvasAnchor,top:naturalY(element),left:r.left,width:r.width,height:r.height,sticky:!!host&&getComputedStyle(host).position==='sticky'};
-      });
       diagrams=[...document.querySelectorAll('[data-source-diagram]')].map(element=>({element,index:Math.max(0,sections.indexOf(element.closest('[data-story-chapter]')))}));
       for(const element of choreography.keys())if(!element.isConnected)choreography.delete(element);
       offsets=sections.map(naturalY);offsets.push(naturalY(sections.at(-1))+sections.at(-1).offsetHeight);
@@ -126,6 +136,7 @@ export default function CinematicExperience() {
       const didResume=resumed,didSeek=semanticSeekPending,dt=previous?(now-previous)/1000:1/60;previous=now;
       controllerFrame++;frameDelta=dt;
       let state=input.get();
+      if(state.sceneEnabled&&!state.sceneFailed)recovery.current?.heartbeat();
       advanceReading(reading,scrollY,dt,{plan,reducedMotion:state.reduced,resumed,seek:seekPending});
       const readingScore=sampleReadingScore(reading,plan),u=readingScore.nativeU;
       // Native reading selects a semantic chapter. It never supplies scene time.
@@ -135,11 +146,14 @@ export default function CinematicExperience() {
         input.set({modelEngaged:false,modelRecovering:false,modelInteractionChapter:null,modelHover:{x:0,y:0,strength:0,chapterId:null}});
         state=input.get();
       }
+      const requested=state.sourceSelection,requestAge=playback.activeSeconds-(requested?.selectedAt??-Infinity);
+      const explicitChapter=state.modelEngaged?state.modelInteractionChapter:requested?.chapterId===chapter.id&&requestAge>=0&&requestAge<8?requested.chapterId:undefined;
+      canvasPlacement=advanceCanvasMotion(canvasMotion,dt,{anchors:offsets,docY:scrollY,viewport:{width:canvasSurface.width,height:canvasSurface.height},reducedMotion:state.reduced,seek:didSeek||didResume,forcedChapter:explicitChapter});
       advanceInspection(inspection,dt,{reducedMotion:state.reduced,resumed});
       const recovering=!!state.modelRecovering&&!inspection.settled;
       const impulse=pendingImpulse;pendingImpulse=0;
       advanceChapterPlayback(playback,dt,{
-        chapter:chapter.id,impulse,paused:state.paused||!state.sceneEnabled||state.sceneFailed,
+        chapter:canvasPlacement.chapter,impulse,paused:state.paused||!state.sceneEnabled||state.sceneFailed,
         reducedMotion:!!state.systemReduced,resumed,engaged:!!state.modelEngaged||recovering,
         seek:didSeek||lastChapter===null,
       });
@@ -177,7 +191,7 @@ export default function CinematicExperience() {
         publisher.attribute(element,'data-choreography-phase',value.phase);item.last=state.sceneEnabled?value:null;
       });
       sections.forEach((section,index)=>{
-        publisher.style(section,'--attention',state.reduced?1:Math.max(.25,playbackScore.chapterWeights[index]));
+        publisher.style(section,'--attention',state.reduced?1:Math.max(.25,Number(index===chapter.index)));
         publisher.style(section,'--energy',state.reduced?0:playbackScore.energy);
       });
       planes.forEach(item=>{
@@ -190,17 +204,12 @@ export default function CinematicExperience() {
         moving=moving||!item.response.settled;
       });
 
-      // The outer Canvas travels through document anchors. The camera composes
-      // only inside its fixed local aperture, never chasing these screen rects.
+      // Chapter boundaries own the viewport hold. Information rectangles never
+      // determine the scene size or camera framing.
       const modelViewports={};
       let inspectionWeight=0,inspectionViewport=state.inspectionViewport;
-      const slotRects=new Map(),anchorRects=new Map();
-      const canvasChapter=sections[playbackScore.chapterWeights.indexOf(Math.max(...playbackScore.chapterWeights))].id;
-      canvasAnchors.forEach(anchor=>{
-        const top=anchor.top-reading.visualDocY,r=anchor.sticky&&anchor.id===canvasChapter?anchor.element.getBoundingClientRect():{left:anchor.left,top,width:anchor.width,height:anchor.height,right:anchor.left+anchor.width,bottom:top+anchor.height};
-        slotRects.set(anchor.element,r);anchorRects.set(anchor.id,r);
-      });
-      canvasPlacement=advanceCanvasMotion(canvasMotion,dt,{chapter:canvasChapter,rect:anchorRects.get(canvasChapter)??null,viewport:{width:innerWidth,height:innerHeight},surface:canvasSurface,reducedMotion:state.reduced,seek:didSeek||didResume});
+      const canvasChapter=canvasPlacement.chapter;
+      const authoredViewport=viewportStageSourceViewport(canvasSurface.width/canvasSurface.height,canvasSurface.width);
       const canvasActive=canvasPlacement.visible&&state.sceneEnabled&&!state.sceneFailed;
       if(canvasActive&&!canvasWasVisible)canvasActivation=controllerFrame;
       canvasWasVisible=canvasActive;
@@ -212,8 +221,8 @@ export default function CinematicExperience() {
       moving=moving||!canvasPlacement.settled||canvasAwaitingPaint;
       for(const id of ['form','system','pattern']){
         const weight=canvasPlacement.visible&&id===canvasChapter?1:0;
-        modelViewports[id]={viewport:CANVAS_LOCAL_SOURCE_VIEWPORT,weight};
-        if(id===chapter.id){inspectionWeight=weight;inspectionViewport=CANVAS_LOCAL_SOURCE_VIEWPORT;}
+        modelViewports[id]={viewport:authoredViewport,weight};
+        if(id===chapter.id){inspectionWeight=weight;inspectionViewport=authoredViewport;}
       }
       // Moving pointers are checked each delivered frame; a stationary pointer
       // still notices a moving source leaving it within 100 ms, without a
@@ -222,17 +231,18 @@ export default function CinematicExperience() {
       if(pointerSurface&&!state.modelEngaged&&(pointerMoved||now-lastHoverCheck>=100)){
         lastHoverCheck=now;
         const under=document.elementFromPoint(pointerClient.x,pointerClient.y);
-        const over=pointerSurface.isConnected&&(under===pointerSurface||pointerSurface.contains(under));
+        const over=pointerSurface.isConnected&&under&&!under.closest?.('button,a,select,input,summary,[data-protect],[data-feedback-plane]');
         const hit=over&&window.__thesis?.hitTest?.(pointerClient.x,pointerClient.y);
         const found=!!hit&&hit.source===true&&hit.chapterId===pointerSurface.dataset.studyChapter;
         publisher.attribute(pointerSurface,'data-model-hit',found?'true':null);
-        const r=slotRects.get(pointerSurface)??pointerSurface.getBoundingClientRect();
+        const r=pointerSurface.getBoundingClientRect();
         modelHover={x:Math.min(1,Math.max(-1,(pointerClient.x-r.left)/Math.max(1,r.width)*2-1)),y:Math.min(1,Math.max(-1,(pointerClient.y-r.top)/Math.max(1,r.height)*2-1)),strength:found?1:0,chapterId:pointerSurface.dataset.studyChapter};
       }
       pointerMoved=false;
-      const fieldUv=[(pointerClient.x-canvasPlacement.x)/(canvasSurface.width*canvasPlacement.scale),1-(pointerClient.y-canvasPlacement.y)/(canvasSurface.height*canvasPlacement.scale)];
-      const fieldActive=decorate&&pointerActive&&canvasPlacement.visible&&fieldUv.every(value=>value>=0&&value<=1);
+      const fieldUv=[pointerClient.x/innerWidth,1-pointerClient.y/innerHeight];
+      const fieldActive=decorate&&pointerActive&&fieldUv.every(value=>value>=0&&value<=1);
       latestScene=sampleChapterScene(playbackScore,{reducedMotion:!!state.systemReduced,quality:state.detail,aspect:canvasSurface.width/canvasSurface.height,pointer:{...pointer,uv:fieldUv,active:fieldActive,strength:modelHover.strength||.35}});
+      pageField.render({field:latestScene.field,frameTimeMs:now,paused:state.paused||!state.sceneEnabled||state.sceneFailed,hidden:state.hidden,systemReduced:state.systemReduced},canvasSurface.width,canvasSurface.height);
       diagrams.forEach(({element:diagram,index})=>{
         const count=Math.max(1,Number(diagram.dataset.diagramCount)||4),phase=playbackScore.phases[index];
         // The discrete index owns source highlighting. The old continuously
@@ -254,7 +264,7 @@ export default function CinematicExperience() {
         editorial:{lightSweep:0,materialLift:0},pointer,modelHover,hidden:false,modelRecovering:recovering,
         inspection:{...inspection.value,lightMix:0},inspectionSettled:inspection.settled,
         inspectionActive:inspectionWeight>0,inspectionWeight,inspectionViewport,modelViewports,
-        canvasLocal:true,canvasPlacement:{...canvasPlacement},canvasSurface,
+        compositionMode:'viewport-stage',independentAscii:true,informationChapter:chapter.id,canvasLocal:false,canvasPresented:canvasActive&&!canvasAwaitingPaint&&canvasPlacement.opacity>0,canvasPlacement:{...canvasPlacement},canvasSurface,
       });
       history.push({time:now,...reading,...readingScore,playback:{chapterId:playbackScore.chapterId,activeSeconds:playbackScore.activeSeconds,loopPhase:playbackScore.loopPhase,tempo:playbackScore.tempo,needsFrame:playbackScore.needsFrame}});
       if(history.length>240)history.shift();
@@ -263,7 +273,8 @@ export default function CinematicExperience() {
     function schedule(){scheduler.schedule();}
     const move=event=>{
       if(scheduler.suspended||!['mouse','pen'].includes(event.pointerType))return;
-      pointerMoved=true;pointerClient={x:event.clientX,y:event.clientY};pointerSurface=event.target.closest?.('[data-model-viewport]')??null;
+      pointerMoved=true;pointerClient={x:event.clientX,y:event.clientY};
+      pointerSurface=event.target.closest?.('[data-model-viewport]')??document.querySelector(`[data-model-viewport][data-study-chapter="${input.get().canvasPlacement?.chapter}"]`);
       // Explicit source hover remains usable while paused/Reduced or with a pen;
       // decorative whole-page tilt still respects the original pointer policy.
       if(!fine.matches||input.get().reduced){pointerActive=false;pointerTarget={x:0,y:0};hovered=null;schedule();return;}
@@ -323,20 +334,21 @@ export default function CinematicExperience() {
       if(state.reduced!==wasReduced){wasReduced=state.reduced;seekPending=true;schedule();}
       const key=[state.paused,state.systemReduced,state.sceneEnabled,state.sceneFailed,state.detail].join('/');if(key!==preferenceKey){preferenceKey=key;schedule();}
     });
-    window.__story={inspect:()=>({...reading,...sampleReadingScore(reading,plan),controllerFrame,frameDelta,readingPending:seekPending||resumed||Math.abs(reading.nativeDocY-scrollY)>.01,playback:sampleChapterPlayback(playback),chapterScene:latestScene,canvasPlacement:canvasPlacement?{...canvasPlacement}:null,canvasSurface,canvasAwaitingPaint,history:[...history],stops:plan.stops,scheduled:scheduler.inspect().scheduled,lifecycle:scheduler.inspect(),domPublication:publisher.inspect(),inspectionActive:!!input.get().inspectionActive,inspectionWeight:input.get().inspectionWeight,modelViewports:input.get().modelViewports,modelEngaged:!!input.get().modelEngaged,modelRecovering:!!input.get().modelRecovering,sourceSelection:input.get().sourceSelection,choreography:[...choreography].map(([element,item])=>({kind:item.kind,firstVisibleAt:item.firstVisibleAt,phase:element.dataset.choreographyPhase,settled:item.last?.settled??false})),inspection:{target:{...inspection.target},value:{...inspection.value},lightMix:0,settled:inspection.settled}})};
+    window.__story={inspect:()=>({...reading,...sampleReadingScore(reading,plan),controllerFrame,frameDelta,readingPending:seekPending||resumed||Math.abs(reading.nativeDocY-scrollY)>.01,playback:sampleChapterPlayback(playback),chapterScene:latestScene,informationChapter:lastChapter,pageField:pageField.inspect(),canvasPlacement:canvasPlacement?{...canvasPlacement}:null,canvasSurface,canvasAwaitingPaint,history:[...history],stops:plan.stops,scheduled:scheduler.inspect().scheduled,lifecycle:scheduler.inspect(),domPublication:publisher.inspect(),inspectionActive:!!input.get().inspectionActive,inspectionWeight:input.get().inspectionWeight,modelViewports:input.get().modelViewports,modelEngaged:!!input.get().modelEngaged,modelRecovering:!!input.get().modelRecovering,sourceSelection:input.get().sourceSelection,choreography:[...choreography].map(([element,item])=>({kind:item.kind,firstVisibleAt:item.firstVisibleAt,phase:element.dataset.choreographyPhase,settled:item.last?.settled??false})),inspection:{target:{...inspection.target},value:{...inspection.value},lightMix:0,settled:inspection.settled}})};
     input.set({hidden:scheduler.suspended});document.documentElement.setAttribute('data-cinematic-ready','');measure();if(location.hash)hash();
-    return()=>{disposed=true;window.history.scrollRestoration=previousRestoration;scheduler.dispose();window.removeEventListener('pagehide',pagehide);window.removeEventListener('pageshow',pageshow);document.removeEventListener('freeze',freeze);document.removeEventListener('resume',resume);resize.disconnect();unsubscribe();window.removeEventListener('scroll',scroll);window.removeEventListener('wheel',wheel);window.removeEventListener('touchstart',touchstart);window.removeEventListener('touchmove',touchmove);window.removeEventListener('touchend',touchend);window.removeEventListener('touchcancel',touchend);window.removeEventListener('thesis:representation',representation);window.removeEventListener('popstate',pop);document.removeEventListener('pointerdown',press);document.removeEventListener('pointerup',press);document.removeEventListener('pointercancel',press);window.removeEventListener('resize',resizeWindow);window.removeEventListener('pointermove',move);document.documentElement.removeEventListener('pointerleave',reset);window.removeEventListener('blur',reset);document.removeEventListener('visibilitychange',visibility);fine.removeEventListener('change',reset);document.removeEventListener('focusin',focus);document.removeEventListener('focusout',focusout);document.removeEventListener('click',anchor);window.removeEventListener('hashchange',hash);document.removeEventListener('keydown',keyboard);document.documentElement.removeAttribute('data-cinematic-ready');delete document.documentElement.dataset.activeChapter;delete document.documentElement.dataset.chapterBeat;root.style.removeProperty('--reading-shift');delete window.__story;};
+    return()=>{disposed=true;pageField.dispose();window.history.scrollRestoration=previousRestoration;scheduler.dispose();window.removeEventListener('pagehide',pagehide);window.removeEventListener('pageshow',pageshow);document.removeEventListener('freeze',freeze);document.removeEventListener('resume',resume);resize.disconnect();unsubscribe();window.removeEventListener('scroll',scroll);window.removeEventListener('wheel',wheel);window.removeEventListener('touchstart',touchstart);window.removeEventListener('touchmove',touchmove);window.removeEventListener('touchend',touchend);window.removeEventListener('touchcancel',touchend);window.removeEventListener('thesis:representation',representation);window.removeEventListener('popstate',pop);document.removeEventListener('pointerdown',press);document.removeEventListener('pointerup',press);document.removeEventListener('pointercancel',press);window.removeEventListener('resize',resizeWindow);window.removeEventListener('pointermove',move);document.documentElement.removeEventListener('pointerleave',reset);window.removeEventListener('blur',reset);document.removeEventListener('visibilitychange',visibility);fine.removeEventListener('change',reset);document.removeEventListener('focusin',focus);document.removeEventListener('focusout',focusout);document.removeEventListener('click',anchor);window.removeEventListener('hashchange',hash);document.removeEventListener('keydown',keyboard);document.documentElement.removeAttribute('data-cinematic-ready');delete document.documentElement.dataset.activeChapter;delete document.documentElement.dataset.chapterBeat;root.style.removeProperty('--reading-shift');delete window.__story;};
   }, [input, inspection]);
   // Discrete preference changes also wake the DOM decoration controller once.
   useEffect(() => {window.dispatchEvent(new Event('resize'));}, [still, systemReduced, detail, enabled, failed, ready]);
   return <>
     <div className={styles.backdrop} aria-hidden="true" data-cinematic-background>
-
+      {!ready&&<picture><source media="(max-width:780px)" srcSet="/assets/cinematic/model-poster-mobile.webp"/><img className={styles.poster} src="/assets/cinematic/model-poster.webp" alt=""/></picture>}
       <div className={styles.vignette} data-cinematic-vignette />
     </div>
     <div className={styles.stage} ref={stage} style={{visibility: ready ? 'visible' : 'hidden'}} aria-hidden="true" data-cinematic-stage>
       {enabled && !failed && <SceneBoundary onFailure={onFailure}><Scene input={input} onReady={onReady} onFailure={onFailure} /></SceneBoundary>}
     </div>
+    <canvas className={styles.asciiField} ref={fieldCanvas} data-ascii-field aria-hidden="true"/>
     {hydrated && <div className={styles.readingTools} data-protect data-reading-tools>
       <span ref={status} aria-hidden="true" data-choreography="nav">01 / 07</span>
       <label className={styles.detailLabel}><span data-choreography="caption">Visual detail</span><select aria-label="Visual detail" value={detail} onChange={event => setDetail(event.target.value)}><option value="full">Full</option><option value="light">Light</option></select></label>

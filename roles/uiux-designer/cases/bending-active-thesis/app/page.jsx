@@ -40,12 +40,6 @@ function Paragraphs({ paragraphs }) {
   return paragraphs.map((paragraph, index) => <p key={paragraph} data-editorial-copy data-protect data-choreography="prose" data-feedback-plane style={{'--copy-index':index}}>{paragraph}</p>);
 }
 
-function SceneAnchor({chapter}) {
-  return <div className={styles.sceneAnchor} data-canvas-anchor={chapter} aria-hidden="true">
-    <picture><source media="(max-width:780px)" srcSet="/assets/cinematic/model-poster-mobile.webp"/><img src="/assets/cinematic/model-poster.webp" alt="" width="1440" height="1000" loading={chapter==='overview'?'eager':'lazy'}/></picture>
-  </div>;
-}
-
 export default function Page() {
   return <>
     <CinematicExperience />
@@ -62,9 +56,6 @@ export default function Page() {
             <div className={styles.openingLabel}><Glyph /><span data-protect data-choreography="caption">{story.overview.eyebrow}</span></div>
             <h1 id="project-title" aria-label={review.title} data-story-heading data-feedback-plane><span data-heading-line data-protect data-choreography="heading" style={{'--line-index':0}}>{review.hero.titleLines[0]}</span><span data-heading-line data-protect data-choreography="heading" style={{'--line-index':1}}>{review.hero.titleLines[1]}</span></h1>
             <p className={styles.subtitle} data-protect data-choreography="prose">{review.hero.subtitle}</p>
-          </div>
-          <SceneAnchor chapter="overview"/>
-          <div className={[styles.openingCopy,styles.openingDetails].join(' ')} data-story-panel>
             <p className={styles.openingText} data-reading-copy data-protect data-choreography="prose" data-feedback-plane>{story.overview.introduction}</p>
             <p className={styles.projectType} data-protect data-choreography="credit">{review.projectType}<span aria-hidden="true"> — </span>{review.institution}</p>
           </div>
@@ -154,7 +145,6 @@ export default function Page() {
               <div className={styles.sourceLinks} aria-label="Original source pages">{Object.values(story.media).map(item => <a key={item.figure} href={item.source} target="_blank" rel="noreferrer">{item.figure} <span aria-hidden="true">↗</span></a>)}</div>
             </details>
           </div>
-          <SceneAnchor chapter="credits"/>
           <footer className={styles.endnote} data-protect data-choreography="credit"><span>{review.owner}</span><span>FORM / SYSTEM / MAKE</span></footer>
         </div>
       </section>
