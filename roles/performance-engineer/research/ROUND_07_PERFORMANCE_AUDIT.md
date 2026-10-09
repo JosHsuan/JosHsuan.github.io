@@ -1,5 +1,7 @@
 # Round 07: sustained performance and Safari stability
 
+**9 October follow-up:** The owner subsequently confirmed desktop browsing works but Safari still sometimes crashes. Round 07 therefore remains a partial improvement, not a physical-device resolution. [Round 08](../../uiux-designer/cases/bending-active-thesis/ROUND_08_VERIFICATION.md) records a separate measured viewport-allocation hot path and its targeted follow-up.
+
 Date: 2026-10-09. Inspected release: `5261c5eba83315b9b465b469a08fa35f60407544`.
 
 ## Reported failure and limits

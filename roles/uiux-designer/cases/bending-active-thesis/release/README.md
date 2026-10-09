@@ -16,6 +16,10 @@ The canonical site is `https://joshsuan.github.io/`. `/release.json` identifies 
 
 Full source geometry and existing fallback/quality controls are retained. Model/HDR transfer and triangle counts still exceed earlier mobile/source budgets. Physical phone performance is not certified. Original source attribution and year uncertainty remain visible; publication does not fabricate missing credits or engineering evidence.
 
+## Round 08 — mobile viewport stability, 9 October 2026
+
+The owner confirms desktop browsing works but Safari still sometimes crashes. The follow-up stabilizes the touch Canvas across browser-chrome height changes and corrects source fitting for a Canvas taller than the visible page. It retains Full effects and unchanged public assets. [Round 08 verification](../ROUND_08_VERIFICATION.md) distinguishes measured allocation-churn removal from the still-required physical-device check.
+
 ## Round 07 — rendering pressure and reading layers, 9 October 2026
 
 The existing 36 assets and story remain unchanged. The rear Canvas now sits beneath distinct rounded reading surfaces, with shared-light rims replacing foreground masks. Allocation guards, bounded sustained-pressure density relief, compact glyph sampling and controller/lifecycle cleanup reduce work while retaining source geometry and authored optics. [Round 07 verification](../ROUND_07_VERIFICATION.md) separates measured engine results from unverified physical Safari behavior.
