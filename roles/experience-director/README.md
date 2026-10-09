@@ -8,6 +8,7 @@ The missing responsibility was integration direction: deciding how content, scen
 - [Toolkit](toolkit.json): pinned upstream skill/MCP sources and role-local configuration.
 - [Verification](verification/README.md): actual role/config/MCP evidence; does not substitute for the parent case's browser review.
 - [Independent integration review](verification/INTEGRATION_REVIEW.md): observed first-build defects, coordinated corrections and inspected closure on the revised artifact.
+- [Round 07 layer refactor](research/ROUND_07_LAYER_REFACTOR.md): current cross-role contract for clear reading surfaces, sustained rendering and the owner-reported browser failure; implementation checks remain distinct from release acceptance.
 
 Run from this repository using the pinned toolchain:
 

@@ -4,7 +4,7 @@ This repository contains the reusable empty Next.js portfolio framework and the 
 
 Build the published home page with `pnpm build:pages` and verify it with `pnpm test:pages`. Output is `.pages-workspace/out/`, previewed at `http://127.0.0.1:4186/`. The canonical public URL is `https://joshsuan.github.io/`. Earlier local-review sections below preserve research history; they do not revoke the explicit publication request.
 
-Current [Round 06](roles/uiux-designer/cases/bending-active-thesis/ROUND_06_VERIFICATION.md) adds IBM Plex, interactive source diagrams, seven original CAD representations, autonomous chapter lighting/camera loops and direct model interaction. The published case is maintained separately from the empty framework.
+Current [Round 07](roles/uiux-designer/cases/bending-active-thesis/ROUND_07_VERIFICATION.md) preserves the IBM Plex/source-led presentation while bounding rendering allocations, reducing sustained rendering pressure and moving reading protection into clearly bounded DOM surfaces. Performance Engineer and Software Architect roles join the cross-discipline review. The published case is maintained separately from the empty framework.
 
 ## Source authority and language
 

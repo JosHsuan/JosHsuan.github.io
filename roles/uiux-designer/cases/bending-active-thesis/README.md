@@ -4,7 +4,15 @@
 
 Open [the local work page](http://127.0.0.1:4184/). It presents **Bending-Active Metal Panel Deformation**, the NCKU metal-panel thesis, separately from the later T3 bamboo project. The same case now also has an owner-authorized public release; the reusable portfolio framework and content arrays remain empty.
 
-## Current round 06 — autonomous source chapters
+## Current round 07 — bounded rendering and clear reading layers
+
+The single Canvas stays behind the document. Rounded graphite reading surfaces own contrast; shared chapter-light color and thin pointer-responsive rims connect them to the scene. Full-page foreground masks and GPU semantic cutouts are removed. Clear source apertures retain the actual models and their direct interaction. The existing materials, source geometry, camera/light score, entrances, black-mist diffusion and autonomous ASCII field remain.
+
+One renderer sizing boundary enforces physical pixel and dimension limits before every allocation, including intermediate canvas width/height assignments. Sustained slow delivered frames can reduce density through bounded stages while preserving optical CSS size and shared story time. The controller reuses DOM nodes, avoids unchanged publication and redundant hover raycasts, and composes page-cache/freeze/visibility suspension. Hidden asset completion waits before constructing scene GPU resources.
+
+The new [Performance Engineer](../../../performance-engineer/README.md) and [Software Architect](../../../software-architect/README.md) roles coordinate with [Experience Direction](../../../experience-director/research/ROUND_07_LAYER_REFACTOR.md) and the existing source/material/motion disciplines. See [Round 07 verification](ROUND_07_VERIFICATION.md) for measured results and the explicit physical-Safari verification limit.
+
+## Round 06 — historical autonomous source chapters
 
 The owner's explicit IBM Plex selection and [cross-role direction](../../../experience-director/research/ROUND_06_DIRECTION.md) now drive the published case. Plex Sans, Mono and Serif Italic are self-hosted under the included OFL. Rounded shadowboxes, bounded anticipation/overshoot entrances and orange-inverted photographs provide the information treatment; hover/focus and the source reader reveal unchanged originals.
 

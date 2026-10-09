@@ -14,9 +14,11 @@ These workspaces preserve the successive research, specialist tooling and local 
 | [3D Animation Designer](3d-animation-designer/README.md) | Verified shell/base layer separation and exact rest-pose rejoin | Integrated at 4184; closed source catalog |
 | [Information Designer](information-designer/README.md) | Source diagram meaning, vector interaction and evidence-preserving 3D explanation | Integrated public case |
 | [Interactive Experience Director](experience-director/README.md) | Cross-role direction, layer/story contract and rendered acceptance | Reviews the integrated case |
+| [Browser and GPU Performance Engineer](performance-engineer/README.md) | Sustained profiling, rendering budgets, resource stability and measured optical cost | Built public artifact; private raw profiles |
+| [Software Architect / Runtime Engineer](software-architect/README.md) | Runtime ownership, lifecycle, DOM work and refactoring without changing source evidence | Built public artifact and focused contract tests |
 | [Bending-Active Thesis case](uiux-designer/cases/bending-active-thesis/README.md) | Seven-chapter cinematic integration of the specialists' work | `http://127.0.0.1:4184/` |
 
-The review servers are opt-in local processes, not hosted deployments. Each role README describes its pinned tools, build commands, licences and verification limits. Existing test reports are dated evidence; a new checkout does not imply a fresh successful test run.
+The review servers are opt-in local processes, separate from the owner-authorized public thesis release. Each role README describes its tools, commands and verification limits. Existing test reports are dated evidence; a new checkout does not imply a fresh successful test run. The [Round 07 layer and refactoring review](experience-director/research/ROUND_07_LAYER_REFACTOR.md) reconciles the existing disciplines with the new performance/software roles.
 
 The [round-02 team](experience-director/research/ROUND_02_TEAM.md) and [layer contract](experience-director/research/ROUND_02_LAYER_CONTRACT.md) now describe the implemented local case, while retaining the earlier role-establishment checkpoint. The revision integrates optical focus/lens changes, chapter lighting, the actual 50-object source base, three-layer display separation, damped visual holds, HTML feedback and depth/luminance-driven ASCII with protected reading regions. It uses one persistent Canvas and camera writer. Decorative halo/contact-opacity catalog channels remain reserved; they are not claimed as independent rendered effects.
 
