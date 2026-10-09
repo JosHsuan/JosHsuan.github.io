@@ -35,6 +35,7 @@ const sources = [
   'components/cinematic.module.css', 'components/story-input.js', 'components/story-response.mjs',
   'components/render-budget.mjs', 'components/runtime-scheduler.mjs', 'components/dom-publisher.mjs', 'components/scene-visibility.mjs',
   'components/renderer-budget.mjs', 'components/render-pressure.mjs',
+  'components/source-viewport.mjs',
   'components/element-score.mjs', 'components/optical-score.mjs', 'components/scene-compositor.mjs',
   'components/scene-direction.mjs', 'components/vendor/cinematic-plan.mjs',
   'components/exhibition-stage.mjs', 'components/editorial-score.mjs',

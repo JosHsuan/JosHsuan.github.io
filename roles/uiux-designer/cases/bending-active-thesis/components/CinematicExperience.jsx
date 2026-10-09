@@ -10,6 +10,7 @@ import {sampleChapterScene} from './chapter-scene-score.mjs';
 import {createInspectionState, advanceInspection, setInspectionTarget, INSPECTION_DEFAULTS} from './inspection-state.mjs';
 import {createFrameScheduler} from './runtime-scheduler.mjs';
 import {createDOMPublisher} from './dom-publisher.mjs';
+import {resolveSourceViewport} from './source-viewport.mjs';
 import ModelInspector from './ModelInspector';
 import styles from './cinematic.module.css';
 
@@ -61,7 +62,7 @@ export default function CinematicExperience() {
     // offsetTop follows untransformed layout; rect + scrollY would feed our own
     // compensation back into anchors and cause drift on every ResizeObserver.
     const naturalY = element => {let y=0;for(let node=element;node;node=node.offsetParent)y+=node.offsetTop;return y;};
-    const ease = value => {const t=Math.min(1,Math.max(0,value));return t*t*t*(10+t*(-15+6*t));};
+    let canvasFrame={left:0,top:0,width:innerWidth,height:innerHeight};
     let plan, offsets=[], previous=0, controllerFrame=0, frameDelta=0, resumed=true, seekPending=false, semanticSeekPending=false, seekOnScroll=false, initialHash=!!location.hash, historyNavigation=null;
     let inspectionRevision=input.get().inspectionRevision??0, wasReduced=input.get().reduced;
     let preferenceKey='', pendingImpulse=0, touchY=null, pointerActive=false, latestScene=null, lastChapter=null;
@@ -78,6 +79,8 @@ export default function CinematicExperience() {
     scheduler.suspend('visibility',document.hidden);
     const measure = () => {
       if(disposed||(scheduler.suspended&&plan))return;
+      const frame=stage.current?.getBoundingClientRect();
+      canvasFrame=frame?.width&&frame?.height?{left:frame.left,top:frame.top,width:frame.width,height:frame.height}:{left:0,top:0,width:innerWidth,height:innerHeight};
       // Discrete resize/source hydration refreshes collections. No document-wide
       // selector walk is needed while a settled chapter keeps playing.
       planes=[...document.querySelectorAll('[data-feedback-plane]')].map(element=>{
@@ -184,13 +187,7 @@ export default function CinematicExperience() {
       const slotRects=new Map();
       modelSlots.forEach(slot=>{
         const id=slot.dataset.studyChapter,r=slot.getBoundingClientRect();slotRects.set(slot,r);
-        const top=Math.max(92,r.top),left=Math.max(16,r.left),right=Math.min(innerWidth-16,r.right),bottom=Math.min(innerHeight-(innerWidth<=780?86:28),r.bottom);
-        const height=bottom-top,width=right-left;
-        let weight=0,viewport={left:.08,top:.2,width:.84,height:.55};
-        if(height>innerHeight*.16&&width>100){
-          weight=ease((height/Math.max(1,r.height)-.35)/.5)*ease((height/innerHeight-.16)/.15);
-          viewport={left:left/innerWidth,top:top/innerHeight,width:width/innerWidth,height:height/innerHeight};
-        }
+        const {weight,viewport}=resolveSourceViewport(r,{width:innerWidth,height:innerHeight},canvasFrame);
         if(id)modelViewports[id]={viewport,weight};
         if(id===chapter.id){inspectionWeight=weight;inspectionViewport=viewport;}
       });
@@ -287,6 +284,7 @@ export default function CinematicExperience() {
     const resume=()=>{visibility();suspension('freeze',false);};
     const resizeWindow=()=>{resumed=true;measure();};
     const resize=new ResizeObserver(measure);sections.forEach(el=>resize.observe(el));
+    if(stage.current)resize.observe(stage.current);
     window.addEventListener('scroll',scroll,{passive:true});window.addEventListener('wheel',wheel,{passive:true});window.addEventListener('popstate',pop);document.addEventListener('pointerdown',press);document.addEventListener('pointerup',press);document.addEventListener('pointercancel',press);window.addEventListener('resize',resizeWindow);window.addEventListener('pointermove',move,{passive:true});
     window.addEventListener('touchstart',touchstart,{passive:true});window.addEventListener('touchmove',touchmove,{passive:true});window.addEventListener('touchend',touchend,{passive:true});window.addEventListener('touchcancel',touchend,{passive:true});window.addEventListener('thesis:representation',representation);
     document.documentElement.addEventListener('pointerleave',reset);window.addEventListener('blur',reset);document.addEventListener('visibilitychange',visibility);fine.addEventListener('change',reset);

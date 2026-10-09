@@ -19,3 +19,9 @@
 .readingTools{gap:10px}.readingTools button,.detailLabel select{border-radius:12px;box-shadow:0 6px 18px #0003,inset 0 1px #ffffff10}.stage canvas{background:transparent}.progress,.progress span{border-radius:2px}@media print{.stage{display:none}}
 
 .stage,.stage *{pointer-events:none!important}
+
+/* Touch browser chrome changes the visible height during scrolling. Keep the
+   expensive drawing surface at the large viewport height; reading and source
+   fitting still clip to the currently visible client area. Orientation and
+   actual window-size changes remain real resizes. Desktop sizing is unchanged. */
+@media(hover:none) and (pointer:coarse){.stage{bottom:auto;height:100vh;height:100lvh}}
