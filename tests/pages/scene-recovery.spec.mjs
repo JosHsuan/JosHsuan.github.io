@@ -55,7 +55,13 @@ test('context loss preserves reading and reload requires explicit 3D recovery',a
   await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(0,{timeout:WAIT});
   await expect.poll(()=>page.evaluate(key=>JSON.parse(sessionStorage.getItem(key)).status,SCENE_RECOVERY_KEY)).toBe('failed');
   await settle(page);
-  expect(await page.evaluate(()=>window.__story.inspect().scheduled)).toBe(false);
+  // Scene removal and fallback media can queue one final layout update after
+  // reading settles. Await the empty controller queue before checking idleness.
+  await page.waitForFunction(()=>!window.__story.inspect().scheduled,null,{timeout:WAIT});
+  const sample=()=>page.evaluate(()=>{const story=window.__story.inspect();return{
+    controller:story.controllerFrame,time:story.playback.activeSeconds,draws:story.pageField.draws,scheduled:story.scheduled,
+  };});
+  const held=await sample();await frames(page,8);expect(await sample()).toEqual(held);
   await page.reload();await expectStaticReading(page);await enableExplicitly(page);
   expect(errors).toEqual([]);
 });
