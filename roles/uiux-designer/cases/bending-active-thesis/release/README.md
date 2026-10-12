@@ -18,6 +18,8 @@ Full source geometry and existing fallback/quality controls are retained. Model/
 
 ## Round 10 — viewport holds and independent ASCII, 9 October 2026
 
+The owner authorized publishing the subsequent reviewed runtime integration on 12 October 2026. Its scoped event/command/state services, feature registration and director/presentation boundaries retain this visual target and the same 36 approved assets/story bytes. [The runtime verification record](../../../../software-architect/research/RUNTIME_REFACTOR_VERIFICATION.md) documents 207 portable passes, 2 conditional skips, the full integrated browser matrix, final cleanup regressions, 44 pixel-identical controlled capture pairs and matched real-time observations. Publication continues to require successful exact-commit CI and uses its existing artifact without rebuilding. Physical iPhone stability is not certified by the refactor.
+
 The public case restores the earlier viewport composition, separate scene/information triggers and a borderless held scene. A bounded 2D decorative layer keeps ASCII visible across the page, sharing the existing clock. Touch/iOS rendering reduces attachment cost and preserves a manual recovery path after a known failure or recent interrupted session. All 36 asset hashes and story bytes remain unchanged. See [Round 10 verification](../ROUND_10_VERIFICATION.md); physical iPhone crash resolution remains unverified.
 
 ## Historical Round 09 — moving contained Canvas, 9 October 2026

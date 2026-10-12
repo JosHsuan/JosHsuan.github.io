@@ -24,6 +24,8 @@ const artifactIndexSHA256=createHash('sha256').update(await (await fetch(base)).
 const report = {startedAt:new Date().toISOString(), engine, release:published, artifactIndexSHA256, os:`${platform()} ${osRelease()}`, cpu:cpus()[0]?.model,
   viewport, deviceScaleFactor, methodology:'Real wall clock; RAF histogram and bounded duration samples. Renderer memory values are resource counts; compositor bytes are estimated attachments, not total VRAM.',
   errors:[], crashes:[], samples:[], phases:[], lifecycle:{}, instrumentation:{rafReservoirLimit:4096,resourceSampleIntervalSeconds:5,cpuProfile:false,synchronousPerFrameGpuQueries:false}};
+report.instrumentation.fixedScenePose=options['fixed-pose']==='1';
+report.instrumentation.alignStoryTime=options['align-story-time']==='1';
 const browser = await ({chromium,webkit}[engine]).launch({headless:true});
 report.browserVersion = browser.version();
 const context = await browser.newContext({viewport,deviceScaleFactor,isMobile:engine==='webkit',hasTouch:engine==='webkit',reducedMotion:'no-preference'});
@@ -78,8 +80,14 @@ const phase = async (name,seconds,action) => {
 try {
   await page.goto(base,{waitUntil:'domcontentloaded',timeout:60000});
   await page.waitForFunction(()=>window.__thesis?.inspect().ready,{},{timeout:120000});
+  if(report.instrumentation.fixedScenePose)await page.evaluate(()=>window.__thesis.setOverrides({
+    stageU:.5/7,visualU:.5/7,playback:{chapterWeights:[1,0,0,0,0,0,0],phases:Array(7).fill(.32),activeSeconds:24,energy:0},
+  }));
   report.gpu=await page.evaluate(()=>{const canvas=document.querySelector('canvas'),gl=canvas?.getContext('webgl2');if(!gl)return null;const extension=gl.getExtension('WEBGL_debug_renderer_info');return {vendor:gl.getParameter(gl.VENDOR),renderer:gl.getParameter(gl.RENDERER),unmaskedVendor:extension?gl.getParameter(extension.UNMASKED_VENDOR_WEBGL):null,unmaskedRenderer:extension?gl.getParameter(extension.UNMASKED_RENDERER_WEBGL):null};});
-  await phase('warmup-full',15);
+  if(report.instrumentation.alignStoryTime){
+    const start=Date.now();await page.waitForFunction(()=>window.__story?.inspect().playback.activeSeconds>=15,null,{timeout:120000});
+    report.lifecycle.storyAlignedWarmup={elapsedSeconds:(Date.now()-start)/1000,activeSeconds:await page.evaluate(()=>window.__story.inspect().playback.activeSeconds)};
+  }else await phase('warmup-full',15);
   const traverse = offset => async elapsed => {
     const chapter=Math.floor(elapsed/12+offset)%7,progress=(elapsed%12)/12;
     await page.evaluate(({chapter,progress})=>{const sections=[...document.querySelectorAll('[data-story-chapter]')];const el=sections[chapter];let top=0;for(let node=el;node;node=node.offsetParent)top+=node.offsetTop;window.scrollTo({top:Math.max(0,top+Math.max(0,el.offsetHeight-innerHeight*.8)*progress),behavior:'instant'});},{chapter,progress});

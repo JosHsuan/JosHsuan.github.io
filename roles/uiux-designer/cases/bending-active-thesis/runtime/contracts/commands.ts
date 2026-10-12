@@ -1,0 +1,15 @@
+import type {RuntimeState,SourceSelection} from './state.ts';
+
+export type InteractionPatch = Partial<Pick<RuntimeState,'modelEngaged'|'modelRecovering'|'modelInteractionChapter'|'sourceSelection'>>;
+export type CommandMap = {
+  'preferences.apply': Pick<RuntimeState,'systemReduced'|'paused'|'sceneEnabled'|'sceneFailed'> & {sceneReady?: boolean};
+  'quality.set': {detail: RuntimeState['detail']};
+  'model.interact': InteractionPatch;
+  'model.select': SourceSelection & {modelRecovering?: boolean};
+};
+export type RuntimeEvents = {
+  stateChanged: {version:number;previous:RuntimeState;current:RuntimeState};
+  representationChanged: {selection:SourceSelection|null;version:number};
+  representationResolved: {chapterId:string;index:number;representationId:string;label:string;pinned:boolean};
+  layoutInvalidated: {reason:string;resumed:boolean};
+};

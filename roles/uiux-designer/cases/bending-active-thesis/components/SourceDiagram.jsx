@@ -1,6 +1,7 @@
 'use client';
 
-import {memo, useEffect, useId, useRef, useState} from 'react';
+import {memo, useEffect, useId, useMemo, useRef, useState} from 'react';
+import {useExperienceInput} from '../runtime/ExperienceProvider';
 import styles from './source-diagram.module.css';
 
 const TITLES = {library: 'Function library', miura: 'Miura fold anatomy', workflow: 'From geometry to fabrication'};
@@ -27,100 +28,27 @@ const NativeDrawing = memo(function NativeDrawing({data, prefix}) {
 
 /** Discrete source selection only. The shared chapter controller owns time. */
 export default function SourceDiagram({kind = 'library', title, className = ''}) {
+  const input=useExperienceInput();
   const validKind = Object.hasOwn(TITLES, kind) ? kind : 'library';
-  const frame = useRef(null), pinned = useRef(null), hover = useRef(null), dataRef = useRef(null), presented = useRef(0);
+  const frame = useRef(null);
   const [data, setData] = useState(null);
   const id = useId().replaceAll(':', '');
   const heading = title || TITLES[validKind];
 
-  function paint(index, announce = false) {
-    const root = frame.current, source = dataRef.current;
-    if (!root || !source?.groups.length) return;
-    const selected = ((Number(index) || 0) % source.groups.length + source.groups.length) % source.groups.length;
-    root.dataset.diagramSelection = source.groups[selected].id;
-    root.querySelectorAll('[data-diagram-index]').forEach(element => {
-      const active = Number(element.dataset.diagramIndex) === selected;
-      element.dataset.diagramActive = String(active);
-      if (element.tagName === 'BUTTON') element.setAttribute('aria-pressed', String(active));
-    });
-    const caption = root.querySelector('[data-diagram-caption]');
-    if (caption) caption.textContent = source.groups[selected].description;
-    if (announce) {
-      const live = root.querySelector('[data-diagram-announcement]');
-      if (live) live.textContent = `${source.groups[selected].label}. ${source.groups[selected].description}`;
-    }
-  }
-
-  function automaticIndex() {
-    const root = frame.current;
-    // A visible source owns its matching workflow highlight. When the bounded
-    // Canvas leaves, the existing controller's chapter phase keeps the readable
-    // SVG alive without requesting a WebGL frame or starting another clock.
-    return validKind === 'workflow' && root?.dataset.sourcePresented === 'true'
-      ? presented.current : Number(root?.dataset.autonomousIndex ?? 0);
-  }
-
-  function restore() {
-    paint(pinned.current ?? hover.current ?? automaticIndex());
-  }
-
-  function activate(index) {
-    pinned.current = index;
-    paint(index, true);
-    const group = dataRef.current?.groups[index];
-    if (validKind === 'workflow' && Number.isInteger(group?.representation)) {
-      window.dispatchEvent(new CustomEvent('thesis:representation', {detail: {chapterId: 'system', index: group.representation}}));
-    }
-  }
-
-  useEffect(() => {
-    const abort = new AbortController();
-    fetch(`${ASSETS}${validKind}.json`, {signal: abort.signal})
-      .then(response => {if (!response.ok) throw new Error('Diagram unavailable'); return response.json();})
-      .then(source => {
-        if (source.version !== 1 || source.kind !== validKind || !Array.isArray(source.groups) || !Array.isArray(source.paths)) throw new Error('Invalid diagram');
-        dataRef.current = source;
-        pinned.current = null;
-        hover.current = null;
-        setData(source);
-      })
-      .catch(() => {/* The complete static source SVG remains available. */});
-    return () => abort.abort();
-  }, [validKind]);
-
-  useEffect(() => {
-    if (!data || !frame.current) return;
-    const root = frame.current;
-    const update = () => {
-      if (pinned.current !== null || hover.current !== null) return;
-      paint(automaticIndex());
-    };
-    update();
-    const observer = new MutationObserver(update);
-    observer.observe(root, {attributes: true, attributeFilter: ['data-autonomous-index', 'data-source-presented']});
-    const followPresentation = event => {
-      if (validKind !== 'workflow' || event.detail?.chapterId !== 'system') return;
-      const index = data.groups.findIndex(group => group.representation === event.detail.index);
-      if (index < 0) return;
-      presented.current = index;
-      if (event.detail.pinned === false) {pinned.current = null; hover.current = null;}
-      // Actual displayed source has priority while its surface is presented.
-      // Offscreen warm-up events must not replace the shared-phase SVG state.
-      if (root.dataset.sourcePresented === 'true') paint(index);
-      else update();
-    };
-    window.addEventListener('thesis:representation-presented', followPresentation);
-    // Source loading changes no outer geometry, but a new core may need measuring.
-    window.dispatchEvent(new Event('resize'));
-    return () => {observer.disconnect(); window.removeEventListener('thesis:representation-presented', followPresentation);};
-  }, [data, validKind]);
+  const manager=useMemo(()=>input.features.create('diagram',{kind:validKind,getRoot:()=>frame.current,onData:setData,
+    requestLayout:()=>input.invalidateLayout('diagram-'+validKind)}),[validKind,input]);
+  useEffect(()=>input.features.connect('diagram.load.'+validKind,()=>{
+    const abort=new AbortController();void manager.load({signal:abort.signal});
+    return()=>{abort.abort();manager.cancelLoad();};
+  }),[input,validKind,manager]);
+  useEffect(()=>input.features.connect('diagram.'+validKind,()=>manager.connect()),[input,manager,validKind,data]);
 
   const available = data?.kind === validKind ? data : null;
   const paths = available ? new Map(available.paths.map(path => [path.id, path])) : null;
   return <figure ref={frame} className={`${styles.frame} ${className}`} data-source-diagram={validKind}
     data-diagram-count={available?.groups.length ?? (validKind === 'library' ? 11 : validKind === 'miura' ? 3 : 4)}
-    onKeyDown={event => {if (event.key === 'Escape') {pinned.current = null; hover.current = null; restore();}}}
-    onBlur={event => {if (!event.currentTarget.contains(event.relatedTarget)) {hover.current = null; restore();}}}>
+    onKeyDown={manager.key}
+    onBlur={manager.blur}>
     <figcaption className={styles.heading} data-protect data-choreography="caption">
       <span className={styles.eyebrow}>Source study</span>
       <h3 id={`${id}-title`}>{heading}</h3>
@@ -133,9 +61,9 @@ export default function SourceDiagram({kind = 'library', title, className = ''})
           <NativeDrawing data={available} prefix={id}/>
           {available.groups.map((group, index) => <g key={group.id} id={`${id}-${group.id}`} className={styles.highlight}
             data-diagram-index={index} data-diagram-active="false" aria-hidden="true"
-            onPointerEnter={event => {if (validKind !== 'workflow' && event.pointerType !== 'touch') {hover.current = index; paint(index);}}}
-            onPointerLeave={() => {hover.current = null; restore();}}
-            onClick={() => activate(index)}>
+            onPointerEnter={event => {if (validKind !== 'workflow' && event.pointerType !== 'touch') {manager.hover(index);}}}
+            onPointerLeave={() => {manager.leave();}}
+            onClick={() => manager.activate(index)}>
             {group.paths.length ? group.paths.map(pathId => <path key={pathId} className={styles.trace} d={paths.get(pathId)?.attrs.d}/>)
               : <rect className={styles.node} x={group.bounds[0]} y={group.bounds[1]} width={group.bounds[2]-group.bounds[0]} height={group.bounds[3]-group.bounds[1]} rx="12"/>}
             {validKind === 'library' ? <path className={styles.curveHit} d={paths.get(group.paths[0])?.attrs.d}/>
@@ -148,8 +76,8 @@ export default function SourceDiagram({kind = 'library', title, className = ''})
       <div className={styles.choices} role="group" aria-label={`Select ${heading.toLowerCase()}`}>
         {available.groups.map((group, index) => <button type="button" key={group.id} data-diagram-index={index} data-diagram-active="false"
           aria-controls={`${id}-${group.id}`} aria-pressed="false"
-          onFocus={() => {if (validKind !== 'workflow') {hover.current = index; paint(index);}}} onClick={() => activate(index)}><span data-choreography="nav">{group.label}</span></button>)}
-        <button type="button" className={styles.follow} onClick={() => {pinned.current = null; hover.current = null; restore();}}><span data-choreography="nav">Follow chapter</span></button>
+          onFocus={() => {if (validKind !== 'workflow') {manager.hover(index);}}} onClick={() => manager.activate(index)}><span data-choreography="nav">{group.label}</span></button>)}
+        <button type="button" className={styles.follow} onClick={() => {manager.follow();}}><span data-choreography="nav">Follow chapter</span></button>
       </div>
       <p className={styles.caption} data-choreography="prose">
         <span data-diagram-caption>{available.groups[0].description}</span>

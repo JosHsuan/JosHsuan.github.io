@@ -1,6 +1,7 @@
 import CinematicExperience from '../components/CinematicExperience';
 import EvidenceInspector from '../components/EvidenceInspector';
 import SourceDiagram from '../components/SourceDiagram';
+import {ExperienceProvider} from '../runtime/ExperienceProvider';
 import review from '../release/story.json';
 import styles from './page.module.css';
 
@@ -41,7 +42,7 @@ function Paragraphs({ paragraphs }) {
 }
 
 export default function Page() {
-  return <>
+  return <ExperienceProvider>
     <CinematicExperience />
     <EvidenceInspector items={evidence} />
     <a href="#main" className={styles.skip}>Skip to the study</a>
@@ -149,5 +150,5 @@ export default function Page() {
         </div>
       </section>
     </main></div>
-  </>;
+  </ExperienceProvider>;
 }

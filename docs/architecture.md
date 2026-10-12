@@ -8,7 +8,7 @@
 |---|---|
 | Owner | JosHsuan Chao |
 | Audience | The owner, collaborating developers, and coding agents |
-| Revision | **2.7 — 9 October 2026; viewport scene holds and independent page ASCII** |
+| Revision | **2.8 — 10 October 2026; scoped Bending-Active runtime integration** |
 | Language | English for project documentation and future website content; Traditional Chinese for discussion with the owner |
 | Scope | Portfolio, Research & Development, About/CV, Contact, and selected interactive project stories |
 | Delivery baseline | Next.js static export to GitHub Pages; no paid domain, paid storage, or continuously running backend required for the initial release |
@@ -19,6 +19,8 @@
 | Materials preparation root | `D:\JosHsuan_Website\_private\portfolio-preparation` — designated source for all project, CV, and content preparation |
 
 ## Executive decision
+
+**Local runtime refactor — 10 October 2026:** The owner authorized phased Bending-Active implementation and local visualization while preserving the current visuals, content and interactions. [Runtime design and implementation mapping](../roles/software-architect/research/BENDING_ACTIVE_RUNTIME_DESIGN.md) separates scoped events, commands, discrete state, feature lifetimes, frame orchestration and presentation. [The verification record](../roles/software-architect/research/RUNTIME_REFACTOR_VERIFICATION.md) identifies accepted artifacts and measured limits. Existing chapter/inspection/optical samplers, demand rendering, the independent 2D field and approved public inputs remain. This selected case uses a small application-owned state/command kernel; it does not migrate the root framework or add a live backend. That local checkpoint excluded publication. On 12 October 2026 the owner explicitly authorized commit, push and deployment, retaining the successful exact-commit CI artifact requirement.
 
 **Viewport scene holds — 9 October 2026:** The owner rejected the bounded-card visual result and selected Round 08 as the presentation target. [Decision 0008](decisions/0008-viewport-thesis-holds.md) restores a borderless viewport scene, exact chapter holds with separate information triggers, and an independent bounded 2D ASCII overlay. One retained WebGL context, one camera writer and one controller clock remain. Touch attachment budgets and interrupted-session recovery reduce sustained-rendering risk; source geometry and Full materials/optics remain. [Round 10 verification](../roles/uiux-designer/cases/bending-active-thesis/ROUND_10_VERIFICATION.md) records measured evidence and physical-device limits. The same-commit Pages publication gate is unchanged.
 

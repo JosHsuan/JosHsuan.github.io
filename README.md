@@ -6,6 +6,8 @@ Build the published home page with `pnpm build:pages` and verify it with `pnpm t
 
 Current [Round 10](roles/uiux-designer/cases/bending-active-thesis/ROUND_10_VERIFICATION.md) restores the Round 08 viewport composition with borderless chapter holds and an independent full-page ASCII layer. Scene and information triggers are separate; one controller supplies their shared clock. Mobile attachment budgets and interrupted-session recovery address sustained-rendering risk without shrinking the scene into a card. [Decision 0008](docs/decisions/0008-viewport-thesis-holds.md) supersedes Round 09 placement. Physical iPhone crash resolution remains unverified.
 
+The owner subsequently authorized a staged local [Bending-Active runtime refactor](roles/software-architect/research/BENDING_ACTIVE_RUNTIME_DESIGN.md): scoped events, explicit feature registration, validated discrete commands/state, and separate frame/presentation services. The [verification record](roles/software-architect/research/RUNTIME_REFACTOR_VERIFICATION.md) records artifact-specific tests, pixel comparisons and performance evidence. The existing story, assets and presentation remain the comparison target. The local implementation checkpoint excluded publication; on 12 October 2026 the owner explicitly authorized commit, push and GitHub Pages deployment through the existing same-commit validation gate.
+
 ## Source authority and language
 
 | Responsibility | Primary source |

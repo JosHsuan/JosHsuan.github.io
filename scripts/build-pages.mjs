@@ -29,6 +29,20 @@ assert.equal(path.basename(work), '.pages-workspace');
 await rm(work, {recursive: true, force: true});
 await mkdir(work, {recursive: true});
 const sources = [
+  'tsconfig.json', 'runtime/ExperienceProvider.jsx',
+  'runtime/core/DisposableScope.ts', 'runtime/core/EventManager.ts',
+  'runtime/features/ModelManager.mjs', 'runtime/features/EvidenceManager.mjs',
+  'runtime/features/DiagramManager.mjs',
+  'runtime/features/LifecycleManager.mjs',
+  'runtime/features/ReadingManager.mjs',
+  'runtime/RuntimeInput.ts', 'runtime/contracts/state.ts', 'runtime/contracts/commands.ts',
+  'runtime/core/StateStore.ts', 'runtime/core/FrameStore.ts',
+  'runtime/core/TransactionEngine.ts', 'runtime/core/CommandRouter.ts',
+  'runtime/orchestration/ExperienceDirector.mjs',
+  'runtime/presentation/LayoutScheduler.ts', 'runtime/presentation/DOMPresenter.ts',
+  'runtime/presentation/SceneRuntime.mjs',
+  'runtime/presentation/EditorialPresenter.mjs',
+  'runtime/RuntimeRoot.mjs', 'runtime/core/FeatureRegistry.ts', 'runtime/core/Registrar.ts',
   'app/page.jsx', 'app/layout.jsx', 'app/globals.css', 'app/page.module.css',
   'components/CinematicExperience.jsx', 'components/CinematicScene.jsx',
   'components/EvidenceInspector.jsx', 'components/evidence-inspector.module.css',
