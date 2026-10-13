@@ -132,7 +132,7 @@ test('engagement resolves a retargeted or in-flight chapter before freezing its 
   assert.deepEqual(inflight, held, 'settled same-chapter engagement changes no pose or clock bookkeeping');
 });
 
-test('hidden, resumed and stale gaps discard elapsed time while ordinary heavy frames integrate exactly', () => {
+test('hidden and resumed gaps discard elapsed time while slow active frames integrate exactly', () => {
   const state = createChapterPlayback();
   advance(state, .5, {impulse: 0});
   const time = state.activeSeconds;
@@ -142,13 +142,14 @@ test('hidden, resumed and stale gaps discard elapsed time while ordinary heavy f
   advanceChapterPlayback(state, 600, {resumed: true});
   near(state.activeSeconds, time);
   assert.equal(state.needsFrame, true);
-  advanceChapterPlayback(state, 2);
-  near(state.activeSeconds, time);
+  advanceChapterPlayback(state, 2, {chapter:'system'});
+  near(state.activeSeconds, time+2);
+  assert.deepEqual(state.chapterWeights,[0,0,1,0,0,0,0]);
   const a = createChapterPlayback(), b = createChapterPlayback();
   advanceChapterPlayback(a, 0, {impulse: .75});
   advanceChapterPlayback(b, 0, {impulse: .75});
-  advanceChapterPlayback(a, .5);
-  advance(b, .5);
+  advanceChapterPlayback(a, 2);
+  advance(b, 2);
   near(a.activeSeconds, b.activeSeconds);
   near(a.boost, b.boost);
 });

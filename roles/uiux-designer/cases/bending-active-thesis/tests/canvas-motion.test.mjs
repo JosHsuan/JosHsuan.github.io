@@ -111,13 +111,27 @@ test('reversal preserves the displayed pose, cancels old intent, and completes a
   advanceFor(state,1.11,input(2500));assert.equal(state.opacity,1);assert(state.settled);
 });
 
-test('resume and renderer wait freeze active time; large frame gaps never finish a passage',()=>{
+test('resume and renderer wait freeze active time even across large gaps',()=>{
   const state=advanceCanvasMotion(createCanvasMotion(),0,input(2000));
   advanceCanvasMotion(state,.2,input(2900));const pose={...state.pose},elapsed=state.transition.elapsed;
-  for(const options of [{resumed:true},{paused:true},{}]){
+  for(const options of [{resumed:true},{paused:true}]){
     advanceCanvasMotion(state,4,input(2900,options));assert.deepEqual(state.pose,pose);assert.equal(state.transition.elapsed,elapsed);
   }
   advanceFor(state,.8,input(2900));assert(state.settled);assert.equal(state.opacity,0);
+});
+
+test('delivered active frames slower than one hertz still finish and close the latest passage',()=>{
+  const state=advanceCanvasMotion(createCanvasMotion(),0,input(1500));
+  advanceCanvasMotion(state,0,input(4000));const id=state.request.id;
+  advanceCanvasMotion(state,1.3166,input(4000));
+  assert.equal(state.chapter,'system');assert.equal(state.mode,'entry');
+  near(state.transition.elapsed,1.3166-.95);
+  assert(!state.settled);assert(state.opacity>0&&state.opacity<1);
+  advanceCanvasMotion(state,1.3166,input(4000));
+  assert.deepEqual(visual(state),{x:0,y:0,scale:1,opacity:1,mode:'hold'});
+  assert(state.settled);assert.equal(state.request.id,id);
+  assert.deepEqual(state.events.map(e=>[e.id,e.status]),[[id,'completed']]);
+  advanceCanvasMotion(state,4,input(4000));assert.deepEqual(state.events,[]);
 });
 
 test('seek, Reduced and explicit inspection show a useful still with exactly one terminal event',()=>{

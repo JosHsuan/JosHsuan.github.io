@@ -81,7 +81,9 @@ export function advanceChapterPlayback(state, dt, {
     state.transitionElapsed = TRANSITION_SECONDS;
   }
 
-  if (!state.needsFrame || resumed || dt > 1) {
+  // Lifecycle flags exclude hidden time. Slow delivered foreground frames
+  // still advance the chapter weights needed by the Canvas paint gate.
+  if (!state.needsFrame || resumed) {
     state.boost = 0;
     state.direction = 0;
     return state;

@@ -33,6 +33,30 @@ test('native scroll triggers a timed Canvas departure and completion follows the
  }finally{await page.clock.resume();}
 });
 
+test('slow delivered foreground frames finish the Canvas and matching scene without another scroll',async({page})=>{
+ test.setTimeout(scenarioTimeout(120000));await page.clock.install();await loadScene(page);await centerStudy(page,'form');
+ const canvas=await page.locator('[data-cinematic-stage] canvas').elementHandle();
+ const target=await page.evaluate(()=>window.__story.inspect().canvasPlacement.end+innerHeight*.3);
+ await page.clock.pauseAt(new Date(Date.now()+3600000));
+ try{
+  await page.evaluate(y=>scrollTo({top:y,behavior:'instant'}),target);
+  const samples=[];
+  // Deliver one RAF per 1.317 active seconds: the Full-mode CI failure cadence.
+  // Real lifecycle/renderer gates still run; no runtime state is overwritten.
+  for(let i=0;i<8;i++){
+   await page.clock.fastForward(1317);
+   samples.push(await page.evaluate(()=>{const s=window.__story.inspect();return{delta:s.frameDelta,placement:s.canvasPlacement,waiting:s.canvasAwaitingPaint,events:s.canvasTransitions,rendered:window.__thesis.inspect().representation?.chapterId,opacity:Number(document.querySelector('[data-cinematic-stage]').style.opacity)};}));
+  }
+  expect(samples.some(s=>s.delta>1)).toBe(true);
+  const last=samples.at(-1);
+  expect(last.placement).toMatchObject({chapter:'system',mode:'hold',opacity:1,scale:1,settled:true});
+  expect(last.waiting).toBe(false);expect(last.rendered).toBe('system');expect(last.opacity).toBe(1);
+  expect(last.events.open).toBe(null);expect(last.events.pending).toBe(null);
+  expect(last.events.history.filter(e=>e.id===last.placement.request.id).map(e=>e.status)).toEqual(['requested','completed']);
+  expect(await page.evaluate(el=>document.querySelector('[data-cinematic-stage] canvas')===el,canvas)).toBe(true);
+ }finally{await page.clock.resume();}
+});
+
 test('information windows share one fluid surface while native reading, focus and Reduced remain intact',async({page})=>{
  test.setTimeout(scenarioTimeout(120000));const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.clock.install();await loadScene(page);
  await centerStudy(page,'system');

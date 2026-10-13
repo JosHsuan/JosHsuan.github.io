@@ -67,6 +67,9 @@ Scroll distance and the chapter playback's wheel-tempo boost never supply passag
 time. Repeated samples within the same intent do not restart it. Remaining active
 time is carried across an exit/entry boundary, including low frame rates. A new
 chapter does not replace a still-visible old chapter during ordinary scrolling.
+Delivered foreground frames over one second still advance both the passage and
+chapter weights. Only explicit pause, visibility/resume and renderer-wait gates
+exclude their respective elapsed time; frame duration alone is not suspension.
 
 The pure motion state produces a per-update outbox. After DOM writes and frame
 publication, `CanvasTransitionEvents` publishes `canvasTransition` facts through
@@ -192,6 +195,20 @@ actual computed `clip-path: path(...)`, motion and opacity one. All nine window
 integration scenarios passed locally across the three browser projects after
 this test-only correction. Runtime code and the inspected fluid artifact did not
 change.
+
+The next hosted run passed 116 of 117 scenarios but exposed a real low-frame-rate
+stall in Full-mode Chromium: delivered frames of about 1.3 seconds were discarded
+by both the Canvas passage and chapter playback. The passage could not finish,
+and unchanged chapter weights could also prevent the renderer acknowledgment.
+Both now consume delivered foreground time while retaining their explicit
+lifecycle gates. A regression first reproduced the stall, then passed after the
+fix. A controlled-clock browser scenario also delivers one frame every 1.317
+seconds and requires the matching scene, visible settled Canvas, and exactly one
+completion after native scrolling stops. This is not an increase to test timeouts.
+The timing fix passed `pnpm check`, 230 portable tests (2 existing conditional
+skips), the 80-file/36-asset public build audit and the new browser scenario in
+all three projects. Complete final browser and hosted results are recorded with
+the delivery; earlier candidate digests above predate this runtime correction.
 
 The release must pass the complete selected hosted matrix and required gate at
 the pushed commit before the manual Pages workflow can publish its tested output.

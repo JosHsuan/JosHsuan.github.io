@@ -148,7 +148,10 @@ export function advanceCanvasMotion(state, dt, options = {}) {
     if(!state.request.completed){state.request.completed=true;event(state,'completed',seek?'seek':reducedMotion?'reduced':'still');}
   }else{
     reconcile(state);
-    let remaining=!paused&&!resumed&&dt<=1?dt:0;
+    // The director explicitly marks suspension/resume and renderer waits. A
+    // delivered foreground frame can take over one second on a software GPU;
+    // discarding every such delta would leave the request open indefinitely.
+    let remaining=!paused&&!resumed?dt:0;
     while(state.transition&&remaining>0){
       const transition=state.transition,step=Math.min(remaining,transition.duration-transition.elapsed);
       remaining-=step;
