@@ -3,6 +3,7 @@
 import {memo, useEffect, useId, useMemo, useRef, useState} from 'react';
 import {useExperienceInput} from '../runtime/ExperienceProvider';
 import styles from './source-diagram.module.css';
+import InformationSkin from './InformationSkin';
 
 const TITLES = {library: 'Function library', miura: 'Miura fold anatomy', workflow: 'From geometry to fabrication'};
 const HINTS = {library: 'Follow a length trace.', miura: 'Read the net, folds and form.', workflow: 'Follow the source. Select a stage to compare its model.'};
@@ -45,10 +46,11 @@ export default function SourceDiagram({kind = 'library', title, className = ''})
 
   const available = data?.kind === validKind ? data : null;
   const paths = available ? new Map(available.paths.map(path => [path.id, path])) : null;
-  return <figure ref={frame} className={`${styles.frame} ${className}`} data-source-diagram={validKind}
+  return <figure ref={frame} className={`${styles.frame} ${className}`} data-source-diagram={validKind} data-information-window="source-diagram"
     data-diagram-count={available?.groups.length ?? (validKind === 'library' ? 11 : validKind === 'miura' ? 3 : 4)}
     onKeyDown={manager.key}
     onBlur={manager.blur}>
+    <InformationSkin/>
     <figcaption className={styles.heading} data-protect data-choreography="caption">
       <span className={styles.eyebrow}>Source study</span>
       <h3 id={`${id}-title`}>{heading}</h3>

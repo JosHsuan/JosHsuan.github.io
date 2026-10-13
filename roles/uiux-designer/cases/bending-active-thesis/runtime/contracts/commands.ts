@@ -12,4 +12,5 @@ export type RuntimeEvents = {
   representationChanged: {selection:SourceSelection|null;version:number};
   representationResolved: {chapterId:string;index:number;representationId:string;label:string;description:string;count:number;pinned:boolean};
   layoutInvalidated: {reason:string;resumed:boolean};
+  canvasTransition: {id:number;chapter:string;target:'hold'|'away';status:'requested'|'completed'|'cancelled';reason?:string};
 };

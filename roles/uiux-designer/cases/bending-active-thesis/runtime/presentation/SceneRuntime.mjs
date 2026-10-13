@@ -13,7 +13,7 @@ import {sampleChapterScene, applyChapterLighting} from '../../components/chapter
 import {SOURCE_DIAGRAM_REVISION, prepareSourceFamilies, resolveSourceSelection, sampleSourceScenePose} from '../../components/source-scene-score.mjs';
 import {waitForSceneVisibility} from '../../components/scene-visibility.mjs';
 import {modelInformationSummary,modelAnnotationLabel} from '../../components/model-information.mjs';
-import {publishModelAnnotation} from './ModelAnnotationPresenter.mjs';
+import {publishModelAnnotation,placeModelAnnotation} from './ModelAnnotationPresenter.mjs';
 
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 async function loadSourceDiagrams(signal, manager) {
@@ -66,13 +66,36 @@ function prepareLayerCaptions(descriptions,selector='[data-layer-caption]',kind=
 export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,scene,invalidate,get}){
   const root=new T.Group(),data={current:null},frames={current:0},last={current:null},overrides={current:{}};
   const initialization={current:{phase:'loading',gpuInitializationAttempts:0}};
+  let paintedAnnotations=new Map(),annotationPublication=null;
+  const clearAnnotations=()=>{
+    for(const [study,painted] of paintedAnnotations)painted.representation.annotation=placeModelAnnotation(study,{anchor:null});
+    paintedAnnotations.clear();annotationPublication=null;
+  };
+  const refreshAnnotations=state=>{
+    const present=!state.hidden&&!state.sceneFailed&&state.sceneEnabled!==false&&state.canvasPresented&&state.canvasPlacement?.visible!==false;
+    const chapter=state.canvasPlacement?.chapter,publication=`${state.controllerFrame}:${!!present}:${chapter}`;
+    // Discrete input updates may notify several times within a controller
+    // frame. Only a fresh publication or a visibility/chapter change needs DOM.
+    if(publication===annotationPublication)return;
+    annotationPublication=publication;
+    const active=(study,painted)=>present&&!!painted.anchor&&study.isConnected&&chapter===painted.chapterId;
+    const canvasRect=[...paintedAnnotations].some(([study,painted])=>active(study,painted))?gl.domElement.getBoundingClientRect():null;
+    for(const [study,painted] of paintedAnnotations){
+      if(!active(study,painted)&&!painted.representation.annotation)continue;
+      painted.representation.annotation=placeModelAnnotation(study,{...painted,anchor:active(study,painted)?painted.anchor:null,canvasRect});
+    }
+  };
   return {root,
     connect(){
-      return input.subscribe(()=>{
+      const unsubscribe=input.subscribe(()=>{
         const state=input.get();
+        // Director publishes after stage and information DOM writes. Refresh
+        // both endpoints now, even if Fiber next paints on a later RAF.
+        refreshAnnotations(state);
         if(state.hidden||state.canvasPlacement?.visible===false||state.paused||state.systemReduced||state.modelEngaged||state.modelRecovering)runtime.pressure.suspend('inactive');
         if(!state.hidden&&(state.canvasPlacement?.visible!==false||!data.current?.ready))invalidate();
       });
+      return ()=>{unsubscribe();clearAnnotations();};
     },
     viewportChanged(){runtime.pressure.suspend('viewport-change');},
     initialize(){
@@ -112,6 +135,7 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
       const lights = {}, adapters = [], layers = [], diagramNodes = new Map();
       cleanup = () => {
         if (disposed) return; disposed = true;
+        clearAnnotations();
         root.remove(gltf.scene, diagrams.scene, rig); disposeObject(gltf.scene); disposeObject(diagrams.scene); disposeObject(rig);
         if (exhibition) {root.remove(exhibition.group); exhibition.dispose();}
         Object.values(lights).forEach(light => light.dispose?.());
@@ -311,6 +335,7 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
       d.compositor.render(scene, camera, optics, {width: size.width, height: size.height, dpr, requestedDpr:d.renderBudget.requestedDpr, samples: detail === 'full' && debug.samples !== 0 ? runtime.profile.maxSamples : 0,independentField:!!state.independentAscii});
       // Publish only after a successful scene paint, including autonomous
       // source changes. Reconcile readiness renders without per-frame React state.
+      const nextAnnotations=new Map();
       document.querySelectorAll('[data-model-study]').forEach(study=>{study.dataset.modelActive=String(study.dataset.studyChapter===selected.chapterId);});
       for(const surface of document.querySelectorAll(`[data-model-viewport][data-study-chapter="${selected.chapterId}"]`)) {
         if(surface.dataset.sourceIndex!==String(selected.index))surface.dataset.sourceIndex=String(selected.index);
@@ -320,11 +345,14 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
           const node=study?.querySelector(selector);if(node&&node.textContent!==text)node.textContent=text;
         }
         representation.annotation=publishModelAnnotation(study,{points:entry?.record.framingSupport.points,mesh:entry?.mesh,camera,width:size.width,height:size.height,present,canvasRect:gl.domElement.getBoundingClientRect()});
+        nextAnnotations.set(study,{anchor:representation.annotation,width:size.width,height:size.height,chapterId:selected.chapterId,representation});
         if(presentationKey!==d.presentationKey&&selected.pinned) {
           const announcement=study?.querySelector('[data-source-announcement]');
           if(announcement)announcement.textContent=`${label}. Comparison selected. Escape returns to the chapter.`;
         }
       }
+      for(const [study,painted] of paintedAnnotations)if(!nextAnnotations.has(study))painted.representation.annotation=placeModelAnnotation(study,{anchor:null});
+      paintedAnnotations=nextAnnotations;
       // Selection can name an absent source. Observe actual compiled programs,
       // including Full/Light variants, and discard the following delivery gap.
       d.seenPrograms ??= new WeakSet();
@@ -339,7 +367,7 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
       frames.current++;
       input.markPresented(state.controllerFrame??0,selected.chapterId);
       if (!d.ready) {d.ready = true; initialization.current.phase='ready'; queueMicrotask(onReady);}
-    } catch (error) {d.failed = true; console.error('Local scene rendering failed:', error.message); queueMicrotask(onFailure);}
+    } catch (error) {d.failed = true; clearAnnotations();console.error('Local scene rendering failed:', error.message); queueMicrotask(onFailure);}
 
     },
   };

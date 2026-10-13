@@ -95,11 +95,12 @@ test('native reading stays responsive without controller frames while the scene 
  }
 });
 
-test('text and images respond in perspective; focus, hashes, Pause and Reduced keep content reachable',async({page,isMobile})=>{
+test('information has one fluid surface; focus, hashes, Pause and Reduced keep content reachable',async({page,isMobile})=>{
  test.setTimeout(scenarioTimeout(180000));await load(page);await phase(page,'system',.45);await openSourceFigure(page);
  const source=page.locator('[data-inspect-figure="0"]'),media=source.locator('[data-feedback-plane]');await expect(media).toBeVisible();await source.scrollIntoViewIfNeeded();await settle(page);
- if(!isMobile){await media.hover({position:{x:15,y:15}});await settle(page);expect(Math.abs(await media.evaluate(el=>parseFloat(getComputedStyle(el).getPropertyValue('--feedback-x'))))).toBeGreaterThan(.3);expect(await media.evaluate(el=>getComputedStyle(el).transform)).not.toBe('none');await page.mouse.move(1,1);await settle(page);}
- await page.waitForFunction(()=>document.querySelector('[data-inspect-figure="0"] [data-feedback-plane]')?.dataset.choreographyPhase==='settled');
+ // The enclosing C3 information window owns material response; nested media
+ // no longer receives a second perspective/choreography writer.
+ if(!isMobile){await media.hover({position:{x:15,y:15}});await settle(page);expect(await media.evaluate(el=>getComputedStyle(el).transform)).toBe('none');await page.mouse.move(1,1);await settle(page);}
  // Reading settles independently of the final few hover-return frames.
  await expect.poll(()=>media.evaluate(el=>getComputedStyle(el).transform)).toBe('none');
  await source.focus();await settle(page);const focus=await source.boundingBox();expect(focus.y+focus.height).toBeGreaterThan(90);expect(focus.y).toBeLessThan(await page.evaluate(()=>innerHeight));

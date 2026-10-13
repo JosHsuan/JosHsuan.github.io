@@ -39,3 +39,50 @@ html[data-cinematic-ready] [data-choreography-phase="settled"]{translate:none!im
 html[data-cinematic-ready] [data-choreography-phase="settled"]:not([data-feedback-plane]):not([data-choreography="nav"]),
 html[data-cinematic-ready] [data-feedback-plane]:not([data-choreography]):not([data-feedback-active]),
 html[data-cinematic-ready] [data-feedback-plane][data-choreography-phase="settled"]:not([data-feedback-active]){transform:none!important}
+
+/* C3 is one material response per information window. The decorative skin is
+   clipped; its sibling text, source pixels, hit areas and focus rings are not. */
+[data-information-window]{isolation:isolate}
+[data-information-window="evidence-caption"],[data-information-window="source-details"],[data-information-window="source-portal"]{position:relative}
+[data-information-skin]{display:none;pointer-events:none!important;user-select:none}
+html [data-information-window][data-information-ready]:not(details:not([open])){
+  background:transparent!important;border-color:transparent!important;box-shadow:var(--information-shadow,none)!important;
+}
+html [data-information-window="editorial"][data-information-ready]{outline-color:transparent}
+html [data-information-window][data-information-ready]>[data-information-skin]{
+  display:block;position:absolute;inset:0;z-index:-1;margin:0!important;padding:0!important;
+  background:var(--information-background);border-style:solid;
+  border-width:var(--information-border-width,0);border-color:var(--information-border-color,transparent);
+  border-radius:var(--information-radius,0px);box-shadow:var(--information-shadow,none);
+  clip-path:var(--information-skin-path,inset(0 round var(--information-radius,0px)));
+}
+/* Fixed paint overscan does not change any content or source Canvas dimensions. */
+[data-information-skin]::before{content:'';position:absolute;inset:-24px;z-index:-1;background:inherit;pointer-events:none}
+html [data-information-window][data-information-moving=true]{box-shadow:none!important}
+html [data-information-window][data-information-moving=true]>[data-information-skin]{border-color:transparent;box-shadow:none}
+html :is([data-information-window="editorial"],[data-information-window="source-diagram"])[data-information-moving=true]::before,
+html :is([data-information-window="editorial"],[data-information-window="source-diagram"])[data-information-moving=true]::after{opacity:0}
+html[data-cinematic-ready] body [data-information-window][data-information-ready]:not([data-information-nested]){
+  transform:translate3d(var(--information-x,0px),var(--information-y,0px),0) rotateZ(var(--information-rz,0deg))!important;
+  translate:none!important;rotate:none!important;scale:none!important;
+}
+html[data-cinematic-ready] body [data-information-window][data-information-ready] :is([data-choreography],[data-feedback-plane],[data-editorial-copy],[data-story-heading]):not([data-information-skin]){
+  transform:none!important;translate:none!important;rotate:none!important;scale:none!important;filter:none!important;
+}
+html[data-cinematic-ready] body [data-information-window][data-information-ready] [data-glyph-kind] svg>*,
+html[data-cinematic-ready] body [data-information-window][data-information-ready] :has(>[data-glyph-kind])::after{transform:none!important}
+html[data-cinematic-ready] body [data-information-window][data-information-ready]:focus-within{
+  transform:none!important;translate:none!important;rotate:none!important;scale:none!important;
+}
+html [data-information-window][data-information-ready]:focus-within>[data-information-skin]{clip-path:inset(0 round var(--information-radius,0px))!important}
+html[data-cinematic-ready] body [data-information-window][data-information-ready][data-information-moving=false],
+html[data-cinematic-static] body [data-information-window][data-information-ready]:not([data-information-nested]){transform:none!important}
+html[data-cinematic-static] [data-information-window]>[data-information-skin]{clip-path:inset(0 round var(--information-radius,0px))!important}
+@media(prefers-reduced-motion:reduce){
+  html[data-cinematic-ready] body [data-information-window][data-information-ready]:not([data-information-nested]){transform:none!important}
+  html [data-information-window]>[data-information-skin]{clip-path:inset(0 round var(--information-radius,0px))!important}
+}
+@media print{
+  html[data-cinematic-ready] body [data-information-window][data-information-ready]:not([data-information-nested]){transform:none!important}
+  html [data-information-window]>[data-information-skin]{display:none!important}
+}

@@ -14,7 +14,6 @@ export function projectModelAnnotation(points,matrixWorld,camera,width,height){
  return best;
 }
 export function publishModelAnnotation(study,{points,mesh,camera,width,height,present,canvasRect}){
- const svg=study.querySelector('[data-model-connector]'),label=study.querySelector('[data-model-annotation-label]');
  const same=mesh&&study.dataset.annotationSource===mesh.userData.representationId;
  const previous=same?Number(study.dataset.annotationSupport):NaN;
  const tracked=Number.isInteger(previous)&&points?.[previous];
@@ -23,8 +22,17 @@ export function publishModelAnnotation(study,{points,mesh,camera,width,height,pr
   if(tracked)anchor.index=previous;
   study.dataset.annotationSource=mesh.userData.representationId;study.dataset.annotationSupport=String(anchor.index);
  }
- svg.dataset.annotationVisible=String(!!anchor);
- if(!anchor)return null;
+ return placeModelAnnotation(study,{anchor,width,height,canvasRect});
+}
+
+// The anchor belongs to a successful scene paint. DOM-only passage/label motion
+// remaps that same projection; it must never sample an unpainted camera or mesh.
+export function placeModelAnnotation(study,{anchor,width,height,canvasRect}){
+ const svg=study?.querySelector('[data-model-connector]'),label=study?.querySelector('[data-model-annotation-label]');
+ if(!svg)return null;
+ const present=!!anchor&&!!label&&!!canvasRect&&width>0&&height>0;
+ svg.dataset.annotationVisible=String(present);
+ if(!present)return null;
  const outer=study.getBoundingClientRect(),caption=label.getBoundingClientRect();
  const screen={x:canvasRect.left-outer.left+anchor.x*canvasRect.width/width,y:canvasRect.top-outer.top+anchor.y*canvasRect.height/height};
  if(screen.x<0||screen.x>width||screen.y<0||screen.y>height){svg.dataset.annotationVisible='false';return {...anchor,screen,visible:false};}

@@ -74,19 +74,44 @@ test('permanent side information and source annotations stay beside the model an
  }
 });
 
-test('side information stays fixed during the existing scene exit and its leader uses the displayed Canvas position',async({page})=>{
- test.setTimeout(scenarioTimeout(120000));await loadScene(page);await centerStudy(page,'form');
+test('side information and its leader follow the displayed Canvas throughout the timed exit',async({page})=>{
+ test.setTimeout(scenarioTimeout(120000));await page.clock.install();await loadScene(page);await centerStudy(page,'form');
+ const canvas=await page.locator('[data-cinematic-stage] canvas').elementHandle();
  const panel=page.locator('[data-model-study][data-study-chapter="form"] [data-model-side-label]');
  const before=await panel.boundingBox();
  const exit=await page.evaluate(()=>{const p=window.__story.inspect().canvasPlacement;return p.holdEnd+(p.end-p.holdEnd)*.4;});
- await page.evaluate(y=>scrollTo({top:y,behavior:'instant'}),exit);await settle(page);
- expect(await page.evaluate(()=>window.__story.inspect().canvasPlacement.mode)).toBe('exit');
- const after=await panel.boundingBox();expect(after.x).toBeCloseTo(before.x,2);expect(after.y).toBeCloseTo(before.y,2);
- const sample=await page.evaluate(()=>{
-  const r=window.__thesis.inspect().representation,canvas=document.querySelector('[data-cinematic-stage] canvas'),display=canvas.getBoundingClientRect(),study=document.querySelector('[data-model-study][data-model-active="true"]'),outer=study.getBoundingClientRect();
-  const dot=study.querySelector('[data-model-anchor]');return {annotation:r.annotation,expectedX:display.left-outer.left+r.annotation.x*display.width/canvas.clientWidth,expectedY:display.top-outer.top+r.annotation.y*display.height/canvas.clientHeight,dotX:Number(dot.getAttribute('cx')),dotY:Number(dot.getAttribute('cy'))};
- });
- expect(sample.annotation.visible).toBe(true);expect(sample.dotX).toBeCloseTo(sample.expectedX,2);expect(sample.dotY).toBeCloseTo(sample.expectedY,2);
+ await page.clock.pauseAt(new Date(Date.now()+3600000));
+ try{
+  await page.evaluate(y=>scrollTo({top:y,behavior:'instant'}),exit);
+  const phases=[.15,.25,.30];let captured=0,requestId;
+  for(let frame=0;frame<100&&captured<phases.length;frame++){
+   await page.clock.runFor(16);
+   const sample=await page.evaluate(()=>{
+    const p=window.__story.inspect().canvasPlacement,r=window.__thesis.inspect().representation;
+    const canvas=document.querySelector('[data-cinematic-stage] canvas'),display=canvas.getBoundingClientRect();
+    const study=document.querySelector('[data-model-study][data-study-chapter="form"]'),outer=study.getBoundingClientRect();
+    const dot=study.querySelector('[data-model-anchor]'),caption=study.querySelector('[data-model-annotation-label]').getBoundingClientRect();
+    const points=study.querySelector('[data-model-leader]').getAttribute('points').trim().split(/\s+/).map(point=>point.split(',').map(Number));
+    return{p,annotation:r.annotation,visible:study.querySelector('[data-model-connector]').dataset.annotationVisible,
+     expectedX:display.left-outer.left+r.annotation.x*display.width/canvas.clientWidth,expectedY:display.top-outer.top+r.annotation.y*display.height/canvas.clientHeight,
+     dotX:Number(dot.getAttribute('cx')),dotY:Number(dot.getAttribute('cy')),end:points.at(-1),expectedEnd:[caption.left-outer.left-10,caption.top-outer.top+caption.height/2]};
+   });
+   if(sample.p.transition?.kind!=='exit'||sample.p.transition.elapsed<phases[captured])continue;
+   captured++;requestId??=sample.p.request.id;
+   expect(sample.p.request.id).toBe(requestId);expect(sample.p.scale).toBe(1);
+   expect(sample.visible).toBe('true');expect(sample.annotation.visible).toBe(true);
+   expect(sample.dotX).toBeCloseTo(sample.expectedX,2);expect(sample.dotY).toBeCloseTo(sample.expectedY,2);
+   expect(sample.end[0]).toBeCloseTo(sample.expectedEnd[0],2);expect(sample.end[1]).toBeCloseTo(sample.expectedEnd[1],2);
+   const after=await panel.boundingBox();expect(Math.abs(after.x-before.x)).toBeLessThanOrEqual(12.01);expect(Math.abs(after.y-before.y)).toBeLessThanOrEqual(12.01);
+  }
+  expect(captured).toBe(phases.length);
+  // Stopping native scroll must finish this passage, not leave a scrubbed pose.
+  await page.clock.runFor(1100);
+  const done=await page.evaluate(()=>window.__story.inspect());
+  expect(done.canvasPlacement).toMatchObject({mode:'exit',opacity:0,settled:true,scale:1});
+  expect(done.canvasTransitions.history.filter(event=>event.id===requestId).map(event=>event.status)).toEqual(['requested','completed']);
+  expect(await page.evaluate(el=>document.querySelector('[data-cinematic-stage] canvas')===el,canvas)).toBe(true);
+ }finally{await page.clock.resume();}
 });
 
 test('tablet source fits beside the reading copy and clear of fixed navigation',async({page})=>{

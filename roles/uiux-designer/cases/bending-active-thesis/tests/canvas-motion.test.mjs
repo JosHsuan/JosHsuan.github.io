@@ -53,74 +53,121 @@ test('every entry, hold and exit retraces the same screen pose on reverse scroll
   assert(forward.some(p => p.mode === 'exit' && p.x < -viewport.width * .5 && p.scale === 1));
 });
 
-test('caller-owned trigger damping agrees at 3, 30, 60 and 120 Hz and settles exactly', () => {
-  const results = [];
-  for (const rate of [3, 30, 60, 120]) {
-    const state = advanceCanvasMotion(createCanvasMotion(), 0, input(2500));
-    for (let frame = 0; frame < rate / 3; frame++) advanceCanvasMotion(state, 1 / rate, input(3100));
-    assert(state.sceneDocY > 2500 && state.sceneDocY < 3100);
-    results.push(state);
+// Event policy replaces the historical scroll-pose sampler above. These cases
+// verify elapsed-time behavior, independently of the geometric reference curve.
+const advanceFor=(state,seconds,options,rate=120)=>{
+  for(let time=0;time<seconds-1e-9;time+=1/rate)advanceCanvasMotion(state,Math.min(1/rate,seconds-time),options);
+  return state;
+};
+
+test('exit consumes fixed active time at different scroll speeds and frame rates',()=>{
+  const results=[];
+  for(const rate of [3,30,60,120]){
+    const state=advanceCanvasMotion(createCanvasMotion(),0,input(2000));
+    advanceCanvasMotion(state,0,input(2900));
+    const id=state.request.id;
+    advanceFor(state,1/3,input(3000),rate);
+    assert.equal(state.request.id,id,'scroll within the exit band does not restart the event');
+    assert.equal(state.mode,'exit');assert(state.opacity>0&&state.opacity<1);
+    results.push({...state.pose});
+    advanceFor(state,.7,input(3000),rate);
+    assert(state.settled);assert.equal(state.opacity,0);
   }
-  for (const state of results.slice(1)) {
-    near(state.sceneDocY, results[0].sceneDocY); near(state.x, results[0].x); near(state.opacity, results[0].opacity);
-  }
-  const state = results[0];
-  for (let frame = 0; frame < 120; frame++) advanceCanvasMotion(state, 1 / 60, input(3100));
-  assert(state.settled); assert.equal(state.sceneDocY, 3100);
-  const saved = structuredClone(state);
-  for (let frame = 0; frame < 10; frame++) advanceCanvasMotion(state, 1 / 60, input(3100));
-  assert.deepEqual(state, saved);
+  for(const result of results.slice(1))for(const key of ['x','y','opacity'])near(result[key],results[0][key]);
 });
 
-test('interruption preserves the presented trigger position instead of restarting an entrance', () => {
-  const state = advanceCanvasMotion(createCanvasMotion(), 0, input(2500));
-  advanceCanvasMotion(state, 1 / 30, input(3200));
-  const before = state.sceneDocY;
-  advanceCanvasMotion(state, 0, input(2500));
-  near(state.sceneDocY, before);
-  advanceCanvasMotion(state, 1 / 60, input(2500));
-  assert(state.sceneDocY < before && state.sceneDocY > 2500);
-  assert.equal(state.scale, 1);
+test('fast jumps finish the old exit then enter only the latest chapter',()=>{
+  const state=advanceCanvasMotion(createCanvasMotion(),0,input(2000));
+  advanceCanvasMotion(state,0,input(8000));
+  assert.equal(state.chapter,'form');assert.equal(state.opacity,1);
+  assert.equal(state.request.chapter,'pattern');assert.equal(state.mode,'exit');
+  advanceFor(state,.4,input(12900));
+  assert.equal(state.chapter,'form');assert.equal(state.request.chapter,'credits');
+  advanceFor(state,.55,input(12900));
+  assert.equal(state.chapter,'credits');assert.equal(state.opacity,0);assert.equal(state.mode,'entry');
+  advanceFor(state,.5,input(12900));
+  assert(state.opacity>0&&state.opacity<1);
+  advanceFor(state,.61,input(12900));
+  assert.deepEqual(visual(state),{x:0,y:0,scale:1,opacity:1,mode:'hold'});
+  assert(state.settled);assert(state.request.completed);
 });
 
-test('seek and Reduced choose a useful still hold while real subsequent scroll resumes authored passage', () => {
-  const y = anchors[2] - viewport.height * .59;
-  const state = advanceCanvasMotion(createCanvasMotion(), 0, input(y, {seek: true}));
-  assert.equal(state.chapter, 'system'); assert.equal(state.mode, 'hold'); assert.equal(state.opacity, 1);
-  advanceCanvasMotion(state, 1 / 60, input(y));
-  assert.equal(state.mode, 'hold');
-  advanceCanvasMotion(state, 1 / 60, input(y + 1));
-  assert(!state.seekUntilInput); assert.equal(state.mode, 'hold'); assert.equal(state.opacity, 1);
-  advanceCanvasMotion(state, 1, input(y - 1));
-  assert.equal(state.mode, 'entry'); assert(state.opacity > .999 && state.opacity < 1, 'reverse leaves the seek hold continuously');
-  advanceCanvasMotion(state, 1, input(anchors[2]));
-  assert.equal(state.seekHold, null); assert.equal(state.mode, 'hold');
-  const reduced = advanceCanvasMotion(createCanvasMotion(), 0, input(y, {reducedMotion: true}));
-  assert.deepEqual(visual(reduced), {x: 0, y: 0, scale: 1, opacity: 1, mode: 'hold'});
-  const forced = sampleCanvasHold(input(0, {forcedChapter: 'pattern'}));
-  assert.equal(forced.chapter, 'pattern'); assert.equal(forced.mode, 'hold'); assert.equal(forced.opacity, 1);
-  const descriptor = sampleCanvasHold(input(anchors[2]));
-  const exitY = descriptor.end - 200;
-  const departure = advanceCanvasMotion(createCanvasMotion(), 0, input(exitY, {seek: true}));
-  advanceCanvasMotion(departure, 1, input(exitY + 1));
-  assert.equal(departure.mode, 'exit'); assert(departure.opacity > .999 && departure.opacity < 1);
-  advanceCanvasMotion(departure, 1, input(exitY - 1));
-  assert.equal(departure.mode, 'hold'); assert.equal(departure.opacity, 1);
+test('stopping just inside a new chapter completes entry without another scroll event',()=>{
+  const state=advanceCanvasMotion(createCanvasMotion(),0,input(2000));
+  advanceCanvasMotion(state,0,input(3100));
+  advanceFor(state,2.1,input(3100));
+  assert.equal(state.chapter,'system');assert.equal(state.mode,'hold');assert.equal(state.opacity,1);
+  const id=state.request.id;
+  advanceFor(state,2,input(3100));assert.equal(state.request.id,id);assert(state.settled);
 });
 
-test('MAKE and VALIDATION are genuinely absent, while credits return and remain full scale at the end', () => {
-  for (const index of [4, 5]) {
-    const state = advanceCanvasMotion(createCanvasMotion(), 0, input(anchors[index]));
-    assert.equal(state.chapter, CANVAS_CHAPTERS[index]);
-    assert(state.settled && !state.visible && state.opacity === 0 && state.mode === 'absent');
+test('reversal preserves the displayed pose, cancels old intent, and completes a return',()=>{
+  const state=advanceCanvasMotion(createCanvasMotion(),0,input(2000));
+  advanceCanvasMotion(state,0,input(2900));
+  advanceFor(state,.35,input(2900));const pose={...state.pose},old=state.request.id;
+  advanceCanvasMotion(state,0,input(2500));
+  assert.deepEqual(state.pose,pose);assert.equal(state.mode,'entry');
+  assert.deepEqual(state.events.map(e=>[e.id,e.status]),[[old,'cancelled'],[old+1,'requested']]);
+  advanceFor(state,1.11,input(2500));assert.equal(state.opacity,1);assert(state.settled);
+});
+
+test('resume and renderer wait freeze active time; large frame gaps never finish a passage',()=>{
+  const state=advanceCanvasMotion(createCanvasMotion(),0,input(2000));
+  advanceCanvasMotion(state,.2,input(2900));const pose={...state.pose},elapsed=state.transition.elapsed;
+  for(const options of [{resumed:true},{paused:true},{}]){
+    advanceCanvasMotion(state,4,input(2900,options));assert.deepEqual(state.pose,pose);assert.equal(state.transition.elapsed,elapsed);
   }
-  for (const y of [anchors[6], anchors[7] - viewport.height, anchors[7]]) {
-    const state = advanceCanvasMotion(createCanvasMotion(), 1.01, input(y));
-    assert.equal(state.chapter, 'credits'); assert(state.visible && state.opacity === 1 && state.scale === 1);
+  advanceFor(state,.8,input(2900));assert(state.settled);assert.equal(state.opacity,0);
+});
+
+test('seek, Reduced and explicit inspection show a useful still with exactly one terminal event',()=>{
+  for(const patch of [{seek:true},{reducedMotion:true},{forcedChapter:'system'}]){
+    const state=advanceCanvasMotion(createCanvasMotion(),0,input(2000));
+    advanceCanvasMotion(state,.1,input(2900));const old=state.request.id;
+    advanceCanvasMotion(state,0,input(3100,patch));
+    assert.equal(state.chapter,'system');assert.equal(state.opacity,1);assert(state.settled);
+    assert.deepEqual(state.events.map(e=>[e.id,e.status]),[[old,'cancelled'],[old+1,'requested'],[old+1,'completed']]);
+    advanceCanvasMotion(state,.1,input(3100,patch));assert.deepEqual(state.events,[]);
   }
-  const state = advanceCanvasMotion(createCanvasMotion(), 0, input(0));
-  advanceCanvasMotion(state, 1 / 60, input(anchors[6]));
-  assert.equal(state.sceneDocY, anchors[6]); assert.equal(state.chapter, 'credits');
+});
+
+test('MAKE and VALIDATION become absent only after an ordinary timed departure',()=>{
+  for(const chapter of ['make','validation']){
+    const y=anchors[CANVAS_CHAPTERS.indexOf(chapter)];
+    const state=advanceCanvasMotion(createCanvasMotion(),0,input(8000));
+    advanceCanvasMotion(state,0,input(y));assert.equal(state.chapter,'pattern');assert.equal(state.opacity,1);
+    advanceFor(state,.96,input(y));
+    assert.equal(state.chapter,chapter);assert(state.settled);assert(!state.visible);assert.equal(state.mode,'absent');
+    const reduced=advanceCanvasMotion(createCanvasMotion(),0,input(y,{reducedMotion:true}));
+    assert.equal(reduced.mode,'absent');assert(!reduced.visible);
+  }
+});
+
+test('a same-position static preference replaces away with a matching hold event',()=>{
+  for(const patch of [{reducedMotion:true},{seek:true},{forcedChapter:'form'}]){
+    const state=advanceCanvasMotion(createCanvasMotion(),0,input(2000));
+    advanceCanvasMotion(state,.2,input(2900));const id=state.request.id;
+    assert.equal(state.request.target,'away');
+    advanceCanvasMotion(state,0,input(2900,patch));
+    assert.equal(state.request.target,'hold');assert.equal(state.opacity,1);
+    assert.deepEqual(state.events.map(e=>[e.id,e.status]),[[id,'cancelled'],[id+1,'requested'],[id+1,'completed']]);
+  }
+});
+
+test('remaining frame time crosses the exit/entry boundary at low and high frame rates',()=>{
+  for(const rate of [3,30,60,120]){
+    const state=advanceCanvasMotion(createCanvasMotion(),0,input(1500));
+    advanceCanvasMotion(state,0,input(4000));advanceFor(state,2.05,input(4000),rate);
+    assert.equal(state.chapter,'system');assert.equal(state.mode,'hold');assert(state.settled);
+  }
+});
+
+test('small trackpad reversals use accumulated travel from the turning point',()=>{
+  const state=advanceCanvasMotion(createCanvasMotion(),0,input(1500));
+  advanceCanvasMotion(state,.1,input(2900));const id=state.request.id;
+  advanceCanvasMotion(state,.1,input(2950));advanceCanvasMotion(state,.1,input(2949));
+  assert.equal(state.request.id,id);assert.equal(state.request.target,'away');
+  advanceCanvasMotion(state,0,input(2937));assert.equal(state.request.target,'hold');
 });
 
 test('invalid chapter ranges, viewport, time or explicit scene request are rejected', () => {

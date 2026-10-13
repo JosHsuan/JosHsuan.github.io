@@ -3,8 +3,8 @@
 // This module owns no DOM, camera, renderer, dimensions, RAF or clock.
 export const CANVAS_CHAPTERS = Object.freeze(['overview', 'form', 'system', 'pattern', 'make', 'validation', 'credits']);
 export const CANVAS_SCENE_PROBE = .62;
-const RATE = 16;
-const EPSILON = .025;
+export const CANVAS_ENTRY_SECONDS = 1.1;
+export const CANVAS_EXIT_SECONDS = .95;
 const clamp = value => Math.max(0, Math.min(1, value));
 const smooth = value => {const t = clamp(value); return clamp(t * t * t * (10 + t * (-15 + 6 * t)));};
 
@@ -67,34 +67,103 @@ export function sampleCanvasHold(options, seekHold = null) {
 
 export function createCanvasMotion() {
   return {chapter: 'overview', index: 0, phase: 0, x: 0, y: 0, scale: 1, opacity: 0, visible: false,
-    settled: true, mode: 'absent', initialized: false, sceneDocY: 0, nativeDocY: 0, seekUntilInput: false, seekHold: null};
+    settled: true, mode: 'absent', initialized: false, sceneDocY: 0, nativeDocY: 0,
+    direction: 1, reverseTravel: 0, pose: {x: 0, y: 0, opacity: 0}, transition: null, request: null,
+    sequence: 0, events: [], seekUntilInput: false, seekHold: null};
 }
 
-/** Advance using dt seconds from the caller's existing clock. Only the scene
- * trigger position is damped; each entire hold has EXACT x=0,y=0,scale=1.
- * Never fit to a clipped information rectangle or animate backing dimensions.
- * Seek/Reduced/resume and large jumps avoid replaying intermediate chapters.
- * Returns the same state, including chapter for the scene playback owner.
+const held = () => ({x:0,y:0,opacity:1});
+const outside = direction => direction > 0 ? {x:-1.08,y:-.05,opacity:0} : {x:.22,y:.035,opacity:0};
+const absent = chapter => chapter === 'make' || chapter === 'validation';
+function event(state,status,reason){
+  const request=state.request;
+  if(request)state.events.push({id:request.id,chapter:request.chapter,target:request.target,status,reason});
+}
+function begin(state,kind,direction){
+  state.transition={kind,elapsed:0,duration:kind==='entry'?CANVAS_ENTRY_SECONDS:CANVAS_EXIT_SECONDS,
+    from:{...state.pose},to:kind==='entry'?held():outside(direction)};
+  state.mode=kind;state.settled=false;
+}
+function reconcile(state){
+  const request=state.request;
+  if(state.chapter!==request.chapter){
+    if(state.pose.opacity>0){if(state.transition?.kind!=='exit')begin(state,'exit',request.direction);return;}
+    state.chapter=request.chapter;state.index=CANVAS_CHAPTERS.indexOf(state.chapter);
+    state.transition=null;
+    state.pose=outside(-request.direction);
+  }
+  if(request.target==='hold'){
+    if(state.pose.opacity!==1||state.pose.x!==0){if(state.transition?.kind!=='entry')begin(state,'entry',request.direction);}
+    else {state.transition=null;state.mode='hold';state.settled=true;}
+  }else{
+    if(state.pose.opacity>0){if(state.transition?.kind!=='exit')begin(state,'exit',request.direction);}
+    else {state.transition=null;state.mode=absent(state.chapter)?'absent':'exit';state.settled=true;}
+  }
+  if(state.settled&&!request.completed){request.completed=true;event(state,'completed');}
+}
+
+/** Scroll chooses a discrete intent. Only caller-owned active seconds advance
+ * the fixed-duration passage; wheel magnitude and scroll distance never do.
+ * A superseding chapter leaves the current scene before the latest one enters.
+ * Semantic seek/Reduced choose a useful still; resume only rebases the clock.
+ * Events are a drainable per-update outbox, not an autonomous timer or bus.
  */
 export function advanceCanvasMotion(state, dt, options = {}) {
   validate(options);
   if (!state || !Number.isFinite(state.sceneDocY) || !Number.isFinite(state.nativeDocY)) throw new TypeError('A Canvas motion state is required.');
   if (!Number.isFinite(dt) || dt < 0) throw new RangeError('Canvas motion delta must be finite nonnegative seconds.');
-  const {docY, viewport, reducedMotion = false, seek = false} = options;
+  const {docY, viewport, reducedMotion = false, seek = false, resumed = false, paused = false} = options;
+  state.events=[];
   const changed = docY !== state.nativeDocY;
+  if(changed){
+    const delta=docY-state.nativeDocY;
+    if(Math.sign(delta)===state.direction)state.reverseTravel=0;
+    else {state.reverseTravel+=Math.abs(delta);if(state.reverseTravel>=12){state.direction=Math.sign(delta);state.reverseTravel=0;}}
+  }
   if (changed) state.seekUntilInput = false;
   if (seek) state.seekUntilInput = true;
-  const jump = Math.abs(docY - state.nativeDocY) > viewport.height * 1.5;
-  const snap = !state.initialized || reducedMotion || seek || dt > 1 || jump;
-  const next = snap ? docY : docY + (state.sceneDocY - docY) * Math.exp(-RATE * dt);
-  state.settled = Math.abs(next - docY) <= EPSILON;
-  state.sceneDocY = state.settled ? docY : next;
+  const natural=sampleCanvasHold({...options,reducedMotion:false,hold:false});
+  const forced=options.forcedChapter!==undefined&&options.forcedChapter!==null;
+  const snap=!state.initialized||reducedMotion||seek||forced;
+  let target=absent(natural.chapter)?'away':!snap&&state.request?.chapter===natural.chapter&&!changed?state.request.target:'hold';
+  // Arrival starts once at the chapter boundary. Direction reversals inside a
+  // shoulder can request a return, but repeated scroll samples cannot restart it.
+  if(!snap&&!state.seekUntilInput&&changed&&natural.chapter===state.request?.chapter&&!absent(natural.chapter)){
+    if((docY>natural.holdEnd+12&&state.direction>0)||(docY<natural.holdStart-12&&state.direction<0))target='away';
+    else if(state.request.target==='away'&&((docY>natural.holdEnd-12&&state.direction>0)||(docY<natural.holdStart+12&&state.direction<0)))target='away';
+  }
+  const key=natural.chapter+':'+target;
+  if(state.request?.key!==key){
+    if(state.request&&!state.request.completed)event(state,'cancelled','superseded');
+    state.request={id:++state.sequence,key,chapter:natural.chapter,target,direction:state.direction,origin:docY,completed:false};
+    event(state,'requested');
+  }
   state.nativeDocY = docY;
+  state.sceneDocY = docY;
   state.initialized = true;
-  const targetOptions = {...options, docY: state.sceneDocY};
-  const natural = sampleCanvasHold({...targetOptions, reducedMotion: false, hold: false, forcedChapter: undefined});
-  if (seek || reducedMotion) state.seekHold = ['entry', 'exit'].includes(natural.mode) ? {chapter: natural.chapter, docY: state.sceneDocY, band: natural.mode} : null;
-  else if (state.seekHold && (natural.chapter !== state.seekHold.chapter || natural.mode !== state.seekHold.band)) state.seekHold = null;
-  Object.assign(state, sampleCanvasHold({...targetOptions, hold: state.seekUntilInput || options.hold}, state.seekHold));
+  if(snap){
+    state.chapter=natural.chapter;state.index=natural.index;state.transition=null;
+    state.pose=absent(state.chapter)?outside(state.direction):held();
+    state.mode=absent(state.chapter)?'absent':'hold';state.settled=true;
+    if(!state.request.completed){state.request.completed=true;event(state,'completed',seek?'seek':reducedMotion?'reduced':'still');}
+  }else{
+    reconcile(state);
+    let remaining=!paused&&!resumed&&dt<=1?dt:0;
+    while(state.transition&&remaining>0){
+      const transition=state.transition,step=Math.min(remaining,transition.duration-transition.elapsed);
+      remaining-=step;
+      transition.elapsed=Math.min(transition.duration,transition.elapsed+step);
+      if(transition.duration-transition.elapsed<1e-10)transition.elapsed=transition.duration;
+      const p=smooth(transition.elapsed/transition.duration);
+      for(const key of ['x','y','opacity'])state.pose[key]=transition.from[key]+(transition.to[key]-transition.from[key])*p;
+      if(transition.elapsed===transition.duration){state.pose={...transition.to};state.transition=null;reconcile(state);}
+    }
+  }
+  // Geometry metadata follows the actually displayed chapter while an old
+  // scene finishes leaving. Camera fitting and backing size remain untouched.
+  const geometry=sampleCanvasHold({...options,forcedChapter:state.chapter,hold:true});
+  for(const key of ['phase','start','end','holdStart','holdEnd'])state[key]=geometry[key];
+  state.x=state.pose.x*viewport.width;state.y=state.pose.y*viewport.height;state.opacity=state.pose.opacity;
+  state.visible=state.opacity>0&&state.x<viewport.width&&state.x+viewport.width>0;
   return state;
 }

@@ -2,6 +2,7 @@
 import {useEffect,useMemo} from 'react';
 import {MODEL_STUDIES} from '../runtime/features/ModelManager.mjs';
 import styles from './model-inspector.module.css';
+import InformationSkin from './InformationSkin';
 
 export default function ModelInspector({input,inspection,activate,ready,failed}){
   const manager=useMemo(()=>input.features.create('model',{inspection,hitTest:(x,y)=>input.scene.hitTest(x,y)}),[input,inspection]);
@@ -26,7 +27,7 @@ export default function ModelInspector({input,inspection,activate,ready,failed})
         <p role="status">{failed ? 'Interactive geometry unavailable. Continue with the source evidence.' : 'Enable the model to explore the supplied geometry.'}</p>
       </div>}
     </div>
-    <aside className={styles.sideLabel} data-model-side-label data-protect>
+    <aside className={styles.sideLabel} data-model-side-label data-protect data-information-window="model-label"><InformationSkin/>
       <span className={styles.eyebrow}>THESIS SOURCE / {study.id.toUpperCase()}</span>
       <div className={styles.information}>
         <h3 id={`model-source-label-${study.id}`} data-source-label data-study-chapter={study.id}>{ready ? 'Source geometry' : 'Assembly reference'}</h3>

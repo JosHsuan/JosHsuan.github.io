@@ -1,6 +1,7 @@
 import CinematicExperience from '../components/CinematicExperience';
 import EvidenceInspector from '../components/EvidenceInspector';
 import SourceDiagram from '../components/SourceDiagram';
+import InformationSkin from '../components/InformationSkin';
 import {ExperienceProvider} from '../runtime/ExperienceProvider';
 import review from '../release/story.json';
 import styles from './page.module.css';
@@ -31,8 +32,8 @@ function Heading({ number, label, lines, id, kind }) {
 function EvidenceImage({ item, className = '', kind = 'photo' }) {
   return <figure className={[styles.evidence, className].join(' ')} data-story-media data-media-kind={kind}>
     <div className={styles.figureIndex} data-protect data-choreography="caption" aria-hidden="true"><span>Evidence / {String(evidence.indexOf(item)+1).padStart(2,'0')}</span><span>{kind === 'diagram' ? 'RESEARCH DRAWING' : 'PHYSICAL RECORD'}</span></div>
-    <a className={styles.mediaFrame} data-inspect-figure={evidence.indexOf(item)} href={item.source} target="_blank" rel="noreferrer" aria-label={`Inspect original source: ${item.figure}`}><span className={styles.mediaPlane} data-protect data-choreography={kind === 'photo' ? 'photo' : 'diagram'} data-feedback-plane><span className={styles.frameCorner} aria-hidden="true"/><img src={item.src} width={item.width} height={item.height} alt={item.alt} loading="lazy" /></span><span className={styles.mediaAction}>Inspect evidence <span aria-hidden="true">↗</span></span></a>
-    <figcaption data-editorial-caption data-protect data-choreography="caption"><span>{item.figure}</span><p>{item.caption}</p></figcaption>
+    <a className={styles.mediaFrame} data-information-window="evidence-image" data-inspect-figure={evidence.indexOf(item)} href={item.source} target="_blank" rel="noreferrer" aria-label={`Inspect original source: ${item.figure}`}><InformationSkin/><span className={styles.mediaPlane} data-protect data-choreography={kind === 'photo' ? 'photo' : 'diagram'} data-feedback-plane><span className={styles.frameCorner} aria-hidden="true"/><img src={item.src} width={item.width} height={item.height} alt={item.alt} loading="lazy" /></span><span className={styles.mediaAction}>Inspect evidence <span aria-hidden="true">↗</span></span></a>
+    <figcaption data-information-window="evidence-caption" data-editorial-caption data-protect data-choreography="caption"><InformationSkin/><span>{item.figure}</span><p>{item.caption}</p></figcaption>
     <div data-evidence-host={evidence.indexOf(item)} />
   </figure>;
 }
@@ -53,7 +54,7 @@ export default function Page() {
     <div className={styles.readingFrame} data-reading-frame><main id="main" tabIndex={-1} className={styles.story} data-story-root>
       <section id="overview" className={[styles.chapter, styles.overview].join(' ')} tabIndex={-1} data-story-chapter="overview" data-layout="left" aria-labelledby="project-title">
         <div className={styles.chapterInner}>
-          <div className={styles.openingCopy} data-story-panel>
+          <div className={styles.openingCopy} data-story-panel data-information-window="editorial"><InformationSkin/>
             <div className={styles.openingLabel}><Glyph /><span data-protect data-choreography="caption">{story.overview.eyebrow}</span></div>
             <h1 id="project-title" aria-label={review.title} data-story-heading data-feedback-plane><span data-heading-line data-protect data-choreography="heading" style={{'--line-index':0}}>{review.hero.titleLines[0]}</span><span data-heading-line data-protect data-choreography="heading" style={{'--line-index':1}}>{review.hero.titleLines[1]}</span></h1>
             <p className={styles.subtitle} data-protect data-choreography="prose">{review.hero.subtitle}</p>
@@ -66,7 +67,7 @@ export default function Page() {
 
       <section id="form" className={[styles.chapter, styles.form].join(' ')} tabIndex={-1} data-story-chapter="form" data-layout="left" aria-labelledby="form-heading">
         <div className={styles.chapterInner}>
-          <div className={styles.copy} data-story-panel>
+          <div className={styles.copy} data-story-panel data-information-window="editorial"><InformationSkin/>
             <Heading number="01" label={story.form.label} lines={story.form.heading} id="form-heading" kind="form" />
             <Paragraphs paragraphs={story.form.paragraphs} />
             <p className={styles.marginNote} data-protect data-choreography="caption">{story.form.aside}</p>
@@ -80,7 +81,7 @@ export default function Page() {
 
       <section id="system" className={[styles.chapter, styles.system].join(' ')} tabIndex={-1} data-story-chapter="system" data-layout="left" aria-labelledby="system-heading">
         <div className={styles.chapterInner}>
-          <div className={styles.copy} data-story-panel>
+          <div className={styles.copy} data-story-panel data-information-window="editorial"><InformationSkin/>
             <Heading number="02" label={story.system.label} lines={story.system.heading} id="system-heading" kind="system" />
             <Paragraphs paragraphs={story.system.paragraphs} />
             <ol className={styles.methodSequence}>{story.system.sequence.map((step, index) => <li key={step} style={{'--step-index':index}} data-protect><details><summary><span>{String(index + 1).padStart(2, '0')}</span><span data-choreography="diagram">{step}</span><span className={styles.stepArrow} aria-hidden="true">↗</span></summary><p>{methodNotes[index]}</p></details></li>)}</ol>
@@ -88,21 +89,21 @@ export default function Page() {
           </div>
           <div className={styles.inlineStudy} data-model-study-host="system" />
           <div className={styles.diagramWide}><SourceDiagram kind="workflow" title="Read the design-to-fabrication sequence" />
-            <details className={styles.sourceComparison}><summary data-protect>Compare with the original thesis figure</summary><EvidenceImage item={story.media.geometry} kind="diagram" /></details>
+            <details className={styles.sourceComparison} data-information-window="source-details"><InformationSkin/><summary data-protect>Compare with the original thesis figure</summary><EvidenceImage item={story.media.geometry} kind="diagram" /></details>
           </div>
         </div>
       </section>
 
       <section id="pattern" className={[styles.chapter, styles.pattern].join(' ')} tabIndex={-1} data-story-chapter="pattern" data-layout="left" aria-labelledby="pattern-heading">
         <div className={styles.chapterInner}>
-          <div className={styles.copy} data-story-panel>
+          <div className={styles.copy} data-story-panel data-information-window="editorial"><InformationSkin/>
             <Heading number="03" label={story.pattern.label} lines={story.pattern.heading} id="pattern-heading" kind="system" />
             <Paragraphs paragraphs={story.pattern.paragraphs} />
             <p className={styles.smallNote} data-protect data-choreography="caption">{story.pattern.note}</p>
           </div>
           <div className={styles.inlineStudy} data-model-study-host="pattern" />
           <div className={styles.diagramWide}><SourceDiagram kind="library" title="Follow the sampled function library" />
-            <details className={styles.sourceComparison}><summary data-protect>Read the original library figure</summary><EvidenceImage item={story.media.library} kind="diagram" /></details>
+            <details className={styles.sourceComparison} data-information-window="source-details"><InformationSkin/><summary data-protect>Read the original library figure</summary><EvidenceImage item={story.media.library} kind="diagram" /></details>
           </div>
         </div>
       </section>
@@ -110,7 +111,7 @@ export default function Page() {
       <section id="make" className={[styles.chapter, styles.make].join(' ')} tabIndex={-1} data-story-chapter="make" data-layout="right" aria-labelledby="make-heading">
         <div className={styles.chapterInner}>
           <EvidenceImage item={story.media.connection} className={styles.connectionImage} />
-          <div className={styles.copy} data-story-panel>
+          <div className={styles.copy} data-story-panel data-information-window="editorial"><InformationSkin/>
             <Heading number="04" label={story.make.label} lines={story.make.heading} id="make-heading" kind="make" />
             <Paragraphs paragraphs={story.make.paragraphs} />
             <dl className={styles.measurements}>{story.make.measurements.map(measurement => <div key={measurement.label} data-protect data-choreography="metric"><dt>{measurement.label}</dt><dd>{measurement.value}</dd></div>)}</dl>
@@ -121,7 +122,7 @@ export default function Page() {
 
       <section id="validation" className={[styles.chapter, styles.validation].join(' ')} tabIndex={-1} data-story-chapter="validation" data-layout="left" aria-labelledby="validation-heading">
         <div className={styles.chapterInner}>
-          <div className={styles.copy} data-story-panel>
+          <div className={styles.copy} data-story-panel data-information-window="editorial"><InformationSkin/>
             <Heading number="05" label={story.validation.label} lines={story.validation.heading} id="validation-heading" kind="make" />
             <Paragraphs paragraphs={story.validation.paragraphs} />
             <p className={styles.smallNote} data-protect data-choreography="caption">{story.validation.note}</p>
@@ -132,7 +133,7 @@ export default function Page() {
 
       <section id="credits" className={[styles.chapter, styles.credits].join(' ')} tabIndex={-1} data-story-chapter="credits" data-layout="left" aria-labelledby="credits-heading">
         <div className={styles.chapterInner}>
-          <div className={styles.closingCopy} data-story-panel>
+          <div className={styles.closingCopy} data-story-panel data-information-window="editorial"><InformationSkin/>
             <Heading number="06" label={story.credits.label} lines={story.credits.heading} id="credits-heading" kind="form" />
             <p className={styles.closingSummary} data-protect data-choreography="credit">{story.credits.summary}</p>
             <p data-protect data-choreography="credit">{story.credits.contribution}</p>

@@ -10,6 +10,8 @@ import {createCanvasMotion, advanceCanvasMotion} from '../../components/canvas-m
 import {viewportStageSourceViewport} from '../../components/source-scene-score.mjs';
 import {modelInformationLayout} from '../../components/model-information.mjs';
 import {createPageFieldRenderer} from '../../components/page-field-renderer.mjs';
+import {createCanvasTransitionEvents} from './CanvasTransitionEvents.mjs';
+import {createInformationWindowPresenter} from '../presentation/InformationWindowPresenter.mjs';
 
 /** Owns chapter time and frame coordination, independently of React presentation. */
 export function createExperienceDirector({input,inspection,lifecycle,stage,fieldCanvas,progress,status}){
@@ -23,6 +25,9 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
     const links = [...document.querySelectorAll('[data-chapter-link]')];
     const planeMap = new Map(), publisher = input.dom.forOwner('director');
     const pageField=createPageFieldRenderer(fieldCanvas.current);
+    const windowPresenter=createInformationWindowPresenter({publisher:input.dom.forOwner('information-windows')});
+    const informationObserved=new Set();
+    const canvasEvents=createCanvasTransitionEvents(value=>input.events.emit('canvasTransition',value));
     let planes=[], diagrams=[];
     // offsetTop follows untransformed layout; rect + scrollY would feed our own
     // compensation back into anchors and cause drift on every ResizeObserver.
@@ -53,19 +58,24 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       canvasSurface={width:stage.current?.offsetWidth||1,height:stage.current?.offsetHeight||1};
       // Discrete resize/source hydration refreshes collections. No document-wide
       // selector walk is needed while a settled chapter keeps playing.
-      planes=[...document.querySelectorAll('[data-feedback-plane]')].map(element=>{
+      planes=[...document.querySelectorAll('[data-feedback-plane]')].filter(element=>!element.closest('[data-information-window]')).map(element=>{
         if(!planeMap.has(element))planeMap.set(element,{element,response:createPlaneFeedback(),target:{x:0,y:0,press:0}});
         return planeMap.get(element);
       });
-      for(const element of planeMap.keys())if(!element.isConnected)planeMap.delete(element);
+      for(const element of planeMap.keys())if(!element.isConnected||element.closest('[data-information-window]'))planeMap.delete(element);
       diagrams=[...document.querySelectorAll('[data-source-diagram]')].map(element=>({element,index:Math.max(0,sections.indexOf(element.closest('[data-story-chapter]')))}));
-      for(const element of choreography.keys())if(!element.isConnected)choreography.delete(element);
+      for(const element of choreography.keys())if(!element.isConnected||element.closest('[data-information-window]'))choreography.delete(element);
       offsets=sections.map(naturalY);offsets.push(naturalY(sections.at(-1))+sections.at(-1).offsetHeight);
+      windowPresenter.measure({naturalY,viewportHeight:innerHeight,docY:scrollY});
+      const informationElements=new Set(document.querySelectorAll('[data-information-window]'));
+      for(const element of informationObserved)if(!informationElements.has(element)){resize.unobserve(element);informationObserved.delete(element);}
+      for(const element of informationElements)if(!informationObserved.has(element)){resize.observe(element);informationObserved.add(element);}
       // Reading follows the native document; only the separate Canvas keeps
       // authored chapter holds. No paragraph/media pause points are measured.
       plan=createReadingPlan({anchors:offsets,viewportHeight:innerHeight,maxScroll:Math.max(0,document.documentElement.scrollHeight-innerHeight),stops:[]});readingManager.setPlan(plan);
       const counters=new Map();
       document.querySelectorAll('[data-choreography]').forEach(element=>{
+        if(element.closest('[data-information-window]'))return;
         const kind=element.dataset.choreography||'prose', section=element.closest('[data-story-chapter]');
         const key=`${section?.id??'page'}:${kind}`, index=counters.get(key)??0;counters.set(key,index+1);
         if(!choreography.has(element))choreography.set(element,{kind,index,firstVisibleAt:null,last:null});
@@ -91,7 +101,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       }
       const requested=state.sourceSelection,requestAge=playback.activeSeconds-(requested?.selectedAt??-Infinity);
       const explicitChapter=state.modelEngaged?state.modelInteractionChapter:requested?.chapterId===chapter.id&&requestAge>=0&&requestAge<8?requested.chapterId:undefined;
-      canvasPlacement=advanceCanvasMotion(canvasMotion,dt,{anchors:offsets,docY:scrollY,viewport:{width:canvasSurface.width,height:canvasSurface.height},reducedMotion:state.reduced,seek:didSeek||didResume,forcedChapter:explicitChapter});
+      canvasPlacement=advanceCanvasMotion(canvasMotion,dt,{anchors:offsets,docY:scrollY,viewport:{width:canvasSurface.width,height:canvasSurface.height},reducedMotion:state.reduced,seek:didSeek,resumed:didResume,paused:canvasAwaitingPaint,forcedChapter:explicitChapter});
       advanceInspection(inspection,dt,{reducedMotion:state.reduced,resumed});
       const recovering=!!state.modelRecovering&&!inspection.settled;
       const impulse=pendingImpulse;pendingImpulse=0;
@@ -117,6 +127,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       let moving=Math.abs(pointer.x-next.x)+Math.abs(pointer.y-next.y)>.001;if(!moving)pointer={...next};
 
       moving=publishEditorial({choreography,stickyRects,reading,playbackScore,state,didSeek,didResume,sections,planes,hovered,focused,fine,dt,publisher,viewportHeight:innerHeight,chapter})||moving;
+      moving=windowPresenter.publish({docY:scrollY,dt,reduced:state.reduced,seek:didSeek,resumed:didResume,canvasPlacement})||moving;
 
       // Chapter boundaries own the viewport hold. Information rectangles never
       // determine the scene size or camera framing.
@@ -200,6 +211,8 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
         inspectionActive:inspectionWeight>0,inspectionWeight,inspectionViewport,modelViewports,
         compositionMode:'viewport-stage',independentAscii:true,informationChapter:chapter.id,canvasLocal:false,canvasPresented:canvasActive&&!canvasAwaitingPaint&&canvasPlacement.opacity>0,canvasPlacement:{...canvasPlacement},canvasSurface,
       });
+      canvasEvents.consume(canvasMotion.events,controllerFrame);
+      moving=canvasEvents.flush({presented:input.getPresentation(),requiresScene:state.sceneEnabled&&!state.sceneFailed})||moving;
       history.push({time:now,...reading,...readingScore,playback:{chapterId:playbackScore.chapterId,activeSeconds:playbackScore.activeSeconds,loopPhase:playbackScore.loopPhase,tempo:playbackScore.tempo,needsFrame:playbackScore.needsFrame}});
       if(history.length>240)history.shift();
       if(playbackScore.needsFrame||moving||!reading.settled||!inspection.settled)schedule();else previous=0;
@@ -271,9 +284,9 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       if(state.reduced!==wasReduced){wasReduced=state.reduced;seekPending=true;schedule();}
       const key=[state.paused,state.systemReduced,state.sceneEnabled,state.sceneFailed,state.detail].join('/');if(key!==preferenceKey){preferenceKey=key;schedule();}
     });
-    window.__story={inspect:()=>({...reading,...sampleReadingScore(reading,plan),controllerFrame,frameDelta,readingPending:seekPending||resumed||Math.abs(reading.nativeDocY-scrollY)>.01,playback:sampleChapterPlayback(playback),chapterScene:latestScene,informationChapter:lastChapter,pageField:pageField.inspect(),canvasPlacement:canvasPlacement?{...canvasPlacement}:null,canvasSurface,canvasAwaitingPaint,history:[...history],stops:plan.stops,scheduled:scheduler.inspect().scheduled,lifecycle:scheduler.inspect(),domPublication:publisher.inspect(),inspectionActive:!!input.get().inspectionActive,inspectionWeight:input.get().inspectionWeight,modelViewports:input.get().modelViewports,modelEngaged:!!input.get().modelEngaged,modelRecovering:!!input.get().modelRecovering,sourceSelection:input.get().sourceSelection,choreography:[...choreography].map(([element,item])=>({kind:item.kind,firstVisibleAt:item.firstVisibleAt,phase:element.dataset.choreographyPhase,settled:item.last?.settled??false})),inspection:{target:{...inspection.target},value:{...inspection.value},lightMix:0,settled:inspection.settled}})};
+    window.__story={inspect:()=>({...reading,...sampleReadingScore(reading,plan),controllerFrame,frameDelta,readingPending:seekPending||resumed||Math.abs(reading.nativeDocY-scrollY)>.01,playback:sampleChapterPlayback(playback),chapterScene:latestScene,informationChapter:lastChapter,pageField:pageField.inspect(),canvasPlacement:canvasPlacement?{...canvasPlacement}:null,canvasSurface,canvasAwaitingPaint,canvasTransitions:canvasEvents.inspect(),informationWindows:windowPresenter.inspect(),history:[...history],stops:plan.stops,scheduled:scheduler.inspect().scheduled,lifecycle:scheduler.inspect(),domPublication:publisher.inspect(),inspectionActive:!!input.get().inspectionActive,inspectionWeight:input.get().inspectionWeight,modelViewports:input.get().modelViewports,modelEngaged:!!input.get().modelEngaged,modelRecovering:!!input.get().modelRecovering,sourceSelection:input.get().sourceSelection,choreography:[...choreography].map(([element,item])=>({kind:item.kind,firstVisibleAt:item.firstVisibleAt,phase:element.dataset.choreographyPhase,settled:item.last?.settled??false})),inspection:{target:{...inspection.target},value:{...inspection.value},lightMix:0,settled:inspection.settled}})};
     input.publishFrame({hidden:scheduler.suspended});document.documentElement.setAttribute('data-cinematic-ready','');measure();if(location.hash)hash();
-    return()=>{disposed=true;pageField.dispose();readingManager.dispose();layout.dispose();scheduler.dispose();scope.dispose();resize.disconnect();unsubscribe();document.documentElement.removeAttribute('data-cinematic-ready');delete document.documentElement.dataset.activeChapter;delete document.documentElement.dataset.chapterBeat;delete window.__story;};
+    return()=>{disposed=true;canvasEvents.dispose();windowPresenter.dispose();pageField.dispose();readingManager.dispose();layout.dispose();scheduler.dispose();scope.dispose();resize.disconnect();unsubscribe();document.documentElement.removeAttribute('data-cinematic-ready');delete document.documentElement.dataset.activeChapter;delete document.documentElement.dataset.chapterBeat;delete window.__story;};
 
   }};
 }
