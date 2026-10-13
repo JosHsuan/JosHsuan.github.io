@@ -34,7 +34,7 @@ test('native scroll triggers a timed Canvas departure and completion follows the
 });
 
 test('information windows share one fluid surface while native reading, focus and Reduced remain intact',async({page})=>{
- test.setTimeout(scenarioTimeout(120000));const errors=[];page.on('pageerror',e=>errors.push(e.message));await loadScene(page);
+ test.setTimeout(scenarioTimeout(120000));const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.clock.install();await loadScene(page);
  await centerStudy(page,'system');
  expect(await page.evaluate(()=>window.__story.inspect().informationWindows.recipe)).toBe('ink');
  const registered=page.locator('[data-information-window][data-information-ready]');
@@ -44,14 +44,17 @@ test('information windows share one fluid surface while native reading, focus an
  for(const row of ownership){expect(row.skin).toBe(1);expect(row.clip).toBe('none');expect(row.opacity).toBe('1');expect(row.nested).toBe(false);}
  const panel=page.locator('#system [data-story-panel]');
  await panel.scrollIntoViewIfNeeded();await settle(page);
- const movement=await page.evaluate(async()=>{
-  const el=document.querySelector('#system [data-story-panel]'),samples=[];
+ const movement=[];
+ await page.clock.pauseAt(new Date(Date.now()+3600000));
+ try{
+  // Two real RAF deliveries can exceed the entire elastic response on a
+  // software GPU. Sample fixed active time, including the actual painted clip.
   for(let i=0;i<8;i++){
-   scrollBy({top:i<4?55:-55,behavior:'instant'});await new Promise(requestAnimationFrame);await new Promise(requestAnimationFrame);
-   samples.push({path:el.querySelector('[data-information-skin]').style.getPropertyValue('--information-skin-path')||getComputedStyle(el.querySelector('[data-information-skin]')).clipPath,moving:el.dataset.informationMoving,opacity:getComputedStyle(el).opacity});
+   await page.evaluate(delta=>scrollBy({top:delta,behavior:'instant'}),i<4?55:-55);
+   await page.clock.runFor(48);
+   movement.push(await panel.evaluate(el=>({path:getComputedStyle(el.querySelector('[data-information-skin]')).clipPath,moving:el.dataset.informationMoving,opacity:getComputedStyle(el).opacity})));
   }
-  return samples;
- });
+ }finally{await page.clock.resume();}
  expect(movement.some(value=>value.moving==='true')).toBe(true);
  expect(movement.some(value=>value.path.includes('path('))).toBe(true);
  expect(movement.every(value=>value.opacity==='1')).toBe(true);

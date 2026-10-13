@@ -184,6 +184,15 @@ Detailed local evidence is in `animation-review/.local/main-fluid-integration/`.
 These are pre-commit local build identifiers; the hosted build embeds the pushed
 commit and supplies the authoritative publication digest.
 
+The first hosted WebKit run exposed a sampling problem in the new material test:
+16 real RAF deliveries spanned 9.7 wall-clock seconds, so its snapshots recorded
+the resting inset instead of the short-lived fluid outline. The test now advances
+48 ms of controlled active time per native-scroll sample and still requires an
+actual computed `clip-path: path(...)`, motion and opacity one. All nine window
+integration scenarios passed locally across the three browser projects after
+this test-only correction. Runtime code and the inspected fluid artifact did not
+change.
+
 The release must pass the complete selected hosted matrix and required gate at
 the pushed commit before the manual Pages workflow can publish its tested output.
 Deployment run URLs and public `/release.json` confirmation are reported with the
