@@ -21,6 +21,10 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
       - name: Verify tested artifact provenance
         env:
           GH_TOKEN: ${{ github.token }}
@@ -38,6 +42,17 @@ jobs:
           path: out
           run-id: ${{ inputs.validation_run_id }}
           github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: validated-release
+          run-id: ${{ inputs.validation_run_id }}
+          github-token: ${{ github.token }}
+      - name: Verify selected checks and the tested output digest
+        env:
+          RUN_ID: ${{ inputs.validation_run_id }}
+          EXPECTED_SHA: ${{ github.sha }}
+          EXPECTED_BRANCH: ${{ github.event.repository.default_branch }}
+        run: node scripts/ci-artifact.mjs verify out
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

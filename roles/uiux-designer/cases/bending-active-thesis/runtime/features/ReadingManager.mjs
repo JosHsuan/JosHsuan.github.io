@@ -54,7 +54,7 @@ export function createReadingManager({window:win,document:doc,root,naturalY,seek
  return{reading,start,hash,anchor,key,focus,pop,
   get initialHash(){return initialHash;},
   setPlan(value){plan=value;},
-  advance(y,dt,options){advanceReading(reading,y,dt,{plan,...options});return sampleReadingScore(reading,plan);},
+  advance(y,dt,options){advanceReading(reading,y,dt,{plan,...options,nativeScroll:true});return sampleReadingScore(reading,plan);},
   scroll(){if(!historyNavigation)remember();const value=seekOnScroll;seekOnScroll=false;return value;},
   directInput(){initialHash=false;historyNavigation=null;seekOnScroll=false;},
   pointerInput(){initialHash=false;},

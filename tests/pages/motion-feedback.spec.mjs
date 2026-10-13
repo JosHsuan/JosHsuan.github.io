@@ -46,7 +46,7 @@ async function sampleMoving(page){
  }
 }
 
-test('whole reading plane shares model progress, damping, content stops and reversible native travel',async({page})=>{
+test('native reading stays responsive without controller frames while the scene keeps independent playback',async({page})=>{
  test.setTimeout(scenarioTimeout(180000));
  // Install before navigation so every application RAF uses the same clock.
  // Loading and the initial chapter placement still advance in real time.
@@ -61,15 +61,24 @@ test('whole reading plane shares model progress, damping, content stops and reve
   // remaining contracts use single-RAF steps, including the actual pause UI.
   // The built page, native scroll, DOM and bounded Canvas remain active when visible.
   await page.clock.pauseAt(new Date('2026-01-01T01:00:00Z'));
+  // The browser must move readable content even when application RAFs cannot
+  // run. This guards against reintroducing whole-layer scroll compensation.
+  for(const delta of [80,-65,900,-900]){
+   const result=await page.evaluate(delta=>{
+    const element=document.getElementById('system'),root=document.querySelector('[data-story-root]');
+    const before={y:scrollY,top:element.getBoundingClientRect().top,frame:window.__story.inspect().controllerFrame};
+    scrollBy({top:delta,behavior:'instant'});
+    return{before,after:{y:scrollY,top:element.getBoundingClientRect().top,frame:window.__story.inspect().controllerFrame},transform:getComputedStyle(root).transform};
+   },delta);
+   expect(result.after.y).not.toBe(result.before.y);
+   expect(result.after.frame).toBe(result.before.frame);expect(result.transform).toBe('none');
+   expect(Math.abs(result.after.top-result.before.top+result.after.y-result.before.y)).toBeLessThan(.1);
+  }
   const samples=await sampleMoving(page);await settleClock(page);
-  const moving=samples.find(s=>s.shift>5&&!s.settled);expect(moving,JSON.stringify({realtimeFrameDelta,samples})).toBeTruthy();expect(Math.abs(moving.velocity)).toBeGreaterThan(1);expect(Number.isFinite(moving.acceleration)).toBe(true);
-  for(const s of samples){expect(Number.isFinite(s.rule)).toBe(true);expect(s.sceneVisualU).toBe(s.visualU);expect(Math.abs((s.top+s.visual)-(samples[0].top+samples[0].visual))).toBeLessThan(.1);}
-  const stop=await page.evaluate(()=>{const s=window.__story.inspect();return s.stops.find(stop=>stop.y>s.visualDocY+200);});expect(stop).toBeTruthy();
-  await page.evaluate(y=>scrollTo({top:y,behavior:'instant'}),stop.start-40);await settleClock(page);
-  await page.evaluate(y=>scrollTo({top:y,behavior:'instant'}),stop.holdStart+2);await settleClock(page);
-  const before=await page.evaluate(()=>window.__story.inspect());expect(before.holdWeight,JSON.stringify({native:before.nativeDocY,visual:before.visualDocY,bypass:before.bypassHoldId,seek:before.seekUntilInput,hold:before.holdId,stop})).toBeGreaterThan(.99);
-  await page.evaluate(y=>scrollTo({top:y,behavior:'instant'}),stop.holdEnd-2);await settleClock(page);
-  const after=await page.evaluate(()=>window.__story.inspect());expect(after.nativeDocY).toBeGreaterThan(before.nativeDocY);expect(after.holdId).toBe(before.holdId);expect(after.holdWeight).toBeGreaterThan(.99);expect(Math.abs(after.stops.find(item=>item.id===stop.id).y-stop.y),'Autonomous content must not move the authored reading stop.').toBeLessThan(.1);expect(Math.abs(after.visualDocY-before.visualDocY)).toBeLessThan(.1);
+  expect(samples.length,JSON.stringify({realtimeFrameDelta,samples})).toBeGreaterThan(0);
+  for(const s of samples){expect(s.visual).toBe(s.native);expect(s.shift).toBe(0);expect(s.settled).toBe(true);expect(Number.isFinite(s.rule)).toBe(true);expect(s.sceneVisualU).toBe(s.visualU);expect(Math.abs((s.top+s.native)-(samples[0].top+samples[0].native))).toBeLessThan(.1);}
+  const reading=await page.evaluate(()=>window.__story.inspect());
+  expect(reading.stops).toEqual([]);expect(reading.holdId).toBe(null);expect(reading.holdWeight).toBe(0);
   for(const id of ['pattern','make','system']){await phase(page,id,.5,settleClock);expect(await page.evaluate(original=>document.querySelector('[data-cinematic-stage] canvas')===original,canvas)).toBe(true);}
   await page.locator('[data-model-viewport][data-study-chapter="system"]').evaluate(el=>{let y=0;for(let n=el;n;n=n.offsetParent)y+=n.offsetTop;scrollTo({top:y-Math.max(112,(innerHeight-el.offsetHeight)*.34),behavior:"instant"});});await settleClock(page);
   const snapshot=()=>page.evaluate(()=>{const story=window.__story.inspect(),scene=window.__thesis.inspect();return {time:story.playback.activeSeconds,field:scene.compositor.field.time,pose:scene.pose.position,frames:scene.frames};});

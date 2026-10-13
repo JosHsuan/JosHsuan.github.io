@@ -37,7 +37,7 @@ test('keyboard seeks, pointer focus and reading response retain separate meaning
  f.setPointer(false);f.manager.focus({target:f.nodes.get('form')});assert.equal(f.win.scrollY,440);assert.equal(f.getFocused(),f.nodes.get('form'));
  f.manager.setPlan(createReadingPlan({anchors:Array.from({length:8},(_,index)=>index*800),viewportHeight:600,maxScroll:5000,stops:[]}));
  const first=f.manager.advance(500,1/60,{resumed:true});assert.equal(first.nativeDocY,500);assert.equal(first.visualDocY,500);
- const moving=f.manager.advance(900,.05,{});assert.equal(moving.nativeDocY,900);assert(moving.visualDocY>500&&moving.visualDocY<900);
+ const moving=f.manager.advance(900,.05,{});assert.equal(moving.nativeDocY,900);assert.equal(moving.visualDocY,900);assert.equal(moving.readingShiftY,0);
  const resumed=f.manager.advance(1300,2,{resumed:true});assert.equal(resumed.visualDocY,1300);f.manager.dispose();
 });
 

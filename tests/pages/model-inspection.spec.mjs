@@ -2,8 +2,26 @@ import {test,expect} from '@playwright/test';
 import {readFileSync} from 'node:fs';
 import {PerspectiveCamera,Vector3} from 'three';
 import {viewportStageSourceViewport} from '../../roles/uiux-designer/cases/bending-active-thesis/components/source-scene-score.mjs';
+import {modelInformationSummary} from '../../roles/uiux-designer/cases/bending-active-thesis/components/model-information.mjs';
 import {WAIT,scenarioTimeout,surface,frames,settle,loadScene,centerStudy,hitPoint,pause,expectIdle} from './case-helpers.mjs';
 const catalog=JSON.parse(readFileSync(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/public/assets/thesis/source-diagrams.json',import.meta.url),'utf8'));
+async function expectSourceInformation(page,chapter) {
+ const r=await page.evaluate(()=>window.__thesis.inspect().representation);
+ const record=catalog.representations.find(item=>item.id===r.id),count=chapter==='pattern'?3:4;
+ const description=record.description+(r.id==='curvature'?' '+catalog.limits[0]:'');
+ const study=page.locator(`[data-model-study][data-study-chapter="${chapter}"]`);
+ await expect(study.locator('[data-source-label]')).toHaveText(record.label);
+ await expect(study.locator('[data-model-caption-current]')).toHaveText(modelInformationSummary(record));
+ await expect(study.locator('[data-source-position]')).toHaveText(`${chapter==='pattern'?'Experiment':'Representation'} ${r.index+1} / ${count}`);
+ expect(r.description).toBe(description);expect(r.count).toBe(count);
+ await expect(study.locator('[data-model-side-label]')).toBeVisible();
+ await expect(study.locator('[data-model-connector]')).toHaveAttribute('data-annotation-visible','true');
+ expect(r.annotation).toBeTruthy();
+ await expect(study.locator('[data-source-description]')).toHaveCSS('display','grid');
+ expect(await study.locator('[data-source-description]').evaluate(el=>{
+  const current=el.querySelector('[data-model-caption-current]');return current.getBoundingClientRect().height<=el.getBoundingClientRect().height+.1;
+ })).toBe(true);
+}
 async function fit(page){
  const {pose,representation,width,height,display,renderSuspended,canvasPlacement}=await page.evaluate(()=>{const canvas=document.querySelector('[data-cinematic-stage] canvas'),r=canvas.getBoundingClientRect();return {...window.__thesis.inspect(),width:canvas.clientWidth,height:canvas.clientHeight,display:{left:r.left,top:r.top,width:r.width,height:r.height}};});
  expect(renderSuspended).toBe(false);expect(canvasPlacement.visible).toBe(true);expect(width).toBeGreaterThan(0);expect(height).toBeGreaterThan(0);
@@ -13,6 +31,11 @@ async function fit(page){
  expect(representation.vertices).toBe(item.vertices);expect(representation.triangles).toBe(item.triangles);expect(representation.assetRevision).toBe(catalog.revision);
  const camera=new PerspectiveCamera(pose.fov,width/height,pose.near,pose.far);camera.position.fromArray(pose.position);camera.up.fromArray(pose.up);camera.lookAt(...pose.target);camera.setViewOffset(width,height,width*pose.viewOffsetNormalized.x,height*pose.viewOffsetNormalized.y,width,height);camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
  const viewport=pose.viewport,p=new Vector3(),margin=[Infinity,Infinity,Infinity,Infinity],extent={left:Infinity,right:-Infinity,top:Infinity,bottom:-Infinity};let near=Infinity,far=-Infinity;
+ if(representation.annotation){
+  p.fromArray(item.framingSupport.points[representation.annotation.index]).project(camera);
+  expect(representation.annotation.x).toBeCloseTo((p.x+1)*width/2,3);
+  expect(representation.annotation.y).toBeCloseTo((1-p.y)*height/2,3);
+ }
  // Projection uses the stable Canvas aspect, not the page viewport. Uniform
  // DOM scale preserves that aspect and actual pointer mapping. Every support
  // point is still projected. Assert the six extrema once instead
@@ -21,6 +44,50 @@ async function fit(page){
  for(const gap of margin)expect(gap).toBeGreaterThanOrEqual(.0299);expect(near).toBeGreaterThan(-1);expect(far).toBeLessThan(1);
  return {left:display.left+extent.left*display.width,right:display.left+extent.right*display.width,top:display.top+extent.top*display.height,bottom:display.top+extent.bottom*display.height};
 }
+
+test('model information follows autonomous changes and explicit comparison release',async({page})=>{
+ test.setTimeout(scenarioTimeout(120000));await loadScene(page);await centerStudy(page,'form');
+ const initial=await page.evaluate(()=>window.__thesis.inspect().representation.id);
+ await expect.poll(()=>page.evaluate(()=>window.__thesis.inspect().representation.id),{timeout:WAIT}).not.toBe(initial);
+ await pause(page);await expectSourceInformation(page,'form');
+ await surface(page).press('Enter');await settle(page);await expectSourceInformation(page,'form');
+ expect(await page.evaluate(()=>window.__thesis.inspect().representation.pinned)).toBe(true);
+ await surface(page).press('Escape');await settle(page);await expectSourceInformation(page,'form');
+ expect(await page.evaluate(()=>window.__thesis.inspect().representation.pinned)).toBe(false);
+ await expectIdle(page);
+});
+
+test('permanent side information and source annotations stay beside the model and follow inspection',async({page})=>{
+ test.setTimeout(scenarioTimeout(150000));await loadScene(page);await pause(page);
+ for(const [width,height] of [[1440,1000],[820,1180],[390,844],[320,700]]){
+  await page.setViewportSize({width,height});await centerStudy(page,'pattern');await surface(page,'pattern').press('Enter');await settle(page);
+  const sample=()=>page.evaluate(()=>{
+   const study=document.querySelector('[data-model-study][data-model-active="true"]'),panel=study.querySelector('[data-model-side-label]').getBoundingClientRect(),model=study.querySelector('[data-model-viewport]').getBoundingClientRect();
+   const r=window.__thesis.inspect().representation;
+   return {panel:{left:panel.left,right:panel.right,top:panel.top,bottom:panel.bottom},model:{left:model.left,right:model.right,top:model.top,bottom:model.bottom},annotation:r.annotation,source:r.id};
+  });
+  const before=await sample();expect(before.panel.left).toBeGreaterThan(before.model.right);expect(before.panel.right).toBeLessThanOrEqual(width);expect(before.panel.top).toBeCloseTo(before.model.top,1);expect(before.panel.bottom).toBeLessThan(height-40);
+  await expect(page.locator('[data-model-study-host] header,[data-model-study-host] footer')).toHaveCount(0);
+  await surface(page,'pattern').press('ArrowRight');await settle(page);await expectSourceInformation(page,'pattern');await fit(page);
+  const after=await sample();expect(after.panel).toEqual(before.panel);expect(after.annotation.index).toBe(before.annotation.index);expect(Math.abs(after.annotation.x-before.annotation.x)+Math.abs(after.annotation.y-before.annotation.y)).toBeGreaterThan(.1);
+  await surface(page,'pattern').press('Escape');await settle(page);
+ }
+});
+
+test('side information stays fixed during the existing scene exit and its leader uses the displayed Canvas position',async({page})=>{
+ test.setTimeout(scenarioTimeout(120000));await loadScene(page);await centerStudy(page,'form');
+ const panel=page.locator('[data-model-study][data-study-chapter="form"] [data-model-side-label]');
+ const before=await panel.boundingBox();
+ const exit=await page.evaluate(()=>{const p=window.__story.inspect().canvasPlacement;return p.holdEnd+(p.end-p.holdEnd)*.4;});
+ await page.evaluate(y=>scrollTo({top:y,behavior:'instant'}),exit);await settle(page);
+ expect(await page.evaluate(()=>window.__story.inspect().canvasPlacement.mode)).toBe('exit');
+ const after=await panel.boundingBox();expect(after.x).toBeCloseTo(before.x,2);expect(after.y).toBeCloseTo(before.y,2);
+ const sample=await page.evaluate(()=>{
+  const r=window.__thesis.inspect().representation,canvas=document.querySelector('[data-cinematic-stage] canvas'),display=canvas.getBoundingClientRect(),study=document.querySelector('[data-model-study][data-model-active="true"]'),outer=study.getBoundingClientRect();
+  const dot=study.querySelector('[data-model-anchor]');return {annotation:r.annotation,expectedX:display.left-outer.left+r.annotation.x*display.width/canvas.clientWidth,expectedY:display.top-outer.top+r.annotation.y*display.height/canvas.clientHeight,dotX:Number(dot.getAttribute('cx')),dotY:Number(dot.getAttribute('cy'))};
+ });
+ expect(sample.annotation.visible).toBe(true);expect(sample.dotX).toBeCloseTo(sample.expectedX,2);expect(sample.dotY).toBeCloseTo(sample.expectedY,2);
+});
 
 test('tablet source fits beside the reading copy and clear of fixed navigation',async({page})=>{
  test.setTimeout(scenarioTimeout(180000));await page.setViewportSize({width:820,height:1180});await loadScene(page);await pause(page);
@@ -40,16 +107,16 @@ test('three source surfaces share one WebGL Canvas and preserve every fitted ori
  test.setTimeout(scenarioTimeout(180000));const models=[],errors=[];page.on('request',r=>{if(/\.glb(?:\?|$)/.test(r.url()))models.push(r.url());});page.on('pageerror',e=>errors.push(e.message));await loadScene(page);await pause(page);const canvas=await page.locator('[data-cinematic-stage] canvas').elementHandle();
  await expect(page.locator('[data-model-study]')).toHaveCount(3);await expect(page.locator('[data-model-study] input,[data-model-study] select,[data-model-study] [role="tab"],[data-model-study] [role="slider"]')).toHaveCount(0);
  expect(await page.evaluate(()=>window.__thesis.inspect().source)).toMatchObject({vertices:172789,triangles:227521,sourceObjects:51});
- const layout=()=>page.evaluate(()=>({document:document.documentElement.scrollHeight,captions:[...document.querySelectorAll('[data-layer-caption]')].map(el=>el.getBoundingClientRect().height)})),before=await layout();
+ const layout=()=>page.evaluate(()=>({document:document.documentElement.scrollHeight})),before=await layout();
  for(const id of ['form','system','pattern']){await centerStudy(page,id);const count=id==='pattern'?3:4;const seen=new Set();
   expect(await layout(),'Changing the source family must preserve native document layout.').toEqual(before);
-  for(let n=0;n<count;n++){await surface(page,id).press('Enter');await settle(page);const r=await page.evaluate(()=>window.__thesis.inspect().representation);seen.add(r.id);await fit(page);expect(await layout(),'Source representation captions must preserve native document layout.').toEqual(before);}expect(seen.size).toBe(count);}
+  for(let n=0;n<count;n++){await surface(page,id).press('Enter');await settle(page);const r=await page.evaluate(()=>window.__thesis.inspect().representation);seen.add(r.id);await fit(page);await expectSourceInformation(page,id);expect(await layout(),'Source representation captions must preserve native document layout.').toEqual(before);}expect(seen.size).toBe(count);}
  await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);await expect(page.locator('canvas[data-ascii-field]')).toHaveCount(1);await expect(page.locator('canvas')).toHaveCount(2);expect(await page.evaluate(el=>document.querySelector('[data-cinematic-stage] canvas')===el,canvas)).toBe(true);expect(models.filter(x=>x.includes('source-layers.glb'))).toHaveLength(1);expect(models.filter(x=>x.includes('source-diagrams.glb'))).toHaveLength(1);expect(errors).toEqual([]);await expectIdle(page);
 });
 test('actual object hover and click compare sources; empty space is not an invisible button',async({page,isMobile})=>{
  test.setTimeout(scenarioTimeout(120000));await loadScene(page);await pause(page);await centerStudy(page);const p=await hitPoint(page),before=await page.evaluate(()=>window.__thesis.inspect().representation.id);
  if(!isMobile){await page.mouse.move(p.x,p.y);await expect(surface(page)).toHaveAttribute('data-model-hit','true');await page.mouse.click(p.x,p.y);}else await page.touchscreen.tap(p.x,p.y);
- await settle(page);expect(await page.evaluate(()=>window.__thesis.inspect().representation.id)).not.toBe(before);
+ await settle(page);expect(await page.evaluate(()=>window.__thesis.inspect().representation.id)).not.toBe(before);await expectSourceInformation(page,'form');
  const empty=await page.evaluate(()=>{const r=document.querySelector('[data-model-viewport][data-study-chapter="form"]').getBoundingClientRect();for(const x of [.02,.98])for(const y of [.03,.9]){const p={x:r.left+r.width*x,y:r.top+r.height*y};if(p.y>100&&p.y<innerHeight-90&&!window.__thesis.hitTest(p.x,p.y))return p;}return null;});expect(empty).toBeTruthy();const selected=await page.evaluate(()=>window.__thesis.inspect().representation.id);await page.mouse.click(empty.x,empty.y);await frames(page);expect(await page.evaluate(()=>window.__thesis.inspect().representation.id)).toBe(selected);
 });
 test('keyboard holds and returns a view; native touch pan and chapter navigation release engagement',async({page,context,isMobile})=>{
@@ -61,7 +128,7 @@ test('keyboard holds and returns a view; native touch pan and chapter navigation
  await centerStudy(page);await surface(page).press('ArrowRight');await page.locator('[data-chapter-link="make"]').click();await settle(page);await expect.poll(()=>page.evaluate(()=>window.__story.inspect().playback.activeSeconds)).toBeGreaterThan(time);expect(await page.evaluate(()=>document.body.style.overflow)).not.toBe('hidden');
 });
 test('Reduced requires activation and keeps deliberate comparison accessible without autonomous motion',async({page})=>{
- test.setTimeout(scenarioTimeout(120000));const models=[];page.on('request',r=>{if(/\.glb(?:\?|$)/.test(r.url()))models.push(r.url());});await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');await centerStudy(page,'form',{ready:false});expect(models).toHaveLength(0);await page.locator('[data-model-study][data-study-chapter="form"]').getByRole('button',{name:'Enable model'}).click();await page.waitForFunction(()=>window.__thesis?.inspect().ready,null,{timeout:WAIT});await centerStudy(page);await surface(page).press('Enter');await settle(page);await fit(page);await page.getByRole('combobox',{name:'Visual detail',exact:true}).selectOption('light');await settle(page);expect(await page.evaluate(()=>window.__thesis.inspect().compositor.requestedSamples)).toBe(0);await expectIdle(page);
+ test.setTimeout(scenarioTimeout(120000));const models=[];page.on('request',r=>{if(/\.glb(?:\?|$)/.test(r.url()))models.push(r.url());});await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');await centerStudy(page,'form',{ready:false});expect(models).toHaveLength(0);await page.locator('[data-model-study][data-study-chapter="form"]').getByRole('button',{name:'Enable model'}).click();await page.waitForFunction(()=>window.__thesis?.inspect().ready,null,{timeout:WAIT});await centerStudy(page);await surface(page).press('Enter');await settle(page);await fit(page);await expectSourceInformation(page,'form');await page.getByRole('combobox',{name:'Visual detail',exact:true}).selectOption('light');await settle(page);expect(await page.evaluate(()=>window.__thesis.inspect().compositor.requestedSamples)).toBe(0);await expectIdle(page);
 });
 test('load failure and context loss preserve fallback reading and release source gestures',async({page})=>{
  test.setTimeout(scenarioTimeout(150000));await page.route('**/source-layers.glb',r=>r.abort());await page.goto('/');await expect(page.getByRole('button',{name:'Still background',exact:true})).toBeVisible({timeout:WAIT});await centerStudy(page,'form',{ready:false});await expect(page.locator('[data-model-study][data-study-chapter="form"]')).toContainText('Interactive geometry unavailable');await expect(surface(page)).toHaveAttribute('aria-disabled','true');

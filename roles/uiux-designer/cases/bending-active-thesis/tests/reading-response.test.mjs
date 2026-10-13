@@ -4,6 +4,32 @@ import {createReadingPlan, createReadingState, advanceReading, sampleReadingTarg
 
 const near = (actual, expected, tolerance = 1e-9) => assert(Math.abs(actual - expected) <= tolerance, `${actual} differs from ${expected}`);
 const planFor = (viewportHeight = 1000) => createReadingPlan({anchors: [0, 1350, 2700, 4900, 6200, 7400, 8600, 10000], viewportHeight, maxScroll: 10000 - viewportHeight, stops: [600, 1800, 2850, 3450, 4100, 4650, 5450, 6700, 8100].map((y, index) => ({id: `stop-${index}`, y}))});
+
+test('native reading has no lag, holds or residual response across reversal and heavy frames',()=>{
+ const plan=planFor();
+ for(const dt of [1/120,1/30,1/3,2]){
+  const state=createReadingState(450);
+  for(const y of [615,640,599,3450,3420,8100,0]){
+   advanceReading(state,y,dt,{plan,nativeScroll:true});
+   assert.equal(state.nativeDocY,y);assert.equal(state.targetDocY,y);assert.equal(state.visualDocY,y);
+   assert.equal(state.acceleration,0);assert.equal(state.settled,true);
+   const score=sampleReadingScore(state,plan);
+   assert.equal(score.readingShiftY,0);assert.equal(score.holdId,null);assert.equal(score.holdWeight,0);
+   assert.equal(score.nativeU,score.visualU);
+   advanceReading(state,y,dt,{plan,nativeScroll:true});
+   assert.equal(state.velocity,0);assert.equal(state.energy,0);
+  }
+ }
+});
+
+test('native input energy preserves pressure classification without a deceleration tail',()=>{
+ const plan=planFor(),state=createReadingState(450);
+ advanceReading(state,500,.05,{plan,nativeScroll:true});
+ assert.equal(state.velocity,1000);assert(state.energy>0);assert.equal(state.visualDocY,500);
+ advanceReading(state,490,.05,{plan,nativeScroll:true});assert.equal(state.direction,-1);
+ advanceReading(state,490,.05,{plan,nativeScroll:true});assert.equal(state.velocity,0);assert.equal(state.energy,0);
+ advanceReading(state,600,.05,{plan,nativeScroll:true,seek:true});assert.equal(state.energy,0);assert.equal(state.visualDocY,600);
+});
 const settle = (state, y, plan) => {
   for (let frame = 0; frame < 240; frame += 1) {advanceReading(state, y, 1 / 60, {plan}); if (state.settled) return state;}
   assert.fail('Reading response did not return to idle.');

@@ -86,10 +86,17 @@ test('rear scene keeps reading surfaces legible over actual, white and black bac
  expect(await page.evaluate(()=>({detail:window.__thesis.inspect().detail,samples:window.__thesis.inspect().compositor.requestedSamples,mist:window.__thesis.inspect().compositor.mist.enabled,suspended:window.__thesis.inspect().renderSuspended}))).toEqual({detail:'full',samples:isMobile?0:2,mist:true,suspended:false});
  const layers=await page.evaluate(()=>({canvases:document.querySelectorAll('canvas').length,glCanvases:document.querySelectorAll('[data-cinematic-stage] canvas').length,asciiCanvases:document.querySelectorAll('canvas[data-ascii-field]').length,stage:Number(getComputedStyle(document.querySelector('[data-cinematic-stage]')).zIndex),reading:Number(getComputedStyle(document.querySelector('[data-reading-frame]')).zIndex),scrim:!!document.querySelector('[data-cinematic-scrim]'),rects:window.__thesis.inspect().protectedRects,layering:window.__thesis.inspect().compositor.layering}));
  expect(layers.canvases).toBe(2);expect(layers.glCanvases).toBe(1);expect(layers.asciiCanvases).toBe(1);expect(layers.stage).toBeLessThan(layers.reading);expect(layers.scrim).toBe(false);expect(layers.rects).toBeUndefined();expect(layers.layering).toMatchObject({position:'rear',semanticMask:false,independentField:true});
- for(const selector of ['#overview h1','#system [data-editorial-copy]:first-of-type','[data-source-diagram="workflow"] figcaption','[data-model-study][data-study-chapter="system"] footer']){
-  const target=page.locator(selector);await target.scrollIntoViewIfNeeded();await settle(page);
-  // Read in the document's unobscured center, away from fixed masthead/tools.
-  await target.evaluate(el=>{const r=el.getBoundingClientRect();scrollBy({top:r.top+r.height/2-innerHeight/2,behavior:'instant'});});await settle(page);
+ for(const selector of ['#overview h1','#system [data-editorial-copy]:first-of-type','[data-source-diagram="workflow"] figcaption','[data-model-study][data-study-chapter="system"] [data-model-side-label]']){
+  const target=page.locator(selector);
+  if(selector.includes('[data-model-side-label]')){
+   // The source information is fixed beside the model; present its chapter
+   // instead of trying to scroll a removed document footer into view.
+   await centerStudy(page,'system');await pause(page);
+  }else{
+   await target.scrollIntoViewIfNeeded();await settle(page);
+   // Read in the document's unobscured center, away from fixed masthead/tools.
+   await target.evaluate(el=>{const r=el.getBoundingClientRect();scrollBy({top:r.top+r.height/2-innerHeight/2,behavior:'instant'});});await settle(page);
+  }
   const stage=page.locator('[data-cinematic-stage]'),original=await stage.evaluate(el=>el.style.cssText);
   try{
    for(const backdrop of [null,'#ffffff','#000000']){

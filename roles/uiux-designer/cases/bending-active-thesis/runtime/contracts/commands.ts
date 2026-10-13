@@ -10,6 +10,6 @@ export type CommandMap = {
 export type RuntimeEvents = {
   stateChanged: {version:number;previous:RuntimeState;current:RuntimeState};
   representationChanged: {selection:SourceSelection|null;version:number};
-  representationResolved: {chapterId:string;index:number;representationId:string;label:string;pinned:boolean};
+  representationResolved: {chapterId:string;index:number;representationId:string;label:string;description:string;count:number;pinned:boolean};
   layoutInvalidated: {reason:string;resumed:boolean};
 };

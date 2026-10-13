@@ -31,18 +31,18 @@ export async function centerStudy(page,chapter='form',{ready=true}={}){
  const el=surface(page,chapter);
  await el.evaluate(el=>{
   const naturalY=element=>{let y=0;for(let n=element;n;n=n.offsetParent)y+=n.offsetTop;return y;};
-  const section=el.closest('[data-story-chapter]'),sections=[...document.querySelectorAll('[data-story-chapter]')],index=sections.indexOf(section);
+  const section=document.querySelector(`[data-story-chapter="${el.dataset.studyChapter}"]`),host=section.querySelector('[data-model-study-host]'),sections=[...document.querySelectorAll('[data-story-chapter]')],index=sections.indexOf(section);
   const start=naturalY(section),end=index<sections.length-1?naturalY(sections[index+1]):start+section.offsetHeight;
   const height=document.querySelector('[data-cinematic-stage]')?.offsetHeight||innerHeight,span=end-start;
   const holdStart=start-height*.62+Math.min(span*.18,height*.45),holdEnd=end-height*.62-Math.min(span*.20,height*.50);
   // Put the document controls near the authored scene, but never make their
   // rectangle the camera/stage owner. Long source chapters have a true hold.
-  const desired=naturalY(el)-Math.max(112,(innerHeight-el.offsetHeight)*.34);
-  el.focus({preventScroll:true});
+  const desired=naturalY(host)-Math.max(112,(innerHeight-el.offsetHeight)*.34);
   scrollTo({top:Math.max(holdStart+1,Math.min(holdEnd-1,desired)),behavior:'instant'});
  });
  await settle(page);
  if(ready)await page.waitForFunction(id=>window.__thesis?.inspect().representation?.chapterId===id&&window.__thesis.inspect().studyWeight>.99,chapter,{timeout:WAIT});
+ await el.evaluate(el=>el.focus({preventScroll:true}));
 }
 export async function hitPoint(page,chapter='form'){
  return page.evaluate(id=>{

@@ -22,4 +22,6 @@ This follows GitHub's [custom Pages workflow](https://docs.github.com/en/pages/g
 
 ## Verification record
 
+**CI policy update — 13 October 2026:** [Decision 0009](0009-impact-selected-ci.md) replaces unconditional full-suite execution with conservative impact-selected checks, a required aggregate gate and a verified output digest. The successful exact-commit default-branch push and manual publication requirements remain.
+
 The public artifact must pass `pnpm build:pages`, `pnpm test:pages`, root `pnpm check` and built-root browser tests before the authorized first deployment. Remote CI/deployment run records provide commit-specific evidence; `/release.json` identifies the deployed commit and model revision. Local validation is recorded in the release README. A post-deployment report does not require rebuilding or deploying a different artifact merely to update documentation.

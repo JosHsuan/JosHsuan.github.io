@@ -12,7 +12,7 @@ node scripts/serve-pages.mjs
 
 The disposable artifact is `.pages-workspace/out/`, previewed at `http://127.0.0.1:4186/`. It uses the same maintained cinematic runtime as the local case. Only the release allowlist is copied; the original local `public/assets` folder is never scanned by the public build. The private shell-hull dependency has been removed because the current verified source/base revision uses combined bounds.
 
-The canonical site is `https://joshsuan.github.io/`. `/release.json` identifies the deployed commit. CI validates the original framework and public case; deployment consumes the successful same-commit `static-export-pages` artifact without rebuilding.
+The canonical site is `https://joshsuan.github.io/`. `/release.json` identifies the deployed commit. [Impact-selected CI](../../../../../docs/CI_CD.md) builds/audits the complete public output once, shares it across the required browser jobs and records their results/output digest. Deployment consumes the successful exact-commit default-branch push `static-export-pages` and `validated-release` artifacts, checks every output byte and publishes without rebuilding. The owner authorized publishing the latest native-reading and permanent model-side information implementation on 13 October 2026; its CI migration/shared runtime inputs require full validation.
 
 Full source geometry and existing fallback/quality controls are retained. Model/HDR transfer and triangle counts still exceed earlier mobile/source budgets. Physical phone performance is not certified. Original source attribution and year uncertainty remain visible; publication does not fabricate missing credits or engineering evidence.
 

@@ -12,6 +12,8 @@ import {sampleContinuousLighting} from '../../components/inspection-lighting.mjs
 import {sampleChapterScene, applyChapterLighting} from '../../components/chapter-scene-score.mjs';
 import {SOURCE_DIAGRAM_REVISION, prepareSourceFamilies, resolveSourceSelection, sampleSourceScenePose} from '../../components/source-scene-score.mjs';
 import {waitForSceneVisibility} from '../../components/scene-visibility.mjs';
+import {modelInformationSummary,modelAnnotationLabel} from '../../components/model-information.mjs';
+import {publishModelAnnotation} from './ModelAnnotationPresenter.mjs';
 
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 async function loadSourceDiagrams(signal, manager) {
@@ -37,16 +39,16 @@ function liveBounds(meta, elements) {
 // A representation may change every chapter beat. Reserve the wrapped height
 // of every approved description once, without letting those changes move the
 // native document or its reading stops. Only the current span is spoken.
-function prepareLayerCaptions(descriptions) {
-  const slots=[...document.querySelectorAll('[data-layer-caption]')].map(element=>{
+function prepareLayerCaptions(descriptions,selector='[data-layer-caption]',kind='layer') {
+  const slots=[...document.querySelectorAll(selector)].map(element=>{
     const current=document.createElement('span');
-    current.dataset.layerCaptionCurrent='';current.textContent=element.textContent;
+    current.dataset[`${kind}CaptionCurrent`]='';current.textContent=element.textContent;
     const variants=[...new Set([current.textContent,...descriptions])];
     const sizing=variants.map(description=>{
-      const span=document.createElement('span');span.dataset.layerCaptionSizer='';
-      span.setAttribute('aria-hidden','true');span.textContent=description;return span;
+      const span=document.createElement('span');
+      span.dataset[`${kind}CaptionSizer`]='';span.setAttribute('aria-hidden','true');span.textContent=description;return span;
     });
-    element.replaceChildren(current,...sizing);element.dataset.layerCaptionSized='';
+    element.replaceChildren(current,...sizing);element.dataset[`${kind}CaptionSized`]='';
     return {element,current};
   });
   return {
@@ -55,7 +57,7 @@ function prepareLayerCaptions(descriptions) {
       // Failure may already have replaced the outer paragraph with its static
       // message. Preserve that message; otherwise unwrap our latest caption.
       if(current.parentNode===element)element.replaceChildren(document.createTextNode(current.textContent));
-      element.removeAttribute('data-layer-caption-sized');
+      element.removeAttribute(`data-${kind}-caption-sized`);
     });},
   };
 }
@@ -106,7 +108,7 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
       }
       initialization.current.phase='initializing';
       const meta = results[2].value, rig = new T.Group(), previousEnvironment = scene.environment, previousFog = scene.fog, previousBackground = scene.background;
-      let environment = null, compositor = null, exhibition = null, captionSlots = null, disposed = false;
+      let environment = null, compositor = null, exhibition = null, captionSlots = null, modelCaptionSlots = null, disposed = false;
       const lights = {}, adapters = [], layers = [], diagramNodes = new Map();
       cleanup = () => {
         if (disposed) return; disposed = true;
@@ -114,7 +116,7 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
         if (exhibition) {root.remove(exhibition.group); exhibition.dispose();}
         Object.values(lights).forEach(light => light.dispose?.());
         adapters.forEach(adapter => adapter.dispose()); compositor?.dispose();
-        captionSlots?.dispose();
+        captionSlots?.dispose();modelCaptionSlots?.dispose();
         if (scene.environment === environment?.texture) scene.environment = previousEnvironment;
         scene.fog = previousFog; scene.background = previousBackground; environment?.dispose(); hdr.dispose(); data.current = null;
       };
@@ -174,6 +176,8 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
         scene.environment = environment.texture; scene.fog = new T.FogExp2('#091217', .03);
         compositor = createSceneCompositor(gl); exhibition = createExhibitionStage({bounds:meta.bounds}); root.add(gltf.scene, diagrams.scene, rig, exhibition.group);
         captionSlots=prepareLayerCaptions([...diagramMeta.representations.map(record=>record.description),sampleSourceSeparation(0).caption,sampleSourceSeparation(1).caption]);
+        const modelDescriptions=diagramMeta.representations.map(modelInformationSummary);
+        modelCaptionSlots=prepareLayerCaptions(modelDescriptions,'[data-source-description]','model');
         data.current = {meta,diagramMeta,diagramRoot:diagrams.scene,diagramNodes,families,inspectionBounds,previousBackground,studyBackground:new T.Color(),sourceRoot:gltf.scene,exhibition,layers,lights,ground,adapters,compositor,ready:false,failed:false,captions:captionSlots.captions,caption:null,visibleSource:[],presentationKey:null};
         invalidate();
       } catch (error) {cleanup(); if (!cancelled) {console.error('Local source scene unavailable:', error.message); onFailure();}}
@@ -290,21 +294,13 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
         else if(value.record.id==='curvature') value.mesh.material.color.setScalar(1+(value===entry?hover*.035:0));
       }
       const label=entry?.record.label ?? 'Source assembly';
-      const representation={...selected,label,vertices:entry?.record.vertices??d.meta.vertices,triangles:entry?.record.triangles??d.meta.triangles,
+      const description=entry?`${entry.record.description}${selected.id==='curvature'?` ${d.diagramMeta.limits[0]}`:''}`:elements.caption;
+      const count=selected.family==='experiment'?3:selected.family==='representation'?4:1;
+      const summary=entry?modelInformationSummary(entry.record):description;
+      const representation={...selected,label,description,summary,count,vertices:entry?.record.vertices??d.meta.vertices,triangles:entry?.record.triangles??d.meta.triangles,
         assetRevision:entry?d.diagramMeta.revision:d.meta.revision,bounds,fitBounds:family.bounds,framingSupportPoints:family.points.length,
         viewport:slot.viewport??null,weight:studyWeight,hover,sourceGeometryUnmodified:true,vertexColors:entry?.record.vertexColors??0};
       const presentationKey=`${selected.chapterId}:${selected.id}:${selected.pinned}`;
-      // React's one-time readiness render can replace the initial source label.
-      // Reconcile the live DOM value, while dispatching only real source changes.
-      for(const surface of document.querySelectorAll(`[data-model-viewport][data-study-chapter="${selected.chapterId}"]`)) {
-        if(surface.dataset.sourceIndex!==String(selected.index))surface.dataset.sourceIndex=String(selected.index);
-        if(surface.dataset.representationId!==selected.id)surface.dataset.representationId=selected.id;
-        const labelNode=surface.closest('[data-model-study]')?.querySelector('[data-source-label]');if(labelNode&&labelNode.textContent!==label)labelNode.textContent=label;
-      }
-      if(presentationKey!==d.presentationKey) {
-        d.presentationKey=presentationKey;
-        input.events.emit('representationResolved',{chapterId:selected.chapterId,index:selected.index,representationId:selected.id,label,pinned:selected.pinned});
-      }
       const caption=entry?entry.record.description:elements.caption;
       if (caption !== d.caption) {d.caption = caption; d.captions.forEach(element => {element.textContent = caption;});}
       if(d.pressureDetail!==detail){d.pressureDetail=detail;runtime.pressure.suspend('quality-change');}
@@ -313,6 +309,22 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
       const dpr=d.renderBudget.dpr;
       gl.info.reset();
       d.compositor.render(scene, camera, optics, {width: size.width, height: size.height, dpr, requestedDpr:d.renderBudget.requestedDpr, samples: detail === 'full' && debug.samples !== 0 ? runtime.profile.maxSamples : 0,independentField:!!state.independentAscii});
+      // Publish only after a successful scene paint, including autonomous
+      // source changes. Reconcile readiness renders without per-frame React state.
+      document.querySelectorAll('[data-model-study]').forEach(study=>{study.dataset.modelActive=String(study.dataset.studyChapter===selected.chapterId);});
+      for(const surface of document.querySelectorAll(`[data-model-viewport][data-study-chapter="${selected.chapterId}"]`)) {
+        if(surface.dataset.sourceIndex!==String(selected.index))surface.dataset.sourceIndex=String(selected.index);
+        if(surface.dataset.representationId!==selected.id)surface.dataset.representationId=selected.id;
+        const study=surface.closest('[data-model-study]');
+        for(const [selector,text] of [['[data-source-label]',label],['[data-model-caption-current]',summary],['[data-model-annotation-text]',modelAnnotationLabel(selected.id)],['[data-source-position]',`${selected.family==='experiment'?'Experiment':'Representation'} ${selected.index+1} / ${count}`]]) {
+          const node=study?.querySelector(selector);if(node&&node.textContent!==text)node.textContent=text;
+        }
+        representation.annotation=publishModelAnnotation(study,{points:entry?.record.framingSupport.points,mesh:entry?.mesh,camera,width:size.width,height:size.height,present,canvasRect:gl.domElement.getBoundingClientRect()});
+        if(presentationKey!==d.presentationKey&&selected.pinned) {
+          const announcement=study?.querySelector('[data-source-announcement]');
+          if(announcement)announcement.textContent=`${label}. Comparison selected. Escape returns to the chapter.`;
+        }
+      }
       // Selection can name an absent source. Observe actual compiled programs,
       // including Full/Light variants, and discard the following delivery gap.
       d.seenPrograms ??= new WeakSet();
@@ -320,6 +332,10 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
         d.seenPrograms.add(program);runtime.pressure.suspend('shader-warmup');
       }
       last.current = {mode:'autonomous-source-story',renderedControllerFrame:state.controllerFrame??0,studyWeight,representation,playback,chapterScene,pose: {...pose, fov: camera.fov, focalLengthMm: optics.focalLengthMm}, optics, lights: direction, elements, bounds, detail, stageLayout, exhibition:exhibitionState, shadowUpdated,keyIntensity: d.lights.key.intensity};
+      if(presentationKey!==d.presentationKey) {
+        d.presentationKey=presentationKey;
+        input.events.emit('representationResolved',{chapterId:selected.chapterId,index:selected.index,representationId:selected.id,label,description,count,pinned:selected.pinned});
+      }
       frames.current++;
       input.markPresented(state.controllerFrame??0,selected.chapterId);
       if (!d.ready) {d.ready = true; initialization.current.phase='ready'; queueMicrotask(onReady);}

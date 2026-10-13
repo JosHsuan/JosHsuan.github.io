@@ -3,12 +3,70 @@ on:
   push:
   pull_request:
   workflow_dispatch:
+    inputs:
+      full_validation:
+        description: Run all framework and public-case checks
+        type: boolean
+        default: true
 permissions:
   contents: read
+  actions: read
+concurrency:
+  group: validate-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  NEXT_TELEMETRY_DISABLED: '1'
 jobs:
-  validate:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      framework: ${{ steps.plan.outputs.framework }}
+      pages: ${{ steps.plan.outputs.pages }}
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+      - name: Check impact selection and publication gates
+        run: node --test tests/ci/*.test.mjs
+      - name: Select affected checks
+        id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/ci-plan.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: validation-plan
+          path: ci-plan.json
+          retention-days: 14
+
+  quality:
+    needs: plan
+    if: needs.plan.outputs.framework == 'true' || needs.plan.outputs.pages == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Validate content, lint, types and fast regression tests once
+        run: pnpm content:validate && pnpm lint && pnpm typecheck && pnpm test
+      - name: Public case portable tests
+        if: needs.plan.outputs.pages == 'true'
+        run: node --test roles/uiux-designer/cases/bending-active-thesis/tests/*.test.mjs
+
+  framework:
+    needs: plan
+    if: needs.plan.outputs.framework == 'true'
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         include:
           - name: root
@@ -17,15 +75,20 @@ jobs:
             basePath: /portfolio-test
     env:
       NEXT_PUBLIC_BASE_PATH: ${{ matrix.basePath }}
-      NEXT_TELEMETRY_DISABLED: '1'
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
-      - uses: pnpm/action-setup@v4
+          cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm check
+      - uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-framework-${{ matrix.name }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-framework-${{ matrix.name }}-${{ hashFiles('pnpm-lock.yaml') }}-
+      - run: pnpm build
       - run: pnpm exec playwright install --with-deps chromium firefox webkit
       - run: pnpm test:e2e
       - uses: actions/upload-artifact@v4
@@ -41,36 +104,101 @@ jobs:
           path: out/
           include-hidden-files: true
           retention-days: 14
-  public-case:
+
+  pages-build:
+    needs: plan
+    if: needs.plan.outputs.pages == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/cache@v4
+        with:
+          path: .pages-workspace/.next/cache
+          key: ${{ runner.os }}-pages-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-pages-${{ hashFiles('pnpm-lock.yaml') }}-
+      - name: Build and audit the complete public export once
+        run: pnpm build:pages
+      - run: node scripts/ci-artifact.mjs record
+      - uses: actions/upload-artifact@v4
+        with:
+          name: static-export-pages
+          path: .pages-workspace/out/
+          include-hidden-files: true
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pages-build-record
+          path: ci-build.json
+          retention-days: 14
+
+  pages-browser:
+    needs: [plan, pages-build]
+    if: needs.plan.outputs.pages == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
       fail-fast: false
-      matrix:
-        browser: [chromium, webkit, mobile-chromium]
-    env:
-      NEXT_TELEMETRY_DISABLED: '1'
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@v4
+        with:
+          name: validation-plan
+      - uses: actions/download-artifact@v4
+        with:
+          name: pages-build-record
+      - uses: actions/download-artifact@v4
+        with:
+          name: static-export-pages
+          path: .pages-workspace/out
+      - name: Verify exact shared output before browser checks
+        run: node scripts/ci-artifact.mjs check-build
+      - run: pnpm exec playwright install --with-deps ${{ matrix.engine }}
+      - run: node scripts/ci-run-pages.mjs ${{ matrix.browser }} ${{ matrix.shard }}
+      - name: Ensure tests left the public output unchanged
+        run: node scripts/ci-artifact.mjs check-build
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: public-case-failures-${{ matrix.browser }}-${{ strategy.job-index }}
+          path: pages-test-results/
+
+  gate:
+    name: Required validation gate
+    needs: [plan, quality, framework, pages-build, pages-browser]
+    if: always()
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
-      - uses: pnpm/action-setup@v4
-      - run: pnpm install --frozen-lockfile
-      - name: Verify case response, source transforms, materials and stage
-        run: node --test roles/uiux-designer/cases/bending-active-thesis/tests/*.test.mjs
-      - run: pnpm build:pages
-      - run: pnpm exec playwright install --with-deps chromium webkit
-      - run: pnpm test:pages --project ${{ matrix.browser }}
-      - uses: actions/upload-artifact@v4
-        if: failure()
+      - uses: actions/download-artifact@v4
         with:
-          name: public-case-browser-failures-${{ matrix.browser }}
-          path: pages-test-results/
-      - uses: actions/upload-artifact@v4
-        if: matrix.browser == 'chromium'
+          name: validation-plan
+      - uses: actions/download-artifact@v4
+        if: needs.plan.outputs.pages == 'true'
         with:
-          name: static-export-pages
-          path: .pages-workspace/out/
-          include-hidden-files: true
+          name: pages-build-record
+      - name: Require every selected job, reject unexpected skips
+        env:
+          CI_JOB_RESULTS: ${{ toJSON(needs) }}
+          CI_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: node scripts/ci-gate.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: validated-release
+          path: ci-validation.json
           retention-days: 14

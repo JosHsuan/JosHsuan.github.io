@@ -24,8 +24,8 @@ function parameters(chapter,aspect=1.44,phase=.25) {
 }
 
 test('viewport-stage owns fixed source apertures independent of scroll slots and local-frame mode',()=>{
-  assert.deepEqual(viewportStageSourceViewport(1.44),{left:.51,top:.20,width:.43,height:.52});
-  assert.deepEqual(viewportStageSourceViewport(390/844),{left:.045,top:.205,width:.91,height:.43});
+  assert.deepEqual(viewportStageSourceViewport(1.44),{left:.51,top:.20,width:.27,height:.52});
+  assert.deepEqual(viewportStageSourceViewport(390/844),{left:.045,top:.205,width:.52,height:.43});
   for(const invalid of [0,-1,Infinity,NaN])assert.throws(()=>viewportStageSourceViewport(invalid),/aspect/);
   for(const invalid of [0,-1,Infinity,NaN])assert.throws(()=>viewportStageSourceViewport(.7,invalid),/width/);
   for(const aspect of [1.44,.46])for(const chapter of [1,2,3]) {
@@ -44,7 +44,7 @@ test('viewport-stage owns fixed source apertures independent of scroll slots and
 });
 
 test('authored study aperture follows the CSS layout breakpoint on tall tablets and narrow screens',()=>{
-  const centered={left:.045,top:.205,width:.91,height:.43},compact={left:.51,top:.20,width:.41,height:.52},right={left:.51,top:.20,width:.43,height:.52};
+  const centered={left:.045,top:.205,width:.52,height:.43},compact={left:.51,top:.20,width:.215,height:.52},right={left:.51,top:.20,width:.27,height:.52};
   for(const [width,height,viewport] of [[430,932,centered],[780,1180,centered],[781,1180,compact],[820,1180,compact],[932,430,compact],[1100,1180,compact],[1101,1180,right]]) {
     assert.deepEqual(viewportStageSourceViewport(width/height,width),viewport);
     for(const chapter of [1,2,3]) {

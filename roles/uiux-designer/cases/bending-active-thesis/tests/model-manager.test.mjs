@@ -5,7 +5,7 @@ import {createStoryInput} from '../components/story-input.js';
 import {createInspectionState} from '../components/inspection-state.mjs';
 
 function setup(){
- const input=createStoryInput(),inspection=createInspectionState(),captures=new Set(),label={textContent:''},announcement={textContent:''};
+ const input=createStoryInput(),inspection=createInspectionState(),captures=new Set(),label={textContent:'Origami representation'},announcement={textContent:''};
  const surface={dataset:{sourceIndex:'0'},setPointerCapture:id=>captures.add(id),hasPointerCapture:id=>captures.has(id),releasePointerCapture:id=>captures.delete(id),
   closest:()=>({querySelector:selector=>selector==='[data-source-label]'?label:announcement})};
  let source=true;
@@ -33,7 +33,7 @@ test('a touch tap compares but native touch travel neither captures nor selects'
   if(pan)f.manager.move(f.pointer({pointerType:'touch',clientY:90}),true);
   f.manager.end(f.pointer({pointerType:'touch',timeStamp:200}),false,true);
   assert.equal(f.input.get().sourceSelection?.index,pan?undefined:1);
-  if(!pan){assert.equal(f.label.textContent,'Opening representation');assert.match(f.announcement.textContent,/Comparison selected/);}
+  if(!pan){assert.equal(f.label.textContent,'Origami representation');assert.equal(f.surface.dataset.sourceIndex,'0');assert.match(f.announcement.textContent,/Opening representation.*Comparison requested/);}
  }
 });
 

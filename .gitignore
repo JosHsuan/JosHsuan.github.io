@@ -11,3 +11,6 @@ src/app/(entries)/
 .DS_Store
 .pages-workspace/
 pages-test-results/
+ci-plan.json
+ci-build.json
+ci-validation.json

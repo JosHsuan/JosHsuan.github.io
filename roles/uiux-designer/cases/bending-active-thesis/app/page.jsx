@@ -84,7 +84,6 @@ export default function Page() {
             <Heading number="02" label={story.system.label} lines={story.system.heading} id="system-heading" kind="system" />
             <Paragraphs paragraphs={story.system.paragraphs} />
             <ol className={styles.methodSequence}>{story.system.sequence.map((step, index) => <li key={step} style={{'--step-index':index}} data-protect><details><summary><span>{String(index + 1).padStart(2, '0')}</span><span data-choreography="diagram">{step}</span><span className={styles.stepArrow} aria-hidden="true">↗</span></summary><p>{methodNotes[index]}</p></details></li>)}</ol>
-            <p className={styles.layerCaption} data-protect data-choreography="caption" data-layer-caption>Source geometry · original placement</p>
 
           </div>
           <div className={styles.inlineStudy} data-model-study-host="system" />
@@ -100,7 +99,6 @@ export default function Page() {
             <Heading number="03" label={story.pattern.label} lines={story.pattern.heading} id="pattern-heading" kind="system" />
             <Paragraphs paragraphs={story.pattern.paragraphs} />
             <p className={styles.smallNote} data-protect data-choreography="caption">{story.pattern.note}</p>
-            <p className={styles.layerCaption} data-protect data-choreography="caption" data-layer-caption>Source geometry · original placement</p>
           </div>
           <div className={styles.inlineStudy} data-model-study-host="pattern" />
           <div className={styles.diagramWide}><SourceDiagram kind="library" title="Follow the sampled function library" />

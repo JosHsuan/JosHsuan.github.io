@@ -34,7 +34,7 @@ export async function renderedTextContrast(page, locator) {
     // Restore authored color while transitions are still disabled. Otherwise
     // the next sample can observe the transparent-to-color transition itself.
     await style.evaluate((element,css)=>{element.textContent=css;},base);
-    await locator.evaluate(element=>{getComputedStyle(element).color;element.removeAttribute('data-reading-contrast-probe');});
+    await locator.evaluate(element=>{getComputedStyle(element).getPropertyValue('color');element.removeAttribute('data-reading-contrast-probe');});
     await style.evaluate(element=>element.remove());
   }
   return page.evaluate(async({png,geometry})=>{

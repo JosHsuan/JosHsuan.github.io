@@ -6,6 +6,8 @@ The proposed runtime separates event infrastructure, feature behavior, committed
 
 ## Local implementation mapping
 
+The owner-selected Plan B follow-up on 12 October 2026 makes the active reader native: visual/document reading positions match, the director supplies no paragraph/media hold points, and CSS/DOM publication no longer compensate the entire article's scroll position. Scene chapter holds and playback remain independent. Existing damped reading functions are retained as historical opt-in samplers, rather than the active reader. Native input velocity/energy still inform rendering-pressure classification and have no deceleration tail. This follow-up is a local review change.
+
 The implementation remains inside the existing case. React views use `ExperienceProvider.jsx` and `RuntimeRoot.mjs`; typed contracts and core services are under `runtime/contracts` and `runtime/core`. The five feature factories live in `runtime/features`, the director in `runtime/orchestration`, and scene/editorial/DOM/layout adapters in `runtime/presentation`. Existing pure samplers, `runtime-scheduler.mjs`, the compositor and `page-field-renderer.mjs` remain the executable frame/render algorithms.
 
 - The closed catalog registers factories and their required services. Mounted views connect their real feature work through the Registrar. Module imports create no browser listeners, timers or GPU resources.

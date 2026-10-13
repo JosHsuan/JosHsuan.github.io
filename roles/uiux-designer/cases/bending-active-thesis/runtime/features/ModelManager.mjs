@@ -41,11 +41,11 @@ export function createModelManager({input,inspection,hitTest}){
   const result=input.commands.execute('model.select',{chapterId:study.id,index,selectedAt:state.playback?.activeSeconds??0,modelRecovering:!inspection.settled});
   if(result.status==='rejected')return;
   input.publishFrame({inspectionRevision:(input.get().inspectionRevision??0)+1});
-  surface.dataset.sourceIndex=String(index);
-  const parent=surface.closest('[data-model-study]'),label=parent?.querySelector('[data-source-label]');
-  if(label)label.textContent=study.labels[index];
+  // The scene publishes source information after its successful paint. A
+  // requested selection must not rename geometry that is still on screen.
+  const parent=surface.closest('[data-model-study]');
   const announcement=parent?.querySelector('[data-source-announcement]');
-  if(announcement)announcement.textContent=`${study.labels[index]}. Comparison selected. Escape returns to the chapter.`;
+  if(announcement)announcement.textContent=`${study.labels[index]}. Comparison requested. Escape returns to the chapter.`;
  }
  function begin(event,study,surface=event.currentTarget,ready=false){
   if(!ready||event.button!==0||event.isPrimary===false||press||!hit(event,study.id,ready))return;

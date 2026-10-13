@@ -8,11 +8,13 @@ import {createFrameScheduler} from '../../components/runtime-scheduler.mjs';
 import {LayoutScheduler} from '../presentation/LayoutScheduler.ts';
 import {createCanvasMotion, advanceCanvasMotion} from '../../components/canvas-motion.mjs';
 import {viewportStageSourceViewport} from '../../components/source-scene-score.mjs';
+import {modelInformationLayout} from '../../components/model-information.mjs';
 import {createPageFieldRenderer} from '../../components/page-field-renderer.mjs';
 
 /** Owns chapter time and frame coordination, independently of React presentation. */
 export function createExperienceDirector({input,inspection,lifecycle,stage,fieldCanvas,progress,status}){
   return {connect(){
+    const modelOverlay=document.querySelector('[data-model-overlay]');
     const root = document.querySelector('[data-story-root]');
     const sections = [...document.querySelectorAll('[data-story-chapter]')];
     if (!root || sections.length !== 7) return;
@@ -59,15 +61,9 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       diagrams=[...document.querySelectorAll('[data-source-diagram]')].map(element=>({element,index:Math.max(0,sections.indexOf(element.closest('[data-story-chapter]')))}));
       for(const element of choreography.keys())if(!element.isConnected)choreography.delete(element);
       offsets=sections.map(naturalY);offsets.push(naturalY(sections.at(-1))+sections.at(-1).offsetHeight);
-      const candidates=[...root.querySelectorAll('[data-story-heading],[data-editorial-copy],[data-story-media],[data-model-viewport],[data-reading-copy]')];
-      const stops=candidates.flatMap((element,index)=>{
-        const host=element.closest('[data-model-study-host]');
-        if(element.hasAttribute('data-model-viewport')&&host&&getComputedStyle(host).position==='sticky')return [];
-        const y=naturalY(element),height=element.offsetHeight;
-        const first=y+Math.min(height*.5,innerHeight*.22)-innerHeight*.42;
-        return [{id:`reading-${index}`,y:first},...(height>innerHeight*.65?[{id:`reading-${index}-end`,y:y+height-innerHeight*.7}]:[])];
-      });
-      plan=createReadingPlan({anchors:offsets,viewportHeight:innerHeight,maxScroll:Math.max(0,document.documentElement.scrollHeight-innerHeight),stops});readingManager.setPlan(plan);
+      // Reading follows the native document; only the separate Canvas keeps
+      // authored chapter holds. No paragraph/media pause points are measured.
+      plan=createReadingPlan({anchors:offsets,viewportHeight:innerHeight,maxScroll:Math.max(0,document.documentElement.scrollHeight-innerHeight),stops:[]});readingManager.setPlan(plan);
       const counters=new Map();
       document.querySelectorAll('[data-choreography]').forEach(element=>{
         const kind=element.dataset.choreography||'prose', section=element.closest('[data-story-chapter]');
@@ -106,7 +102,6 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       });
       const playbackScore=sampleChapterPlayback(playback);
       lastChapter=chapter.id;resumed=false;seekPending=false;semanticSeekPending=false;
-      publisher.style(root,'--reading-shift',readingScore.readingShiftY+'px');
       // Read the few unsettled sticky labels together, before any element
       // transform writes. Already-settled labels need no live rectangle.
       const stickyRects=new Map();
@@ -129,6 +124,19 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       let inspectionWeight=0,inspectionViewport=state.inspectionViewport;
       const canvasChapter=canvasPlacement.chapter;
       const authoredViewport=viewportStageSourceViewport(canvasSurface.width/canvasSurface.height,canvasSurface.width);
+      const informationViewport=modelInformationLayout(canvasSurface.width/canvasSurface.height,canvasSurface.width).information;
+      const modelUIVisible=canvasPlacement.visible&&['form','system','pattern'].includes(canvasPlacement.chapter);
+      if(modelOverlay){
+        publisher.style(modelOverlay,'height',`${canvasSurface.height}px`);
+        for(const [prefix,rect] of [['slot',authoredViewport],['info',informationViewport]]){
+          for(const [name,value] of [['left',rect.left*canvasSurface.width],['top',rect.top*canvasSurface.height],['width',rect.width*canvasSurface.width],['height',rect.height*canvasSurface.height]])publisher.style(modelOverlay,`--model-${prefix}-${name}`,`${value}px`);
+        }
+        // Native focus must survive the momentary empty boundary between two
+        // scene passages, just as the previous document controls did.
+        publisher.attribute(modelOverlay,'hidden',modelUIVisible||modelOverlay.contains(document.activeElement)?null:'');
+        publisher.attribute(modelOverlay,'data-model-ui-visible',String(modelUIVisible));
+        if(!state.sceneReady||state.sceneFailed)modelOverlay.querySelectorAll('[data-model-study]').forEach(study=>{study.dataset.modelActive=String(study.dataset.studyChapter===canvasPlacement.chapter);});
+      }
       const canvasActive=canvasPlacement.visible&&state.sceneEnabled&&!state.sceneFailed;
       if(canvasActive&&!canvasWasVisible)canvasActivation=controllerFrame;
       canvasWasVisible=canvasActive;
@@ -136,6 +144,12 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       canvasAwaitingPaint=canvasActive&&(presented.controllerFrame<canvasActivation||presented.chapterId!==canvasChapter);
       publisher.style(stage.current,'transform',`translate3d(${canvasPlacement.x}px,${canvasPlacement.y}px,0) scale(${canvasPlacement.scale})`);
       publisher.style(stage.current,'opacity',canvasAwaitingPaint?0:canvasPlacement.opacity);
+      if(modelOverlay){
+        // The information column is permanent; only its model aperture follows
+        // the existing scene entry/exit. Source leader points use the real Canvas rect.
+        publisher.style(modelOverlay,'opacity',canvasAwaitingPaint||!modelUIVisible?0:1);
+        modelOverlay.querySelectorAll('[data-model-viewport]').forEach(surface=>publisher.style(surface,'transform',`translate3d(${canvasPlacement.x}px,${canvasPlacement.y}px,0) scale(${canvasPlacement.scale})`));
+      }
       publisher.attribute(stage.current,'data-canvas-mode',canvasPlacement.mode);
       moving=moving||!canvasPlacement.settled||canvasAwaitingPaint;
       for(const id of ['form','system','pattern']){
@@ -211,7 +225,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
     const anchor=event=>readingManager.anchor(event);
 
     const keyboard=event=>readingManager.key(event);
-    const scroll=()=>{const shouldSeek=readingManager.scroll();if(!input.get().reduced)publisher.style(root,'--reading-shift',`${scrollY-reading.visualDocY}px`);if(shouldSeek)seekPending=true;schedule();};
+    const scroll=()=>{const shouldSeek=readingManager.scroll();if(shouldSeek)seekPending=true;schedule();};
     const wheel=event=>{if(event.ctrlKey)return;readingManager.directInput();const delta=event.deltaY*(event.deltaMode===1?16:event.deltaMode===2?innerHeight:1);pendingImpulse=Math.max(-1,Math.min(1,pendingImpulse+delta/600));schedule();};
     const touchstart=event=>{touchY=event.touches.length===1?event.touches[0].clientY:null;readingManager.directInput();};
     const touchmove=event=>{if(touchY===null||event.touches.length!==1)return;const y=event.touches[0].clientY;pendingImpulse=Math.max(-1,Math.min(1,pendingImpulse+(touchY-y)/500));touchY=y;schedule();};
@@ -259,7 +273,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
     });
     window.__story={inspect:()=>({...reading,...sampleReadingScore(reading,plan),controllerFrame,frameDelta,readingPending:seekPending||resumed||Math.abs(reading.nativeDocY-scrollY)>.01,playback:sampleChapterPlayback(playback),chapterScene:latestScene,informationChapter:lastChapter,pageField:pageField.inspect(),canvasPlacement:canvasPlacement?{...canvasPlacement}:null,canvasSurface,canvasAwaitingPaint,history:[...history],stops:plan.stops,scheduled:scheduler.inspect().scheduled,lifecycle:scheduler.inspect(),domPublication:publisher.inspect(),inspectionActive:!!input.get().inspectionActive,inspectionWeight:input.get().inspectionWeight,modelViewports:input.get().modelViewports,modelEngaged:!!input.get().modelEngaged,modelRecovering:!!input.get().modelRecovering,sourceSelection:input.get().sourceSelection,choreography:[...choreography].map(([element,item])=>({kind:item.kind,firstVisibleAt:item.firstVisibleAt,phase:element.dataset.choreographyPhase,settled:item.last?.settled??false})),inspection:{target:{...inspection.target},value:{...inspection.value},lightMix:0,settled:inspection.settled}})};
     input.publishFrame({hidden:scheduler.suspended});document.documentElement.setAttribute('data-cinematic-ready','');measure();if(location.hash)hash();
-    return()=>{disposed=true;pageField.dispose();readingManager.dispose();layout.dispose();scheduler.dispose();scope.dispose();resize.disconnect();unsubscribe();document.documentElement.removeAttribute('data-cinematic-ready');delete document.documentElement.dataset.activeChapter;delete document.documentElement.dataset.chapterBeat;root.style.removeProperty('--reading-shift');delete window.__story;};
+    return()=>{disposed=true;pageField.dispose();readingManager.dispose();layout.dispose();scheduler.dispose();scope.dispose();resize.disconnect();unsubscribe();document.documentElement.removeAttribute('data-cinematic-ready');delete document.documentElement.dataset.activeChapter;delete document.documentElement.dataset.chapterBeat;delete window.__story;};
 
   }};
 }

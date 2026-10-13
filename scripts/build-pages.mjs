@@ -1,10 +1,11 @@
-import {readFile, writeFile, mkdir, copyFile, rm, realpath} from 'node:fs/promises';
+import {readFile, writeFile, mkdir, copyFile, realpath} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {spawnSync, execFileSync} from 'node:child_process';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import assert from 'node:assert/strict';
 import {auditPages} from './audit-pages.mjs';
+import {preparePagesWorkspace} from './prepare-pages-workspace.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const source = path.join(root, 'roles/uiux-designer/cases/bending-active-thesis');
@@ -26,8 +27,7 @@ for (const asset of manifest.assets) {
 }
 assert.equal(path.dirname(path.resolve(work)), path.resolve(root));
 assert.equal(path.basename(work), '.pages-workspace');
-await rm(work, {recursive: true, force: true});
-await mkdir(work, {recursive: true});
+await preparePagesWorkspace(root);
 const sources = [
   'tsconfig.json', 'runtime/ExperienceProvider.jsx',
   'runtime/core/DisposableScope.ts', 'runtime/core/EventManager.ts',
@@ -42,6 +42,7 @@ const sources = [
   'runtime/presentation/LayoutScheduler.ts', 'runtime/presentation/DOMPresenter.ts',
   'runtime/presentation/SceneRuntime.mjs',
   'runtime/presentation/EditorialPresenter.mjs',
+  'runtime/presentation/ModelAnnotationPresenter.mjs',
   'runtime/RuntimeRoot.mjs', 'runtime/core/FeatureRegistry.ts', 'runtime/core/Registrar.ts',
   'app/page.jsx', 'app/layout.jsx', 'app/globals.css', 'app/page.module.css',
   'components/CinematicExperience.jsx', 'components/CinematicScene.jsx',
@@ -57,6 +58,7 @@ const sources = [
   'components/source-scene-score.mjs', 'components/chapter-playback.mjs', 'components/chapter-scene-score.mjs', 'components/element-choreography.mjs',
   'components/SourceDiagram.jsx', 'components/source-diagram.module.css',
   'components/ModelInspector.jsx', 'components/model-inspector.module.css',
+  'components/model-information.mjs',
   'components/inspection-state.mjs', 'components/inspection-camera.mjs', 'components/inspection-lighting.mjs',
   'components/inspection-framing-support.mjs',
   'components/materials/cinematic-material.js', 'release/story.json',

@@ -22,6 +22,8 @@ The preflight throwaway WebGL context is removed. A session lease provides best-
 
 ## Acceptance and publication
 
+**CI policy update — 13 October 2026:** [Decision 0009](0009-impact-selected-ci.md) supersedes the unconditional all-jobs rule below. Every job selected by the conservative impact plan must succeed; publication also verifies the exact tested output digest and successful same-SHA default-branch push.
+
 The [twelve-role direction](../../roles/experience-director/research/ROUND_10_DIRECTION.md), [scene review](../../roles/3d-artist/research/ROUND_10_SCENE_DIRECTION.md), [runtime review](../../roles/software-architect/research/ROUND_10_RUNTIME_REVIEW.md) and [verification](../../roles/uiux-designer/cases/bending-active-thesis/ROUND_10_VERIFICATION.md) identify evidence and limits. Rendered comparisons use the exact Round 08 tested artifact. Windows WebKit is not the owner's physical iPhone, and neither resource estimates nor synthetic context loss prove the cause or resolution of whole-process Safari failure.
 
 Categorized commits, push and publication are explicitly authorized. Deployment still requires all same-SHA push CI jobs, then consumes their tested `static-export-pages` artifact without rebuilding. The reusable empty framework and generated entry routes remain separate.

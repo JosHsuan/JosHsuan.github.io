@@ -3,6 +3,7 @@
  * The sole World writer supplies Motion's chapter weights and resolved loop cues.
  */
 import {sampleCinematicPose, CINEMATIC_CHAPTERS} from './vendor/cinematic-plan.mjs';
+import {modelInformationLayout} from './model-information.mjs';
 
 export const SOURCE_DIAGRAM_REVISION = '13fbd10da48e6aa71fe6bfb8c7711741293833f7bba33611f394f9b1543e505a';
 export const REPRESENTATION_IDS = Object.freeze(['origami', 'opening', 'bending', 'curvature']);
@@ -12,17 +13,8 @@ export const EXPERIMENT_IDS = Object.freeze(['experiment-a', 'experiment-b', 'ex
 export const CANVAS_LOCAL_SOURCE_VIEWPORT = Object.freeze({left:.06,top:.06,width:.88,height:.88});
 // Round 10 restores the viewport-composed study footprint. These authored
 // apertures are stable for the chapter hold; no scrolling DOM slot owns them.
-const VIEWPORT_STAGE_DESKTOP = Object.freeze({left:.51,top:.20,width:.43,height:.52});
-const VIEWPORT_STAGE_COMPACT = Object.freeze({left:.51,top:.20,width:.41,height:.52});
-const VIEWPORT_STAGE_PORTRAIT = Object.freeze({left:.045,top:.205,width:.91,height:.43});
 export function viewportStageSourceViewport(aspect, viewportWidth) {
-  if (!(aspect>0) || !Number.isFinite(aspect)) throw RangeError('Finite positive stage aspect required');
-  if (viewportWidth!==undefined&&(!(viewportWidth>0)||!Number.isFinite(viewportWidth))) throw RangeError('Finite positive stage width required');
-  // The authored reading layout stacks at 780 CSS px. A tall tablet may still
-  // have two columns, so portrait aspect alone must not center its source
-  // behind the left reading plane. This is viewport policy, not DOM tracking.
-  const stacked=viewportWidth===undefined?aspect<1:viewportWidth<=780;
-  return stacked ? VIEWPORT_STAGE_PORTRAIT : viewportWidth<=1100 ? VIEWPORT_STAGE_COMPACT : VIEWPORT_STAGE_DESKTOP;
+  return modelInformationLayout(aspect,viewportWidth).model;
 }
 const clamp = (n, a = 0, b = 1) => Math.max(a, Math.min(b, Number.isFinite(n) ? n : a));
 const rad = n => n * Math.PI / 180;

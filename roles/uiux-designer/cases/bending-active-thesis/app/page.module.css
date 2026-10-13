@@ -259,10 +259,9 @@
 .studyLink>span:nth-child(2){color:var(--accent);transition:transform .2s}.studyLink small{grid-column:1/-1;font:.53rem/1.5 var(--mono);color:#b9c3b7}
 .studyLink:hover,.studyLink:focus-visible{border-color:var(--accent);background:#243027}.studyLink:hover>span:nth-child(2){transform:translate(2px,-2px)}
 
-/* One measured reading plane, shared with the scene. Natural section anchors
-   remain in document flow; overflow clipping prevents transforms adding scroll. */
+/* Native document reading is independent of the held rear scene. Clip only
+   decorative child transforms; the whole story has no scroll compensation. */
 .readingFrame{position:relative;z-index:2;overflow:clip}
-:global(html[data-cinematic-ready]) .story{transform:translateY(var(--reading-shift,0px))}
 :global(html[data-cinematic-ready]) .chapterInner,:global(html[data-cinematic-ready]) .overview .chapterInner{position:relative}
 .inlineStudy{grid-column:7/13;min-width:0;align-self:center;scroll-margin-top:7rem}
 .form .chapterInner{padding-top:15svh;padding-bottom:18svh}
@@ -327,6 +326,14 @@
 @media(prefers-reduced-motion:reduce){.story [data-choreography]{transform:none!important;filter:none!important}}
 
 /* Keep the source object beside its explanation while the diagram is read. */
+.inlineStudy{min-height:clamp(300px,52svh,600px);pointer-events:none}
+@media(max-width:780px){
+  .inlineStudy{min-height:43svh}
+  /* Reading cards may pass in front of the stage; transparent space still
+     exposes its permanent side controls and exact model pointer hits. */
+  .readingFrame{z-index:4;pointer-events:none}
+  .copy,.closingCopy,.openingCopy,.story [data-protect],.story [data-source-diagram],.story a,.story button,.story summary{pointer-events:auto}
+}
 @media(min-width:1000px){.form .inlineStudy,.system .inlineStudy,.pattern .inlineStudy{grid-column:7/13;grid-row:1/3;position:sticky;top:112px;align-self:start;margin-top:0}.form .diagramWide,.system .diagramWide,.pattern .diagramWide{grid-column:1/7;grid-row:2;margin-top:0}.form .copy,.system .copy,.pattern .copy{grid-column:1/7;grid-row:1;max-width:none}.diagramWide>figure{margin-top:0}.chapterInner{align-items:start}.overview .chapterInner,.make .chapterInner,.validation .chapterInner,.credits .chapterInner{align-items:center}}
 @media(min-width:1000px) and (max-height:760px){.form .inlineStudy,.system .inlineStudy,.pattern .inlineStudy{top:96px}}
 @media print{.form .inlineStudy,.system .inlineStudy,.pattern .inlineStudy{position:static}}

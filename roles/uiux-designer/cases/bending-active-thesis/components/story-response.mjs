@@ -206,17 +206,29 @@ function finishReading(state, targetDocY) {
   return state;
 }
 
-/** The case's ONLY scroll spring. Velocity/acceleration are px/s and px/s².
- * The native document changes immediately. Its visible plane is translated by
- * nativeDocY-visualDocY; no scrollTo, prevented wheel, timer or RAF is owned here.
+/** Reading policies share position/progress sampling. Native mode has no visual
+ * lag; the historical spring remains an opt-in analytical sampler. Native
+ * velocity reports input movement only. No DOM, timer or RAF is owned here.
  */
-export function advanceReading(state, nativeDocY, dt, {plan, reducedMotion = false, resumed = false, seek = false} = {}) {
+export function advanceReading(state, nativeDocY, dt, {plan, nativeScroll = false, reducedMotion = false, resumed = false, seek = false} = {}) {
   validPlan(plan); deltaSeconds(dt);
   if (!state || !Number.isFinite(state.visualDocY) || !Number.isFinite(state.velocity) || !Number.isFinite(state.nativeDocY)) throw new TypeError('A reading response state is required.');
   const native = clampTo(finiteNumber(nativeDocY, 'Native document position'), 0, plan.maxScroll);
-  const distance = Math.abs(native - state.nativeDocY);
+  const nativeDelta = native - state.nativeDocY, distance = Math.abs(nativeDelta);
   if (distance > 0) state.seekUntilInput = false;
   state.nativeDocY = native;
+  state.nativeScroll = nativeScroll;
+  // Native reading tracks document position in one update. The existing spring
+  // remains available to the historical sampler, independently of scene holds.
+  if (nativeScroll) {
+    state.seekUntilInput = false; state.bypassHoldId = null;
+    const velocity = !reducedMotion && !resumed && !seek && dt > 0 && dt <= MAX_FRAME_GAP && distance <= plan.viewportHeight * 1.5 ? nativeDelta / dt : 0;
+    finishReading(state, native);
+    // Keep the renderer's existing interaction-pressure gate meaningful without
+    // carrying motion beyond the actual native input sample.
+    Object.assign(state,{velocity,energy:clamp(Math.abs(velocity)/(plan.viewportHeight*1.5)),direction:Math.sign(velocity)});
+    return state;
+  }
   if (reducedMotion || resumed || seek || dt > MAX_FRAME_GAP || distance > plan.viewportHeight * 1.5) {
     state.seekUntilInput = true;
     state.bypassHoldId = sampleReadingTarget(native, plan).holdId;
@@ -259,7 +271,7 @@ export function sampleReadingScore(state, plan) {
   if (!state || !Number.isFinite(state.nativeDocY) || !Number.isFinite(state.visualDocY)) throw new TypeError('A reading response state is required.');
   const nativeDocY = clampTo(state.nativeDocY, 0, plan.maxScroll), visualDocY = clampTo(state.visualDocY, 0, plan.maxScroll);
   const nativeU = readingProgress(nativeDocY, plan), visualU = readingProgress(visualDocY, plan);
-  const stop = state.seekUntilInput || state.bypassHoldId !== null ? {holdId: null, holdWeight: 0, targetDocY: nativeDocY} : sampleReadingTarget(nativeDocY, plan);
+  const stop = state.nativeScroll || state.seekUntilInput || state.bypassHoldId !== null ? {holdId: null, holdWeight: 0, targetDocY: nativeDocY} : sampleReadingTarget(nativeDocY, plan);
   const arrival = smoother(1 - Math.abs(visualDocY - stop.targetDocY) / (plan.viewportHeight * 0.12));
   return {...sampleResponseScore(visualU), nativeU, visualU, nativeDocY, visualDocY, readingShiftY: nativeDocY - visualDocY, holdId: stop.holdId, holdWeight: stop.holdWeight * arrival};
 }

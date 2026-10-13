@@ -81,7 +81,7 @@ test('absent evidence scenes sleep WebGL while the independent page ASCII keeps 
  await expect(page.locator(stageCanvas)).toHaveCount(1);await expect(page.locator('canvas[data-ascii-field]')).toHaveCount(1);
 });
 
-test('a real visible source hit outside its document slot still compares geometry in the narrow chapter hold',async({page})=>{
+test('a real visible source hit still compares geometry through transparent side-information overlays',async({page})=>{
  test.setTimeout(scenarioTimeout(150000));await page.setViewportSize({width:390,height:844});
  await page.addInitScript(()=>{
   const writes=new WeakMap();window.__stageStorageWrites=canvas=>writes.get(canvas)??0;
@@ -102,10 +102,10 @@ test('a real visible source hit outside its document slot still compares geometr
   await scrollTo(page,range.start+(range.end-range.start)*step/18);
   const result=await page.evaluate(remaining=>{
    const scene=window.__thesis.inspect(),story=window.__story.inspect(),r=document.querySelector('[data-cinematic-stage] canvas').getBoundingClientRect(),v=scene.pose.viewport;
-   const slot=document.querySelector('[data-model-viewport][data-study-chapter="system"]').getBoundingClientRect(),candidates=[];
+   const slot=document.querySelector('[data-model-study-host="system"]').getBoundingClientRect(),candidates=[];
    for(let row=1;row<=13;row++)for(let column=1;column<=13;column++){
     const u=column/14,w=row/14,x=r.left+r.width*(v.left+v.width*u),y=r.top+r.height*(v.top+v.height*w);
-    if(x<16||x>innerWidth-16||y<100||y>innerHeight-90||x>=slot.left-6&&x<=slot.right+6&&y>=slot.top-6&&y<=slot.bottom+6)continue;
+    if(x<16||x>innerWidth-16||y<100||y>innerHeight-90)continue;
     const clear=[[-3,0],[3,0],[0,-3],[0,3],[0,0]].every(([dx,dy])=>{
      const under=document.elementFromPoint(x+dx,y+dy);
      return under&&!under.closest('button,a,select,input,summary,[data-protect],[data-feedback-plane]');
@@ -120,9 +120,9 @@ test('a real visible source hit outside its document slot still compares geometr
   rays+=result.rays;attempts.push(result);point=result.point;
  }
  await test.info().attach('outside-slot-native-hit-search',{body:JSON.stringify({range,rays,attempts}),contentType:'application/json'});
- expect(point,'Natural narrow-layout chapter holds must expose an unobscured real source hit outside the old HTML slot.').not.toBeNull();
+  expect(point,'The narrow chapter hold must expose an unobscured real source hit through the transparent UI.').not.toBeNull();
  const last=attempts.at(-1);expect(last).toMatchObject({chapter:'system',mode:'hold',presented:true});
- expect(point.x<last.slot.left-6||point.x>last.slot.right+6||point.y<last.slot.top-6||point.y>last.slot.bottom+6).toBe(true);
+  expect(await page.evaluate(p=>document.elementFromPoint(p.x,p.y).closest('[data-model-viewport]')===null,point)).toBe(true);
  const resources=()=>page.evaluate(()=>{const scene=window.__thesis.inspect(),canvas=document.querySelector('[data-cinematic-stage] canvas');return {id:scene.representation.id,index:scene.representation.index,source:scene.source,diagrams:scene.diagramSource,budget:scene.renderBudget,initialization:scene.initialization,native:[canvas.width,canvas.height],writes:window.__stageStorageWrites(canvas),docY:scrollY};});
  const before=await resources();await page.mouse.click(point.x,point.y);await settle(page);const after=await resources();
  expect(after.id).not.toBe(before.id);expect(after.index).toBe((before.index+1)%4);

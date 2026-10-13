@@ -16,11 +16,12 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/unit/*.test.ts tests/integration/*.test.ts",
+    "test:ci": "node --test tests/ci/*.test.mjs",
     "build": "pnpm content:export && pnpm motion:validate && next build --webpack && pnpm audit:build",
     "audit:build": "tsx scripts/audit-build.ts",
     "preview": "tsx scripts/serve-export.ts",
     "test:e2e": "playwright test",
-    "check": "pnpm content:validate && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "check": "pnpm content:validate && pnpm lint && pnpm typecheck && pnpm test && pnpm test:ci && pnpm build",
     "build:pages": "node scripts/build-pages.mjs",
     "audit:pages": "node scripts/audit-pages.mjs",
     "test:pages": "playwright test --config playwright.pages.config.mjs"

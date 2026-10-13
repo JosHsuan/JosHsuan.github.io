@@ -8,7 +8,7 @@
 |---|---|
 | Owner | JosHsuan Chao |
 | Audience | The owner, collaborating developers, and coding agents |
-| Revision | **2.8 — 10 October 2026; scoped Bending-Active runtime integration** |
+| Revision | **2.10 — 13 October 2026; impact-selected CI and verified shared release artifacts** |
 | Language | English for project documentation and future website content; Traditional Chinese for discussion with the owner |
 | Scope | Portfolio, Research & Development, About/CV, Contact, and selected interactive project stories |
 | Delivery baseline | Next.js static export to GitHub Pages; no paid domain, paid storage, or continuously running backend required for the initial release |
@@ -19,6 +19,12 @@
 | Materials preparation root | `D:\JosHsuan_Website\_private\portfolio-preparation` — designated source for all project, CV, and content preparation |
 
 ## Executive decision
+
+**Impact-selected CI and latest release authorization — 13 October 2026:** The owner authorized the CI changes, project documentation, and commit/push/Pages publication of the latest native-reading and model-side information implementation. [Decision 0009](decisions/0009-impact-selected-ci.md) records the required selection gate and exact tested-output verification. The migration/shared runtime inputs select full validation for this release; subsequent scoped changes use the explicit conservative impact map.
+
+**Local source-information composition — 13 October 2026:** The owner authorized permanent side information and linked model annotations for Bending-Active, preserving switch synchronization and motion. ModelInspector has a viewport overlay with separate model/information columns; ModelAnnotationPresenter reads the final camera and verified source-support coordinates after successful scene paint. The side column stays fixed through the existing entry/exit, and leaders follow the displayed Canvas position. Existing source selection, chapter clock, camera ownership, geometry/materials and rendering budgets remain; the static study framing reserves the information column. Per-frame projection stays outside React state. This local change preserves the empty framework and separate publication gate. See the [case implementation and verification](../roles/uiux-designer/cases/bending-active-thesis/README.md).
+
+**Local native-reading follow-up — 12 October 2026:** The owner selected Plan B for the reported uneven scroll feel and requested local implementation/preview. ReadingManager tracks native position directly, paragraph/media reading holds are removed from the active director, and the article has no whole-layer scroll compensation. The rear scene retains its independent chapter holds, entry/exit, shared clock, camera owner and rendering budgets. Child entrances and pointer feedback remain. This local follow-up is separate from the published `5311edd` checkpoint.
 
 **Local runtime refactor — 10 October 2026:** The owner authorized phased Bending-Active implementation and local visualization while preserving the current visuals, content and interactions. [Runtime design and implementation mapping](../roles/software-architect/research/BENDING_ACTIVE_RUNTIME_DESIGN.md) separates scoped events, commands, discrete state, feature lifetimes, frame orchestration and presentation. [The verification record](../roles/software-architect/research/RUNTIME_REFACTOR_VERIFICATION.md) identifies accepted artifacts and measured limits. Existing chapter/inspection/optical samplers, demand rendering, the independent 2D field and approved public inputs remain. This selected case uses a small application-owned state/command kernel; it does not migrate the root framework or add a live backend. That local checkpoint excluded publication. On 12 October 2026 the owner explicitly authorized commit, push and deployment, retaining the successful exact-commit CI artifact requirement.
 
@@ -1131,6 +1137,8 @@ Pre-generate appropriate image sizes/formats and reserve dimensions. `unoptimize
 Start Contact with a confirmed email and relevant links. Do not ship a form that appears to submit but has no working delivery mechanism. Adding submissions later is a separate service/security decision.
 
 ### 17.5 Build once, test, then publish that artifact
+
+**Implemented CI policy — 13 October 2026:** [Decision 0009](decisions/0009-impact-selected-ci.md) and [CI/CD operations](CI_CD.md) define conservative impact selection, successful-ancestor push baselines, one shared public build, pnpm/Next caches and separate-runner Chromium sharding. Every case release retains the complete asset/private-data audit and three-browser public baseline. A required gate records selected-job outcomes and every static output byte; manual deployment verifies that record and the exact successful default-branch push SHA before publishing the tested output. Documentation/framework-only runs do not create a new case release. This updates the earlier all-jobs policy without changing the exact-commit publication boundary.
 
 ```text
 Pinned toolchain and frozen dependency install
