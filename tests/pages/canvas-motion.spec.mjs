@@ -4,7 +4,7 @@ import {WAIT,scenarioTimeout,settle,centerStudy,frames,loadScene,expectIdle,surf
 const stageCanvas='[data-cinematic-stage] canvas';
 const sample=page=>page.evaluate(()=>{
  const scene=window.__thesis.inspect(),story=window.__story.inspect(),canvas=document.querySelector('[data-cinematic-stage] canvas'),r=canvas.getBoundingClientRect();
- return {placement:story.canvasPlacement,informationChapter:story.informationChapter,pose:scene.pose,frames:scene.frames,time:story.playback.activeSeconds,field:story.pageField,rect:{x:r.x,y:r.y,width:r.width,height:r.height},surface:story.canvasSurface,screen:{width:innerWidth,height:innerHeight},native:[canvas.width,canvas.height],suspended:scene.renderSuspended,informationTop:document.querySelector('#system [data-story-heading]').getBoundingClientRect().top};
+ return {placement:story.canvasPlacement,informationChapter:story.informationChapter,pose:scene.pose,frames:scene.frames,time:story.playback.activeSeconds,field:story.pageField,rect:{x:r.x,y:r.y,width:r.width,height:r.height},surface:story.canvasSurface,screen:{width:innerWidth,height:innerHeight},native:[canvas.width,canvas.height],budget:scene.renderBudget,pressure:scene.renderPressure,suspended:scene.renderSuspended,informationTop:document.querySelector('#system [data-story-heading]').getBoundingClientRect().top};
 });
 const scrollTo=async(page,y)=>{await page.evaluate(top=>window.scrollTo({top,behavior:'instant'}),y);await settle(page);};
 const reduce=async page=>{await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(()=>window.__story.inspect().playback.reducedMotion,null,{timeout:WAIT});};
@@ -14,16 +14,27 @@ test('one viewport scene holds its cinematic scale while information scrolls ind
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await loadScene(page);await centerStudy(page,'system');
  const canvas=await page.locator(stageCanvas).elementHandle(),first=await sample(page),observed=[];
  const {holdStart,holdEnd}=first.placement;
+ let previous=first;
  for(const fraction of [.1,.5,.9]){
   await scrollTo(page,holdStart+(holdEnd-holdStart)*fraction);const current=await sample(page);observed.push(current);
   expect(current.placement).toMatchObject({chapter:'system',x:0,y:0,scale:1,opacity:1,visible:true,settled:true,mode:'hold'});
   expect(current.rect).toEqual({x:0,y:0,width:current.surface.width,height:current.surface.height});
   expect(current.rect.width).toBe(current.screen.width);expect(current.rect.height).toBe(current.screen.height);
   expect(current.pose.compositionSpace).toBe('viewport-stage');
-  // Full playback may move its authored camera and source beat. Native reading
-  // must preserve the viewport composition and drawing-surface allocation.
-  expect(current.pose.viewport).toEqual(first.pose.viewport);expect(current.native).toEqual(first.native);expect(current.time).toBeGreaterThanOrEqual(first.time);
+  // Full playback preserves viewport composition. Sustained slow delivery may
+  // lower backing density, but only through the existing pressure policy.
+  expect(current.pose.viewport).toEqual(first.pose.viewport);expect(current.time).toBeGreaterThanOrEqual(first.time);
+  expect(current.budget.detail).toBe('full');expect(current.native).toEqual([current.budget.width,current.budget.height]);
+  expect(current.budget.pixels).toBeLessThanOrEqual(current.budget.pixelBudget);
+  expect(current.budget.densityScale).toBeLessThanOrEqual(previous.budget.densityScale);
+  if(current.budget.densityScale===previous.budget.densityScale)expect(current.native).toEqual(previous.native);
+  else{
+   expect(current.pressure.decisions).toBeGreaterThan(previous.pressure.decisions);
+   expect(current.native[0]).toBeLessThan(previous.native[0]);expect(current.native[1]).toBeLessThan(previous.native[1]);
+  }
+  previous=current;
  }
+ await test.info().attach('native-reading-density-records',{body:JSON.stringify([first,...observed].map(({native,budget,pressure})=>({native,budget,pressure}))),contentType:'application/json'});
  expect(observed[0].informationTop-observed[2].informationTop).toBeGreaterThan(100);
  // Between the .42vh reading probe and .62vh scene probe, FORM can remain the
  // current information chapter while SYSTEM already owns the displayed scene.
