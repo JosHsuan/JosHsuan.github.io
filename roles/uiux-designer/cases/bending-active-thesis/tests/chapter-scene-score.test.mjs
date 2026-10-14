@@ -50,8 +50,8 @@ test('bounded authored loops preserve source identity and emit only generic, nor
   }
 });
 
-test('pause freezes through caller time, Reduced removes autonomous motion, and pointer affects only editorial field', () => {
-  const input = {...playback(3), paused: true};
+test('caller time owns sampling, Reduced removes autonomous motion, and pointer affects only editorial field', () => {
+  const input = playback(3);
   assert.deepEqual(sampleChapterScene(input), sampleChapterScene(input));
   const reduced = sampleChapterScene(input, {reducedMotion: true, pointer: {x: .5, y: -.2, active: true}});
   assert.equal(reduced.camera.azimuthOffsetDeg, 0); assert.equal(reduced.field.fieldTime, 0); assert.equal(reduced.field.fieldWeight, 0);
@@ -59,8 +59,10 @@ test('pause freezes through caller time, Reduced removes autonomous motion, and 
   const base = sampleChapterScene(input), pointer = sampleChapterScene(input, {pointer: {x: .5, y: -.2, active: true}});
   assert.deepEqual(pointer.camera, base.camera); assert.deepEqual(pointer.representation, base.representation);
   assert.deepEqual(pointer.field.fieldPointerUv, [.75, .6]); assert.equal(pointer.field.fieldPointerStrength, 1);
-  assert.ok(sampleChapterScene(input, {quality: 'light'}).field.fieldWeight > 0);
-  assert.equal(sampleChapterScene(input, {quality: 'light'}).optics.maxBlurPx, 0);
+  assert.ok(base.field.fieldWeight > 0);assert.ok(base.optics.maxBlurPx > 0);
+  const mobile=sampleChapterScene(input,{aspect:390/844});
+  assert.ok(mobile.optics.maxBlurPx > 0);assert.ok(mobile.optics.mistStrength > 0);
+  assert.deepEqual(mobile.field.fieldBlendMix,base.field.fieldBlendMix);
 });
 
 test('autonomous optics resolves focus from the final camera and never changes its fitted FOV', () => {

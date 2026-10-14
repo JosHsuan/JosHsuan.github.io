@@ -1,4 +1,5 @@
 import CinematicExperience from '../components/CinematicExperience';
+import EntryLoader from '../components/EntryLoader';
 import EvidenceInspector from '../components/EvidenceInspector';
 import SourceDiagram from '../components/SourceDiagram';
 import InformationSkin from '../components/InformationSkin';
@@ -44,6 +45,8 @@ function Paragraphs({ paragraphs }) {
 
 export default function Page() {
   return <ExperienceProvider>
+    <EntryLoader />
+    <div data-project-content style={{display:'contents'}}>
     <CinematicExperience />
     <EvidenceInspector items={evidence} />
     <a href="#main" className={styles.skip}>Skip to the study</a>
@@ -149,5 +152,6 @@ export default function Page() {
         </div>
       </section>
     </main></div>
+    </div>
   </ExperienceProvider>;
 }

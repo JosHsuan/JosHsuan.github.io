@@ -1,7 +1,7 @@
 import {createSceneRecovery} from '../../components/scene-recovery.mjs';
 
 /** Activation policy and best-effort session lease; no timer or renderer ownership. */
-export function createLifecycleManager({events,onSystemReduced,onHydrated,onAutomaticEnable}){
+export function createLifecycleManager({events,onSystemReduced,onHydrated,onAutomaticEnable,onPolicy=()=>{}}){
  let recovery=null;
  function initialize({window:windowTarget,document:documentTarget,navigator:navigatorTarget,readStorage}){
   const scope=events.createScope('preferences'),reduced=windowTarget.matchMedia('(prefers-reduced-motion: reduce)');
@@ -10,7 +10,9 @@ export function createLifecycleManager({events,onSystemReduced,onHydrated,onAuto
   let storage;try{storage=readStorage();}catch{storage=null;}
   recovery=createSceneRecovery(storage);
   documentTarget.documentElement.toggleAttribute('data-scene-recovery',recovery.recovery);
-  if(!navigatorTarget.connection?.saveData&&!reduced.matches&&!recovery.recovery)onAutomaticEnable();
+  const automatic=!navigatorTarget.connection?.saveData&&!reduced.matches&&!recovery.recovery;
+  onPolicy(automatic?'pending':'deferred');
+  if(automatic)onAutomaticEnable();
   events.listen(scope,reduced,'change',update);
   return()=>scope.dispose();
  }

@@ -38,6 +38,9 @@ export function createDiagramManager({kind,input,getRoot,onData,requestLayout,re
  }
  function connect({target=window,observerFactory=callback=>new MutationObserver(callback)}={}){
   const root=getRoot();if(!data||!root)return()=>{};
+  // The library has no selection lifecycle. Its original paths belong solely
+  // to the director's event-triggered reveal presenter.
+  if(kind==='library'){requestLayout();return()=>{};}
   const scope=input.events.createScope('diagram-'+kind);
   const update=()=>{if(pinned===null&&hover===null)paint(automaticIndex());};
   update();

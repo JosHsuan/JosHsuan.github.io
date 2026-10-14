@@ -25,7 +25,7 @@ function slots(count, phase) {
   values[index] += 1 - t; values[next] += t; return values;
 }
 
-export function sampleChapterScene(playback, {reducedMotion = false, quality = 'full', aspect = 1, pointer = null} = {}) {
+export function sampleChapterScene(playback, {reducedMotion = false, aspect = 1, pointer = null} = {}) {
   const supplied = playback?.chapterWeights;
   if (!Array.isArray(supplied) || supplied.length !== 7 || !supplied.every(v => Number.isFinite(v) && v >= 0)) throw new RangeError('Seven finite nonnegative chapter weights required');
   const total = supplied.reduce((sum, value) => sum + value, 0);
@@ -35,7 +35,7 @@ export function sampleChapterScene(playback, {reducedMotion = false, quality = '
   if (!Array.isArray(phases) || phases.length !== 7 || !phases.every(Number.isFinite)) throw new RangeError('Seven finite chapter phases required');
   const time = Math.max(0, finite(playback.activeSeconds, 'active seconds'));
   if (!(finite(aspect, 'aspect') > 0)) throw new RangeError('Aspect must be positive');
-  const mobile = clamp((1.1 - aspect) / .5), active = !reducedMotion, full = quality === 'full';
+  const mobile = clamp((1.1 - aspect) / .5), active = !reducedMotion;
   const scalar = (key, sampler = value => value) => keys.reduce((sum, value, i) => sum + weights[i] * sampler(value[key], i), 0);
   const phase = i => ((phases[i] % 1) + 1) % 1;
   const wave = i => active ? Math.sin(phase(i) * TAU) : 0;
@@ -50,11 +50,11 @@ export function sampleChapterScene(playback, {reducedMotion = false, quality = '
       azimuthOffsetDeg: scalar('az', orbit) * (1 - mobile * .3), elevationOffsetDeg: scalar('el', (v, i) => v * (active ? Math.sin(phase(i) * TAU * 2) : 0)),
       distanceScale: 1 - scalar('dolly', breathing), fovScale: 1 + scalar('lens', breathing), fitOrder: 'apply cues then fit verified active source support',
     },
-    optics: {focusFraction: clamp(scalar('focus') + scalar('rack', orbit), .16, .84), apertureScale: active && full ? scalar('aperture') : 0, maxBlurPx: active && full ? scalar('blur') * (1 - mobile * .35) : 0, mistStrength: active && full ? scalar('mist') * (1 - mobile * .2) : 0, mistRadiusPx: 22, mistThreshold: .65},
+    optics: {focusFraction: clamp(scalar('focus') + scalar('rack', orbit), .16, .84), apertureScale: active ? scalar('aperture') : 0, maxBlurPx: active ? scalar('blur') * (1 - mobile * .35) : 0, mistStrength: active ? scalar('mist') * (1 - mobile * .2) : 0, mistRadiusPx: 22, mistThreshold: .65},
     light: {keyEnergy: 1 + scalar('key', orbit), areaAzimuthDeg: scalar('area', orbit), areaEnergy: 1 + scalar('key', (v, i) => v * (active ? Math.sin(phase(i) * TAU * 2) : 0)), rimEnergy: 1 + scalar('rim', orbit), shadowKeyPosition: 'fixed during chapter loop'},
     layers: {foregroundMix: active ? scalar('foreground') : 0, semanticFeatherPx: 40 + mobile * 12},
     field: {
-      fieldTime: reducedMotion ? 0 : time, fieldWeight: active ? scalar('field') * (full ? 1 : .6) * (1 - mobile * .18) : 0,
+      fieldTime: reducedMotion ? 0 : time, fieldWeight: active ? scalar('field') * (1 - mobile * .18) : 0,
       fieldSceneMix: scalar('sceneMix'), fieldFlow: [.035, -.018], fieldEnvelope: [mobile > .5 ? .5 : .65, .5, mobile > .5 ? .62 : .5, .62],
       fieldPointerUv: uv, fieldPointerStrength: active && pointer?.active === true ? clamp(pointer.strength ?? 1) : 0,
       fieldBlendMix: [0, 1, 2, 3].map(channel => keys.reduce((sum, key, i) => sum + key.blend[channel] * weights[i], 0)),

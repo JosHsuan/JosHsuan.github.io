@@ -90,8 +90,8 @@ test('actual SVG/React rendering, keyboard selection, autonomous highlights and 
     await page.waitForFunction(() => document.querySelector('[data-source-diagram="workflow"]').dataset.diagramSelection === 'colours');
     assert.deepEqual(await page.evaluate(() => window.selectionEvents), [{chapterId: 'system', index: 2}], 'autonomous visibility changes emit no selection requests');
     const library = page.locator('[data-source-diagram="library"]');
-    await library.locator('button[data-diagram-index="10"]').focus();
-    assert.equal(await library.getAttribute('data-diagram-selection'), 'trace-11');
+    assert.equal(await library.locator('button').count(), 0, 'library reveal has no legacy source-selection controls');
+    assert.equal(await library.locator('[data-library-trace]').count(), 11);
     for (const width of [1120, 390]) {
       await page.setViewportSize({width, height: 1000});
       for (const kind of ['library', 'miura', 'workflow']) {
@@ -101,7 +101,7 @@ test('actual SVG/React rendering, keyboard selection, autonomous highlights and 
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
     }
     await page.emulateMedia({reducedMotion: 'reduce'});
-    assert.equal(await library.locator('button').first().evaluate(node => getComputedStyle(node).transitionDuration), '0s');
+    assert.equal(await workflow.locator('button').first().evaluate(node => getComputedStyle(node).transitionDuration), '0s');
     await page.route('**/assets/diagrams/library.json', route => route.abort());
     await page.reload();
     const fallback = page.locator('[data-source-diagram="library"] img');

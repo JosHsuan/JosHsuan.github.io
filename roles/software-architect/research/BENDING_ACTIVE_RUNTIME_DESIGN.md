@@ -11,7 +11,7 @@ The owner-selected Plan B follow-up on 12 October 2026 makes the active reader n
 The implementation remains inside the existing case. React views use `ExperienceProvider.jsx` and `RuntimeRoot.mjs`; typed contracts and core services are under `runtime/contracts` and `runtime/core`. The five feature factories live in `runtime/features`, the director in `runtime/orchestration`, and scene/editorial/DOM/layout adapters in `runtime/presentation`. Existing pure samplers, `runtime-scheduler.mjs`, the compositor and `page-field-renderer.mjs` remain the executable frame/render algorithms.
 
 - The closed catalog registers factories and their required services. Mounted views connect their real feature work through the Registrar. Module imports create no browser listeners, timers or GPU resources.
-- Current typed commands are `preferences.apply`, `quality.set`, `model.interact` and `model.select`. The broader command vocabulary below describes the design, not additional implemented handlers. Native navigation, pointer capture, focus and cancellation retain synchronous feature boundaries.
+- Current typed commands are `preferences.apply`, `model.interact` and `model.select`. The 14 October Full-only integration removes the quality command and user pause state. The broader command vocabulary below describes the design, not additional implemented handlers. Native navigation, pointer capture, focus and cancellation retain synchronous feature boundaries.
 - Discrete validated state and latest frame data have different stores. React remains the owner of markup and discrete controls; chapter-driven DOM publication uses DOMPresenter. Feature-specific ARIA announcements, source labels and scene-caption adaptation keep their existing narrow native presentation boundaries.
 - Registrar stop releases connections and permits React effect reconnection; permanent disposal closes the kernel. Both startup rollback and disposal continue releasing other resources when one cleanup throws, then report the collected errors.
 - ExperienceDirector creates the one existing chapter scheduler. Fiber uses demand rendering; SceneRuntime is the final camera/object writer. The independent 2D page field consumes director time and owns no timer.
@@ -60,9 +60,10 @@ flowchart TB
 
 - **ReadingManager** handles chapter navigation, hash/history restoration and focus intent. It owns navigation state and supplies natural reading information to the frame pipeline.
 - **ModelManager** validates representations and handles exact source hits, inspection begin/end and view targets. Continuous drag targets live in the frame input buffer. It receives hit-test/query interfaces, not a mutable camera.
-- **DiagramManager** owns source-diagram interaction and highlighting. It issues selection commands and observes accepted selection/presentation facts.
+- **DiagramManager** owns Miura/workflow source-diagram interaction and highlighting. It issues selection commands and observes accepted selection/presentation facts. The library has no selection controls; **LibraryDiagramPresenter** reveals its original paths on Director active time and emits requested/completed/cancelled facts after DOM publication.
 - **EvidenceManager** owns figure expansion, close behavior and focus return. Expansion explicitly invalidates layout.
 - **LifecycleManager** owns activation/loading/failure/recovery transitions, cancellation generations and the session lease. It also reports independent suspension reasons to the director.
+- **EntryManager** gates project interaction on document, typography and actual scene readiness or explicit static outcome. RuntimeRoot registers it once; scoped setup owns prerequisite subscriptions and generation checks. Its reveal and startup deadline advance only on the Director clock. React owns static loader markup and discrete status; DOMPresenter owns the animated variables and entry/inert attributes.
 
 Existing pure reading, chapter, inspection, optical and choreography samplers remain functions. Feature controllers can be factory-created objects; inheritance and classes are optional.
 
@@ -80,18 +81,18 @@ flowchart LR
     Effects --> Acknowledge[Report effect or render submission result]
 ```
 
-- Example commands: `chapter.navigate`, `model.select`, `inspection.begin`, `inspection.end`, `motion.setPaused`, `quality.set` and `scene.enable`.
-- Example facts: `navigationChanged`, `representationChanged`, `inspectionChanged`, `sceneStatusChanged` and `layoutInvalidated`.
+- Example commands: `chapter.navigate`, `model.select`, `inspection.begin`, `inspection.end` and `scene.enable`.
+- Example facts: `navigationChanged`, `representationChanged`, `inspectionChanged`, `sceneStatusChanged` and `layoutInvalidated`. Implemented `entryReadiness` and `diagramReveal` facts describe their scoped presentation lifecycles.
 - A model-selection handler can propose a representation, its associated chapter request and inspection release together. Commit succeeds only if that combination is valid.
-- Native `preventDefault`, focus and pointer capture remain synchronous at the browser boundary when required. Passive touch listeners preserve native scrolling. A universal asynchronous queue must not delay those browser operations.
+- Native `preventDefault`, focus and pointer capture remain synchronous at the browser boundary when required. The active model viewport owns two-axis touch with `touch-action: none`; passive listeners preserve native scrolling outside that bounded region. A universal asynchronous queue must not delay those browser operations.
 - A fact subscriber may request another command, but reentrant state changes are deferred until the current publication completes. This ordering is explicit and tested.
 - State transactions cover logical state. They cannot roll back network requests, a GPU submission or already-performed DOM changes.
 - `representationChanged` means an accepted logical change. A rendered-frame submission has a separate passive acknowledgment; it does not mean that pixels are physically visible on the device. The acknowledgment must not notify subscribers or schedule itself into a loop.
 
 ## State and frame data
 
-- **Committed application state:** source selection, inspection ownership, requested navigation, Full/Light preference, explicit pause, system reduced-motion preference and scene status. A transition increments the state version once.
-- **Scene status:** `disabled`, `loading`, `ready`, `failed` and permanent runtime disposal. Loading failure and manual retry rules remain separate from visibility and pause.
+- **Committed application state:** source selection, inspection ownership, system reduced-motion preference and scene status. Full is the sole rendering policy; user detail and pause settings are absent. A transition increments the state version once.
+- **Scene status:** `disabled`, `loading`, `ready`, `failed` and permanent runtime disposal. Loading failure and manual activation rules remain separate from lifecycle suspension.
 - **Suspension state:** a set of independent reasons such as visibility, page lifecycle and freeze. Removing one reason cannot resume a runtime still suspended for another reason.
 - **Frame input buffer:** latest pointer, native scroll position, drag target and accumulated input impulse. Pointer positions can be coalesced; discrete clicks and navigation requests retain order.
 - **Frame working state:** playback time, damping/inspection responses, chapter holds and pressure measurements. These remain controller-owned mutable values.
@@ -118,7 +119,7 @@ flowchart TB
 - The director reads the submission mailbox during an already-needed update. Entry reveals can wait for the required chapter/frame submission; the mailbox itself creates no scheduling loop.
 - DOM and ASCII consume the same sampled frame independently of when Fiber submits its demanded frame. No GPU readback or synchronous rendering wait is introduced.
 - Pure samplers calculate competing story/inspection contributions. Only SceneRuntime combines and applies the final camera pose. It also owns final model transforms.
-- Continue scheduling only while playback, settlement, a deliberate response or required reveal is active. Settled Pause/hidden operation has zero ongoing controller, scene and field work.
+- Continue scheduling only while playback, settlement, a deliberate response or required reveal is active. Hidden operation has zero ongoing controller, scene and field work; settled Reduced or deliberate model holds likewise require no ongoing animation frames.
 - MAKE/VALIDATION retain their current heavy-scene absence. The independent page field and readable HTML can continue under their existing policies.
 - Retain the current physical pixel budgets, touch/iOS profile, stable height handling and source-support fitting. Architectural organization does not authorize changing these visual/resource contracts.
 
@@ -205,5 +206,5 @@ The folders are a target boundary, not a requirement to create a file for every 
 - Contract checks cover typed payloads, one command owner, duplicate IDs, missing/cyclic dependencies, delivery mutation, reentrant commands and grouped state acceptance/rejection.
 - Lifecycle checks cover partial startup rollback, repeated cleanup, independent runtime instances, disposal during loading, stale completion and overlapping suspension reasons.
 - Scheduling checks cover input coalescing, layout read/write order, selective subscriptions and passive renderer acknowledgment without a feedback loop.
-- Built-public checks preserve native reading, touch pan, keyboard/focus/history, exact source hits, independent chapter holds, Full/Light allocation bounds, posters and settled zero-work pause.
+- Built-public checks preserve native reading, two-axis model touch and outside pan, keyboard/focus/history, exact source hits, independent chapter holds, Full device allocation bounds, posters, readiness gates and settled zero-work Reduced/inspection behavior.
 - Matched captures and sustained profiles validate the migrated artifact. Physical iPhone behavior remains a device test, not an architectural claim.

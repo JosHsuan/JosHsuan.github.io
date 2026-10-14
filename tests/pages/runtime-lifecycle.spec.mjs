@@ -1,5 +1,5 @@
 import {test, expect} from '@playwright/test';
-import {WAIT, scenarioTimeout, loadScene, centerStudy, surface, hitPoint, frames, settle, pause, expectIdle} from './case-helpers.mjs';
+import {WAIT, scenarioTimeout, loadScene, centerStudy, holdModel, surface, hitPoint, frames, settle, expectIdle} from './case-helpers.mjs';
 
 async function snapshot(page) {
   return page.evaluate(() => {
@@ -40,35 +40,35 @@ test('overlapping page-cache and freeze signals stop work until the last reason 
   await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1); expect(errors).toEqual([]);
 });
 
-test('lifecycle suspension releases a held source gesture and preserves explicit Pause on return', async ({page, isMobile}) => {
+test('lifecycle suspension releases a held mouse or touch gesture and returns to the Full story', async ({page, context, isMobile}) => {
   test.setTimeout(scenarioTimeout(120000));
   const errors = []; page.on('pageerror', error => errors.push(error.message));
-  await loadScene(page); await pause(page); await centerStudy(page);
+  await loadScene(page); await centerStudy(page);
+  await surface(page).evaluate(element => element.addEventListener('gotpointercapture', event => {element.dataset.testCapturedPointer = String(event.pointerId);}, {once: true}));
+  const point = await hitPoint(page),cdp=isMobile?await context.newCDPSession(page):null;
   if (isMobile) {
-    // Touch pan has its own native browser test; keyboard engagement is an
-    // accessible source operation on this emulated mobile viewport.
-    await surface(page).press('ArrowRight');
+    await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{...point,id:1}]});
+    await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:point.x+40,y:point.y-12,id:1}]});
   } else {
-    await surface(page).evaluate(element => element.addEventListener('gotpointercapture', event => {element.dataset.testCapturedPointer = String(event.pointerId);}, {once: true}));
-    const point = await hitPoint(page); await page.mouse.move(point.x, point.y);
+    await page.mouse.move(point.x, point.y);
     await expect(surface(page)).toHaveAttribute('data-model-hit', 'true');
     await page.mouse.down(); await page.mouse.move(point.x + 40, point.y - 12, {steps: 3});
-    await expect(surface(page)).toHaveAttribute('data-model-dragging', 'true');
-    expect(await surface(page).evaluate(element => element.hasPointerCapture(Number(element.dataset.testCapturedPointer)))).toBe(true);
   }
+  await expect(surface(page)).toHaveAttribute('data-model-dragging', 'true');
+  expect(await surface(page).evaluate(element => element.hasPointerCapture(Number(element.dataset.testCapturedPointer)))).toBe(true);
   await frames(page, 2);
   expect(await page.evaluate(() => window.__story.inspect().modelEngaged)).toBe(true);
   const held = await snapshot(page);
   await page.evaluate(() => window.dispatchEvent(new Event('pagehide')));
   expect(await page.evaluate(() => window.__story.inspect().modelEngaged)).toBe(false);
   await expect(surface(page)).not.toHaveAttribute('data-model-dragging', 'true');
-  if (!isMobile) {
-    expect(await surface(page).evaluate(element => element.hasPointerCapture(Number(element.dataset.testCapturedPointer)))).toBe(false);
-    await page.mouse.up();
-  }
+  expect(await surface(page).evaluate(element => element.hasPointerCapture(Number(element.dataset.testCapturedPointer)))).toBe(false);
+  if(cdp){await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await cdp.detach();}
+  else await page.mouse.up();
   const suspended = await snapshot(page); await frames(page, 5); expect(await snapshot(page)).toEqual(suspended);
   await page.evaluate(() => window.dispatchEvent(new Event('pageshow'))); await settle(page);
-  expect(await page.evaluate(() => ({angle: window.__story.inspect().inspection.value.azimuth, time: window.__story.inspect().playback.activeSeconds, y: scrollY}))).toEqual({angle: 30, time: held.time, y: held.y});
-  await expect(page.getByRole('button', {name: 'Resume motion', exact: true})).toBeVisible();
-  await expectIdle(page); expect(errors).toEqual([]);
+  expect(await page.evaluate(() => ({angle: window.__story.inspect().inspection.value.azimuth, y: scrollY, detail:window.__thesis.inspect().detail}))).toEqual({angle: 30, y: held.y, detail:'full'});
+  await expect.poll(()=>page.evaluate(()=>window.__story.inspect().playback.activeSeconds),{timeout:WAIT}).toBeGreaterThan(held.time);
+  await expect(page.getByRole('button', {name:/^(Pause|Resume) motion$/})).toHaveCount(0);
+  await holdModel(page);await expectIdle(page);expect(errors).toEqual([]);
 });

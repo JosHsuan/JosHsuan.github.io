@@ -21,8 +21,10 @@ export function checkCommandContract(commands:CommandRouter<CommandMap>){
   commands.execute('model.select',{chapterId:'form',index:0,selectedAt:0});
   // @ts-expect-error Chapter identities are a closed contract.
   commands.execute('model.select',{chapterId:'credits',index:0,selectedAt:0});
-  // @ts-expect-error Visual quality has a closed set of supported values.
-  commands.execute('quality.set',{detail:'ultra'});
+  // @ts-expect-error There is no user visual-quality command.
+  commands.execute('quality.set',{detail:'full'});
+  // @ts-expect-error User pause has been removed from the lifecycle contract.
+  commands.execute('preferences.apply',{systemReduced:false,sceneEnabled:true,sceneFailed:false,paused:true});
   // @ts-expect-error Model state cannot own a visual preference.
   commands.execute('model.interact',{detail:'light'});
 }

@@ -1,5 +1,7 @@
 import {test, expect} from '@playwright/test';
-import {WAIT, scenarioTimeout, centerStudy, frames, settle} from './case-helpers.mjs';
+import {WAIT, scenarioTimeout, loadScene, centerStudy, holdModel, frames, settle, expectIdle} from './case-helpers.mjs';
+
+async function entered(page){await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered',null,{timeout:WAIT});}
 
 test('published story, canonical metadata and every linked asset work without JavaScript', async ({browser}) => {
   const context = await browser.newContext({javaScriptEnabled:false});
@@ -7,6 +9,9 @@ test('published story, canonical metadata and every linked asset work without Ja
   await page.goto('http://127.0.0.1:4186/');
   await expect(page.locator('[data-story-chapter]')).toHaveCount(7);
   await expect(page.locator('h1')).toHaveAccessibleName('Bending-Active Metal Panel Deformation');
+  await expect(page.locator('h1')).toBeVisible();
+  await expect(page.locator('[data-entry-loader]')).toBeHidden();
+  await expect(page.locator('[data-project-content]')).not.toHaveAttribute('inert','');
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'index, follow');
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://joshsuan.github.io/');
   const assets = await page.locator('img, source, a[href^="/assets/"]').evaluateAll(elements => [...new Set(elements.flatMap(el => [el.getAttribute('src'),el.getAttribute('srcset'),el.getAttribute('href')]).filter(Boolean))]);
@@ -15,13 +20,13 @@ test('published story, canonical metadata and every linked asset work without Ja
   await context.close();
 });
 
-test('public model initializes with base layers and supports chapter navigation and Light mode', async ({page,isMobile}) => {
+test('public model initializes in Full and preserves chapter navigation without quality or pause controls', async ({page,isMobile}) => {
   test.setTimeout(scenarioTimeout(120000));
   const errors=[]; page.on('pageerror', error=>errors.push(error.message));
-  await page.goto('/');
-  await page.waitForFunction(()=>window.__thesis?.inspect().ready);
-  // Exercise a held source chapter before asserting its Full/Light policy.
-  await centerStudy(page,'form');
+  await loadScene(page);
+  // A visitor's real keyboard inspection holds the source while its Full
+  // materials, resource policy and geometry are measured.
+  await centerStudy(page,'form');await holdModel(page);
   const initial=await page.evaluate(()=>window.__thesis.inspect());
   expect(initial.source).toMatchObject({vertices:172789,triangles:227521,sourceObjects:51});
   expect(initial.material).toMatchObject({finish:'satin',roughness:.58,anisotropy:.35});
@@ -29,21 +34,20 @@ test('public model initializes with base layers and supports chapter navigation 
   expect(initial.detail).toBe('full');
   expect(initial.compositor.requestedSamples).toBe(isMobile?0:2);
   expect(initial.renderSuspended).toBe(false);
-  // Verify Full initialization, then exercise native interaction in supported
-  // Light mode so software-rendered Full frames do not dominate input timing.
-  await page.getByRole('combobox',{name:'Visual detail',exact:true}).selectOption('light');
-  await expect.poll(()=>page.evaluate(()=>window.__thesis.inspect().detail),{timeout:WAIT}).toBe('light');
+  await expect(page.getByRole('combobox',{name:'Visual detail',exact:true})).toHaveCount(0);
+  await expect(page.getByRole('button',{name:/^(Pause|Resume) motion$/})).toHaveCount(0);
   await page.locator('[data-chapter-link="system"]').click();
   // Native document input drives one visible reading plane and scene score.
   // Linux software rendering can exceed the default five-second assertion budget.
   await expect(page.locator('[data-chapter-link="system"]')).toHaveAttribute('aria-current', 'location', {timeout:30000});
-  await centerStudy(page,'system');
+  await centerStudy(page,'system');await holdModel(page,'system');
   await page.waitForFunction(() => {
     const story = window.__story?.inspect(), scene = window.__thesis?.inspect();
     return story?.settled && story.chapterId === 'system' && scene?.representation?.chapterId === 'system';
   }, null, {timeout:30000});
-  expect(await page.evaluate(()=>window.__thesis.inspect().compositor.requestedSamples)).toBe(0);
-  expect(await page.evaluate(()=>window.__thesis.inspect().compositor.mist.enabled)).toBe(false);
+  expect(await page.evaluate(()=>window.__thesis.inspect().detail)).toBe('full');
+  expect(await page.evaluate(()=>window.__thesis.inspect().compositor.requestedSamples)).toBe(isMobile?0:2);
+  expect(await page.evaluate(()=>window.__thesis.inspect().compositor.mist.enabled)).toBe(true);
   await page.locator('[data-chapter-link="make"]').click();
   await settle(page);
   await page.waitForFunction(()=>{const story=window.__story?.inspect(),scene=window.__thesis?.inspect();return story?.settled&&story.chapterId==='make'&&story.canvasPlacement?.settled&&story.canvasPlacement.visible===false&&scene?.renderSuspended&&!scene.sourceVisible;},null,{timeout:30000});
@@ -55,15 +59,14 @@ test('public model initializes with base layers and supports chapter navigation 
   await centerStudy(page,'form');
   await page.waitForFunction(()=>{const story=window.__story?.inspect(),scene=window.__thesis?.inspect();return story?.settled&&scene?.pose.chapter.id==='form'&&scene.sourceVisible&&!scene.renderSuspended&&scene.canvasPlacement?.visible;},null,{timeout:30000});
   expect(await page.evaluate(()=>window.__thesis.inspect().frames)).toBeGreaterThan(resting);
-  await page.getByRole('button',{name:'Pause motion'}).click();
-  await expect(page.getByRole('button',{name:'Resume motion'})).toBeVisible();
+  await holdModel(page);await expectIdle(page);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
   expect(errors).toEqual([]);
 });
 
 test('evidence inspection and method disclosure preserve native reading and keyboard focus', async ({page}) => {
   await page.emulateMedia({reducedMotion:'reduce'});
-  await page.goto('/');
+  await page.goto('/');await entered(page);
   await page.locator('[data-chapter-link="system"]').click();
   const step=page.locator('#system details').first();
   await step.locator('summary').click();
@@ -89,14 +92,17 @@ test('reduced motion and unavailable model retain the public story', async ({bro
   const page = await context.newPage(); const sceneRequests=[];
   page.on('request', request=>{if(/\.(glb|hdr)(\?|$)/.test(request.url()))sceneRequests.push(request.url());});
   await page.goto('http://127.0.0.1:4186/');
-  await expect(page.getByRole('button',{name:'Reduced motion'})).toBeVisible();
+  await entered(page);
+  await expect(page.getByRole('button',{name:'Enable 3D',exact:true})).toBeVisible();
+  expect(await page.evaluate(()=>window.__story.inspect().entry.reason)).toBe('static-ready');
   expect(sceneRequests).toEqual([]);
   await expect(page.locator('[data-story-chapter]')).toHaveCount(7);
   await context.close();
   const fallback = await browser.newContext(); const failedPage = await fallback.newPage();
   await failedPage.route('**/source-layers.glb', route=>route.abort());
-  await failedPage.goto('http://127.0.0.1:4186/');
-  await expect(failedPage.getByRole('button',{name:'Still background'})).toBeVisible();
+  await failedPage.goto('http://127.0.0.1:4186/');await entered(failedPage);
+  await expect(failedPage.locator('[data-scene-fallback]')).toContainText('3D unavailable');
+  expect(await failedPage.evaluate(()=>window.__story.inspect().entry.reason)).toBe('scene-unavailable');
   await expect(failedPage.locator('[data-story-chapter]')).toHaveCount(7);
   await fallback.close();
 });

@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-import {WAIT,scenarioTimeout,loadScene,pause,settle,frames} from './case-helpers.mjs';
+import {WAIT,scenarioTimeout,loadScene,settle,frames} from './case-helpers.mjs';
 import {SCENE_RECOVERY_KEY} from '../../roles/uiux-designer/cases/bending-active-thesis/components/scene-recovery.mjs';
 
 async function instrumentContexts(page){
@@ -14,7 +14,7 @@ async function instrumentContexts(page){
 }
 
 async function expectStaticReading(page){
-  await page.waitForFunction(()=>window.__story,null,{timeout:WAIT});await settle(page);
+  await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered',null,{timeout:WAIT});await settle(page);
   await expect(page.locator('h1')).toHaveAccessibleName('Bending-Active Metal Panel Deformation');
   await expect(page.locator('[data-story-chapter]')).toHaveCount(7);
   await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(0);
@@ -34,13 +34,13 @@ async function expectStaticReading(page){
 }
 
 async function enableExplicitly(page){
-  await page.getByRole('combobox',{name:'Visual detail',exact:true}).selectOption('light');
   await page.getByRole('button',{name:'Enable 3D',exact:true}).click();
   await page.waitForFunction(()=>window.__thesis?.inspect().ready,null,{timeout:WAIT});await settle(page);
   await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);
   expect(await page.evaluate(()=>window.__recoveryContexts.canvases)).toBe(1);
   expect(await page.evaluate(key=>JSON.parse(sessionStorage.getItem(key)).status,SCENE_RECOVERY_KEY)).toBe('active');
   expect(await page.evaluate(()=>window.__thesis.inspect().source)).toMatchObject({vertices:172789,triangles:227521,sourceObjects:51});
+  expect(await page.evaluate(()=>({detail:window.__thesis.inspect().detail,shadow:window.__thesis.inspect().renderer.shadowEnabled}))).toEqual({detail:'full',shadow:true});
 }
 
 // Synthetic WebGL context loss exercises the application fallback, not the
@@ -48,10 +48,11 @@ async function enableExplicitly(page){
 test('context loss preserves reading and reload requires explicit 3D recovery',async({page})=>{
   test.setTimeout(scenarioTimeout(120000));
   await instrumentContexts(page);const errors=[];page.on('pageerror',error=>errors.push(error.message));
-  await loadScene(page);await pause(page);
+  await loadScene(page);
   expect(await page.evaluate(()=>window.__recoveryContexts.canvases)).toBe(1);
   await page.evaluate(()=>window.__thesis.loseContext());
-  await expect(page.getByRole('button',{name:'Still background',exact:true})).toBeDisabled({timeout:WAIT});
+  await expect(page.locator('[data-scene-fallback]')).toHaveText('Source study available · 3D unavailable',{timeout:WAIT});
+  await expect(page.locator('[data-scene-fallback]')).toBeVisible();
   await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(0,{timeout:WAIT});
   await expect.poll(()=>page.evaluate(key=>JSON.parse(sessionStorage.getItem(key)).status,SCENE_RECOVERY_KEY)).toBe('failed');
   await settle(page);
@@ -69,7 +70,7 @@ test('context loss preserves reading and reload requires explicit 3D recovery',a
 test('a simulated unfinished scene lease blocks automatic reload without blocking semantic navigation',async({page})=>{
   test.setTimeout(scenarioTimeout(120000));
   await instrumentContexts(page);const errors=[];page.on('pageerror',error=>errors.push(error.message));
-  await loadScene(page);await pause(page);
+  await loadScene(page);
   // Persist the lease after ordinary cleanup to model a process that never
   // completed pagehide. This is deliberately a lease simulation, not a crash.
   await page.evaluate(key=>window.addEventListener('pagehide',()=>sessionStorage.setItem(key,JSON.stringify({status:'active',at:Date.now()})),{once:true}),SCENE_RECOVERY_KEY);

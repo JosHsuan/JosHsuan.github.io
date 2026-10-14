@@ -1,9 +1,9 @@
 import {test,expect} from '@playwright/test';
-import {WAIT,scenarioTimeout,loadScene,settle,frames,pause,centerStudy} from './case-helpers.mjs';
+import {WAIT,scenarioTimeout,loadScene,settle,frames,centerStudy} from './case-helpers.mjs';
 import {renderedTextContrast} from './reading-contrast.mjs';
 
 test('IBM Plex, rounded shadowboxes and orange photos retain an accessible original',async({page,isMobile})=>{
- await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');await page.evaluate(()=>document.fonts.ready);
+ await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');await page.waitForFunction(()=>window.__story?.inspect().entry?.phase==='entered',null,{timeout:WAIT});await page.evaluate(()=>document.fonts.ready);
  const fonts=await page.evaluate(async()=>{await document.fonts.load('400 16px "IBM Plex Mono"');await document.fonts.load('italic 400 16px "IBM Plex Serif"');return{sans:document.fonts.check('400 16px "IBM Plex Sans"'),mono:document.fonts.check('400 16px "IBM Plex Mono"'),serif:document.fonts.check('italic 400 16px "IBM Plex Serif"'),body:getComputedStyle(document.body).fontFamily};});expect(fonts).toMatchObject({sans:true,mono:true,serif:true});expect(fonts.body).toContain('IBM Plex Sans');
  const photo=page.locator('#make [data-media-kind="photo"] img'),link=page.locator('#make [data-inspect-figure]');await link.scrollIntoViewIfNeeded();
  expect(await photo.evaluate(el=>getComputedStyle(el).filter)).toContain('invert(1)');expect(await link.evaluate(el=>parseFloat(getComputedStyle(el).borderTopLeftRadius))).toBeGreaterThanOrEqual(16);
@@ -12,19 +12,22 @@ test('IBM Plex, rounded shadowboxes and orange photos retain an accessible origi
  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
 });
 
-test('original SVG paths support accessible curve and workflow selections with static failure fallbacks',async({page})=>{
- test.setTimeout(scenarioTimeout(120000));await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');
- for(const [kind,count]of [['miura',3],['library',11],['workflow',4]]){const diagram=page.locator(`[data-source-diagram="${kind}"]`);await diagram.scrollIntoViewIfNeeded();await expect(diagram.locator('svg')).toBeVisible({timeout:WAIT});expect(await diagram.locator('svg path').count()).toBeGreaterThan(10);const buttons=diagram.locator('button[data-diagram-index]');await expect(buttons).toHaveCount(count);await buttons.last().focus();await page.keyboard.press('Enter');await expect(buttons.last()).toHaveAttribute('aria-pressed','true');await expect(diagram.locator('[data-diagram-caption]')).not.toBeEmpty();
+test('original SVG paths retain fold and workflow selections, a complete static library and failure fallbacks',async({page})=>{
+ test.setTimeout(scenarioTimeout(120000));await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');await page.waitForFunction(()=>window.__story?.inspect().entry?.phase==='entered',null,{timeout:WAIT});
+ for(const [kind,count]of [['miura',3],['workflow',4]]){const diagram=page.locator(`[data-source-diagram="${kind}"]`);await diagram.scrollIntoViewIfNeeded();await expect(diagram.locator('svg')).toBeVisible({timeout:WAIT});expect(await diagram.locator('svg path').count()).toBeGreaterThan(10);const buttons=diagram.locator('button[data-diagram-index]');await expect(buttons).toHaveCount(count);await buttons.last().focus();await page.keyboard.press('Enter');await expect(buttons.last()).toHaveAttribute('aria-pressed','true');await expect(diagram.locator('[data-diagram-caption]')).not.toBeEmpty();
   // Every authored caption must fit without changing the reading stop plan.
   // Selection shares the same paint path as autonomous presentation changes.
   await page.evaluate(()=>document.fonts.ready);
   const heights=await diagram.evaluate(async el=>{const values=[];for(const button of el.querySelectorAll('button[data-diagram-index]')){button.click();await new Promise(requestAnimationFrame);values.push({figure:el.getBoundingClientRect().height,document:document.documentElement.scrollHeight});}return values;});
   for(const value of heights){expect(Math.abs(value.figure-heights[0].figure)).toBeLessThan(.01);expect(value.document).toBe(heights[0].document);}
   await diagram.getByRole('button',{name:'Follow chapter'}).click();}
- await page.route('**/assets/diagrams/*.json',r=>r.abort());await page.reload();for(const kind of ['miura','library','workflow']){const img=page.locator(`[data-source-diagram="${kind}"] img`);await img.scrollIntoViewIfNeeded();await expect.poll(()=>img.evaluate(el=>el.complete&&el.naturalWidth>0)).toBe(true);}
+ const library=page.locator('[data-source-diagram="library"]');await library.locator('svg').scrollIntoViewIfNeeded();await settle(page);
+ await expect(library.locator('svg path')).toHaveCount(452);await expect(library.locator('svg text')).toHaveCount(27);await expect(library.locator('button')).toHaveCount(0);await expect(library).toHaveAttribute('data-diagram-reveal','completed');
+ expect(await library.locator('[data-library-trace]').evaluateAll(paths=>paths.every(path=>getComputedStyle(path).strokeDasharray==='none'&&getComputedStyle(path).visibility==='visible'))).toBe(true);
+ await page.route('**/assets/diagrams/*.json',r=>r.abort());await page.reload();await page.waitForFunction(()=>window.__story?.inspect().entry?.phase==='entered',null,{timeout:WAIT});for(const kind of ['miura','library','workflow']){const img=page.locator(`[data-source-diagram="${kind}"] img`);await img.scrollIntoViewIfNeeded();await expect.poll(()=>img.evaluate(el=>el.complete&&el.naturalWidth>0)).toBe(true);}
 });
 
-test('zero-wheel chapter loops advance field and diagram selections while Pause holds the shared clock',async({page})=>{
+test('zero-wheel chapter loops advance field and workflow selections while OS Reduced stops autonomous time',async({page})=>{
  test.setTimeout(scenarioTimeout(180000));await page.clock.install({time:new Date('2026-01-01T00:00:00Z')});await loadScene(page);await page.locator('[data-chapter-link="system"]').click();await centerStudy(page,'system');await page.mouse.move(10,130);await frames(page,4);
  expect(await page.evaluate(()=>({visible:window.__story.inspect().canvasPlacement.visible,suspended:window.__thesis.inspect().renderSuspended}))).toEqual({visible:true,suspended:false});
  // Fixed sub-stale intervals verify autonomous behavior even when one software
@@ -46,7 +49,7 @@ test('zero-wheel chapter loops advance field and diagram selections while Pause 
  await choice.focus();await settle(page);await choice.click();await settle(page);
  await expect(choice).toHaveAttribute('aria-pressed','true');
  expect(await page.evaluate(()=>window.__story.inspect().sourceSelection)).toMatchObject({chapterId:'system',index:2});
- await page.getByRole('button',{name:'Pause motion',exact:true}).click();await settle(page);const frozen=await page.evaluate(()=>window.__story.inspect().playback.activeSeconds);await frames(page,10);expect(await page.evaluate(()=>window.__story.inspect().playback.activeSeconds)).toBe(frozen);
+ await page.emulateMedia({reducedMotion:'reduce'});await settle(page);const frozen=await page.evaluate(()=>window.__story.inspect().playback.activeSeconds);await frames(page,10);expect(await page.evaluate(()=>window.__story.inspect().playback.activeSeconds)).toBe(frozen);
 });
 
 test('viewport source holds while information scrolls and workflow follows its presented shared phase',async({page})=>{
@@ -82,7 +85,7 @@ test('viewport source holds while information scrolls and workflow follows its p
 
 
 test('rear scene keeps reading surfaces legible over actual, white and black backdrops',async({page,isMobile})=>{
- test.setTimeout(scenarioTimeout(180000));await loadScene(page);await centerStudy(page,'system');await page.getByRole('combobox',{name:'Visual detail',exact:true}).selectOption('full');await settle(page);await pause(page);
+ test.setTimeout(scenarioTimeout(180000));await loadScene(page);await centerStudy(page,'system');await settle(page);
  expect(await page.evaluate(()=>({detail:window.__thesis.inspect().detail,samples:window.__thesis.inspect().compositor.requestedSamples,mist:window.__thesis.inspect().compositor.mist.enabled,suspended:window.__thesis.inspect().renderSuspended}))).toEqual({detail:'full',samples:isMobile?0:2,mist:true,suspended:false});
  const layers=await page.evaluate(()=>({canvases:document.querySelectorAll('canvas').length,glCanvases:document.querySelectorAll('[data-cinematic-stage] canvas').length,asciiCanvases:document.querySelectorAll('canvas[data-ascii-field]').length,stage:Number(getComputedStyle(document.querySelector('[data-cinematic-stage]')).zIndex),reading:Number(getComputedStyle(document.querySelector('[data-reading-frame]')).zIndex),scrim:!!document.querySelector('[data-cinematic-scrim]'),rects:window.__thesis.inspect().protectedRects,layering:window.__thesis.inspect().compositor.layering}));
  expect(layers.canvases).toBe(2);expect(layers.glCanvases).toBe(1);expect(layers.asciiCanvases).toBe(1);expect(layers.stage).toBeLessThan(layers.reading);expect(layers.scrim).toBe(false);expect(layers.rects).toBeUndefined();expect(layers.layering).toMatchObject({position:'rear',semanticMask:false,independentField:true});
@@ -91,7 +94,7 @@ test('rear scene keeps reading surfaces legible over actual, white and black bac
   if(selector.includes('[data-model-side-label]')){
    // The source information is fixed beside the model; present its chapter
    // instead of trying to scroll a removed document footer into view.
-   await centerStudy(page,'system');await pause(page);
+   await centerStudy(page,'system');
   }else{
    await target.scrollIntoViewIfNeeded();await settle(page);
    // Read in the document's unobscured center, away from fixed masthead/tools.

@@ -1,7 +1,7 @@
 // Presentation size and device resource pressure are separate decisions. This
 // profile never changes camera composition, authored geometry or material modes.
-const STANDARD = Object.freeze({id:'standard',pixelBudgets:Object.freeze({full:1_600_000,light:1_200_000}),maxSamples:2,shadowMapSize:1024});
-const TOUCH = Object.freeze({id:'conservative-touch',pixelBudgets:Object.freeze({full:520_000,light:360_000}),maxSamples:0,shadowMapSize:512});
+const STANDARD = Object.freeze({id:'standard',pixelBudget:1_600_000,maxSamples:2,shadowMapSize:1024});
+const TOUCH = Object.freeze({id:'conservative-touch',pixelBudget:520_000,maxSamples:0,shadowMapSize:512});
 
 export function resolveRenderProfile({coarsePointer=false,userAgent='',platform='',maxTouchPoints=0}={}) {
   // Include desktop-mode iPad Safari and iOS browsers without depending on a

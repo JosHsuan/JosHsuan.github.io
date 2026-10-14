@@ -7,7 +7,7 @@ function fakeRenderer(getPolicy) {
   let width = 390, height = 844, ratio = 1, canvasWidth = width, canvasHeight = height;
   const allocations = [], viewport = [], calls = [];
   const record = axis => allocations.push({axis, width: canvasWidth, height: canvasHeight,
-    pixels: canvasWidth * canvasHeight, limit: getPolicy().pixelBudget ?? RENDER_PIXEL_BUDGET[getPolicy().detail]});
+    pixels: canvasWidth * canvasHeight, limit: getPolicy().pixelBudget ?? RENDER_PIXEL_BUDGET});
   const canvas = {style: {}, get width() {return canvasWidth;}, set width(value) {canvasWidth = value; record('width');},
     get height() {return canvasHeight;}, set height(value) {canvasHeight = value; record('height');}};
   const renderer = {domElement: canvas, capabilities: {maxTextureSize: 4096}, xr: {isPresenting: false},
@@ -29,7 +29,7 @@ function assertEveryAllocation(allocations) {
 }
 
 test('stale Fiber DPR never allocates an oversized buffer in either resize direction', () => {
-  const policy = {detail: 'full', deviceDpr: 3}, fake = fakeRenderer(() => policy), guard = createRendererBudget(fake.renderer, () => policy);
+  const policy = {deviceDpr: 3}, fake = fakeRenderer(() => policy), guard = createRendererBudget(fake.renderer, () => policy);
   for (const [width, height] of [[390,844],[3840,2160],[390,844],[1440,2560],[3840,2160],[900,3000],[3000,900],[20000,200],[200,20000],[1440,1000]]) {
     // This is Fiber's real ordering: stale DPR first, new viewport second.
     fake.renderer.setPixelRatio(1.25); fake.renderer.setSize(width, height);
@@ -43,18 +43,18 @@ test('stale Fiber DPR never allocates an oversized buffer in either resize direc
   assert(fake.calls.every(name => name === 'setDrawingBufferSize'), 'Never call native recursive setPixelRatio/setSize');
 });
 
-test('a quality change also bounds intermediate allocations and direct drawing-buffer calls', () => {
-  const policy = {detail: 'full', deviceDpr: 2}, fake = fakeRenderer(() => policy), guard = createRendererBudget(fake.renderer, () => policy);
+test('pressure relief also bounds intermediate allocations and direct drawing-buffer calls', () => {
+  const policy = {deviceDpr: 2,densityScale:1}, fake = fakeRenderer(() => policy), guard = createRendererBudget(fake.renderer, () => policy);
   guard.sync(1440,2560);
-  policy.detail = 'light'; fake.renderer.setPixelRatio(3); fake.renderer.setSize(3840,2160,false);
+  policy.densityScale = .75; fake.renderer.setPixelRatio(3); fake.renderer.setSize(3840,2160,false);
   fake.renderer.setDrawingBufferSize(2160,3840,8);
-  policy.detail = 'full'; fake.renderer.setSize(3840,2160);
+  policy.densityScale = 1; fake.renderer.setSize(3840,2160);
   assertEveryAllocation(fake.allocations);
   assert.equal(guard.inspect().budget.detail, 'full');
 });
 
 test('unchanged sync makes no canvas writes and preserves caller CSS/viewport semantics', () => {
-  const policy = {detail: 'full', deviceDpr: 1}, fake = fakeRenderer(() => policy), guard = createRendererBudget(fake.renderer, () => policy);
+  const policy = {deviceDpr: 1}, fake = fakeRenderer(() => policy), guard = createRendererBudget(fake.renderer, () => policy);
   fake.renderer.setSize(1440,1000); const count = fake.allocations.length;
   for (let frame = 0; frame < 120; frame++) guard.sync(1440,1000);
   assert.equal(fake.allocations.length, count);
@@ -65,7 +65,7 @@ test('unchanged sync makes no canvas writes and preserves caller CSS/viewport se
 });
 
 test('density pressure applies before stale ratio callbacks and invalid sizes allocate nothing', () => {
-  const policy = {detail: 'full', deviceDpr: 2, densityScale: 1}, fake = fakeRenderer(() => policy), guard = createRendererBudget(fake.renderer, () => policy);
+  const policy = {deviceDpr: 2, densityScale: 1}, fake = fakeRenderer(() => policy), guard = createRendererBudget(fake.renderer, () => policy);
   const full = guard.sync(3840,2160);
   policy.densityScale = .5; fake.renderer.setPixelRatio(1.25);
   assert.equal(guard.inspect().budget.dpr, full.dpr * .5);
@@ -78,17 +78,17 @@ test('density pressure applies before stale ratio callbacks and invalid sizes al
 });
 
 test('guard disposal restores only its own methods and rejects further sync', () => {
-  const fake = fakeRenderer(() => ({detail: 'full', deviceDpr: 1})), original = fake.renderer.setSize;
-  const guard = createRendererBudget(fake.renderer, () => ({detail: 'full', deviceDpr: 1}));
+  const fake = fakeRenderer(() => ({deviceDpr: 1})), original = fake.renderer.setSize;
+  const guard = createRendererBudget(fake.renderer, () => ({deviceDpr: 1}));
   const replacement = () => {}; fake.renderer.setPixelRatio = replacement;
   guard.dispose(); guard.dispose(); assert.equal(fake.renderer.setSize,original); assert.equal(fake.renderer.setPixelRatio,replacement);
   assert.throws(() => guard.sync(1440,1000), /disposed/);
 });
 
-test('touch cap also guards every native width/height assignment across repeated orientation and quality changes',()=>{
-  const policy={detail:'full',deviceDpr:3,pixelBudget:520000},fake=fakeRenderer(()=>policy),guard=createRendererBudget(fake.renderer,()=>policy);
+test('touch cap also guards every native width/height assignment across repeated orientation and pressure changes',()=>{
+  const policy={deviceDpr:3,pixelBudget:520000,densityScale:1},fake=fakeRenderer(()=>policy),guard=createRendererBudget(fake.renderer,()=>policy);
   for(let cycle=0;cycle<60;cycle++)for(const [width,height] of [[430,932],[932,430],[430,852]]){
-    policy.detail=cycle%2?'full':'light';policy.pixelBudget=policy.detail==='full'?520000:360000;
+    policy.densityScale=cycle%2?1:.75;
     fake.renderer.setPixelRatio(3);fake.renderer.setSize(width,height,false);
     const writes=fake.allocations.length;for(let frame=0;frame<60;frame++)guard.sync(width,height);
     assert.equal(fake.allocations.length,writes,'Held chapter frames cannot allocate another backing store');

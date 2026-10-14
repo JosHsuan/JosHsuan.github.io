@@ -25,9 +25,9 @@ flowchart TD
 |---|---|
 | README/AGENTS, documentation Markdown outside content/public asset inputs | Selector/gate tests and plan; expensive jobs skipped; no publishable output. |
 | Known framework source/content/public files and framework test/export tools | Fast checks, root and simulated-subpath builds/audits and all framework browser projects. |
-| ModelInspector, model information/CSS or ModelManager | Release baseline; model inspection, canvas interaction, source artwork/diagram synchronization, lifecycle and mobile stability. |
+| ModelInspector, model information/CSS or ModelManager | Release baseline; model inspection, native mouse/touch drag, canvas interaction, source artwork/diagram synchronization, lifecycle and mobile stability. |
 | Evidence inspector or EvidenceManager | Release baseline, source artwork and motion/reading feedback. |
-| SourceDiagram/CSS or DiagramManager | Release baseline, source artwork, model inspection and canvas interaction. |
+| SourceDiagram/CSS or DiagramManager | Release baseline, source artwork, library line reveal, model inspection and canvas interaction. |
 | ReadingManager or its response tests | Release baseline, motion/reading feedback, canvas interaction, source artwork and model inspection. |
 | Event/core/contracts, Director, SceneRuntime, app/global layout, camera/material/render modules, assets, or other unmapped case inputs | All case portable tests and browser specs; root framework remains independent. |
 | Shared browser helper/configuration | All case browser specs. A changed individual spec runs itself plus the release baseline. |
@@ -35,7 +35,7 @@ flowchart TD
 
 The implementation is [ci-impact.mjs](../scripts/ci-impact.mjs). Multiple changes select a union. Newly introduced paths default to the wider scope; update the map only with evidence of the feature's integration boundaries. Git diffs disable rename detection so both old and new paths contribute to selection. Markdown under content or release public assets is never classified as documentation-only.
 
-Every case candidate runs the **whole audited public build**, complete cheap portable tests, and `public-release.spec.mjs` on Chromium, WebKit and mobile Chromium. The baseline covers semantic/no-JavaScript reading and linked assets, model initialization/navigation/quality, evidence keyboard focus and reduced/failure fallbacks. Feature selection reduces additional expensive browser checks; it does not publish a partially built website.
+Every case candidate runs the **whole audited public build**, complete cheap portable tests, and `public-release.spec.mjs` on Chromium, WebKit and mobile Chromium. The baseline covers semantic/no-JavaScript reading and linked assets, Full model initialization/navigation, evidence keyboard focus and reduced/failure fallbacks. The entry-readiness service and library presenter/sampler conservatively select the full case. Feature selection reduces additional expensive browser checks; it does not publish a partially built website.
 
 Push selection uses the last successful **ancestor push run**, not `event.before`. This includes all cumulative changes since success, including failed/cancelled runs. Missing ancestry, no successful history, or a failed baseline query causes full validation. PRs use the base/head merge base. A manually dispatched run defaults to full validation; turning off its `full_validation` input uses the same successful-ancestor selection, but manual/PR runs do not satisfy publication provenance.
 

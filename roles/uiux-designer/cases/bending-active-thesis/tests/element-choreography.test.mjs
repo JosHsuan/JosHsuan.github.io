@@ -41,15 +41,11 @@ test('stagger remains bounded for long mobile prose and each revealed item event
   }
 });
 
-test('Reduced immediately settles every element and Light retains the designed shape at lower amplitude', () => {
+test('Reduced immediately settles every element without changing its reveal completion contract', () => {
   for (const kind of CHOREOGRAPHY_KINDS) {
     assert.deepEqual(transform(sampleElementChoreography({kind, elapsed: -10, index: 5, reducedMotion: true})), identity);
-    const full = sampleElementChoreography({kind, elapsed: .2});
-    const light = sampleElementChoreography({kind, elapsed: .2, light: true});
-    assert.equal(light.phase, full.phase);
-    assert.equal(light.progress, full.progress);
-    assert(Math.abs(light.z) < Math.abs(full.z));
-    assert.equal(light.scale - 1 === 0, full.scale - 1 === 0);
+    const reduced = sampleElementChoreography({kind, elapsed: .2, reducedMotion:true});
+    assert.equal(reduced.settled,true);assert.equal(reduced.ruleProgress,1);
   }
 });
 

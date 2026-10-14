@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-import {loadScene,centerStudy,settle,pause,expectIdle,scenarioTimeout,WAIT} from './case-helpers.mjs';
+import {loadScene,centerStudy,settle,expectIdle,scenarioTimeout,WAIT} from './case-helpers.mjs';
 
 test('native scroll triggers a timed Canvas departure and completion follows the submitted frame',async({page})=>{
  test.setTimeout(scenarioTimeout(120000));await page.clock.install();await loadScene(page);await centerStudy(page,'system');
@@ -82,16 +82,15 @@ test('information windows share one fluid surface while native reading, focus an
  expect(movement.some(value=>value.moving==='true')).toBe(true);
  expect(movement.some(value=>value.path.includes('path('))).toBe(true);
  expect(movement.every(value=>value.opacity==='1')).toBe(true);
- await pause(page);await expectIdle(page);
  const control=page.locator('[data-chapter-link="form"]');await control.focus();await expect(control).toBeFocused();
- await page.emulateMedia({reducedMotion:'reduce'});await settle(page);
+ await page.emulateMedia({reducedMotion:'reduce'});await settle(page);await expectIdle(page);
  const reduced=await registered.evaluateAll(elements=>elements.map(el=>({moving:el.dataset.informationMoving,transform:getComputedStyle(el).transform})));
  for(const row of reduced){expect(row.moving).not.toBe('true');expect(row.transform).toBe('none');}
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);expect(errors).toEqual([]);
 });
 
-test('dynamic evidence windows join and leave the shared presenter without duplicate surfaces',async({page})=>{
- test.setTimeout(scenarioTimeout(120000));await loadScene(page);await pause(page);
+test('dynamic evidence windows join and leave the shared presenter without duplicate surfaces under OS Reduced',async({page})=>{
+ test.setTimeout(scenarioTimeout(120000));await loadScene(page);await page.emulateMedia({reducedMotion:'reduce'});await settle(page);
  const trigger=page.locator('[data-inspect-figure]').filter({visible:true}).first();
  await trigger.scrollIntoViewIfNeeded();await settle(page);await trigger.click();
  const portal=page.locator('[data-source-comparison]');await expect(portal).toBeVisible();

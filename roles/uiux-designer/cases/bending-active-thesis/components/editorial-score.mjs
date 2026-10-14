@@ -26,7 +26,6 @@ export function sampleEditorialScore({
   elementIndex = 0,
   elementCount = 1,
   reducedMotion = false,
-  light = false,
 } = {}) {
   const visual = clamp(finite(visualU, 'Visual progress'));
   const native = clamp(finite(nativeU, 'Native progress'));
@@ -47,12 +46,12 @@ export function sampleEditorialScore({
   const exit = reducedMotion ? 0 : range(visualPhase, chapter.hold[1] + (1 - rank) * 0.08, 1.26 + (1 - rank) * 0.08);
   const incoming = 1 - entry;
   const dwell = entry * (1 - exit);
-  const amplitude = reducedMotion ? 0 : light ? 0.45 : 1;
+  const amplitude = reducedMotion ? 0 : 1;
   const travel = (incoming + exit) * amplitude;
   // This is the stage's existing transition gate, not another remap of stageU.
   // Dynamic accents are zero on holds and at rest. Scene bindings may consume
   // the same values once, regardless of which foreground element is sampled.
-  const transitionWeight = reducedMotion || light ? 0 : clamp(1 - sampleResponseScore(visual).dwellWeight);
+  const transitionWeight = reducedMotion ? 0 : clamp(1 - sampleResponseScore(visual).dwellWeight);
   const materialLift = speed * transitionWeight;
   const flow = signedDirection * speed * (1 - readingHold) * amplitude;
   const approach = (incoming - exit) * amplitude;

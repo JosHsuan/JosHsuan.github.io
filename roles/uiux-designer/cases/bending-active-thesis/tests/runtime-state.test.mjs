@@ -21,13 +21,14 @@ test('invalid grouped requests cannot partially commit or run effects; model own
 
 test('frame publication and passive acknowledgments do not create domain transactions or UI updates',()=>{
  const input=createRuntimeInput();let domain=0,frames=0;
- const off=input.state.subscribe(state=>state.detail,()=>domain++),release=input.subscribe(()=>frames++);
+ const off=input.state.subscribe(state=>state.systemReduced,()=>domain++),release=input.subscribe(()=>frames++);
  for(let i=0;i<120;i++)input.publishFrame({controllerFrame:i,pointer:{x:i/120,y:0}});
  assert.equal(input.state.version,0);assert.equal(domain,0);assert.equal(frames,120);
  input.markPresented(119,'overview');assert.equal(frames,120);assert.equal(input.getPresentation().controllerFrame,119);
- assert.throws(()=>input.publishFrame({paused:true}),/cannot change/);
- input.commands.execute('quality.set',{detail:'light'});assert.equal(domain,1);assert.equal(input.state.version,1);
- input.commands.execute('quality.set',{detail:'light'});assert.equal(domain,1);assert.equal(input.state.version,1);
+ assert.throws(()=>input.publishFrame({systemReduced:true}),/cannot change/);
+ const preferences={systemReduced:true,sceneEnabled:true,sceneFailed:false};
+ input.commands.execute('preferences.apply',preferences);assert.equal(domain,1);assert.equal(input.state.version,1);
+ input.commands.execute('preferences.apply',preferences);assert.equal(domain,1);assert.equal(input.state.version,1);
  off();release();input.dispose();
 });
 
@@ -35,12 +36,12 @@ test('commands requested by a subscriber commit only after the complete outer pu
  const input=createRuntimeInput(),scope=input.events.createScope('observer'),order=[];let nested;
  input.events.on(scope,'stateChanged',event=>{
   order.push('a'+event.version);
-  if(event.version===1){nested=input.commands.execute('quality.set',{detail:'full'});assert.equal(input.state.get().detail,'light');}
+  if(event.version===1){nested=input.commands.execute('preferences.apply',{systemReduced:false,sceneEnabled:true,sceneFailed:false});assert.equal(input.state.get().systemReduced,true);}
  });
  input.events.on(scope,'stateChanged',event=>order.push('b'+event.version));
- const outer=input.commands.execute('quality.set',{detail:'light'});
+ const outer=input.commands.execute('preferences.apply',{systemReduced:true,sceneEnabled:true,sceneFailed:false});
  assert.equal(outer.version,1);assert.equal(nested.status,'queued');assert.deepEqual(order,['a1','b1','a2','b2']);
- assert.equal(input.state.get().detail,'full');input.dispose();
+ assert.equal(input.state.get().systemReduced,false);input.dispose();
 });
 
 test('duplicate command owners are rejected and a failed effect reports an already committed transition',()=>{
@@ -48,14 +49,25 @@ test('duplicate command owners are rejected and a failed effect reports an alrea
  const scope=events.createScope('commands'),transactions=new TransactionEngine(state,events),commands=new CommandRouter(transactions);let effects=0;
  commands.register(scope,'owner','update',payload=>({patch:payload,effects:[()=>{effects++;throw Error('effect failed');}]}));
  assert.throws(()=>commands.register(scope,'other','update',()=>({patch:{}})),/already owned/);
- assert.equal(commands.execute('update',{detail:'unknown'}).status,'rejected');assert.equal(effects,0);assert.equal(state.version,0);
- const result=commands.execute('update',{detail:'light'});assert.equal(result.status,'failed');assert(result.committed);assert.equal(state.version,1);assert.equal(effects,1);
- scope.dispose();assert.equal(commands.execute('update',{detail:'full'}).status,'rejected');events.dispose();state.dispose();
+ assert.equal(commands.execute('update',{systemReduced:'unknown'}).status,'rejected');assert.equal(effects,0);assert.equal(state.version,0);
+ const result=commands.execute('update',{systemReduced:true});assert.equal(result.status,'failed');assert(result.committed);assert.equal(state.version,1);assert.equal(effects,1);
+ scope.dispose();assert.equal(commands.execute('update',{systemReduced:false}).status,'rejected');events.dispose();state.dispose();
 });
 
 test('selective observer failure cannot prevent subsequent observers or factual publication',()=>{
  const errors=[],events=new EventManager(error=>errors.push(error)),state=new StateStore(undefined,error=>errors.push(error)),transactions=new TransactionEngine(state,events),scope=events.createScope('facts');
- let notices=0;state.subscribe(value=>value.detail,()=>{throw Error('observer');});state.subscribe(value=>value.detail,()=>notices++);
+ let notices=0;state.subscribe(value=>value.systemReduced,()=>{throw Error('observer');});state.subscribe(value=>value.systemReduced,()=>notices++);
  events.on(scope,'stateChanged',()=>notices++);
- transactions.apply({patch:{detail:'light'}});assert.equal(notices,2);assert.equal(errors.length,1);assert.equal(state.get().detail,'light');events.dispose();state.dispose();
+ transactions.apply({patch:{systemReduced:true}});assert.equal(notices,2);assert.equal(errors.length,1);assert.equal(state.get().systemReduced,true);events.dispose();state.dispose();
+});
+
+test('removed quality and pause settings cannot return through commands or state patches',()=>{
+ const input=createRuntimeInput(),before=input.state.get();
+ assert.equal('detail' in before,false);assert.equal('paused' in before,false);
+ assert.equal(input.commands.execute('quality.set',{detail:'light'}).status,'rejected');
+ for(const patch of [{detail:'full'},{detail:'light'},{paused:true},{paused:false}]){
+  assert.equal(input.commands.execute('preferences.apply',{systemReduced:false,sceneEnabled:true,sceneFailed:false,...patch}).status,'rejected');
+  assert.equal(input.state.get(),before);
+ }
+ assert.equal(input.state.version,0);input.dispose();
 });

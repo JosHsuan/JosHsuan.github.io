@@ -1,3 +1,5 @@
+// Historical cinematic-artifact verifier. Its retired UI assumptions do not
+// validate the current Full-only release; use pnpm test:pages instead.
 import {createRequire} from 'node:module';
 import {mkdir, writeFile} from 'node:fs/promises';
 import assert from 'node:assert/strict';

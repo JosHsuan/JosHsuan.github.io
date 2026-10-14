@@ -1,3 +1,5 @@
+// Historical Round 02 artifact verifier. Its retired quality/pause controls do
+// not validate the current Full-only release; use pnpm test:pages instead.
 import {createRequire} from 'node:module';
 import {mkdir, writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';

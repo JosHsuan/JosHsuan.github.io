@@ -1,15 +1,15 @@
 import {test,expect} from '@playwright/test';
 import {settle,scenarioTimeout} from './case-helpers.mjs';
-const WAIT=30000;
-async function load(page,path='/'){await page.goto(path);await page.getByRole('combobox',{name:'Visual detail',exact:true}).selectOption('light');await page.waitForFunction(()=>window.__thesis?.inspect().ready&&window.__story,null,{timeout:WAIT});await page.evaluate(()=>document.fonts.ready);await settle(page);}
+const WAIT=45000;
+async function load(page,path='/'){await page.goto(path);await page.waitForFunction(()=>window.__thesis?.inspect().ready&&window.__story?.inspect().entry.phase==='entered',null,{timeout:WAIT});await page.evaluate(()=>document.fonts.ready);await settle(page);}
 async function phase(page,id,value,settleAfter=settle){await page.evaluate(({id,value})=>{const el=document.getElementById(id);let y=0;for(let n=el;n;n=n.offsetParent)y+=n.offsetTop;scrollTo({top:y+el.offsetHeight*value-innerHeight*.45,behavior:'instant'});},{id,value});await settleAfter(page);}
 // Locator auto-scroll may finish before the authored reading plane settles.
 // Click the visible, settled summary instead of a stale pre-response coordinate.
 async function openSourceFigure(page){const summary=page.getByText('Compare with the original thesis figure',{exact:true});await summary.scrollIntoViewIfNeeded();await settle(page);await summary.click();await expect(summary.locator('..')).toHaveAttribute('open','');await settle(page);}
 
 // Each fastForward fires a due RAF once. A 500ms controller step exercises the
-// real heavy-frame response without entering its intentional >1s stale policy
-// or rendering dozens of intermediate software-GPU frames with runFor.
+// real heavy-frame response without rendering dozens of intermediate
+// software-GPU frames with runFor. This is a functional clock fixture.
 async function settleClock(page){
  let candidate=null,last=null;
  for(let step=0;step<12;step++){
@@ -51,14 +51,13 @@ test('native reading stays responsive without controller frames while the scene 
  // Install before navigation so every application RAF uses the same clock.
  // Loading and the initial chapter placement still advance in real time.
  await page.clock.install({time:new Date('2026-01-01T00:00:00Z')});await load(page);
- // Use the supported Light renderer for frame-sensitive DOM sampling. Full
- // initialization and optics are covered by public smoke and optical fixtures.
+ // Full optics remain active while the controlled clock isolates DOM timing.
  const canvas=await page.locator('[data-cinematic-stage] canvas').elementHandle();await phase(page,'system',.35);
  const realtimeFrameDelta=await page.evaluate(()=>window.__story.inspect().frameDelta);
  try {
   // A future pause point avoids a protocol race with Date.now(). pauseAt fires
   // overdue callbacks once. runFor is confined to the 160ms shape sample; the
-  // remaining contracts use single-RAF steps, including the actual pause UI.
+  // remaining contracts use single-RAF steps and a live OS motion preference.
   // The built page, native scroll, DOM and bounded Canvas remain active when visible.
   await page.clock.pauseAt(new Date('2026-01-01T01:00:00Z'));
   // The browser must move readable content even when application RAFs cannot
@@ -84,9 +83,7 @@ test('native reading stays responsive without controller frames while the scene 
   const snapshot=()=>page.evaluate(()=>{const story=window.__story.inspect(),scene=window.__thesis.inspect();return {time:story.playback.activeSeconds,field:scene.compositor.field.time,pose:scene.pose.position,frames:scene.frames};});
   const autonomousBefore=await snapshot();for(let step=0;step<3;step++)await page.clock.fastForward(500);const autonomousAfter=await snapshot();
   expect(autonomousAfter.time).toBeGreaterThan(autonomousBefore.time);expect(autonomousAfter.field).toBeGreaterThan(autonomousBefore.field);expect(autonomousAfter.pose).not.toEqual(autonomousBefore.pose);expect(autonomousAfter.frames).toBeGreaterThan(autonomousBefore.frames);
-  // Trigger the real button handler without actionability waiting on a paused
-  // clock. Native pointer/focus activation remains covered by the next tests.
-  await page.getByRole('button',{name:'Pause motion',exact:true}).dispatchEvent('click');await settleClock(page);
+  await page.emulateMedia({reducedMotion:'reduce'});await settleClock(page);
   expect(await page.evaluate(()=>window.__story.inspect().scheduled)).toBe(false);
   const frozen=await snapshot();for(let step=0;step<8;step++)await page.clock.fastForward(500);const idle=await snapshot();
   expect(idle).toEqual(frozen);
@@ -95,7 +92,7 @@ test('native reading stays responsive without controller frames while the scene 
  }
 });
 
-test('information has one fluid surface; focus, hashes, Pause and Reduced keep content reachable',async({page,isMobile})=>{
+test('information has one fluid surface; focus, hashes and live Reduced keep content reachable',async({page,isMobile})=>{
  test.setTimeout(scenarioTimeout(180000));await load(page);await phase(page,'system',.45);await openSourceFigure(page);
  const source=page.locator('[data-inspect-figure="0"]'),media=source.locator('[data-feedback-plane]');await expect(media).toBeVisible();await source.scrollIntoViewIfNeeded();await settle(page);
  // The enclosing C3 information window owns material response; nested media
@@ -106,9 +103,9 @@ test('information has one fluid surface; focus, hashes, Pause and Reduced keep c
  await source.focus();await settle(page);const focus=await source.boundingBox();expect(focus.y+focus.height).toBeGreaterThan(90);expect(focus.y).toBeLessThan(await page.evaluate(()=>innerHeight));
  await source.press('Enter');await expect(page.locator('[data-source-comparison]')).toBeVisible();expect(await page.evaluate(()=>document.body.style.overflow)).not.toBe('hidden');await page.getByRole('button',{name:'Close source comparison'}).click();await expect(source).toBeFocused();
  for(const id of ['make','credits','form']){await page.locator(`[data-chapter-link="${id}"]`).click();await settle(page);expect(await page.evaluate(()=>window.__story.inspect().readingShiftY)).toBe(0);await expect(page.locator(`[data-chapter-link="${id}"]`)).toHaveAttribute('aria-current','location');}
- await page.getByRole('button',{name:'Pause motion'}).click();await settle(page);
+ await page.emulateMedia({reducedMotion:'reduce'});await settle(page);
  const staticTransforms=()=>page.evaluate(()=>[...document.querySelectorAll('[data-story-root],[data-feedback-plane],[data-heading-line],[data-editorial-copy]')].map(el=>getComputedStyle(el).transform));expect((await staticTransforms()).every(value=>value==='none')).toBe(true);
- await page.getByRole('button',{name:'Resume motion'}).click();await page.emulateMedia({reducedMotion:'reduce'});await settle(page);await phase(page,'system',.6);expect((await staticTransforms()).every(value=>value==='none')).toBe(true);
+ await phase(page,'system',.6);expect((await staticTransforms()).every(value=>value==='none')).toBe(true);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
 });
 

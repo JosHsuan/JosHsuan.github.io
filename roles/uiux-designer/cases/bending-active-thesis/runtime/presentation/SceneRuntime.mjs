@@ -92,7 +92,7 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
         // Director publishes after stage and information DOM writes. Refresh
         // both endpoints now, even if Fiber next paints on a later RAF.
         refreshAnnotations(state);
-        if(state.hidden||state.canvasPlacement?.visible===false||state.paused||state.systemReduced||state.modelEngaged||state.modelRecovering)runtime.pressure.suspend('inactive');
+        if(state.hidden||state.canvasPlacement?.visible===false||state.systemReduced||state.modelEngaged||state.modelRecovering)runtime.pressure.suspend('inactive');
         if(!state.hidden&&(state.canvasPlacement?.visible!==false||!data.current?.ready))invalidate();
       });
       return ()=>{unsubscribe();clearAnnotations();};
@@ -243,13 +243,13 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
     const d = data.current, state = input.get(); if (!d || d.failed || state.hidden || (d.ready&&state.canvasPlacement?.visible===false)) return;
     try {
       const debug = overrides.current, aspect=size.width/size.height;
-      // Explicit Pause freezes the shared chapter phase. Only the OS preference
-      // requests the reduced optical policy; pausing must not change the shot.
-      const reduced = state.systemReduced === true, detail = state.detail === 'light' ? 'light' : 'full';
+      // The OS preference requests reduced optics. Device resource profiles
+      // change allocation density and attachments, never the rendering mode.
+      const reduced = state.systemReduced === true;
       const fallbackIndex=Math.min(6,Math.floor(clamp(state.stageU??state.u??0,0,1)*7));
       let playback=debug.playback ?? state.playback ?? {chapterWeights:Array.from({length:7},(_,i)=>Number(i===fallbackIndex)),phases:Array(7).fill(.32),activeSeconds:0};
       if(Number.isFinite(debug.stageU)) {const index=Math.min(6,Math.floor(clamp(debug.stageU,0,1)*7));playback={...playback,chapterWeights:Array.from({length:7},(_,i)=>Number(i===index))};}
-      const chapterScene=debug.chapterScene ?? ((!debug.playback && !Number.isFinite(debug.stageU)) ? state.chapterScene : null) ?? sampleChapterScene(playback,{reducedMotion:state.systemReduced??reduced,quality:detail,aspect,pointer:state.pointer});
+      const chapterScene=debug.chapterScene ?? ((!debug.playback && !Number.isFinite(debug.stageU)) ? state.chapterScene : null) ?? sampleChapterScene(playback,{reducedMotion:state.systemReduced??reduced,aspect,pointer:state.pointer});
       const selected=resolveSourceSelection(playback,debug.sourceSelection ?? state.sourceSelection,chapterScene);
       const viewports=debug.modelViewports ?? state.modelViewports;
       const slot=viewports?.[selected.chapterId] ?? {viewport:state.inspectionViewport,weight:selected.chapterId==='form'?(state.inspectionWeight??0):0};
@@ -272,7 +272,7 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
       const optics=sampleOpticalScore(opticalInput,pose,{bounds});
       optics.focalLengthMm=Number.isFinite(debug.focalLengthMm)?clamp(debug.focalLengthMm,10,160):focalLengthForFov(pose.fov,aspect,optics.filmGaugeMm);
       const opticalOverrides = {...(debug.optical ?? {})};
-      const opticalWeight = detail === 'light' || reduced ? 0 : 1-studyWeight*.8;
+      const opticalWeight = reduced ? 0 : 1-studyWeight*.8;
       for (const key of ['apertureScale', 'maxBlurPx', 'asciiWeight', 'veil', 'mistStrength']) {
         optics[key] *= opticalWeight;
         if (Number.isFinite(opticalOverrides[key])) opticalOverrides[key] *= opticalWeight;
@@ -288,7 +288,7 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
       d.sourceRoot.visible=selected.id==='assembly' && present;
       for(const [id,value] of d.diagramNodes) value.nodes.forEach(node=>{node.visible=id===selected.id && present;});
       d.visibleSource=present?(entry?[entry.mesh]:d.layers.map(layer=>layer.node)):[];
-      const exhibitionState = d.exhibition.update({direction,camera,bounds:family.bounds,quality:detail,reducedMotion:reduced,lightSweep:0});
+      const exhibitionState = d.exhibition.update({direction,camera,bounds:family.bounds,reducedMotion:reduced,lightSweep:0});
       scene.background=state.independentAscii?null:direction.backgroundColor?d.studyBackground.fromArray(direction.backgroundColor):d.previousBackground;
       const keyScale = Number.isFinite(debug.keyIntensityScale) ? clamp(debug.keyIntensityScale, 0, 5) : 1;
       for (const id of ['key', 'fill', 'rim']) {
@@ -301,9 +301,9 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
       shadow.camera.left = shadow.camera.bottom = -extent; shadow.camera.right = shadow.camera.top = extent;
       shadow.camera.near = .05; shadow.camera.far = Math.max(20, stageLayout.radius * 10); shadow.camera.updateProjectionMatrix();
       shadow.bias = direction.stage.shadow.bias; shadow.normalBias = direction.stage.shadow.normalBias;
-      gl.shadowMap.enabled = detail === 'full'; d.lights.key.castShadow = detail === 'full' && direction.key.castShadow !== false;
-      const shadowKey=JSON.stringify([detail,selected.id,elements.separationWeight,direction.key.position,stageLayout.center,stageLayout.shadowHalfExtent,present]);
-      const shadowUpdated=detail==='full'&&shadowKey!==d.shadowKey;
+      gl.shadowMap.enabled = true; d.lights.key.castShadow = direction.key.castShadow !== false;
+      const shadowKey=JSON.stringify([selected.id,elements.separationWeight,direction.key.position,stageLayout.center,stageLayout.shadowHalfExtent,present]);
+      const shadowUpdated=shadowKey!==d.shadowKey;
       gl.shadowMap.autoUpdate=false;gl.shadowMap.needsUpdate=shadowUpdated;d.shadowKey=shadowKey;
       scene.environmentIntensity = direction.environmentIntensity; scene.fog.color.fromArray(direction.haze.color); scene.fog.density = direction.haze.density;
       d.ground.position.fromArray(stageLayout.groundPosition); d.ground.scale.set(...stageLayout.groundSize, 1); d.ground.material.color.fromArray(direction.groundColor); d.ground.material.opacity = direction.groundOpacity;
@@ -327,12 +327,11 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
       const presentationKey=`${selected.chapterId}:${selected.id}:${selected.pinned}`;
       const caption=entry?entry.record.description:elements.caption;
       if (caption !== d.caption) {d.caption = caption; d.captions.forEach(element => {element.textContent = caption;});}
-      if(d.pressureDetail!==detail){d.pressureDetail=detail;runtime.pressure.suspend('quality-change');}
-      runtime.pressure.observe(performance.now(),{eligible:d.ready&&!state.paused&&!reduced&&!state.modelEngaged&&!state.modelRecovering&&(state.energy??0)<.02,reason:'interaction-or-still'});
+      runtime.pressure.observe(performance.now(),{eligible:d.ready&&!reduced&&!state.modelEngaged&&!state.modelRecovering&&(state.energy??0)<.02,reason:'interaction-or-still'});
       d.renderBudget=runtime.budget.sync(size.width,size.height);
       const dpr=d.renderBudget.dpr;
       gl.info.reset();
-      d.compositor.render(scene, camera, optics, {width: size.width, height: size.height, dpr, requestedDpr:d.renderBudget.requestedDpr, samples: detail === 'full' && debug.samples !== 0 ? runtime.profile.maxSamples : 0,independentField:!!state.independentAscii});
+      d.compositor.render(scene, camera, optics, {width: size.width, height: size.height, dpr, requestedDpr:d.renderBudget.requestedDpr, samples: debug.samples !== 0 ? runtime.profile.maxSamples : 0,independentField:!!state.independentAscii});
       // Publish only after a successful scene paint, including autonomous
       // source changes. Reconcile readiness renders without per-frame React state.
       const nextAnnotations=new Map();
@@ -354,12 +353,12 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
       for(const [study,painted] of paintedAnnotations)if(!nextAnnotations.has(study))painted.representation.annotation=placeModelAnnotation(study,{anchor:null});
       paintedAnnotations=nextAnnotations;
       // Selection can name an absent source. Observe actual compiled programs,
-      // including Full/Light variants, and discard the following delivery gap.
+      // for each source material, and discard the following delivery gap.
       d.seenPrograms ??= new WeakSet();
       for(const program of gl.info.programs??[])if(!d.seenPrograms.has(program)){
         d.seenPrograms.add(program);runtime.pressure.suspend('shader-warmup');
       }
-      last.current = {mode:'autonomous-source-story',renderedControllerFrame:state.controllerFrame??0,studyWeight,representation,playback,chapterScene,pose: {...pose, fov: camera.fov, focalLengthMm: optics.focalLengthMm}, optics, lights: direction, elements, bounds, detail, stageLayout, exhibition:exhibitionState, shadowUpdated,keyIntensity: d.lights.key.intensity};
+      last.current = {mode:'autonomous-source-story',renderedControllerFrame:state.controllerFrame??0,studyWeight,representation,playback,chapterScene,pose: {...pose, fov: camera.fov, focalLengthMm: optics.focalLengthMm}, optics, lights: direction, elements, bounds, detail:'full', stageLayout, exhibition:exhibitionState, shadowUpdated,keyIntensity: d.lights.key.intensity};
       if(presentationKey!==d.presentationKey) {
         d.presentationKey=presentationKey;
         input.events.emit('representationResolved',{chapterId:selected.chapterId,index:selected.index,representationId:selected.id,label,description,count,pinned:selected.pinned});

@@ -71,20 +71,18 @@ test('area-light emitting faces aim at the source and share one source-radius un
   } finally {stage.dispose();}
 });
 
-test('Light and reduced motion remove practicals and moving sweeps without losing the broad-light rig', () => {
+test('reduced motion removes practicals and moving sweeps without losing the broad-light rig', () => {
   const stage = createExhibitionStage({bounds}), camera = cameraAt();
   try {
     const direction = sampleSceneDirection(.5);
     const active = stage.update({camera, direction, lightSweep: 50});
     assert.equal(active.lightSweep, 1);
     const fullKey = stage.group.getObjectByName('exhibition-area-key').position.clone();
-    for (const flags of [{quality: 'light'}, {reducedMotion: true}]) {
-      const stats = stage.update({camera, direction, lightSweep: 50, ...flags});
-      assert.equal(stats.lightSweep, 0); assert.equal(stats.meshDraws, 1);
-      const key = stage.group.getObjectByName('exhibition-area-key');
-      assert.ok(key.intensity > 0); assert.ok(key.position.distanceTo(fullKey) > 0);
-      assert.equal(stage.group.getObjectByName('editorial-practical-right').visible, false);
-    }
+    const stats = stage.update({camera, direction, lightSweep: 50, reducedMotion:true});
+    assert.equal(stats.lightSweep, 0); assert.equal(stats.meshDraws, 1);
+    const key = stage.group.getObjectByName('exhibition-area-key');
+    assert.ok(key.intensity > 0); assert.ok(key.position.distanceTo(fullKey) > 0);
+    assert.equal(stage.group.getObjectByName('editorial-practical-right').visible, false);
     const baseline = stage.update({camera, direction});
     assert.equal(baseline.meshDraws, 3); assert.equal(baseline.lightSweep, 0);
   } finally {stage.dispose();}

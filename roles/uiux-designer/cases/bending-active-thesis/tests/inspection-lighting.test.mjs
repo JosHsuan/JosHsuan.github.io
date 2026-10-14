@@ -86,12 +86,12 @@ test('inspection world-space lamps and emitting directions remain fixed when the
   } finally {stage.dispose();}
 });
 
-test('explicit light choices work in Full, Light and Reduced and returning to the story restores its camera-relative set', () => {
+test('explicit light choices work in Full and Reduced and returning to the story restores its camera-relative set', () => {
   const stage = createExhibitionStage({bounds}), camera = cameraAt(.8);
   try {
     const direction = sampleInspectionLighting({preset: 'raking', azimuth: 35});
     let reference = null;
-    for (const flags of [{quality: 'full'}, {quality: 'light'}, {quality: 'full', reducedMotion: true}]) {
+    for (const flags of [{}, {reducedMotion: true}]) {
       stage.update({camera, direction, ...flags});
       const light = stage.group.getObjectByName('exhibition-area-key'), position = light.getWorldPosition(new T.Vector3());
       if (reference) assert.ok(reference.distanceTo(position) < 1e-8); else reference = position;

@@ -26,7 +26,7 @@ export async function settle(page){
   raf=requestAnimationFrame(sample);
  }),WAIT);
 }
-export async function loadScene(page){await page.goto('/');await page.getByRole('combobox',{name:'Visual detail',exact:true}).selectOption('light');await page.waitForFunction(()=>window.__thesis?.inspect().ready&&window.__story,null,{timeout:WAIT});await page.evaluate(()=>document.fonts.ready);await settle(page);}
+export async function loadScene(page){await page.goto('/');await page.waitForFunction(()=>window.__thesis?.inspect().ready&&window.__story?.inspect().entry.phase==='entered',null,{timeout:WAIT});await page.evaluate(()=>document.fonts.ready);await settle(page);}
 export async function centerStudy(page,chapter='form',{ready=true}={}){
  const el=surface(page,chapter);
  await el.evaluate(el=>{
@@ -59,7 +59,11 @@ export async function hitPoint(page,chapter='form'){
   if(best)return{x:best.x,y:best.y};throw Error('No unobscured actual source hit in '+id+' at '+JSON.stringify(aperture));
  },chapter);
 }
-export async function pause(page){const b=page.getByRole('button',{name:'Pause motion',exact:true});if(await b.count())await b.click();await settle(page);}
+export async function holdModel(page,chapter='form'){
+ const el=surface(page,chapter);await el.evaluate(el=>el.focus({preventScroll:true}));
+ await el.press('ArrowLeft');await el.press('ArrowRight');
+ await page.waitForFunction(()=>window.__story.inspect().modelEngaged,null,{timeout:WAIT});await settle(page);
+}
 export async function expectIdle(page){
  await settle(page);
  await page.waitForFunction(()=>{

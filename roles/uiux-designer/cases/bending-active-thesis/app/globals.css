@@ -4,6 +4,7 @@
 :root{color-scheme:dark;--bg:#090d0d;--surface:#121a18;--paper:#efeee7;--muted:#c1c9c4;--line:#495650;--accent:#ff9469;--ink:#131b17;--sans:'IBM Plex Sans',Arial,sans-serif;--mono:'IBM Plex Mono',monospace;--serif:'IBM Plex Serif',Georgia,serif;--radius:24px;font-family:var(--sans);color:var(--paper);background:var(--bg)}
 *{box-sizing:border-box}
 html{scroll-behavior:auto}
+html[data-entry-state="preparing"],html[data-entry-state="revealing"]{overflow:hidden}
 body{margin:0;min-width:320px;background:var(--bg)}
 button,input,select,textarea{font:inherit}
 button,a{-webkit-tap-highlight-color:transparent}

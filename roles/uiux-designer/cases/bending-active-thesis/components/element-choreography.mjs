@@ -29,7 +29,7 @@ function factorAt(t, profile) {
  * CSS pixels/degrees, unitless scale. Apply to inner visual planes, never the
  * stable native link/button/summary hit region. Content stays opaque and present.
  */
-export function sampleElementChoreography({kind = 'prose', elapsed = 0, index = 0, reducedMotion = false, light = false} = {}) {
+export function sampleElementChoreography({kind = 'prose', elapsed = 0, index = 0, reducedMotion = false} = {}) {
   const name = Object.hasOwn(ALIASES, kind) ? ALIASES[kind] : kind;
   const profile = Object.hasOwn(PROFILES, name) ? PROFILES[name] : null;
   if (!profile) throw new RangeError(`Unknown choreography kind: ${kind}`);
@@ -37,7 +37,7 @@ export function sampleElementChoreography({kind = 'prose', elapsed = 0, index = 
   const delay = Math.min(.48, index * profile.stagger);
   const progress = reducedMotion ? 1 : clamp((elapsed - delay) / profile.duration);
   const settled = progress === 1;
-  const factor = (settled ? 0 : factorAt(progress, profile)) * (light ? .55 : 1);
+  const factor = settled ? 0 : factorAt(progress, profile);
   const side = name === 'glyph' || name === 'diagram' ? (index % 2 ? -1 : 1) : 1;
   const phase = settled ? 'settled' : elapsed < delay ? 'waiting' : progress < profile.turn ? 'anticipation' : progress < profile.pop ? 'arrival' : 'settle';
   // Avoid negative zero in the stable representation and diagnostics.

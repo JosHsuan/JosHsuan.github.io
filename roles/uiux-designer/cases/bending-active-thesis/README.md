@@ -1,5 +1,7 @@
 # Bending-Active Thesis — cinematic case
 
+**Full-mode interaction and entry — 14 October 2026:** The owner authorized implementing and publishing the [current integration contract](FULL_MODE_INTERACTION_ENTRY.md) under the existing architecture and development rules. Full/Light and user Pause controls/settings are removed; mouse and touch orbit follow the hand; the original library curves reveal sequentially; an event-driven loading surface waits for actual scene paint or an explicit readable static outcome. Use `pnpm check`, the portable case tests, `pnpm build:pages` and `pnpm test:pages` for current validation. Earlier round-specific scripts and quality-mode references below describe historical artifacts.
+
 **Fluid information windows and timed passages — 13 October 2026:** The owner selected Pressure aperture and Fluid page edge for both catalog surfaces, then chose **Fluid page edge** throughout Bending-Active information windows and authorized commit, push and Pages publication. [The integration record](WINDOW_MOTION_INTEGRATION.md) documents the common material implementation, single information-window writer, fixed 1.10 s / 0.95 s Canvas passage clock, interruption and presentation acknowledgment. Model geometry, cameras and rendering resources retain their existing owners. Publication uses the successful same-commit CI artifact; earlier records below describe their own artifacts.
 
 **Release and CI follow-up — 13 October 2026:** The owner authorized publication of the latest native-reading and permanent side-information/linked-annotation implementation. [Decision 0009](../../../../docs/decisions/0009-impact-selected-ci.md) and [CI/CD operations](../../../../docs/CI_CD.md) define conservative impact-selected validation, one shared audited public build, required job outcomes and exact output-digest verification. This migration and its shared runtime changes intentionally require full validation before publication. Earlier local verification notes below remain artifact-specific history.
@@ -108,7 +110,7 @@ Narrative, source figures, models, framing support data and posters are ignored 
 
 `integration-manifest.json` records the current code/asset hashes and ownership. The camera is now a documented adaptation, not a byte-identical copy of the earlier camera. Its former 446-point private shell hull is revision-gated and is **not used for the new shell-plus-base revision**, whose framing uses combined bounds. No runtime calls another role desk or MCP server. New role tools remain opt-in and isolated. The procedural score is not a fabricated Theatre export.
 
-## Verification
+## Historical Round 02 verification
 
 ```powershell
 node --test roles/uiux-designer/cases/bending-active-thesis/tests/*.test.mjs

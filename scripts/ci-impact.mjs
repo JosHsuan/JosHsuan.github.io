@@ -5,9 +5,9 @@ export const ALL_BROWSER_TESTS = readdirSync(new URL('../tests/pages/', import.m
   .filter(name => name.endsWith('.spec.mjs')).sort().map(name => `tests/pages/${name}`);
 const baseline = ['public-release'];
 const features = {
-  model: ['model-inspection', 'canvas-motion', 'source-artwork', 'runtime-lifecycle', 'mobile-stability'],
+  model: ['model-inspection', 'model-drag', 'canvas-motion', 'source-artwork', 'runtime-lifecycle', 'mobile-stability'],
   evidence: ['source-artwork', 'motion-feedback'],
-  diagram: ['source-artwork', 'model-inspection', 'canvas-motion'],
+  diagram: ['source-artwork', 'library-reveal', 'model-inspection', 'canvas-motion'],
   reading: ['motion-feedback', 'canvas-motion', 'source-artwork', 'model-inspection'],
 };
 // Explicit cross-feature coverage includes CSS and delegated event contracts.

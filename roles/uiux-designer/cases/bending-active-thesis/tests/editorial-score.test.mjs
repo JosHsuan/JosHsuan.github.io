@@ -74,10 +74,10 @@ test('forward and reverse scrubbing restore the same geometry with no accumulate
   for (let repeat = 0; repeat < 20; repeat += 1) assert.deepEqual(sampleEditorialScore({visualU: 1, index: 3, elementIndex: 1, elementCount: 4}), last);
 });
 
-test('full and Light motion stay bounded for all chapters, group sizes, jumps and scroll directions', () => {
+test('Full motion stays bounded for all chapters, group sizes, jumps and scroll directions', () => {
   for (let index = 0; index < 7; index += 1) for (const elementCount of [1, 2, 7]) for (let elementIndex = 0; elementIndex < elementCount; elementIndex += 1) {
-    for (let step = -1; step <= 71; step += 1) for (const light of [false, true]) {
-      const score = sampleEditorialScore({visualU: step / 70, nativeU: 1 - step / 70, index, elementIndex, elementCount, energy: 1, direction: -1, light});
+    for (let step = -1; step <= 71; step += 1) {
+      const score = sampleEditorialScore({visualU: step / 70, nativeU: 1 - step / 70, index, elementIndex, elementCount, energy: 1, direction: -1});
       assert(Math.abs(score.headingShift) + Math.abs(score.lineOffset) <= 46);
       assert(Math.abs(score.lineRotate) <= 1.75);
       assert(Math.abs(score.mediaShift) <= 42 && score.mediaScale >= 0.965 && score.mediaScale <= 1);
@@ -91,17 +91,13 @@ test('full and Light motion stay bounded for all chapters, group sizes, jumps an
   }
 });
 
-test('reduced motion restores inner planes and Light reduces depth without introducing another reading coordinate', () => {
+test('reduced motion restores inner planes without introducing another reading coordinate', () => {
   for (let index = 0; index < 7; index += 1) for (const phase of [-0.2, 0, 0.5, 0.9, 1.2]) {
     const reduced = at(index, phase, {elementIndex: 2, elementCount: 3, reducedMotion: true, energy: 1, direction: 1});
     for (const [key, value] of Object.entries(rest)) near(reduced[key], value);
     assert.equal(reduced.entry, 1); assert.equal(reduced.exit, 0); assert.equal(reduced.dwell, 1);
     near(reduced.ruleProgress, at(index, phase).ruleProgress);
-    const full = at(index, phase), light = at(index, phase, {light: true});
-    near(light.mediaShift, full.mediaShift * 0.45);
-    near(light.headingShift, full.headingShift * 0.45);
-    near(light.ruleProgress, full.ruleProgress);
-    assert.equal(light.materialLift, 0); assert.equal(light.lightSweep, 0);
+    assert.equal(reduced.materialLift,0);assert.equal(reduced.lightSweep,0);
   }
 });
 

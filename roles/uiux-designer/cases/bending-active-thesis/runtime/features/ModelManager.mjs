@@ -50,7 +50,6 @@ export function createModelManager({input,inspection,hitTest}){
  function begin(event,study,surface=event.currentTarget,ready=false){
   if(!ready||event.button!==0||event.isPrimary===false||press||!hit(event,study.id,ready))return;
   press={id:event.pointerId,surface,study,x:event.clientX,y:event.clientY,at:event.timeStamp,moved:false,touch:event.pointerType==='touch',azimuth:inspection.value.azimuth,elevation:inspection.value.elevation};
-  if(event.pointerType==='touch')return;
   surface.setPointerCapture(event.pointerId);surface.dataset.modelDragging='true';
   publish({modelEngaged:true,modelRecovering:false,modelInteractionChapter:study.id});
  }
@@ -59,8 +58,10 @@ export function createModelManager({input,inspection,hitTest}){
   if(!ready){cancelPress();return;}
   const dx=event.clientX-current.x,dy=event.clientY-current.y;
   current.moved||=Math.hypot(dx,dy)>(current.touch?10:4);
-  if(current.touch||!current.moved)return;
-  setInspectionTarget(inspection,{azimuth:current.azimuth+dx*.23,elevation:current.elevation-dy*.18});
+  if(!current.moved)return;
+  // Inspection orbits the camera around unchanged source geometry. Move the
+  // camera opposite the dragged surface so the visible model follows the hand.
+  setInspectionTarget(inspection,{azimuth:current.azimuth-dx*.23,elevation:current.elevation+dy*.18});
   publish({modelEngaged:true,modelRecovering:false,modelInteractionChapter:current.study.id});
  }
  function end(event,cancelled=false,ready=false){
@@ -72,7 +73,7 @@ export function createModelManager({input,inspection,hitTest}){
  }
  function key(event,study,ready){
   if(!ready)return;
-  const patch={ArrowLeft:{azimuth:inspection.target.azimuth-7},ArrowRight:{azimuth:inspection.target.azimuth+7},ArrowUp:{elevation:inspection.target.elevation+5},ArrowDown:{elevation:inspection.target.elevation-5}}[event.key];
+  const patch={ArrowLeft:{azimuth:inspection.target.azimuth+7},ArrowRight:{azimuth:inspection.target.azimuth-7},ArrowUp:{elevation:inspection.target.elevation-5},ArrowDown:{elevation:inspection.target.elevation+5}}[event.key];
   if(patch){
    event.preventDefault();pinned=true;setInspectionTarget(inspection,patch);
    publish({modelEngaged:true,modelRecovering:false,modelInteractionChapter:study.id});
@@ -102,7 +103,7 @@ export function createModelManager({input,inspection,hitTest}){
   input.events.listen(scope,documentTarget,'pointermove',event=>move(event,ready));
   input.events.listen(scope,documentTarget,'pointerup',event=>end(event,false,ready));
   input.events.listen(scope,documentTarget,'pointercancel',event=>end(event,true,ready));
-  return()=>scope.dispose();
+  return()=>{scope.dispose();cancelPress();clearHover();};
  }
  return{
   bindSurface,clearHover,cancelPress,begin,move,end,key,choose,connectLifecycle,connectPointer,

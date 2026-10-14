@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {readFileSync} from 'node:fs';
 import {PerspectiveCamera,Vector3} from 'three';
-import {WAIT,scenarioTimeout,loadScene,pause,settle,centerStudy,surface,hitPoint} from './case-helpers.mjs';
+import {scenarioTimeout,loadScene,holdModel,settle,centerStudy,surface,hitPoint} from './case-helpers.mjs';
 const catalog=JSON.parse(readFileSync(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/public/assets/thesis/source-diagrams.json',import.meta.url),'utf8'));
 const phone={baseURL:'http://127.0.0.1:4186',viewport:{width:390,height:844},deviceScaleFactor:3,isMobile:true,hasTouch:true};
 
@@ -20,7 +20,7 @@ test('touch browser inset changes do not reallocate the Full drawing surface',as
         WebGL2RenderingContext.prototype[name]=function(...args){counts[name==='texStorage2D'?'textures':'renderbuffers']++;return original.apply(this,args);};
       }
     });
-    await page.goto('/');await page.waitForFunction(()=>window.__thesis?.inspect().ready,null,{timeout:WAIT});await pause(page);
+    await loadScene(page);await centerStudy(page,'system');await holdModel(page,'system');
     expect(await page.evaluate(()=>matchMedia('(hover:none) and (pointer:coarse)').matches)).toBe(true);
     const before=await page.evaluate(()=>({counts:{...window.__mobileAllocations},budget:window.__thesis.inspect().renderBudget,samples:window.__thesis.inspect().compositor.requestedSamples}));
     expect(before.samples).toBe(0);
@@ -62,19 +62,19 @@ test('a tall touch Canvas preserves source fitting and real mesh hits in the vis
   test.setTimeout(scenarioTimeout(90000));
   const context=await browser.newContext(phone),page=await context.newPage();
   try{
-    await loadScene(page);await pause(page);
+    await loadScene(page);
     // An unusually tall presentation exercises a logical aspect different from
     // the visible viewport; all source/camera math remains production code.
     await page.locator('[data-cinematic-stage]').evaluate(el=>{el.style.height='1000px';});
     await expect.poll(()=>page.evaluate(()=>window.__thesis.inspect().renderBudget.viewportHeight)).toBe(1000);
-    await centerStudy(page,'system');await surface(page,'system').press('Enter');await settle(page);
+    await centerStudy(page,'system');await surface(page,'system').press('Enter');await settle(page);await holdModel(page,'system');
     const state=await page.evaluate(()=>{
       const canvas=document.querySelector('[data-cinematic-stage] canvas').getBoundingClientRect(),slot=document.querySelector('[data-model-viewport][data-study-chapter="system"]').getBoundingClientRect();
       return {scene:window.__thesis.inspect(),canvas:{left:canvas.left,top:canvas.top,width:canvas.width,height:canvas.height},slot:{left:slot.left,top:slot.top,right:slot.right,bottom:slot.bottom},visible:{width:innerWidth,height:innerHeight}};
     });
     const {pose,representation,renderBudget}=state.scene,{canvas,slot,visible}=state;
     const original=catalog.representations.find(item=>item.id===representation.id);expect(original).toBeTruthy();
-    expect(renderBudget).toMatchObject({viewportWidth:390,viewportHeight:1000,detail:'light',pixelBudget:360000});
+    expect(renderBudget).toMatchObject({viewportWidth:390,viewportHeight:1000,detail:'full',pixelBudget:520000});
     expect(canvas.width/canvas.height).toBeCloseTo(renderBudget.viewportWidth/renderBudget.viewportHeight,5);
     expect(pose.aspect).toBeCloseTo(renderBudget.viewportWidth/renderBudget.viewportHeight,5);
     const camera=new PerspectiveCamera(pose.fov,canvas.width/canvas.height,pose.near,pose.far);

@@ -129,7 +129,7 @@ export function createExhibitionStage({bounds} = {}) {
   let disposed = false;
   acquireLtc();
 
-  function update({direction = sampleSceneDirection(1, {reducedMotion: true}), camera, quality = 'full', reducedMotion = direction.reducedMotion, lightSweep = 0, bounds: familyBounds} = {}) {
+  function update({direction = sampleSceneDirection(1, {reducedMotion: true}), camera, reducedMotion = direction.reducedMotion, lightSweep = 0, bounds: familyBounds} = {}) {
     if (disposed) throw Error('Exhibition stage has been disposed');
     if (!camera?.position || ![camera.position.x, camera.position.y, camera.position.z].every(Number.isFinite)) throw new RangeError('Expected a finite final camera position');
     const spec = direction.exhibition;
@@ -149,8 +149,7 @@ export function createExhibitionStage({bounds} = {}) {
     if (requestedOpacity !== undefined && (typeof requestedOpacity !== 'number' || !Number.isFinite(requestedOpacity))) throw new RangeError('Expected finite stage surface opacity');
     const surfaceOpacity = requestedOpacity === undefined ? Number(direction.stage.surfaceVisible !== false) : clamp(requestedOpacity, 0, 1);
     const surfaceVisible = surfaceOpacity > .0001;
-    const full = quality !== 'light' && !reducedMotion;
-    const sweep = full && !sourceFixed && Number.isFinite(lightSweep) ? clamp(lightSweep, -1, 1) : 0;
+    const sweep = !reducedMotion && !sourceFixed && Number.isFinite(lightSweep) ? clamp(lightSweep, -1, 1) : 0;
     const x = camera.position.x - center.x, z = camera.position.z - center.z;
     // A view-conditioned editorial set, explicitly not a fixed architectural
     // location. No pitch/roll following: the floor remains the source Y datum.
@@ -174,7 +173,7 @@ export function createExhibitionStage({bounds} = {}) {
     const portraitScale = Number.isFinite(camera.aspect) && camera.aspect < .8 ? .65 : 1;
     apertures.forEach((aperture, index) => {
       const side = index === 0 ? -1 : 1;
-      aperture.visible = full && surfaceVisible && spec.aperture.radiance > .0001;
+      aperture.visible = !reducedMotion && surfaceVisible && spec.aperture.radiance > .0001;
       aperture.material.opacity = .18 * surfaceOpacity;
       aperture.position.set(side * spec.aperture.spread * radius, radius * (index ? .92 : .78), -1.88 * radius);
       aperture.scale.set(radius * (index ? .13 : .09), radius * (index ? 1.22 : .94), 1);

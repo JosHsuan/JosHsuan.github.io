@@ -44,6 +44,16 @@ test('superseded, aborted and invalid diagram responses cannot replace the live 
  assert.equal(f.accepted.length,1);
 });
 
+test('the event-revealed library loads source data without legacy selection observers or subscriptions',async()=>{
+ const input=createStoryInput(),root={},layouts=[];
+ const manager=createDiagramManager({kind:'library',input,getRoot:()=>root,onData(){},requestLayout:()=>layouts.push('loaded')});
+ assert(await manager.load({signal:new AbortController().signal,fetcher:async()=>({ok:true,json:async()=>({...source,kind:'library'})})}));
+ const before=input.events.inspect();
+ const disconnect=manager.connect({target:new EventTarget(),observerFactory:()=>{throw Error('Library must not observe autonomous selection');}});
+ assert.deepEqual(layouts,['loaded']);assert.deepEqual(input.events.inspect(),before);
+ disconnect();assert.deepEqual(input.events.inspect(),before);
+});
+
 test('evidence selection keeps modified native links, synchronous disclosure and focus return',()=>{
  const input=createStoryInput(),changes=[],documentTarget=new EventTarget();let currentLink;
  const link=index=>({dataset:{inspectFigure:String(index)},attributes:new Map(),focused:false,

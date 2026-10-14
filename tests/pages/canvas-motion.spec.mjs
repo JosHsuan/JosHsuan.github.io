@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-import {WAIT,scenarioTimeout,pause,settle,centerStudy,frames,loadScene,expectIdle,surface} from './case-helpers.mjs';
+import {WAIT,scenarioTimeout,settle,centerStudy,frames,loadScene,expectIdle,surface} from './case-helpers.mjs';
 
 const stageCanvas='[data-cinematic-stage] canvas';
 const sample=page=>page.evaluate(()=>{
@@ -10,7 +10,7 @@ const scrollTo=async(page,y)=>{await page.evaluate(top=>window.scrollTo({top,beh
 
 test('one viewport scene holds its cinematic scale while information scrolls independently',async({page})=>{
  test.setTimeout(scenarioTimeout(120000));
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await loadScene(page);await pause(page);await centerStudy(page,'system');
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await loadScene(page);await centerStudy(page,'system');
  const canvas=await page.locator(stageCanvas).elementHandle(),first=await sample(page),observed=[];
  const {holdStart,holdEnd}=first.placement;
  for(const fraction of [.1,.5,.9]){
@@ -18,8 +18,10 @@ test('one viewport scene holds its cinematic scale while information scrolls ind
   expect(current.placement).toMatchObject({chapter:'system',x:0,y:0,scale:1,opacity:1,visible:true,settled:true,mode:'hold'});
   expect(current.rect).toEqual({x:0,y:0,width:current.surface.width,height:current.surface.height});
   expect(current.rect.width).toBe(current.screen.width);expect(current.rect.height).toBe(current.screen.height);
-  expect(current.pose.compositionSpace).toBe('viewport-stage');expect(current.pose.position).toEqual(first.pose.position);
-  expect(current.pose.viewport).toEqual(first.pose.viewport);expect(current.native).toEqual(first.native);expect(current.time).toBe(first.time);
+  expect(current.pose.compositionSpace).toBe('viewport-stage');
+  // Full playback may move its authored camera and source beat. Native reading
+  // must preserve the viewport composition and drawing-surface allocation.
+  expect(current.pose.viewport).toEqual(first.pose.viewport);expect(current.native).toEqual(first.native);expect(current.time).toBeGreaterThanOrEqual(first.time);
  }
  expect(observed[0].informationTop-observed[2].informationTop).toBeGreaterThan(100);
  // Between the .42vh reading probe and .62vh scene probe, FORM can remain the
@@ -30,7 +32,9 @@ test('one viewport scene holds its cinematic scale while information scrolls ind
  await expect(page.locator('[data-chapter-link="form"]')).toHaveAttribute('aria-current','location');
  expect(await page.evaluate(el=>document.querySelector('[data-cinematic-stage] canvas')===el,canvas)).toBe(true);
  await expect(page.locator(stageCanvas)).toHaveCount(1);await expect(page.locator('canvas[data-ascii-field]')).toHaveCount(1);await expect(page.locator('canvas')).toHaveCount(2);
- await expectIdle(page);expect(errors).toEqual([]);
+ await page.emulateMedia({reducedMotion:'reduce'});await expectIdle(page);
+ const reduced=await sample(page);await frames(page,8);const still=await sample(page);
+ expect(still.time).toBe(reduced.time);expect(still.pose.position).toEqual(reduced.pose.position);expect(errors).toEqual([]);
 });
 
 test('keyboard inspection across the information and scene gap presents its requested chapter before freezing',async({page})=>{
@@ -58,7 +62,7 @@ test('keyboard inspection across the information and scene gap presents its requ
  expect(pending.length,'The real chapter retarget must traverse its renderer-acknowledgment window.').toBeGreaterThan(0);
  for(const value of pending)expect(value).toEqual({chapter:'form',presented:false,opacity:0,hit:false});
  const held=await page.evaluate(()=>{const story=window.__story.inspect();return {information:story.informationChapter,chapter:story.canvasPlacement.chapter,weights:story.playback.chapterWeights,engaged:story.modelEngaged,awaiting:story.canvasAwaitingPaint,source:window.__thesis.inspect().representation.chapterId,azimuth:story.inspection.value.azimuth,opacity:Number(document.querySelector('[data-cinematic-stage]').style.opacity)};});
- expect(held).toEqual({information:'form',chapter:'form',weights:[0,1,0,0,0,0,0],engaged:true,awaiting:false,source:'form',azimuth:37,opacity:1});
+ expect(held).toEqual({information:'form',chapter:'form',weights:[0,1,0,0,0,0,0],engaged:true,awaiting:false,source:'form',azimuth:23,opacity:1});
  await expectIdle(page);
  await page.keyboard.press('Escape');await settle(page);
  expect(await page.evaluate(()=>({chapter:window.__story.inspect().canvasPlacement.chapter,engaged:window.__story.inspect().modelEngaged,awaiting:window.__story.inspect().canvasAwaitingPaint,source:window.__thesis.inspect().representation.chapterId}))).toEqual({chapter:'system',engaged:false,awaiting:false,source:'system'});
@@ -77,11 +81,11 @@ test('absent evidence scenes sleep WebGL while the independent page ASCII keeps 
  }
  await centerStudy(page,'system');const returned=await sample(page);expect(returned.suspended).toBe(false);expect(returned.placement.visible).toBe(true);
  await expect.poll(()=>page.evaluate(()=>window.__thesis.inspect().frames),{timeout:WAIT}).toBeGreaterThan(returned.frames);
- await pause(page);await expectIdle(page);
+ await page.emulateMedia({reducedMotion:'reduce'});await expectIdle(page);
  await expect(page.locator(stageCanvas)).toHaveCount(1);await expect(page.locator('canvas[data-ascii-field]')).toHaveCount(1);
 });
 
-test('a real visible source hit still compares geometry through transparent side-information overlays',async({page})=>{
+test('with OS Reduced, a real visible source hit still compares geometry through transparent side-information overlays',async({page})=>{
  test.setTimeout(scenarioTimeout(150000));await page.setViewportSize({width:390,height:844});
  await page.addInitScript(()=>{
   const writes=new WeakMap();window.__stageStorageWrites=canvas=>writes.get(canvas)??0;
@@ -90,7 +94,7 @@ test('a real visible source hit still compares geometry through transparent side
    Object.defineProperty(HTMLCanvasElement.prototype,axis,{...descriptor,set(value){writes.set(this,(writes.get(this)??0)+1);descriptor.set.call(this,value);}});
   }
  });
- await loadScene(page);await pause(page);await centerStudy(page,'system');
+ await loadScene(page);await page.emulateMedia({reducedMotion:'reduce'});await settle(page);await centerStudy(page,'system');
  expect(await page.evaluate(()=>typeof window.__thesis.inspect().rendererPendingFrames)).toBe('number');
  const canvas=await page.locator(stageCanvas).elementHandle();
  const range=await page.evaluate(()=>({start:scrollY,end:window.__story.inspect().canvasPlacement.holdEnd-2}));

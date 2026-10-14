@@ -18,27 +18,25 @@ export default function CinematicExperience() {
   const input = useExperienceInput();
   const inspection = useMemo(() => createInspectionState(), []);
   const [enabled, setEnabled] = useState(false), [ready, setReady] = useState(false), [failed, setFailed] = useState(false);
-  const [still, setStill] = useState(false), [systemReduced, setSystemReduced] = useState(false), [hydrated, setHydrated] = useState(false);
-  const [detail, setDetail] = useState('full');
+  const [systemReduced, setSystemReduced] = useState(false), [hydrated, setHydrated] = useState(false);
   const activateStudy = useCallback(() => setEnabled(true), []);
-  const lifecycle=useMemo(()=>input.features.create('lifecycle',{onSystemReduced:setSystemReduced,onHydrated:setHydrated,onAutomaticEnable:()=>setEnabled(true)}),[input]);
+  const lifecycle=useMemo(()=>input.features.create('lifecycle',{onSystemReduced:setSystemReduced,onHydrated:setHydrated,onAutomaticEnable:()=>setEnabled(true),onPolicy:value=>input.entry.scenePolicy(value)}),[input]);
   const stage = useRef(null), fieldCanvas=useRef(null), progress = useRef(null), status = useRef(null);
   const onReady = useCallback(() => setReady(true), []), onFailure = useCallback(() => {lifecycle.fail();setFailed(true); setReady(false); document.querySelectorAll('[data-layer-caption]').forEach(element => {element.textContent='Source geometry · static view';});}, [lifecycle]);
   useEffect(()=>input.features.connect('lifecycle.preferences',()=>lifecycle.initialize({window,document,navigator,readStorage:()=>sessionStorage})),[input,lifecycle]);
   useEffect(()=>input.features.connect('lifecycle.lease',()=>lifecycle.connectLease(window,{enabled,failed})),[input,lifecycle,enabled,failed]);
+  useEffect(()=>input.entry.bindFailure(onFailure),[input,onFailure]);
   useEffect(() => {
-    const reduce = systemReduced || still || !enabled || failed;
-    input.commands.execute('preferences.apply',{systemReduced,paused:still,sceneEnabled:enabled,sceneFailed:failed,sceneReady:ready});
+    const reduce = systemReduced || !enabled || failed;
+    input.commands.execute('preferences.apply',{systemReduced,sceneEnabled:enabled,sceneFailed:failed,sceneReady:ready});
     document.documentElement.toggleAttribute('data-cinematic-static', reduce);
-    document.documentElement.dataset.motionPaused=String(still);
-    return () => {document.documentElement.removeAttribute('data-cinematic-static');delete document.documentElement.dataset.motionPaused;};
-  }, [input, systemReduced, still, enabled, failed, ready]);
-  useEffect(() => {input.commands.execute('quality.set',{detail});}, [input, detail]);
+    return () => {document.documentElement.removeAttribute('data-cinematic-static');};
+  }, [input, systemReduced, enabled, failed, ready]);
   useEffect(() => {document.documentElement.toggleAttribute('data-canvas-available',ready&&!failed);return()=>document.documentElement.removeAttribute('data-canvas-available');},[ready,failed]);
   useEffect(()=>input.features.connect('director',()=>input.features.create('director',{inspection,lifecycle,stage,fieldCanvas,progress,status}).connect()),[input,inspection,lifecycle]);
 
   // Discrete preference changes also wake the DOM decoration controller once.
-  useEffect(() => {input.invalidateLayout('preferences');}, [input,still,systemReduced,detail,enabled,failed,ready]);
+  useEffect(() => {input.invalidateLayout('preferences');}, [input,systemReduced,enabled,failed,ready]);
   return <>
     <div className={styles.backdrop} aria-hidden="true" data-cinematic-background>
       {!ready&&<picture><source media="(max-width:780px)" srcSet="/assets/cinematic/model-poster-mobile.webp"/><img className={styles.poster} src="/assets/cinematic/model-poster.webp" alt=""/></picture>}
@@ -50,8 +48,8 @@ export default function CinematicExperience() {
     <canvas className={styles.asciiField} ref={fieldCanvas} data-ascii-field aria-hidden="true"/>
     {hydrated && <div className={styles.readingTools} data-protect data-reading-tools>
       <span ref={status} aria-hidden="true" data-choreography="nav">01 / 07</span>
-      <label className={styles.detailLabel}><span data-choreography="caption">Visual detail</span><select aria-label="Visual detail" value={detail} onChange={event => setDetail(event.target.value)}><option value="full">Full</option><option value="light">Light</option></select></label>
-      <button type="button" aria-pressed={still || systemReduced || !enabled || failed} disabled={systemReduced || failed} onClick={() => {if (!enabled) {setEnabled(true); setStill(false);} else setStill(value => !value);}}><span data-choreography="nav">{failed ? 'Still background' : systemReduced ? 'Reduced motion' : !enabled ? 'Enable 3D' : still ? 'Resume motion' : 'Pause motion'}</span></button>
+      {!enabled&&!failed&&<button type="button" onClick={activateStudy}><span data-choreography="nav">Enable 3D</span></button>}
+      {failed&&<span role="status" data-scene-fallback>Source study available · 3D unavailable</span>}
     </div>}
     <ModelInspector input={input} inspection={inspection} activate={activateStudy} ready={ready} failed={failed}/>
     <div className={styles.progress} aria-hidden="true"><span ref={progress} /></div>

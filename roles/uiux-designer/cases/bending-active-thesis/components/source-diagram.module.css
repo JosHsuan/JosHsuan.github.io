@@ -13,7 +13,6 @@
 .trace { fill: none; stroke: #fa5104; stroke-width: 1.5px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; opacity: 0; transition: opacity 240ms ease; }
 .node { fill: #ff610008; stroke: #fa5104; stroke-width: 2px; vector-effect: non-scaling-stroke; opacity: 0; transition: opacity 240ms ease; }
 .highlight[data-diagram-active='true'] .trace, .highlight[data-diagram-active='true'] .node { opacity: 1; }
-.curveHit { fill: none; stroke: transparent; stroke-width: 12px; vector-effect: non-scaling-stroke; pointer-events: stroke; }
 .regionHit { fill: transparent; stroke: none; pointer-events: fill; }
 .controls { margin-top: 1.15rem; }
 .choices { display: flex; flex-wrap: wrap; gap: .45rem; }
@@ -28,4 +27,3 @@
 .live { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 @media (max-width: 600px) { .frame { padding: .85rem; margin: 1.6rem 0; border-radius: 1.25rem; } .panel { border-radius: .65rem; } .choices { gap: .4rem; } .choices button { padding: .6rem .7rem; font-size: .7rem; } .choices .follow { margin-left: 0; } }
 @media (prefers-reduced-motion: reduce) { .trace, .node, .choices button { transition: none; } }
-:global([data-motion-paused='true']) .trace, :global([data-motion-paused='true']) .node, :global([data-motion-paused='true']) .choices button { transition: none; }

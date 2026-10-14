@@ -11,9 +11,9 @@ export function publishEditorial({choreography,stickyRects,reading,playbackScore
         const top=rect?rect.top:item.top-(item.viewportFixed?0:reading.visualDocY),bottom=rect?rect.bottom:top+item.height;
         const visible=bottom>(item.viewportFixed?0:80)&&top<viewportHeight-(item.viewportFixed?0:24);
         if(visible&&item.firstVisibleAt===null)item.firstVisibleAt=playbackScore.activeSeconds;
-        if(visible&&(didSeek||state.systemReduced||state.paused||state.sceneFailed))item.firstVisibleAt=playbackScore.activeSeconds-3;
+        if(visible&&(didSeek||state.systemReduced||state.sceneFailed))item.firstVisibleAt=playbackScore.activeSeconds-3;
         if(item.firstVisibleAt===null)return;
-        const value=sampleElementChoreography({kind:item.kind,index:item.index,elapsed:playbackScore.activeSeconds-item.firstVisibleAt,reducedMotion:state.reduced,light:state.detail==='light'});
+        const value=sampleElementChoreography({kind:item.kind,index:item.index,elapsed:playbackScore.activeSeconds-item.firstVisibleAt,reducedMotion:state.reduced});
         const values={'x':[value.x,'px'],'y':[value.y,'px'],'z':[value.z,'px'],'rx':[value.rotateX,'deg'],'ry':[value.rotateY,'deg'],'rz':[value.rotateZ,'deg'],'scale':[value.scale,''],'shadow':[value.shadowDepth,'px']};
         for(const [key,[amount,unit]]of Object.entries(values))publisher.style(element,'--choreo-'+key,amount+unit);
         publisher.style(element,'--choreo-transform','translate3d('+value.x+'px,'+value.y+'px,'+value.z+'px) rotateX('+value.rotateX+'deg) rotateY('+value.rotateY+'deg) rotateZ('+value.rotateZ+'deg) scale('+value.scale+')');

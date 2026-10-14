@@ -13,7 +13,6 @@ export function createRuntimeInput(){
   const transactions=new TransactionEngine(state,events),commands=new CommandRouter<CommandMap>(transactions);
   const scope=events.createScope('kernel-commands');
   commands.register(scope,'preferences','preferences.apply',payload=>({patch:payload}));
-  commands.register(scope,'quality','quality.set',payload=>({patch:{detail:payload.detail}}));
   commands.register(scope,'model','model.interact',payload=>{
     for(const key of Object.keys(payload))if(!['modelEngaged','modelRecovering','modelInteractionChapter','sourceSelection'].includes(key))throw Error(`Model cannot change ${key}`);
     return{patch:payload};

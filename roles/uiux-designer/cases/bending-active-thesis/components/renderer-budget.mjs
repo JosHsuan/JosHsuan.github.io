@@ -3,7 +3,7 @@ import {resolveRenderBudget} from './render-budget.mjs';
 /** Install before Fiber configures its renderer. Fiber's stored viewport DPR can
  * be stale during resize; this renderer boundary is the allocation authority.
  * The case uses Three's ordinary output buffer (no setEffects) and no XR.
- * getPolicy supplies the current detail, deviceDpr and optional densityScale. */
+ * getPolicy supplies the device pixel budget, deviceDpr and densityScale. */
 export function createRendererBudget(renderer, getPolicy) {
   const canvas = renderer.domElement;
   const original = {setSize: renderer.setSize, setPixelRatio: renderer.setPixelRatio, setDrawingBufferSize: renderer.setDrawingBufferSize};
@@ -33,7 +33,7 @@ export function createRendererBudget(renderer, getPolicy) {
       canvas.style.width = width + 'px'; canvas.style.height = height + 'px';
     }
     last = {...budget, viewportWidth: width, viewportHeight: height,
-      detail: policy.detail ?? 'full', deviceDpr: policy.deviceDpr ?? 1, densityScale: policy.densityScale ?? 1};
+      detail: 'full', deviceDpr: policy.deviceDpr ?? 1, densityScale: policy.densityScale ?? 1};
     return last;
   }
 

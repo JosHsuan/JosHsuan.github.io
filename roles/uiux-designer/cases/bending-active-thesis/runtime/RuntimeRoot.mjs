@@ -6,6 +6,7 @@ import {createDiagramManager} from './features/DiagramManager.mjs';
 import {createEvidenceManager} from './features/EvidenceManager.mjs';
 import {createLifecycleManager} from './features/LifecycleManager.mjs';
 import {createReadingManager} from './features/ReadingManager.mjs';
+import {createEntryManager} from './features/EntryManager.mjs';
 import {createExperienceDirector} from './orchestration/ExperienceDirector.mjs';
 
 /** A closed feature catalog; factories are pure and scene code stays dynamically loaded. */
@@ -14,6 +15,7 @@ export function createRuntimeRoot(){
  let query=null;
  input.scene={hitTest:(x,y)=>query?.(x,y)??null,bindHitTest(callback){query=callback;return()=>{if(query===callback)query=null;};}};
  registry.register({id:'kernel',create:()=>({input,dispose:kernelDispose})});
+ registry.register({id:'entry',requires:['kernel'],create:()=>createEntryManager({input})});
  for(const [id,factory] of [['model',createModelManager],['diagram',createDiagramManager],['evidence',createEvidenceManager],['lifecycle',createLifecycleManager],['reading',createReadingManager],['director',createExperienceDirector]]){
   registry.register({id,requires:['kernel'],create:(_context,services)=>options=>{
    const kernel=services.get('kernel').input;return factory({input:kernel,events:kernel.events,...options});
@@ -21,6 +23,7 @@ export function createRuntimeRoot(){
  }
  registry.register({id:'scene',requires:['kernel'],create:()=>({factory,...options})=>factory({input,...options})});
  const registrar=new Registrar(registry,{});registrar.start();
+ input.entry=registrar.get('entry');
  input.features={create:(id,options)=>registrar.get(id)(options),connect:(label,setup)=>registrar.connect(label,()=>{
   const checkpoint=input.events.checkpoint();try{return setup();}catch(error){input.events.rollback(checkpoint);throw error;}
  }),inspect:()=>registrar.inspect()};

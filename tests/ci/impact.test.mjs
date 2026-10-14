@@ -14,13 +14,22 @@ test('documentation skips expensive jobs; documentation-like public inputs do no
     const plan = classifyChanges([file]); assert(plan.framework || plan.fullCase, file);
   }
 });
-test('model UI includes source synchronization, canvas routing, lifecycle and mobile coverage without framework builds', () => {
+test('model UI includes drag direction, source synchronization, canvas routing, lifecycle and touch coverage without framework builds', () => {
   const plan = classifyChanges([`${CASE_ROOT}components/model-inspector.module.css`]);
   assert.equal(plan.framework, false); assert.equal(plan.fullCase, false);
-  for (const name of ['public-release', 'model-inspection', 'source-artwork', 'canvas-motion', 'runtime-lifecycle', 'mobile-stability'])
+  for (const name of ['public-release', 'model-inspection', 'model-drag', 'source-artwork', 'canvas-motion', 'runtime-lifecycle', 'mobile-stability'])
     assert(plan.browserTests.includes(`tests/pages/${name}.spec.mjs`), name);
   assert(!plan.browserTests.includes('tests/pages/render-resources.spec.mjs'));
   assert.equal(plan.browserMatrix.length, 3);
+});
+
+test('scoped diagram changes always exercise the event-driven library reveal and linked source interaction',()=>{
+  for(const file of ['components/SourceDiagram.jsx','components/source-diagram.module.css','runtime/features/DiagramManager.mjs','tests/source-diagram.test.mjs']){
+    const plan=classifyChanges([CASE_ROOT+file]);
+    assert.equal(plan.framework,false);assert.equal(plan.fullCase,false);
+    for(const name of ['public-release','library-reveal','source-artwork','model-inspection','canvas-motion'])
+      assert(plan.browserTests.includes(`tests/pages/${name}.spec.mjs`),`${file} must verify ${name}`);
+  }
 });
 test('combined feature updates select the union, not just the final path', () => {
   const plan = classifyChanges([`${CASE_ROOT}components/model-information.mjs`, `${CASE_ROOT}runtime/features/ReadingManager.mjs`]);
@@ -31,7 +40,9 @@ test('combined feature updates select the union, not just the final path', () =>
 test('core, scene, assets and unknown case modules require every browser spec', () => {
   for (const file of ['runtime/core/EventManager.ts', 'runtime/orchestration/ExperienceDirector.mjs',
     'runtime/presentation/SceneRuntime.mjs', 'components/materials/cinematic-material.js',
-    'release/public/assets/thesis/source-diagrams.glb', 'runtime/new-feature.mjs']) {
+    'release/public/assets/thesis/source-diagrams.glb', 'runtime/new-feature.mjs',
+    'runtime/features/EntryManager.mjs','components/EntryLoader.jsx','runtime/motion/entry-motion.mjs',
+    'runtime/presentation/LibraryDiagramPresenter.mjs','runtime/motion/library-reveal.mjs']) {
     const plan = classifyChanges([CASE_ROOT + file]);
     assert.equal(plan.framework, false); assert.deepEqual(plan.browserTests, ALL_BROWSER_TESTS);
     assert.deepEqual(plan.browserMatrix.filter(job => job.browser === 'chromium').map(job => job.shard), ['1/2', '2/2']);
@@ -50,6 +61,11 @@ test('changed tests run, while shared helpers require the entire case', () => {
   const plan = classifyChanges(['tests/pages/model-inspection.spec.mjs']);
   assert.deepEqual(plan.browserTests, ['tests/pages/model-inspection.spec.mjs', 'tests/pages/public-release.spec.mjs']);
   assert.equal(classifyChanges(['tests/pages/case-helpers.mjs']).fullCase, true);
+  for(const name of ['model-drag','library-reveal','entry-readiness']){
+    const file=`tests/pages/${name}.spec.mjs`;
+    assert(ALL_BROWSER_TESTS.includes(file),`Release discovery must include ${name}`);
+    assert.deepEqual(classifyChanges([file]).browserTests,[file,'tests/pages/public-release.spec.mjs'].sort());
+  }
 });
 test('the gate rejects selected skips/failures/cancellations and unexpected unselected executions', () => {
   for (const plan of [classifyChanges(['README.md']), classifyChanges([`${CASE_ROOT}components/ModelInspector.jsx`]), classifyChanges([], {forceFull: true})]) {

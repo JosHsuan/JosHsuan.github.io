@@ -1,5 +1,7 @@
 # Repository working notes
 
+All Bending-Active adjustments must follow the current project architecture and development rules, including runtime ownership, pinned toolchain, built-artifact validation and the existing CI/CD publication gate. The owner-authorized Full-mode, model interaction, library reveal and entry-readiness implementation is recorded in [the current integration contract](roles/uiux-designer/cases/bending-active-thesis/FULL_MODE_INTERACTION_ENTRY.md). It does not populate the reusable empty portfolio framework.
+
 Read `README.md`, `docs/decisions/0001-empty-framework.md`, and relevant parts of `docs/architecture.md` before changes. The architecture is a reference proposal; the user's current task determines which phase is authorized.
 
 Read `docs/WEBSITE_DESIGN_GUIDELINES.md` for future presentation, content hierarchy, interaction and visual acceptance. Its implementation phases, execution brief and ready-to-use prompt are reference material, not authorization to start them. The current owner request is documentation integration only after withdrawing the portfolio implementation; see `docs/decisions/0002-design-guidelines-integration.md`. Preserve the existing empty framework until the owner explicitly requests another implementation step.
