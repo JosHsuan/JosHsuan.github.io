@@ -1,9 +1,29 @@
 import {test, expect} from '@playwright/test';
-import {scenarioTimeout, frames, loadScene, holdModel, settle, centerStudy} from './case-helpers.mjs';
+import {scenarioTimeout, frames, loadScene, holdModel, settle, centerStudy, surface} from './case-helpers.mjs';
 import {RENDER_PIXEL_BUDGET} from '../../roles/uiux-designer/cases/bending-active-thesis/components/render-budget.mjs';
 
 const RESOURCE_WAIT = 20000;
 const binaryAssets = /\/(?:source-layers\.glb|studio-small\.hdr|source-diagrams\.glb)(?:\?|$)/;
+
+async function warmSourceRepresentations(page) {
+  const painted=[];
+  for(const [chapter,count] of [['system',4],['pattern',3]]){
+    await centerStudy(page,chapter);
+    const seen=new Set();
+    for(let index=0;index<count;index++){
+      await surface(page,chapter).press('Enter');await holdModel(page,chapter);
+      const value=await page.evaluate(()=>{
+        const scene=window.__thesis.inspect();
+        return{id:scene.representation.id,memory:scene.memory,programs:scene.renderer.programs};
+      });
+      seen.add(value.id);painted.push(value);
+    }
+    expect(seen.size).toBe(count);
+    await surface(page,chapter).press('Escape');await settle(page);
+  }
+  expect(new Set(painted.map(value=>value.id)).size).toBe(7);
+  await test.info().attach('source-material-warmup',{body:JSON.stringify(painted),contentType:'application/json'});
+}
 
 async function readResources(page) {
   return page.evaluate(() => {
@@ -52,7 +72,9 @@ async function profile(page, viewport) {
 }
 
 test('Full 4K resize cycles retain source data, optics and bounded stable rendering resources', async ({page}) => {
-  test.setTimeout(scenarioTimeout(90000));
+  // Seven actual source paints precede three resize rounds; this wall-clock
+  // allowance is for functional coverage, not a product performance threshold.
+  test.setTimeout(scenarioTimeout(150000));
   // Observe each native dimension setter, including the intermediate width /
   // old-height combination. A final correct diagnostic cannot hide a transient
   // oversized backing buffer allocated by Fiber before the next World frame.
@@ -71,7 +93,7 @@ test('Full 4K resize cycles retain source data, optics and bounded stable render
   const errors = [], requests = []; page.on('pageerror', error => errors.push(error.message));
   page.on('request', request => {if (binaryAssets.test(request.url())) requests.push(new URL(request.url()).pathname);});
   const originalViewport = page.viewportSize();
-  await loadScene(page);await centerStudy(page,'system');await holdModel(page,'system');
+  await loadScene(page);await warmSourceRepresentations(page);await centerStudy(page,'system');await holdModel(page,'system');
   const canvas = await page.locator('[data-cinematic-stage] canvas').elementHandle(), source = await readResources(page);
   expect(source.source).toMatchObject({vertices: 172789, triangles: 227521, sourceObjects: 51});
   expect(source.diagrams.representations).toHaveLength(7);
@@ -108,8 +130,9 @@ test('Full 4K resize cycles retain source data, optics and bounded stable render
     return {memory: value.memory, programs: value.programs, width: value.compositor.width, height: value.compositor.height};
   };
   // A real keyboard inspection hold retains the Full optical shot and prevents
-  // autonomous density relief during this allocation test. One complete cycle
-  // warms the material/target configuration, then returns to the same viewport;
+  // autonomous density relief during this allocation test. Explicit source
+  // warmup covers lazy geometry/shader creation; one complete resize cycle warms
+  // the target configuration, then returns to the same viewport;
   // these resource counts are neither byte-accurate VRAM nor device capacity.
   const warm = await round();
   expect(await round()).toEqual(warm); expect(await round()).toEqual(warm);
@@ -139,21 +162,25 @@ test('Full chapter holds and transitions preserve one Canvas without reallocatin
     }
   });
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
-  await page.clock.install();await loadScene(page);await page.clock.pauseAt(new Date());
+  // Use one explicit clock origin: the browser clock can overtake Node's wall
+  // clock while loading, so pauseAt(new Date()) can accidentally target the past.
+  const clockOrigin=new Date('2026-01-01T00:00:00Z');
+  await page.clock.install({time:clockOrigin});await loadScene(page);await warmSourceRepresentations(page);
+  await page.clock.pauseAt(new Date(clockOrigin.getTime()+600000));
   // Advance browser RAF/timers deliberately while executing the real scroll
   // and renderer pipeline. This checks allocation behavior, not delivered FPS
   // or sustained-device stability. No model hold suppresses Canvas transitions.
   const drive=async operation=>{
     let finished=false,failure;
     const pending=operation().then(()=>{finished=true;},error=>{failure=error;finished=true;});
-    for(let step=0;step<600&&!finished;step++)await page.clock.runFor(48);
+    for(let step=0;step<600&&!finished;step++)await page.clock.fastForward(48);
     if(!finished){await page.clock.resume();await pending;throw Error('Controlled allocation route did not complete');}
     await pending;if(failure)throw failure;
   };
   const canvas=await page.locator('[data-cinematic-stage] canvas').elementHandle();
   const capture=()=>page.evaluate(()=>{
     const scene=window.__thesis.inspect(),story=window.__story.inspect(),stage=document.querySelector('[data-cinematic-stage]');
-    return{counts:{...window.__dockingAllocations},budget:scene.renderBudget,memory:scene.memory,frames:scene.frames,
+    return{counts:{...window.__dockingAllocations},budget:scene.renderBudget,memory:scene.memory,frames:scene.frames,pressure:scene.renderPressure,frameDelta:story.frameDelta,
       samples:scene.compositor.requestedSamples,placement:story.canvasPlacement,scroll:scrollY,transform:stage.style.transform};
   });
   const route=async()=>{
@@ -172,9 +199,9 @@ test('Full chapter holds and transitions preserve one Canvas without reallocatin
     }
     return records;
   };
-  // Warm precisely the source/material route before counting native storage.
-  // Fixed 16ms RAF delivery prevents simulated pressure from impersonating a
-  // device measurement; the Full optical pipeline remains active throughout.
+  // Warm the transition route after every source/material has been painted.
+  // Each 48ms step delivers one RAF below the pressure policy's 50ms threshold.
+  // This is functional timing, not an FPS measurement; Full optics stay active.
   await route();
   const before=await capture(),records=await route(),after=await capture();
   await test.info().attach('scroll-docking-allocation-records',{body:JSON.stringify({before,records,after}),contentType:'application/json'});
@@ -182,6 +209,8 @@ test('Full chapter holds and transitions preserve one Canvas without reallocatin
     expect(value.counts).toEqual(before.counts);
     expect(value.budget).toEqual(before.budget);
     expect(value.samples).toBe(before.samples);
+    expect(value.pressure.decisions).toBe(before.pressure.decisions);
+    expect(value.frameDelta).toBeLessThanOrEqual(.05);
   }
   expect(after.frames).toBeGreaterThan(before.frames);
   expect(after.memory).toEqual(before.memory);
