@@ -127,15 +127,28 @@ test('Full 4K resize cycles retain source data, optics and bounded stable render
     },null,{timeout:RESOURCE_WAIT});
     await settle(page);
     const value = await readResources(page);
-    return {memory: value.memory, programs: value.programs, width: value.compositor.width, height: value.compositor.height};
+    expect(value.compositor).toMatchObject({width:value.budget.width,height:value.budget.height,dpr:value.budget.dpr});
+    return {memory: value.memory, programs: value.programs, width: value.compositor.width, height: value.compositor.height,densityScale:value.budget.densityScale};
   };
   // A real keyboard inspection hold retains the Full optical shot and prevents
-  // autonomous density relief during this allocation test. Explicit source
+  // autonomous density relief while engaged. Resizing can release that hold,
+  // so real slow-device pressure may legitimately lower drawing density.
+  // Explicit source
   // warmup covers lazy geometry/shader creation; one complete resize cycle warms
   // the target configuration, then returns to the same viewport;
   // these resource counts are neither byte-accurate VRAM nor device capacity.
-  const warm = await round();
-  expect(await round()).toEqual(warm); expect(await round()).toEqual(warm);
+  const warm = await round(),rounds=[warm];
+  for(let cycle=0;cycle<2;cycle++){
+    const previous=rounds.at(-1),value=await round();rounds.push(value);
+    expect(value.memory).toEqual(warm.memory);expect(value.programs).toBe(warm.programs);
+    expect(value.densityScale).toBeLessThanOrEqual(previous.densityScale);
+    if(value.densityScale===previous.densityScale){
+      expect(value.width).toBe(previous.width);expect(value.height).toBe(previous.height);
+    }else{
+      expect(value.width).toBeLessThanOrEqual(previous.width);expect(value.height).toBeLessThanOrEqual(previous.height);
+    }
+  }
+  await test.info().attach('resize-round-resource-records',{body:JSON.stringify(rounds),contentType:'application/json'});
   expect(await page.evaluate(element => document.querySelector('[data-cinematic-stage] canvas') === element, canvas)).toBe(true);
   const assignments = await page.evaluate(element => window.__recordedCanvasSizes(element), canvas);
   expect(assignments.length).toBeGreaterThan(20);
@@ -149,7 +162,9 @@ test('Full 4K resize cycles retain source data, optics and bounded stable render
 });
 
 test('Full chapter holds and transitions preserve one Canvas without reallocating its backing storage',async({page})=>{
-  test.setTimeout(scenarioTimeout(120000));
+  // Full source/material warmup and twelve actual transition positions can
+  // exceed two minutes on a software GPU; assertions use controlled frame time.
+  test.setTimeout(scenarioTimeout(180000));
   await page.addInitScript(()=>{
     const counts={canvasWrites:0,textures:0,renderbuffers:0};window.__dockingAllocations=counts;
     for(const axis of ['width','height']){
@@ -199,12 +214,13 @@ test('Full chapter holds and transitions preserve one Canvas without reallocatin
     }
     return records;
   };
-  // Warm the transition route after every source/material has been painted.
+  // Every source/material has already been painted, so measure the complete
+  // three-chapter route once without an additional duplicate warmup route.
   // Each 48ms step delivers one RAF below the pressure policy's 50ms threshold.
   // This is functional timing, not an FPS measurement; Full optics stay active.
-  await route();
   const before=await capture(),records=await route(),after=await capture();
   await test.info().attach('scroll-docking-allocation-records',{body:JSON.stringify({before,records,after}),contentType:'application/json'});
+  expect(records).toHaveLength(12);
   for(const value of records){
     expect(value.counts).toEqual(before.counts);
     expect(value.budget).toEqual(before.budget);

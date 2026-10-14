@@ -19,7 +19,7 @@ export function createModelManager({input,inspection,hitTest}){
  const returnView=(clearSelection=false)=>{
   pinned=false;
   setInspectionTarget(inspection,{azimuth:INSPECTION_DEFAULTS.azimuth,elevation:INSPECTION_DEFAULTS.elevation});
-  publish({modelEngaged:false,modelRecovering:!inspection.settled,...(clearSelection?{sourceSelection:null}:{})});
+  publish({modelEngaged:false,modelRecovering:!inspection.settled,modelHeldSource:null,...(clearSelection?{sourceSelection:null}:{})});
  };
  const cancelPress=()=>{
   const current=press;press=null;
@@ -30,7 +30,17 @@ export function createModelManager({input,inspection,hitTest}){
  function hit(event,chapterId,ready){
   if(!ready)return false;
   const result=hitTest(event.clientX,event.clientY);
-  return !!result&&result.source===true&&(!result.chapterId||result.chapterId===chapterId);
+  return result?.source===true&&result.chapterId===chapterId?result:null;
+ }
+ const sourceAt=(study,index)=>Number.isInteger(index)&&index>=0&&index<study.labels.length?{chapterId:study.id,index}:null;
+ function keyboardSource(study,surface){
+  const state=input.get();
+  if(state.modelEngaged&&state.modelHeldSource?.chapterId===study.id)return state.modelHeldSource;
+  const selection=state.sourceSelection,age=(state.playback?.activeSeconds??0)-(selection?.selectedAt??-Infinity);
+  // Enter may request a comparison just before Arrow takes ownership. Preserve
+  // that explicit intent even when its first paint is still pending.
+  if(selection?.chapterId===study.id&&age>=0&&age<8)return sourceAt(study,selection.index);
+  return sourceAt(study,Number(surface.dataset.sourceIndex));
  }
  function choose(study,surface,ready){
   if(!ready)return;
@@ -48,10 +58,14 @@ export function createModelManager({input,inspection,hitTest}){
   if(announcement)announcement.textContent=`${study.labels[index]}. Comparison requested. Escape returns to the chapter.`;
  }
  function begin(event,study,surface=event.currentTarget,ready=false){
-  if(!ready||event.button!==0||event.isPrimary===false||press||!hit(event,study.id,ready))return;
+  if(!ready||event.button!==0||event.isPrimary===false||press)return;
+  const result=hit(event,study.id,ready),held=result&&sourceAt(study,result.index);
+  if(!held)return;
   press={id:event.pointerId,surface,study,x:event.clientX,y:event.clientY,at:event.timeStamp,moved:false,touch:event.pointerType==='touch',azimuth:inspection.value.azimuth,elevation:inspection.value.elevation};
   surface.setPointerCapture(event.pointerId);surface.dataset.modelDragging='true';
-  publish({modelEngaged:true,modelRecovering:false,modelInteractionChapter:study.id});
+  // The raycast names the successfully painted source, which may precede the
+  // latest controller frame. Ownership must retain what the pointer grabbed.
+  publish({modelEngaged:true,modelRecovering:false,modelInteractionChapter:study.id,modelHeldSource:held});
  }
  function move(event,ready){
   const current=press;if(!current||current.id!==event.pointerId)return;
@@ -76,7 +90,7 @@ export function createModelManager({input,inspection,hitTest}){
   const patch={ArrowLeft:{azimuth:inspection.target.azimuth+7},ArrowRight:{azimuth:inspection.target.azimuth-7},ArrowUp:{elevation:inspection.target.elevation-5},ArrowDown:{elevation:inspection.target.elevation+5}}[event.key];
   if(patch){
    event.preventDefault();pinned=true;setInspectionTarget(inspection,patch);
-   publish({modelEngaged:true,modelRecovering:false,modelInteractionChapter:study.id});
+   publish({modelEngaged:true,modelRecovering:false,modelInteractionChapter:study.id,modelHeldSource:keyboardSource(study,event.currentTarget)});
   }else if(event.key==='Enter'||event.key===' '){
    event.preventDefault();if(!event.repeat)choose(study,event.currentTarget,ready);
   }else if(event.key==='Escape'||event.key==='Home'){
@@ -95,6 +109,9 @@ export function createModelManager({input,inspection,hitTest}){
  }
  function connectPointer(documentTarget,hosts,ready){
   const scope=input.events.createScope('model-pointer');
+  input.events.on(scope,'stateChanged',({current})=>{
+   if(press&&(!current.modelEngaged||current.modelInteractionChapter!==press.study.id))cancelPress();
+  });
   input.events.listen(scope,documentTarget,'pointerdown',event=>{
    if(event.target.closest?.('button,a,select,input,summary,[data-protect],[data-feedback-plane]'))return;
    const result=hitTest(event.clientX,event.clientY),study=hosts.find(value=>value.id===result?.chapterId),surface=surfaces.get(study?.id);

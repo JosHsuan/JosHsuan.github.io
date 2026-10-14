@@ -14,11 +14,11 @@ export function createRuntimeInput(){
   const scope=events.createScope('kernel-commands');
   commands.register(scope,'preferences','preferences.apply',payload=>({patch:payload}));
   commands.register(scope,'model','model.interact',payload=>{
-    for(const key of Object.keys(payload))if(!['modelEngaged','modelRecovering','modelInteractionChapter','sourceSelection'].includes(key))throw Error(`Model cannot change ${key}`);
+    for(const key of Object.keys(payload))if(!['modelEngaged','modelRecovering','modelInteractionChapter','modelHeldSource','sourceSelection'].includes(key))throw Error(`Model cannot change ${key}`);
     return{patch:payload};
   });
   commands.register(scope,'model','model.select',payload=>({patch:{sourceSelection:{chapterId:payload.chapterId,index:payload.index,selectedAt:payload.selectedAt},
-    modelEngaged:false,modelRecovering:payload.modelRecovering??false,modelInteractionChapter:payload.chapterId}}));
+    modelEngaged:false,modelRecovering:payload.modelRecovering??false,modelInteractionChapter:payload.chapterId,modelHeldSource:null}}));
   frames.publish({...state.get(),stateVersion:state.version});
   const unsubscribe=state.subscribe(value=>value,current=>{frames.publish({...current,stateVersion:state.version});frames.notify();});
   const get=()=>frames.get();

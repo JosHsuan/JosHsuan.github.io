@@ -7,14 +7,18 @@ test('model follows mouse or touch in both axes and outside gestures scroll the 
  test.setTimeout(scenarioTimeout(150000));
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
  await loadScene(page);await centerStudy(page);
- const p=await hitPoint(page),before=await page.evaluate(()=>({
-  scroll:scrollY,source:window.__thesis.inspect().representation.id,
-  azimuth:window.__story.inspect().inspection.value.azimuth,
-  elevation:window.__story.inspect().inspection.value.elevation,
- }));
  await expect(surface(page)).toHaveCSS('touch-action','none');
  await expect(surface(page)).toHaveCSS('pointer-events','auto');
  const cdp=isMobile?await context.newCDPSession(page):null;
+ const pressSnapshot=await page.evaluateHandle(()=>{
+  const sample={};
+  document.addEventListener('pointerdown',()=>{
+   const source=window.__thesis.inspect().representation;
+   Object.assign(sample,{source:source.id,index:source.index,chapterId:source.chapterId,scroll:scrollY});
+  },{capture:true,once:true});
+  return sample;
+ });
+ const p=await hitPoint(page),scrollBeforePress=await page.evaluate(()=>scrollY);
  let touchActive=false;
  const start=async()=>{
   if(cdp){await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{...p,id:1}]});touchActive=true;}
@@ -27,25 +31,35 @@ test('model follows mouse or touch in both axes and outside gestures scroll the 
  };
  try{
   await start();
+  const pressed=await pressSnapshot.jsonValue();
   await expect.poll(()=>page.evaluate(()=>window.__story.inspect().modelEngaged),{timeout:WAIT}).toBe(true);
   await settle(page);
-  const heldPose=await page.evaluate(()=>window.__thesis.inspect().pose);
+  // Autoplay may advance before pointerdown, but the source displayed at that
+  // native event must survive the handoff to the next successfully drawn frame.
+  const held=await page.evaluate(()=>({
+   pose:window.__thesis.inspect().pose,source:window.__thesis.inspect().representation.id,
+   inspection:window.__story.inspect().inspection.value,time:window.__story.inspect().playback.activeSeconds,scroll:scrollY,
+   heldSource:window.__story.inspect().modelHeldSource,pinned:window.__thesis.inspect().representation.pinned,
+  }));
+  expect(pressed.scroll).toBe(scrollBeforePress);
+  expect(held).toMatchObject({source:pressed.source,scroll:pressed.scroll,pinned:false,heldSource:{chapterId:pressed.chapterId,index:pressed.index}});
   await move(30,24);
-  await expect.poll(()=>page.evaluate(()=>window.__story.inspect().inspection.target.azimuth)).toBeCloseTo(before.azimuth-6.9,4);
-  await expect.poll(()=>page.evaluate(()=>window.__story.inspect().inspection.target.elevation)).toBeCloseTo(before.elevation+4.32,4);
+  await expect.poll(()=>page.evaluate(()=>window.__story.inspect().inspection.target.azimuth)).toBeCloseTo(held.inspection.azimuth-6.9,4);
+  await expect.poll(()=>page.evaluate(()=>window.__story.inspect().inspection.target.elevation)).toBeCloseTo(held.inspection.elevation+4.32,4);
   await settle(page);
-  const rightDown=await page.evaluate(()=>({pose:window.__thesis.inspect().pose,scroll:scrollY,source:window.__thesis.inspect().representation.id}));
+  const rightDown=await page.evaluate(()=>({pose:window.__thesis.inspect().pose,scroll:scrollY,source:window.__thesis.inspect().representation.id,time:window.__story.inspect().playback.activeSeconds}));
   // The existing camera owner renders the requested orbit. Reversing camera
   // azimuth makes the source surface turn right; elevation makes it turn down.
-  expect(rightDown.pose.azimuth).toBeLessThan(heldPose.azimuth);expect(rightDown.pose.elevation).toBeGreaterThan(heldPose.elevation);
-  expect(rightDown.scroll).toBe(before.scroll);expect(rightDown.source).toBe(before.source);
+  expect(rightDown.pose.azimuth).toBeLessThan(held.pose.azimuth);expect(rightDown.pose.elevation).toBeGreaterThan(held.pose.elevation);
+  expect(rightDown).toMatchObject({scroll:held.scroll,source:held.source,time:held.time});
   await move(-30,-24);await settle(page);
-  const leftUp=await page.evaluate(()=>window.__thesis.inspect().pose);
-  expect(leftUp.azimuth).toBeGreaterThan(heldPose.azimuth);expect(leftUp.elevation).toBeLessThan(heldPose.elevation);
+  const leftUp=await page.evaluate(()=>({pose:window.__thesis.inspect().pose,scroll:scrollY,source:window.__thesis.inspect().representation.id,time:window.__story.inspect().playback.activeSeconds}));
+  expect(leftUp.pose.azimuth).toBeGreaterThan(held.pose.azimuth);expect(leftUp.pose.elevation).toBeLessThan(held.pose.elevation);
+  expect(leftUp).toMatchObject({scroll:held.scroll,source:held.source,time:held.time});
   if(cdp){await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});touchActive=false;}else await page.mouse.up();
   await settle(page);
   const released=await page.evaluate(()=>window.__story.inspect());
-  expect(released.modelEngaged).toBe(false);expect(released.sourceSelection).toBeNull();
+  expect(released.modelEngaged).toBe(false);expect(released.sourceSelection).toBeNull();expect(released.modelHeldSource).toBeNull();
   expect(released.inspection.value).toMatchObject({azimuth:30,elevation:30});
   await expect(surface(page)).not.toHaveAttribute('data-model-dragging','true');
 
@@ -81,5 +95,6 @@ test('model follows mouse or touch in both axes and outside gestures scroll the 
  }finally{
   if(cdp){if(touchActive)await cdp.send('Input.dispatchTouchEvent',{type:'touchCancel',touchPoints:[]});await cdp.detach();}
   else await page.mouse.up();
+  await pressSnapshot.dispose();
  }
 });

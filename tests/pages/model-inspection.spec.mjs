@@ -58,9 +58,14 @@ test('model information follows autonomous changes and explicit comparison relea
  await holdView(page);await expectSourceInformation(page,'form');
  await surface(page).press('Enter');await holdView(page);await expectSourceInformation(page,'form');
  expect(await page.evaluate(()=>window.__thesis.inspect().representation.pinned)).toBe(true);
- await surface(page).press('Escape');await settle(page);await expectSourceInformation(page,'form');
+ const heldTime=await page.evaluate(()=>window.__story.inspect().playback.activeSeconds);
+ await surface(page).press('Escape');await settle(page);
+ expect(await page.evaluate(()=>({engaged:window.__story.inspect().modelEngaged,selection:window.__story.inspect().sourceSelection,held:window.__story.inspect().modelHeldSource}))).toEqual({engaged:false,selection:null,held:null});
  expect(await page.evaluate(()=>window.__thesis.inspect().representation.pinned)).toBe(false);
- await holdView(page);await expectIdle(page);
+ await expect.poll(()=>page.evaluate(()=>window.__story.inspect().playback.activeSeconds),{timeout:WAIT}).toBeGreaterThan(heldTime);
+ // After proving release resumes the shared clock, use real keyboard ownership
+ // before checking multiple DOM fields against one rendered representation.
+ await holdView(page);await expectSourceInformation(page,'form');await expectIdle(page);
 });
 
 test('permanent side information and source annotations stay beside the model and follow inspection',async({page})=>{

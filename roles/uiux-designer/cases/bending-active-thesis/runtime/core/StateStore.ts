@@ -10,7 +10,7 @@ export class StateStore {
   get version(){return this.revision;}
   commit(patch:Partial<RuntimeState>){
     const next=validateState({...this.state,...patch});
-    const changed=(Object.keys(next) as (keyof RuntimeState)[]).some(key=>key==='sourceSelection'?
+    const changed=(Object.keys(next) as (keyof RuntimeState)[]).some(key=>key==='sourceSelection'||key==='modelHeldSource'?
       JSON.stringify(next[key])!==JSON.stringify(this.state[key]):!Object.is(next[key],this.state[key]));
     if(!changed)return null;
     const previous=this.state;this.state=next;this.revision++;

@@ -34,6 +34,21 @@ test('source cues resolve actual variants, with a bounded manual pin and no even
   assert.throws(()=>resolveSourceSelection({chapterWeights:[0,0,0,0,0,0,0]}));
 });
 
+test('painted source ownership survives a newer controller cue without becoming a comparison pin',()=>{
+ const p=playback(1,.8,15),held={chapterId:'form',index:2},before=structuredClone(p);
+ assert.equal(resolveSourceSelection(p,null).id,'curvature');
+ const grabbed=resolveSourceSelection(p,null,null,held);
+ assert.equal(grabbed.id,'bending');assert.equal(grabbed.held,true);assert.equal(grabbed.pinned,false);assert.equal(grabbed.pinSecondsRemaining,0);
+ assert.equal(resolveSourceSelection(p,null).id,'curvature');assert.deepEqual(p,before);
+ const pending={chapterId:'form',index:3,selectedAt:15};
+ const during=resolveSourceSelection(p,pending,null,held);
+ assert.equal(during.id,'bending');assert.equal(during.pinned,false);assert.equal(during.pinSecondsRemaining,0);
+ assert.equal(resolveSourceSelection(p,pending).id,'curvature');assert.equal(resolveSourceSelection(p,pending).pinned,true);
+ assert.equal(resolveSourceSelection(p,{...pending,index:2},null,held).pinned,true);
+ assert.equal(resolveSourceSelection(p,null,null,{chapterId:'system',index:2}).held,false);
+ assert.equal(resolveSourceSelection(p,null,null,{chapterId:'form',index:4}).held,false);
+});
+
 test('fixed comparison envelope never changes the camera when selecting another member',()=>{
   for(const chapter of [1,2,3]) {
     const p=playback(chapter,.37,4),cue=sampleChapterScene(p),first=resolveSourceSelection(p,null,cue);

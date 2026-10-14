@@ -61,6 +61,7 @@ test('lifecycle suspension releases a held mouse or touch gesture and returns to
   const held = await snapshot(page);
   await page.evaluate(() => window.dispatchEvent(new Event('pagehide')));
   expect(await page.evaluate(() => window.__story.inspect().modelEngaged)).toBe(false);
+  expect(await page.evaluate(() => window.__story.inspect().modelHeldSource)).toBeNull();
   await expect(surface(page)).not.toHaveAttribute('data-model-dragging', 'true');
   expect(await surface(page).evaluate(element => element.hasPointerCapture(Number(element.dataset.testCapturedPointer)))).toBe(false);
   if(cdp){await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await cdp.detach();}

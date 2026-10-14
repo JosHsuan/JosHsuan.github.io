@@ -5,7 +5,7 @@ const library=page=>page.locator('[data-source-diagram="library"]');
 const sample=page=>page.evaluate(()=>{
  const element=document.querySelector('[data-source-diagram="library"]');
  const paths=[...element.querySelectorAll('[data-library-trace]')].sort((a,b)=>Number(a.dataset.libraryTrace)-Number(b.dataset.libraryTrace));
- return {reveal:window.__story.inspect().libraryDiagram,paths:paths.map(path=>({id:path.dataset.sourcePath,offset:Number(getComputedStyle(path).strokeDashoffset),dash:getComputedStyle(path).strokeDasharray,visibility:getComputedStyle(path).visibility})),scroll:scrollY};
+ return {reveal:window.__story.inspect().libraryDiagram,paths:paths.map(path=>({id:path.dataset.sourcePath,offset:Number.parseFloat(getComputedStyle(path).strokeDashoffset),dash:getComputedStyle(path).strokeDasharray,visibility:getComputedStyle(path).visibility})),scroll:scrollY};
 });
 const show=page=>library(page).locator('[data-library-drawing]').evaluate(element=>{
  let top=0;for(let node=element;node;node=node.offsetParent)top+=node.offsetTop;
@@ -41,7 +41,11 @@ test('library departure closes its request, re-entry starts a fresh sequence and
   await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));await page.clock.runFor(16);const cancelled=await sample(page);
   expect(cancelled.reveal.history.at(-1)).toMatchObject({id:first.reveal.items[0].id,status:'cancelled',reason:'offscreen'});expect(cancelled.paths.every(path=>path.dash==='none'&&path.visibility==='visible')).toBe(true);
   await show(page);await page.clock.runFor(160);const again=await sample(page);expect(again.reveal.items[0].id).toBeGreaterThan(first.reveal.items[0].id);expect(again.reveal.items[0].status).toBe('playing');
-  await page.emulateMedia({reducedMotion:'reduce'});await page.clock.runFor(32);const reduced=await sample(page);
+  await page.emulateMedia({reducedMotion:'reduce'});
+  // Media-query delivery and React publication can follow the emulation reply.
+  // Wait for the actual director acknowledgment while advancing its clock.
+  await expect.poll(async()=>{await page.clock.runFor(16);return page.evaluate(()=>window.__story.inspect().playback.reducedMotion);},{timeout:WAIT}).toBe(true);
+  const reduced=await sample(page);
   expect(reduced.reveal.history.at(-1)).toMatchObject({id:again.reveal.items[0].id,status:'completed',reason:'reduced'});expect(reduced.paths.every(path=>path.dash==='none'&&path.visibility==='visible')).toBe(true);expect(reduced.reveal.open).toEqual([]);
   expect(reduced.reveal.history.map(event=>event.status)).toEqual(['requested','cancelled','requested','completed']);
  }finally{await page.clock.resume();}

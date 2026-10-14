@@ -1,6 +1,6 @@
 import type {RuntimeState,SourceSelection} from './state.ts';
 
-export type InteractionPatch = Partial<Pick<RuntimeState,'modelEngaged'|'modelRecovering'|'modelInteractionChapter'|'sourceSelection'>>;
+export type InteractionPatch = Partial<Pick<RuntimeState,'modelEngaged'|'modelRecovering'|'modelInteractionChapter'|'modelHeldSource'|'sourceSelection'>>;
 export type CommandMap = {
   'preferences.apply': Pick<RuntimeState,'systemReduced'|'sceneEnabled'|'sceneFailed'> & {sceneReady?: boolean};
   'model.interact': InteractionPatch;

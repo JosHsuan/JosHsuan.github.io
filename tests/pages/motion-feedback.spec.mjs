@@ -10,18 +10,18 @@ async function openSourceFigure(page){const summary=page.getByText('Compare with
 // Each fastForward fires a due RAF once. A 500ms controller step exercises the
 // real heavy-frame response without rendering dozens of intermediate
 // software-GPU frames with runFor. This is a functional clock fixture.
-async function settleClock(page){
+async function settleClock(page,{reducedIdle=false}={}){
  let candidate=null,last=null;
  for(let step=0;step<12;step++){
   await page.clock.fastForward(500);
   last=await page.evaluate(()=>{
    const story=window.__story.inspect(),scene=window.__thesis.inspect();
-   return {current:Math.abs(story.nativeDocY-scrollY)<.01&&!story.readingPending&&story.settled&&story.inspection.settled&&story.canvasPlacement.settled&&!story.canvasAwaitingPaint,signature:[scrollY,story.visualDocY,document.documentElement.scrollHeight,story.inspection.value.azimuth,story.inspection.value.elevation,story.canvasPlacement.x,story.canvasPlacement.y,story.canvasPlacement.scale].join('/'),native:story.nativeDocY,visual:story.visualDocY,frameDelta:story.frameDelta,controllerFrame:story.controllerFrame,renderedControllerFrame:scene.renderedControllerFrame,ready:scene.ready,renderSuspended:scene.renderSuspended};
+   return {current:Math.abs(story.nativeDocY-scrollY)<.01&&!story.readingPending&&story.settled&&story.inspection.settled&&story.canvasPlacement.settled&&!story.canvasAwaitingPaint,signature:[scrollY,story.visualDocY,document.documentElement.scrollHeight,story.inspection.value.azimuth,story.inspection.value.elevation,story.canvasPlacement.x,story.canvasPlacement.y,story.canvasPlacement.scale].join('/'),native:story.nativeDocY,visual:story.visualDocY,frameDelta:story.frameDelta,controllerFrame:story.controllerFrame,renderedControllerFrame:scene.renderedControllerFrame,ready:scene.ready,renderSuspended:scene.renderSuspended,reducedMotion:story.playback.reducedMotion,scheduled:story.scheduled,pendingFrames:scene.rendererPendingFrames??0};
   });
   if(!last.current)candidate=null;
   else {
    if(candidate?.signature!==last.signature)candidate={signature:last.signature,frame:last.controllerFrame};
-   if(last.ready&&(last.renderSuspended||last.renderedControllerFrame>=candidate.frame))return;
+   if(last.ready&&(last.renderSuspended||last.renderedControllerFrame>=candidate.frame)&&(!reducedIdle||last.reducedMotion&&!last.scheduled&&last.pendingFrames===0))return;
   }
  }
  throw Error('Controlled controller/render did not settle: '+JSON.stringify(last));
@@ -83,7 +83,9 @@ test('native reading stays responsive without controller frames while the scene 
   const snapshot=()=>page.evaluate(()=>{const story=window.__story.inspect(),scene=window.__thesis.inspect();return {time:story.playback.activeSeconds,field:scene.compositor.field.time,pose:scene.pose.position,frames:scene.frames};});
   const autonomousBefore=await snapshot();for(let step=0;step<3;step++)await page.clock.fastForward(500);const autonomousAfter=await snapshot();
   expect(autonomousAfter.time).toBeGreaterThan(autonomousBefore.time);expect(autonomousAfter.field).toBeGreaterThan(autonomousBefore.field);expect(autonomousAfter.pose).not.toEqual(autonomousBefore.pose);expect(autonomousAfter.frames).toBeGreaterThan(autonomousBefore.frames);
-  await page.emulateMedia({reducedMotion:'reduce'});await settleClock(page);
+  // Media emulation, its change event and React preference publication are
+  // separate tasks. Await the runtime's Reduced acknowledgment and final paint.
+  await page.emulateMedia({reducedMotion:'reduce'});await settleClock(page,{reducedIdle:true});
   expect(await page.evaluate(()=>window.__story.inspect().scheduled)).toBe(false);
   const frozen=await snapshot();for(let step=0;step<8;step++)await page.clock.fastForward(500);const idle=await snapshot();
   expect(idle).toEqual(frozen);

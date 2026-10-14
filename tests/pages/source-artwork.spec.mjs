@@ -49,7 +49,7 @@ test('zero-wheel chapter loops advance field and workflow selections while OS Re
  await choice.focus();await settle(page);await choice.click();await settle(page);
  await expect(choice).toHaveAttribute('aria-pressed','true');
  expect(await page.evaluate(()=>window.__story.inspect().sourceSelection)).toMatchObject({chapterId:'system',index:2});
- await page.emulateMedia({reducedMotion:'reduce'});await settle(page);const frozen=await page.evaluate(()=>window.__story.inspect().playback.activeSeconds);await frames(page,10);expect(await page.evaluate(()=>window.__story.inspect().playback.activeSeconds)).toBe(frozen);
+ await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(()=>window.__story.inspect().playback.reducedMotion,null,{timeout:WAIT});await settle(page);const frozen=await page.evaluate(()=>window.__story.inspect().playback.activeSeconds);await frames(page,10);expect(await page.evaluate(()=>window.__story.inspect().playback.activeSeconds)).toBe(frozen);
 });
 
 test('viewport source holds while information scrolls and workflow follows its presented shared phase',async({page})=>{
@@ -85,7 +85,7 @@ test('viewport source holds while information scrolls and workflow follows its p
 
 
 test('rear scene keeps reading surfaces legible over actual, white and black backdrops',async({page,isMobile})=>{
- test.setTimeout(scenarioTimeout(180000));await loadScene(page);await centerStudy(page,'system');await settle(page);
+ test.setTimeout(scenarioTimeout(180000));await page.clock.install();await loadScene(page);await centerStudy(page,'system');await settle(page);
  expect(await page.evaluate(()=>({detail:window.__thesis.inspect().detail,samples:window.__thesis.inspect().compositor.requestedSamples,mist:window.__thesis.inspect().compositor.mist.enabled,suspended:window.__thesis.inspect().renderSuspended}))).toEqual({detail:'full',samples:isMobile?0:2,mist:true,suspended:false});
  const layers=await page.evaluate(()=>({canvases:document.querySelectorAll('canvas').length,glCanvases:document.querySelectorAll('[data-cinematic-stage] canvas').length,asciiCanvases:document.querySelectorAll('canvas[data-ascii-field]').length,stage:Number(getComputedStyle(document.querySelector('[data-cinematic-stage]')).zIndex),reading:Number(getComputedStyle(document.querySelector('[data-reading-frame]')).zIndex),scrim:!!document.querySelector('[data-cinematic-scrim]'),rects:window.__thesis.inspect().protectedRects,layering:window.__thesis.inspect().compositor.layering}));
  expect(layers.canvases).toBe(2);expect(layers.glCanvases).toBe(1);expect(layers.asciiCanvases).toBe(1);expect(layers.stage).toBeLessThan(layers.reading);expect(layers.scrim).toBe(false);expect(layers.rects).toBeUndefined();expect(layers.layering).toMatchObject({position:'rear',semanticMask:false,independentField:true});
@@ -101,13 +101,17 @@ test('rear scene keeps reading surfaces legible over actual, white and black bac
    await target.evaluate(el=>{const r=el.getBoundingClientRect();scrollBy({top:r.top+r.height/2-innerHeight/2,behavior:'instant'});});await settle(page);
   }
   const stage=page.locator('[data-cinematic-stage]'),original=await stage.evaluate(el=>el.style.cssText);
+  // Capture the actual Full shot, then stop autonomous RAF delivery while
+  // reading pixels. This is contrast acceptance, not an FPS measurement.
+  // Use the browser's clock plus a future offset to avoid cross-clock races.
+  await page.clock.pauseAt(new Date((await page.evaluate(()=>Date.now()))+60000));
   try{
    for(const backdrop of [null,'#ffffff','#000000']){
     await stage.evaluate((el,color)=>{el.style.background=color??'transparent';el.querySelector('canvas').style.visibility=color?'hidden':'visible';},backdrop);
     const measurements=await renderedTextContrast(page,target);expect(measurements.length).toBeGreaterThan(0);
     for(const value of measurements)expect(value.ratio,`${selector}: ${value.text}, backdrop ${backdrop??'scene'}`).toBeGreaterThanOrEqual(value.required);
    }
-  }finally{await stage.evaluate((el,css)=>{el.style.cssText=css;el.querySelector('canvas').style.visibility='';},original);}
+  }finally{await stage.evaluate((el,css)=>{el.style.cssText=css;el.querySelector('canvas').style.visibility='';},original);await page.clock.resume();}
  }
  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
 });

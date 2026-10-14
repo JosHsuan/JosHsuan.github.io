@@ -7,6 +7,7 @@ const sample=page=>page.evaluate(()=>{
  return {placement:story.canvasPlacement,informationChapter:story.informationChapter,pose:scene.pose,frames:scene.frames,time:story.playback.activeSeconds,field:story.pageField,rect:{x:r.x,y:r.y,width:r.width,height:r.height},surface:story.canvasSurface,screen:{width:innerWidth,height:innerHeight},native:[canvas.width,canvas.height],suspended:scene.renderSuspended,informationTop:document.querySelector('#system [data-story-heading]').getBoundingClientRect().top};
 });
 const scrollTo=async(page,y)=>{await page.evaluate(top=>window.scrollTo({top,behavior:'instant'}),y);await settle(page);};
+const reduce=async page=>{await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(()=>window.__story.inspect().playback.reducedMotion,null,{timeout:WAIT});};
 
 test('one viewport scene holds its cinematic scale while information scrolls independently',async({page})=>{
  test.setTimeout(scenarioTimeout(120000));
@@ -32,7 +33,7 @@ test('one viewport scene holds its cinematic scale while information scrolls ind
  await expect(page.locator('[data-chapter-link="form"]')).toHaveAttribute('aria-current','location');
  expect(await page.evaluate(el=>document.querySelector('[data-cinematic-stage] canvas')===el,canvas)).toBe(true);
  await expect(page.locator(stageCanvas)).toHaveCount(1);await expect(page.locator('canvas[data-ascii-field]')).toHaveCount(1);await expect(page.locator('canvas')).toHaveCount(2);
- await page.emulateMedia({reducedMotion:'reduce'});await expectIdle(page);
+ await reduce(page);await expectIdle(page);
  const reduced=await sample(page);await frames(page,8);const still=await sample(page);
  expect(still.time).toBe(reduced.time);expect(still.pose.position).toEqual(reduced.pose.position);expect(errors).toEqual([]);
 });
@@ -81,7 +82,7 @@ test('absent evidence scenes sleep WebGL while the independent page ASCII keeps 
  }
  await centerStudy(page,'system');const returned=await sample(page);expect(returned.suspended).toBe(false);expect(returned.placement.visible).toBe(true);
  await expect.poll(()=>page.evaluate(()=>window.__thesis.inspect().frames),{timeout:WAIT}).toBeGreaterThan(returned.frames);
- await page.emulateMedia({reducedMotion:'reduce'});await expectIdle(page);
+ await reduce(page);await expectIdle(page);
  await expect(page.locator(stageCanvas)).toHaveCount(1);await expect(page.locator('canvas[data-ascii-field]')).toHaveCount(1);
 });
 
@@ -94,7 +95,7 @@ test('with OS Reduced, a real visible source hit still compares geometry through
    Object.defineProperty(HTMLCanvasElement.prototype,axis,{...descriptor,set(value){writes.set(this,(writes.get(this)??0)+1);descriptor.set.call(this,value);}});
   }
  });
- await loadScene(page);await page.emulateMedia({reducedMotion:'reduce'});await settle(page);await centerStudy(page,'system');
+ await loadScene(page);await reduce(page);await settle(page);await centerStudy(page,'system');
  expect(await page.evaluate(()=>typeof window.__thesis.inspect().rendererPendingFrames)).toBe('number');
  const canvas=await page.locator(stageCanvas).elementHandle();
  const range=await page.evaluate(()=>({start:scrollY,end:window.__story.inspect().canvasPlacement.holdEnd-2}));
@@ -126,7 +127,9 @@ test('with OS Reduced, a real visible source hit still compares geometry through
  await test.info().attach('outside-slot-native-hit-search',{body:JSON.stringify({range,rays,attempts}),contentType:'application/json'});
   expect(point,'The narrow chapter hold must expose an unobscured real source hit through the transparent UI.').not.toBeNull();
  const last=attempts.at(-1);expect(last).toMatchObject({chapter:'system',mode:'hold',presented:true});
-  expect(await page.evaluate(p=>document.elementFromPoint(p.x,p.y).closest('[data-model-viewport]')===null,point)).toBe(true);
+ // The real touch-enabled aperture now receives pointer input. It must still
+ // resolve the actual source mesh before a comparison is allowed.
+ expect(await page.evaluate(p=>{const viewport=document.elementFromPoint(p.x,p.y).closest('[data-model-viewport]'),hit=window.__thesis.hitTest(p.x,p.y);return{active:viewport?.closest('[data-model-study]')?.dataset.modelActive,disabled:viewport?.getAttribute('aria-disabled'),source:hit?.source,chapter:hit?.chapterId};},point)).toEqual({active:'true',disabled:'false',source:true,chapter:'system'});
  const resources=()=>page.evaluate(()=>{const scene=window.__thesis.inspect(),canvas=document.querySelector('[data-cinematic-stage] canvas');return {id:scene.representation.id,index:scene.representation.index,source:scene.source,diagrams:scene.diagramSource,budget:scene.renderBudget,initialization:scene.initialization,native:[canvas.width,canvas.height],writes:window.__stageStorageWrites(canvas),docY:scrollY};});
  const before=await resources();await page.mouse.click(point.x,point.y);await settle(page);const after=await resources();
  expect(after.id).not.toBe(before.id);expect(after.index).toBe((before.index+1)%4);

@@ -48,19 +48,20 @@ export function prepareSourceFamilies(metadata, assembly) {
   return result;
 }
 
-export function resolveSourceSelection(playback, selection, sceneScore) {
+export function resolveSourceSelection(playback, selection, sceneScore, heldSource = null) {
   const supplied = playback?.chapterWeights ?? [1,0,0,0,0,0,0];
   if (supplied.length !== 7 || supplied.some(v=>!Number.isFinite(v)||v<0) || !supplied.some(v=>v>0)) throw RangeError('Seven nonnegative chapter weights required');
   const chapterIndex = supplied.indexOf(Math.max(...supplied)), chapterId = CINEMATIC_CHAPTERS[chapterIndex];
   const ids = chapterId === 'pattern' ? EXPERIMENT_IDS : ['form','system'].includes(chapterId) ? REPRESENTATION_IDS : ['assembly'];
   const time = playback?.activeSeconds ?? 0;
   const age = time - (selection?.selectedAt ?? -Infinity);
-  const pinned = selection?.chapterId === chapterId && Number.isInteger(selection.index) && selection.index >= 0 && selection.index < ids.length && age >= 0 && age < 8;
+  const held = heldSource?.chapterId === chapterId && Number.isInteger(heldSource.index) && heldSource.index >= 0 && heldSource.index < ids.length;
+  const pinned = selection?.chapterId === chapterId && Number.isInteger(selection.index) && selection.index >= 0 && selection.index < ids.length && age >= 0 && age < 8 && (!held || selection.index === heldSource.index);
   const phase = playback?.phases?.[chapterIndex] ?? playback?.chapters?.[chapterIndex]?.phase ?? 0;
   const slots = sceneScore?.representation?.sourceSlots?.find(record=>record.chapter === chapterId)?.slots;
   const autoIndex = slots?.length === ids.length ? slots.indexOf(Math.max(...slots)) : Math.min(ids.length-1,Math.floor((((phase%1)+1)%1)*ids.length));
-  const index = pinned ? selection.index : autoIndex;
-  return {id:ids[index], index, chapterId, chapterIndex, pinned, pinSecondsRemaining:pinned ? 8-age : 0,
+  const index = held ? heldSource.index : pinned ? selection.index : autoIndex;
+  return {id:ids[index], index, chapterId, chapterIndex, held, pinned, pinSecondsRemaining:pinned ? 8-age : 0,
     family:ids === EXPERIMENT_IDS ? 'experiment' : ids === REPRESENTATION_IDS ? 'representation' : 'assembly'};
 }
 

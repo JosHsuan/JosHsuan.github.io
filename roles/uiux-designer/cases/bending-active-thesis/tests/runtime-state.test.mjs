@@ -71,3 +71,27 @@ test('removed quality and pause settings cannot return through commands or state
  }
  assert.equal(input.state.version,0);input.dispose();
 });
+
+test('held sources are atomic, chapter-bound inspection intent and do not publish comparison requests',()=>{
+ const input=createRuntimeInput(),scope=input.events.createScope('held-source-test');let comparisons=0;
+ input.events.on(scope,'representationChanged',()=>comparisons++);
+ const held={chapterId:'form',index:2},patch={modelEngaged:true,modelRecovering:false,modelInteractionChapter:'form',modelHeldSource:held};
+ for(const invalid of [
+  {modelHeldSource:held},
+  {modelHeldSource:false},
+  {...patch,modelEngaged:false},
+  {...patch,modelInteractionChapter:'system'},
+  {...patch,modelHeldSource:{chapterId:'form',index:4}},
+  {...patch,modelHeldSource:{chapterId:'pattern',index:3}},
+ ])assert.equal(input.commands.execute('model.interact',invalid).status,'rejected');
+ assert.equal(input.state.version,0);
+ assert.equal(input.commands.execute('model.interact',patch).status,'accepted');
+ assert.deepEqual(input.state.get().modelHeldSource,held);assert.equal(comparisons,0);
+ assert.throws(()=>{input.state.get().modelHeldSource.index=0;},TypeError);
+ const version=input.state.version;
+ input.commands.execute('model.interact',{...patch,modelHeldSource:{...held}});assert.equal(input.state.version,version);
+ assert.equal(input.commands.execute('model.interact',{modelEngaged:false}).status,'rejected');
+ input.commands.execute('model.select',{chapterId:'form',index:3,selectedAt:15});
+ assert.equal(input.state.get().modelHeldSource,null);assert.equal(input.state.get().modelEngaged,false);assert.equal(comparisons,1);
+ input.dispose();
+});

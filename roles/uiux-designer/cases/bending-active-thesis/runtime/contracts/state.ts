@@ -1,16 +1,18 @@
 export type StudyId = 'form' | 'system' | 'pattern';
+export type ModelHeldSource = Readonly<{chapterId: StudyId; index: number}>;
 export type SourceSelection = Readonly<{chapterId: StudyId; index: number; selectedAt: number}>;
 export type RuntimeState = Readonly<{
   systemReduced: boolean;
   sceneEnabled: boolean; sceneFailed: boolean; sceneReady: boolean;
   sceneStatus: 'disabled' | 'loading' | 'ready' | 'failed'; reduced: boolean;
   modelEngaged: boolean; modelRecovering: boolean; modelInteractionChapter: StudyId | null;
+  modelHeldSource: ModelHeldSource | null;
   sourceSelection: SourceSelection | null;
 }>;
 
 export const initialState: RuntimeState = Object.freeze({systemReduced:false,
   sceneEnabled:false,sceneFailed:false,sceneReady:false,sceneStatus:'disabled',reduced:true,
-  modelEngaged:false,modelRecovering:false,modelInteractionChapter:null,sourceSelection:null});
+  modelEngaged:false,modelRecovering:false,modelInteractionChapter:null,modelHeldSource:null,sourceSelection:null});
 
 export function validateState(candidate: RuntimeState): RuntimeState {
   for(const key of Object.keys(candidate))if(!Object.hasOwn(initialState,key))throw Error(`Unknown state field ${key}`);
@@ -21,9 +23,11 @@ export function validateState(candidate: RuntimeState): RuntimeState {
   const chapter=candidate.modelInteractionChapter;
   if(chapter!==null&&!Object.hasOwn(counts,chapter))throw Error('Unknown interaction chapter');
   if(candidate.modelEngaged&&(chapter===null||candidate.modelRecovering))throw Error('Invalid inspection ownership');
+  const held=candidate.modelHeldSource;
+  if(held!==null&&(!held||typeof held!=='object'||Array.isArray(held)||!candidate.modelEngaged||held.chapterId!==chapter||!Object.hasOwn(counts,held.chapterId)||!Number.isInteger(held.index)||held.index<0||held.index>=counts[held.chapterId]))throw Error('Invalid held source');
   const selection=candidate.sourceSelection;
   if(selection&&(!Object.hasOwn(counts,selection.chapterId)||!Number.isInteger(selection.index)||selection.index<0||selection.index>=counts[selection.chapterId]||!Number.isFinite(selection.selectedAt)||selection.selectedAt<0))throw Error('Invalid source selection');
-  return Object.freeze({...candidate,sourceSelection:selection?Object.freeze({...selection}):null,sceneReady:candidate.sceneReady&&!candidate.sceneFailed,
+  return Object.freeze({...candidate,modelHeldSource:held?Object.freeze({...held}):null,sourceSelection:selection?Object.freeze({...selection}):null,sceneReady:candidate.sceneReady&&!candidate.sceneFailed,
     reduced:candidate.systemReduced||!candidate.sceneEnabled||candidate.sceneFailed,
     sceneStatus:candidate.sceneFailed?'failed':!candidate.sceneEnabled?'disabled':candidate.sceneReady?'ready':'loading'});
 }
