@@ -5,21 +5,48 @@ import {RENDER_PIXEL_BUDGET} from '../../roles/uiux-designer/cases/bending-activ
 const RESOURCE_WAIT = 20000;
 const binaryAssets = /\/(?:source-layers\.glb|studio-small\.hdr|source-diagrams\.glb)(?:\?|$)/;
 
-async function warmSourceRepresentations(page) {
+// The installed clock stays frozen during native keyboard IPC. Software-GPU
+// runners can spend more than the comparison's eight active seconds between
+// Enter and Arrow, so wall time must not choose which source gets warmed.
+async function pauseResourceClock(page) {
+  const now=await page.evaluate(()=>Date.now());
+  // Read the browser's installed clock, with enough future margin for slow
+  // IPC; a Node wall-clock date or a one-second margin can already be past.
+  await page.clock.pauseAt(new Date(now+60000));
+  return async operation=>{
+    let finished=false,failure;
+    const pending=operation().then(()=>{finished=true;},error=>{failure=error;finished=true;});
+    for(let step=0;step<600&&!finished;step++)await page.clock.fastForward(48);
+    if(!finished){await page.clock.resume();await pending;throw Error('Controlled allocation route did not complete');}
+    await pending;if(failure)throw failure;
+  };
+}
+
+async function warmSourceRepresentations(page,drive) {
   const painted=[];
   for(const [chapter,count] of [['system',4],['pattern',3]]){
-    await centerStudy(page,chapter);
+    await drive(()=>centerStudy(page,chapter));
+    const el=surface(page,chapter);
     const seen=new Set();
     for(let index=0;index<count;index++){
-      await surface(page,chapter).press('Enter');await holdModel(page,chapter);
+      const previous=await page.evaluate(()=>({index:window.__thesis.inspect().representation.index,frames:window.__thesis.inspect().frames})),expected=(previous.index+1)%count;
+      // These are real browser key events. No RAF/time advances between the
+      // comparison request and its inspection hold, regardless of IPC latency.
+      await el.press('Enter');await el.press('ArrowLeft');await el.press('ArrowRight');
+      await drive(()=>settle(page));
       const value=await page.evaluate(()=>{
-        const scene=window.__thesis.inspect();
-        return{id:scene.representation.id,memory:scene.memory,programs:scene.renderer.programs};
+        const scene=window.__thesis.inspect(),story=window.__story.inspect();
+        return{id:scene.representation.id,index:scene.representation.index,chapter:scene.representation.chapterId,pinned:scene.representation.pinned,
+          selected:story.sourceSelection,held:story.modelHeldSource,engaged:story.modelEngaged,
+          memory:scene.memory,programs:scene.renderer.programs,detail:scene.detail,
+          frames:scene.frames,controllerFrame:story.controllerFrame,renderedControllerFrame:scene.renderedControllerFrame};
       });
+      expect(value).toMatchObject({index:expected,chapter,pinned:true,selected:{chapterId:chapter,index:expected},held:{chapterId:chapter,index:expected},engaged:true,detail:'full'});
+      expect(value.frames).toBeGreaterThan(previous.frames);
       seen.add(value.id);painted.push(value);
     }
     expect(seen.size).toBe(count);
-    await surface(page,chapter).press('Escape');await settle(page);
+    await el.press('Escape');await drive(()=>settle(page));
   }
   expect(new Set(painted.map(value=>value.id)).size).toBe(7);
   await test.info().attach('source-material-warmup',{body:JSON.stringify(painted),contentType:'application/json'});
@@ -73,8 +100,9 @@ async function profile(page, viewport) {
 
 test('Full 4K resize cycles retain source data, optics and bounded stable rendering resources', async ({page}) => {
   // Seven actual source paints precede three resize rounds; this wall-clock
-  // allowance is for functional coverage, not a product performance threshold.
-  test.setTimeout(scenarioTimeout(150000));
+  // allowance includes controlled warmup plus real-time resize IPC on a
+  // software GPU; it is not a product performance threshold.
+  test.setTimeout(scenarioTimeout(210000));
   // Observe each native dimension setter, including the intermediate width /
   // old-height combination. A final correct diagnostic cannot hide a transient
   // oversized backing buffer allocated by Fiber before the next World frame.
@@ -93,7 +121,11 @@ test('Full 4K resize cycles retain source data, optics and bounded stable render
   const errors = [], requests = []; page.on('pageerror', error => errors.push(error.message));
   page.on('request', request => {if (binaryAssets.test(request.url())) requests.push(new URL(request.url()).pathname);});
   const originalViewport = page.viewportSize();
-  await loadScene(page);await warmSourceRepresentations(page);await centerStudy(page,'system');await holdModel(page,'system');
+  await page.clock.install();await loadScene(page);
+  const drive=await pauseResourceClock(page);
+  try{await warmSourceRepresentations(page,drive);}finally{await page.clock.resume();}
+  // Resize rounds retain normal autonomous playback and pressure adaptation.
+  await centerStudy(page,'system');await holdModel(page,'system');
   const canvas = await page.locator('[data-cinematic-stage] canvas').elementHandle(), source = await readResources(page);
   expect(source.source).toMatchObject({vertices: 172789, triangles: 227521, sourceObjects: 51});
   expect(source.diagrams.representations).toHaveLength(7);
@@ -177,21 +209,12 @@ test('Full chapter holds and transitions preserve one Canvas without reallocatin
     }
   });
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
-  // Use one explicit clock origin: the browser clock can overtake Node's wall
-  // clock while loading, so pauseAt(new Date()) can accidentally target the past.
-  const clockOrigin=new Date('2026-01-01T00:00:00Z');
-  await page.clock.install({time:clockOrigin});await loadScene(page);await warmSourceRepresentations(page);
-  await page.clock.pauseAt(new Date(clockOrigin.getTime()+600000));
+  await page.clock.install();await loadScene(page);
+  const drive=await pauseResourceClock(page);
+  await warmSourceRepresentations(page,drive);
   // Advance browser RAF/timers deliberately while executing the real scroll
   // and renderer pipeline. This checks allocation behavior, not delivered FPS
   // or sustained-device stability. No model hold suppresses Canvas transitions.
-  const drive=async operation=>{
-    let finished=false,failure;
-    const pending=operation().then(()=>{finished=true;},error=>{failure=error;finished=true;});
-    for(let step=0;step<600&&!finished;step++)await page.clock.fastForward(48);
-    if(!finished){await page.clock.resume();await pending;throw Error('Controlled allocation route did not complete');}
-    await pending;if(failure)throw failure;
-  };
   const canvas=await page.locator('[data-cinematic-stage] canvas').elementHandle();
   const capture=()=>page.evaluate(()=>{
     const scene=window.__thesis.inspect(),story=window.__story.inspect(),stage=document.querySelector('[data-cinematic-stage]');
