@@ -186,7 +186,14 @@ test('pointer lighting and press share the Director clock and cancel, focus and 
  expect(glint.totalMean).toBeGreaterThan(.1);expect(glint.negativeX-glint.positiveX).toBeGreaterThan(rect.width*.12);
  await testInfo.attach('pointer-glint-displacement',{body:JSON.stringify(glint),contentType:'application/json'});
  await page.mouse.down();await expect.poll(async()=>(await read()).press,{timeout:WAIT}).toBeGreaterThan(.95);
- await surface.dispatchEvent('pointercancel',{pointerId:1,pointerType:'mouse'});expect((await read()).press).toBe(0);expect((await read()).hover).toBe(0);await page.mouse.up();
+ await surface.dispatchEvent('pointercancel',{pointerId:1,pointerType:'mouse'});expect((await read()).press).toBe(0);expect((await read()).hover).toBe(0);
+ // A synthetic pointercancel cannot cancel the browser's native mouse click.
+ // Suppress only this cancelled gesture's default Home navigation.
+ const cancelClick=await surface.evaluateHandle(element=>{
+  const prevent=event=>event.preventDefault();element.addEventListener('click',prevent,{capture:true,once:true});
+  return()=>element.removeEventListener('click',prevent,true);
+ });
+ try{await page.mouse.up();}finally{await cancelClick.evaluate(dispose=>dispose());await cancelClick.dispose();}
  if(isMobile){
   const cdp=await context.newCDPSession(page);let touchActive=false;
   try{
@@ -197,7 +204,10 @@ test('pointer lighting and press share the Director clock and cancel, focus and 
   }finally{if(touchActive)await cdp.send('Input.dispatchTouchEvent',{type:'touchCancel',touchPoints:[]});await cdp.detach();}
  }
  await page.keyboard.press('Tab');
- const link=page.locator('[data-story-navigation] a').first();await link.focus();await frames(page,2);
+ await expect(page).toHaveURL(/#overview$/);
+ await expect(page.locator('[data-cinematic-stage]')).toHaveAttribute('data-presentation-context','project');
+ await expect(page.locator('[data-story-navigation]')).toBeVisible();
+ const link=page.locator('[data-story-navigation] a').first();await link.focus();await expect(link).toBeFocused();await frames(page,2);
  const focused=await page.evaluate(()=>window.__story.inspect().liquidGlass.items.find(item=>item.kind==='chapter-navigation'));
  expect(focused.hover).toBe(0);expect(focused.press).toBe(0);expect(focused.settled).toBe(true);
  await page.evaluate(()=>document.activeElement.blur());await page.mouse.move(rect.x+rect.width*.3,rect.y+rect.height*.5);await expect.poll(async()=>(await read()).hover,{timeout:WAIT}).toBeGreaterThan(.9);
