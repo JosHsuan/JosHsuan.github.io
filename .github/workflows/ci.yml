@@ -57,9 +57,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Validate content, lint, types and fast regression tests once
         run: pnpm content:validate && pnpm lint && pnpm typecheck && pnpm test
-      - name: Public case portable tests
+      - name: Public case and role tooling portable tests
         if: needs.plan.outputs.pages == 'true'
-        run: node --test roles/uiux-designer/cases/bending-active-thesis/tests/*.test.mjs
+        run: node --test roles/uiux-designer/cases/bending-active-thesis/tests/*.test.mjs roles/uiux-designer/tools/*.test.mjs
 
   framework:
     needs: plan

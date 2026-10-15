@@ -64,7 +64,7 @@ The [design approach and integration contract](research/spatial-editorial-system
 
 ## Role-only skills and MCP
 
-The three skills and two MCP servers are defined in [toolkit.json](toolkit.json). Skills live here, outside automatic root/global discovery. Display names identify **UIUX designer**. The launcher renders [config.template.toml](config.template.toml), copies role skills into ignored `.runtime/codex-home/skills`, and sets `CODEX_HOME` only for its child Codex invocation. The prior environment value is restored afterwards. No global settings, credentials, repository-root `.agents` or `.codex` registration are written.
+The four skills and two configured MCP servers are defined in [toolkit.json](toolkit.json). Skills live here, outside automatic root/global discovery. The launcher renders [config.template.toml](config.template.toml), copies the project workflows and pinned vendor skills into ignored `.runtime/codex-home/skills`, and sets `CODEX_HOME` only for its child Codex invocation. The prior environment value is restored afterwards. No global settings, credentials, repository-root `.agents` or `.codex` registration are written.
 
 ```powershell
 & roles/uiux-designer/codex-role.ps1 -PrepareOnly
@@ -75,6 +75,17 @@ The three skills and two MCP servers are defined in [toolkit.json](toolkit.json)
 Use the last command for an actual UI/UX Codex CLI session. Model authentication uses normal Codex login/keyring behavior; no credentials are copied into the role. The existing desktop chat does not hot-load these servers merely because their files exist. Other roles should have sibling directories, their own skills/config/runtime and their own preview port.
 
 `uiux_catalog` exposes only search, detail and catalog status. `uiux_browser` is Microsoft Playwright MCP 0.0.83, with an isolated profile and the existing project headless-shell binary. Its own alpha Playwright dependency is isolated in this role's exact lockfile and was actually tested; the website's stable packages remain unchanged. The origin allowlist guides browser requests; it is not an operating-system security boundary. See [MCP results](verification/mcp-results.json).
+
+The original [Liquid Glass web skill](skills/liquid-glass-web/SKILL.md) translates Apple guidance into the Bending-Active material and runtime boundaries. Its [zero-dependency research CLI](tools/apple-design.mjs) explicitly calls the independent Sosumi remote MCP; it does not add a server to the launcher or a dependency to the website. It discovers live tool schemas and accepts only official Apple documentation/HIG/video paths. The following commands run from the repository root with Node 24.19.0:
+
+```sh
+node roles/uiux-designer/tools/apple-design.mjs list --json
+node roles/uiux-designer/tools/apple-design.mjs fetch /design/human-interface-guidelines/materials --json
+node roles/uiux-designer/tools/apple-design.mjs fetch /videos/play/wwdc2025/219/ --content
+node --test roles/uiux-designer/tools/apple-design.test.mjs
+```
+
+Metadata is the default output; `--content` prints untrusted research text for reading. The CLI writes no files or project data to the service. [The verification record](verification/liquid-glass-tooling.json) stores source revisions/licenses, actual MCP status/schema metadata, and Materials/WWDC25/WWDC26 response hashes rather than full Apple prose. The inspected upstream commit is separate from the remote service's reported version and does not attest its deployed revision.
 
 The copied upstream browser skill contains portable CLI guidance. On this Windows host its npx/bash wrapper is not the active path; the verified MCP configuration performs inspection. The role workflow honors the project brief over generic aesthetic defaults in the upstream frontend skill.
 
@@ -94,6 +105,7 @@ roles/uiux-designer/
   research/                Object-to-feedback matrix, primary sources and design rationale
   preview/                 Review shell; individual specimen documents
   mcp/                     Read-only catalog server
+  tools/                   Explicit development-only Apple research CLI and protocol tests
   scripts/                 Acquisition, build, preview and verification
   verification/            Actual validation records (screenshots ignored)
   .runtime/                Ignored config, profiles, temporary authoring and logs

@@ -6,6 +6,7 @@
   "testedCodexVersion": "0.144.1",
   "skills": [
     { "name": "uiux-material-curation", "path": "skills/uiux-material-curation", "origin": "Project-original role workflow" },
+    { "name": "liquid-glass-web", "path": "skills/liquid-glass-web", "origin": "Project-original Apple-guided web material workflow; development-only documentation MCP accessed explicitly through tools/apple-design.mjs" },
     { "name": "frontend-design", "path": "skills/vendor/frontend-design", "repo": "anthropics/skills", "revision": "683bc88e56f3e09ba94f7055977f3d3aa499f202", "sourcePath": "skills/frontend-design", "license": "Apache-2.0", "adaptation": "UIUX display metadata added; upstream skill and license retained" },
     { "name": "playwright", "path": "skills/vendor/playwright", "repo": "openai/skills", "revision": "49f948faa9258a0c61caceaf225e179651397431", "sourcePath": "skills/.curated/playwright", "license": "Apache-2.0", "adaptation": "Display labels scoped to UIUX; upstream prompts, icons, notices and policy preserved", "platformNote": "CLI guidance is retained; this Windows role uses the configured browser MCP for local inspection" }
   ],

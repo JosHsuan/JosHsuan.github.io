@@ -149,3 +149,77 @@ html[data-cinematic-static] [data-information-window]>[data-information-skin]{cl
   html[data-cinematic-ready] body [data-information-window][data-information-ready]:not([data-information-nested]){transform:none!important}
   html [data-information-window]>[data-information-skin]{display:none!important}
 }
+
+/* Liquid Glass is reserved for the three floating functional groups. Reading
+   materials above retain their separate standard-material ownership. The
+   presenter enables the SVG backdrop only after its browser policy accepts it. */
+:root{
+  --liquid-fill:var(--glass-fallback);
+  --liquid-native-backdrop:none;
+  --liquid-border:rgb(229 241 235 / .28);
+  --liquid-shadow:0 12px 30px rgb(0 0 0 / .28),0 2px 5px rgb(0 0 0 / .18),inset 0 1px 0 rgb(255 255 255 / .15),inset 0 -1px 0 rgb(0 0 0 / .52);
+  --liquid-rim-opacity:.72;
+  --liquid-glow-opacity:.11;
+}
+@supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  :root{
+    --liquid-fill:linear-gradient(145deg,rgb(255 255 255 / .025),rgb(255 255 255 / .006) 62%),rgb(13 23 24 / .78);
+    --liquid-native-backdrop:blur(6px) saturate(145%);
+  }
+  @media(max-width:780px){:root{--liquid-native-backdrop:blur(5px) saturate(140%)}}
+}
+html [data-liquid-glass]{
+  isolation:isolate;color:var(--glass-foreground);background:var(--liquid-fill);
+  border-color:var(--liquid-border);box-shadow:var(--liquid-shadow);
+  -webkit-backdrop-filter:var(--liquid-native-backdrop);backdrop-filter:var(--liquid-native-backdrop);
+}
+[data-liquid-skin]{display:none;pointer-events:none!important;user-select:none}
+[data-liquid-skin]>svg{position:absolute;inset:0;width:0;height:0;overflow:hidden;pointer-events:none}
+html [data-liquid-glass][data-liquid-ready]{
+  background:transparent;border-color:transparent;box-shadow:none;
+  -webkit-backdrop-filter:none;backdrop-filter:none;
+}
+html [data-liquid-glass][data-liquid-ready]>[data-liquid-skin]{
+  display:block;position:absolute;inset:-1px;z-index:-1;margin:0!important;padding:0!important;
+  border:1px solid var(--liquid-border);border-radius:inherit;background:var(--liquid-fill);
+  box-shadow:var(--liquid-shadow);overflow:hidden;
+  -webkit-backdrop-filter:var(--liquid-refraction-filter,) var(--liquid-native-backdrop);
+  backdrop-filter:var(--liquid-refraction-filter,) var(--liquid-native-backdrop);
+  transform:scale(calc(1 + var(--liquid-hover,0) * .004 - var(--liquid-press,0) * .014));
+}
+/* The silhouette catches light while its lower edge stays dark. These painted
+   layers do not sample the backdrop again and never filter foreground labels. */
+[data-liquid-skin]::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
+  background:linear-gradient(135deg,rgb(255 255 255 / .82),rgb(216 239 227 / .12) 32%,rgb(0 0 0 / .52) 64%,rgb(231 242 235 / .38));
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  opacity:calc(var(--liquid-rim-opacity) + var(--liquid-hover,0) * .12 + var(--liquid-press,0) * .16);
+}
+[data-liquid-skin]::after{
+  content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(ellipse at var(--liquid-glint-x,28%) var(--liquid-glint-y,12%),rgb(255 255 255 / .68),rgb(214 235 224 / .15) 30%,transparent 66%);
+  opacity:calc(var(--liquid-glow-opacity) + var(--liquid-hover,0) * .11 + var(--liquid-press,0) * .2);
+}
+html [data-liquid-glass]:is(:focus-visible,:has(:focus-visible))>[data-liquid-skin]{transform:none}
+html [data-liquid-glass][data-liquid-mode="opaque"]>[data-liquid-skin]{
+  background:var(--glass-fallback);-webkit-backdrop-filter:none;backdrop-filter:none;transform:none;
+}
+html [data-liquid-glass][data-liquid-mode="opaque"]>[data-liquid-skin]::before,
+html [data-liquid-glass][data-liquid-mode="opaque"]>[data-liquid-skin]::after{display:none}
+@media(prefers-reduced-motion:reduce){html [data-liquid-glass][data-liquid-ready]>[data-liquid-skin]{transform:none}}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
+  :root{--liquid-fill:var(--glass-fallback);--liquid-native-backdrop:none;--liquid-border:#a4b5ac}
+  html [data-liquid-glass][data-liquid-ready]>[data-liquid-skin]{-webkit-backdrop-filter:none;backdrop-filter:none;transform:none}
+  [data-liquid-skin]::before,[data-liquid-skin]::after{display:none}
+}
+@media(forced-colors:active){
+  :root{--liquid-fill:Canvas;--liquid-native-backdrop:none;--liquid-border:CanvasText;--liquid-shadow:none}
+  html [data-liquid-glass][data-liquid-ready]>[data-liquid-skin]{background:Canvas;-webkit-backdrop-filter:none;backdrop-filter:none;transform:none}
+  [data-liquid-skin]::before,[data-liquid-skin]::after{display:none}
+}
+@media print{
+  html [data-liquid-glass]{background:transparent;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+  html [data-liquid-glass]>[data-liquid-skin]{display:none!important}
+}

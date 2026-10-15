@@ -12,16 +12,17 @@ function readMaterial(input){
   return values.length===4?values[3]:1;
  };
  const sample=element=>{
-  const style=getComputedStyle(element),skin=element.querySelector(':scope > [data-information-skin]');
-  const skinStyle=skin&&getComputedStyle(skin),paint=skinStyle?.display!=='none'&&skin?getComputedStyle(skin,'::before'):style;
+  const style=getComputedStyle(element),skin=element.querySelector(':scope > [data-information-skin],:scope > [data-liquid-skin]');
+  const liquid=element.hasAttribute('data-liquid-glass'),skinStyle=skin&&getComputedStyle(skin);
+  const paint=skinStyle?.display!=='none'&&skin?(liquid?skinStyle:getComputedStyle(skin,'::before')):style;
   const owners=[{node:'surface',value:backdrop(style)}];
   if(skinStyle?.display!=='none'&&skin){
    owners.push({node:'skin',value:backdrop(skinStyle)},{node:'skin paint',value:backdrop(getComputedStyle(skin,'::before'))});
   }
   return {
-   kind:element.dataset.informationWindow,material:style.getPropertyValue('--glass-material').trim(),
-   ready:element.hasAttribute('data-information-ready'),nested:!!element.parentElement?.closest('[data-information-window]'),
-   skinCount:element.querySelectorAll(':scope > [data-information-skin]').length,
+   kind:element.dataset.informationWindow||element.dataset.liquidGlass,material:style.getPropertyValue('--glass-material').trim(),mode:element.dataset.liquidMode,
+   ready:element.hasAttribute('data-information-ready')||element.hasAttribute('data-liquid-ready'),nested:!!element.parentElement?.closest('[data-information-window]'),
+   skinCount:element.querySelectorAll(':scope > [data-information-skin],:scope > [data-liquid-skin]').length,
    owners:owners.filter(owner=>owner.value!=='none'),opacity:Number(style.opacity),
    alpha:alpha(paint.backgroundColor),background:paint.background,filter:style.filter,
    supportsBackdrop:CSS.supports('backdrop-filter','blur(1px)')||CSS.supports('-webkit-backdrop-filter','blur(1px)'),
@@ -69,13 +70,18 @@ test('all information surfaces share one glass owner and preserve readable sourc
  expect(surfaces.some(row=>row.nested)).toBe(true);expect(surfaces.some(row=>row.ready)).toBe(true);
  for(const row of surfaces)expectSingleMaterial(row);
 
+ await expect(page.locator('[data-liquid-glass][data-liquid-ready]')).toHaveCount(3,{timeout:WAIT});
  const navigation=await page.locator('[data-story-navigation],[data-page-masthead] > span,[data-reading-tools]').evaluateAll(readMaterial);
  expect(navigation).toHaveLength(3);
  for(const row of navigation){
-  expect(row.material).toBe('navigation');expect(row.opacity).toBe(1);
-  expect(row.owners.map(owner=>owner.node)).toEqual(row.supportsBackdrop?['surface']:[]);
+  expect(row.material).toBe('navigation');expect(row.opacity).toBe(1);expect(row.skinCount).toBe(1);expect(row.ready).toBe(true);
+  expect(row.mode).toMatch(/^(refractive|reflective|opaque)$/);
+  expect(row.owners.map(owner=>owner.node)).toEqual(row.supportsBackdrop&&row.mode!=='opaque'?['skin']:[]);
   expect(row.background).toBe(navigation[0].background);
-  expect(row.owners.map(owner=>owner.value)).toEqual(navigation[0].owners.map(owner=>owner.value));
+  // Each refracting group has its own bounded map. Compare the common native
+  // diffusion while keeping each unique SVG URL on its sole decorative owner.
+  const diffusion=value=>value.replace(/url\([^)]*\)\s*/g,'');
+  expect(row.owners.map(owner=>diffusion(owner.value))).toEqual(navigation[0].owners.map(owner=>diffusion(owner.value)));
  }
  const papers=await page.locator('[data-source-diagram] [data-choreography="diagram"]').evaluateAll(readMaterial);
  expect(papers).toHaveLength(3);

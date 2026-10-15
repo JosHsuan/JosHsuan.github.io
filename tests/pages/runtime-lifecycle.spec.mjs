@@ -8,6 +8,7 @@ async function snapshot(page) {
       y: scrollY, native: story.nativeDocY, visual: story.visualDocY,
       scheduled: story.scheduled, hidden: scene.hidden,
       informationTicks:story.informationWindows.ticks,
+      liquid:{ticks:story.liquidGlass.ticks,maps:story.liquidGlass.mapGenerations,items:story.liquidGlass.items.map(({kind,x,y,hover,press})=>({kind,x,y,hover,press}))},
       ascii:{draws:story.pageField.draws,time:story.pageField.fieldTime,allocations:story.pageField.allocations}};
   });
 }

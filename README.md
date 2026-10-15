@@ -1,5 +1,7 @@
 # Portfolio framework and Bending-Active presentation
 
+The owner-authorized [Liquid Glass integration](roles/uiux-designer/cases/bending-active-thesis/LIQUID_GLASS_INTEGRATION.md) adds bounded optical refraction to the three floating control groups on tested Chromium paths, a reflective fallback on WebKit, and a project-local Apple documentation CLI/skill. Reading windows retain their standard material and the existing shared runtime clock.
+
 The owner-authorized [Apple-inspired materials, entry and event lifecycle integration](roles/uiux-designer/cases/bending-active-thesis/APPLE_GLASS_EVENT_INTEGRATION.md) records the 15 October request: a restrained readiness presentation, consistent frosted information panels, and reconciled 2D / 3D / ASCII trigger, interruption and terminal ownership. It follows the existing architecture, exact toolchain and same-artifact publication gate.
 
 This repository contains the reusable empty Next.js portfolio framework and the completed Bending-Active presentation. On 8 October 2026 the owner authorized publishing that presentation to GitHub Pages. The explicit [public release](roles/uiux-designer/cases/bending-active-thesis/release/README.md) builds independently from its approved story/assets; the original framework and public-content arrays remain empty. [Decision 0006](docs/decisions/0006-public-thesis-pages.md) supersedes the earlier local-only boundary for this selected presentation.

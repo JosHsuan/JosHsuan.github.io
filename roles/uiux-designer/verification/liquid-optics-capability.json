@@ -1,0 +1,53 @@
+{
+  "recordedAt": "2026-10-15T11:22:10.771Z",
+  "scope": "Isolated synthetic DOM/SVG capability experiment; not application acceptance or real-device performance proof",
+  "toolchain": {"node": "24.19.0", "playwright": "1.63.0", "os": "Windows", "browserConcurrency": 1},
+  "scenarioCount": 51,
+  "scenarioDefinition": "17 methods, including one baseline, in each of three fresh sequential browser contexts",
+  "errorsOrCrashes": 0,
+  "fixture": {
+    "sizeCss": [384, 220],
+    "glassRectCss": [40, 40, 280, 140],
+    "normalMap": "Constant red=255, green=128 with feDisplacementMap scale=40",
+    "expectedHorizontalDisplacementCss": 20,
+    "measurement": "Real PNG screenshots decoded to RGB; compare a 200 CSS pixel scanline against source baseline offsets from -30 to +30 CSS pixels",
+    "foreground": "Ordinary text remains a separate sibling above the decorative glass; RGB changes can include compositor text antialiasing and are not a deformation metric"
+  },
+  "backdropUrlResults": [
+    {"project": "chromium", "version": "153.0.8010.12", "cssParsingAccepted": true, "measuredShiftCss": 20, "shiftedMeanChannelError": 0, "unshiftedMeanChannelError": 100.73333333333333},
+    {"project": "webkit", "version": "26.6", "cssParsingAccepted": true, "measuredShiftCss": 0, "shiftedMeanChannelError": 0, "unshiftedMeanChannelError": 0},
+    {"project": "mobile-chromium", "version": "153.0.8010.12", "cssParsingAccepted": true, "measuredShiftCss": 20, "shiftedMeanChannelError": 0.39666666666666667, "unshiftedMeanChannelError": 100.65666666666667}
+  ],
+  "alternativeResults": [
+    {"method": "Same-element SVG filter plus native backdrop", "chromiumShiftCss": 20, "webkitShiftCss": 0, "mobileChromiumShiftCss": 20},
+    {"method": "Parent SVG filter with child backdrop", "chromiumShiftCss": 0, "webkitShiftCss": 0, "mobileChromiumShiftCss": 0},
+    {"method": "Parent backdrop with child SVG filter", "chromiumShiftCss": 0, "webkitShiftCss": 0, "mobileChromiumShiftCss": 0},
+    {"method": "Scaled backdrop element", "chromiumShiftCss": 0, "webkitShiftCss": 0, "mobileChromiumShiftCss": 0},
+    {"method": "SVG foreignObject containing native SVG backdrop URL", "chromiumShiftCss": 20, "webkitShiftCss": 0, "mobileChromiumShiftCss": 20},
+    {"method": "SVG group filter around foreignObject with native backdrop", "chromiumShiftCss": 0, "webkitShiftCss": 0, "mobileChromiumShiftCss": 0},
+    {"method": "feImage reference to SVG source", "chromiumShiftCss": 20, "webkitShiftCss": 20, "mobileChromiumShiftCss": 20, "limit": "SVG-source rasterization, not arbitrary DOM backdrop capture"},
+    {"method": "feImage reference to ordinary HTML div", "chromiumShiftCss": 0, "webkitShiftCss": 0, "mobileChromiumShiftCss": 0},
+    {"method": "feImage reference to HTML already embedded in SVG foreignObject", "chromiumShiftCss": 0, "webkitShiftCss": 20, "mobileChromiumShiftCss": 0, "limit": "Requires restructuring original DOM into SVG; not a compatible replacement for existing native document flow"},
+    {"method": "Direct source filter on SVG foreignObject", "chromiumShiftCss": 20, "webkitShiftCss": 20, "mobileChromiumShiftCss": 20, "limit": "Transforms the complete source rather than sampling the original DOM behind a separate glass surface"}
+  ],
+  "controlsAndLimits": [
+    "Chromium and mobile Chromium blur and invert controls changed the screenshot pixels.",
+    "Windows WebKit native blur and invert controls were pixel-inert, including visible 2% white paint, translateZ acceleration, removal of overflow clipping and body background variants. This port cannot establish normal macOS/iOS blur quality.",
+    "SVG feImage and direct SVG foreignObject source filtering were positive optical controls in Windows WebKit.",
+    "CSS parsing and computed style do not establish actual backdrop refraction.",
+    "No tested method preserves the existing native HTML flow, avoids content duplication, and provides arbitrary DOM backdrop displacement across all three tested projects.",
+    "No extra WebGL context, runtime dependency or external asset was introduced. All browsers, contexts and the local HTTP server were closed."
+  ],
+  "primaryReferences": [
+    "https://drafts.csswg.org/filter-effects-2/",
+    "https://bugs.webkit.org/show_bug.cgi?id=245510",
+    "https://bugs.webkit.org/show_bug.cgi?id=297770",
+    "https://bugs.webkit.org/show_bug.cgi?id=317059"
+  ],
+  "localEvidence": {
+    "probe": "animation-review/.local/liquid-optical-capability-probe.mjs",
+    "summary": "animation-review/.local/liquid-optical-probe-final/summary.json",
+    "fullResultsAndPngs": "animation-review/.local/liquid-optical-probe-final/",
+    "publication": "Only this compact record is maintained; generated synthetic screenshots remain ignored local QA evidence"
+  }
+}

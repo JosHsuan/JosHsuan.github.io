@@ -14,6 +14,7 @@ import {createPageFieldRenderer} from '../../components/page-field-renderer.mjs'
 import {createCanvasTransitionEvents} from './CanvasTransitionEvents.mjs';
 import {createInformationWindowPresenter} from '../presentation/InformationWindowPresenter.mjs';
 import {createLibraryDiagramPresenter} from '../presentation/LibraryDiagramPresenter.mjs';
+import {createLiquidGlassPresenter} from '../presentation/LiquidGlassPresenter.mjs';
 
 /** Owns chapter time and frame coordination, independently of React presentation. */
 export function createExperienceDirector({input,inspection,lifecycle,stage,fieldCanvas,progress,status}){
@@ -24,11 +25,14 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
     if (!root || sections.length !== 7) return;
     const scope=input.events.createScope('director');
     const fine = matchMedia('(hover: hover) and (pointer: fine)');
+    const glassPreferences=['(prefers-reduced-transparency: reduce)','(prefers-contrast: more)','(forced-colors: active)'].map(query=>matchMedia(query));
+    const opaqueGlass=()=>glassPreferences.some(query=>query.matches);
     const links = [...document.querySelectorAll('[data-chapter-link]')];
     const planeMap = new Map(), publisher = input.dom.forOwner('director');
     const pageField=createPageFieldRenderer(fieldCanvas.current);
     const windowPresenter=createInformationWindowPresenter({publisher:input.dom.forOwner('information-windows')});
     const libraryPresenter=createLibraryDiagramPresenter({publisher:input.dom.forOwner('library-diagram'),emit:value=>input.events.emit('diagramReveal',value)});
+    const liquidPresenter=createLiquidGlassPresenter({publisher:input.dom.forOwner('liquid-glass')});
     const informationObserved=new Set();
     const canvasEvents=createCanvasTransitionEvents(value=>input.events.emit('canvasTransition',value));
     let planes=[], diagrams=[];
@@ -36,7 +40,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
     // compensation back into anchors and cause drift on every ResizeObserver.
     const naturalY = element => {let y=0;for(let node=element;node;node=node.offsetParent)y+=node.offsetTop;return y;};
     const readingManager=input.features.create('reading',{window,document,root,naturalY,seek:()=>seek(),
-      onKeyboard:()=>{pointerFocus=false;},isPointerFocus:()=>pointerFocus,
+      onKeyboard:()=>{pointerFocus=false;liquidKeyboardFocus=true;liquidPresenter.reset();},isPointerFocus:()=>pointerFocus,
       onFocus:event=>{focused=event.target.closest?.('[data-feedback-plane]')??event.target.querySelector?.('[data-feedback-plane]')??null;const item=planeMap.get(focused);if(item)item.target={x:.3,y:-.3,press:.35};}});
     const reading=readingManager.reading,playback=createChapterPlayback(),history=[],choreography=new Map();
     let canvasSurface={width:1,height:1},canvasPlacement=null,canvasWasVisible=false,canvasActivation=-1,canvasAwaitingPaint=false,stableWidth=0;
@@ -49,6 +53,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
     input.events.on(scope,'entryReadiness',({phase,id})=>{if(phase==='entered'&&id===input.entry.inspect().id)readingManager.completeInitialNavigation();});
     let pointer={x:0,y:0}, pointerTarget={x:0,y:0}, hovered=null, focused=null, pointerFocus=false;
     let pointerSurface=null,pointerClient={x:0,y:0},pointerMoved=false,lastHoverCheck=-Infinity,disposed=false;
+    let liquidKeyboardFocus=true;
     const scheduler=createFrameScheduler({request:callback=>requestAnimationFrame(callback),cancel:id=>cancelAnimationFrame(id),onFrame:now=>tick(now)});
     const layout=new LayoutScheduler(()=>scheduler.schedule());
     scheduler.suspend('visibility',document.hidden);
@@ -73,7 +78,8 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       offsets=sections.map(naturalY);offsets.push(naturalY(sections.at(-1))+sections.at(-1).offsetHeight);
       windowPresenter.measure({naturalY,viewportHeight:innerHeight,docY:scrollY});
       libraryPresenter.measure({naturalY,viewportHeight:innerHeight});
-      const informationElements=new Set(document.querySelectorAll('[data-information-window]'));
+      liquidPresenter.measure({opaque:opaqueGlass()});
+      const informationElements=new Set(document.querySelectorAll('[data-information-window],[data-liquid-glass]'));
       for(const element of informationObserved)if(!informationElements.has(element)){resize.unobserve(element);informationObserved.delete(element);}
       for(const element of informationElements)if(!informationObserved.has(element)){resize.observe(element);informationObserved.add(element);}
       // Reading follows the native document; only the separate Canvas keeps
@@ -137,6 +143,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       moving=windowPresenter.publish({docY:scrollY,dt,reduced:state.reduced,seek:didSeek,resumed:didResume,canvasPlacement})||moving;
       moving=input.entry.advance(dt,{resumed:didResume,hidden:state.hidden,systemReduced:state.systemReduced})||moving;
       moving=libraryPresenter.publish({docY:scrollY,dt,reduced:state.systemReduced,resumed:didResume,hidden:state.hidden||input.entry.inspect().phase!=='entered'})||moving;
+      moving=liquidPresenter.publish({dt,reduced:state.reduced,resumed:didResume,hidden:state.hidden,opaque:opaqueGlass(),keyboardFocus:liquidKeyboardFocus})||moving;
 
       // Chapter boundaries own the viewport hold. Information rectangles never
       // determine the scene size or camera framing.
@@ -228,7 +235,9 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
     };
     function schedule(){scheduler.schedule();}
     const move=event=>{
-      if(scheduler.suspended||!['mouse','pen'].includes(event.pointerType))return;
+      if(scheduler.suspended)return;
+      if(liquidPresenter.pointer(event))schedule();
+      if(!['mouse','pen'].includes(event.pointerType))return;
       pointerMoved=true;pointerClient={x:event.clientX,y:event.clientY};
       pointerSurface=event.target.closest?.('[data-model-viewport]')??document.querySelector(`[data-model-viewport][data-study-chapter="${input.get().canvasPlacement?.chapter}"]`);
       // Explicit source hover remains usable with Reduced motion or with a pen;
@@ -239,7 +248,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       hovered=event.target.closest?.('[data-feedback-plane]')??null;
       schedule();
     };
-    const reset=()=>{pointerTarget={x:0,y:0};hovered=null;focused=null;pointerFocus=false;pointerActive=false;pointerSurface=null;pointerMoved=false;lastHoverCheck=-Infinity;schedule();};
+    const reset=()=>{pointerTarget={x:0,y:0};hovered=null;focused=null;pointerFocus=false;pointerActive=false;pointerSurface=null;pointerMoved=false;lastHoverCheck=-Infinity;liquidPresenter.reset();schedule();};
     const focusout=()=>{focused=null;schedule();};
     const seek=()=>{seekPending=true;semanticSeekPending=true;schedule();};
     const focus=event=>readingManager.focus(event);
@@ -260,7 +269,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       input.publishFrame({inspectionRevision:(input.get().inspectionRevision??0)+1});
     };
     const pop=event=>readingManager.pop(event);
-    const press=event=>{readingManager.pointerInput();pointerFocus=event.type==='pointerdown';const element=event.target.closest?.('[data-feedback-plane]');const item=planeMap.get(element);if(item){hovered=element;item.target.press=event.type==='pointerdown'?1:element===focused ? .35 : 0;schedule();}};
+    const press=event=>{if(scheduler.suspended)return;readingManager.pointerInput();pointerFocus=event.type==='pointerdown';if(pointerFocus)liquidKeyboardFocus=false;if(liquidPresenter.pointer(event))schedule();const element=event.target.closest?.('[data-feedback-plane]');const item=planeMap.get(element);if(item){hovered=element;item.target.press=event.type==='pointerdown'?1:element===focused ? .35 : 0;schedule();}};
     const suspension=(reason,hidden)=>{
       const wasSuspended=scheduler.suspended;scheduler.suspend(reason,hidden);
       if(wasSuspended===scheduler.suspended)return;
@@ -286,6 +295,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
     listen(window,'scroll',scroll,{passive:true});listen(window,'wheel',wheel,{passive:true});listen(window,'popstate',pop);listen(document,'pointerdown',press);listen(document,'pointerup',press);listen(document,'pointercancel',press);listen(window,'resize',resizeWindow);listen(window,'pointermove',move,{passive:true});
     listen(window,'touchstart',touchstart,{passive:true});listen(window,'touchmove',touchmove,{passive:true});listen(window,'touchend',touchend,{passive:true});listen(window,'touchcancel',touchend,{passive:true});listen(window,'thesis:representation',representation);
     listen(document.documentElement,'pointerleave',reset);listen(window,'blur',reset);listen(document,'visibilitychange',visibility);listen(fine,'change',reset);
+    for(const query of glassPreferences)listen(query,'change',()=>{liquidPresenter.reset();layout.invalidate('liquid-preferences');});
     listen(window,'pagehide',pagehide);listen(window,'pageshow',pageshow);listen(document,'freeze',freeze);listen(document,'resume',resume);
     listen(document,'focusin',focus);listen(document,'focusout',focusout);listen(document,'click',anchor);listen(window,'hashchange',hash);listen(document,'keydown',keyboard);
     const unsubscribe=input.subscribe(()=>{
@@ -293,9 +303,9 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       if(state.reduced!==wasReduced){wasReduced=state.reduced;seekPending=true;schedule();}
       const key=[state.systemReduced,state.sceneEnabled,state.sceneFailed,state.sceneReady].join('/');if(key!==preferenceKey){preferenceKey=key;schedule();}
     });
-    window.__story={inspect:()=>({...reading,...sampleReadingScore(reading,plan),controllerFrame,frameDelta,readingPending:seekPending||resumed||Math.abs(reading.nativeDocY-scrollY)>.01,playback:sampleChapterPlayback(playback),chapterScene:latestScene,informationChapter:lastChapter,pageField:pageField.inspect(),canvasPlacement:canvasPlacement?{...canvasPlacement}:null,canvasSurface,canvasAwaitingPaint,canvasTransitions:canvasEvents.inspect(),informationWindows:windowPresenter.inspect(),entry:input.entry.inspect(),libraryDiagram:libraryPresenter.inspect(),history:[...history],stops:plan.stops,scheduled:scheduler.inspect().scheduled,lifecycle:scheduler.inspect(),domPublication:publisher.inspect(),inspectionActive:!!input.get().inspectionActive,inspectionWeight:input.get().inspectionWeight,modelViewports:input.get().modelViewports,modelEngaged:!!input.get().modelEngaged,modelRecovering:!!input.get().modelRecovering,sourceSelection:input.get().sourceSelection,modelHeldSource:input.get().modelHeldSource,choreography:[...choreography].map(([element,item])=>({kind:item.kind,firstVisibleAt:item.firstVisibleAt,phase:element.dataset.choreographyPhase,settled:item.last?.settled??false})),inspection:{target:{...inspection.target},value:{...inspection.value},lightMix:0,settled:inspection.settled}})};
+    window.__story={inspect:()=>({...reading,...sampleReadingScore(reading,plan),controllerFrame,frameDelta,readingPending:seekPending||resumed||Math.abs(reading.nativeDocY-scrollY)>.01,playback:sampleChapterPlayback(playback),chapterScene:latestScene,informationChapter:lastChapter,pageField:pageField.inspect(),canvasPlacement:canvasPlacement?{...canvasPlacement}:null,canvasSurface,canvasAwaitingPaint,canvasTransitions:canvasEvents.inspect(),informationWindows:windowPresenter.inspect(),liquidGlass:liquidPresenter.inspect(),entry:input.entry.inspect(),libraryDiagram:libraryPresenter.inspect(),history:[...history],stops:plan.stops,scheduled:scheduler.inspect().scheduled,lifecycle:scheduler.inspect(),domPublication:publisher.inspect(),inspectionActive:!!input.get().inspectionActive,inspectionWeight:input.get().inspectionWeight,modelViewports:input.get().modelViewports,modelEngaged:!!input.get().modelEngaged,modelRecovering:!!input.get().modelRecovering,sourceSelection:input.get().sourceSelection,modelHeldSource:input.get().modelHeldSource,choreography:[...choreography].map(([element,item])=>({kind:item.kind,firstVisibleAt:item.firstVisibleAt,phase:element.dataset.choreographyPhase,settled:item.last?.settled??false})),inspection:{target:{...inspection.target},value:{...inspection.value},lightMix:0,settled:inspection.settled}})};
     input.publishFrame({hidden:scheduler.suspended});document.documentElement.setAttribute('data-cinematic-ready','');measure();if(location.hash)hash();
-    return()=>{disposed=true;canvasEvents.dispose();windowPresenter.dispose();libraryPresenter.dispose();pageField.dispose();readingManager.dispose();layout.dispose();scheduler.dispose();scope.dispose();resize.disconnect();unsubscribe();document.documentElement.removeAttribute('data-cinematic-ready');delete document.documentElement.dataset.activeChapter;delete document.documentElement.dataset.chapterBeat;delete window.__story;};
+    return()=>{disposed=true;canvasEvents.dispose();windowPresenter.dispose();libraryPresenter.dispose();liquidPresenter.dispose();pageField.dispose();readingManager.dispose();layout.dispose();scheduler.dispose();scope.dispose();resize.disconnect();unsubscribe();document.documentElement.removeAttribute('data-cinematic-ready');delete document.documentElement.dataset.activeChapter;delete document.documentElement.dataset.chapterBeat;delete window.__story;};
 
   }};
 }

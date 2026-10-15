@@ -3,6 +3,7 @@ import EntryLoader from '../components/EntryLoader';
 import EvidenceInspector from '../components/EvidenceInspector';
 import SourceDiagram from '../components/SourceDiagram';
 import InformationSkin from '../components/InformationSkin';
+import LiquidGlassSkin from '../components/LiquidGlassSkin';
 import {ExperienceProvider} from '../runtime/ExperienceProvider';
 import review from '../release/story.json';
 import styles from './page.module.css';
@@ -51,9 +52,9 @@ export default function Page() {
     <EvidenceInspector items={evidence} />
     <a href="#main" className={styles.skip}>Skip to the study</a>
     <header className={styles.masthead} data-protect data-page-masthead>
-      <span className={styles.owner} data-choreography="nav">{review.owner}<span aria-hidden="true"> / </span><span className={styles.discipline}>RESEARCH</span></span>
+      <span className={styles.owner} data-choreography="nav" data-liquid-glass="identity">{review.owner}<span aria-hidden="true"> / </span><span className={styles.discipline}>RESEARCH</span><LiquidGlassSkin id="identity" /></span>
     </header>
-    <nav className={styles.chapterRail} aria-label="Study chapters" data-protect data-story-navigation>{['overview','form','system','pattern','make','validation','credits'].map((id,index)=><a key={id} href={`#${id}`} data-chapter-link={id}><span data-choreography="nav">{String(index+1).padStart(2,'0')}</span><span className={styles.railLabel}>{id}</span></a>)}</nav>
+    <nav className={styles.chapterRail} aria-label="Study chapters" data-protect data-story-navigation data-liquid-glass="chapter-navigation">{['overview','form','system','pattern','make','validation','credits'].map((id,index)=><a key={id} href={`#${id}`} data-chapter-link={id}><span data-choreography="nav">{String(index+1).padStart(2,'0')}</span><span className={styles.railLabel}>{id}</span></a>)}<LiquidGlassSkin id="chapter-navigation" /></nav>
     <div className={styles.readingFrame} data-reading-frame><main id="main" tabIndex={-1} className={styles.story} data-story-root>
       <section id="overview" className={[styles.chapter, styles.overview].join(' ')} tabIndex={-1} data-story-chapter="overview" data-layout="left" aria-labelledby="project-title">
         <div className={styles.chapterInner}>

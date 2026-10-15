@@ -1,5 +1,7 @@
 # Repository working notes
 
+The current [Liquid Glass integration contract](roles/uiux-designer/cases/bending-active-thesis/LIQUID_GLASS_INTEGRATION.md) limits optical materials to the three floating control groups, with tested engine fallbacks, a single Director clock, and project-local research tooling. Preserve its reading-material and resource ownership boundaries when adjusting these surfaces.
+
 The 15 October owner request and current [Apple-inspired material, entry and event-lifecycle contract](roles/uiux-designer/cases/bending-active-thesis/APPLE_GLASS_EVENT_INTEGRATION.md) authorize that Bending-Active integration under the existing architecture and CI/CD rules. Preserve the empty reusable framework and approved source assets.
 
 All Bending-Active adjustments must follow the current project architecture and development rules, including runtime ownership, pinned toolchain, built-artifact validation and the existing CI/CD publication gate. The owner-authorized Full-mode, model interaction, library reveal and entry-readiness implementation is recorded in [the current integration contract](roles/uiux-designer/cases/bending-active-thesis/FULL_MODE_INTERACTION_ENTRY.md). It does not populate the reusable empty portfolio framework.

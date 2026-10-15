@@ -10,7 +10,7 @@ New-Item -ItemType Directory -Path $runtimeHome,(Join-Path $runtimeHome 'skills'
 $template=[IO.File]::ReadAllText((Join-Path $roleRoot 'config.template.toml'))
 $rendered=$template.Replace('__ROLE_ROOT__',$roleRoot.Replace('\','/')).Replace('__NODE__',$nodePath).Replace('__CHROMIUM__',$chromiumPath)
 [IO.File]::WriteAllText((Join-Path $runtimeHome 'config.toml'),$rendered,[Text.UTF8Encoding]::new($false))
-foreach($skillPath in @((Join-Path $roleRoot 'skills/uiux-material-curation')) + @(Get-ChildItem -LiteralPath (Join-Path $roleRoot 'skills/vendor') -Directory | ForEach-Object { $_.FullName })) {
+foreach($skillPath in @((Join-Path $roleRoot 'skills/uiux-material-curation'), (Join-Path $roleRoot 'skills/liquid-glass-web')) + @(Get-ChildItem -LiteralPath (Join-Path $roleRoot 'skills/vendor') -Directory | ForEach-Object { $_.FullName })) {
   $destination=Join-Path (Join-Path $runtimeHome 'skills') (Split-Path -Leaf $skillPath)
   New-Item -ItemType Directory -Path $destination -Force | Out-Null
   Get-ChildItem -LiteralPath $skillPath -Force | ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination $destination -Recurse -Force }
