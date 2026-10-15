@@ -1,9 +1,11 @@
 /** Source meaning and comparison state; the presentation director remains the clock. */
 export function createDiagramManager({kind,input,getRoot,onData,requestLayout,requestRepresentation=detail=>{
- const result=input.commands.execute('model.select',{...detail,selectedAt:input.get().playback?.activeSeconds??0});
+ const request={...detail,selectedAt:input.get().playback?.activeSeconds??0},result=input.commands.execute('model.select',request);
  if(result.status==='accepted')input.publishFrame({inspectionRevision:(input.get().inspectionRevision??0)+1});
+ const current=input.get().sourceSelection;
+ return result.status==='accepted'&&current?.chapterId===request.chapterId&&current.index===request.index&&current.selectedAt===request.selectedAt?current:null;
 }}){
- let data=null,pinned=null,hover=null,presented=0,generation=0;
+ let data=null,pinned=null,hover=null,presented=0,generation=0,ownedSelection=null;
  function paint(index,announce=false){
   const root=getRoot();if(!root||!data?.groups.length)return;
   const selected=((Number(index)||0)%data.groups.length+data.groups.length)%data.groups.length;
@@ -22,8 +24,17 @@ export function createDiagramManager({kind,input,getRoot,onData,requestLayout,re
   pinned=index;paint(index,true);
   const group=data?.groups[index];
   if(kind==='workflow'&&Number.isInteger(group?.representation)){
-   requestRepresentation({chapterId:'system',index:group.representation});
+   const requested=requestRepresentation({chapterId:'system',index:group.representation});
+   ownedSelection=requested?.chapterId==='system'&&requested.index===group.representation?{...requested}:null;
   }
+ }
+ function follow(){
+  pinned=null;hover=null;
+  const current=input.get().sourceSelection,owned=ownedSelection;ownedSelection=null;
+  // Follow/Escape closes this diagram's accepted comparison only. A newer
+  // model/diagram request and independently held source keep their ownership.
+  if(kind==='workflow'&&owned&&current?.chapterId===owned.chapterId&&current.index===owned.index&&current.selectedAt===owned.selectedAt)input.updateInteraction({sourceSelection:null});
+  restore();
  }
  async function load({signal,fetcher=fetch}){
   const current=++generation;
@@ -56,14 +67,14 @@ export function createDiagramManager({kind,input,getRoot,onData,requestLayout,re
   input.events.on(scope,'representationResolved',followPresentation);
   // Compatibility is limited to an incoming native boundary; normal features use typed facts.
   input.events.listen(scope,target,'thesis:representation-presented',event=>followPresentation(event.detail));
-  requestLayout();return()=>scope.dispose();
+  requestLayout();let active=true;return()=>{if(!active)return;active=false;scope.dispose();follow();};
  }
  return{load,connect,paint,activate,restore,
   hover(index){hover=index;paint(index);},
   leave(){hover=null;restore();},
-  follow(){pinned=null;hover=null;restore();},
+  follow,
   blur(event){if(!event.currentTarget.contains(event.relatedTarget)){hover=null;restore();}},
-  key(event){if(event.key==='Escape'){pinned=null;hover=null;restore();}},
+  key(event){if(event.key==='Escape'){event.preventDefault?.();follow();}},
   cancelLoad(){generation++;},
   inspect:()=>({pinned,hover,presented,loaded:!!data}),
  };

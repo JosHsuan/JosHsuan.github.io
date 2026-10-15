@@ -16,12 +16,12 @@ export function cancelLibraryReveal(state,reason){
  return[fact(state,'cancelled',reason)];
 }
 
-export function advanceLibraryReveal(state,dt,{visible,onScreen=visible,reduced=false,resumed=false,hidden=false}={}){
+export function advanceLibraryReveal(state,dt,{visible,onScreen=visible,reduced=false,resumed=false,hidden=false,requestId}={}){
  if(hidden)return[];
  const events=[];
  if(state.status==='playing'&&!onScreen)return cancelLibraryReveal(state,'offscreen');
  if((state.status==='waiting'||state.status==='cancelled')&&visible){
-  state.id++;state.elapsed=0;state.status='playing';
+  state.id=requestId??state.id+1;state.elapsed=0;state.status='playing';
   events.push(fact(state,'requested','visible'));
  }else if(state.status==='playing'&&!resumed){
   state.elapsed+=Number.isFinite(dt)?Math.max(0,dt):0;

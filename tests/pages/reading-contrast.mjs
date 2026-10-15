@@ -4,7 +4,12 @@ export async function renderedTextContrast(page, locator) {
   await locator.evaluate(element=>element.setAttribute('data-reading-contrast-probe',''));
   const selector='[data-reading-contrast-probe],[data-reading-contrast-probe] *';
   const base=selector+'{transition:none!important}';
-  const style=await page.addStyleTag({content:base});
+  // Inline CSS is available synchronously. Playwright's addStyleTag awaits a
+  // style.onload handler, which cannot run when JavaScript is disabled.
+  const style=(await page.evaluateHandle(css=>{
+    const element=document.createElement('style');element.textContent=css;
+    document.head.appendChild(element);return element;
+  },base)).asElement();
   const geometry=await locator.evaluate(element=>{
     const box=element.getBoundingClientRect(),text=[];
     const walker=document.createTreeWalker(element,NodeFilter.SHOW_TEXT);

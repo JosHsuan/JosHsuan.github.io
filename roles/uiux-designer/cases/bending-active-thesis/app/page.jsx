@@ -31,7 +31,7 @@ function Heading({ number, label, lines, id, kind }) {
 }
 
 function EvidenceImage({ item, className = '', kind = 'photo' }) {
-  return <figure className={[styles.evidence, className].join(' ')} data-story-media data-media-kind={kind}>
+  return <figure className={[styles.evidence, className].join(' ')} data-story-media data-media-kind={kind} style={{'--evidence-aspect-ratio':item.width/item.height}}>
     <div className={styles.figureIndex} data-protect data-choreography="caption" aria-hidden="true"><span>Evidence / {String(evidence.indexOf(item)+1).padStart(2,'0')}</span><span>{kind === 'diagram' ? 'RESEARCH DRAWING' : 'PHYSICAL RECORD'}</span></div>
     <a className={styles.mediaFrame} data-information-window="evidence-image" data-inspect-figure={evidence.indexOf(item)} href={item.source} target="_blank" rel="noreferrer" aria-label={`Inspect original source: ${item.figure}`}><InformationSkin/><span className={styles.mediaPlane} data-protect data-choreography={kind === 'photo' ? 'photo' : 'diagram'} data-feedback-plane><span className={styles.frameCorner} aria-hidden="true"/><img src={item.src} width={item.width} height={item.height} alt={item.alt} loading="lazy" /></span><span className={styles.mediaAction}>Inspect evidence <span aria-hidden="true">↗</span></span></a>
     <figcaption data-information-window="evidence-caption" data-editorial-caption data-protect data-choreography="caption"><InformationSkin/><span>{item.figure}</span><p>{item.caption}</p></figcaption>

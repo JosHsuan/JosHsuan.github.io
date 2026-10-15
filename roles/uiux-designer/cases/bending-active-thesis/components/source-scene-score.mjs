@@ -8,6 +8,7 @@ import {modelInformationLayout} from './model-information.mjs';
 export const SOURCE_DIAGRAM_REVISION = '13fbd10da48e6aa71fe6bfb8c7711741293833f7bba33611f394f9b1543e505a';
 export const REPRESENTATION_IDS = Object.freeze(['origami', 'opening', 'bending', 'curvature']);
 export const EXPERIMENT_IDS = Object.freeze(['experiment-a', 'experiment-b', 'experiment-c']);
+export const SOURCE_COMPARISON_SECONDS = 8;
 // The moving DOM surface owns page composition. Its camera fits within this
 // stable local aperture and never follows a second, page-space source slot.
 export const CANVAS_LOCAL_SOURCE_VIEWPORT = Object.freeze({left:.06,top:.06,width:.88,height:.88});
@@ -56,12 +57,12 @@ export function resolveSourceSelection(playback, selection, sceneScore, heldSour
   const time = playback?.activeSeconds ?? 0;
   const age = time - (selection?.selectedAt ?? -Infinity);
   const held = heldSource?.chapterId === chapterId && Number.isInteger(heldSource.index) && heldSource.index >= 0 && heldSource.index < ids.length;
-  const pinned = selection?.chapterId === chapterId && Number.isInteger(selection.index) && selection.index >= 0 && selection.index < ids.length && age >= 0 && age < 8 && (!held || selection.index === heldSource.index);
+  const pinned = selection?.chapterId === chapterId && Number.isInteger(selection.index) && selection.index >= 0 && selection.index < ids.length && age >= 0 && age < SOURCE_COMPARISON_SECONDS && (!held || selection.index === heldSource.index);
   const phase = playback?.phases?.[chapterIndex] ?? playback?.chapters?.[chapterIndex]?.phase ?? 0;
   const slots = sceneScore?.representation?.sourceSlots?.find(record=>record.chapter === chapterId)?.slots;
   const autoIndex = slots?.length === ids.length ? slots.indexOf(Math.max(...slots)) : Math.min(ids.length-1,Math.floor((((phase%1)+1)%1)*ids.length));
   const index = held ? heldSource.index : pinned ? selection.index : autoIndex;
-  return {id:ids[index], index, chapterId, chapterIndex, held, pinned, pinSecondsRemaining:pinned ? 8-age : 0,
+  return {id:ids[index], index, chapterId, chapterIndex, held, pinned, pinSecondsRemaining:pinned ? SOURCE_COMPARISON_SECONDS-age : 0,
     family:ids === EXPERIMENT_IDS ? 'experiment' : ids === REPRESENTATION_IDS ? 'representation' : 'assembly'};
 }
 

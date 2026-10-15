@@ -9,14 +9,21 @@ export default function EntryLoader(){
  useEffect(()=>input.features.connect('entry.presentation',()=>input.entry.connect({element:element.current,content:document.querySelector('[data-project-content]'),document,onChange:setStatus})),[input]);
  const ready=status.progress===100;
  return <><div ref={element} className={styles.loader} data-entry-loader data-phase="preparing" aria-label="Preparing Bending-Active">
-  <div className={styles.upper}/><div className={styles.lower}/>
+  <div className={styles.backdrop} aria-hidden="true"><picture>
+   <source media="(max-width:780px)" srcSet="/assets/cinematic/model-poster-mobile.webp"/>
+   <img src="/assets/cinematic/model-poster.webp" alt="" decoding="async"/>
+  </picture></div>
   <div className={styles.content}>
-   <span className={styles.identity}>JOSHSUAN CHAO <span>RESEARCH / 01</span></span>
-   <div className={styles.title}><span>BENDING</span><span className={styles.titleLast}>— ACTIVE</span></div>
-   <svg className={styles.traces} viewBox="0 0 800 150" fill="none" aria-hidden="true">
-    {[0,1,2,3,4,5].map(i=><path key={i} pathLength="1" d={`M0 ${115+i*5} C180 ${115+i*5} 210 ${15+i*9} 400 ${15+i*9} S620 ${115+i*5} 800 ${115+i*5}`}/>)}
-   </svg>
-   <div className={styles.bottom}><p role="status" aria-live="polite">{ready?(status.reason?'Ready to read':'Study ready'):'Preparing the study'}</p><span className={styles.number} aria-hidden="true">{String(status.progress).padStart(3,'0')}<small>%</small></span></div>
+   <section className={styles.panel} aria-labelledby="entry-title" aria-describedby="entry-description">
+    <p className={styles.eyebrow}>Thesis study</p>
+    <h2 id="entry-title" className={styles.title}>Bending-Active</h2>
+    <p id="entry-description" className={styles.subtitle}>Metal Panel Deformation</p>
+    <div className={styles.preparation}>
+     <span className={styles.activity} data-ready={ready} aria-hidden="true">{ready&&<svg viewBox="0 0 16 16" fill="none"><path d="m4 8 2.5 2.5L12 5"/></svg>}</span>
+     <p role="status" aria-live="polite" aria-atomic="true">{ready?(status.reason?'Ready to read':'Study ready'):'Preparing the study'}</p>
+    </div>
+   </section>
+   <p className={styles.identity}>JosHsuan Chao</p>
   </div>
  </div><noscript><style>{'[data-entry-loader]{display:none!important}'}</style></noscript></>;
 }

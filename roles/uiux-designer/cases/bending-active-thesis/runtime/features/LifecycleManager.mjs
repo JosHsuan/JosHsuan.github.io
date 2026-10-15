@@ -20,7 +20,7 @@ export function createLifecycleManager({events,onSystemReduced,onHydrated,onAuto
   if(!enabled||failed)return()=>{};
   const scope=events.createScope('scene-lease');recovery?.begin();
   events.listen(scope,windowTarget,'pagehide',()=>recovery?.end());
-  events.listen(scope,windowTarget,'pageshow',()=>recovery?.begin());
+  events.listen(scope,windowTarget,'pageshow',()=>recovery?.resume());
   return()=>scope.dispose();
  }
  return{initialize,connectLease,fail:()=>recovery?.fail(),heartbeat:()=>recovery?.heartbeat(),

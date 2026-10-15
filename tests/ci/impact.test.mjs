@@ -54,8 +54,10 @@ test('core, scene, assets and unknown case modules require every browser spec', 
       {browser: 'chromium', engine: 'chromium', shard: '2/4'},
       {browser: 'chromium', engine: 'chromium', shard: '3/4'},
       {browser: 'chromium', engine: 'chromium', shard: '4/4'},
-      {browser: 'webkit', engine: 'webkit', shard: '1/1'},
-      {browser: 'mobile-chromium', engine: 'chromium', shard: '1/1'},
+      {browser: 'webkit', engine: 'webkit', shard: '1/2'},
+      {browser: 'webkit', engine: 'webkit', shard: '2/2'},
+      {browser: 'mobile-chromium', engine: 'chromium', shard: '1/2'},
+      {browser: 'mobile-chromium', engine: 'chromium', shard: '2/2'},
     ]);
   }
 });

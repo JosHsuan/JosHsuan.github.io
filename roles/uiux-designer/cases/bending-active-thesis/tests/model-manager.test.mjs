@@ -1,8 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createModelManager,MODEL_STUDIES} from '../runtime/features/ModelManager.mjs';
+import {createModelManager,MODEL_STUDIES,expireSourceSelection} from '../runtime/features/ModelManager.mjs';
 import {createStoryInput} from '../components/story-input.js';
 import {createInspectionState} from '../components/inspection-state.mjs';
+import {createChapterPlayback,advanceChapterPlayback,sampleChapterPlayback} from '../components/chapter-playback.mjs';
+import {resolveSourceSelection} from '../components/source-scene-score.mjs';
 
 function setup(){
  const input=createStoryInput(),inspection=createInspectionState(),captures=new Set(),label={textContent:'Origami representation'},announcement={textContent:''};
@@ -131,4 +133,52 @@ test('chapter ownership changes release capture and cannot turn a later pointeru
  assert.equal(f.captures.size,0);assert.equal(f.manager.inspect().pointerId,null);assert.equal(f.input.get().modelHeldSource,null);
  f.manager.end(f.pointer({timeStamp:100}),false,true);assert.equal(f.input.get().sourceSelection,null);
  disconnect();
+});
+
+test('comparison expiry closes committed state once at the same eight-active-second boundary as the source sampler',()=>{
+ const f=setup(),playback=createChapterPlayback('form'),scope=f.input.events.createScope('comparison-expiry'),facts=[];
+ f.input.events.on(scope,'stateChanged',event=>facts.push(['state',event.current.sourceSelection]));
+ f.input.events.on(scope,'representationChanged',event=>facts.push(['selection',event.selection]));
+ f.input.commands.execute('model.select',{chapterId:'form',index:3,selectedAt:0});facts.length=0;
+ const selection=f.input.get().sourceSelection;
+ advanceChapterPlayback(playback,7.999,{chapter:'form'});
+ assert.equal(resolveSourceSelection(sampleChapterPlayback(playback),selection).pinned,true);
+ assert.equal(expireSourceSelection(f.input,playback.activeSeconds),false);assert.deepEqual(facts,[]);
+ advanceChapterPlayback(playback,.001,{chapter:'form'});
+ assert.equal(resolveSourceSelection(sampleChapterPlayback(playback),selection).pinned,false);
+ assert.equal(expireSourceSelection(f.input,playback.activeSeconds),true);
+ assert.equal(f.input.get().sourceSelection,null);assert.deepEqual(facts,[['state',null],['selection',null]]);
+ const version=f.input.state.version;
+ for(let tick=0;tick<5;tick++)assert.equal(expireSourceSelection(f.input,playback.activeSeconds+tick),false);
+ assert.equal(f.input.state.version,version);assert.equal(facts.length,2);
+ scope.dispose();f.input.dispose();
+});
+
+test('expiry preserves the independently held painted source, inspection ownership and camera target',()=>{
+ const f=setup();f.setSourceIndex(2);
+ f.input.commands.execute('model.select',{chapterId:'form',index:3,selectedAt:0});
+ f.manager.begin(f.pointer(),MODEL_STUDIES[0],f.surface,true);
+ f.manager.move(f.pointer({clientX:45,clientY:35}),true);
+ const held=f.input.get().modelHeldSource,target={...f.inspection.target};
+ assert.equal(expireSourceSelection(f.input,8),true);
+ assert.equal(f.input.get().modelEngaged,true);assert.deepEqual(f.input.get().modelHeldSource,held);
+ assert.deepEqual(f.inspection.target,target);assert.equal(f.captures.has(1),true);
+ const selected=resolveSourceSelection(sampleChapterPlayback(createChapterPlayback('form')),null,null,held);
+ assert.equal(selected.index,2);assert.equal(selected.held,true);assert.equal(selected.pinned,false);
+ f.manager.end(f.pointer({timeStamp:200}),true,true);f.input.dispose();
+});
+
+test('hidden, resumed, Reduced and held time do not consume the comparison lifetime; a newer request owns its own deadline',()=>{
+ const f=setup(),playback=createChapterPlayback('form');
+ f.input.commands.execute('model.select',{chapterId:'form',index:3,selectedAt:0});
+ advanceChapterPlayback(playback,4,{chapter:'form'});
+ for(const flags of [{hidden:true},{resumed:true},{reducedMotion:true},{engaged:true}]){
+  advanceChapterPlayback(playback,100,{chapter:'form',...flags});
+  assert.equal(playback.activeSeconds,4);assert.equal(expireSourceSelection(f.input,playback.activeSeconds),false);
+ }
+ f.input.commands.execute('model.select',{chapterId:'form',index:1,selectedAt:4});
+ advanceChapterPlayback(playback,4,{chapter:'form'});assert.equal(playback.activeSeconds,8);
+ assert.equal(expireSourceSelection(f.input,playback.activeSeconds),false);assert.equal(f.input.get().sourceSelection.index,1);
+ advanceChapterPlayback(playback,4,{chapter:'form'});assert.equal(expireSourceSelection(f.input,playback.activeSeconds),true);
+ f.input.dispose();
 });

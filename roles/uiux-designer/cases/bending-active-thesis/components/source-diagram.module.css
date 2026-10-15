@@ -1,11 +1,13 @@
-.frame { --diagram-phase: 0; --diagram-energy: 0; position: relative; margin: 2.5rem 0; padding: clamp(.9rem, 2.2vw, 1.5rem); border: 1px solid #c6d0ca40; border-radius: 1.65rem; background: linear-gradient(145deg,#20282bf5,#141d20f2); box-shadow: 0 16px 36px #0003, inset 0 1px 0 #ffffff0c; color: #ece8e0; isolation: isolate; }
-.frame::before { content: ''; position: absolute; top: 0; left: 26px; right: 26px; height: 1px; pointer-events: none; background: linear-gradient(90deg,transparent,rgb(var(--scene-rim-rgb,200 214 201) / calc(.22 + var(--scene-rim-strength,0) * .2)) var(--scene-rim-x,50%),transparent); }
+.frame { --diagram-phase: 0; --diagram-energy: 0; position: relative; margin: 2.5rem 0; padding: clamp(.9rem, 2.2vw, 1.5rem); border: 1px solid var(--glass-border); border-radius: 1.65rem; background: var(--glass-background); box-shadow: var(--glass-shadow); color: var(--glass-foreground); isolation: isolate; }
+.frame::before { content: none; }
 .heading { max-width: 42rem; margin-bottom: 1.2rem; }
 .eyebrow { color: #b7b1a7; font: .65rem/1.4 var(--mono, monospace); letter-spacing: .14em; text-transform: uppercase; }
 .heading h3 { margin: .45rem 0; font: 400 clamp(1.25rem, 2.2vw, 1.9rem)/1.14 var(--sans, sans-serif); letter-spacing: -.025em; }
 .heading p { margin: .6rem 0 0; color: #c3bfb8; font: .75rem/1.6 var(--mono, monospace); }
 .hitRegion { position: relative; width: 100%; perspective: 950px; }
-.panel { position: absolute; inset: 0; overflow: hidden; border-radius: 1rem; background: #f8f8f9; box-shadow: 0 8px 25px #0004; transform-origin: 50% 50%; }
+/* Authored dark linework needs its original opaque paper; it is content inside
+   the glass frame, not a second translucent interface material. */
+.panel { --glass-material:source-paper; position: absolute; inset: 0; overflow: hidden; border-radius: 1rem; background: var(--glass-paper); box-shadow: 0 8px 25px #0004; transform-origin: 50% 50%; forced-color-adjust: none; }
 .vector, .fallback { display: block; width: 100%; height: 100%; object-fit: contain; }
 .original { pointer-events: none; }
 .original text { font-family: var(--sans, sans-serif); }
@@ -16,10 +18,11 @@
 .regionHit { fill: transparent; stroke: none; pointer-events: fill; }
 .controls { margin-top: 1.15rem; }
 .choices { display: flex; flex-wrap: wrap; gap: .45rem; }
-.choices button { min-height: 2.75rem; padding: .6rem .8rem; border: 1px solid #ffffff20; border-radius: 999px; background: #24262a; color: #d2cec6; font: .7rem/1.3 var(--mono, monospace); cursor: pointer; transition: border-color 200ms, color 200ms, background 200ms; }
-.choices button[data-diagram-active='true'] { border-color: #ff792b; color: #ff9a5c; background: #ff65000d; }
+.choices button { --glass-material:nested; min-height: 2.75rem; padding: .6rem .8rem; border: 1px solid var(--glass-border); border-radius: 999px; background: var(--glass-control-background); color: var(--glass-foreground); font: .7rem/1.3 var(--mono, monospace); cursor: pointer; transition: border-color 200ms, color 200ms, background 200ms; }
+.choices button:hover { background: var(--glass-control-hover); }
+.choices button[data-diagram-active='true'] { border-color: var(--accent); color: var(--glass-control-accent); background: var(--glass-control-hover); }
 .choices button:focus-visible { outline: 2px solid #ffa165; outline-offset: 3px; }
-.choices .follow { margin-left: auto; background: transparent; color: #aaa69f; }
+.choices .follow { margin-left: auto; background: transparent; color: var(--glass-muted); }
 .choices button > span { display: inline-block; }
 .caption { display: grid; grid-template-columns: minmax(0, 1fr); max-width: 46rem; margin: .8rem 0 0; color: #bcb8b1; font: .68rem/1.6 var(--mono, monospace); }
 .caption > span { grid-area: 1 / 1; min-width: 0; }

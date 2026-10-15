@@ -75,14 +75,14 @@ test('Reduced immediately provides the original complete drawing and exactly one
  }
 });
 
-function fixture(){
+function fixture({onEmit=()=>{}}={}){
  const operations=[],events=[];
  const paths=Array.from({length:11},(_,index)=>({dataset:{libraryTrace:String(10-index)},styles:new Map()}));
  const drawing={top:600,offsetHeight:400};
  const element={attrs:new Map(),querySelector:()=>drawing,querySelectorAll:()=>paths};
  const root={nodes:[element],querySelectorAll(){return this.nodes;}};
  const publisher={style(node,key,value){operations.push('paint:'+key);if(value==='')node.styles.delete(key);else node.styles.set(key,String(value));},attribute(node,key,value){if(value===null)node.attrs.delete(key);else node.attrs.set(key,String(value));}};
- const presenter=createLibraryDiagramPresenter({publisher,root,emit:event=>{operations.push('event:'+event.status);events.push({event,paint:paths.map(path=>Object.fromEntries(path.styles))});}});
+ const presenter=createLibraryDiagramPresenter({publisher,root,emit:event=>{operations.push('event:'+event.status);events.push({event,paint:paths.map(path=>Object.fromEntries(path.styles))});onEmit(event);}});
  const measure=()=>presenter.measure({naturalY:node=>node.top,viewportHeight:800});
  const publish=options=>presenter.publish({docY:0,dt:0,...options});
  measure();return{presenter,paths,drawing,root,element,events,operations,measure,publish};
@@ -111,4 +111,45 @@ test('viewport exit, source removal and disposal restore source paint before can
   assert(last.paint.every(styles=>Object.keys(styles).length===0));
   f.presenter.dispose();assert.equal(f.events.filter(row=>row.event.status==='cancelled').length,1);
  }
+});
+
+test('removed and replaced source drawings receive monotonically distinct presenter request identities',()=>{
+ const f=fixture();f.publish();f.publish({dt:.14});const oldPaths=[...f.paths];
+ f.paths.splice(0,f.paths.length,...Array.from({length:11},(_,index)=>({dataset:{libraryTrace:String(index)},styles:new Map()})));
+ f.measure();f.publish();
+ assert(oldPaths.every(path=>path.styles.size===0),'the replaced source is restored before its cancellation');
+ f.root.nodes=[];f.measure();f.root.nodes=[f.element];f.measure();f.publish({reduced:true});
+ assert.deepEqual(f.events.map(row=>[row.event.id,row.event.status]),[[1,'requested'],[1,'cancelled'],[2,'requested'],[2,'cancelled'],[3,'requested'],[3,'completed']]);
+ assert.deepEqual(f.presenter.inspect().open,[]);f.presenter.dispose();assert.equal(f.events.length,6);
+});
+
+test('synchronous request observers can dispose or replace a drawing without double terminal facts or stale DOM ownership',()=>{
+ for(const action of ['dispose','replace']){
+  let f,replaced=false;
+  f=fixture({onEmit:event=>{
+   if(event.status!=='requested'||replaced)return;replaced=true;
+   if(action==='dispose')f.presenter.dispose();
+   else{
+    f.paths.splice(0,f.paths.length,...Array.from({length:11},(_,index)=>({dataset:{libraryTrace:String(index)},styles:new Map()})));
+    f.measure();
+   }
+  }});
+  f.publish();
+  assert.deepEqual(f.events.slice(0,2).map(row=>[row.event.id,row.event.status]),[[1,'requested'],[1,'cancelled']]);
+  if(action==='replace'){
+   assert.equal(f.events.at(-1).event.id,2);assert.equal(f.events.at(-1).event.status,'requested');
+   f.publish({dt:4});assert.equal(f.events.at(-1).event.status,'completed');assert.equal(f.events.at(-1).event.id,2);
+  }
+  f.presenter.dispose();
+  for(const id of new Set(f.events.map(row=>row.event.id)))assert.equal(f.events.filter(row=>row.event.id===id&&row.event.status!=='requested').length,1);
+ }
+});
+
+test('a Reduced drawing painted complete can retain its single completion when a request observer disposes it',()=>{
+ let f;
+ f=fixture({onEmit:event=>{if(event.status==='requested')f.presenter.dispose();}});
+ f.publish({reduced:true});
+ assert.deepEqual(f.events.map(row=>[row.event.id,row.event.status]),[[1,'requested'],[1,'completed']]);
+ assert(f.events.every(row=>row.paint.every(styles=>Object.keys(styles).length===0)));
+ f.presenter.dispose();assert.equal(f.events.length,2);
 });

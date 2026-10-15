@@ -13,6 +13,9 @@ export function createSceneRecovery(storage,now=()=>Date.now()) {
   return {
     recovery,
     begin(){failed=false;lastWrite=now();write({status:'active',at:lastWrite});},
+    // BFCache resume is not an explicit retry. A queued pageshow must never
+    // erase a confirmed failure before the old React lease disconnects.
+    resume(){if(!failed){lastWrite=now();write({status:'active',at:lastWrite});}},
     heartbeat(){if(!failed&&now()-lastWrite>=30000)this.begin();},
     end(){if(!failed)write({status:'ended',at:now()});},
     fail(){failed=true;lastWrite=now();write({status:'failed',at:lastWrite});},

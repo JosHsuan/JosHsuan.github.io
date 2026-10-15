@@ -68,7 +68,7 @@ test('document, fonts and scene-ready facts are independent gates; completion fo
  assert.equal(f.content.getAttribute('inert'),'');
  assert.equal(f.manager.advance(.36),false);
  assert.deepEqual(f.facts.map(row=>row.fact.phase),['preparing','ready','revealing','entered']);
- assert.deepEqual(f.facts.at(-1),{fact:{phase:'entered'},inert:null,busy:null,hidden:'',phase:'entered'});
+ assert.deepEqual(f.facts.at(-1),{fact:{id:1,phase:'entered'},inert:null,busy:null,hidden:'',phase:'entered'});
  const count=f.facts.length;f.manager.advance(10);f.disconnect();assert.equal(f.facts.length,count);
 });
 
@@ -138,7 +138,7 @@ test('a rejected fonts promise retains a visible fallback and follows the same c
 test('disconnect cancels once, preserves inherited inert and ignores a stale fonts completion',async t=>{
  const f=fixture(t,{previousInert:''});f.connect();const connected=f.input.events.inspect();
  f.disconnect();const count=f.facts.length,writes=f.input.dom.inspect().entry.writes,changes=f.changes.length,layouts=f.layouts.length;
- assert.deepEqual(f.facts.at(-1),{fact:{phase:'cancelled'},inert:'',busy:null,hidden:'',phase:null},'Cancellation observers must see restored DOM, including inherited inert');
+ assert.deepEqual(f.facts.at(-1),{fact:{id:1,phase:'cancelled'},inert:'',busy:null,hidden:'',phase:null},'Cancellation observers must see restored DOM, including inherited inert');
  assert.equal(f.content.getAttribute('inert'),'');assert.equal(f.content.getAttribute('aria-busy'),null);
  assert.equal(f.document.documentElement.getAttribute('data-entry-state'),null);assert.equal(f.loader.getAttribute('hidden'),'');
  assert.equal(f.input.events.inspect().subscriptions,connected.subscriptions-1);
@@ -149,11 +149,54 @@ test('disconnect cancels once, preserves inherited inert and ignores a stale fon
 
 test('an old connection cannot resolve a replacement entry or dispose its live scope',async t=>{
  const f=fixture(t);const firstDisconnect=f.connect();f.disconnect();
- assert.deepEqual(f.facts.at(-1),{fact:{phase:'cancelled'},inert:null,busy:null,hidden:'',phase:null},'Ordinary content is interactive before cancellation is announced');
+ assert.deepEqual(f.facts.at(-1),{fact:{id:1,phase:'cancelled'},inert:null,busy:null,hidden:'',phase:null},'Ordinary content is interactive before cancellation is announced');
  const replacementFonts=deferred();f.document.fonts.ready=replacementFonts.promise;f.manager.scenePolicy('deferred');f.connect();
  f.fonts.resolve();await Promise.resolve();firstDisconnect();
  assert.equal(f.manager.inspect().phase,'preparing');assert.equal(f.manager.inspect().prerequisites.typography,false);
  replacementFonts.resolve();await Promise.resolve();f.manager.advance(0,{systemReduced:true});
  assert.equal(f.manager.inspect().phase,'entered');assert.equal(f.content.getAttribute('inert'),null);
  assert.deepEqual(f.facts.map(row=>row.fact.phase),['preparing','cancelled','preparing','ready','revealing','entered']);
+});
+
+test('synchronous teardown during an unfinished readiness outbox never publishes a phase after cancellation',async t=>{
+ for(const trigger of ['ready','revealing']){
+  const f=fixture(t);f.manager.scenePolicy('deferred');f.connect();f.fonts.resolve();await Promise.resolve();
+  const scope=f.input.events.createScope('entry-teardown');
+  f.input.events.on(scope,'entryReadiness',fact=>{if(fact.phase===trigger)f.disconnect();});
+  assert.equal(f.manager.advance(0),false);
+  assert.deepEqual(f.facts.map(row=>row.fact.phase),trigger==='ready'?['preparing','ready','cancelled']:['preparing','ready','revealing','cancelled']);
+  assert(f.facts.every(row=>row.fact.id===1));assert.equal(f.content.getAttribute('inert'),null);
+  assert.equal(f.loader.getAttribute('hidden'),'');assert.equal(f.manager.inspect().phase,'cancelled');
+  f.manager.advance(100);assert.equal(f.facts.at(-1).fact.phase,'cancelled');scope.dispose();
+ }
+});
+
+test('replacing an unfinished entry from its ready observer cannot publish old phases or notify the new connection',async t=>{
+ const f=fixture(t),replacementFonts=deferred();f.manager.scenePolicy('deferred');f.connect();
+ const scope=f.input.events.createScope('entry-replacement');let replaced=false;
+ f.input.events.on(scope,'entryReadiness',fact=>{
+  if(fact.phase!=='ready'||replaced)return;replaced=true;f.disconnect();f.document.fonts.ready=replacementFonts.promise;f.connect();
+ });
+ f.fonts.resolve();await Promise.resolve();f.manager.advance(0);
+ assert.deepEqual(f.facts.map(row=>[row.fact.id,row.fact.phase]),[[1,'preparing'],[1,'ready'],[1,'cancelled'],[3,'preparing']]);
+ assert.equal(f.manager.inspect().id,3);assert.equal(f.manager.inspect().phase,'preparing');assert.equal(f.manager.inspect().time,0);
+ assert.equal(f.changes.at(-1).phase,'preparing');assert.equal(f.content.getAttribute('inert'),'');assert.equal(f.loader.getAttribute('hidden'),null);
+ replacementFonts.resolve();await Promise.resolve();f.manager.advance(0,{systemReduced:true});
+ assert.deepEqual(f.facts.filter(row=>row.fact.id===3).map(row=>row.fact.phase),['preparing','ready','revealing','entered']);
+ assert.equal(f.facts.filter(row=>row.fact.id===1&&row.fact.phase==='cancelled').length,1);scope.dispose();
+});
+
+test('a Reduced entry already painted complete retains its own terminal facts across synchronous replacement',async t=>{
+ const f=fixture(t),replacementFonts=deferred();f.manager.scenePolicy('deferred');f.connect();
+ const scope=f.input.events.createScope('completed-entry-replacement');let replaced=false;
+ f.input.events.on(scope,'entryReadiness',fact=>{
+  if(fact.phase!=='ready'||replaced)return;replaced=true;f.disconnect();f.manager.scenePolicy('required');f.document.fonts.ready=replacementFonts.promise;f.connect();
+ });
+ f.fonts.resolve();await Promise.resolve();assert.equal(f.manager.advance(0,{systemReduced:true}),false);
+ const old=f.facts.filter(row=>row.fact.id===1);
+ assert.deepEqual(old.map(row=>row.fact.phase),['preparing','ready','revealing','entered']);
+ assert.equal(old.at(-1).fact.reason,'static-ready','the terminal retains its own readiness outcome');
+ assert.equal(f.manager.inspect().id,3);assert.equal(f.manager.inspect().phase,'preparing');assert.equal(f.manager.inspect().time,0);
+ assert.equal(f.changes.at(-1).phase,'preparing');assert.equal(f.content.getAttribute('inert'),'');assert.equal(f.loader.getAttribute('hidden'),null);
+ scope.dispose();replacementFonts.resolve();await Promise.resolve();
 });

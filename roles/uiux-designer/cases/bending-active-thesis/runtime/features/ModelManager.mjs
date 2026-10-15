@@ -1,4 +1,13 @@
 import {INSPECTION_DEFAULTS,setInspectionTarget} from '../../components/inspection-state.mjs';
+import {SOURCE_COMPARISON_SECONDS} from '../../components/source-scene-score.mjs';
+
+/** Called in the director's post-clock phase. Expiry commits a real terminal
+ * selection state, without releasing independent inspection/source ownership. */
+export function expireSourceSelection(input,activeSeconds){
+ const selection=input.get().sourceSelection;
+ if(!selection||!Number.isFinite(activeSeconds)||activeSeconds-selection.selectedAt<SOURCE_COMPARISON_SECONDS)return false;
+ return input.commands.execute('model.interact',{sourceSelection:null}).status==='accepted';
+}
 
 const SOURCE_LABELS=['Origami representation','Opening representation','Bending-active representation','Authored curvature colors'];
 export const MODEL_STUDIES=[
@@ -39,7 +48,7 @@ export function createModelManager({input,inspection,hitTest}){
   const selection=state.sourceSelection,age=(state.playback?.activeSeconds??0)-(selection?.selectedAt??-Infinity);
   // Enter may request a comparison just before Arrow takes ownership. Preserve
   // that explicit intent even when its first paint is still pending.
-  if(selection?.chapterId===study.id&&age>=0&&age<8)return sourceAt(study,selection.index);
+  if(selection?.chapterId===study.id&&age>=0&&age<SOURCE_COMPARISON_SECONDS)return sourceAt(study,selection.index);
   return sourceAt(study,Number(surface.dataset.sourceIndex));
  }
  function choose(study,surface,ready){

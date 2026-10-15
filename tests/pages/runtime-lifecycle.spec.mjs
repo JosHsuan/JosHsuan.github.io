@@ -6,7 +6,9 @@ async function snapshot(page) {
     const story = window.__story.inspect(), scene = window.__thesis.inspect();
     return {controller: story.controllerFrame, frames: scene.frames, time: story.playback.activeSeconds,
       y: scrollY, native: story.nativeDocY, visual: story.visualDocY,
-      scheduled: story.scheduled, hidden: scene.hidden};
+      scheduled: story.scheduled, hidden: scene.hidden,
+      informationTicks:story.informationWindows.ticks,
+      ascii:{draws:story.pageField.draws,time:story.pageField.fieldTime,allocations:story.pageField.allocations}};
   });
 }
 

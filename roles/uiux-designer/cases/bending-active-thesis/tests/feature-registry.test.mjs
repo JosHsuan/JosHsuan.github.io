@@ -61,3 +61,58 @@ test('permanent disposal releases other connections and services after cleanup f
  assert.deepEqual(log,['second','first','service']);assert.deepEqual(registrar.inspect(),{services:[],connections:[]});
  registrar.dispose();assert.throws(()=>registrar.start(),/disposed/);
 });
+
+test('a synchronous stop or permanent disposal during setup releases returned native work instead of registering it afterward',()=>{
+ for(const operation of ['stop','dispose']){
+  const root=createRuntimeRoot(),target=new EventTarget();let calls=0,cleanups=0;
+  const release=root.features.connect('interrupted-setup',()=>{
+   const scope=root.events.createScope('pending-native');root.events.listen(scope,target,'change',()=>calls++);
+   root[operation]();
+   return()=>{cleanups++;scope.dispose();};
+  });
+  target.dispatchEvent(new Event('change'));assert.equal(calls,0);assert.equal(cleanups,1);
+  assert.equal(root.events.inspect().nativeListeners,0);assert.deepEqual(root.features.inspect().connections,[]);
+  release();assert.equal(cleanups,1);
+  if(operation==='stop'){
+   const again=root.features.connect('reconnected',()=>()=>cleanups++);again();assert.equal(cleanups,2);
+   root.dispose();
+  }
+ }
+});
+
+test('cleanup cannot resurrect connections during stop and one faulty cleanup cannot prevent remaining releases',()=>{
+ const registrar=new Registrar(new FeatureRegistry(),{}),released=[];
+ registrar.connect('first',()=>()=>released.push('first'));
+ registrar.connect('reentrant',()=>()=>registrar.connect('resurrected',()=>{released.push('unexpected-setup');}));
+ registrar.connect('last',()=>()=>{released.push('last');registrar.stop();});
+ assert.throws(()=>registrar.stop(),error=>error instanceof AggregateError&&error.errors[0].message==='Cannot connect during runtime stop');
+ assert.deepEqual(released,['last','first']);assert.deepEqual(registrar.inspect().connections,[]);
+ const again=registrar.connect('after-stop',()=>()=>released.push('after-stop'));again();
+ assert.deepEqual(released,['last','first','after-stop']);registrar.dispose();
+});
+
+test('permanent disposal requested by a terminal cleanup keeps services alive through all older connections',()=>{
+ const registry=new FeatureRegistry(),log=[];let serviceClosed=false;
+ registry.register({id:'service',create:()=>({dispose(){serviceClosed=true;log.push('service');}})});
+ const registrar=new Registrar(registry,{});
+ registrar.connect('older',()=>()=>{assert.equal(serviceClosed,false);log.push('older');});
+ registrar.connect('newer',()=>()=>{log.push('newer');registrar.dispose();});
+ registrar.stop();assert.deepEqual(log,['newer','older','service']);
+ assert.deepEqual(registrar.inspect(),{services:[],connections:[]});registrar.dispose();
+});
+
+test('nested pending setups release their resources before a requested permanent disposal releases dependencies',()=>{
+ const registry=new FeatureRegistry(),log=[];let serviceClosed=false;
+ registry.register({id:'service',create:()=>({dispose(){serviceClosed=true;log.push('service');}})});
+ const registrar=new Registrar(registry,{});
+ const release=registrar.connect('outer',()=>{
+  registrar.connect('inner',()=>{
+   registrar.dispose();assert.equal(serviceClosed,false);
+   return()=>{assert.equal(serviceClosed,false);log.push('inner');};
+  });
+  assert.equal(serviceClosed,false);
+  return()=>{assert.equal(serviceClosed,false);log.push('outer');};
+ });
+ assert.deepEqual(log,['inner','outer','service']);assert.deepEqual(registrar.inspect(),{services:[],connections:[]});
+ release();registrar.dispose();assert.equal(log.length,3);
+});

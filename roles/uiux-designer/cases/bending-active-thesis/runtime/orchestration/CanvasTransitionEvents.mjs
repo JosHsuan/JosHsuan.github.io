@@ -4,13 +4,15 @@ export function createCanvasTransitionEvents(emit){
   let open=null,pending=null,closed=false;
   const history=[];
   const publish=value=>{history.push(value);if(history.length>32)history.shift();emit(value);};
-  const cancel=reason=>{if(open)publish({...open,status:'cancelled',reason});open=null;pending=null;};
+  const cancel=reason=>{const value=open;open=null;pending=null;if(value)publish({...value,status:'cancelled',reason});};
   return {
     consume(events,frame){
       if(closed)return;
       for(const value of events){
+        if(closed)break;
         if(value.status==='requested'){
           if(open)cancel('superseded');
+          if(closed)break;
           open=value;publish(value);
         }else if(open?.id===value.id){
           if(value.status==='cancelled')cancel(value.reason);
@@ -20,11 +22,11 @@ export function createCanvasTransitionEvents(emit){
     },
     flush({presented,requiresScene}){
       if(pending&&(pending.target==='away'||!requiresScene||presented.chapterId===pending.chapter&&presented.controllerFrame>=pending.frame)){
-        const {frame:_,...value}=pending;publish(value);open=null;pending=null;
+        const value={...pending};delete value.frame;open=null;pending=null;publish(value);
       }
       return !!pending;
     },
     inspect:()=>({open:open?{...open}:null,pending:pending?{...pending}:null,history:[...history]}),
-    dispose(){if(closed)return;cancel('disposed');closed=true;},
+    dispose(){if(closed)return;closed=true;cancel('disposed');},
   };
 }

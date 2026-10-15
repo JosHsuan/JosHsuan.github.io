@@ -5,7 +5,7 @@ const MARKER='[data-source-diagram="library"]';
 /** One owner for original path reveal. No observer, timer, listener or independent RAF. */
 export function createLibraryDiagramPresenter({publisher,emit,root=globalThis.document}){
  const registry=new Map(),history=[];
- let viewportHeight=1,disposed=false;
+ let viewportHeight=1,disposed=false,sequence=0;
  const publishEvents=events=>{for(const event of events){history.push(event);if(history.length>32)history.shift();emit(event);}};
  const paint=(item,progress)=>{
   item.paths.forEach((path,index)=>{
@@ -53,7 +53,8 @@ export function createLibraryDiagramPresenter({publisher,emit,root=globalThis.do
     const onScreen=bottom>0&&top<viewportHeight;
     // The panel must enter the reading area, rather than start at a single edge pixel.
     const visible=bottom>viewportHeight*.1&&top<viewportHeight*.85;
-    const events=advanceLibraryReveal(item.state,dt,{visible,onScreen,reduced,resumed});
+    const events=advanceLibraryReveal(item.state,dt,{visible,onScreen,reduced,resumed,requestId:sequence+1});
+    if(events.some(event=>event.status==='requested'))sequence=item.state.id;
     item.progress=sampleLibraryReveal(item.state,{reduced});
     paint(item,item.progress);
     // Terminal facts follow the actual DOM writes, never just elapsed time.

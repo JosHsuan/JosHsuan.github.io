@@ -22,4 +22,6 @@ Regression tests cover selection unions, shared/unknown fallbacks, cancelled/fai
 
 ## Partition amendment — 15 October 2026
 
+The subsequent materials/event integration keeps four Chromium shards and divides full-case WebKit and mobile Chromium into two file shards each. The preceding successful release `1d0bd9f` ran the mobile suite in 26.1 minutes against the unchanged 30-minute limit, before the added integration checks. Scoped checks stay unsharded. No scenario, assertion, optical effect or artifact gate is removed; final file-level listings and exact scenario-union checks validate the partition.
+
 The expanded Full-mode suite uses four file-level Chromium shards instead of two after hosted shard `1/2` at `37d3728` reached the existing 30-minute job limit while progressing through scenario 21 of 24, with no preceding assertion failure. A three-shard listing still grouped the first 21 scenarios together; four shards produce 12/12/12/9 and separate model inspection from the costly canvas/library scenarios. Scoped Chromium, WebKit and mobile Chromium retain one shard each. File-local sequences, one worker per runner, the 30-minute limit, full scenario coverage, shared-output digest checks and the exact-commit publication gate are unchanged. The original two-shard decision and its 13 October verification remain historical evidence.

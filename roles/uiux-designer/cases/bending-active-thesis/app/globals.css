@@ -2,6 +2,53 @@
 @font-face{font-family:'IBM Plex Mono';src:url('/assets/fonts/ibm-plex-mono-regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
 @font-face{font-family:'IBM Plex Serif';src:url('/assets/fonts/ibm-plex-serif-italic.woff2') format('woff2');font-weight:400;font-style:italic;font-display:swap}
 :root{color-scheme:dark;--bg:#090d0d;--surface:#121a18;--paper:#efeee7;--muted:#c1c9c4;--line:#495650;--accent:#ff9469;--ink:#131b17;--sans:'IBM Plex Sans',Arial,sans-serif;--mono:'IBM Plex Mono',monospace;--serif:'IBM Plex Serif',Georgia,serif;--radius:24px;font-family:var(--sans);color:var(--paper);background:var(--bg)}
+/* One web material family, informed by Apple's material hierarchy. Reading
+   surfaces use a regular material; floating navigation uses a lighter variant.
+   These CSS backdrops do not alter source pixels or the WebGL/ASCII renderers. */
+:root{
+  --glass-fallback:#182322;
+  --glass-background:var(--glass-fallback);
+  --glass-navigation-background:var(--glass-fallback);
+  --glass-backdrop:none;
+  --glass-navigation-backdrop:none;
+  --glass-border:rgb(224 238 232 / .24);
+  --glass-shadow:0 18px 48px #0004,inset 0 1px 0 #ffffff18;
+  --glass-navigation-shadow:0 10px 30px #0004,inset 0 1px 0 #ffffff21;
+  --glass-foreground:#f2f4f0;
+  --glass-muted:#c6d0ca;
+  --glass-control-background:rgb(255 255 255 / .035);
+  --glass-control-hover:rgb(255 255 255 / .07);
+  --glass-control-accent:#ffd4bf;
+  --glass-paper:#f8f8f9;
+}
+@supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  :root{
+    --glass-background:linear-gradient(145deg,rgb(255 255 255 / .045),rgb(255 255 255 / .008) 62%),rgb(13 23 24 / .86);
+    --glass-navigation-background:linear-gradient(145deg,rgb(255 255 255 / .045),rgb(255 255 255 / .015) 62%),rgb(13 23 24 / .84);
+    --glass-backdrop:blur(24px) saturate(145%);
+    --glass-navigation-backdrop:blur(28px) saturate(160%);
+  }
+  @media(max-width:780px){:root{--glass-backdrop:blur(18px) saturate(145%);--glass-navigation-backdrop:blur(20px) saturate(160%)}}
+}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
+  :root{
+    --glass-background:var(--glass-fallback);--glass-navigation-background:var(--glass-fallback);
+    --glass-backdrop:none;--glass-navigation-backdrop:none;
+    --glass-border:#a4b5ac;--glass-muted:#e0e7e1;
+    --glass-control-background:#22302d;--glass-control-hover:#31413b;
+  }
+}
+@media(forced-colors:active){
+  :root{
+    --glass-fallback:Canvas;--glass-background:Canvas;--glass-navigation-background:Canvas;
+    --glass-backdrop:none;--glass-navigation-backdrop:none;
+    --glass-border:CanvasText;--glass-foreground:CanvasText;--glass-muted:CanvasText;
+    --glass-control-background:Canvas;--glass-control-hover:Canvas;
+    --glass-control-accent:LinkText;
+    --glass-shadow:none;--glass-navigation-shadow:none;
+    --paper:CanvasText;--muted:CanvasText;--accent:LinkText;
+  }
+}
 *{box-sizing:border-box}
 html{scroll-behavior:auto}
 html[data-entry-state="preparing"],html[data-entry-state="revealing"]{overflow:hidden}
@@ -43,22 +90,36 @@ html[data-cinematic-ready] [data-feedback-plane][data-choreography-phase="settle
 
 /* C3 is one material response per information window. The decorative skin is
    clipped; its sibling text, source pixels, hit areas and focus rings are not. */
-[data-information-window]{isolation:isolate}
+html [data-information-window]{
+  --glass-material:regular;
+  isolation:isolate;background:var(--glass-background);border-color:var(--glass-border);box-shadow:var(--glass-shadow);
+  -webkit-backdrop-filter:var(--glass-backdrop);backdrop-filter:var(--glass-backdrop);
+}
+/* Nested evidence shares its parent's material. Controls use the small fill
+   token separately; nested windows add neither a second backdrop nor tint. */
+html [data-information-window] [data-information-window]{
+  --glass-material:nested;
+  background:transparent;box-shadow:none;
+  -webkit-backdrop-filter:none;backdrop-filter:none;
+}
 [data-information-window="evidence-caption"],[data-information-window="source-details"],[data-information-window="source-portal"]{position:relative}
 [data-information-skin]{display:none;pointer-events:none!important;user-select:none}
 html [data-information-window][data-information-ready]:not(details:not([open])){
-  background:transparent!important;border-color:transparent!important;box-shadow:var(--information-shadow,none)!important;
+  background:transparent!important;border-color:transparent!important;box-shadow:none!important;
+  -webkit-backdrop-filter:none;backdrop-filter:none;
 }
 html [data-information-window="editorial"][data-information-ready]{outline-color:transparent}
 html [data-information-window][data-information-ready]>[data-information-skin]{
   display:block;position:absolute;inset:0;z-index:-1;margin:0!important;padding:0!important;
-  background:var(--information-background);border-style:solid;
-  border-width:var(--information-border-width,0);border-color:var(--information-border-color,transparent);
-  border-radius:var(--information-radius,0px);box-shadow:var(--information-shadow,none);
+  background:transparent;border-style:solid;
+  border-width:var(--information-border-width,0);border-color:var(--glass-border);
+  border-radius:var(--information-radius,0px);box-shadow:var(--glass-shadow);
+  -webkit-backdrop-filter:var(--glass-backdrop);backdrop-filter:var(--glass-backdrop);
   clip-path:var(--information-skin-path,inset(0 round var(--information-radius,0px)));
 }
-/* Fixed paint overscan does not change any content or source Canvas dimensions. */
-[data-information-skin]::before{content:'';position:absolute;inset:-24px;z-index:-1;background:inherit;pointer-events:none}
+/* Fixed overscan preserves the existing fluid edge without resizing content.
+   Only this pseudo-element paints the tint; the skin owns the single backdrop. */
+[data-information-skin]::before{content:'';position:absolute;inset:-24px;z-index:-1;background:var(--glass-background);pointer-events:none}
 html [data-information-window][data-information-moving=true]{box-shadow:none!important}
 html [data-information-window][data-information-moving=true]>[data-information-skin]{border-color:transparent;box-shadow:none}
 html :is([data-information-window="editorial"],[data-information-window="source-diagram"])[data-information-moving=true]::before,
@@ -84,6 +145,7 @@ html[data-cinematic-static] [data-information-window]>[data-information-skin]{cl
   html [data-information-window]>[data-information-skin]{clip-path:inset(0 round var(--information-radius,0px))!important}
 }
 @media print{
+  :root{--glass-background:transparent;--glass-navigation-background:transparent;--glass-backdrop:none;--glass-navigation-backdrop:none;--glass-shadow:none;--glass-navigation-shadow:none;--glass-border:#68756d;--glass-control-background:transparent;--glass-control-hover:transparent;--glass-foreground:#151b17;--glass-muted:#333b35;--glass-control-accent:#92300c}
   html[data-cinematic-ready] body [data-information-window][data-information-ready]:not([data-information-nested]){transform:none!important}
   html [data-information-window]>[data-information-skin]{display:none!important}
 }

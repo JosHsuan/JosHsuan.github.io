@@ -16,11 +16,18 @@ test('a recently interrupted session gates automatic restart; normal pagehide do
 test('failure is latched against queued heartbeat and pagehide until explicit begin',()=>{
   const storage=fixture();let now=1000;const session=createSceneRecovery(storage,()=>now);
   session.begin();session.fail();const failure=storage.getItem(SCENE_RECOVERY_KEY);
-  now+=31*60*1000;session.heartbeat();session.end();assert.equal(storage.getItem(SCENE_RECOVERY_KEY),failure);
-  const next=createSceneRecovery(storage,()=>now);assert.equal(next.recovery,true);next.heartbeat();next.end();
+  now+=31*60*1000;session.heartbeat();session.end();session.resume();assert.equal(storage.getItem(SCENE_RECOVERY_KEY),failure);
+  const next=createSceneRecovery(storage,()=>now);assert.equal(next.recovery,true);next.heartbeat();next.end();next.resume();
   assert.equal(storage.getItem(SCENE_RECOVERY_KEY),failure);
   next.begin();assert.equal(JSON.parse(storage.getItem(SCENE_RECOVERY_KEY)).status,'active');next.end();
   assert.equal(createSceneRecovery(storage,()=>now).recovery,false);
+});
+test('ordinary resume renews the lease without changing an explicit failure latch',()=>{
+  const storage=fixture();let now=1000;const session=createSceneRecovery(storage,()=>now);
+  session.begin();session.end();now+=5000;session.resume();
+  assert.deepEqual(JSON.parse(storage.getItem(SCENE_RECOVERY_KEY)),{status:'active',at:now});
+  session.fail();const failure=storage.getItem(SCENE_RECOVERY_KEY);now+=5000;session.resume();
+  assert.equal(storage.getItem(SCENE_RECOVERY_KEY),failure);
 });
 test('active heartbeat is throttled and storage denial never prevents reading',()=>{
   const storage=fixture();let now=1000;const session=createSceneRecovery(storage,()=>now);session.begin();

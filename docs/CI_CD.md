@@ -41,7 +41,7 @@ Push selection uses the last successful **ancestor push run**, not `event.before
 
 ## Build reuse and caches
 
-`quality` runs fast checks once. `pages-build` creates/audits a new export once and uploads `static-export-pages` plus `pages-build-record`. Case browser jobs download that exact export; each verifies its digest before and after tests. Only the required browser engine is installed. Full-case Chromium uses four file-level shards; scoped Chromium, WebKit and mobile Chromium each run one shard. Every runner retains `workers: 1` to limit software-GPU contention. The browser job's 30-minute limit remains unchanged.
+`quality` runs fast checks once. `pages-build` creates/audits a new export once and uploads `static-export-pages` plus `pages-build-record`. Case browser jobs download that exact export; each verifies its digest before and after tests. Only the required browser engine is installed. Full-case Chromium uses four file-level shards; full-case WebKit and mobile Chromium each use two. Scoped checks use one shard per browser. Every runner retains `workers: 1` to limit software-GPU contention. The browser job's 30-minute limit remains unchanged.
 
 The pnpm store cache uses the lockfile. Next cache keys separate framework root/subpath and Pages, with a lockfile-scoped restore prefix and a commit-specific save key. [prepare-pages-workspace.mjs](../scripts/prepare-pages-workspace.mjs) preserves only `.next/cache`; app sources, public files, server output and old exports are removed before assembling the allowlisted build. Cache hits are an optimization, never validation evidence or a reusable deployed output.
 
@@ -72,6 +72,10 @@ pnpm test:pages
 To inspect a targeted plan locally, set `CI_BASE_SHA` to a verified ancestor and run `node scripts/ci-plan.mjs`; set `CI_FORCE_FULL=true` to force every check. The local diff covers committed history. To inspect uncommitted inputs, pass their paths to the exported `classifyChanges` function, including untracked files. Generated plan/build/validation JSON files are ignored.
 
 ## Verification limits
+
+### Materials/event integration capacity — 15 October 2026
+
+The preceding successful `1d0bd9f` release ran 45 identical scenarios per public browser, 135 total. Hosted mobile Chromium took 26.1 minutes and WebKit 19.9 minutes. Full-case WebKit/mobile now use two file shards each to accommodate the new integration checks within the same 30-minute job limit. Chromium retains four shards; scoped checks remain unsharded. Scenario union and artifact identity remain required. This is workload partitioning, not a claim of faster rendering or weaker acceptance.
 
 ### Local migration checkpoint — 13 October 2026
 

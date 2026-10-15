@@ -1,10 +1,11 @@
-.inspector{margin:1.5rem 0 0;border:1px solid #b7c7b557;padding:1rem;background:#0b1111;color:#e5e9de}
+.inspector{margin:1.5rem 0 0;border:1px solid var(--glass-border);padding:1rem;background:var(--glass-background);color:var(--glass-foreground)}
 .inspector header{display:flex;gap:1rem;align-items:center;justify-content:space-between;margin-bottom:1rem;font:.55rem/1.5 var(--mono)}
-.inspector button{font:inherit;color:inherit;border:1px solid #bac8b65e;min-height:44px;padding:.6rem;background:#1b2822;cursor:pointer}
+.inspector button{--glass-material:nested;font:inherit;color:inherit;border:1px solid var(--glass-border);min-height:44px;padding:.6rem;background:var(--glass-control-background);cursor:pointer}
+.inspector button:hover,.inspector button:focus-visible{background:var(--glass-control-hover)}
 .inspector button:hover{border-color:var(--accent)}
 .inspector :focus-visible{outline:2px solid var(--accent);outline-offset:4px}
 .inspector img{display:block;width:100%;height:auto}
 .inspector>a{display:inline-block;margin-top:1rem;font:.65rem var(--mono);padding:.5rem 0}
 @media(max-width:780px){.inspector{padding:.65rem}.inspector header{gap:.5rem}}
 
-.inspector{border-radius:20px;box-shadow:0 20px 50px #0005,inset 0 1px #ffffff14}.inspector button{border-radius:12px}.inspector img{border-radius:12px}.inspector>a{border-radius:8px}
+.inspector{border-radius:20px;box-shadow:var(--glass-shadow)}.inspector button{border-radius:12px}.inspector img{border-radius:12px;forced-color-adjust:none}.inspector>a{border-radius:8px}

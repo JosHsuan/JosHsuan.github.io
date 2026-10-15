@@ -7,7 +7,8 @@ import {advanceInspection, setInspectionTarget, INSPECTION_DEFAULTS} from '../..
 import {createFrameScheduler} from '../../components/runtime-scheduler.mjs';
 import {LayoutScheduler} from '../presentation/LayoutScheduler.ts';
 import {createCanvasMotion, advanceCanvasMotion} from '../../components/canvas-motion.mjs';
-import {viewportStageSourceViewport} from '../../components/source-scene-score.mjs';
+import {viewportStageSourceViewport,SOURCE_COMPARISON_SECONDS} from '../../components/source-scene-score.mjs';
+import {expireSourceSelection} from '../features/ModelManager.mjs';
 import {modelInformationLayout} from '../../components/model-information.mjs';
 import {createPageFieldRenderer} from '../../components/page-field-renderer.mjs';
 import {createCanvasTransitionEvents} from './CanvasTransitionEvents.mjs';
@@ -44,6 +45,8 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
     let inspectionRevision=input.get().inspectionRevision??0, wasReduced=input.get().reduced;
     let preferenceKey='', pendingImpulse=0, touchY=null, pointerActive=false, latestScene=null, lastChapter=null;
     readingManager.start();
+    if(input.entry.inspect().phase==='entered')readingManager.completeInitialNavigation();
+    input.events.on(scope,'entryReadiness',({phase,id})=>{if(phase==='entered'&&id===input.entry.inspect().id)readingManager.completeInitialNavigation();});
     let pointer={x:0,y:0}, pointerTarget={x:0,y:0}, hovered=null, focused=null, pointerFocus=false;
     let pointerSurface=null,pointerClient={x:0,y:0},pointerMoved=false,lastHoverCheck=-Infinity,disposed=false;
     const scheduler=createFrameScheduler({request:callback=>requestAnimationFrame(callback),cancel:id=>cancelAnimationFrame(id),onFrame:now=>tick(now)});
@@ -103,7 +106,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
         state=input.get();
       }
       const requested=state.sourceSelection,requestAge=playback.activeSeconds-(requested?.selectedAt??-Infinity);
-      const explicitChapter=state.modelEngaged?state.modelInteractionChapter:requested?.chapterId===chapter.id&&requestAge>=0&&requestAge<8?requested.chapterId:undefined;
+      const explicitChapter=state.modelEngaged?state.modelInteractionChapter:requested?.chapterId===chapter.id&&requestAge>=0&&requestAge<SOURCE_COMPARISON_SECONDS?requested.chapterId:undefined;
       canvasPlacement=advanceCanvasMotion(canvasMotion,dt,{anchors:offsets,docY:scrollY,viewport:{width:canvasSurface.width,height:canvasSurface.height},reducedMotion:state.reduced,seek:didSeek,resumed:didResume,paused:canvasAwaitingPaint,forcedChapter:explicitChapter});
       advanceInspection(inspection,dt,{reducedMotion:state.reduced,resumed});
       const recovering=!!state.modelRecovering&&!inspection.settled;
@@ -114,6 +117,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
         seek:didSeek||lastChapter===null,
       });
       const playbackScore=sampleChapterPlayback(playback);
+      if(expireSourceSelection(input,playbackScore.activeSeconds))state=input.get();
       lastChapter=chapter.id;resumed=false;seekPending=false;semanticSeekPending=false;
       // Read the few unsettled sticky labels together, before any element
       // transform writes. Already-settled labels need no live rectangle.

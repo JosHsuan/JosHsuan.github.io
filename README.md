@@ -1,5 +1,7 @@
 # Portfolio framework and Bending-Active presentation
 
+The owner-authorized [Apple-inspired materials, entry and event lifecycle integration](roles/uiux-designer/cases/bending-active-thesis/APPLE_GLASS_EVENT_INTEGRATION.md) records the 15 October request: a restrained readiness presentation, consistent frosted information panels, and reconciled 2D / 3D / ASCII trigger, interruption and terminal ownership. It follows the existing architecture, exact toolchain and same-artifact publication gate.
+
 This repository contains the reusable empty Next.js portfolio framework and the completed Bending-Active presentation. On 8 October 2026 the owner authorized publishing that presentation to GitHub Pages. The explicit [public release](roles/uiux-designer/cases/bending-active-thesis/release/README.md) builds independently from its approved story/assets; the original framework and public-content arrays remain empty. [Decision 0006](docs/decisions/0006-public-thesis-pages.md) supersedes the earlier local-only boundary for this selected presentation.
 
 Build the published home page with `pnpm build:pages` and verify it with `pnpm test:pages`. Output is `.pages-workspace/out/`, previewed at `http://127.0.0.1:4186/`. The canonical public URL is `https://joshsuan.github.io/`. Earlier local-review sections below preserve research history; they do not revoke the explicit publication request.

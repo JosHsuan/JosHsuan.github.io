@@ -3,7 +3,7 @@ import {createReadingState,advanceReading,sampleReadingScore} from '../../compon
 /** Native navigation/history and reading response; no scene or camera writes. */
 export function createReadingManager({window:win,document:doc,root,naturalY,seek,onKeyboard,onFocus,isPointerFocus,now=()=>Date.now()}){
  const reading=createReadingState(win.scrollY),positions=new Map();let plan=null,initialHash=!!win.location.hash;
- let historyNavigation=null,seekOnScroll=false,sequence=0,activeEntry=null,historyPosition=null,previousRestoration;
+ let historyNavigation=null,seekOnScroll=false,sequence=0,activeEntry=null,historyPosition=null,previousRestoration,lastHash=win.location.hash;
  const remember=()=>positions.set(activeEntry,{x:win.scrollX,y:win.scrollY});
  const restore=()=>{if(historyPosition)win.scrollTo({left:historyPosition.x,top:historyPosition.y,behavior:'instant'});seek();};
  function start(){
@@ -12,7 +12,13 @@ export function createReadingManager({window:win,document:doc,root,naturalY,seek
   win.history.replaceState({...win.history.state,thesisReadingId:activeEntry},'',win.location.href);remember();
  }
  function hash(event){
+  // The startup fragment is a temporary layout intent, not a permanent scroll
+  // lock. A new native navigation supersedes it even when its target is absent.
+  if(event)initialHash=false;
+  if(event?.newURL&&event.newURL!==win.location.href)return;
+  lastHash=win.location.hash;
   if(event?.newURL===historyNavigation){restore();historyNavigation=null;return;}
+  if(event)historyNavigation=null;
   let id;try{id=decodeURIComponent(win.location.hash.slice(1));}catch{return;}
   const target=doc.getElementById(id);
   if(target&&root.contains(target)){
@@ -48,11 +54,21 @@ export function createReadingManager({window:win,document:doc,root,naturalY,seek
   }
  }
  function pop(event){
-  initialHash=false;historyNavigation=win.location.href;activeEntry=event.state?.thesisReadingId??`reading-${now()}-${++sequence}`;
-  historyPosition=positions.get(activeEntry)??event.state?.thesisReadingPosition??{x:0,y:0};seekOnScroll=true;restore();
+  initialHash=false;seekOnScroll=true;
+  const id=event.state?.thesisReadingId,position=positions.get(id)??event.state?.thesisReadingPosition,changed=lastHash!==win.location.hash;
+  lastHash=win.location.hash;historyNavigation=null;historyPosition=null;
+  if(typeof id==='string'&&id&&position&&Number.isFinite(position.x)&&Number.isFinite(position.y)){
+   activeEntry=id;historyPosition=position;historyNavigation=changed?win.location.href:null;restore();return;
+  }
+  // Native fragment navigation also dispatches popstate, with no reading id.
+  // It is a new destination, not an unknown history entry to restore at zero.
+  activeEntry=`reading-${now()}-${++sequence}`;
+  win.history.replaceState({...event.state,thesisReadingId:activeEntry,thesisReadingPosition:null},'',win.location.href);
+  hash();remember();seek();
  }
  return{reading,start,hash,anchor,key,focus,pop,
   get initialHash(){return initialHash;},
+  completeInitialNavigation(){initialHash=false;},
   setPlan(value){plan=value;},
   advance(y,dt,options){advanceReading(reading,y,dt,{plan,...options,nativeScroll:true});return sampleReadingScore(reading,plan);},
   scroll(){if(!historyNavigation)remember();const value=seekOnScroll;seekOnScroll=false;return value;},

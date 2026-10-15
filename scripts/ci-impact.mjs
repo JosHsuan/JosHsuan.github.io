@@ -27,12 +27,11 @@ export function browserMatrix(tests, fullCase) {
   if (!tests.length) return [];
   // Separate runners keep one software-GPU worker per machine. File sharding
   // preserves test-local sequences and does not increase concurrent GL clients.
-  const shards = fullCase ? 4 : 1;
-  return [
-    ...Array.from({length: shards}, (_, i) => ({browser: 'chromium', engine: 'chromium', shard: `${i + 1}/${shards}`})),
-    {browser: 'webkit', engine: 'webkit', shard: '1/1'},
-    {browser: 'mobile-chromium', engine: 'chromium', shard: '1/1'},
-  ];
+  return [['chromium','chromium',4],['webkit','webkit',2],['mobile-chromium','chromium',2]]
+    .flatMap(([browser,engine,fullShards])=>{
+      const shards=fullCase?fullShards:1;
+      return Array.from({length:shards},(_,i)=>({browser,engine,shard:`${i+1}/${shards}`}));
+    });
 }
 
 export function classifyChanges(changedFiles, {forceFull = false} = {}) {
