@@ -144,8 +144,16 @@ async function neutralReadingMaterials(page,testInfo){
     // ancestry produced. Otherwise a moved caption loses .evidence figcaption
     // padding/flex/font rules and its figure index falls outside the round skin.
     // No material paint, opacity, filter or backdrop value is replaced here.
-    const properties=['color','-webkit-text-fill-color','box-sizing','display','width','height','min-width','max-width','min-height','max-height','font-family','font-size','font-weight','font-style','font-stretch','line-height','letter-spacing','text-transform','white-space','overflow-wrap','word-break','margin-top','margin-right','margin-bottom','margin-left','padding-top','padding-right','padding-bottom','padding-left','gap','row-gap','column-gap','align-items','justify-content','flex-direction','flex-wrap','flex-grow','flex-shrink','flex-basis','grid-template-columns'];
+    const typography=['color','-webkit-text-fill-color','font-family','font-size','font-weight','font-style','font-stretch','line-height','letter-spacing','text-transform','white-space','overflow-wrap','word-break'];
+    const layoutProperties=['box-sizing','display','width','height','min-width','max-width','min-height','max-height','margin-top','margin-right','margin-bottom','margin-left','padding-top','padding-right','padding-bottom','padding-left','gap','row-gap','column-gap','align-items','justify-content','flex-direction','flex-wrap','flex-grow','flex-shrink','flex-basis','grid-template-columns'];
     const layout=[element,...element.querySelectorAll('*')].filter(node=>node instanceof HTMLElement&&!node.closest('[data-information-skin]')).map(node=>{
+     // Preserve the moved window's original box and inherited typography.
+     // Descendants retain native layout: freezing resolved flex widths and
+     // auto margins can wrap a button while retaining its old row height,
+     // placing that button over the next caption on Linux Chromium.
+     const captionChild=element.dataset.informationWindow==='evidence-caption'&&node.parentElement===element;
+     const ancestryLayout=captionChild&&node.tagName==='P'?['margin-top','margin-right','margin-bottom','margin-left','max-width']:captionChild&&node.tagName==='SPAN'?['padding-top']:[];
+     const properties=node===element?[...typography,...layoutProperties]:[...typography,...ancestryLayout];
      const computed=getComputedStyle(node);return{node,style:node.getAttribute('style'),values:properties.map(property=>[property,computed.getPropertyValue(property)])};
     });
     // Move the production node itself, preserving its width, descendants and
@@ -170,6 +178,18 @@ async function neutralReadingMaterials(page,testInfo){
     const result={kind,appearance:'neutral-dark',monotonicQuantizationTolerance:1,status:'measuring',samples:[]};results.push(result);
     const box=await owner.boundingBox();expect(box.width).toBeGreaterThan(60);expect(box.height).toBeGreaterThan(30);
     if(box.height+24>page.viewportSize().height)await page.setViewportSize({width:viewport.width,height:Math.ceil(box.height+24)});
+    if(kind==='source-diagram'){
+     const geometry=await owner.evaluate(element=>{
+      const choices=element.querySelector('[role="group"]'),caption=element.querySelector('[data-diagram-caption]')?.parentElement;
+      if(!choices||!caption)return null;
+      return{choicesBottom:choices.getBoundingClientRect().bottom,buttonBottom:Math.max(...[...choices.querySelectorAll('button')].map(button=>button.getBoundingClientRect().bottom)),captionTop:caption.getBoundingClientRect().top,captionBottom:caption.getBoundingClientRect().bottom,ownerBottom:element.getBoundingClientRect().bottom};
+     });
+     expect(geometry,'source-diagram retains its native controls and caption').not.toBeNull();
+     expect(geometry.buttonBottom,'native button rows fit their controls container').toBeLessThanOrEqual(geometry.choicesBottom+.5);
+     expect(geometry.captionTop,'the material fixture must not put buttons over its caption').toBeGreaterThanOrEqual(geometry.choicesBottom-.5);
+     expect(geometry.captionBottom,'caption remains inside the measured material').toBeLessThanOrEqual(geometry.ownerBottom+.5);
+     result.layout=geometry;
+    }
     const samples=result.samples;
     for(const background of ['#000000','#404040','#808080','#c0c0c0','#ffffff']){
      await page.locator('[data-reading-material-background]').evaluate((element,color)=>{element.style.background=color;},background);
