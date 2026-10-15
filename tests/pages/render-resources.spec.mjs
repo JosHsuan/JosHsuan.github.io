@@ -13,19 +13,23 @@ async function pauseResourceClock(page) {
   // Read the browser's installed clock, with enough future margin for slow
   // IPC; a Node wall-clock date or a one-second margin can already be past.
   await page.clock.pauseAt(new Date(now+60000));
-  return async operation=>{
+  return async (operation,stepMilliseconds=48)=>{
     let finished=false,failure;
     const pending=operation().then(()=>{finished=true;},error=>{failure=error;finished=true;});
-    for(let step=0;step<600&&!finished;step++)await page.clock.fastForward(48);
+    for(let step=0;step<600&&!finished;step++)await page.clock.fastForward(stepMilliseconds);
     if(!finished){await page.clock.resume();await pending;throw Error('Controlled allocation route did not complete');}
     await pending;if(failure)throw failure;
   };
 }
 
 async function warmSourceRepresentations(page,drive) {
+  // Setup needs actual settled source paints, not dense transition sampling.
+  // Larger foreground steps avoid hundreds of software-GPU draws before the
+  // resource baseline; the measured allocation route still uses 48 ms steps.
+  const warm=operation=>drive(operation,500);
   const painted=[];
   for(const [chapter,count] of [['system',4],['pattern',3]]){
-    await drive(()=>centerStudy(page,chapter));
+    await warm(()=>centerStudy(page,chapter));
     const el=surface(page,chapter);
     const seen=new Set();
     for(let index=0;index<count;index++){
@@ -33,7 +37,7 @@ async function warmSourceRepresentations(page,drive) {
       // These are real browser key events. No RAF/time advances between the
       // comparison request and its inspection hold, regardless of IPC latency.
       await el.press('Enter');await el.press('ArrowLeft');await el.press('ArrowRight');
-      await drive(()=>settle(page));
+      await warm(()=>settle(page));
       const value=await page.evaluate(()=>{
         const scene=window.__thesis.inspect(),story=window.__story.inspect();
         return{id:scene.representation.id,index:scene.representation.index,chapter:scene.representation.chapterId,pinned:scene.representation.pinned,
@@ -46,7 +50,11 @@ async function warmSourceRepresentations(page,drive) {
       seen.add(value.id);painted.push(value);
     }
     expect(seen.size).toBe(count);
-    await el.press('Escape');await drive(()=>settle(page));
+    await el.press('Escape');
+    // The last held source has suspended normal pressure sampling. Resume the
+    // final view using measured cadence so no slow warmup sample enters the
+    // allocation route's pressure window.
+    await (chapter==='pattern'?drive:warm)(()=>settle(page));
   }
   expect(new Set(painted.map(value=>value.id)).size).toBe(7);
   await test.info().attach('source-material-warmup',{body:JSON.stringify(painted),contentType:'application/json'});
@@ -102,7 +110,7 @@ test('Full 4K resize cycles retain source data, optics and bounded stable render
   // Seven actual source paints precede three resize rounds; this wall-clock
   // allowance includes controlled warmup plus real-time resize IPC on a
   // software GPU; it is not a product performance threshold.
-  test.setTimeout(scenarioTimeout(210000));
+  test.setTimeout(scenarioTimeout(300000));
   // Observe each native dimension setter, including the intermediate width /
   // old-height combination. A final correct diagnostic cannot hide a transient
   // oversized backing buffer allocated by Fiber before the next World frame.
@@ -196,7 +204,7 @@ test('Full 4K resize cycles retain source data, optics and bounded stable render
 test('Full chapter holds and transitions preserve one Canvas without reallocating its backing storage',async({page})=>{
   // Full source/material warmup and twelve actual transition positions can
   // exceed two minutes on a software GPU; assertions use controlled frame time.
-  test.setTimeout(scenarioTimeout(180000));
+  test.setTimeout(scenarioTimeout(300000));
   await page.addInitScript(()=>{
     const counts={canvasWrites:0,textures:0,renderbuffers:0};window.__dockingAllocations=counts;
     for(const axis of ['width','height']){
@@ -241,7 +249,8 @@ test('Full chapter holds and transitions preserve one Canvas without reallocatin
   // three-chapter route once without an additional duplicate warmup route.
   // Each 48ms step delivers one RAF below the pressure policy's 50ms threshold.
   // This is functional timing, not an FPS measurement; Full optics stay active.
-  const before=await capture(),records=await route(),after=await capture();
+  const before=await capture();expect(before.frameDelta).toBeLessThanOrEqual(.05);
+  const records=await route(),after=await capture();
   await test.info().attach('scroll-docking-allocation-records',{body:JSON.stringify({before,records,after}),contentType:'application/json'});
   expect(records).toHaveLength(12);
   for(const value of records){
