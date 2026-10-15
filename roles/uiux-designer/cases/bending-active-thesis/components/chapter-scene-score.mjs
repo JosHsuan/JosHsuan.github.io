@@ -5,6 +5,10 @@
  * geometry, measured curvature, or a claim of structural simulation.
  */
 export const CHAPTER_SCENE_IDS = Object.freeze(['overview', 'form', 'system', 'pattern', 'make', 'validation', 'credits']);
+// Editorial studio light, not analysis data. One sampled score supplies the
+// viewport backdrop and the existing 3D cyclorama; neither owns another clock.
+const backdropPalette = {cool: [95, 144, 166], warm: [184, 133, 80]};
+const backdropKeys = [[1, .55, 0], [1, .28, 0], [.86, .22, 0], [.76, .18, 0], [.48, .84, 1], [.70, .38, .25], [.78, .42, .1]];
 const TAU = Math.PI * 2;
 const clamp = (n, a = 0, b = 1) => Math.max(a, Math.min(b, n));
 const finite = (n, name) => {if (typeof n !== 'number' || !Number.isFinite(n)) throw new RangeError(`Expected finite ${name}`); return n;};
@@ -46,6 +50,13 @@ export function sampleChapterScene(playback, {reducedMotion = false, aspect = 1,
   const dominant = weights.indexOf(Math.max(...weights));
   return {
     owner: 'chapter-scene-score', chapter: CHAPTER_SCENE_IDS[dominant], chapterWeights: weights, activeSeconds: time,
+    backdrop: {
+      owner: 'chapter-scene-score', purpose: 'editorial steel-blue and warm-copper studio light; not source evidence',
+      coolRgb: [...backdropPalette.cool], warmRgb: [...backdropPalette.warm],
+      coolEnergy: weights.reduce((sum, weight, i) => sum + weight * backdropKeys[i][0], 0) * .64,
+      warmEnergy: weights.reduce((sum, weight, i) => sum + weight * backdropKeys[i][1], 0) * .65,
+      warmSide: weights.reduce((sum, weight, i) => sum + weight * backdropKeys[i][2], 0),
+    },
     camera: {
       azimuthOffsetDeg: scalar('az', orbit) * (1 - mobile * .3), elevationOffsetDeg: scalar('el', (v, i) => v * (active ? Math.sin(phase(i) * TAU * 2) : 0)),
       distanceScale: 1 - scalar('dolly', breathing), fovScale: 1 + scalar('lens', breathing), fitOrder: 'apply cues then fit verified active source support',

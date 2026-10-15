@@ -1,5 +1,6 @@
 import {test,expect} from '@playwright/test';
-import {WAIT,scenarioTimeout,settle} from './case-helpers.mjs';
+import {writeFile} from 'node:fs/promises';
+import {WAIT,scenarioTimeout,settle,centerStudy} from './case-helpers.mjs';
 import {renderedTextContrast} from './reading-contrast.mjs';
 
 // This function runs in the browser. Inspect the actual material owner and
@@ -56,7 +57,153 @@ function expectSingleMaterial(row){
  }
 }
 
-test('all information surfaces share one glass owner and preserve readable source paper',async({page})=>{
+// Measure the real skin, with its original layout and paint. Hiding sibling
+// content for this one crop prevents opaque source paper or glyphs from being
+// mistaken for a bright, transmitting interface material.
+async function skinPixels(page,owner){
+ const parentStyle=await owner.evaluate(element=>{
+  const style=element.getAttribute('style');element.style.setProperty('color','transparent','important');element.style.setProperty('-webkit-text-fill-color','transparent','important');return style;
+ });
+ const saved=await owner.evaluate(element=>[...element.children].filter(child=>!child.hasAttribute('data-information-skin')).map(child=>{
+  const style=child.getAttribute('style');child.style.setProperty('visibility','hidden','important');return{style};
+ }));
+ try{
+  const box=await owner.boundingBox();expect(box).not.toBeNull();
+  const width=Math.min(64,box.width*.3),height=Math.min(32,box.height*.3);
+  const png=await page.screenshot({animations:'disabled',clip:{x:box.x+(box.width-width)/2,y:box.y+(box.height-height)/2,width,height}});
+  return await page.evaluate(async png=>{
+   const bitmap=await createImageBitmap(await(await fetch('data:image/png;base64,'+png)).blob()),canvas=document.createElement('canvas');canvas.width=bitmap.width;canvas.height=bitmap.height;
+   const context=canvas.getContext('2d');context.drawImage(bitmap,0,0);bitmap.close();const pixels=context.getImageData(0,0,canvas.width,canvas.height).data,rgb=[0,0,0];
+   for(let offset=0;offset<pixels.length;offset+=4)for(let channel=0;channel<3;channel++)rgb[channel]+=pixels[offset+channel]/(pixels.length/4);
+   return rgb;
+  },png.toString('base64'));
+ }finally{
+  await owner.evaluate((element,saved)=>{
+   const children=[...element.children].filter(child=>!child.hasAttribute('data-information-skin'));
+   for(let index=0;index<children.length;index++){const style=saved[index].style;if(style===null)children[index].removeAttribute('style');else children[index].setAttribute('style',style);}
+  },saved);
+  await owner.evaluate((element,style)=>{if(style===null)element.removeAttribute('style');else element.setAttribute('style',style);},parentStyle);
+ }
+}
+
+function materialDiagnostic(element){
+ const read=(node,pseudo)=>{
+  const style=getComputedStyle(node,pseudo),box=node.getBoundingClientRect();
+  return{node:node.tagName,kind:node.dataset.informationWindow,pseudo,background:style.background,backdrop:style.backdropFilter||style.webkitBackdropFilter||'none',clipPath:style.clipPath,maskImage:style.maskImage||style.webkitMaskImage,filter:style.filter,opacity:style.opacity,isolation:style.isolation,transform:style.transform,willChange:style.willChange,visibility:style.visibility,position:style.position,zIndex:style.zIndex,inset:style.inset,box:{x:box.x,y:box.y,width:box.width,height:box.height}};
+ };
+ const skin=element.querySelector(':scope > [data-information-skin]'),ancestors=[];
+ for(let node=element.parentElement;node;node=node.parentElement)ancestors.push(read(node));
+ return{surface:read(element),skin:skin?read(skin):null,skinPaint:skin?read(skin,'::before'):null,ancestors};
+}
+
+async function neutralReadingMaterials(page,testInfo){
+ // Native reading must lay out the real model information column before its
+ // geometry is preserved. An inactive hidden study has no usable label box.
+ await centerStudy(page,'form',{ready:false});
+ const modelLabel=page.locator('[data-model-study][data-study-chapter="form"] [data-model-side-label]');
+ await expect(modelLabel).toBeVisible();
+ await expect.poll(async()=>(await modelLabel.boundingBox())?.width??0,{timeout:WAIT}).toBeGreaterThan(60);
+ // Check every existing UI variant, including metadata outside the seven
+ // representative crops. Original SVG labels retain their source-authored ink.
+ const foregrounds=await page.locator('[data-information-window]').evaluateAll(owners=>owners.flatMap(element=>{
+  const rows=[],walker=document.createTreeWalker(element,NodeFilter.SHOW_TEXT);
+  while(walker.nextNode()){
+   const node=walker.currentNode,parent=node.parentElement;if(!node.textContent.trim()||!parent||parent.closest('svg,[role="status"],[aria-hidden="true"]'))continue;
+   const style=getComputedStyle(parent);if(style.visibility==='hidden'||style.display==='none')continue;
+   const range=document.createRange();range.selectNodeContents(node);if(![...range.getClientRects()].some(rect=>rect.width>3&&rect.height>3))continue;
+   const color=style.color.match(/[\d.]+/g)?.map(Number);if(!color||color.length<3)throw Error('Unsupported UI ink: '+style.color);
+   let opacity=color[3]??1;for(let owner=parent;owner;owner=owner.parentElement)opacity*=Number(getComputedStyle(owner).opacity);if(opacity===0)continue;
+   const luminance=color.slice(0,3).map(channel=>{const value=channel/255;return value<=.04045?value/12.92:((value+.055)/1.055)**2.4;}).reduce((value,channel,index)=>value+channel*[.2126,.7152,.0722][index],0);
+   rows.push({kind:parent.closest('[data-information-window]').dataset.informationWindow,text:node.textContent.trim().slice(0,65),color,luminance});
+  }
+  return rows;
+ }));
+ expect(foregrounds.length).toBeGreaterThan(30);
+ const outside=await page.locator('[data-story-root]').evaluate(element=>({color:getComputedStyle(element).color,background:getComputedStyle(document.body).backgroundColor}));
+ const mean=color=>color.match(/[\d.]+/g).slice(0,3).reduce((sum,value)=>sum+Number(value),0)/3;
+ expect(mean(outside.color),'the surrounding story retains its light foreground').toBeGreaterThan(180);
+ expect(mean(outside.background),'the scene retains its dark page background').toBeLessThan(40);
+ const selectors=[
+  '#form [data-information-window="editorial"]','[data-source-diagram="miura"]',
+  '#make [data-information-window="evidence-image"]','#make [data-information-window="evidence-caption"]',
+  '[data-model-study][data-study-chapter="form"] [data-model-side-label]','#pattern [data-information-window="source-details"]','[data-source-comparison]',
+ ];
+ const viewport=page.viewportSize(),results=[];
+ await page.evaluate(()=>{
+  window.dispatchEvent(new Event('pagehide'));
+  const background=document.createElement('div');background.dataset.readingMaterialBackground='';Object.assign(background.style,{position:'fixed',inset:'0',zIndex:'2147483000',pointerEvents:'none'});document.body.appendChild(background);
+ });
+ try{
+  for(const selector of selectors){
+   // Retain the exact node: its original chapter-scoped selector stops
+   // matching while that same node is exposed directly under document.body.
+   const owner=await page.locator(selector).first().elementHandle();expect(owner).not.toBeNull();
+   const kind=await owner.evaluate(element=>{
+    const box=element.getBoundingClientRect(),parent=element.parentNode,next=element.nextSibling,style=element.getAttribute('style'),saved=[];
+    // Preserve the typography, box layout and exact ink that the real CSS
+    // ancestry produced. Otherwise a moved caption loses .evidence figcaption
+    // padding/flex/font rules and its figure index falls outside the round skin.
+    // No material paint, opacity, filter or backdrop value is replaced here.
+    const properties=['color','-webkit-text-fill-color','box-sizing','display','width','height','min-width','max-width','min-height','max-height','font-family','font-size','font-weight','font-style','font-stretch','line-height','letter-spacing','text-transform','white-space','overflow-wrap','word-break','margin-top','margin-right','margin-bottom','margin-left','padding-top','padding-right','padding-bottom','padding-left','gap','row-gap','column-gap','align-items','justify-content','flex-direction','flex-wrap','flex-grow','flex-shrink','flex-basis','grid-template-columns'];
+    const layout=[element,...element.querySelectorAll('*')].filter(node=>node instanceof HTMLElement&&!node.closest('[data-information-skin]')).map(node=>{
+     const computed=getComputedStyle(node);return{node,style:node.getAttribute('style'),values:properties.map(property=>[property,computed.getPropertyValue(property)])};
+    });
+    // Move the production node itself, preserving its width, descendants and
+    // decorative skin. No copied text, recoloring or replacement panel exists.
+    document.body.appendChild(element);
+    // Normal inline priority lets the contrast helper's temporary important
+    // transparent ink expose the backdrop beneath these exact authored colors.
+    for(const row of layout)for(const [property,value] of row.values)row.node.style.setProperty(property,value);
+    for(const [key,value] of Object.entries({position:'fixed',left:'12px',top:'12px',right:'auto',bottom:'auto',width:box.width+'px',maxWidth:'none',margin:'0',visibility:'visible',zIndex:'2147483001'}))element.style.setProperty(key.replace(/[A-Z]/g,char=>'-'+char.toLowerCase()),value,'important');
+    // Source-authored text is outside interface contrast acceptance. Keep its
+    // geometry, but exclude it from this temporary UI-only contrast exposure.
+    for(const child of element.querySelectorAll('svg')){
+     if(child.closest('[data-information-skin]'))continue;
+     saved.push({child,style:child.getAttribute('style')});
+     if(child.tagName.toLowerCase()==='svg')child.style.setProperty('visibility','hidden','important');
+    }
+    const action=element.querySelector('[class*="mediaAction"]');if(action){saved.push({child:action,style:action.getAttribute('style')});action.style.setProperty('opacity','1','important');}
+    window.__readingMaterialRestore=()=>{for(const row of saved){if(row.style===null)row.child.removeAttribute('style');else row.child.setAttribute('style',row.style);}for(const row of layout){if(row.style===null)row.node.removeAttribute('style');else row.node.setAttribute('style',row.style);}parent.insertBefore(element,next);if(style===null)element.removeAttribute('style');else element.setAttribute('style',style);delete window.__readingMaterialRestore;};
+    return element.dataset.informationWindow;
+   });
+   try{
+    const result={kind,appearance:'neutral-dark',monotonicQuantizationTolerance:1,status:'measuring',samples:[]};results.push(result);
+    const box=await owner.boundingBox();expect(box.width).toBeGreaterThan(60);expect(box.height).toBeGreaterThan(30);
+    if(box.height+24>page.viewportSize().height)await page.setViewportSize({width:viewport.width,height:Math.ceil(box.height+24)});
+    const samples=result.samples;
+    for(const background of ['#000000','#404040','#808080','#c0c0c0','#ffffff']){
+     await page.locator('[data-reading-material-background]').evaluate((element,color)=>{element.style.background=color;},background);
+     const rgb=await skinPixels(page,owner),rows=await renderedTextContrast(page,owner),facts=await owner.evaluate(materialDiagnostic);
+     const coreMean=rgb.reduce((sum,value)=>sum+value,0)/3,channelSpread=Math.max(...rgb)-Math.min(...rgb);
+     samples.push({background,rgb,coreMean,channelSpread,rows,facts});
+    }
+    // Project-selected neutral-dark range, not an Apple numeric requirement.
+    const brightness=samples[0].coreMean,transmission=samples.at(-1).coreMean-brightness;
+    Object.assign(result,{brightness,transmission,status:'measured'});
+    // Complete the five-point evidence before any numeric acceptance assertion.
+    for(const [index,sample] of samples.entries()){
+     expect(sample.rows.length,kind+' visible UI text').toBeGreaterThan(0);
+     for(const row of sample.rows)expect(row.ratio,`${kind} / ${sample.background} / ${row.text}`).toBeGreaterThanOrEqual(row.required);
+     expect(sample.channelSpread,`${kind} / ${sample.background}: neutral core`).toBeLessThan(14);
+     if(index)expect(sample.coreMean+1,`${kind}: gray transfer must increase within one-code quantization`).toBeGreaterThan(samples[index-1].coreMean);
+    }
+    expect(brightness,kind+' visible dark core over black').toBeGreaterThan(8);expect(brightness,kind+' must not wash black into a white panel').toBeLessThan(85);
+    expect(transmission,kind+' must transmit its real backdrop').toBeGreaterThan(20);expect(transmission,kind+' preserves a stable reading substrate').toBeLessThan(85);
+    result.status='passed';
+   }finally{await page.evaluate(()=>window.__readingMaterialRestore?.());await owner.dispose();}
+  }
+  expect(results.map(row=>row.kind).sort()).toEqual(['editorial','evidence-caption','evidence-image','model-label','source-details','source-diagram','source-portal']);
+  expect(await page.locator('[data-story-root]').evaluate(element=>({color:getComputedStyle(element).color,background:getComputedStyle(document.body).backgroundColor}))).toEqual(outside);
+ }finally{
+  const body=JSON.stringify({foregrounds,results},null,2)+'\n';
+  await writeFile(testInfo.outputPath('neutral-reading-material.json'),body);
+  await testInfo.attach('neutral-reading-material-pixels-and-contrast',{body,contentType:'application/json'});
+  await page.evaluate(()=>{window.__readingMaterialRestore?.();document.querySelector('[data-reading-material-background]')?.remove();});
+  await page.setViewportSize(viewport);await page.evaluate(()=>window.dispatchEvent(new Event('pageshow')));await settle(page);
+ }
+}
+
+test('all information surfaces share one glass owner and preserve readable source paper',async({page},testInfo)=>{
  test.setTimeout(scenarioTimeout(120000));await staticStudy(page);
  const details=page.locator('#pattern [data-information-window="source-details"]');
  await details.locator(':scope > summary').click();await expect(details).toHaveJSProperty('open',true);await settle(page);
@@ -94,6 +241,7 @@ test('all information surfaces share one glass owner and preserve readable sourc
  }));
  expect(content.length).toBeGreaterThan(6);
  for(const row of content){expect(row.filters.some(filter=>filter.includes('blur('))).toBe(false);expect(row.backdrop).toBe('none');}
+ await neutralReadingMaterials(page,testInfo);
  await page.getByRole('button',{name:'Close source comparison'}).click();await expect(portal).toHaveCount(0);await expect(trigger).toBeFocused();
 });
 

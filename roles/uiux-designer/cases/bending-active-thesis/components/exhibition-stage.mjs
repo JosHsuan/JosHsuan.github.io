@@ -67,18 +67,34 @@ function makeCyclorama() {
 }
 
 function softenStageSurface(material) {
+  const wash = {cool: {value: new T.Color()}, warm: {value: new T.Color()}, field: {value: new T.Vector3(0, 0, 0)}};
   material.onBeforeCompile = shader => {
+    Object.assign(shader.uniforms, {exhibitionCool: wash.cool, exhibitionWarm: wash.warm, exhibitionField: wash.field});
     shader.vertexShader = `varying vec3 vExhibitionPosition;\n${shader.vertexShader}`.replace('#include <begin_vertex>', '#include <begin_vertex>\nvExhibitionPosition = position;');
-    shader.fragmentShader = `varying vec3 vExhibitionPosition;\n${shader.fragmentShader}`.replace('#include <color_fragment>', `#include <color_fragment>
+    shader.fragmentShader = `varying vec3 vExhibitionPosition;\nuniform vec3 exhibitionCool;\nuniform vec3 exhibitionWarm;\nuniform vec3 exhibitionField;\n${shader.fragmentShader}`.replace('#include <color_fragment>', `#include <color_fragment>
       // Lower floor reflectance gradually through the continuous curved sweep.
       diffuseColor.rgb *= mix(0.28, 1.0, smoothstep(0.04, 0.45, vExhibitionPosition.y));
       float sideFade = 1.0 - smoothstep(1.55, 2.8, abs(vExhibitionPosition.x));
       float frontFade = 1.0 - smoothstep(1.20, 3.9, vExhibitionPosition.z);
       float topFade = 1.0 - smoothstep(0.95, 2.30, vExhibitionPosition.y);
       diffuseColor.a *= sideFade * frontFade * topFade;
+    `).replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
+      // Bounded scenic light on this set only: no extra lamp, GI, source
+      // recoloring or shadow pass. Keep the contact floor dark and connected.
+      float wallLift = smoothstep(0.08, 0.62, vExhibitionPosition.y);
+      float coolDistance = (vExhibitionPosition.y - 0.92 - vExhibitionPosition.x * 0.12) / 0.67;
+      float coolBand = exp(-coolDistance * coolDistance);
+      float warmX = mix(0.55, -1.10, exhibitionField.z);
+      vec2 warmDistance = vec2((vExhibitionPosition.x - warmX) / 1.60, (vExhibitionPosition.y - 0.55) / 0.70);
+      float warmBand = exp(-dot(warmDistance, warmDistance));
+      float floorDistance = (vExhibitionPosition.z - 0.85) / 1.65;
+      float floorShoulder = (1.0 - smoothstep(0.02, 0.16, vExhibitionPosition.y)) * smoothstep(0.65, 1.55, abs(vExhibitionPosition.x)) * exp(-floorDistance * floorDistance) * 0.35;
+      totalEmissiveRadiance += exhibitionCool * coolBand * wallLift * exhibitionField.x * 0.22;
+      totalEmissiveRadiance += exhibitionWarm * (warmBand * wallLift + floorShoulder) * exhibitionField.y * 0.34;
     `);
   };
-  material.customProgramCacheKey = () => 'exhibition-continuous-feather-v1';
+  material.customProgramCacheKey = () => 'exhibition-continuous-feather-lightfield-v2';
+  return wash;
 }
 
 function softenPractical(material) {
@@ -114,7 +130,7 @@ export function createExhibitionStage({bounds} = {}) {
     object.castShadow = false; group.add(object); return object;
   };
   const backdrop = mesh('editorial-continuous-gallery-not-source-base', makeCyclorama(), new T.MeshStandardMaterial({color: 0x151e24, roughness: .93, metalness: 0, side: T.FrontSide, transparent: true, opacity: 1, alphaTest: .005, depthWrite: true}));
-  softenStageSurface(backdrop.material);
+  const lightWash = softenStageSurface(backdrop.material);
   backdrop.scale.setScalar(radius); backdrop.position.y = -.001; backdrop.receiveShadow = true;
   const apertureGeometry = new T.PlaneGeometry(1, 1);
   const apertures = [-1, 1].map(side => {
@@ -129,7 +145,7 @@ export function createExhibitionStage({bounds} = {}) {
   let disposed = false;
   acquireLtc();
 
-  function update({direction = sampleSceneDirection(1, {reducedMotion: true}), camera, reducedMotion = direction.reducedMotion, lightSweep = 0, bounds: familyBounds} = {}) {
+  function update({direction = sampleSceneDirection(1, {reducedMotion: true}), camera, reducedMotion = direction.reducedMotion, lightSweep = 0, bounds: familyBounds, backdrop: lightField} = {}) {
     if (disposed) throw Error('Exhibition stage has been disposed');
     if (!camera?.position || ![camera.position.x, camera.position.y, camera.position.z].every(Number.isFinite)) throw new RangeError('Expected a finite final camera position');
     const spec = direction.exhibition;
@@ -170,6 +186,11 @@ export function createExhibitionStage({bounds} = {}) {
     backdrop.visible = surfaceVisible;
     backdrop.material.opacity = surfaceOpacity;
     backdrop.material.color.fromArray(spec.backdrop.color); backdrop.material.roughness = spec.backdrop.roughness;
+    if (lightField) {
+      lightWash.cool.value.setRGB(lightField.coolRgb[0]/255, lightField.coolRgb[1]/255, lightField.coolRgb[2]/255, T.SRGBColorSpace);
+      lightWash.warm.value.setRGB(lightField.warmRgb[0]/255, lightField.warmRgb[1]/255, lightField.warmRgb[2]/255, T.SRGBColorSpace);
+      lightWash.field.value.set(lightField.coolEnergy, lightField.warmEnergy, lightField.warmSide);
+    } else lightWash.field.value.set(0, 0, 0);
     const portraitScale = Number.isFinite(camera.aspect) && camera.aspect < .8 ? .65 : 1;
     apertures.forEach((aperture, index) => {
       const side = index === 0 ? -1 : 1;
@@ -180,7 +201,7 @@ export function createExhibitionStage({bounds} = {}) {
       aperture.material.color.fromArray(spec.aperture.color).multiplyScalar(spec.aperture.radiance * (index ? 1 : .38) * portraitScale);
     });
     group.updateMatrixWorld(true);
-    return {owner: 'exhibition-stage', sourceGeometry: false, radius, meshDraws: Number(backdrop.visible) + apertures.filter(value => value.visible).length, areaLights: 2, extraShadowMaps: 0, lightSweep: sweep, lightFrame: sourceFixed ? 'source' : 'camera', surfaceOpacity};
+    return {owner: 'exhibition-stage', sourceGeometry: false, radius, meshDraws: Number(backdrop.visible) + apertures.filter(value => value.visible).length, areaLights: 2, extraShadowMaps: 0, lightSweep: sweep, lightFrame: sourceFixed ? 'source' : 'camera', surfaceOpacity, backdropLightField: lightField ? {coolEnergy: lightField.coolEnergy, warmEnergy: lightField.warmEnergy, warmSide: lightField.warmSide, extraDraws: 0} : null};
   }
 
   function dispose() {

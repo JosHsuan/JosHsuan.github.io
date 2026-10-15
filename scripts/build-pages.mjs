@@ -53,7 +53,7 @@ const sources = [
   'runtime/motion/window-recipes.mjs', 'runtime/motion/window-motion-api.mjs',
   'runtime/presentation/ModelAnnotationPresenter.mjs',
   'runtime/RuntimeRoot.mjs', 'runtime/core/FeatureRegistry.ts', 'runtime/core/Registrar.ts',
-  'app/page.jsx', 'app/layout.jsx', 'app/globals.css', 'app/page.module.css',
+  'app/page.jsx', 'app/layout.jsx', 'app/globals.css', 'app/glass-materials.css', 'app/page.module.css',
   'components/CinematicExperience.jsx', 'components/CinematicScene.jsx',
   'components/InformationSkin.jsx',
   'components/LiquidGlassSkin.jsx',

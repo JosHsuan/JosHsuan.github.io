@@ -288,7 +288,7 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
       d.sourceRoot.visible=selected.id==='assembly' && present;
       for(const [id,value] of d.diagramNodes) value.nodes.forEach(node=>{node.visible=id===selected.id && present;});
       d.visibleSource=present?(entry?[entry.mesh]:d.layers.map(layer=>layer.node)):[];
-      const exhibitionState = d.exhibition.update({direction,camera,bounds:family.bounds,reducedMotion:reduced,lightSweep:0});
+      const exhibitionState = d.exhibition.update({direction,camera,bounds:family.bounds,reducedMotion:reduced,lightSweep:0,backdrop:chapterScene.backdrop});
       scene.background=state.independentAscii?null:direction.backgroundColor?d.studyBackground.fromArray(direction.backgroundColor):d.previousBackground;
       const keyScale = Number.isFinite(debug.keyIntensityScale) ? clamp(debug.keyIntensityScale, 0, 5) : 1;
       for (const id of ['key', 'fill', 'rim']) {

@@ -1,4 +1,7 @@
-.backdrop{position:fixed;inset:0;z-index:0;pointer-events:none;background:#090d0d;overflow:hidden}
+.backdrop{--backdrop-cool-rgb:95 144 166;--backdrop-warm-rgb:184 133 80;--backdrop-cool-energy:.64;--backdrop-warm-energy:.36;--backdrop-warm-x:63%;--backdrop-warm-y:66%;position:fixed;inset:0;z-index:0;pointer-events:none;background:
+  radial-gradient(ellipse 85% 30% at 12% 12%,rgb(var(--backdrop-cool-rgb) / var(--backdrop-cool-energy)),transparent 100%),
+  radial-gradient(ellipse 86% 42% at var(--backdrop-warm-x) var(--backdrop-warm-y),rgb(var(--backdrop-warm-rgb) / var(--backdrop-warm-energy)),transparent 100%),
+  linear-gradient(154deg,#14252e 0%,#182932 34%,#10191f 61%,#1c2225 100%);overflow:hidden}
 .poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:65% 50%}
 .stage{position:fixed;left:0;top:0;width:100vw;height:var(--scene-height,100svh);opacity:0;z-index:1;pointer-events:none;overflow:hidden;transform-origin:0 0}
 .stage canvas{display:block;pointer-events:none!important}
@@ -21,4 +24,5 @@
 .stage,.stage *{pointer-events:none!important}
 
 .asciiField{position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+@media(max-width:780px){.backdrop{--backdrop-warm-y:62%}}
 @media print{.asciiField{display:none}}

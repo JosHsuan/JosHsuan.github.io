@@ -21,6 +21,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
   return {connect(){
     const modelOverlay=document.querySelector('[data-model-overlay]');
     const root = document.querySelector('[data-story-root]');
+    const backdrop = document.querySelector('[data-cinematic-background]');
     const sections = [...document.querySelectorAll('[data-story-chapter]')];
     if (!root || sections.length !== 7) return;
     const scope=input.events.createScope('director');
@@ -202,6 +203,14 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       const fieldUv=[pointerClient.x/innerWidth,1-pointerClient.y/innerHeight];
       const fieldActive=decorate&&pointerActive&&fieldUv.every(value=>value>=0&&value<=1);
       latestScene=sampleChapterScene(playbackScore,{reducedMotion:!!state.systemReduced,aspect:canvasSurface.width/canvasSurface.height,pointer:{...pointer,uv:fieldUv,active:fieldActive,strength:modelHover.strength||.35}});
+      // Same chapter weights as the scene, quantized to avoid repainting a
+      // stationary light field for autonomous camera/ASCII beats.
+      const lightField=latestScene.backdrop;
+      publisher.style(backdrop,'--backdrop-cool-rgb',lightField.coolRgb.join(' '));
+      publisher.style(backdrop,'--backdrop-warm-rgb',lightField.warmRgb.join(' '));
+      publisher.style(backdrop,'--backdrop-cool-energy',Math.round(lightField.coolEnergy*100)/100);
+      publisher.style(backdrop,'--backdrop-warm-energy',Math.round(lightField.warmEnergy*100)/100);
+      publisher.style(backdrop,'--backdrop-warm-x',Math.round(63-lightField.warmSide*45)+'%');
       pageField.render({field:latestScene.field,frameTimeMs:now,paused:!state.sceneEnabled||state.sceneFailed,hidden:state.hidden,systemReduced:state.systemReduced},canvasSurface.width,canvasSurface.height);
       diagrams.forEach(({element:diagram,index})=>{
         const count=Math.max(1,Number(diagram.dataset.diagramCount)||4),phase=playbackScore.phases[index];

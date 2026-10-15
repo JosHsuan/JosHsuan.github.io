@@ -25,12 +25,14 @@ export async function build(){
  }};
  await esbuild.build({absWorkingDir:repository,tsconfigRaw:{compilerOptions:{}},stdin:{contents:await readFile(path.join(directory,'app.mjs'),'utf8'),resolveDir:directory,sourcefile:'review-app.mjs',loader:'js'},plugins:[files],bundle:true,platform:'browser',format:'esm',target:['chrome120','safari17'],outfile:path.join(dist,'app.js'),legalComments:'linked'});
  await copyFile(path.join(directory,'index.html'),path.join(dist,'index.html'));
- let css=await readFile(path.join(directory,'style.css'),'utf8');
+ // One case-owned material vocabulary; the catalog adds no runtime theme writer.
+ const materialFile=path.join(source,'app/glass-materials.css'),materialCSS=await readFile(materialFile,'utf8');
+ let css=materialCSS+'\n'+await readFile(path.join(directory,'style.css'),'utf8');
  for(const file of ['effects-2d.css','effects-3d.css','window-specimen.css'])try{css+='\n'+await readFile(path.join(directory,file),'utf8');}catch(error){if(error.code!=='ENOENT')throw error;}
  await writeFile(path.join(dist,'style.css'),css);
- const hashes={};for(const absolute of loaded){if(absolute.startsWith(source+path.sep)&&!absolute.startsWith(directory+path.sep)){hashes[path.relative(repository,absolute).replaceAll('\\','/')]=createHash('sha256').update(await readFile(absolute)).digest('hex');}}
+ const hashes={[path.relative(repository,materialFile).replaceAll('\\','/')]:createHash('sha256').update(materialCSS).digest('hex')};for(const absolute of loaded){if(absolute.startsWith(source+path.sep)&&!absolute.startsWith(directory+path.sep)){hashes[path.relative(repository,absolute).replaceAll('\\','/')]=createHash('sha256').update(await readFile(absolute)).digest('hex');}}
  await writeFile(path.join(dist,'source-manifest.json'),JSON.stringify({generatedAt:new Date().toISOString(),scope:['3d','2d'],hashes},null,2));
- console.log(`Animation artifact built; ${Object.keys(hashes).length} original source modules referenced.`);
+ console.log(`Animation artifact built; ${Object.keys(hashes).length} original source inputs referenced.`);
  return hashes;
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url))await build();

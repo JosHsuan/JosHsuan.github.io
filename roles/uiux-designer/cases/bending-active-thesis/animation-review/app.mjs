@@ -24,7 +24,14 @@ async function select(id){
  $('#mode').textContent='共用配方 · 獨立展示';$('#availability').hidden=false;$('#availability').textContent='壓力開口與流體頁緣共用 runtime 的純數學。此舞台獨立比較模型 Canvas 與 2D 資訊；參考連結提供概念，使用既有核准素材。';
  $('#status').textContent='準備效果…';$('#values').textContent='—';$('#error').hidden=true;$('#phase').value='0';$('#phase-value').textContent='0%';$('#phase').disabled=true;
  const stage=$('#stage');stage.dataset.window='true';stage.replaceChildren();const mount=document.createElement('div');mount.className='effect-mount';stage.append(mount);
- const hooks={reducedQuery:reduced,report(status,state){if(own!==token)return;if(status&&status!==lastStatus){lastStatus=status;$('#status').textContent=text(status);}if(state&&performance.now()-lastValueWrite>100){lastValueWrite=performance.now();try{$('#values').textContent=JSON.stringify(state,null,2);}catch{$('#values').textContent=text(state);}}}};
+ const hooks={reducedQuery:reduced,report(status,state){
+  if(own!==token)return;
+  if(status&&status!==lastStatus){lastStatus=status;$('#status').textContent=text(status);}
+  // The position control reports native travel, including the final settled
+  // sample. Writing its value does not dispatch input or seek the specimen.
+  if(Number.isFinite(state?.scrollProgress)){const percent=Math.round(state.scrollProgress*100);$('#phase').value=String(percent);$('#phase-value').textContent=percent+'%';}
+  if(state&&performance.now()-lastValueWrite>100){lastValueWrite=performance.now();try{$('#values').textContent=JSON.stringify(state,null,2);}catch{$('#values').textContent=text(state);}}
+ }};
  let mounted;
  try{mounted=await mountWindow(mount,effect,hooks);if(own!==token){mounted?.dispose();return;}instance=mounted;$('#phase').disabled=typeof instance.seek!=='function';if(instance.ready)await instance.ready;if(own!==token){mounted.dispose();return;}
   if(effect.autoPlay===false){const initialPhase=instance.inspect?.().phase??.5;$('#phase').value=String(Math.round(initialPhase*100));$('#phase-value').textContent=Math.round(initialPhase*100)+'%';}

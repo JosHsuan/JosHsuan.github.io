@@ -1,3 +1,4 @@
+@import './glass-materials.css';
 @font-face{font-family:'IBM Plex Sans';src:url('/assets/fonts/ibm-plex-sans-variable.woff2') format('woff2');font-weight:100 700;font-stretch:75% 100%;font-style:normal;font-display:swap}
 @font-face{font-family:'IBM Plex Mono';src:url('/assets/fonts/ibm-plex-mono-regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
 @font-face{font-family:'IBM Plex Serif';src:url('/assets/fonts/ibm-plex-serif-italic.woff2') format('woff2');font-weight:400;font-style:italic;font-display:swap}
@@ -92,6 +93,12 @@ html[data-cinematic-ready] [data-feedback-plane][data-choreography-phase="settle
    clipped; its sibling text, source pixels, hit areas and focus rings are not. */
 html [data-information-window]{
   --glass-material:regular;
+  --glass-fallback:var(--material-reading-fallback);--glass-background:var(--material-reading-fill);
+  --glass-backdrop:var(--material-reading-backdrop);--glass-border:var(--material-reading-border);--glass-shadow:var(--material-reading-shadow);
+  --glass-foreground:var(--material-reading-ink);--glass-muted:var(--material-reading-muted);--glass-control-accent:var(--material-reading-accent);
+  --glass-control-background:var(--material-inner-fill);--glass-control-hover:var(--material-inner-hover);
+  --paper:var(--material-reading-ink);--muted:var(--material-reading-muted);--accent:var(--material-reading-accent);--line:var(--material-inner-border);--ink:var(--material-selection-ink);
+  color-scheme:var(--material-color-scheme);color:var(--glass-foreground);
   isolation:isolate;background:var(--glass-background);border-color:var(--glass-border);box-shadow:var(--glass-shadow);
   -webkit-backdrop-filter:var(--glass-backdrop);backdrop-filter:var(--glass-backdrop);
 }
@@ -154,21 +161,19 @@ html[data-cinematic-static] [data-information-window]>[data-information-skin]{cl
    materials above retain their separate standard-material ownership. The
    presenter enables the SVG backdrop only after its browser policy accepts it. */
 :root{
-  --liquid-fill:var(--glass-fallback);
-  --liquid-native-backdrop:none;
-  --liquid-border:rgb(229 241 235 / .28);
-  --liquid-shadow:0 12px 30px rgb(0 0 0 / .28),0 2px 5px rgb(0 0 0 / .18),inset 0 1px 0 rgb(255 255 255 / .15),inset 0 -1px 0 rgb(0 0 0 / .52);
+  --liquid-fill:var(--material-control-fill);
+  --liquid-native-backdrop:var(--material-control-backdrop);
+  --liquid-border:var(--material-control-border);
+  --liquid-shadow:var(--material-control-shadow);
   --liquid-rim-opacity:.72;
   --liquid-glow-opacity:.11;
 }
-@supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
-  :root{
-    --liquid-fill:linear-gradient(145deg,rgb(255 255 255 / .025),rgb(255 255 255 / .006) 62%),rgb(13 23 24 / .78);
-    --liquid-native-backdrop:blur(6px) saturate(145%);
-  }
-  @media(max-width:780px){:root{--liquid-native-backdrop:blur(5px) saturate(140%)}}
-}
 html [data-liquid-glass]{
+  --glass-fallback:var(--material-control-fallback);--glass-background:var(--material-control-fallback);
+  --glass-foreground:var(--material-control-ink);--glass-muted:var(--material-control-muted);--glass-control-accent:var(--material-control-accent);
+  --glass-control-background:var(--material-inner-fill);--glass-control-hover:var(--material-inner-hover);--glass-border:var(--material-inner-border);
+  --paper:var(--material-control-ink);--muted:var(--material-control-muted);--accent:var(--material-control-accent);--ink:var(--material-selection-ink);
+  color-scheme:var(--material-color-scheme);
   isolation:isolate;color:var(--glass-foreground);background:var(--liquid-fill);
   border-color:var(--liquid-border);box-shadow:var(--liquid-shadow);
   -webkit-backdrop-filter:var(--liquid-native-backdrop);backdrop-filter:var(--liquid-native-backdrop);
@@ -183,15 +188,15 @@ html [data-liquid-glass][data-liquid-ready]>[data-liquid-skin]{
   display:block;position:absolute;inset:-1px;z-index:-1;margin:0!important;padding:0!important;
   border:1px solid var(--liquid-border);border-radius:inherit;background:var(--liquid-fill);
   box-shadow:var(--liquid-shadow);overflow:hidden;
-  -webkit-backdrop-filter:var(--liquid-refraction-filter,) var(--liquid-native-backdrop);
-  backdrop-filter:var(--liquid-refraction-filter,) var(--liquid-native-backdrop);
+  -webkit-backdrop-filter:var(--liquid-native-backdrop) var(--liquid-refraction-filter,);
+  backdrop-filter:var(--liquid-native-backdrop) var(--liquid-refraction-filter,);
   transform:scale(calc(1 + var(--liquid-hover,0) * .004 - var(--liquid-press,0) * .014));
 }
 /* The silhouette catches light while its lower edge stays dark. These painted
    layers do not sample the backdrop again and never filter foreground labels. */
 [data-liquid-skin]::before{
   content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
-  background:linear-gradient(135deg,rgb(255 255 255 / .82),rgb(216 239 227 / .12) 32%,rgb(0 0 0 / .52) 64%,rgb(231 242 235 / .38));
+  background:linear-gradient(135deg,rgb(255 255 255 / .88),rgb(216 239 227 / .12) 32%,rgb(16 38 27 / .28) 64%,rgb(244 252 246 / .58));
   -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
   mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
   -webkit-mask-composite:xor;mask-composite:exclude;
@@ -199,7 +204,7 @@ html [data-liquid-glass][data-liquid-ready]>[data-liquid-skin]{
 }
 [data-liquid-skin]::after{
   content:'';position:absolute;inset:0;border-radius:inherit;padding:6px;pointer-events:none;
-  background:radial-gradient(ellipse at var(--liquid-glint-x,28%) var(--liquid-glint-y,12%),rgb(255 255 255 / .68),rgb(214 235 224 / .15) 30%,transparent 66%);
+  background:radial-gradient(ellipse at var(--liquid-glint-x,28%) var(--liquid-glint-y,12%),rgb(255 255 255 / .82),rgb(237 248 241 / .18) 30%,transparent 66%);
   /* Keep the traveling reflection in the rim; the text core never receives
      additive glint, including at maximum hover/press over a white backdrop. */
   -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
@@ -215,7 +220,7 @@ html [data-liquid-glass][data-liquid-mode="opaque"]>[data-liquid-skin]::before,
 html [data-liquid-glass][data-liquid-mode="opaque"]>[data-liquid-skin]::after{display:none}
 @media(prefers-reduced-motion:reduce){html [data-liquid-glass][data-liquid-ready]>[data-liquid-skin]{transform:none}}
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
-  :root{--liquid-fill:var(--glass-fallback);--liquid-native-backdrop:none;--liquid-border:#a4b5ac}
+  :root{--liquid-fill:var(--material-control-fallback);--liquid-native-backdrop:none;--liquid-border:var(--material-control-border)}
   html [data-liquid-glass][data-liquid-ready]>[data-liquid-skin]{-webkit-backdrop-filter:none;backdrop-filter:none;transform:none}
   [data-liquid-skin]::before,[data-liquid-skin]::after{display:none}
 }

@@ -2,6 +2,16 @@
 
 Subsequent owner request: keep this directional response as scrolling feedback and let the complete window leave through the browsing viewport boundary. The current [native-scroll catalog](./README.md) supersedes the fixed-region reveal/opacity presentation described below. Its continuous scroll target, always-opaque surface and residual feedback keep the inertial material model from this review.
 
+## Scroll feedback follow-up — 14 October 2026
+
+The Motion Designer and Experience Director / UIUX review roles confirmed that native page travel already supplies the requested complete exit. The retained membrane and ink recipes remain unchanged across the model and information layers. Elasticity relaxes around the current page position; only continued scrolling takes the window out of the browsing viewport.
+
+The review identified two presentation inconsistencies. The outer position slider did not follow native scrolling or playback, and viewport exit facts used the untransformed page coordinate while elastic lag could still leave content visible. The catalog now synchronizes the position control through the final stopped sample and publishes boundary facts after measuring transformed content bounds. This border-box measure excludes protruding decorative skin. The diagnostic native region remains separate from content visibility. Reset and stationary inspection clear their intent after that final paint.
+
+The 15 October follow-up retains native travel for all four specimens. A scripted exit interrupted by reverse scrolling cannot report exit completion while its content is still visible. This is a catalog consistency correction; the main presentation's event design remains deferred.
+
+The former reverse-return control is labelled Return-to-window because it centres the same surface from either side. Upward replay retains its explicit direction. These changes are confined to the catalog presenter and controls; the deferred main-page event design is not part of this review.
+
 Owner request, 13 October 2026: integrate local elasticity with entrance and exit direction in the catalog. The motion, direction and UI roles discussed the diagnosis and reviewed the implementation. This authorization applies to the isolated catalog; the main presentation's event design remains a separate task.
 
 ## Diagnosis agreed by the roles

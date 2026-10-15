@@ -33,14 +33,27 @@
 .vt-windowfoot{min-height:25px;padding-top:6px;padding-bottom:6px;border-top:1px solid #b9c2bc20;font-size:7px;letter-spacing:.065em;color:#a6b2ab}
 .vt-content{min-height:0;flex:1;position:relative;overflow:hidden}
 .vt-model canvas{display:block;width:100%;height:100%}
-.vt-lab[data-layer="2d"] .vt-window{background:#faf9f3}
-.vt-lab[data-layer="2d"] .vt-windowbar,.vt-lab[data-layer="2d"] .vt-windowfoot{background:#f5f4ed;color:#535c55;border-color:#dedfd6}
-.vt-lab[data-layer="2d"] .vt-windowbar>span:last-child{color:var(--vt-accent)}
-.vt-info{display:grid;grid-template-columns:.9fr 1.1fr;align-items:center;gap:20px;padding:20px 22px;background:#faf9f3;color:var(--vt-ink)}
-.vt-info small{color:#677166;font:8px PlexMono,monospace;letter-spacing:.035em}
-.vt-info h3{margin:11px 0 13px;color:#2c342c;font-size:clamp(18px,2vw,26px);font-weight:500;line-height:1.04;letter-spacing:-.04em}
-.vt-info p{margin:0;color:#687165;font-size:10px;line-height:1.55}
-.vt-info img{display:block;width:100%;max-height:100%;min-height:0;object-fit:contain}
+/* The overscan paints one tint; the window samples one backdrop. Keeping the
+   filter on its element avoids inert pseudo-element color operators. */
+.vt-lab[data-layer="2d"]{--vt-paper:#171d20;--vt-ink:#e7eeea;--vt-muted:#bbc9c3;--vt-line:#46514b;--vt-accent:#e4bca6;color-scheme:dark}
+.vt-lab[data-layer="2d"] .vt-scroll{
+ background:
+  linear-gradient(112deg,transparent 22%,rgb(43 109 146 / .38) 22.5% 38%,transparent 38.5%),
+  linear-gradient(8deg,transparent 44%,rgb(171 102 76 / .28) 44.5% 56%,transparent 56.5%),
+  repeating-linear-gradient(0deg,transparent 0 47px,rgb(209 225 217 / .10) 47px 48px),
+  linear-gradient(155deg,#13222a,#263438 58%,#282021);
+}
+.vt-lab[data-layer="2d"] .vt-window{background:transparent;color:var(--material-reading-ink);box-shadow:var(--material-reading-shadow);-webkit-backdrop-filter:var(--material-reading-backdrop);backdrop-filter:var(--material-reading-backdrop)}
+.vt-lab[data-layer="2d"] .vt-window::before{background:var(--material-reading-fill);-webkit-backdrop-filter:none;backdrop-filter:none}
+.vt-lab[data-layer="2d"] .vt-windowbar,.vt-lab[data-layer="2d"] .vt-windowfoot{background:transparent;color:var(--material-reading-muted);border-color:var(--material-inner-border)}
+.vt-lab[data-layer="2d"] .vt-windowbar>span:last-child{color:var(--material-reading-accent)}
+.vt-lab[data-layer="2d"] .vt-halo{border-color:color-mix(in srgb,var(--material-reading-accent) 40%,transparent);box-shadow:0 0 36px 12px color-mix(in srgb,var(--material-reading-accent) 12%,transparent)}
+.vt-lab[data-layer="2d"] .vt-echo{border-color:color-mix(in srgb,var(--material-reading-accent) 72%,transparent);box-shadow:0 0 0 5px color-mix(in srgb,var(--material-reading-accent) 4%,transparent)}
+.vt-info{display:grid;grid-template-columns:.9fr 1.1fr;align-items:center;gap:20px;padding:20px 22px;background:transparent;color:var(--material-reading-ink)}
+.vt-info small{color:var(--material-reading-muted);font:8px PlexMono,monospace;letter-spacing:.035em}
+.vt-info h3{margin:11px 0 13px;color:var(--material-reading-ink);font-size:clamp(18px,2vw,26px);font-weight:500;line-height:1.04;letter-spacing:-.04em}
+.vt-info p{margin:0;color:var(--material-reading-muted);font-size:10px;line-height:1.55}
+.vt-info img{display:block;width:100%;max-height:100%;min-height:0;object-fit:contain;background:#f8f8f9;border:1px solid var(--material-inner-border);border-radius:2px;forced-color-adjust:none}
 .vt-placeholder{position:absolute;max-width:80%;padding:28px;color:#5b655c;font-size:12px;text-align:center;pointer-events:none;opacity:0}
 .vt-progress{position:relative;height:33px;overflow:hidden;border-top:1px solid #bdc4b7;border-bottom:1px solid var(--vt-line);background:#ebede4;color:#4a544c;font-size:9px}
 .vt-progress i{position:absolute;inset:0 auto 0 0;width:45%;background:rgba(var(--vt-accent-rgb),.075);border-right:2px solid var(--vt-accent)}
@@ -57,6 +70,15 @@
 .vt-caption{margin:9px 18px;color:var(--vt-muted);font-size:11px;line-height:1.7}
 .vt-log{min-height:39px;padding:7px 18px 16px;color:var(--vt-accent);font:9px/1.6 PlexMono,monospace;overflow-wrap:anywhere}
 .vt-actions button[data-action="reverse-play"]{color:var(--vt-accent)}
+.vt-lab[data-layer="2d"] .vt-progress i{background:color-mix(in srgb,var(--material-reading-accent) 7.5%,transparent)}
+.vt-lab[data-layer="2d"] .vt-actions button[data-force]{border-color:color-mix(in srgb,var(--material-reading-accent) 30%,transparent)}
+.vt-lab[data-layer="2d"] .vt-actions button{color:var(--vt-ink);border-color:var(--vt-line)}
+.vt-lab[data-layer="2d"] .vt-actions button:hover{background:#29343a;border-color:#7d9188}
+.vt-lab[data-layer="2d"] .vt-progress{background:#1f282b;color:var(--vt-muted);border-color:var(--vt-line)}
+.vt-lab[data-layer="2d"] .vt-guides,.vt-lab[data-layer="2d"] .vt-page-cue,.vt-lab[data-layer="2d"] .vt-page-cue span{color:var(--vt-muted)}
+@media(forced-colors:active){
+ .vt-lab[data-layer="2d"] .vt-scroll{background:Canvas;scrollbar-color:auto}
+}
 @media(max-width:750px){
  .vt-lab{--view-height:340px;--vt-window-width:88%;--vt-window-height:73%}
  .vt-browserbar{min-height:43px;padding:11px 11px;gap:8px;font-size:10px}

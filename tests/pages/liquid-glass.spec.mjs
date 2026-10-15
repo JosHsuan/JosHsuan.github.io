@@ -65,6 +65,46 @@ async function comparePixels(page,first,second,size){
  },{first:first.toString('base64'),second:second.toString('base64'),...size});
 }
 
+async function controlSkinPixels(page,control){
+ // The production skin keeps its real fill, diffusion, refraction and maximum
+ // response. Hide only sibling content for a small clear-core pixel exposure.
+ const parentStyle=await control.evaluate(element=>{
+  // Identity includes a direct text node, so hiding child elements alone does
+  // not expose a clear core. The skin's authored paint uses no currentColor.
+  const style=element.getAttribute('style');element.style.setProperty('color','transparent','important');element.style.setProperty('-webkit-text-fill-color','transparent','important');return style;
+ });
+ const saved=await control.evaluate(element=>[...element.children].filter(child=>!child.hasAttribute('data-liquid-skin')).map(child=>{
+  const style=child.getAttribute('style');child.style.setProperty('visibility','hidden','important');return style;
+ }));
+ try{
+  const box=await control.boundingBox();expect(box).not.toBeNull();
+  const width=Math.min(48,box.width*.3),height=Math.min(24,box.height*.3);
+  const png=await page.screenshot({animations:'disabled',clip:{x:box.x+(box.width-width)/2,y:box.y+(box.height-height)/2,width,height}});
+  return await page.evaluate(async png=>{
+   const bitmap=await createImageBitmap(await(await fetch('data:image/png;base64,'+png)).blob()),canvas=document.createElement('canvas');canvas.width=bitmap.width;canvas.height=bitmap.height;
+   const context=canvas.getContext('2d');context.drawImage(bitmap,0,0);bitmap.close();const pixels=context.getImageData(0,0,canvas.width,canvas.height).data,rgb=[0,0,0];
+   for(let offset=0;offset<pixels.length;offset+=4)for(let channel=0;channel<3;channel++)rgb[channel]+=pixels[offset+channel]/(pixels.length/4);
+   return rgb;
+  },png.toString('base64'));
+ }finally{
+  await control.evaluate((element,saved)=>{
+   const children=[...element.children].filter(child=>!child.hasAttribute('data-liquid-skin'));
+   for(let index=0;index<children.length;index++){if(saved[index]===null)children[index].removeAttribute('style');else children[index].setAttribute('style',saved[index]);}
+  },saved);
+  await control.evaluate((element,style)=>{if(style===null)element.removeAttribute('style');else element.setAttribute('style',style);},parentStyle);
+ }
+}
+
+function controlMaterialDiagnostic(element){
+ const read=(node,pseudo)=>{
+  const style=getComputedStyle(node,pseudo),box=node.getBoundingClientRect();
+  return{node:node.tagName,kind:node.dataset.liquidGlass,pseudo,background:style.background,backdrop:style.backdropFilter||style.webkitBackdropFilter||'none',clipPath:style.clipPath,maskImage:style.maskImage||style.webkitMaskImage,filter:style.filter,opacity:style.opacity,isolation:style.isolation,transform:style.transform,willChange:style.willChange,visibility:style.visibility,position:style.position,zIndex:style.zIndex,inset:style.inset,box:{x:box.x,y:box.y,width:box.width,height:box.height}};
+ };
+ const skin=element.querySelector(':scope > [data-liquid-skin]'),ancestors=[];
+ for(let node=element.parentElement;node;node=node.parentElement)ancestors.push(read(node));
+ return{mode:element.dataset.liquidMode,surface:read(element),skin:skin?read(skin):null,skinBefore:skin?read(skin,'::before'):null,skinAfter:skin?read(skin,'::after'):null,ancestors};
+}
+
 test('built glass bends the real background only at its rim and leaves foreground geometry intact',async({page,browserName},testInfo)=>{
  test.setTimeout(scenarioTimeout(120000));await staticPage(page);
  await page.screenshot({path:testInfo.outputPath('actual-liquid-controls.png'),animations:'disabled'});
@@ -189,8 +229,8 @@ test('native opacity preferences and no-JavaScript navigation retain readable ma
  }else testInfo.annotations.push({type:'coverage-limit',description:'Native prefers-contrast and forced-colors covered. WebKit reduced-transparency emulation is unavailable.'});
  await expect.poll(async()=>(await modes()).every(row=>row.mode=== (browserName==='chromium'?'refractive':'reflective')),{timeout:WAIT}).toBe(true);
  await settle(page);
- // Exercise the built regular material's brightest authored response, rather
- // than relying on its resting tint or an opaque accessibility replacement.
+ // Measure the built material's resting gray transfer and maximum authored
+ // response, rather than an opaque accessibility replacement.
  // Freeze the Director so Reduced Motion cannot reset these test inputs.
  const contrastFixture=await page.evaluate(()=>{
   window.dispatchEvent(new Event('pagehide'));
@@ -210,27 +250,65 @@ test('native opacity preferences and no-JavaScript navigation retain readable ma
    if(!text)throw Error('No visible control text for contrast: '+element.dataset.liquidGlass);
    const x=(text.left+text.width/2-box.left)/box.width*100,y=(text.top+text.height/2-box.top)/box.height*100;
    element.style.setProperty('--liquid-glint-x',x+'%');element.style.setProperty('--liquid-glint-y',y+'%');
-   element.style.setProperty('--liquid-hover','1');element.style.setProperty('--liquid-press','1');
+   element.style.setProperty('--liquid-hover','0');element.style.setProperty('--liquid-press','0');
    return{kind:element.dataset.liquidGlass,glint:{x,y}};
   });
   window.__liquidContrastCleanup=()=>{background.remove();for(const {element,style} of saved){if(style===null)element.removeAttribute('style');else element.setAttribute('style',style);}delete window.__liquidContrastCleanup;window.dispatchEvent(new Event('pageshow'));};
   return samples;
  });
- const renderedContrast=[];
+ const renderedContrast=[],normalCurve=[],transferMetrics=[],grayStops=['#000000','#404040','#808080','#c0c0c0','#ffffff'];
  try{
-  for(const background of ['#ffffff','#000000']){
+  for(const background of grayStops){
+   await page.locator('[data-liquid-contrast-background]').evaluate((element,color)=>{element.style.background=color;},background);
+   for(const sample of contrastFixture){
+    const control=page.locator(`[data-liquid-glass="${sample.kind}"]`),rgb=await controlSkinPixels(page,control),facts=await control.evaluate(controlMaterialDiagnostic);
+    const coreMean=rgb.reduce((sum,value)=>sum+value,0)/3,channelSpread=Math.max(...rgb)-Math.min(...rgb);
+    normalCurve.push({background,...sample,rgb,coreMean,channelSpread,facts});
+   }
+  }
+  await page.locator('[data-liquid-glass]').evaluateAll(elements=>{for(const element of elements){element.style.setProperty('--liquid-hover','1');element.style.setProperty('--liquid-press','1');}});
+  for(const background of grayStops){
    await page.locator('[data-liquid-contrast-background]').evaluate((element,color)=>{element.style.background=color;},background);
    for(const sample of contrastFixture){
     const control=page.locator(`[data-liquid-glass="${sample.kind}"]`);await expect(control).toBeVisible();
     const response=await control.evaluate(element=>({hover:getComputedStyle(element).getPropertyValue('--liquid-hover').trim(),press:getComputedStyle(element).getPropertyValue('--liquid-press').trim(),glintOpacity:Number(getComputedStyle(element.querySelector(':scope > [data-liquid-skin]'),'::after').opacity)}));
-    expect(response.hover).toBe('1');expect(response.press).toBe('1');expect(response.glintOpacity).toBeCloseTo(.42,3);
-    const rows=await renderedTextContrast(page,control);expect(rows.length,sample.kind+' visible text').toBeGreaterThan(0);
-    renderedContrast.push({background,...sample,response,rows});
-    for(const row of rows)expect(row.ratio,`${sample.kind} / ${background} / ${row.text}`).toBeGreaterThanOrEqual(row.required);
+    const rgb=await controlSkinPixels(page,control),rows=await renderedTextContrast(page,control),facts=await control.evaluate(controlMaterialDiagnostic);
+    const coreMean=rgb.reduce((sum,value)=>sum+value,0)/3,channelSpread=Math.max(...rgb)-Math.min(...rgb);
+    renderedContrast.push({background,...sample,response,rgb,coreMean,channelSpread,rows,facts});
    }
   }
+  for(const sample of contrastFixture){
+   const normal=normalCurve.filter(row=>row.kind===sample.kind),maximum=renderedContrast.filter(row=>row.kind===sample.kind);
+   const brightness=maximum[0].coreMean,transmission=maximum.at(-1).coreMean-brightness,normalTransmission=normal.at(-1).coreMean-normal[0].coreMean;
+   maximum[0].brightness=brightness;maximum[0].transmission=transmission;normal[0].transmission=normalTransmission;
+   transferMetrics.push({kind:sample.kind,brightness,transmission,normalBrightness:normal[0].coreMean,normalTransmission});
+  }
+  // Retain all resting/maximum-response points and text rows before validating
+  // any material threshold, so a failed point cannot erase its transfer curve.
+  for(const sample of contrastFixture){
+   const normal=normalCurve.filter(row=>row.kind===sample.kind),maximum=renderedContrast.filter(row=>row.kind===sample.kind);
+   for(const [index,row] of normal.entries()){
+    expect(row.channelSpread,`${sample.kind} / ${row.background}: resting neutral core`).toBeLessThan(14);
+    if(index)expect(row.coreMean+1,sample.kind+' resting gray transfer increases within one-code quantization').toBeGreaterThan(normal[index-1].coreMean);
+   }
+   for(const [index,row] of maximum.entries()){
+    expect(row.response.hover).toBe('1');expect(row.response.press).toBe('1');expect(row.response.glintOpacity).toBeCloseTo(.42,3);
+    expect(row.channelSpread,`${sample.kind} / ${row.background}: maximum-glint neutral core`).toBeLessThan(14);
+    if(index)expect(row.coreMean+1,sample.kind+' maximum-response gray transfer increases within one-code quantization').toBeGreaterThan(maximum[index-1].coreMean);
+    expect(row.rows.length,sample.kind+' visible text').toBeGreaterThan(0);
+    for(const text of row.rows)expect(text.ratio,`${sample.kind} / ${row.background} / ${text.text}`).toBeGreaterThanOrEqual(text.required);
+   }
+   const {brightness,transmission,normalTransmission}=transferMetrics.find(row=>row.kind===sample.kind);
+   // These are project dark-appearance bounds, not Apple-published constants.
+   expect(brightness,sample.kind+' visible dark core over black').toBeGreaterThan(8);expect(brightness,sample.kind+' maximum glint must not wash the core white').toBeLessThan(85);
+   expect(transmission,sample.kind+' must transmit the actual backdrop').toBeGreaterThan(30);expect(transmission,sample.kind+' keeps a legible material substrate').toBeLessThan(110);
+   expect(normal[0].coreMean,sample.kind+' resting core over black').toBeGreaterThan(8);expect(normal[0].coreMean,sample.kind+' resting core must remain dark').toBeLessThan(85);
+   expect(normalTransmission,sample.kind+' resting transmission').toBeGreaterThan(30);expect(normalTransmission,sample.kind+' resting reading substrate').toBeLessThan(110);
+  }
  }finally{
-  await testInfo.attach('maximum-glint-rendered-contrast',{body:JSON.stringify(renderedContrast),contentType:'application/json'});
+  const body=JSON.stringify({appearance:'neutral-dark',monotonicQuantizationTolerance:1,transferMetrics,normalCurve,maximumResponse:renderedContrast},null,2)+'\n';
+  await writeFile(testInfo.outputPath('neutral-control-material.json'),body);
+  await testInfo.attach('maximum-glint-rendered-contrast',{body,contentType:'application/json'});
   await page.evaluate(()=>window.__liquidContrastCleanup?.());
  }
  const nojs=await browser.newContext({javaScriptEnabled:false,reducedMotion:'reduce',baseURL,viewport:testInfo.project.use.viewport});

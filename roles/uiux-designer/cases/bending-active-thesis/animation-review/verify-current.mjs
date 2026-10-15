@@ -20,8 +20,8 @@ try{
   for(const effect of catalog){
    await page.evaluate(async id=>{await window.__effectDesk.select(id);},effect.id);
    await page.evaluate(()=>window.__effectDesk.reset());await page.waitForTimeout(100);
-   const before=await page.evaluate(()=>window.__effectDesk.inspect());assert.equal(before.errorCount,0,effect.id);assert(before.canvasCount<=1,effect.id);
-   await page.evaluate(()=>window.__effectDesk.seek(.62));await page.waitForTimeout(180);const sampled=await page.evaluate(()=>window.__effectDesk.inspect());
+   const before=await page.evaluate(()=>window.__effectDesk.inspect());assert.equal(before.errorCount,0,effect.id);assert(before.canvasCount<=1,effect.id);assert.equal(before.detail.intent,'idle');
+   await page.evaluate(()=>window.__effectDesk.seek(.62));await page.waitForTimeout(180);const sampled=await page.evaluate(()=>window.__effectDesk.inspect());assert.equal(sampled.detail.intent,'idle');
    await page.evaluate(()=>window.__effectDesk.play());await page.waitForTimeout(250);await page.evaluate(()=>window.__effectDesk.pause());await page.waitForTimeout(100);
    const paused=await page.evaluate(()=>window.__effectDesk.inspect());assert.equal(paused.errorCount,0,effect.id);assert(!paused.detail?.failed,effect.id);
    assert.equal(paused.detail?.ready,true,effect.id);assert(paused.detail.frames>0,effect.id);

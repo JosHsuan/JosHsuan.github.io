@@ -92,7 +92,8 @@ export function createLiquidGlassPresenter({publisher,root=globalThis.document,e
 
  function paint(item){
   const value=item.response.value;
-  publisher.style(item.element,'--liquid-glint-x',(20+value.x*60).toFixed(2)+'%');
+  // A wider travel keeps the directional reflection visible on the neutral film.
+  publisher.style(item.element,'--liquid-glint-x',(10+value.x*80).toFixed(2)+'%');
   publisher.style(item.element,'--liquid-glint-y',(15+value.y*70).toFixed(2)+'%');
   publisher.style(item.element,'--liquid-hover',value.hover.toFixed(4));
   publisher.style(item.element,'--liquid-press',value.press.toFixed(4));

@@ -1,0 +1,90 @@
+/* Shared material policy for the public case and its local 2D catalog.
+   Dark appearance follows the approved scene; no backdrop pixels are read.
+   Numeric optical choices are project-specific, not Apple's native material. */
+:root{
+  --material-color-scheme:dark;--material-selection-ink:#17211d;
+  --material-reading-fallback:#202526;
+  --material-reading-regular-fill:var(--material-reading-fallback);
+  --material-reading-range-fill:var(--material-reading-fallback);
+  --material-reading-fill:var(--material-reading-regular-fill);
+  --material-reading-ink:#f0f3f2;--material-reading-muted:#dfe6e3;--material-reading-accent:#ffeadf;
+  --material-reading-border:rgb(237 244 241 / .22);
+  --material-reading-shadow:0 12px 30px rgb(0 0 0 / .18),inset 0 1px 0 rgb(255 255 255 / .18);
+  --material-reading-regular-backdrop:none;--material-reading-range-backdrop:none;
+  --material-reading-backdrop:var(--material-reading-regular-backdrop);
+  --material-control-fallback:#202526;
+  --material-control-regular-fill:var(--material-control-fallback);
+  --material-control-range-fill:var(--material-control-fallback);
+  --material-control-fill:var(--material-control-regular-fill);
+  --material-control-ink:#f0f3f2;--material-control-muted:#e2e8e5;--material-control-accent:#ffeadf;
+  --material-control-border:rgb(237 244 241 / .28);
+  --material-control-shadow:0 8px 24px rgb(0 0 0 / .18),inset 0 1px 0 rgb(255 255 255 / .22),inset 0 -1px 0 rgb(0 0 0 / .18);
+  --material-control-regular-backdrop:none;--material-control-range-backdrop:none;
+  --material-control-backdrop:var(--material-control-regular-backdrop);
+  --material-inner-fill:rgb(255 255 255 / .045);--material-inner-hover:rgb(255 255 255 / .05);--material-inner-border:rgb(238 246 242 / .2);
+}
+@supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  :root{
+    --material-reading-regular-fill:linear-gradient(145deg,rgb(255 255 255 / .025),rgb(255 255 255 / .005) 64%),rgb(24 29 30 / .72);
+    --material-control-regular-fill:linear-gradient(145deg,rgb(255 255 255 / .025),rgb(255 255 255 / .005) 64%),rgb(25 30 31 / .72);
+    --material-reading-range-fill:linear-gradient(145deg,rgb(255 255 255 / .025),rgb(255 255 255 / .005) 64%),rgb(24 29 30 / .14);
+    --material-control-range-fill:linear-gradient(145deg,rgb(255 255 255 / .025),rgb(255 255 255 / .005) 64%),rgb(25 30 31 / .10);
+    --material-reading-regular-backdrop:blur(18px) saturate(120%);
+    --material-control-regular-backdrop:blur(5px) saturate(120%);
+    --material-reading-range-backdrop:blur(18px) saturate(125%) contrast(55%) brightness(50%);
+    --material-control-range-backdrop:blur(5px) saturate(125%) contrast(55%) brightness(50%);
+  }
+  @media(max-width:780px){:root{--material-reading-regular-backdrop:blur(14px) saturate(120%);--material-reading-range-backdrop:blur(14px) saturate(125%) contrast(55%) brightness(50%)}}
+  /* The tested coarse-pointer compositor did not paint color compression.
+     Use the regular substrate for legible, genuinely translucent reading and
+     control surfaces; the control skin retains its existing rim refraction. */
+  @media(hover:none),(pointer:coarse){:root{
+    --material-reading-range-fill:var(--material-reading-regular-fill);--material-reading-range-backdrop:var(--material-reading-regular-backdrop);
+    --material-control-range-fill:var(--material-control-regular-fill);--material-control-range-backdrop:var(--material-control-regular-backdrop);
+  }}
+}
+/* Reuse the tested Chromium capability. Regular/NoJS stays independently
+   readable; neither a CSS parser result nor this selector claims Safari optics.
+   Select variants only, so native preferences can override their contents. */
+:root:has([data-liquid-mode="refractive"]),[data-material-capability="range"]{
+  --material-reading-fill:var(--material-reading-range-fill);--material-reading-backdrop:var(--material-reading-range-backdrop);
+  --material-control-fill:var(--material-control-range-fill);--material-control-backdrop:var(--material-control-range-backdrop);
+}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
+  :root{
+    --material-reading-regular-fill:var(--material-reading-fallback);--material-reading-range-fill:var(--material-reading-fallback);
+    --material-control-regular-fill:var(--material-control-fallback);--material-control-range-fill:var(--material-control-fallback);
+    --material-reading-regular-backdrop:none;--material-reading-range-backdrop:none;
+    --material-control-regular-backdrop:none;--material-control-range-backdrop:none;
+    --material-reading-border:#a2b5ab;--material-control-border:#a2b5ab;--material-inner-border:#a2b5ab;
+  }
+}
+@media(forced-colors:active){
+  :root{
+    --material-color-scheme:light dark;
+    --material-reading-regular-fill:Canvas;--material-reading-range-fill:Canvas;--material-reading-fallback:Canvas;
+    --material-control-regular-fill:Canvas;--material-control-range-fill:Canvas;--material-control-fallback:Canvas;
+    --material-reading-ink:CanvasText;--material-control-ink:CanvasText;
+    --material-reading-muted:CanvasText;--material-control-muted:CanvasText;
+    --material-reading-accent:LinkText;--material-control-accent:LinkText;
+    --material-reading-border:CanvasText;--material-control-border:CanvasText;--material-inner-border:CanvasText;
+    --material-reading-regular-backdrop:none;--material-reading-range-backdrop:none;
+    --material-control-regular-backdrop:none;--material-control-range-backdrop:none;
+    --material-reading-shadow:none;--material-control-shadow:none;
+    --material-inner-fill:Canvas;--material-inner-hover:Canvas;
+  }
+}
+@media print{
+  :root{
+    --material-color-scheme:light;
+    --material-reading-regular-fill:transparent;--material-reading-range-fill:transparent;
+    --material-control-regular-fill:transparent;--material-control-range-fill:transparent;
+    --material-reading-ink:#151b17;--material-control-ink:#151b17;
+    --material-reading-muted:#333b35;--material-control-muted:#333b35;
+    --material-reading-accent:#713116;--material-control-accent:#713116;
+    --material-reading-regular-backdrop:none;--material-reading-range-backdrop:none;
+    --material-control-regular-backdrop:none;--material-control-range-backdrop:none;
+    --material-reading-shadow:none;--material-control-shadow:none;
+    --material-inner-fill:transparent;--material-inner-hover:transparent;
+  }
+}
