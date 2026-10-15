@@ -167,7 +167,10 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       moving=windowPresenter.publish({docY:scrollY,dt,reduced:state.reduced,seek:didSeek,resumed:didResume,canvasPlacement})||moving;
       moving=input.entry.advance(dt,{resumed:didResume,hidden:state.hidden,systemReduced:state.systemReduced})||moving;
       presentNavigation();
-      moving=libraryPresenter.publish({docY:scrollY,dt,reduced:state.systemReduced,resumed:didResume,hidden:state.hidden||presentationContext==='home'||input.entry.inspect().phase!=='entered'})||moving;
+      // Home is a visible document destination. Its offscreen library must
+      // close through normal viewport sampling; only real suspension/startup
+      // withholds delivery without cancelling the existing reveal.
+      moving=libraryPresenter.publish({docY:scrollY,dt,reduced:state.systemReduced,resumed:didResume,hidden:state.hidden||input.entry.inspect().phase!=='entered'})||moving;
       moving=liquidPresenter.publish({dt,reduced:state.reduced,resumed:didResume,hidden:state.hidden,opaque:opaqueGlass(),keyboardFocus:liquidKeyboardFocus})||moving;
 
       // Chapter boundaries own the viewport hold. Information rectangles never

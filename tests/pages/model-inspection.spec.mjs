@@ -173,7 +173,7 @@ test('Reduced requires activation and keeps Full source comparison accessible wi
 });
 test('load failure and context loss preserve fallback reading and release source gestures',async({page})=>{
  test.setTimeout(scenarioTimeout(150000));await page.route('**/source-layers.glb',r=>r.abort());await page.goto('/#overview');await entered(page);await centerStudy(page,'form',{ready:false});await expect(page.locator('[data-model-study][data-study-chapter="form"]')).toContainText('Interactive geometry unavailable');await expect(surface(page)).toHaveAttribute('aria-disabled','true');
- await page.unroute('**/source-layers.glb');await page.goto('/#overview');await entered(page);
+ await page.unroute('**/source-layers.glb');await page.reload();await entered(page);
  // An intentional failed renderer leaves the same recovery record as an
  // interrupted process. Reload stays readable until the visitor chooses 3D.
  await expect(page.getByRole('button',{name:'Enable 3D',exact:true})).toBeVisible({timeout:WAIT});

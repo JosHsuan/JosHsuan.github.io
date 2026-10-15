@@ -113,6 +113,31 @@ test('viewport exit, source removal and disposal restore source paint before can
  }
 });
 
+test('returning to Home closes an open library after document suspension and restores its original paint before the terminal',()=>{
+ const f=fixture();
+ // Home precedes the seven project chapters. Use the measured document
+ // positions, independently of a semantic Home/Project presentation label.
+ f.drawing.top=2000;f.measure();
+ f.publish({docY:1800});f.publish({docY:1800,dt:.14});
+ assert.deepEqual(f.presenter.inspect().open,[1]);
+ const elapsed=f.presenter.inspect().items[0].elapsed;
+ // A hidden document does no work, even if its native position has changed.
+ assert.equal(f.publish({docY:0,dt:300,hidden:true}),false);
+ assert.equal(f.presenter.inspect().items[0].elapsed,elapsed);assert.equal(f.events.length,1);
+ assert(f.paths.some(path=>path.styles.size>0));
+ // Home is visible after resume, so viewport exit must still cancel before
+ // any elapsed time is consumed. It is not another hidden-document reason.
+ assert.equal(f.publish({docY:0,dt:300,resumed:true}),false);
+ assert.deepEqual(f.events.at(-1).event,{id:1,kind:'library',status:'cancelled',reason:'offscreen'});
+ assert(f.events.at(-1).paint.every(styles=>Object.keys(styles).length===0));
+ assert.equal(f.operations.at(-1),'event:cancelled');assert.deepEqual(f.presenter.inspect().open,[]);
+ f.publish({docY:0,dt:1});assert.equal(f.events.length,2,'remaining on Home emits no duplicate terminal');
+ f.publish({docY:1800});assert.deepEqual(f.presenter.inspect().open,[2]);
+ f.publish({docY:1800,dt:4});f.publish({docY:0,dt:1});
+ assert.deepEqual(f.events.map(row=>[row.event.id,row.event.status]),[[1,'requested'],[1,'cancelled'],[2,'requested'],[2,'completed']]);
+ assert.deepEqual(f.presenter.inspect().open,[]);f.presenter.dispose();
+});
+
 test('removed and replaced source drawings receive monotonically distinct presenter request identities',()=>{
  const f=fixture();f.publish();f.publish({dt:.14});const oldPaths=[...f.paths];
  f.paths.splice(0,f.paths.length,...Array.from({length:11},(_,index)=>({dataset:{libraryTrace:String(index)},styles:new Map()})));
