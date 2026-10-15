@@ -71,6 +71,8 @@ Browser verification also exposed a separate post-navigation shift: the height-c
 
 The no-JavaScript contrast fixture inserts its temporary style synchronously instead of awaiting an unavailable inline `style.onload` handler. It retains the same screenshot, PNG decoding, per-pixel contrast calculation and acceptance thresholds.
 
+Public-network verification showed that preceding Miura/workflow control rows could hydrate during the delayed-library fixture. That unrelated insertion changes the absolute document coordinate through native scroll anchoring. The fixture now waits for those two diagrams before recording its baseline, while still withholding the library until after entry and reading-area positioning. All original static/readiness, library completion, absolute-position and visible-reading assertions remain.
+
 Full-case CI retains four Chromium file shards and uses two each for WebKit/mobile. The preceding successful release's mobile suite took 26.1 minutes against a 30-minute job limit. Partitioning retains every scenario, one worker per runner, exact output digest checks and the unchanged deadline/gate. Scoped checks remain unsharded. [CI/CD procedure](../../../../docs/CI_CD.md).
 
 Publish the successful same-commit default-branch push artifact and validated record without rebuilding. CI/deployment links belong in the delivery report. Physical iOS/Android and real-time GPU performance measurements remain separate from emulated functional validation.
@@ -82,3 +84,5 @@ Desktop and mobile loading captures were inspected for hierarchy, clipping and p
 The final source passed `pnpm check`, case TypeScript and 284 portable cases (282 passed, two existing conditional skips, no failures). Public Build C passed the 80-file / 36-approved-asset audit. All 18 entry/material scenarios passed against that built output in Chromium, WebKit and mobile Chromium, including the delayed-photo native-navigation regression. The local pre-commit `index.html` SHA-256 is `2675cc2d2b7b1ec8309e57f4c7662ae35c28f92e129963294ccd818f25fa407d`; this identifies local validation, not CI release provenance.
 
 Full CI selects 49 public cases per browser (147 total), plus the empty framework's root/subpath checks. Exact shard listing proves no omitted or duplicated public cases. The required gate, successful push identity and complete tested-output digest must pass before deployment; the delivery report records those final results and the deployed commit.
+
+The complete implementation at `7df1992` passed [CI 38719669734](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/38719669734): all 147 public scenarios, 24 framework browser scenarios and the required gate. Its deployment passed exact public HTML/release-record comparison. The subsequent fixture-only correction above leaves application code unchanged and is checked through the existing impact-selected entry/public-release coverage.

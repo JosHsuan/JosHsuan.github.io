@@ -52,6 +52,11 @@ test('Reduced entry preserves reading when its deep-linked library hydrates afte
   await expect(page.getByRole('button',{name:'Enable 3D',exact:true})).toBeVisible();
   await expect(page.getByRole('combobox',{name:'Visual detail',exact:true})).toHaveCount(0);
   await expect(page.getByRole('button',{name:/^(Pause|Resume) motion$/})).toHaveCount(0);
+  // Only the library is delayed in this regression. Let preceding diagrams
+  // finish their separate control-row hydration before recording absolute Y;
+  // native scroll anchoring can legitimately compensate for those rows.
+  await expect(page.locator('[data-source-diagram="miura"] svg[role="img"]')).toHaveCount(1);
+  await expect(page.locator('[data-source-diagram="workflow"] svg[role="img"]')).toHaveCount(1);
   const drawing=page.locator('[data-source-diagram="library"] [data-library-drawing]');
   await expect(drawing.locator('svg')).toHaveCount(0);
   expect(await page.evaluate(()=>window.__story.inspect().libraryDiagram.count)).toBe(0);
