@@ -1,0 +1,118 @@
+import PortfolioNavigation from './PortfolioNavigation';
+import introduction from '../release/introduction.json';
+import contact from '../release/contact.json';
+import review from '../release/story.json';
+import xrStudy from '../release/xr-study.json';
+import styles from '../app/portfolio.module.css';
+
+const projects=[
+  {
+    id:'bending-active',href:'/projects/bending-active/',title:review.title,
+    category:'COMPUTATIONAL DESIGN / MATERIAL RESEARCH',
+    description:'A study connecting geometric representation, metal-panel openings and physical assembly.',
+    image:review.cinematic.media.prototype,
+  },
+  {
+    id:'xr-bending-active',href:'/projects/xr-bending-active/',title:xrStudy.shortTitle,
+    category:'EXTENDED REALITY / RESEARCH PROTOTYPE',description:xrStudy.summary,image:xrStudy.hero,
+  },
+];
+
+const approaches=[
+  {name:'FORM',title:'Geometry and spatial relationships',description:'An idea starts with a shape, a relationship or a question about how things fit together.'},
+  {name:'SYSTEM',title:'Code, tools and interactive systems',description:'Digital methods connect representations and make a process easier to explore.'},
+  {name:'MAKE',title:'Digital methods and physical materials',description:'Making brings the digital description into conversation with a physical result.'},
+];
+
+// An original static typographic field, not a rendering of project geometry.
+const asciiField=Array.from({length:44},(_,row)=>Array.from({length:86},(_,column)=>{
+  const distance=Math.hypot((column-54)/42,(row-21)/24);
+  const value=Math.max(0,Math.min(.999,(1-distance)*.5+(Math.sin(column*.12+row*.09)+1)*.19));
+  return ' .:+ox#'[Math.floor(value*7)];
+}).join('')).join('\n');
+
+function Arrow({diagonal=false}){return <span aria-hidden="true">{diagonal?'↗':'↘'}</span>;}
+
+function Introduction(){
+  return <section id="about" tabIndex={-1} className={styles.introduction} data-home-introduction aria-labelledby="home-title">
+    <div className={styles.introductionInner}>
+      <div className={styles.introductionCopy}>
+        <p className={styles.eyebrow}>{introduction.discipline}</p>
+        <h1 id="home-title" className={styles.homeTitle}><span>{introduction.greeting}{' '}</span><span>{introduction.name}<span className={styles.period}>.</span></span></h1>
+        <p className={styles.statement}>{introduction.statement}</p>
+        <p className={styles.description}>{introduction.description}</p>
+        <a href="#projects" className={styles.projectInvitation} data-home-project-link>
+          <span><span className={styles.invitationLabel}>SELECTED WORK / {String(projects.length).padStart(2,'0')}</span><span className={styles.invitationTitle}>Ideas, systems and things made.</span><span className={styles.invitationAction}>Explore the projects</span></span>
+          <span className={styles.invitationArrow}><Arrow/></span>
+        </a>
+      </div>
+      <div className={styles.notation} aria-hidden="true"><span>FORM</span><span>SYSTEM</span><span>MAKE</span></div>
+      <span className={styles.signature} aria-hidden="true">IDEAS INTO MATERIAL</span>
+    </div>
+  </section>;
+}
+
+function About({standalone=false}){
+  const Heading=standalone?'h1':'h2';
+  const ApproachHeading=standalone?'h2':'h3';
+  return <section id="about" className={[styles.section,standalone?styles.standalone:''].join(' ')} aria-labelledby="about-title" data-portfolio-about data-home-introduction={standalone?'':undefined}>
+    <div className={styles.sectionLead}>
+      <p className={styles.eyebrow}>01 / ABOUT</p>
+      <div><Heading id="about-title" className={styles.sectionTitle}>{standalone?'About the way I work.':'Between ideas and material.'}</Heading>
+        <p className={styles.sectionIntro}>{introduction.statement}</p>
+        <p className={styles.prose}>{introduction.description}</p>
+        {!standalone&&<a href="/about/" className={styles.textLink}>More about my approach <Arrow diagonal/></a>}
+      </div>
+    </div>
+    <div className={styles.approaches}>{approaches.map(approach=><article key={approach.name}>
+      <p className={styles.eyebrow}>{approach.name}</p><ApproachHeading>{approach.title}</ApproachHeading><p>{approach.description}</p>
+    </article>)}</div>
+    {standalone&&<a href="/projects/" className={styles.textLink}>See the ideas in the work <Arrow diagonal/></a>}
+  </section>;
+}
+
+function Projects({standalone=false}){
+  const Heading=standalone?'h1':'h2';
+  const CardHeading=standalone?'h2':'h3';
+  return <section id="projects" className={[styles.section,styles.projects,standalone?styles.standalone:''].join(' ')} aria-labelledby="projects-title" data-portfolio-projects>
+    <div className={styles.projectHeading}>
+      <div><p className={styles.eyebrow}>02 / SELECTED PROJECTS</p><Heading id="projects-title" className={styles.sectionTitle}>A closer look at the work.</Heading></div>
+      <p className={styles.projectCount}>{String(projects.length).padStart(2,'0')} projects<br/>Geometry / interaction / making</p>
+    </div>
+    <ul className={styles.projectGrid} data-project-grid>
+      {projects.map((project,index)=><li key={project.id} className={styles.projectCard}>
+        <a href={project.href} data-project-card={project.id}>
+          <div className={styles.projectImage}><img src={project.image.src} width={project.image.width} height={project.image.height} alt={project.image.alt} loading="eager" decoding="async" data-site-critical/><span className={styles.cardNumber} aria-hidden="true">{String(index+1).padStart(2,'0')}</span></div>
+          <div className={styles.cardCopy}><p className={styles.cardCategory}>{project.category}</p><CardHeading>{project.title}</CardHeading><p className={styles.cardDescription}>{project.description}</p><span className={styles.cardAction}>Explore project <Arrow diagonal/></span></div>
+        </a>
+      </li>)}
+    </ul>
+    <p className={styles.gridNote}>Two connected studies, from material geometry to an extended-reality research prototype.</p>
+  </section>;
+}
+
+function Contact({standalone=false}){
+  const Heading=standalone?'h1':'h2';
+  return <section id="contact" className={[styles.section,styles.contact,standalone?styles.contactPage:''].join(' ')} aria-labelledby="contact-title" data-portfolio-contact>
+    <div><p className={styles.eyebrow}>03 / CONTACT</p><Heading id="contact-title" className={styles.sectionTitle}>Let’s connect.</Heading><p className={styles.prose}>Have a question about the work or an idea to share? I’d be happy to hear from you.</p></div>
+    <div className={styles.contactChannels}>
+      <a href={`mailto:${contact.email}`} className={styles.contactLink} data-contact-email><span><span className={styles.invitationLabel}>EMAIL</span><span className={styles.contactHandle}>{contact.email}</span></span><Arrow diagonal/></a>
+      <nav className={styles.socialLinks} aria-label="Public profiles" data-contact-social-links>{contact.socialLinks.map(link=><a key={link.id} href={link.href} target="_blank" rel="noreferrer">{link.label}<Arrow diagonal/></a>)}</nav>
+    </div>
+  </section>;
+}
+
+/** Shared static portfolio pages. SiteExperience alone owns event-driven entry. */
+export default function PortfolioHome({section='home'}){
+  return <div className={styles.portfolio}>
+    <div className={styles.ambient} aria-hidden="true" data-portfolio-background><span className={styles.asciiField}>{asciiField}</span></div>
+    <PortfolioNavigation current={section}/>
+    <main id="portfolio-main" tabIndex={-1} className={styles.main} data-portfolio-root data-portfolio-section={section}>
+      {section==='home'&&<><Introduction/><Projects/><Contact/></>}
+      {section==='about'&&<><About standalone/><Contact/></>}
+      {section==='projects'&&<><Projects standalone/><Contact/></>}
+      {section==='contact'&&<Contact standalone/>}
+      <footer className={styles.footer}><span>JosHsuan Chao</span><span>GEOMETRY / CODE / MAKING</span><a href="#portfolio-main">Back to top <span aria-hidden="true">↑</span></a></footer>
+    </main>
+  </div>;
+}

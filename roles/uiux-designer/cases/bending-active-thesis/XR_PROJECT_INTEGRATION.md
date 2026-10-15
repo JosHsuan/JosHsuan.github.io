@@ -1,0 +1,66 @@
+# XR project: content, source media and review boundaries
+
+Date: 16 October 2026. Status: local implementation; built-artifact browser verification and publication have not been completed at this checkpoint.
+
+The owner's current request authorizes About / Projects / Contact, a nine-cell project-index composition and a substantive page for **An Extended-Reality App Using Motion Capture for Bending-Active Structure**. It authorizes narrowly relevant content preparation and selected image publication for that page. This supersedes the old Markdown-only preparation boundary for this selected work; it does not release every private project, raw CV, report, source-code repository or source-media directory. The existing reusable empty framework remains separate. Commit, push and deployment are handled by the root task under the current owner authorization and same-artifact CI/CD gate; this role performs none of those actions.
+
+The selected routes are `/projects/bending-active/` for the existing metal-panel presentation and `/projects/xr-bending-active/` for the separate XR case. The new XR article is server-rendered content, with the shared `SiteExperience` controller owning page readiness and route lifecycle. It does not reuse the metal-panel scene as an XR result or create a renderer, a scene animation, a tracking connection, a context, a frame loop or a new runtime state owner.
+
+## Authoritative evidence and public copy
+
+The preparation root is `D:/JosHsuan_Website/_private/portfolio-preparation`. The current `projects/t3-mocap-bending-active/` pack's `project.json`, `evidence.md`, `attribution.json`, `content-draft.md`, canonical `asset-manifest.json` and `interaction-plan.md` were read. The earlier `asset-manifest-reviewed.json` was also inspected and compared for the four selected records; it is a historical snapshot, not the canonical manifest.
+
+| Public statement | Evidence inspected | Limit preserved |
+| --- | --- | --- |
+| Collaborative 2024 research by Chia-Hsuan Chao and Wataru Nomura | Current T3 attribution and evidence records; co-authored report; the owner-designated `C:/Users/JosHsuan/Desktop/JosHsuan_CV_2022/PDF/JosHsuan_CV&Portfolio_2025.VerFacade.pdf`, physical pp46–53, is the preparation pack's primary role reference | Course/project participation does not independently establish a degree award, publication venue or sole authorship. |
+| A loop from physical measurement through adaptive modelling to XR guidance | Actual prepared page images of `D:/JosHsuan_D/ETH_MAS_DFab/T3/Thesis_Writing/FinalThesis_JosHsuan_Wataru.pdf`, physical pp9 and 14; current pack locators for pp9–16 | Team method built on COMPAS XR and other third-party tools, not the invention of an entire tracking or XR framework by one person. |
+| Personal changes to MoCap UI/events, measurement frame/circle display and rod-coordinate/colour output | Actual source excerpts from `C:/Users/JosHsuan/Documents/GitHub/MAS_T3_MoCap/Assets/Scripts/MoCap Scripts/Eventmanager_MoCap.cs`, lines 51–105; `InstantiateObject_MoCap.cs`, lines 226–268; `RH+GH+PY/Main_Files/scripts/Rodmodules.py`, lines 23–111; five existing Git commits listed below | Source and history support bounded code contributions; other authors also changed the shared application. The original application was not executed for this page. |
+| Delays, registration differences and image-target instability remained; no controlled UX evaluation was established | Actual prepared report pages23–25, including discussion and conclusion | No measured productivity gain, current tracking benchmark or validated usability improvement is claimed. |
+| The prototype had module-selection and assembly-related interface states | Individually inspected archived recording frame at 14.8833165 seconds and the prepared UI composite | Only the selected recording frame is published. A still does not establish every interaction, a continuous assembly sequence or reliability. |
+
+The read-only Git check resolved these existing commits to author `JosHsuan`: `cdc43ac14ac1326749b59c7a6b8fb2e950a21a75` (8 August 2024), `fc681eb7e26b9de420b69bfbe6d43093a2c17145` (12 August 2024), `243551d5f7296d19fa912256af5bd62691242a15` (15 July 2024), `4a78b369ce9aeeb0c8fb1ce81cfbd5f13506399f` (10 August 2024), and `621bd8c8f9e875515ace8450407f8663e03ea8a2` (19 August 2024). It does not assign all work in those files to this author.
+
+Public copy is an original English synthesis in [release/xr-study.json](release/xr-study.json). It distinguishes individual contribution, shared research, upstream frameworks, project renderings, recorded prototype evidence and unresolved questions. The credits retain Wataru Nomura; tutors/advisers Alexandra Moisi and Daniela Mitterberger; acknowledged technical/model/equipment support from Kevin Seav, Fabio Scotto and Nijat Mahamaliyev; and the relevant software foundations. An individual image creator is not invented where the sources record only team-project attribution.
+
+## Three distinct role reviews
+
+**Information Designer.** Read [the role README](../../../information-designer/README.md). Present context, method, prototype, contribution, limits and credits in a directly readable order. A three-step HTML workflow explains capture → adapt → guide, without invented measurements or a new quantitative curve. Preserve original image colours, proportions and paper backgrounds. Captions explicitly separate a rendering from a physical record and a single recording frame from a tested interaction. Essential content remains accessible without operating a scene or an animation.
+
+**Geometry Engineer.** Read [the role README](../../../geometry-engineer/README.md). The T3 snapshot is a different source from the existing metal-panel model. Its recorded 3,162 vertices / 6,144 triangles do not resolve physical units, complete fabrication geometry, module IDs or the Unity-to-glTF presentation contract. The source serializer already changes axes; another swap or automatic 0.001 scale would invent a conversion. No T3 geometry is re-exported or published for this page, and no source dimensions are presented as verified built dimensions.
+
+**3D Animation Designer.** Read [the role README](../../../3d-animation-designer/README.md) and [source-element contract](../../../3d-animation-designer/research/ELEMENT_CONTRACT.md). The archived snapshot lacks defensible element groups and a time sequence. Do not manufacture a bending simulation, exploded assembly or construction order. The static research images are truthful evidence; the separate metal-panel animation is not an XR demonstration. New geometry or animation would require a separately verified element/units/ownership handoff.
+
+## Selected image handoff
+
+[release/xr-assets.json](release/xr-assets.json) is the role-owned merge input for the shared release manifest. It contains four relative public paths, sizes, SHA256 values, source-relative locators and processing history; no private absolute path or source configuration enters that JSON. The root build must consume only repository-local allowlisted copies and must not depend on the preparation drive.
+
+| Public derivative | Prepared source selected | Review and representation |
+| --- | --- | --- |
+| `assets/xr/research-environment.webp` — 1800×1273, 137,514 bytes | `t3-cover-02.webp`, from `T3/Presentation/Diagram_materials/CoverPhoto/02.jpg` | Actual image inspected. Research-environment rendering with stylised figures, not a completed-installation photograph. |
+| `assets/xr/measuring-tools.webp` — 1800×1273, 23,516 bytes | `t3-measuring-tool.webp`, from `T3/Presentation/Diagram_materials/Method/Measuring_Tool.jpg` | Actual image inspected. Rendered reflective-marker measuring tools, not an accuracy test. |
+| `assets/xr/module-assembly.webp` — 1800×1273, 12,380 bytes | `t3-module-assembly.webp`, from `T3/Presentation/Diagram_materials/Method/Module_Assembly.jpg` | Actual image inspected. Module/support setup illustration, not a fabrication sequence. |
+| `assets/xr/module-selection.png` — 960×1279, 637,446 bytes | `module-switch-14p88s.png`, from `T3/Presentation/Video_materials/Module_Switch.mp4` at 14.8833165 seconds | Actual image inspected. A recorded interface frame with its original player controls retained. No identifiable face or private configuration is visible. |
+
+The four files total 810,856 bytes. Existing prepared derivatives were copied byte-for-byte; no new crop, colour adjustment, generated illustration, temporal compositing or re-encoding was performed. Their original source files were hashed before and after the copy and remained unchanged. All four outputs were decoded/reopened and their dimensions and hashes checked. The three WebP files match the canonical preparation manifest's recorded derivative hashes. The video still's hash is recorded freshly because its canonical record did not pin that field. None of these checks settle individual creator identity or third-party rights beyond the owner's narrowly selected publication instruction. That unresolved attribution is retained in public credits and the source record.
+
+No whole PDF, CV page, original video, raw geometry snapshot, SDK, code, connection string, portrait or contact document is copied into public assets. The UI composite and report-page renders were inspected as evidence but not selected for publication.
+
+## Project index and contact boundaries
+
+The preparation index contains 25 candidates, all with historical `publishable:false`; some are explicitly restricted. The already authorized metal-panel case and this newly selected XR case are the **two** projects supported by the current publication scope. The visual index may use a 3×3 grid with empty space; it must not add seven fictional works, expose restricted titles/media or imply nine finished public projects. Project Caschlatsch is explicitly not public; the related Voxel NDA boundary remains unresolved. Other personal/coursework and company cases are not released merely because they occur in a private portfolio.
+
+On 16 October 2026 the owner directly confirmed the public email `chiahsuanchao@icloud.com` and all three exact social destinations: [LinkedIn](https://www.linkedin.com/in/joshsuan/), [Instagram](https://www.instagram.com/joshsuan.chao/) and [GitHub](https://github.com/JosHsuan). This explicit owner confirmation is the current publication authority, recorded in [release/contact.json](release/contact.json). No contact handle remains pending, and the email was not inferred from a private CV.
+
+A preceding narrow read-only check of five existing CV sources found the LinkedIn handle `joshsuan`: `C:/Users/JosHsuan/Desktop/JosHsuan_CV_2022/PDF/CV_2025.pdf`, physical page 1, has the PDF link annotation `http://www.linkedin.com/in/joshsuan` followed by two carriage returns. The three other 2025 CV variants contain the same annotation on page 1; `CV_A4.pdf` has no matching platform link. Those five CVs' native text and annotations did not establish an Instagram URL. That historical evidence search has been superseded for current contact selection by the owner's exact confirmations above; no same-name profile search or guessed destination was used.
+
+The owner-designated `JosHsuan_CV&Portfolio_2025.VerFacade.pdf` also contains the same LinkedIn annotation on physical page 2. Only its first three pages were checked for platform links/labels during this contact follow-up; no Instagram destination was found in that limited scope. No whole CV or contact-page render is copied or published.
+
+The current `cv-draft.md` intentionally omits email, telephone and address, and its older contact gate remains historical for the directly confirmed email and social links. No private CV, telephone, address, birthday or portrait is released by this contact selection. No 2026 current employment, current city, degree-award date, unverified professional level or publication DOI is added.
+
+## Validation checkpoint
+
+The role completed source/claim review, individual inspection of the selected images and five relevant report pages, the original-file preservation check and derivative decode/dimension/hash checks. The new SSR article has one H1, ordered sections, native image links, descriptive alternatives, a native project-index return link and a related-project link. It has no per-frame or client state.
+
+The two new JSX files pass a TypeScript syntax parse, both new JSON files parse, all four referenced public image files exist, and the shared XR stylesheet parses with all 21 JSX class bindings present. Focused ESLint completes with zero errors and one existing-pattern advisory for a native `<img>`; these allowlisted static images retain explicit dimensions and do not depend on a runtime image service. These checks used Node 24.19.0. A first package-runner attempt found an unpinned pnpm on this shell's PATH and did not execute ESLint; the successful focused check invoked the installed ESLint directly without installing or changing dependencies.
+
+The clean public build, route/asset allowlist checks, responsive readability, accessibility, browser/device behaviour, navigation and visual acceptance remain pending until the root task tests the rebuilt artifact. No commit, push, CI pass or deployment is claimed for this new work at this checkpoint.

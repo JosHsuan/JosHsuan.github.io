@@ -17,6 +17,8 @@ const manifest = JSON.parse(await readFile(path.join(release, 'manifest.json'), 
 const story = await readFile(path.join(release, 'story.json'));
 assert.equal(digest(story), manifest.storySHA256);
 assert.equal(digest(await readFile(path.join(release, 'introduction.json'))), manifest.introductionSHA256);
+assert.equal(digest(await readFile(path.join(release, 'xr-study.json'))), manifest.xrStudySHA256);
+assert.equal(digest(await readFile(path.join(release, 'contact.json'))), manifest.contactSHA256);
 // Verify the complete public handoff before replacing generated workspace files.
 for (const asset of manifest.assets) {
   assert.match(asset.path, /^(assets|licenses)\/[a-zA-Z0-9/._-]+$/);
@@ -55,6 +57,12 @@ const sources = [
   'runtime/presentation/ModelAnnotationPresenter.mjs',
   'runtime/RuntimeRoot.mjs', 'runtime/core/FeatureRegistry.ts', 'runtime/core/Registrar.ts',
   'app/page.jsx', 'app/layout.jsx', 'app/globals.css', 'app/glass-materials.css', 'app/page.module.css',
+  'app/portfolio.module.css', 'app/about/page.jsx', 'app/projects/page.jsx', 'app/contact/page.jsx',
+  'app/projects/bending-active/page.jsx', 'app/projects/xr-bending-active/page.jsx',
+  'components/BendingProject.jsx', 'components/PortfolioHome.jsx', 'components/PortfolioNavigation.jsx',
+  'components/XRProject.jsx', 'components/XRProject.module.css', 'release/xr-study.json', 'release/contact.json',
+  'components/SiteExperience.jsx', 'components/site-experience.module.css',
+  'runtime/site/SiteReadiness.mjs', 'runtime/site/SiteNavigation.mjs', 'runtime/site/site-entry-bridge.mjs',
   'components/CinematicExperience.jsx', 'components/CinematicScene.jsx',
   'components/InformationSkin.jsx',
   'components/LiquidGlassSkin.jsx',
@@ -88,7 +96,8 @@ for (const asset of manifest.assets) {
 await writeFile(path.join(work, 'next.config.mjs'), `import config from '../roles/uiux-designer/cases/bending-active-thesis/next.config.mjs';\nimport {fileURLToPath} from 'node:url';\nexport default {...config, outputFileTracingRoot:fileURLToPath(new URL('../',import.meta.url))};\n`);
 await writeFile(path.join(work, 'public/.nojekyll'), '');
 await writeFile(path.join(work, 'public/robots.txt'), `User-agent: *\nAllow: /\nSitemap: ${manifest.origin}/sitemap.xml\n`);
-await writeFile(path.join(work, 'public/sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${manifest.origin}/</loc></url></urlset>\n`);
+const routes=['/','/about/','/projects/','/contact/','/projects/bending-active/','/projects/xr-bending-active/'];
+await writeFile(path.join(work, 'public/sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${routes.map(route=>`<url><loc>${manifest.origin}${route}</loc></url>`).join('')}</urlset>\n`);
 const commit = process.env.GITHUB_SHA || execFileSync('git', ['rev-parse', 'HEAD'], {cwd: root, encoding: 'utf8'}).trim();
 await writeFile(path.join(work, 'public/release.json'), JSON.stringify({release: manifest.id, commit, modelRevision: 'ff112b90be104cca7e3705b5eee481ba3973d25e2f3d4a7350faa2f732cae47e', diagramRevision: manifest.assets.find(asset => asset.path === 'assets/thesis/source-diagrams.glb').sha256, typography: 'IBM Plex'}) + '\n');
 const result = spawnSync(process.execPath, [path.join(root, 'node_modules/next/dist/bin/next'), 'build', work, '--webpack'], {cwd: root, stdio: 'inherit', env: {...process.env, THESIS_PUBLIC_RELEASE: '1', NEXT_PUBLIC_BASE_PATH: '', NEXT_TELEMETRY_DISABLED: '1'}});

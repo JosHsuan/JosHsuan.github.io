@@ -8,7 +8,7 @@
 |---|---|
 | Owner | JosHsuan Chao |
 | Audience | The owner, collaborating developers, and coding agents |
-| Revision | **2.11 — 15 October 2026; case-owned personal introduction and native project entry** |
+| Revision | **2.12 — 16 October 2026; selected multi-page portfolio, XR case and site readiness** |
 | Language | English for project documentation and future website content; Traditional Chinese for discussion with the owner |
 | Scope | Portfolio, Research & Development, About/CV, Contact, and selected interactive project stories |
 | Delivery baseline | Next.js static export to GitHub Pages; no paid domain, paid storage, or continuously running backend required for the initial release |
@@ -81,6 +81,8 @@ This follows Theatre's documented framework-agnostic integration model, but the 
 ---
 
 ## 00. Current project baseline and source authority
+
+**Current owner-authorized public application:** [Decision 0011](decisions/0011-selected-portfolio-navigation.md) extends the selected release to About / Project / Contact and two project detail routes. Home now scrolls into a nine-cell index instead of the thesis, and contains no project model or model poster. A root-layout discrete readiness/navigation service composes current-document assets with the existing Bending EntryManager; its Director remains the only case animation clock. The XR case uses a pinned authored public summary and four selected reviewed derivatives. This request supersedes decision 0010's direct home-to-thesis transition. The reusable `src` framework, public snapshot and generated entry directory stay empty; older documentation-only scope statements below describe their dated checkpoints.
 
 ### 0.1 Designated locations
 

@@ -282,7 +282,7 @@ test('assets completing after synthetic pagehide wait before constructing scene 
     await gate; await route.fulfill({response});
   });
   try {
-    await page.goto('/#overview', {waitUntil: 'domcontentloaded'});
+    await page.goto('/projects/bending-active/#overview', {waitUntil: 'domcontentloaded'});
     await page.waitForFunction(() => window.__thesis && window.__story, null, {timeout: RESOURCE_WAIT});
     await expect.poll(() => pending.length, {timeout: RESOURCE_WAIT}).toBe(3);
     const initial = await readResources(page);

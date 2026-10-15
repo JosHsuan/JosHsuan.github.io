@@ -6,16 +6,16 @@ async function entered(page){await page.waitForFunction(()=>window.__story?.insp
 test('published story, canonical metadata and every linked asset work without JavaScript', async ({browser}) => {
   const context = await browser.newContext({javaScriptEnabled:false});
   const page = await context.newPage();
-  await page.goto('http://127.0.0.1:4186/');
+  await page.goto('http://127.0.0.1:4186/projects/bending-active/');
   await expect(page.locator('[data-story-chapter]')).toHaveCount(7);
   await expect(page.locator('h1')).toHaveCount(1);
-  await expect(page.locator('h1')).toHaveText('Hi, I’m JosHsuan.');
+  await expect(page.locator('h1')).toHaveAccessibleName('Bending-Active Metal Panel Deformation');
   await expect(page.locator('h1')).toBeVisible();
-  await expect(page.getByRole('heading',{level:2,name:'Bending-Active Metal Panel Deformation'})).toBeVisible();
+  await expect(page.getByRole('heading',{level:1,name:'Bending-Active Metal Panel Deformation'})).toBeVisible();
   await expect(page.locator('[data-entry-loader]')).toBeHidden();
   await expect(page.locator('[data-project-content]')).not.toHaveAttribute('inert','');
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'index, follow');
-  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://joshsuan.github.io/');
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://joshsuan.github.io/projects/bending-active/');
   const assets = await page.locator('img, source, a[href^="/assets/"]').evaluateAll(elements => [...new Set(elements.flatMap(el => [el.getAttribute('src'),el.getAttribute('srcset'),el.getAttribute('href')]).filter(Boolean))]);
   for (const asset of assets) expect((await page.request.get('http://127.0.0.1:4186'+asset)).status(), asset).toBe(200);
   await expect(page.locator('body')).not.toContainText('Public release of the project and individual media remains pending');
@@ -28,10 +28,13 @@ test('public model initializes in Full and preserves chapter navigation without 
   // Exercise the visitor's real entry once in the public release baseline.
   // Other scene suites enter #overview directly to retain their focused scope.
   await page.goto('/');
+  await expect(page.locator('[data-site-loader]')).toBeHidden({timeout:WAIT});
   await expect(page.locator('[data-home-introduction]')).toBeVisible();
   const projectLink=page.locator('[data-home-project-link]');
-  await expect(projectLink).toHaveAttribute('href','#overview');await projectLink.click();
-  await expect(page).toHaveURL(/\/#overview$/);
+  await expect(projectLink).toHaveAttribute('href','#projects');await projectLink.click();
+  await expect(page.locator('[data-project-grid]')).toBeInViewport();
+  await page.locator('[data-project-card="bending-active"]').click();
+  await expect(page).toHaveURL(/\/projects\/bending-active\/$/);
   await page.waitForFunction(()=>window.__thesis?.inspect().ready&&window.__story?.inspect().entry.phase==='entered',null,{timeout:WAIT});
   await page.evaluate(()=>document.fonts.ready);await settle(page);
   await expect(page.locator('[data-cinematic-stage]')).toHaveAttribute('data-presentation-context','project');
@@ -77,7 +80,7 @@ test('public model initializes in Full and preserves chapter navigation without 
 
 test('evidence inspection and method disclosure preserve native reading and keyboard focus', async ({page}) => {
   await page.emulateMedia({reducedMotion:'reduce'});
-  await page.goto('/#overview');await entered(page);
+  await page.goto('/projects/bending-active/#overview');await entered(page);
   await page.locator('[data-chapter-link="system"]').click();
   const step=page.locator('#system details').first();
   await step.locator('summary').click();
@@ -102,7 +105,7 @@ test('reduced motion and unavailable model retain the public story', async ({bro
   const context = await browser.newContext({reducedMotion:'reduce'});
   const page = await context.newPage(); const sceneRequests=[];
   page.on('request', request=>{if(/\.(glb|hdr)(\?|$)/.test(request.url()))sceneRequests.push(request.url());});
-  await page.goto('http://127.0.0.1:4186/#overview');
+  await page.goto('http://127.0.0.1:4186/projects/bending-active/#overview');
   await entered(page);
   await expect(page.getByRole('button',{name:'Enable 3D',exact:true})).toBeVisible();
   expect(await page.evaluate(()=>window.__story.inspect().entry.reason)).toBe('static-ready');
@@ -111,7 +114,7 @@ test('reduced motion and unavailable model retain the public story', async ({bro
   await context.close();
   const fallback = await browser.newContext(); const failedPage = await fallback.newPage();
   await failedPage.route('**/source-layers.glb', route=>route.abort());
-  await failedPage.goto('http://127.0.0.1:4186/#overview');await entered(failedPage);
+  await failedPage.goto('http://127.0.0.1:4186/projects/bending-active/#overview');await entered(failedPage);
   await expect(failedPage.locator('[data-scene-fallback]')).toContainText('3D unavailable');
   expect(await failedPage.evaluate(()=>window.__story.inspect().entry.reason)).toBe('scene-unavailable');
   await expect(failedPage.locator('[data-story-chapter]')).toHaveCount(7);

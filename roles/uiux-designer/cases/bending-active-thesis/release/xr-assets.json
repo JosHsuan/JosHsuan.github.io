@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "id": "xr-bending-active-selected-media-v1",
+  "selectionAuthorization": "The current owner request explicitly selects a real XR detail page with narrowly relevant source processing/publication; unrelated preparation records remain private.",
+  "reviewScope": "Four individually inspected source derivatives without identifiable faces, contact details, source code, configuration, raw CV or full private documents.",
+  "assets": [
+    {
+      "path": "assets/xr/research-environment.webp",
+      "bytes": 137514,
+      "sha256": "063cbbef1b648a6377034f1e97429aad98b0b6da34d7a809522c87b7b99f1557",
+      "source": "Owner-authorized selected Chao / Nomura XR research derivative; individual image creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/measuring-tools.webp",
+      "bytes": 23516,
+      "sha256": "4d8cb7cd124de8cecbb1700cf201ab029491ca9d07c502110397671064454bec",
+      "source": "Owner-authorized selected Chao / Nomura XR research derivative; individual image creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/module-assembly.webp",
+      "bytes": 12380,
+      "sha256": "b67d3f7a7940227bd7bf760c02a448396ce32d47961894d4550c11b06609945c",
+      "source": "Owner-authorized selected Chao / Nomura XR research derivative; individual image creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/module-selection.png",
+      "bytes": 637446,
+      "sha256": "ffdbee5f6bdae697601be8a0465e3746966f97ca7422a5a6189d0fbc3da237f0",
+      "source": "Owner-authorized selected Chao / Nomura XR research derivative; individual image creator not separately recorded"
+    }
+  ],
+  "provenance": [
+    {
+      "assetId": "t3-cover-02",
+      "publicPath": "assets/xr/research-environment.webp",
+      "sourceLocator": "T3/Presentation/Diagram_materials/CoverPhoto/02.jpg",
+      "sourceSHA256": "3c9fc5426ac01eb505e7038f9aaa4b0b7472f965df8f2c618d642fe5afcc1def",
+      "preparedSHA256": "063cbbef1b648a6377034f1e97429aad98b0b6da34d7a809522c87b7b99f1557",
+      "publicSHA256": "063cbbef1b648a6377034f1e97429aad98b0b6da34d7a809522c87b7b99f1557",
+      "dimensions": [
+        1800,
+        1273
+      ],
+      "processing": "EXIF orientation applied, proportional fit within 1800 px, WebP quality90, no crop, metadata not copied",
+      "handoff": "Byte-preserving copy of the selected existing preparation derivative; no new crop, paint, compositing or generated content",
+      "sourceUnchanged": true,
+      "individualImageCreator": "Not separately recorded; team-project attribution only",
+      "timeSeconds": null
+    },
+    {
+      "assetId": "t3-measuring-tool",
+      "publicPath": "assets/xr/measuring-tools.webp",
+      "sourceLocator": "T3/Presentation/Diagram_materials/Method/Measuring_Tool.jpg",
+      "sourceSHA256": "88d6711e3a2c66c1e7004c81a6f9a90cadf85d2eae5ac084b29cb98c76a2d323",
+      "preparedSHA256": "4d8cb7cd124de8cecbb1700cf201ab029491ca9d07c502110397671064454bec",
+      "publicSHA256": "4d8cb7cd124de8cecbb1700cf201ab029491ca9d07c502110397671064454bec",
+      "dimensions": [
+        1800,
+        1273
+      ],
+      "processing": "EXIF orientation applied, proportional fit within 1800 px, WebP quality90, no crop, metadata not copied",
+      "handoff": "Byte-preserving copy of the selected existing preparation derivative; no new crop, paint, compositing or generated content",
+      "sourceUnchanged": true,
+      "individualImageCreator": "Not separately recorded; team-project attribution only",
+      "timeSeconds": null
+    },
+    {
+      "assetId": "t3-module-assembly",
+      "publicPath": "assets/xr/module-assembly.webp",
+      "sourceLocator": "T3/Presentation/Diagram_materials/Method/Module_Assembly.jpg",
+      "sourceSHA256": "9dc627b3ef27784f6f73d4dd1cb6d7da8ccbb116fd6c6668279625249e364553",
+      "preparedSHA256": "b67d3f7a7940227bd7bf760c02a448396ce32d47961894d4550c11b06609945c",
+      "publicSHA256": "b67d3f7a7940227bd7bf760c02a448396ce32d47961894d4550c11b06609945c",
+      "dimensions": [
+        1800,
+        1273
+      ],
+      "processing": "EXIF orientation applied, proportional fit within 1800 px, WebP quality90, no crop, metadata not copied",
+      "handoff": "Byte-preserving copy of the selected existing preparation derivative; no new crop, paint, compositing or generated content",
+      "sourceUnchanged": true,
+      "individualImageCreator": "Not separately recorded; team-project attribution only",
+      "timeSeconds": null
+    },
+    {
+      "assetId": "t3-module-switch-frame-2",
+      "publicPath": "assets/xr/module-selection.png",
+      "sourceLocator": "T3/Presentation/Video_materials/Module_Switch.mp4",
+      "sourceSHA256": "1144c729d32e34becfb72bd316792b8aeee3f61f0d870faff997249dd88580ef",
+      "preparedSHA256": "ffdbee5f6bdae697601be8a0465e3746966f97ca7422a5a6189d0fbc3da237f0",
+      "publicSHA256": "ffdbee5f6bdae697601be8a0465e3746966f97ca7422a5a6189d0fbc3da237f0",
+      "dimensions": [
+        960,
+        1279
+      ],
+      "processing": "Playwright/Chrome paused video working copy screenshot; preserves player controls; no temporal compositing",
+      "handoff": "Byte-preserving copy of the selected existing preparation derivative; no new crop, paint, compositing or generated content",
+      "sourceUnchanged": true,
+      "individualImageCreator": "Not separately recorded; team-project attribution only",
+      "timeSeconds": 14.8833165
+    }
+  ]
+}

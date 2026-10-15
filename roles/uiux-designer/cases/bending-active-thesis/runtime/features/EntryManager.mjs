@@ -50,14 +50,14 @@ export function createEntryManager({input}){
   },
   scenePolicy(value){policy=value;resolveScene();},
   bindFailure(callback){failure=callback;return()=>{if(failure===callback)failure=null;};},
-  connect({element,content,document:doc,onChange,presentationContext:initialContext}){
+  connect({element,content,document:doc,onChange,presentationContext:initialContext,documentReady}){
    if(connection)throw Error('Entry already connected');
    if(!element||!content)throw Error('Entry requires its loader and project content');
    const nextContext=initialContext??input.get().presentationContext??(doc.getElementById?.('home')?'home':presentationContext);
    if(nextContext!=='home'&&nextContext!=='project')throw Error('Unknown presentation context');
    const current=++generation,scope=input.events.createScope('entry-readiness');
    activeId=current;
-   motion=createEntryMotion();prerequisites={document:true,typography:false,scene:false};notified='';timedOut=false;reason='';
+   motion=createEntryMotion();prerequisites={document:!documentReady,typography:false,scene:false};notified='';timedOut=false;reason='';
    presentationContext=nextContext;
    connection={element,content,document:doc,onChange,previousInert:content.getAttribute('inert')};
    publisher.attribute(content,'inert','');publisher.attribute(content,'aria-busy','true');paint();
@@ -67,6 +67,11 @@ export function createEntryManager({input}){
     if(current!==generation)return;prerequisites.typography=true;notify();wake();
    },()=>{
     if(current!==generation)return;prerequisites.typography=true;reason='fallback-typography';notify();wake();
+   });
+   if(documentReady)Promise.resolve(documentReady).then(result=>{
+    if(current!==generation)return;prerequisites.document=true;if(result?.ready===false)reason='page-resource-unavailable';notify();wake();
+   },()=>{
+    if(current!==generation)return;prerequisites.document=true;reason='page-resource-unavailable';notify();wake();
    });
    return()=>{
     if(current!==generation)return;generation++;scope.dispose();
@@ -82,7 +87,7 @@ export function createEntryManager({input}){
    const current=generation;
    const needsFrame=advanceEntryMotion(motion,dt,{ready:Object.values(prerequisites).every(Boolean),reduced:systemReduced,resumed,hidden});
    if(!motion.ready&&!timedOut&&motion.time>=ENTRY_DEADLINE_SECONDS){
-    timedOut=true;prerequisites.typography=true;
+    timedOut=true;prerequisites.typography=true;if(!prerequisites.document){prerequisites.document=true;reason='document-timeout';}
     if(!prerequisites.scene){reason='scene-timeout';failure?.();}
     notify();wake();
    }

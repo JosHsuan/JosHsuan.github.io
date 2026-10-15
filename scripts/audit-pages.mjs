@@ -36,10 +36,22 @@ export async function auditPages() {
   assert.equal(expected.size, 0, 'Missing approved public assets');
   const html = await readFile(path.join(out, 'index.html'), 'utf8');
   assert(html.includes('Bending-Active')); assert(!html.includes('noindex'));
-  assert.equal((html.match(/data-story-chapter=/g) || []).length, 7);
+  assert.equal((html.match(/data-story-chapter=/g) || []).length, 0, 'Home must not scroll into a case');
   assert.equal((html.match(/<h1[ >]/g) || []).length, 1, 'One personal introduction heading');
-  assert(html.includes('data-home-introduction') && html.includes('id="home"'), 'Public introduction is present');
-  assert(html.includes('data-home-project-link') && html.includes('href="#overview"'), 'Native introduction-to-study link');
+  assert(html.includes('data-home-introduction'), 'Public introduction is present');
+  assert(html.includes('data-home-project-link') && html.includes('href="#projects"'), 'Native introduction-to-project-index link');
+  assert(!html.includes('data-cinematic-stage')&&!html.includes('model-poster'), 'Home has no model stage or poster');
+  assert.equal((html.match(/data-project-card=/g)||[]).length,2,'Only selected evidence-backed projects');
+  for(const route of ['about','projects','contact','projects/bending-active','projects/xr-bending-active']){
+    const page=await readFile(path.join(out,route,'index.html'),'utf8');
+    assert.equal((page.match(/<h1[ >]/g)||[]).length,1,`${route}: one heading`);
+    assert(!page.includes('noindex'),route);
+    assert(page.includes(`${manifest.origin}/${route}/`),`${route}: canonical`);
+    if(route==='projects/bending-active')assert.equal((page.match(/data-story-chapter=/g)||[]).length,7);
+    else assert(!page.includes('data-cinematic-stage')&&!page.includes('model-poster'),`${route}: no unrelated model`);
+  }
+  const xr=await readFile(path.join(out,'projects/xr-bending-active/index.html'),'utf8');
+  for(const marker of ['data-xr-study','xr-context','xr-method','xr-prototype','xr-contribution','xr-limits','xr-credits','Wataru Nomura'])assert(xr.includes(marker),`XR: ${marker}`);
   assert(html.includes('https://joshsuan.github.io/'));
   console.log(`Public release audit passed: ${files.length} output files, ${manifest.assets.length} approved assets; no private inputs.`);
 }

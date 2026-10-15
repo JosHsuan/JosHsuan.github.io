@@ -3,7 +3,7 @@ import {WAIT,scenarioTimeout,loadScene,settle,frames,centerStudy} from './case-h
 import {renderedTextContrast} from './reading-contrast.mjs';
 
 test('IBM Plex, rounded shadowboxes and orange photos retain an accessible original',async({page,isMobile})=>{
- await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/#overview');await page.waitForFunction(()=>window.__story?.inspect().entry?.phase==='entered',null,{timeout:WAIT});await page.evaluate(()=>document.fonts.ready);
+ await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/projects/bending-active/#overview');await page.waitForFunction(()=>window.__story?.inspect().entry?.phase==='entered',null,{timeout:WAIT});await page.evaluate(()=>document.fonts.ready);
  const fonts=await page.evaluate(async()=>{await document.fonts.load('400 16px "IBM Plex Mono"');await document.fonts.load('italic 400 16px "IBM Plex Serif"');return{sans:document.fonts.check('400 16px "IBM Plex Sans"'),mono:document.fonts.check('400 16px "IBM Plex Mono"'),serif:document.fonts.check('italic 400 16px "IBM Plex Serif"'),body:getComputedStyle(document.body).fontFamily};});expect(fonts).toMatchObject({sans:true,mono:true,serif:true});expect(fonts.body).toContain('IBM Plex Sans');
  const photo=page.locator('#make [data-media-kind="photo"] img'),link=page.locator('#make [data-inspect-figure]');await link.scrollIntoViewIfNeeded();
  expect(await photo.evaluate(el=>getComputedStyle(el).filter)).toContain('invert(1)');expect(await link.evaluate(el=>parseFloat(getComputedStyle(el).borderTopLeftRadius))).toBeGreaterThanOrEqual(16);
@@ -13,7 +13,7 @@ test('IBM Plex, rounded shadowboxes and orange photos retain an accessible origi
 });
 
 test('original SVG paths retain fold and workflow selections, a complete static library and failure fallbacks',async({page})=>{
- test.setTimeout(scenarioTimeout(120000));await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/#overview');await page.waitForFunction(()=>window.__story?.inspect().entry?.phase==='entered',null,{timeout:WAIT});
+ test.setTimeout(scenarioTimeout(120000));await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/projects/bending-active/#overview');await page.waitForFunction(()=>window.__story?.inspect().entry?.phase==='entered',null,{timeout:WAIT});
  for(const [kind,count]of [['miura',3],['workflow',4]]){const diagram=page.locator(`[data-source-diagram="${kind}"]`);await diagram.scrollIntoViewIfNeeded();await expect(diagram.locator('svg')).toBeVisible({timeout:WAIT});expect(await diagram.locator('svg path').count()).toBeGreaterThan(10);const buttons=diagram.locator('button[data-diagram-index]');await expect(buttons).toHaveCount(count);await buttons.last().focus();await page.keyboard.press('Enter');await expect(buttons.last()).toHaveAttribute('aria-pressed','true');await expect(diagram.locator('[data-diagram-caption]')).not.toBeEmpty();
   // Every authored caption must fit without changing the reading stop plan.
   // Selection shares the same paint path as autonomous presentation changes.

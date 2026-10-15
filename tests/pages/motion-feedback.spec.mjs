@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {settle,scenarioTimeout} from './case-helpers.mjs';
 const WAIT=45000;
-async function load(page,path='/#overview'){await page.goto(path);await page.waitForFunction(()=>window.__thesis?.inspect().ready&&window.__story?.inspect().entry.phase==='entered',null,{timeout:WAIT});await page.evaluate(()=>document.fonts.ready);await settle(page);}
+async function load(page,path='/projects/bending-active/#overview'){await page.goto(path);await page.waitForFunction(()=>window.__thesis?.inspect().ready&&window.__story?.inspect().entry.phase==='entered',null,{timeout:WAIT});await page.evaluate(()=>document.fonts.ready);await settle(page);}
 async function phase(page,id,value,settleAfter=settle){await page.evaluate(({id,value})=>{const el=document.getElementById(id);let y=0;for(let n=el;n;n=n.offsetParent)y+=n.offsetTop;scrollTo({top:y+el.offsetHeight*value-innerHeight*.45,behavior:'instant'});},{id,value});await settleAfter(page);}
 // Locator auto-scroll may finish before the authored reading plane settles.
 // Click the visible, settled summary instead of a stale pre-response coordinate.
@@ -112,7 +112,7 @@ test('information has one fluid surface; focus, hashes and live Reduced keep con
 });
 
 test('initial fragments, keyboard focus and browser history preserve exact native reading positions',async({page})=>{
- test.setTimeout(scenarioTimeout(180000));await load(page,'/#system');await expect(page.locator('[data-model-study]').first()).toBeAttached();
+ test.setTimeout(scenarioTimeout(180000));await load(page,'/projects/bending-active/#system');await expect(page.locator('[data-model-study]').first()).toBeAttached();
  await expect(page.locator('[data-chapter-link="system"]')).toHaveAttribute('aria-current','location');
  const heading=await page.locator('#system [data-story-heading]').boundingBox();expect(heading.y+heading.height).toBeGreaterThan(100);expect(heading.y).toBeLessThan(await page.evaluate(()=>innerHeight));
  const make=page.locator('[data-chapter-link="make"]');await make.focus();await page.keyboard.press('Enter');await settle(page);await expect(page.locator('#make')).toBeFocused();

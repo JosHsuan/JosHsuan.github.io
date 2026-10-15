@@ -85,5 +85,5 @@ test('a known failed scene remains manual after the uncertain-lease time window'
   await page.addInitScript(key=>{
     if(!sessionStorage.getItem(key))sessionStorage.setItem(key,JSON.stringify({status:'failed',at:Date.now()-31*60*1000}));
   },SCENE_RECOVERY_KEY);
-  await page.goto('/#overview');await expectStaticReading(page);await enableExplicitly(page);
+  await page.goto('/projects/bending-active/#overview');await expectStaticReading(page);await enableExplicitly(page);
 });

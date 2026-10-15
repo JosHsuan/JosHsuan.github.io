@@ -7,7 +7,7 @@ test('entry waits for actual scene paint and releases a deep-linked library only
  await page.route('**/assets/source-layers.glb',async route=>{await assetGate;await route.continue();});
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
  try{
-  await page.goto('/#pattern',{waitUntil:'domcontentloaded'});
+  await page.goto('/projects/bending-active/#pattern',{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>window.__story?.inspect().libraryDiagram.count===1,null,{timeout:WAIT});
   await frames(page,8);
   const preparing=await page.evaluate(()=>window.__story.inspect());
@@ -43,7 +43,7 @@ test('Reduced entry preserves reading when its deep-linked library hydrates afte
  let release;const libraryGate=new Promise(resolve=>{release=resolve;});
  await page.route('**/assets/diagrams/library.json',async route=>{await libraryGate;await route.continue();});
  try{
-  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/#pattern',{waitUntil:'domcontentloaded'});
+  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/projects/bending-active/#pattern',{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered',null,{timeout:WAIT});
   const entry=await page.evaluate(()=>window.__story.inspect().entry);
   expect(entry.reason).toBe('static-ready');expect(entry.progress).toBe(100);expect(entry.reveal).toBe(1);
@@ -79,7 +79,7 @@ test('a native hash navigation relinquishes its chapter anchor before later layo
  let release;const photoGate=new Promise(resolve=>{release=resolve;});
  await page.route('**/assets/cinematic/connection-detail.webp',async route=>{await photoGate;await route.continue();});
  try{
- await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/#form',{waitUntil:'domcontentloaded'});
+ await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/projects/bending-active/#form',{waitUntil:'domcontentloaded'});
  await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered',null,{timeout:WAIT});await settle(page);
  await page.evaluate(async()=>{
   const changed=new Promise(resolve=>addEventListener('hashchange',resolve,{once:true}));

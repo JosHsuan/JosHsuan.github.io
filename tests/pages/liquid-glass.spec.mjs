@@ -6,7 +6,7 @@ import {renderedTextContrast} from './reading-contrast.mjs';
 const identity='[data-liquid-glass="identity"]';
 const liquid=page=>page.evaluate(()=>window.__story.inspect().liquidGlass);
 async function staticPage(page){
- await page.emulateMedia({reducedMotion:'reduce',contrast:'no-preference',forcedColors:'none'});await page.goto('/#overview');
+ await page.emulateMedia({reducedMotion:'reduce',contrast:'no-preference',forcedColors:'none'});await page.goto('/projects/bending-active/#overview');
  await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered'&&window.__story.inspect().liquidGlass.count===3,null,{timeout:WAIT});
  await page.evaluate(()=>document.fonts.ready);await settle(page);
  await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(0);
@@ -27,6 +27,10 @@ async function backdropFixture(page,{pattern=false,geometry=false}={}){
   const header=document.querySelector('[data-page-masthead]'),surface=document.querySelector('[data-liquid-glass="identity"]');
   header.style.zIndex='2147483001';
   if(geometry){
+   // The synthetic 300×80 lens is taller than the real mobile identity. Keep
+   // the new sibling route navigation out of this isolated optical assay;
+   // actual production controls were captured above with their real geometry.
+   header.querySelector('nav[aria-label="Portfolio"]')?.style.setProperty('visibility','hidden','important');
    Object.assign(header.style,{left:'40px',top:'40px',right:'auto',padding:'0',minHeight:'0',width:'300px',height:'80px'});
    Object.assign(surface.style,{display:'block',position:'relative',width:'300px',height:'80px',margin:'0',padding:'24px 20px',borderRadius:'24px'});
   }
@@ -323,7 +327,7 @@ test('native opacity preferences and no-JavaScript navigation retain readable ma
  }
  const nojs=await browser.newContext({javaScriptEnabled:false,reducedMotion:'reduce',baseURL,viewport:testInfo.project.use.viewport});
  try{
-  const staticPage=await nojs.newPage();await staticPage.goto('/#overview');await staticPage.evaluate(()=>document.fonts.ready);
+  const staticPage=await nojs.newPage();await staticPage.goto('/projects/bending-active/#overview');await staticPage.evaluate(()=>document.fonts.ready);
   const owner=staticPage.locator(identity);await expect(owner).toBeVisible();await expect(owner).not.toHaveAttribute('data-liquid-ready',/.*/);
   await expect(owner.locator(':scope > [data-liquid-skin]')).toBeHidden();await expect(staticPage.locator('[data-story-navigation] a')).toHaveCount(7);
   const contrast=await renderedTextContrast(staticPage,owner);expect(contrast.length).toBeGreaterThan(0);for(const row of contrast)expect(row.ratio,row.text).toBeGreaterThanOrEqual(row.required);

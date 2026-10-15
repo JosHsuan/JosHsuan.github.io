@@ -1,0 +1,131 @@
+# Portfolio route and readiness integration
+
+Status: owner-authorized implementation, 16 October 2026. Built-artifact browser
+acceptance and publication are recorded separately by the integrator. This file
+does not claim that local CPU checks prove visible loading, browser history,
+performance or deployment.
+
+The current owner request replaces the preceding single-page personal
+introduction with a model-free Home, About, Projects and Contact navigation,
+native Home-to-project-grid scrolling, and directly reloadable Bending-Active
+and XR motion-capture detail routes. This selected public application remains
+inside the existing case publication boundary. The reusable root `src` framework,
+generated entries and empty public-content snapshot are unchanged.
+
+## Five-role implementation decisions
+
+| Role | Recommendation and implemented boundary |
+| --- | --- |
+| Software Architect | Keep native, full-document anchors for static routes. A small site readiness controller owns site loader DOM and discrete facts; it imports no scene, camera, case score, model or Theatre runtime. Same-document fragment links remain native. |
+| Experience Director | Every locally owned request has one terminal: `entered`, `cancelled` or `failed`. A tracked native departure transfers its request identity to the destination document; the source does not fabricate completion during unload. Scene entry facts are delegated rather than driven again. |
+| Motion Designer | Generic pages use the existing entry presentation and a 0.72-second CSS reveal whose actual `animationend` supplies completion. Reduced Motion skips that movement. Bending's existing Director remains the only scene-entry clock and still owns its reveal. |
+| Performance Engineer | Home mounts no case RuntimeRoot, Canvas, renderer or JavaScript RAF. One shared document service waits only for DOM readiness, fonts and explicitly marked current-page images, with bounded deadlines and reference-counted cleanup. Native CSS activity is limited to the pending loader. No sustained frame-rate or physical-device claim follows from these functional checks. |
+| Animation Cinematographer | Preserve Bending's camera, source materials, scene-light score and composition. Generic route loading shares the panel hierarchy and a static neutral CSS atmosphere, without loading the case poster or placing a model on Home. |
+
+## Files and ownership
+
+- `components/SiteExperience.jsx` mounts **once in the published root layout**.
+  Generic page components and XR must not mount additional copies.
+- `runtime/site/SiteNavigation.mjs` owns `[data-site-loader]` visibility,
+  `data-site-phase`, `html[data-site-entry-state]`, and temporary generic-page
+  `inert` / `aria-busy` attributes. It uses the existing scoped EventManager.
+- `runtime/site/SiteReadiness.mjs` shares one resource check per document. Only
+  `img[data-site-critical]` or images inside a marked container are critical.
+  Their selected source is awaited through load/error and `decode()`; no image
+  is cloned or allocated, and lazy documentary images are not promoted implicitly.
+- `runtime/site/site-entry-bridge.mjs` carries discrete facts from the existing
+  EntryManager. It owns no DOM, elapsed time or animation.
+- The existing EntryLoader remains Bending's visible gate. Its optional
+  `documentReady` prerequisite composes shared page readiness with the existing
+  typography and actual-scene/static readiness checks. The Director alone
+  advances that gate. Without the new option, the existing EntryManager API and
+  default document readiness are unchanged.
+
+The static routes are `/`, `/about/`, `/projects/`, `/contact/`,
+`/projects/bending-active/` and `/projects/xr-bending-active/`. Site navigation
+uses real anchors. Home `#projects` and other same-document fragments do not
+start site loading; an actual same-URL document reload can start a new request.
+The case's ReadingManager retains all Bending chapter fragment/history ownership.
+
+## Readiness, failure and handoff
+
+The site trace uses `requested → ready → revealing → entered`. Cancellation and
+failure are terminal alternatives, never followed by `entered` for the same
+request. Missing or broken fonts, critical images, decoding and the 15-second
+document deadline produce `failed` and release generic content. A missing generic
+reveal completion produces `failed` after 1.6 seconds rather than asserting that
+an unseen animation completed. Hidden or Reduced generic arrivals choose a
+readable static completion. Live Reduced Motion also ends a running generic
+reveal. These deadlines are bounded event waits, not another render loop.
+
+Native `FontFaceSet.ready` fulfills after font loading settles, including failure;
+it is not a successful-font proof and does not reject for ordinary network errors.
+The shared document service therefore inspects the settled set for faces with
+`status === 'error'` and records `fonts-unavailable`. Loaded faces and unused
+`unloaded` faces are accepted. It never calls `load()` or requests unused fonts.
+The defensive promise-rejection path also releases the gate, but portable
+rejection injection alone is not claimed as proof of browser font-failure handling.
+
+Bending receives the same bounded document result as a prerequisite. Its existing
+30-active-second startup bound also releases a still-pending document prerequisite;
+generation checks discard stale promise results. The site controller receives
+the actual case `ready`, `revealing`, `entered` or `cancelled` facts and starts no
+site reveal timer. A case static policy is a valid success; unavailable scene,
+font or page-resource fallbacks yield one site `failed` terminal after the existing
+case gate has released readable content. Case and site request IDs are separate.
+
+Internal unmodified native link activation shows the outgoing loader and stores
+a bounded handoff record in session storage. The destination may adopt that exact
+URL and request ID within 60 seconds. Its trace includes the original request;
+completion belongs to that destination. Pagehide clears timers and temporary DOM
+guards. A tracked handoff is not cancelled merely because its source unloads.
+An expired, future-dated, invalid or destination-mismatched handoff with a
+recoverable original request receives one explicit cancellation before the current
+document starts a fresh arrival. An existing terminal receipt prevents another
+terminal for that request. Empty or malformed records without a recoverable
+request are removed without inventing request/terminal facts.
+If session storage is unavailable, navigation remains native and the old document
+records `cancelled / untracked-handoff`; the destination owns a fresh request.
+This fallback does not pretend that cross-document identity was retained.
+
+Superseding activations, prevented default activation, native history navigation,
+disconnect and unfinished arrival pagehide cancel their current local request.
+Outgoing navigation without a commit fails open after 15 seconds. BFCache restore
+starts a fresh local arrival without replaying a generic reveal; a terminal receipt
+may be incorporated for a transferred request. If that receipt was overwritten,
+the old document does not emit a speculative second terminal for a request whose
+ownership was transferred. The diagnostic history is bounded to 48 facts and is
+not a persistent analytics or exhaustive browsing-history store.
+
+## Progressive enhancement and inspection
+
+The site loader is present in SSR HTML; `noscript` hides it. Bending's own SSR
+gate suppresses the generic SSR gate with a scoped `:has()` rule before effects
+connect. After mounting, explicit visibility ownership remains separate. An
+unconnected loader has a 30-second CSS fail-open escape for hydration failure;
+without executing JavaScript this is a visual escape, not a fabricated terminal
+event. Main content is not SSR-inert, so no-JavaScript reading and links work.
+Connected generic gates preserve and restore prior `inert` / `aria-busy` values.
+Forced colors, Reduced Transparency and print reuse the existing entry visual's
+accessible material rules; generic Reduced Motion also removes CSS activity.
+
+`window.__site.inspect()` exposes `id`, `phase`, `kind`, `url`, `reason`,
+`delegated`, `handedOff`, readiness result, bounded `history` and scoped listener
+counts. It is an inspection port, not a renderer or navigation API. Existing
+`window.__story` and case event ownership remain case-only. Modifier, external,
+download and new-tab activations retain their browser behavior.
+
+## Portable verification
+
+`tests/site-navigation.test.mjs` exercises the actual production controllers with
+injected DOM, resource promises, storage and deadline ports. It checks independent
+readiness/decode ordering, failure terminals, native-link exclusions, request
+replacement/handoff, prevented activation, native history cancellation, BFCache,
+blocked storage, scoped disposal, delegated scene phases and EntryManager's new
+document prerequisite, including rejection, timeout and stale generation.
+`tests/entry-readiness.test.mjs` retains the existing Director-gate checks.
+
+Passing these checks does not prove SSR paint ordering, native navigation paint,
+CSS animation events or physical-device performance. The integrator must validate
+the built exported routes and relevant browser projects, then publish only the
+successful same-commit CI artifact under the existing deployment gate.

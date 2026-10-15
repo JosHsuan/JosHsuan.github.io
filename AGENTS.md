@@ -1,5 +1,7 @@
 # Repository working notes
 
+The 16 October owner request and [selected portfolio decision](docs/decisions/0011-selected-portfolio-navigation.md) authorize the published application to contain About / Project / Contact, the model-free home and nine-cell index, coordinated site loading, and the selected XR case. This supersedes the earlier home-to-thesis transition, not the reusable empty `src` framework or the private-material boundaries. Follow the current [runtime integration](roles/uiux-designer/cases/bending-active-thesis/PORTFOLIO_RUNTIME_INTEGRATION.md) and [XR source record](roles/uiux-designer/cases/bending-active-thesis/XR_PROJECT_INTEGRATION.md), exact toolchain and same-artifact CI/CD gate.
+
 The current [Liquid Glass integration contract](roles/uiux-designer/cases/bending-active-thesis/LIQUID_GLASS_INTEGRATION.md) limits optical materials to the three floating control groups, with tested engine fallbacks, a single Director clock, and project-local research tooling. Preserve its reading-material and resource ownership boundaries when adjusting these surfaces.
 
 The 15 October owner request and current [Apple-inspired material, entry and event-lifecycle contract](roles/uiux-designer/cases/bending-active-thesis/APPLE_GLASS_EVENT_INTEGRATION.md) authorize that Bending-Active integration under the existing architecture and CI/CD rules. Preserve the empty reusable framework and approved source assets.

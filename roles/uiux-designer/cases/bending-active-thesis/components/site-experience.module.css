@@ -1,0 +1,17 @@
+.loader{z-index:1001}
+.status{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+/* The case's SSR gate owns its first paint, before either effect connects. */
+:global(body:has([data-entry-loader])) .loader:not([data-site-connected]){display:none}
+.backdrop{background:radial-gradient(ellipse at 18% 25%,#43667752,transparent 62%),radial-gradient(ellipse at 85% 78%,#8c633c40,transparent 58%),#0b1112}
+.loader[data-site-phase=requested] [data-site-activity]{animation:site-activity 1.8s linear infinite}
+.loader[data-site-phase=revealing]{animation:site-reveal .72s cubic-bezier(.45,0,.15,1) both;pointer-events:none}
+.loader[data-site-phase=revealing]>:last-child{animation:site-lift .72s cubic-bezier(.45,0,.15,1) both}
+/* JS-disabled pages use noscript; this is a separate hydration-failure escape. */
+.loader:not([data-site-connected]){animation:site-fail-open 30s step-end forwards}
+@keyframes site-activity{to{transform:rotate(360deg)}}
+@keyframes site-reveal{from{opacity:1}to{opacity:0}}
+@keyframes site-lift{from{transform:translateY(0)}to{transform:translateY(-12px)}}
+@keyframes site-fail-open{to{visibility:hidden;pointer-events:none}}
+@media(prefers-reduced-motion:reduce){.loader [data-site-activity],.loader[data-site-phase=revealing],.loader[data-site-phase=revealing]>:last-child{animation:none;transform:none}}
+@media(forced-colors:active){.backdrop{background:Canvas}}
+@media print{.loader{display:none}}

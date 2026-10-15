@@ -1,115 +1,141 @@
 import {test,expect} from '@playwright/test';
-import {WAIT,scenarioTimeout,settle} from './case-helpers.mjs';
+import {WAIT,scenarioTimeout} from './case-helpers.mjs';
 
-const home=page=>page.locator('[data-home-introduction]');
-const projectLink=page=>page.locator('[data-home-project-link]');
-const homeLink=page=>page.locator('[data-home-link]');
-const stage=page=>page.locator('[data-cinematic-stage]');
-
-async function introduction(page){
- await expect(page.getByRole('main')).toHaveCount(1);
- await expect(page.locator('h1')).toHaveCount(1);
- await expect(home(page)).toHaveAttribute('id','home');
- await expect(home(page).getByRole('heading',{level:1})).toHaveText('Hi, I’m JosHsuan.');
- await expect(home(page)).toContainText(/design|geometry|fabrication/i);
- await expect(home(page)).toBeVisible();
- await expect(projectLink(page)).toHaveAttribute('href','#overview');
- await expect(projectLink(page)).toHaveAccessibleName(/\S/);
- await expect(homeLink(page)).toHaveAttribute('href','#home');
- expect(await home(page).evaluate(element=>!!element.closest('[inert]')),'The personal introduction must remain outside the project entry gate').toBe(false);
+const loader=page=>page.locator('[data-site-loader]');
+async function entered(page,{failed=false}={}){
+ await page.waitForFunction(()=>['entered','failed'].includes(window.__site?.inspect().phase),null,{timeout:WAIT});
+ await expect(loader(page)).toBeHidden();
+ const state=await page.evaluate(()=>window.__site.inspect());
+ expect(state.phase).toBe(failed?'failed':'entered');
+ const terminals=state.history.filter(fact=>fact.id===state.id&&['entered','failed','cancelled'].includes(fact.phase));
+ expect(terminals).toHaveLength(1);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
+ return state;
 }
 
-test('the personal introduction and original study remain native links without JavaScript',async({browser},testInfo)=>{
- const context=await browser.newContext({javaScriptEnabled:false,reducedMotion:'reduce',baseURL:'http://127.0.0.1:4186',viewport:testInfo.project.use.viewport});
+test('all portfolio categories and both selected projects have direct readable no-JavaScript pages',async({browser})=>{
+ const context=await browser.newContext({javaScriptEnabled:false});
  try{
-  const page=await context.newPage();await page.goto('/');await introduction(page);
-  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href','https://joshsuan.github.io/');
-  await expect(page.locator('[data-story-chapter]')).toHaveCount(7);
-  await expect(page.getByRole('heading',{level:2,name:'Bending-Active Metal Panel Deformation'})).toBeVisible();
-  await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(0);
-  await projectLink(page).click();await expect(page).toHaveURL(/\/#overview$/);
-  await expect(page.locator('#overview')).toBeInViewport();
-  await homeLink(page).click();await expect(page).toHaveURL(/\/#home$/);
-  await expect(home(page)).toBeInViewport();
-  await page.goBack();await expect(page).toHaveURL(/\/#overview$/);
-  await expect(page.locator('#overview')).toBeInViewport();
-  await page.goForward();await expect(page).toHaveURL(/\/#home$/);
-  await expect(home(page)).toBeInViewport();
+  const page=await context.newPage();
+  for(const route of ['/','/about/','/projects/','/contact/','/projects/xr-bending-active/']){
+   const response=await page.goto('http://127.0.0.1:4186'+route);expect(response.status()).toBe(200);
+   await expect(page.locator('main')).toHaveCount(1);await expect(page.locator('h1')).toHaveCount(1);
+   await expect(loader(page)).toBeHidden();await expect(page.locator('main')).not.toHaveAttribute('inert','');
+   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href','https://joshsuan.github.io'+route);
+   await expect(page.locator('canvas')).toHaveCount(0);
+  }
+  await page.goto('http://127.0.0.1:4186/');
+  await page.locator('[data-home-project-link]').click();await expect(page).toHaveURL(/\/#projects$/);
+  await expect(page.locator('[data-project-grid]')).toBeInViewport();
+  await expect(page.locator('[data-project-card]')).toHaveCount(2);
+  await page.locator('[data-project-card="xr-bending-active"]').click();
+  await expect(page.locator('[data-xr-study]')).toBeVisible();
  }finally{await context.close();}
 });
 
-test('Reduced home and study navigation preserve keyboard access, history and direct chapter links',async({page,isMobile})=>{
- test.setTimeout(scenarioTimeout(120000));
- const requests=[],errors=[];
- page.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)/.test(request.url()))requests.push(request.url());});
+test('Home has no project model and scrolls directly into the nine-grid project index',async({page,isMobile})=>{
+ const modelRequests=[],errors=[];
+ page.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)|model-poster/.test(request.url()))modelRequests.push(request.url());});
  page.on('pageerror',error=>errors.push(error.message));
- await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');
- await introduction(page);
- await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered',null,{timeout:WAIT});await settle(page);
- await expect(stage(page)).toHaveAttribute('data-presentation-context','home');
- if(isMobile){const box=await projectLink(page).boundingBox();expect(box.height,'Mobile project-link hit target').toBeGreaterThanOrEqual(44);}
- const originalStage=await stage(page).elementHandle();
- await projectLink(page).focus();await expect(projectLink(page)).toBeFocused();await page.keyboard.press('Enter');await settle(page);
- await expect(page).toHaveURL(/\/#overview$/);await expect(stage(page)).toHaveAttribute('data-presentation-context','project');
- await expect(page.locator('#overview')).toBeFocused();
- await expect(page.locator('[data-story-navigation] [data-chapter-link]')).toHaveCount(7);
- await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(0);
- await homeLink(page).click();await settle(page);
- await expect(page).toHaveURL(/\/#home$/);await expect(stage(page)).toHaveAttribute('data-presentation-context','home');
- await expect(home(page)).toBeInViewport();await introduction(page);
- await page.goBack();await settle(page);await expect(page).toHaveURL(/\/#overview$/);
- await expect(stage(page)).toHaveAttribute('data-presentation-context','project');
- await page.goForward();await settle(page);await expect(page).toHaveURL(/\/#home$/);
- await expect(stage(page)).toHaveAttribute('data-presentation-context','home');
- expect(await stage(page).evaluate((element,original)=>element===original,originalStage),'Native introduction navigation must retain the single stage').toBe(true);
- await originalStage.dispose();
- await page.goto('/#pattern');
- await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered',null,{timeout:WAIT});await settle(page);
- await expect(page).toHaveURL(/\/#pattern$/);await expect(stage(page)).toHaveAttribute('data-presentation-context','project');
- await expect(page.locator('[data-chapter-link="pattern"]')).toHaveAttribute('aria-current','location');
- await expect(page.locator('#pattern')).toBeInViewport();
- await page.reload();await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered',null,{timeout:WAIT});await settle(page);
- await expect(page).toHaveURL(/\/#pattern$/);await expect(page.locator('#pattern')).toBeInViewport();
- await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(0);
- expect(requests,'Reduced introduction and chapter navigation must not request model/HDR assets').toEqual([]);
- expect(errors).toEqual([]);expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
+ await page.goto('/');await entered(page);
+ await expect(page.locator('[data-home-introduction] h1')).toHaveText('Hi, I’m JosHsuan.');
+ expect(await page.locator('main>section').evaluateAll(sections=>sections.map(section=>section.id))).toEqual(['about','projects','contact']);
+ await expect(page.locator('canvas,[data-cinematic-stage],[data-story-chapter]')).toHaveCount(0);
+ const first=await page.evaluate(()=>scrollY);await page.mouse.wheel(0,130);
+ await expect.poll(()=>page.evaluate(()=>scrollY)).toBeGreaterThan(first);
+ await page.locator('[data-home-project-link]').click();await expect(page).toHaveURL(/\/#projects$/);
+ await expect(page.locator('[data-project-grid]')).toBeInViewport();
+ const geometry=await page.locator('[data-project-grid]').evaluate(element=>{const css=getComputedStyle(element);return{columns:css.gridTemplateColumns.split(' ').length,rows:css.gridTemplateRows.split(' ').length};});
+ expect(geometry.columns).toBe(isMobile?1:3);if(!isMobile)expect(geometry.rows).toBe(3);
+ await expect(page.locator('[data-project-card]')).toHaveCount(2);
+ const cards=await page.locator('[data-project-card] img').evaluateAll(images=>images.map(image=>({loaded:image.complete&&image.naturalWidth>0,alt:image.alt})));
+ expect(cards.every(card=>card.loaded&&card.alt.length>15)).toBe(true);
+ expect(modelRequests).toEqual([]);expect(errors).toEqual([]);
 });
 
-test('home stays usable before project readiness and browser Back can leave a pending entry',async({page})=>{
- test.setTimeout(scenarioTimeout(120000));
- let release;const assetGate=new Promise(resolve=>{release=resolve;});
- await page.route('**/assets/source-layers.glb',async route=>{await assetGate;await route.continue();});
- const scrollHome=async()=>{
-  expect(await page.evaluate(()=>[document.documentElement,document.body].map(element=>getComputedStyle(element).overflowY)),'Pending home must not inherit the project entry scroll lock').not.toContain('hidden');
-  const before=await page.evaluate(()=>scrollY),viewport=page.viewportSize();
-  await page.mouse.move(16,viewport.height/2);await page.mouse.wheel(0,80);
-  await expect.poll(()=>page.evaluate(()=>scrollY),{timeout:WAIT}).toBeGreaterThan(before);
-  await expect(stage(page)).toHaveAttribute('data-presentation-context','home');
-  expect(await page.evaluate(()=>window.__story.inspect().entry.phase)).toBe('preparing');
- };
+test('site loading waits for actual critical images and same-page movement does not start another lifecycle',async({page})=>{
+ let release;const imageGate=new Promise(resolve=>{release=resolve;});
+ await page.route('**/assets/xr/research-environment.webp',async route=>{await imageGate;await route.continue();});
  try{
-  await page.emulateMedia({reducedMotion:'no-preference'});await page.goto('/',{waitUntil:'domcontentloaded'});
-  await introduction(page);
+  await page.goto('/',{waitUntil:'domcontentloaded'});
+  await expect(loader(page)).toBeVisible();
+  await expect(page.locator('[data-portfolio-root]')).toHaveAttribute('inert','');
+  await page.waitForFunction(()=>window.__site?.inspect().phase==='requested');
+  release();await page.unrouteAll({behavior:'wait'});
+  const ready=await entered(page);
+  expect(ready.history.filter(fact=>fact.id===ready.id).map(fact=>fact.phase)).toEqual(['requested','ready','revealing','entered']);
+  await page.locator('[data-home-project-link]').click();
+  const after=await page.evaluate(()=>window.__site.inspect());expect(after.id).toBe(ready.id);expect(after.history).toEqual(ready.history);
+  await expect(page.locator('[data-portfolio-root]')).not.toHaveAttribute('inert','');
+ }finally{release();await page.unrouteAll({behavior:'wait'});}
+});
+
+test('native internal routes display loading and close the correlated request across navigation and history',async({page})=>{
+ await page.goto('/');await entered(page);
+ // Read the outgoing document in the native click event. Locator assertions
+ // deliberately wait for navigation and cannot inspect a held response here.
+ await page.evaluate(()=>document.addEventListener('click',event=>{
+  if(event.target.closest('a[href="/about/"]')){
+   const node=document.querySelector('[data-site-loader]');
+   sessionStorage.setItem('test-site-departure',JSON.stringify({state:window.__site.inspect(),visible:!node.hidden&&getComputedStyle(node).visibility==='visible'}));
+  }
+ },{once:true}));
+ await page.locator('[data-portfolio-navigation] a[href="/about/"]').click();
+ const observation=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('test-site-departure')));
+ expect(observation.visible).toBe(true);expect(observation.state.phase).toBe('requested');expect(observation.state.kind).toBe('navigation');
+ const departure=observation.state;
+  const destination=await entered(page);expect(destination.id).toBe(departure.id);
+  expect(destination.history.filter(fact=>fact.id===destination.id).map(fact=>fact.phase)).toEqual(['requested','ready','revealing','entered']);
+  await expect(page.locator('h1')).toHaveText('About the way I work.');
+  await page.locator('[data-portfolio-navigation] a[href="/projects/"]').click();await entered(page);
+  await expect(page.locator('[data-project-card]')).toHaveCount(2);
+  await page.locator('[data-portfolio-navigation] a[href="/contact/"]').click();await entered(page);
+  await expect(page.locator('[data-portfolio-contact] a[href="https://github.com/JosHsuan"]')).toBeVisible();
+  for(const href of ['mailto:chiahsuanchao@icloud.com','https://www.linkedin.com/in/joshsuan/','https://www.instagram.com/joshsuan.chao/'])await expect(page.locator(`[data-portfolio-contact] a[href="${href}"]`)).toBeVisible();
+  await page.goBack();await entered(page);await expect(page).toHaveURL(/\/projects\/$/);
+  await page.goForward();await entered(page);await expect(page).toHaveURL(/\/contact\/$/);
+});
+
+test('a failed image releases readable content with one explicit failure terminal',async({page})=>{
+ await page.route('**/assets/xr/research-environment.webp',route=>route.abort());
+ await page.goto('/');const state=await entered(page,{failed:true});expect(state.reason).toContain('critical-image-unavailable');
+ await expect(page.locator('[data-portfolio-root]')).not.toHaveAttribute('inert','');
+ await expect(page.locator('[data-home-project-link]')).toBeVisible();
+ await page.locator('[data-home-project-link]').click();await expect(page.locator('[data-project-grid]')).toBeInViewport();
+});
+
+test('real unavailable webfonts settle to one explicit failure and readable system typography',async({page})=>{
+ await page.route('**/*.woff2',route=>route.abort());
+ await page.goto('/');const state=await entered(page,{failed:true});expect(state.reason).toContain('fonts-unavailable');
+ expect(await page.evaluate(()=>[...document.fonts].some(face=>face.status==='error'))).toBe(true);
+ await expect(page.locator('[data-portfolio-root]')).not.toHaveAttribute('inert','');
+ await expect(page.locator('[data-home-introduction] h1')).toBeVisible();
+});
+
+test('XR detail preserves real evidence, shared authorship and a native related-project route',async({page})=>{
+ const requests=[],errors=[];page.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)/.test(request.url()))requests.push(request.url());});page.on('pageerror',error=>errors.push(error.message));
+ await page.goto('/projects/xr-bending-active/');await entered(page);
+ await expect(page.locator('h1')).toHaveText('An Extended-Reality App Using Motion Capture for Bending-Active Structure');
+ await expect(page.locator('[data-xr-study]')).toContainText('Wataru Nomura');
+ for(const id of ['xr-context','xr-method','xr-prototype','xr-contribution','xr-limits','xr-credits'])await expect(page.locator('#'+id)).toBeVisible();
+ await expect(page.locator('[data-xr-study] figure img')).toHaveCount(4);
+ for(const image of await page.locator('[data-xr-study] figure img').all()){await image.scrollIntoViewIfNeeded();await expect.poll(()=>image.evaluate(element=>element.complete&&element.naturalWidth>0)).toBe(true);}
+ await expect(page.locator('[data-xr-study] a[href="/projects/bending-active/"]')).toBeVisible();
+ await page.reload();await entered(page);expect(requests).toEqual([]);expect(errors).toEqual([]);
+});
+
+test('Bending page retains one original scene gate and publishes its terminal into site readiness',async({page})=>{
+ test.setTimeout(scenarioTimeout(120000));let release;const modelGate=new Promise(resolve=>{release=resolve;});
+ await page.route('**/assets/source-layers.glb',async route=>{await modelGate;await route.continue();});
+ try{
+  await page.goto('/projects/bending-active/#overview',{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='preparing',null,{timeout:WAIT});
-  await expect(stage(page)).toHaveAttribute('data-presentation-context','home');
-  await expect(page.locator('[data-entry-loader]')).toBeHidden();
-  await scrollHome();await page.mouse.wheel(0,-1000);
-  await expect.poll(()=>page.evaluate(()=>scrollY),{timeout:WAIT}).toBe(0);
-  await projectLink(page).focus();await expect(projectLink(page)).toBeFocused();
-  await page.keyboard.press('Enter');await expect(page).toHaveURL(/\/#overview$/);
-  await expect(stage(page)).toHaveAttribute('data-presentation-context','project');
-  await expect(page.locator('[data-entry-loader]')).toBeVisible();
-  expect(await page.evaluate(()=>window.__story.inspect().entry.phase)).toBe('preparing');
-  await page.goBack();await expect(page).toHaveURL('http://127.0.0.1:4186/');
-  await expect(stage(page)).toHaveAttribute('data-presentation-context','home');
-  await expect(page.locator('[data-entry-loader]')).toBeHidden();await introduction(page);
-  await scrollHome();
-  await projectLink(page).focus();await expect(projectLink(page)).toBeFocused();
- }finally{
-  release();
-  // Finish active continue() calls before disabling interception. The default
-  // unroute teardown can otherwise race this deliberately blocked handler.
-  await page.unrouteAll({behavior:'wait'});
- }
+  await expect(page.locator('[data-entry-loader]')).toBeVisible();await expect(loader(page)).toBeHidden();
+  expect((await page.evaluate(()=>window.__site.inspect())).delegated).toBe(true);
+  release();await page.unrouteAll({behavior:'wait'});
+  await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered'&&window.__thesis?.inspect().ready,null,{timeout:WAIT});
+  const state=await entered(page);expect(state.delegated).toBe(true);
+  await expect(page.locator('[data-entry-loader]')).toBeHidden();await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);
+  await page.locator('[data-home-link]').click();await entered(page);await expect(page.locator('canvas')).toHaveCount(0);
+ }finally{release();await page.unrouteAll({behavior:'wait'});}
 });

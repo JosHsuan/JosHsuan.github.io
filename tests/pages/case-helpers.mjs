@@ -26,7 +26,7 @@ export async function settle(page){
   raf=requestAnimationFrame(sample);
  }),WAIT);
 }
-export async function loadScene(page){await page.goto('/#overview');await page.waitForFunction(()=>window.__thesis?.inspect().ready&&window.__story?.inspect().entry.phase==='entered',null,{timeout:WAIT});await page.evaluate(()=>document.fonts.ready);await settle(page);}
+export async function loadScene(page){await page.goto('/projects/bending-active/#overview');await page.waitForFunction(()=>window.__thesis?.inspect().ready&&window.__story?.inspect().entry.phase==='entered',null,{timeout:WAIT});await page.evaluate(()=>document.fonts.ready);await settle(page);}
 export async function centerStudy(page,chapter='form',{ready=true}={}){
  const el=surface(page,chapter);
  await el.evaluate(el=>{

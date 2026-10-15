@@ -34,7 +34,7 @@ function readMaterial(input){
 
 async function staticStudy(page){
  await page.emulateMedia({reducedMotion:'reduce',contrast:'no-preference',forcedColors:'none'});
- await page.goto('/#overview');
+ await page.goto('/projects/bending-active/#overview');
  await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered'&&window.__story.inspect().libraryDiagram.count===1,null,{timeout:WAIT});
  await page.evaluate(()=>document.fonts.ready);await settle(page);
  await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(0);
@@ -304,7 +304,7 @@ test('without JavaScript the reading material remains legible and original drawi
  test.setTimeout(scenarioTimeout(120000));
  const context=await browser.newContext({javaScriptEnabled:false,reducedMotion:'reduce',baseURL,viewport:testInfo.project.use.viewport});
  try{
-  const page=await context.newPage();await page.goto('/#overview');await page.evaluate(()=>document.fonts.ready);
+  const page=await context.newPage();await page.goto('/projects/bending-active/#overview');await page.evaluate(()=>document.fonts.ready);
   await expect(page.locator('[data-entry-loader]')).toBeHidden();await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(0);
   const panel=page.locator('#overview [data-information-window="editorial"]'),row=await panel.evaluate(readMaterial);
   expect(row.ready).toBe(false);expectSingleMaterial(row);

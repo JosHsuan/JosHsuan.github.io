@@ -1,6 +1,10 @@
 .skip{position:fixed;z-index:60;top:.5rem;left:1rem;padding:1rem;background:var(--accent);color:var(--ink);transform:translateY(-160%)}
 .skip:focus{transform:translateY(0)}
 .masthead{position:fixed;inset:0 0 auto;z-index:30;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;min-height:6.5rem;padding:1.9rem 4vw;pointer-events:none;font-size:.72rem}
+.siteLinks{position:absolute;left:50%;top:1rem;transform:translateX(-50%);display:flex;gap:.25rem;pointer-events:auto;font-family:var(--mono);font-size:.65rem}
+.siteLinks a{display:grid;place-items:center;min-height:44px;padding:0 .8rem;text-decoration:none;background:#152024e8;border:1px solid #d5dedb30;border-radius:10px}
+.siteLinks a:hover,.siteLinks a:focus-visible{background:#314047;color:var(--paper);outline:1px solid var(--accent)}
+@media(max-width:780px){.siteLinks{top:4.3rem}.siteLinks a{padding:0 .65rem}}
 .owner{--glass-material:navigation;position:relative;pointer-events:auto;text-decoration:none;font-weight:600;letter-spacing:.015em;margin:-10px -14px;padding:10px 14px;border:1px solid var(--glass-border);border-radius:14px;background:var(--glass-navigation-background);box-shadow:var(--glass-navigation-shadow);-webkit-backdrop-filter:var(--glass-navigation-backdrop);backdrop-filter:var(--glass-navigation-backdrop)}
 .owner>span:first-child{margin:0 .75rem;color:var(--glass-control-accent)}
 .discipline,.openingLabel,.chapterLabel,.projectType,.scrollCue,.spatialNotation,.methodSequence li>span,.evidence figcaption>span,.measurements dt,.endnote{font-family:var(--mono);font-size:.63rem;line-height:1.5;letter-spacing:.12em}
@@ -20,8 +24,8 @@
 .openingCopy{grid-column:1/8;align-self:center;max-width:53rem;position:relative;z-index:3;padding-bottom:5svh}
 .openingLabel{display:flex;align-items:center;gap:.85rem;color:var(--accent);margin-bottom:2.4rem}
 .openingLabel .glyph{width:25px;height:25px}
-.openingCopy h2{font-size:clamp(6rem,11.9vw,12.5rem);font-weight:400;line-height:.79;letter-spacing:-.084em;margin:0 0 2rem}
-.openingCopy h2>span{display:block;margin-top:.12em}
+.openingCopy h1{font-size:clamp(6rem,11.9vw,12.5rem);font-weight:400;line-height:.79;letter-spacing:-.084em;margin:0 0 2rem}
+.openingCopy h1>span{display:block;margin-top:.12em}
 .subtitle{font-size:clamp(1.05rem,1.75vw,1.75rem);letter-spacing:-.035em;color:var(--paper);margin:0 0 1.6rem .2rem}
 .openingText{max-width:26rem;font-size:clamp(1rem,1.25vw,1.25rem);line-height:1.6;color:var(--muted);margin:0 0 2.8rem .2rem}
 .projectType{max-width:30rem;color:var(--muted);font-size:.61rem;letter-spacing:.025em;margin-left:.2rem}
@@ -89,7 +93,7 @@
 .layerCaption>:global([data-layer-caption-current]),.layerCaption>:global([data-layer-caption-sizer]){grid-area:1/1;min-width:0}
 .layerCaption>:global([data-layer-caption-sizer]){visibility:hidden;pointer-events:none;user-select:none}
 .chapter{scroll-margin-top:0}
-.chapterHeading,.openingCopy h2{transform:translateY(var(--heading-shift,0px))}
+.chapterHeading,.openingCopy h1{transform:translateY(var(--heading-shift,0px))}
 .chapterLabel::after,.openingLabel::after{content:'';height:1px;width:clamp(20px,calc(60px * var(--attention,1)),60px);background:currentColor;opacity:calc(.35 + var(--energy,0) * .6)}
 .glyph{filter:drop-shadow(0 0 calc(var(--energy,0) * 7px) #ff946970);transition:color .18s}
 .glyph svg{transform:rotate(calc(var(--energy,0) * 7deg));transition:stroke-width .18s}
@@ -98,7 +102,7 @@
 .copy>p,.closingCopy>p,.openingText{border-left:1px solid transparent;transition:border-color .18s,color .18s}
 @media(hover:hover) and (pointer:fine){.copy>p:hover,.closingCopy>p:hover,.openingText:hover{border-left-color:#ff94696b;color:var(--paper)}.methodSequence li:hover,.measurements>div:hover{border-color:var(--accent)}}
 .sourceLinks a:hover,.sourceNotes summary:hover{color:var(--accent)}
-:global(html[data-cinematic-static]) .chapterHeading,:global(html[data-cinematic-static]) .openingCopy h2,:global(html[data-cinematic-static]) .glyph svg{transform:none!important}
+:global(html[data-cinematic-static]) .chapterHeading,:global(html[data-cinematic-static]) .openingCopy h1,:global(html[data-cinematic-static]) .glyph svg{transform:none!important}
 .endnote{grid-column:1/-1;display:flex;justify-content:space-between;gap:1rem;align-self:end;color:var(--muted);border-top:1px solid #adbcb32c;padding-top:1rem;font-size:.58rem;letter-spacing:.055em;margin-top:3rem}
 :global(html[data-cinematic-ready]) .mediaPlane{transform:perspective(1400px) translate3d(0,var(--media-shift,0px),0) scale(var(--media-scale,1)) rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg))}
 :global(html[data-cinematic-ready]) .evidence{opacity:1}
@@ -131,7 +135,7 @@
   .openingCopy{align-self:stretch;padding-bottom:0;max-width:38rem}
   .openingLabel{font-size:.57rem;margin-bottom:1.8rem;gap:.75rem}
   .openingLabel .glyph{width:22px;height:22px}
-  .openingCopy h2{font-size:clamp(5rem,14.6vw,7.4rem);letter-spacing:-.08em;margin-bottom:1.45rem}
+  .openingCopy h1{font-size:clamp(5rem,14.6vw,7.4rem);letter-spacing:-.08em;margin-bottom:1.45rem}
   .subtitle{font-size:clamp(1rem,3vw,1.3rem);margin-bottom:1.25rem}
   .openingText{font-size:.98rem;max-width:23rem;margin-bottom:1.5rem}
   .projectType{font-size:.56rem;letter-spacing:.01em;max-width:21rem;line-height:1.7}
@@ -170,7 +174,7 @@
   .chapterInner{padding-left:1.25rem;padding-right:1.25rem}
   .masthead{padding-left:1.25rem;padding-right:1.25rem}
   .discipline{display:none}.owner>span:first-child{display:none}
-  .openingCopy h2{font-size:18.8vw}
+  .openingCopy h1{font-size:18.8vw}
   .openingText{font-size:.93rem;max-width:19rem}
   .openingLabel{margin-bottom:1.4rem}
   .chapterHeading,.pattern .chapterHeading,.validation .chapterHeading{font-size:2.7rem}
@@ -179,7 +183,7 @@
   .chapterInner{position:relative;padding-top:7rem;padding-bottom:5rem}
   .chapter{min-height:110svh}
   .overview .chapterInner{min-height:105svh;padding-top:7rem;padding-bottom:8rem}
-  .openingCopy h2{font-size:clamp(5.5rem,9vw,9rem)}
+  .openingCopy h1{font-size:clamp(5.5rem,9vw,9rem)}
   .openingLabel{margin-bottom:1.5rem}
   .openingText{margin-bottom:1.5rem}
   .chapterHeading{font-size:clamp(2.5rem,4vw,4.5rem)}
@@ -196,20 +200,20 @@
   .chapter,.overview,.form,.system,.pattern,.make,.validation,.credits{min-height:0;break-inside:avoid}
   .chapterInner,.overview .chapterInner{position:static;display:block;min-height:0;padding:2rem}
   .copy,.openingCopy,.closingCopy{max-width:none}
-  .openingCopy h2{font-size:5rem}
+  .openingCopy h1{font-size:5rem}
   .chapterHeading,.closingCopy .chapterHeading{font-size:3rem}
   .evidence{max-width:65%;margin:1.5rem auto;opacity:1!important}
   .mediaPlane,.glyph{transform:none!important}
   .sourceNotes{display:block}
 }
 @media(max-width:780px){.chapterRail{top:auto;left:1rem;right:1rem;bottom:.8rem;flex-direction:row;gap:0;background:#090d0df2;padding:.15rem;border:1px solid #b8c9bf38}.chapterRail a{flex:1;min-width:0;min-height:40px}.railLabel{display:none}.mediaAction{opacity:1;transform:none;font-size:.54rem}.chapterInner{padding-bottom:8rem}}
-@media(prefers-reduced-motion:reduce){.chapterHeading,.openingCopy h2,.glyph svg{transform:none!important}}
+@media(prefers-reduced-motion:reduce){.chapterHeading,.openingCopy h1,.glyph svg{transform:none!important}}
 @media print{.chapterRail,.mediaAction,.layerCaption{display:none}}
 
 /* Round 03: the reading plane stays opaque; each decorative object has its own
    depth response. Values are sampled from the shared editorial playhead. */
-.openingCopy h2>span:first-child{margin-top:0}
-.chapterHeading,.openingCopy h2{transform:none;perspective:900px}
+.openingCopy h1>span:first-child{margin-top:0}
+.chapterHeading,.openingCopy h1{transform:none;perspective:900px}
 .chapterHeading [data-heading-line],.openingCopy [data-heading-line]{transform-origin:0 70%;transform:translate3d(var(--line-offset,0px),var(--line-shift,0px),0) rotateX(var(--line-rotate,0deg));backface-visibility:hidden}
 .headingLast{color:var(--glass-muted)}
 .chapterLabel,.openingLabel{position:relative}
@@ -279,7 +283,7 @@
 .chapter:focus,.story:focus,.inlineStudy:focus{outline:none}
 
 /* Round 06 — Plex typography, rounded shadowboxes and source-led diagrams. */
-.openingCopy h2{font-weight:430;font-stretch:85%;letter-spacing:-.065em;line-height:.87;font-size:clamp(5.5rem,10.9vw,11.8rem)}
+.openingCopy h1{font-weight:430;font-stretch:85%;letter-spacing:-.065em;line-height:.87;font-size:clamp(5.5rem,10.9vw,11.8rem)}
 .chapterHeading{font-weight:450;letter-spacing:-.055em;line-height:1.03}
 .headingLast{font-weight:400;letter-spacing:-.065em}
 .skip,.studyLink,.mediaAction,.sourceLinks a,.sourceNotes summary,.methodSequence summary{border-radius:12px}
@@ -322,8 +326,8 @@
 .story [data-choreography="heading"]{transform:var(--choreo-transform,none)!important;translate:none!important;rotate:none!important;scale:none!important;transform-origin:0 65%}
 .story [data-choreography="diagram"]{transform:perspective(1100px) rotateX(var(--choreo-rx,0deg)) rotateY(var(--choreo-ry,0deg))}
 .story [data-choreography="photo"]{transform:perspective(1200px) rotateX(calc(var(--choreo-rx,0deg) + var(--feedback-x,0deg))) rotateY(calc(var(--choreo-ry,0deg) + var(--feedback-y,0deg)))}
-@media(max-width:1100px){.diagramWide{grid-column:1/-1}.copy{padding:22px}.openingCopy h2{font-size:11.5vw}}
-@media(max-width:780px){.copy,.closingCopy{padding:22px 20px;border-radius:24px;width:100%;max-width:none}.chapterInner{padding-left:1.1rem;padding-right:1.1rem;gap:2rem}.openingCopy{padding-inline:6px}.openingCopy h2{font-size:16.1vw;line-height:.9;letter-spacing:-.065em}.chapterHeading,.pattern .chapterHeading,.validation .chapterHeading{font-size:clamp(2.4rem,10vw,3.8rem)}.diagramWide{margin-top:0}.inlineStudy{margin-top:0}.chapterRail{padding:5px;border-radius:28px}.chapterRail a{min-height:40px}.chapterRail a::after{border-radius:2px}.mediaFrame{padding:7px;border-radius:22px}.mediaPlane,.mediaFrame img{border-radius:16px}.form .chapterInner,.system .chapterInner,.pattern .chapterInner{padding-bottom:7rem}.sourceComparison{padding:10px 14px}.evidence figcaption{flex-direction:column;gap:6px}.figureIndex{font-size:.46rem}.sourceLinks{gap:10px}}
+@media(max-width:1100px){.diagramWide{grid-column:1/-1}.copy{padding:22px}.openingCopy h1{font-size:11.5vw}}
+@media(max-width:780px){.copy,.closingCopy{padding:22px 20px;border-radius:24px;width:100%;max-width:none}.chapterInner{padding-left:1.1rem;padding-right:1.1rem;gap:2rem}.openingCopy{padding-inline:6px}.openingCopy h1{font-size:16.1vw;line-height:.9;letter-spacing:-.065em}.chapterHeading,.pattern .chapterHeading,.validation .chapterHeading{font-size:clamp(2.4rem,10vw,3.8rem)}.diagramWide{margin-top:0}.inlineStudy{margin-top:0}.chapterRail{padding:5px;border-radius:28px}.chapterRail a{min-height:40px}.chapterRail a::after{border-radius:2px}.mediaFrame{padding:7px;border-radius:22px}.mediaPlane,.mediaFrame img{border-radius:16px}.form .chapterInner,.system .chapterInner,.pattern .chapterInner{padding-bottom:7rem}.sourceComparison{padding:10px 14px}.evidence figcaption{flex-direction:column;gap:6px}.figureIndex{font-size:.46rem}.sourceLinks{gap:10px}}
 @media(prefers-reduced-motion:reduce){.story [data-choreography]{transform:none!important}}
 @media print{.copy,.closingCopy{box-shadow:none;background:transparent}.evidence[data-media-kind="photo"] .mediaFrame img{filter:none;mix-blend-mode:normal}.story [data-choreography]{transform:none!important}}
 

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "email": "chiahsuanchao@icloud.com",
+  "emailAuthority": "Owner explicitly provided this address for public contact on 16 October 2026.",
+  "socialLinks": [
+    {
+      "label": "LinkedIn",
+      "id": "linkedin",
+      "href": "https://www.linkedin.com/in/joshsuan/"
+    },
+    {
+      "label": "Instagram",
+      "id": "instagram",
+      "href": "https://www.instagram.com/joshsuan.chao/"
+    },
+    {
+      "label": "GitHub",
+      "id": "github",
+      "href": "https://github.com/JosHsuan"
+    }
+  ]
+}
