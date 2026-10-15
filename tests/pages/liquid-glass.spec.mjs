@@ -187,6 +187,52 @@ test('native opacity preferences and no-JavaScript navigation retain readable ma
   try{await cdp.send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'},{name:'prefers-reduced-transparency',value:'reduce'}]});await opaque();}
   finally{await cdp.send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'},{name:'prefers-reduced-transparency',value:'no-preference'}]});await cdp.detach();}
  }else testInfo.annotations.push({type:'coverage-limit',description:'Native prefers-contrast and forced-colors covered. WebKit reduced-transparency emulation is unavailable.'});
+ await expect.poll(async()=>(await modes()).every(row=>row.mode=== (browserName==='chromium'?'refractive':'reflective')),{timeout:WAIT}).toBe(true);
+ await settle(page);
+ // Exercise the built regular material's brightest authored response, rather
+ // than relying on its resting tint or an opaque accessibility replacement.
+ // Freeze the Director so Reduced Motion cannot reset these test inputs.
+ const contrastFixture=await page.evaluate(()=>{
+  window.dispatchEvent(new Event('pagehide'));
+  const background=document.createElement('div');background.dataset.liquidContrastBackground='';
+  Object.assign(background.style,{position:'fixed',inset:'0',zIndex:'2147483000',pointerEvents:'none',background:'#fff'});document.body.appendChild(background);
+  const owners=[document.querySelector('[data-page-masthead]'),document.querySelector('[data-story-navigation]'),document.querySelector('[data-reading-tools]')];
+  const surfaces=[...document.querySelectorAll('[data-liquid-glass]')];
+  const saved=Array.from(new Set([...owners,...surfaces])).map(element=>({element,style:element.getAttribute('style')}));
+  for(const owner of owners)owner.style.zIndex='2147483001';
+  const samples=surfaces.map(element=>{
+   const box=element.getBoundingClientRect(),walker=document.createTreeWalker(element,NodeFilter.SHOW_TEXT);let text;
+   while(walker.nextNode()){
+    const node=walker.currentNode;if(!node.textContent.trim())continue;
+    const range=document.createRange();range.selectNodeContents(node);const rect=range.getBoundingClientRect();
+    if(rect.width>0&&rect.height>0){text=rect;break;}
+   }
+   if(!text)throw Error('No visible control text for contrast: '+element.dataset.liquidGlass);
+   const x=(text.left+text.width/2-box.left)/box.width*100,y=(text.top+text.height/2-box.top)/box.height*100;
+   element.style.setProperty('--liquid-glint-x',x+'%');element.style.setProperty('--liquid-glint-y',y+'%');
+   element.style.setProperty('--liquid-hover','1');element.style.setProperty('--liquid-press','1');
+   return{kind:element.dataset.liquidGlass,glint:{x,y}};
+  });
+  window.__liquidContrastCleanup=()=>{background.remove();for(const {element,style} of saved){if(style===null)element.removeAttribute('style');else element.setAttribute('style',style);}delete window.__liquidContrastCleanup;window.dispatchEvent(new Event('pageshow'));};
+  return samples;
+ });
+ const renderedContrast=[];
+ try{
+  for(const background of ['#ffffff','#000000']){
+   await page.locator('[data-liquid-contrast-background]').evaluate((element,color)=>{element.style.background=color;},background);
+   for(const sample of contrastFixture){
+    const control=page.locator(`[data-liquid-glass="${sample.kind}"]`);await expect(control).toBeVisible();
+    const response=await control.evaluate(element=>({hover:getComputedStyle(element).getPropertyValue('--liquid-hover').trim(),press:getComputedStyle(element).getPropertyValue('--liquid-press').trim(),glintOpacity:Number(getComputedStyle(element.querySelector(':scope > [data-liquid-skin]'),'::after').opacity)}));
+    expect(response.hover).toBe('1');expect(response.press).toBe('1');expect(response.glintOpacity).toBeCloseTo(.42,3);
+    const rows=await renderedTextContrast(page,control);expect(rows.length,sample.kind+' visible text').toBeGreaterThan(0);
+    renderedContrast.push({background,...sample,response,rows});
+    for(const row of rows)expect(row.ratio,`${sample.kind} / ${background} / ${row.text}`).toBeGreaterThanOrEqual(row.required);
+   }
+  }
+ }finally{
+  await testInfo.attach('maximum-glint-rendered-contrast',{body:JSON.stringify(renderedContrast),contentType:'application/json'});
+  await page.evaluate(()=>window.__liquidContrastCleanup?.());
+ }
  const nojs=await browser.newContext({javaScriptEnabled:false,reducedMotion:'reduce',baseURL,viewport:testInfo.project.use.viewport});
  try{
   const staticPage=await nojs.newPage();await staticPage.goto('/');await staticPage.evaluate(()=>document.fonts.ready);

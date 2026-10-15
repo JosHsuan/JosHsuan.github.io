@@ -198,8 +198,13 @@ html [data-liquid-glass][data-liquid-ready]>[data-liquid-skin]{
   opacity:calc(var(--liquid-rim-opacity) + var(--liquid-hover,0) * .12 + var(--liquid-press,0) * .16);
 }
 [data-liquid-skin]::after{
-  content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  content:'';position:absolute;inset:0;border-radius:inherit;padding:6px;pointer-events:none;
   background:radial-gradient(ellipse at var(--liquid-glint-x,28%) var(--liquid-glint-y,12%),rgb(255 255 255 / .68),rgb(214 235 224 / .15) 30%,transparent 66%);
+  /* Keep the traveling reflection in the rim; the text core never receives
+     additive glint, including at maximum hover/press over a white backdrop. */
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
   opacity:calc(var(--liquid-glow-opacity) + var(--liquid-hover,0) * .11 + var(--liquid-press,0) * .2);
 }
 html [data-liquid-glass]:is(:focus-visible,:has(:focus-visible))>[data-liquid-skin]{transform:none}

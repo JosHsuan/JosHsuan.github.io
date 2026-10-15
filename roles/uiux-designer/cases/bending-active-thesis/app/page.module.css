@@ -2,7 +2,7 @@
 .skip:focus{transform:translateY(0)}
 .masthead{position:fixed;inset:0 0 auto;z-index:30;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;min-height:6.5rem;padding:1.9rem 4vw;pointer-events:none;font-size:.72rem}
 .owner{--glass-material:navigation;position:relative;pointer-events:auto;font-weight:600;letter-spacing:.015em;margin:-10px -14px;padding:10px 14px;border:1px solid var(--glass-border);border-radius:14px;background:var(--glass-navigation-background);box-shadow:var(--glass-navigation-shadow);-webkit-backdrop-filter:var(--glass-navigation-backdrop);backdrop-filter:var(--glass-navigation-backdrop)}
-.owner>span:first-child{margin:0 .75rem;color:var(--accent)}
+.owner>span:first-child{margin:0 .75rem;color:var(--glass-control-accent)}
 .discipline,.openingLabel,.chapterLabel,.projectType,.scrollCue,.spatialNotation,.methodSequence li>span,.evidence figcaption>span,.measurements dt,.endnote{font-family:var(--mono);font-size:.63rem;line-height:1.5;letter-spacing:.12em}
 .discipline{font-weight:400;color:var(--muted)}
 .story{position:relative;z-index:2}
