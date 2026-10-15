@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {settle,scenarioTimeout} from './case-helpers.mjs';
 const WAIT=45000;
-async function load(page,path='/'){await page.goto(path);await page.waitForFunction(()=>window.__thesis?.inspect().ready&&window.__story?.inspect().entry.phase==='entered',null,{timeout:WAIT});await page.evaluate(()=>document.fonts.ready);await settle(page);}
+async function load(page,path='/#overview'){await page.goto(path);await page.waitForFunction(()=>window.__thesis?.inspect().ready&&window.__story?.inspect().entry.phase==='entered',null,{timeout:WAIT});await page.evaluate(()=>document.fonts.ready);await settle(page);}
 async function phase(page,id,value,settleAfter=settle){await page.evaluate(({id,value})=>{const el=document.getElementById(id);let y=0;for(let n=el;n;n=n.offsetParent)y+=n.offsetTop;scrollTo({top:y+el.offsetHeight*value-innerHeight*.45,behavior:'instant'});},{id,value});await settleAfter(page);}
 // Locator auto-scroll may finish before the authored reading plane settles.
 // Click the visible, settled summary instead of a stale pre-response coordinate.

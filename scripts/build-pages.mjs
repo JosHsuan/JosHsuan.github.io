@@ -16,6 +16,7 @@ assert.equal(process.version, 'v24.19.0', 'Use the exact committed Node version'
 const manifest = JSON.parse(await readFile(path.join(release, 'manifest.json'), 'utf8'));
 const story = await readFile(path.join(release, 'story.json'));
 assert.equal(digest(story), manifest.storySHA256);
+assert.equal(digest(await readFile(path.join(release, 'introduction.json'))), manifest.introductionSHA256);
 // Verify the complete public handoff before replacing generated workspace files.
 for (const asset of manifest.assets) {
   assert.match(asset.path, /^(assets|licenses)\/[a-zA-Z0-9/._-]+$/);
@@ -73,7 +74,7 @@ const sources = [
   'components/model-information.mjs',
   'components/inspection-state.mjs', 'components/inspection-camera.mjs', 'components/inspection-lighting.mjs',
   'components/inspection-framing-support.mjs',
-  'components/materials/cinematic-material.js', 'release/story.json',
+  'components/materials/cinematic-material.js', 'release/story.json', 'release/introduction.json',
 ];
 for (const relative of sources) {
   await mkdir(path.dirname(path.join(work, relative)), {recursive: true});

@@ -34,7 +34,7 @@ function readMaterial(input){
 
 async function staticStudy(page){
  await page.emulateMedia({reducedMotion:'reduce',contrast:'no-preference',forcedColors:'none'});
- await page.goto('/');
+ await page.goto('/#overview');
  await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered'&&window.__story.inspect().libraryDiagram.count===1,null,{timeout:WAIT});
  await page.evaluate(()=>document.fonts.ready);await settle(page);
  await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(0);
@@ -238,7 +238,7 @@ test('all information surfaces share one glass owner and preserve readable sourc
  for(const row of surfaces)expectSingleMaterial(row);
 
  await expect(page.locator('[data-liquid-glass][data-liquid-ready]')).toHaveCount(3,{timeout:WAIT});
- const navigation=await page.locator('[data-story-navigation],[data-page-masthead] > span,[data-reading-tools]').evaluateAll(readMaterial);
+ const navigation=await page.locator('[data-story-navigation],[data-liquid-glass="identity"],[data-reading-tools]').evaluateAll(readMaterial);
  expect(navigation).toHaveLength(3);
  for(const row of navigation){
   expect(row.material).toBe('navigation');expect(row.opacity).toBe(1);expect(row.skinCount).toBe(1);expect(row.ready).toBe(true);
@@ -255,7 +255,7 @@ test('all information surfaces share one glass owner and preserve readable sourc
  for(const paper of papers){expect(paper.material).toBe('source-paper');expect(paper.alpha).toBe(1);expect(paper.filter).not.toContain('blur(');expect(paper.owners).toEqual([]);}
  // Backdrop blur belongs behind the interface. Neither its text, original
  // vector linework nor original comparison image may inherit a content blur.
- const content=await page.locator('#overview h1,#system [data-editorial-copy],[data-source-diagram] svg,[data-model-side-label] h3,[data-source-comparison] img').evaluateAll(elements=>elements.map(element=>{
+ const content=await page.locator('#project-title,#system [data-editorial-copy],[data-source-diagram] svg,[data-model-side-label] h3,[data-source-comparison] img').evaluateAll(elements=>elements.map(element=>{
   const filters=[];for(let owner=element;owner;owner=owner.parentElement)filters.push(getComputedStyle(owner).filter);
   const style=getComputedStyle(element);return{filters,backdrop:style.getPropertyValue('backdrop-filter')||style.getPropertyValue('-webkit-backdrop-filter')||'none'};
  }));
@@ -304,7 +304,7 @@ test('without JavaScript the reading material remains legible and original drawi
  test.setTimeout(scenarioTimeout(120000));
  const context=await browser.newContext({javaScriptEnabled:false,reducedMotion:'reduce',baseURL,viewport:testInfo.project.use.viewport});
  try{
-  const page=await context.newPage();await page.goto('/');await page.evaluate(()=>document.fonts.ready);
+  const page=await context.newPage();await page.goto('/#overview');await page.evaluate(()=>document.fonts.ready);
   await expect(page.locator('[data-entry-loader]')).toBeHidden();await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(0);
   const panel=page.locator('#overview [data-information-window="editorial"]'),row=await panel.evaluate(readMaterial);
   expect(row.ready).toBe(false);expectSingleMaterial(row);

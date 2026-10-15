@@ -6,6 +6,7 @@ import InformationSkin from '../components/InformationSkin';
 import LiquidGlassSkin from '../components/LiquidGlassSkin';
 import {ExperienceProvider} from '../runtime/ExperienceProvider';
 import review from '../release/story.json';
+import introduction from '../release/introduction.json';
 import styles from './page.module.css';
 
 const story = review.cinematic;
@@ -47,20 +48,36 @@ function Paragraphs({ paragraphs }) {
 export default function Page() {
   return <ExperienceProvider>
     <EntryLoader />
-    <div data-project-content style={{display:'contents'}}>
     <CinematicExperience />
     <EvidenceInspector items={evidence} />
-    <a href="#main" className={styles.skip}>Skip to the study</a>
+    <a href="#main" className={styles.skip}>Skip to content</a>
     <header className={styles.masthead} data-protect data-page-masthead>
-      <span className={styles.owner} data-choreography="nav" data-liquid-glass="identity">{review.owner}<span aria-hidden="true"> / </span><span className={styles.discipline}>RESEARCH</span><LiquidGlassSkin id="identity" /></span>
+      <a href="#home" className={styles.owner} data-home-link data-choreography="nav" data-liquid-glass="identity" aria-label={`${review.owner} — Home`}>{review.owner}<span aria-hidden="true"> / </span><span className={styles.discipline}>DESIGN + MAKING</span><LiquidGlassSkin id="identity" /></a>
     </header>
     <nav className={styles.chapterRail} aria-label="Study chapters" data-protect data-story-navigation data-liquid-glass="chapter-navigation">{['overview','form','system','pattern','make','validation','credits'].map((id,index)=><a key={id} href={`#${id}`} data-chapter-link={id}><span data-choreography="nav">{String(index+1).padStart(2,'0')}</span><span className={styles.railLabel}>{id}</span></a>)}<LiquidGlassSkin id="chapter-navigation" /></nav>
     <div className={styles.readingFrame} data-reading-frame><main id="main" tabIndex={-1} className={styles.story} data-story-root>
+      <section id="home" className={styles.home} tabIndex={-1} data-home-introduction aria-labelledby="home-title">
+        <div className={styles.homeInner}>
+          <div className={styles.homeCopy}>
+            <p className={styles.homeEyebrow}>{introduction.discipline}</p>
+            <h1 id="home-title"><span>{introduction.greeting}{' '}</span><span>{introduction.name}<span className={styles.homePeriod}>.</span></span></h1>
+            <p className={styles.homeStatement}>{introduction.statement}</p>
+            <p className={styles.homeDescription}>{introduction.description}</p>
+          </div>
+          <div className={styles.homeNotation} aria-hidden="true"><span>FORM</span><span>SYSTEM</span><span>MAKE</span></div>
+          <a href="#overview" className={styles.homeProject} data-home-project-link>
+            <span className={styles.homeProjectCopy}><span className={styles.homeProjectIndex}>SELECTED EXPLORATION / 01</span><span className={styles.homeProjectTitle}>{introduction.transition}</span><span className={styles.homeProjectAction}>{introduction.action}</span></span>
+            <span className={styles.homeProjectArrow} aria-hidden="true">↘</span>
+          </a>
+          <span className={styles.homeSignature} aria-hidden="true">IDEAS INTO MATERIAL</span>
+        </div>
+      </section>
+      <div data-project-content style={{display:'contents'}}>
       <section id="overview" className={[styles.chapter, styles.overview].join(' ')} tabIndex={-1} data-story-chapter="overview" data-layout="left" aria-labelledby="project-title">
         <div className={styles.chapterInner}>
           <div className={styles.openingCopy} data-story-panel data-information-window="editorial"><InformationSkin/>
             <div className={styles.openingLabel}><Glyph /><span data-protect data-choreography="caption">{story.overview.eyebrow}</span></div>
-            <h1 id="project-title" aria-label={review.title} data-story-heading data-feedback-plane><span data-heading-line data-protect data-choreography="heading" style={{'--line-index':0}}>{review.hero.titleLines[0]}</span><span data-heading-line data-protect data-choreography="heading" style={{'--line-index':1}}>{review.hero.titleLines[1]}</span></h1>
+            <h2 id="project-title" aria-label={review.title} data-story-heading data-feedback-plane><span data-heading-line data-protect data-choreography="heading" style={{'--line-index':0}}>{review.hero.titleLines[0]}</span><span data-heading-line data-protect data-choreography="heading" style={{'--line-index':1}}>{review.hero.titleLines[1]}</span></h2>
             <p className={styles.subtitle} data-protect data-choreography="prose">{review.hero.subtitle}</p>
             <p className={styles.openingText} data-reading-copy data-protect data-choreography="prose" data-feedback-plane>{story.overview.introduction}</p>
             <p className={styles.projectType} data-protect data-choreography="credit">{review.projectType}<span aria-hidden="true"> — </span>{review.institution}</p>
@@ -149,10 +166,10 @@ export default function Page() {
               <div className={styles.sourceLinks} aria-label="Original source pages">{Object.values(story.media).map(item => <a key={item.figure} href={item.source} target="_blank" rel="noreferrer">{item.figure} <span aria-hidden="true">↗</span></a>)}</div>
             </details>
           </div>
-          <footer className={styles.endnote} data-protect data-choreography="credit"><span>{review.owner}</span><span>FORM / SYSTEM / MAKE</span></footer>
+          <footer className={styles.endnote} data-protect data-choreography="credit"><a href="#home">Back to the introduction ↑</a><span>FORM / SYSTEM / MAKE</span></footer>
         </div>
       </section>
+      </div>
     </main></div>
-    </div>
   </ExperienceProvider>;
 }

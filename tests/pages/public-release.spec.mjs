@@ -1,5 +1,5 @@
 import {test, expect} from '@playwright/test';
-import {WAIT, scenarioTimeout, loadScene, centerStudy, holdModel, frames, settle, expectIdle} from './case-helpers.mjs';
+import {WAIT, scenarioTimeout, centerStudy, holdModel, frames, settle, expectIdle} from './case-helpers.mjs';
 
 async function entered(page){await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered',null,{timeout:WAIT});}
 
@@ -8,8 +8,10 @@ test('published story, canonical metadata and every linked asset work without Ja
   const page = await context.newPage();
   await page.goto('http://127.0.0.1:4186/');
   await expect(page.locator('[data-story-chapter]')).toHaveCount(7);
-  await expect(page.locator('h1')).toHaveAccessibleName('Bending-Active Metal Panel Deformation');
+  await expect(page.locator('h1')).toHaveCount(1);
+  await expect(page.locator('h1')).toHaveText('Hi, I’m JosHsuan.');
   await expect(page.locator('h1')).toBeVisible();
+  await expect(page.getByRole('heading',{level:2,name:'Bending-Active Metal Panel Deformation'})).toBeVisible();
   await expect(page.locator('[data-entry-loader]')).toBeHidden();
   await expect(page.locator('[data-project-content]')).not.toHaveAttribute('inert','');
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'index, follow');
@@ -23,7 +25,16 @@ test('published story, canonical metadata and every linked asset work without Ja
 test('public model initializes in Full and preserves chapter navigation without quality or pause controls', async ({page,isMobile}) => {
   test.setTimeout(scenarioTimeout(120000));
   const errors=[]; page.on('pageerror', error=>errors.push(error.message));
-  await loadScene(page);
+  // Exercise the visitor's real entry once in the public release baseline.
+  // Other scene suites enter #overview directly to retain their focused scope.
+  await page.goto('/');
+  await expect(page.locator('[data-home-introduction]')).toBeVisible();
+  const projectLink=page.locator('[data-home-project-link]');
+  await expect(projectLink).toHaveAttribute('href','#overview');await projectLink.click();
+  await expect(page).toHaveURL(/\/#overview$/);
+  await page.waitForFunction(()=>window.__thesis?.inspect().ready&&window.__story?.inspect().entry.phase==='entered',null,{timeout:WAIT});
+  await page.evaluate(()=>document.fonts.ready);await settle(page);
+  await expect(page.locator('[data-cinematic-stage]')).toHaveAttribute('data-presentation-context','project');
   // A visitor's real keyboard inspection holds the source while its Full
   // materials, resource policy and geometry are measured.
   await centerStudy(page,'form');await holdModel(page);
@@ -66,7 +77,7 @@ test('public model initializes in Full and preserves chapter navigation without 
 
 test('evidence inspection and method disclosure preserve native reading and keyboard focus', async ({page}) => {
   await page.emulateMedia({reducedMotion:'reduce'});
-  await page.goto('/');await entered(page);
+  await page.goto('/#overview');await entered(page);
   await page.locator('[data-chapter-link="system"]').click();
   const step=page.locator('#system details').first();
   await step.locator('summary').click();
@@ -91,7 +102,7 @@ test('reduced motion and unavailable model retain the public story', async ({bro
   const context = await browser.newContext({reducedMotion:'reduce'});
   const page = await context.newPage(); const sceneRequests=[];
   page.on('request', request=>{if(/\.(glb|hdr)(\?|$)/.test(request.url()))sceneRequests.push(request.url());});
-  await page.goto('http://127.0.0.1:4186/');
+  await page.goto('http://127.0.0.1:4186/#overview');
   await entered(page);
   await expect(page.getByRole('button',{name:'Enable 3D',exact:true})).toBeVisible();
   expect(await page.evaluate(()=>window.__story.inspect().entry.reason)).toBe('static-ready');
@@ -100,7 +111,7 @@ test('reduced motion and unavailable model retain the public story', async ({bro
   await context.close();
   const fallback = await browser.newContext(); const failedPage = await fallback.newPage();
   await failedPage.route('**/source-layers.glb', route=>route.abort());
-  await failedPage.goto('http://127.0.0.1:4186/');await entered(failedPage);
+  await failedPage.goto('http://127.0.0.1:4186/#overview');await entered(failedPage);
   await expect(failedPage.locator('[data-scene-fallback]')).toContainText('3D unavailable');
   expect(await failedPage.evaluate(()=>window.__story.inspect().entry.reason)).toBe('scene-unavailable');
   await expect(failedPage.locator('[data-story-chapter]')).toHaveCount(7);

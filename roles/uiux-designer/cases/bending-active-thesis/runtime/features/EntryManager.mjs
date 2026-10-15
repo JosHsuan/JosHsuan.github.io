@@ -5,13 +5,13 @@ import {createEntryMotion,advanceEntryMotion,ENTRY_DEADLINE_SECONDS} from '../mo
 export function createEntryManager({input}){
  const publisher=input.dom.forOwner('entry');
  let connection=null,policy=null,failure=null,generation=0,activeId=0,motion=createEntryMotion();
- let prerequisites={document:false,typography:false,scene:false},reason='',notified='',timedOut=false;
+ let prerequisites={document:false,typography:false,scene:false},reason='',notified='',timedOut=false,presentationContext='project';
  const history=[];
  const emit=(phase,id=generation,eventReason=reason)=>{const fact={id,phase,...(eventReason?{reason:eventReason}:{})};history.push(fact);if(history.length>24)history.shift();input.events.emit('entryReadiness',fact);};
  const notify=()=>{
   if(!connection)return;
   const count=Object.values(prerequisites).filter(Boolean).length;
-  const snapshot={phase:motion.phase,progress:Math.round(count/3*100),reason};
+  const snapshot={phase:motion.phase,progress:Math.round(count/3*100),reason,presentationContext};
   const key=JSON.stringify(snapshot);if(key!==notified){notified=key;connection.onChange(snapshot);}
  };
  const wake=()=>input.invalidateLayout('entry-readiness',false);
@@ -31,25 +31,36 @@ export function createEntryManager({input}){
   publisher.style(element,'--entry-reveal',p);
   publisher.style(element,'--entry-angle',`${motion.time*180}deg`);
   publisher.attribute(element,'data-phase',motion.phase);
+  publisher.attribute(element,'data-entry-context',presentationContext);
   publisher.attribute(doc.documentElement,'data-entry-state',motion.phase);
+  // Home stays readable while the same project readiness gate runs behind it.
+  // Entering the project exposes that existing gate; it never starts a second
+  // loading lifecycle or rewinds a completed reveal.
+  publisher.attribute(element,'hidden',presentationContext==='home'||motion.phase==='entered'?'':null);
   if(motion.phase==='entered'){
    publisher.attribute(content,'inert',connection.previousInert);
    publisher.attribute(content,'aria-busy',null);
-   publisher.attribute(element,'hidden','');
   }
  };
  return {
+  setPresentationContext(value){
+   if(value!=='home'&&value!=='project')throw Error('Unknown presentation context');
+   if(value===presentationContext)return;
+   presentationContext=value;paint();notify();
+  },
   scenePolicy(value){policy=value;resolveScene();},
   bindFailure(callback){failure=callback;return()=>{if(failure===callback)failure=null;};},
-  connect({element,content,document:doc,onChange}){
+  connect({element,content,document:doc,onChange,presentationContext:initialContext}){
    if(connection)throw Error('Entry already connected');
    if(!element||!content)throw Error('Entry requires its loader and project content');
+   const nextContext=initialContext??input.get().presentationContext??(doc.getElementById?.('home')?'home':presentationContext);
+   if(nextContext!=='home'&&nextContext!=='project')throw Error('Unknown presentation context');
    const current=++generation,scope=input.events.createScope('entry-readiness');
    activeId=current;
    motion=createEntryMotion();prerequisites={document:true,typography:false,scene:false};notified='';timedOut=false;reason='';
+   presentationContext=nextContext;
    connection={element,content,document:doc,onChange,previousInert:content.getAttribute('inert')};
-   publisher.attribute(element,'hidden',null);publisher.attribute(content,'inert','');publisher.attribute(content,'aria-busy','true');
-   publisher.attribute(doc.documentElement,'data-entry-state','preparing');
+   publisher.attribute(content,'inert','');publisher.attribute(content,'aria-busy','true');paint();
    input.events.on(scope,'stateChanged',resolveScene);
    emit('preparing');resolveScene();notify();wake();
    Promise.resolve(doc.fonts?.ready).then(()=>{
@@ -62,7 +73,7 @@ export function createEntryManager({input}){
     const cancelled=motion.phase!=='entered'&&motion.phase!=='cancelled';
     if(cancelled)motion.phase='cancelled';
     publisher.attribute(content,'inert',connection.previousInert);publisher.attribute(content,'aria-busy',null);
-    publisher.attribute(doc.documentElement,'data-entry-state',null);publisher.attribute(element,'hidden','');connection=null;
+    publisher.attribute(doc.documentElement,'data-entry-state',null);publisher.attribute(element,'hidden','');publisher.attribute(element,'data-entry-context',null);connection=null;
     if(cancelled)emit('cancelled',current);
    };
   },
@@ -85,6 +96,6 @@ export function createEntryManager({input}){
    if(current!==generation)return false;
    notify();return needsFrame;
   },
-  inspect:()=>({id:activeId,phase:motion.phase,progress:Math.round(Object.values(prerequisites).filter(Boolean).length/3*100),prerequisites:{...prerequisites},reason,time:motion.time,reveal:motion.reveal,history:[...history]}),
+  inspect:()=>({id:activeId,phase:motion.phase,progress:Math.round(Object.values(prerequisites).filter(Boolean).length/3*100),prerequisites:{...prerequisites},reason,time:motion.time,reveal:motion.reveal,presentationContext,history:[...history]}),
  };
 }

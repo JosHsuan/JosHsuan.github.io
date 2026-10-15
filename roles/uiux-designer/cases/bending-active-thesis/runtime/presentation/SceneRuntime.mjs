@@ -72,7 +72,7 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
     paintedAnnotations.clear();annotationPublication=null;
   };
   const refreshAnnotations=state=>{
-    const present=!state.hidden&&!state.sceneFailed&&state.sceneEnabled!==false&&state.canvasPresented&&state.canvasPlacement?.visible!==false;
+    const present=state.presentationContext!=='home'&&!state.hidden&&!state.sceneFailed&&state.sceneEnabled!==false&&state.canvasPresented&&state.canvasPlacement?.visible!==false;
     const chapter=state.canvasPlacement?.chapter,publication=`${state.controllerFrame}:${!!present}:${chapter}`;
     // Discrete input updates may notify several times within a controller
     // frame. Only a fresh publication or a visibility/chapter change needs DOM.
@@ -222,7 +222,7 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
       setOverrides: (values = {}) => {overrides.current = {...values}; if (!input.get().hidden) invalidate();},
       hitTest: (clientX,clientY) => {
         const d=data.current,r=last.current?.representation;
-        if (!d?.ready || !r || !input.get().canvasPresented || input.get().canvasPlacement?.visible===false || !['form','system','pattern'].includes(r.chapterId) || !Number.isFinite(clientX+clientY)) return null;
+        if (!d?.ready || !r || input.entry.inspect().phase!=='entered' || input.get().presentationContext==='home' || !input.get().canvasPresented || input.get().canvasPlacement?.visible===false || !['form','system','pattern'].includes(r.chapterId) || !Number.isFinite(clientX+clientY)) return null;
         const rect=gl.domElement.getBoundingClientRect(),x=(clientX-rect.left)/rect.width,y=(clientY-rect.top)/rect.height;
         if (x<0||x>1||y<0||y>1) return null;
         ray.setFromCamera(rayPoint.set(x*2-1,1-y*2),camera);

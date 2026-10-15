@@ -3,7 +3,7 @@ import {WAIT,scenarioTimeout,loadScene,settle,frames,centerStudy} from './case-h
 import {renderedTextContrast} from './reading-contrast.mjs';
 
 test('IBM Plex, rounded shadowboxes and orange photos retain an accessible original',async({page,isMobile})=>{
- await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');await page.waitForFunction(()=>window.__story?.inspect().entry?.phase==='entered',null,{timeout:WAIT});await page.evaluate(()=>document.fonts.ready);
+ await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/#overview');await page.waitForFunction(()=>window.__story?.inspect().entry?.phase==='entered',null,{timeout:WAIT});await page.evaluate(()=>document.fonts.ready);
  const fonts=await page.evaluate(async()=>{await document.fonts.load('400 16px "IBM Plex Mono"');await document.fonts.load('italic 400 16px "IBM Plex Serif"');return{sans:document.fonts.check('400 16px "IBM Plex Sans"'),mono:document.fonts.check('400 16px "IBM Plex Mono"'),serif:document.fonts.check('italic 400 16px "IBM Plex Serif"'),body:getComputedStyle(document.body).fontFamily};});expect(fonts).toMatchObject({sans:true,mono:true,serif:true});expect(fonts.body).toContain('IBM Plex Sans');
  const photo=page.locator('#make [data-media-kind="photo"] img'),link=page.locator('#make [data-inspect-figure]');await link.scrollIntoViewIfNeeded();
  expect(await photo.evaluate(el=>getComputedStyle(el).filter)).toContain('invert(1)');expect(await link.evaluate(el=>parseFloat(getComputedStyle(el).borderTopLeftRadius))).toBeGreaterThanOrEqual(16);
@@ -13,7 +13,7 @@ test('IBM Plex, rounded shadowboxes and orange photos retain an accessible origi
 });
 
 test('original SVG paths retain fold and workflow selections, a complete static library and failure fallbacks',async({page})=>{
- test.setTimeout(scenarioTimeout(120000));await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');await page.waitForFunction(()=>window.__story?.inspect().entry?.phase==='entered',null,{timeout:WAIT});
+ test.setTimeout(scenarioTimeout(120000));await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/#overview');await page.waitForFunction(()=>window.__story?.inspect().entry?.phase==='entered',null,{timeout:WAIT});
  for(const [kind,count]of [['miura',3],['workflow',4]]){const diagram=page.locator(`[data-source-diagram="${kind}"]`);await diagram.scrollIntoViewIfNeeded();await expect(diagram.locator('svg')).toBeVisible({timeout:WAIT});expect(await diagram.locator('svg path').count()).toBeGreaterThan(10);const buttons=diagram.locator('button[data-diagram-index]');await expect(buttons).toHaveCount(count);await buttons.last().focus();await page.keyboard.press('Enter');await expect(buttons.last()).toHaveAttribute('aria-pressed','true');await expect(diagram.locator('[data-diagram-caption]')).not.toBeEmpty();
   // Every authored caption must fit without changing the reading stop plan.
   // Selection shares the same paint path as autonomous presentation changes.
@@ -89,7 +89,7 @@ test('rear scene keeps reading surfaces legible over actual, white and black bac
  expect(await page.evaluate(()=>({detail:window.__thesis.inspect().detail,samples:window.__thesis.inspect().compositor.requestedSamples,mist:window.__thesis.inspect().compositor.mist.enabled,suspended:window.__thesis.inspect().renderSuspended}))).toEqual({detail:'full',samples:isMobile?0:2,mist:true,suspended:false});
  const layers=await page.evaluate(()=>({canvases:document.querySelectorAll('canvas').length,glCanvases:document.querySelectorAll('[data-cinematic-stage] canvas').length,asciiCanvases:document.querySelectorAll('canvas[data-ascii-field]').length,stage:Number(getComputedStyle(document.querySelector('[data-cinematic-stage]')).zIndex),reading:Number(getComputedStyle(document.querySelector('[data-reading-frame]')).zIndex),scrim:!!document.querySelector('[data-cinematic-scrim]'),rects:window.__thesis.inspect().protectedRects,layering:window.__thesis.inspect().compositor.layering}));
  expect(layers.canvases).toBe(2);expect(layers.glCanvases).toBe(1);expect(layers.asciiCanvases).toBe(1);expect(layers.stage).toBeLessThan(layers.reading);expect(layers.scrim).toBe(false);expect(layers.rects).toBeUndefined();expect(layers.layering).toMatchObject({position:'rear',semanticMask:false,independentField:true});
- for(const selector of ['#overview h1','#system [data-editorial-copy]:first-of-type','[data-source-diagram="workflow"] figcaption','[data-model-study][data-study-chapter="system"] [data-model-side-label]']){
+ for(const selector of ['#project-title','#system [data-editorial-copy]:first-of-type','[data-source-diagram="workflow"] figcaption','[data-model-study][data-study-chapter="system"] [data-model-side-label]']){
   const target=page.locator(selector);
   if(selector.includes('[data-model-side-label]')){
    // The source information is fixed beside the model; present its chapter

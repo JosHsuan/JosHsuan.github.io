@@ -41,6 +41,38 @@ test('keyboard seeks, pointer focus and reading response retain separate meaning
  const resumed=f.manager.advance(1300,2,{resumed:true});assert.equal(resumed.visualDocY,1300);f.manager.dispose();
 });
 
+test('an explicit project anchor waits for inert to release and then restores focus without scrolling twice',()=>{
+ const f=navigation(),target=f.nodes.get('form');let inert=true,focuses=0;
+ target.closest=()=>inert?{}:null;
+ target.focus=options=>{focuses++;target.focused=options;f.manager.focus({target});};
+ f.manager.anchor({target:{closest:()=>({getAttribute:()=> '#form'})},button:0,preventDefault(){}});
+ assert.equal(f.win.scrollY,780);assert.equal(focuses,0);
+ inert=false;f.manager.completeInitialNavigation();
+ assert.equal(focuses,1);assert.deepEqual(target.focused,{preventScroll:true});assert.equal(f.win.scrollY,780,'entry completion keeps the native anchor destination');
+ f.manager.completeInitialNavigation();assert.equal(focuses,1);f.manager.dispose();
+});
+
+test('an already usable anchor focuses its destination without reapplying keyboard-tab safe insets',()=>{
+ const f=navigation(),target=f.nodes.get('form');let focuses=0;
+ target.closest=()=>null;target.focus=options=>{focuses++;target.focused=options;f.manager.focus({target});};
+ f.manager.anchor({target:{closest:()=>({getAttribute:()=> '#form'})},button:0,preventDefault(){}});
+ assert.equal(focuses,1);assert.deepEqual(target.focused,{preventScroll:true});assert.equal(f.win.scrollY,780);
+ f.manager.dispose();
+});
+
+test('Back or subsequent manual reading cancels the pending project focus while readiness finishes',()=>{
+ for(const action of ['back','manual','focus']){
+  const f=navigation(),original=f.win.history.state,target=f.nodes.get('form');let inert=true,focuses=0;
+  target.closest=()=>inert?{}:null;target.focus=()=>focuses++;
+  f.manager.anchor({target:{closest:()=>({getAttribute:()=> '#form'})},button:0,preventDefault(){}});
+  if(action==='back'){
+   f.win.location.hash='';f.win.location.href='http://local/';f.manager.pop({state:original});assert.equal(f.win.scrollY,0);
+  }else if(action==='manual')f.manager.directInput();
+  else f.manager.focus({target:f.nodes.get('overview')});
+  inert=false;f.manager.completeInitialNavigation();assert.equal(focuses,0,action+' retains the visitor\'s newer intent');f.manager.dispose();
+ }
+});
+
 test('entry completes the initial fragment intent without replaying it on later layout invalidation',()=>{
  const f=navigation({hash:'#form'}),measure=()=>{if(f.manager.initialHash)f.manager.hash();};
  measure();assert.equal(f.win.scrollY,780);assert.equal(f.manager.initialHash,true);

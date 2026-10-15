@@ -5,6 +5,7 @@
   "authorization": "Owner explicitly requested committing, pushing and deploying the completed work to GitHub Pages after making the repository public.",
   "origin": "https://joshsuan.github.io",
   "storySHA256": "4df944efbfca4421457eb2205cdaad9d8c2990adc921c5e95415f9012f77ad32",
+  "introductionSHA256": "2763f86f5f0a813da583df0f1d84ae2b3a39f68bdb788e26d32538b48e3d384e",
   "assets": [
     {
       "path": "assets/cinematic/built-prototype.webp",

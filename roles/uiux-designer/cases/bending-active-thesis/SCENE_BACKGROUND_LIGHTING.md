@@ -74,3 +74,11 @@ After this visual/focus clarification, the owner agreed to continue and then exp
 ## Post-push CI fixture follow-up
 
 The authorized `b11d921` push has a Chromium test-fixture layout failure in CI 38781043505 and is not publishable. The [Liquid Glass CI correction record](LIQUID_GLASS_INTEGRATION.md#ci-fixture-correction-after-the-authorized-push) distinguishes the owner-layout/caption assertion fix from unchanged production material and unchanged acceptance thresholds. The final guarded checks pass in all three browser configurations; a follow-up commit and successful same-SHA CI remain pending. Earlier local validation counts above are preserved without claiming a final CI pass.
+
+## Completed publication checkpoint — 15 October 2026
+
+The earlier pending-execution and `b11d921` failure paragraphs are historical. The corrected release `d34e38aac02c66cfcc4296d5405392eb77501852` is now deployed. [CI 38783455602](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/38783455602) succeeded in all fourteen jobs, including 156 public browser scenarios across fifteen spec files. [Deployment 38787493080](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/38787493080), job `116603173386`, succeeded using that tested output.
+
+The CI output digest is `2488327c95629e5cd4ec12991352ad0b32b0b8f6dd218a98d2b978a999cdc449`; deployed HTML SHA-256 is `383469eb09d3fdffad6bfc4991354ce9cac08b6a2e88ed4029920102aa474c77`. All ten live HTTP comparisons of HTML, release metadata, scripts and styles match the validated bytes. The ignored [deployment provenance](animation-review/.local/liquid-ci-d34e38a/deployment-provenance.json) and [live receipt](animation-review/.local/liquid-ci-d34e38a/live-2026-10-15T18-41-55-124Z/results.json) preserve the commit/run/output identity. These publication results do not change the earlier local counts or physical-device/fallback limits.
+
+The subsequent personal homepage introduction is a separate change still under validation. It is not included in `d34e38a` or claimed as published by this checkpoint.

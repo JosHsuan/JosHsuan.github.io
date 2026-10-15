@@ -6,7 +6,7 @@ import {renderedTextContrast} from './reading-contrast.mjs';
 const identity='[data-liquid-glass="identity"]';
 const liquid=page=>page.evaluate(()=>window.__story.inspect().liquidGlass);
 async function staticPage(page){
- await page.emulateMedia({reducedMotion:'reduce',contrast:'no-preference',forcedColors:'none'});await page.goto('/');
+ await page.emulateMedia({reducedMotion:'reduce',contrast:'no-preference',forcedColors:'none'});await page.goto('/#overview');
  await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered'&&window.__story.inspect().liquidGlass.count===3,null,{timeout:WAIT});
  await page.evaluate(()=>document.fonts.ready);await settle(page);
  await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(0);
@@ -313,7 +313,7 @@ test('native opacity preferences and no-JavaScript navigation retain readable ma
  }
  const nojs=await browser.newContext({javaScriptEnabled:false,reducedMotion:'reduce',baseURL,viewport:testInfo.project.use.viewport});
  try{
-  const staticPage=await nojs.newPage();await staticPage.goto('/');await staticPage.evaluate(()=>document.fonts.ready);
+  const staticPage=await nojs.newPage();await staticPage.goto('/#overview');await staticPage.evaluate(()=>document.fonts.ready);
   const owner=staticPage.locator(identity);await expect(owner).toBeVisible();await expect(owner).not.toHaveAttribute('data-liquid-ready',/.*/);
   await expect(owner.locator(':scope > [data-liquid-skin]')).toBeHidden();await expect(staticPage.locator('[data-story-navigation] a')).toHaveCount(7);
   const contrast=await renderedTextContrast(staticPage,owner);expect(contrast.length).toBeGreaterThan(0);for(const row of contrast)expect(row.ratio,row.text).toBeGreaterThanOrEqual(row.required);

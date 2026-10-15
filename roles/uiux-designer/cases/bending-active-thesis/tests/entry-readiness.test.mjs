@@ -27,7 +27,7 @@ function fixture(t,{previousInert=null}={}){
  if(previousInert!==null)content.setAttribute('inert',previousInert);
  input.events.on(scope,'entryReadiness',fact=>facts.push({fact,inert:content.getAttribute('inert'),busy:content.getAttribute('aria-busy'),hidden:loader.getAttribute('hidden'),phase:document.documentElement.getAttribute('data-entry-state')}));
  input.events.on(scope,'layoutInvalidated',request=>layouts.push(request));
- const connect=()=>{release=manager.connect({element:loader,content,document,onChange:value=>changes.push(value)});return release;};
+ const connect=(options={})=>{release=manager.connect({element:loader,content,document,onChange:value=>changes.push(value),...options});return release;};
  const preferences=patch=>{
   const state=input.get();
   const result=input.commands.execute('preferences.apply',{systemReduced:state.systemReduced,sceneEnabled:state.sceneEnabled,sceneFailed:state.sceneFailed,sceneReady:state.sceneReady,...patch});
@@ -77,6 +77,33 @@ test('scene readiness arriving before typography still waits for the actual font
  f.manager.advance(2);assert.equal(f.manager.inspect().phase,'preparing');assert.equal(f.manager.inspect().prerequisites.typography,false);
  f.fonts.resolve();await Promise.resolve();f.manager.advance(0);
  assert.equal(f.manager.inspect().phase,'revealing');assert.equal(f.manager.inspect().reveal,0);
+});
+
+test('Home stays outside the project gate and context changes never restart its readiness or reveal',async t=>{
+ const f=fixture(t),home=element();f.document.getElementById=id=>id==='home'?home:null;
+ f.manager.scenePolicy('required');f.connect();
+ assert.equal(f.manager.inspect().presentationContext,'home');assert.equal(f.loader.getAttribute('hidden'),'');
+ assert.equal(f.content.getAttribute('inert'),'');assert.equal(f.content.getAttribute('aria-busy'),'true');assert.equal(home.getAttribute('inert'),null);
+ const id=f.manager.inspect().id;f.manager.advance(2);const time=f.manager.inspect().time;
+ f.manager.setPresentationContext('project');assert.equal(f.loader.getAttribute('hidden'),null);assert.equal(f.manager.inspect().id,id);
+ f.manager.setPresentationContext('home');assert.equal(f.loader.getAttribute('hidden'),'');assert.equal(f.manager.inspect().time,time);
+ assert.deepEqual(f.facts.map(row=>row.fact.phase),['preparing']);
+ f.fonts.resolve();await Promise.resolve();f.preferences({sceneEnabled:true,sceneReady:true});
+ f.manager.advance(0);f.manager.advance(.36);const halfway=f.manager.inspect().reveal;
+ f.manager.setPresentationContext('project');assert.equal(f.loader.getAttribute('hidden'),null);assert.equal(f.manager.inspect().reveal,halfway);
+ f.manager.setPresentationContext('home');f.manager.advance(.36);
+ assert.equal(f.manager.inspect().phase,'entered');assert.equal(f.content.getAttribute('inert'),null);assert.equal(f.content.getAttribute('aria-busy'),null);
+ f.manager.setPresentationContext('project');assert.equal(f.loader.getAttribute('hidden'),'');assert.equal(f.manager.inspect().id,id);
+ f.manager.advance(10);assert.deepEqual(f.facts.map(row=>row.fact.phase),['preparing','ready','revealing','entered']);
+});
+
+test('disconnect while Home hides a pending entry still closes the project gate and ignores stale readiness',async t=>{
+ const f=fixture(t);f.connect({presentationContext:'home'});f.disconnect();
+ assert.equal(f.facts.at(-1).fact.phase,'cancelled');assert.equal(f.content.getAttribute('inert'),null);
+ assert.equal(f.loader.getAttribute('hidden'),'');assert.equal(f.loader.getAttribute('data-entry-context'),null);
+ const count=f.facts.length,writes=f.input.dom.inspect().entry.writes;
+ f.fonts.resolve();await Promise.resolve();f.manager.setPresentationContext('project');
+ assert.equal(f.manager.advance(10),false);assert.equal(f.facts.length,count);assert.equal(f.input.dom.inspect().entry.writes,writes);
 });
 
 test('deferred scene policy preserves the readable static route and Reduced completes without a reveal delay',async t=>{

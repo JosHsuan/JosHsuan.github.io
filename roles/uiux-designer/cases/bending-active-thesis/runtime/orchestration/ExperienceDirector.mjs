@@ -22,6 +22,9 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
     const modelOverlay=document.querySelector('[data-model-overlay]');
     const root = document.querySelector('[data-story-root]');
     const backdrop = document.querySelector('[data-cinematic-background]');
+    const home = document.getElementById('home');
+    const homeLinks = [...document.querySelectorAll('[data-home-link]')];
+    const navigation = document.querySelector('[data-story-navigation]');
     const sections = [...document.querySelectorAll('[data-story-chapter]')];
     if (!root || sections.length !== 7) return;
     const scope=input.events.createScope('director');
@@ -46,7 +49,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
     const reading=readingManager.reading,playback=createChapterPlayback(),history=[],choreography=new Map();
     let canvasSurface={width:1,height:1},canvasPlacement=null,canvasWasVisible=false,canvasActivation=-1,canvasAwaitingPaint=false,stableWidth=0;
     const canvasMotion=createCanvasMotion();
-    let plan, offsets=[], previous=0, controllerFrame=0, frameDelta=0, resumed=true, seekPending=false, semanticSeekPending=false;
+    let plan, offsets=[], projectStart=0, presentationContext=home?'home':'project', previous=0, controllerFrame=0, frameDelta=0, resumed=true, seekPending=false, semanticSeekPending=false;
     let inspectionRevision=input.get().inspectionRevision??0, wasReduced=input.get().reduced;
     let preferenceKey='', pendingImpulse=0, touchY=null, pointerActive=false, latestScene=null, lastChapter=null;
     readingManager.start();
@@ -58,6 +61,23 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
     const scheduler=createFrameScheduler({request:callback=>requestAnimationFrame(callback),cancel:id=>cancelAnimationFrame(id),onFrame:now=>tick(now)});
     const layout=new LayoutScheduler(()=>scheduler.schedule());
     scheduler.suspend('visibility',document.hidden);
+    function presentNavigation(){
+      const unavailable=presentationContext==='home'||input.entry.inspect().phase!=='entered';
+      publisher.attribute(navigation,'inert',unavailable?'':null);
+      publisher.attribute(navigation,'aria-hidden',unavailable?'true':null);
+    }
+    function presentContext(docY,{remeasure=true}={}){
+      const next=home&&docY<projectStart-.5?'home':'project',changed=next!==presentationContext;
+      presentationContext=next;
+      publisher.attribute(document.documentElement,'data-presentation-context',next);
+      publisher.attribute(stage.current,'data-presentation-context',next);
+      presentNavigation();
+      homeLinks.forEach(link=>publisher.attribute(link,'aria-current',next==='home'?'location':null));
+      input.entry.setPresentationContext(next);
+      // A context change can hide the chapter rail. Refresh its existing lens
+      // map through the layout owner, rather than reading geometry every frame.
+      if(changed&&remeasure)layout.invalidate('presentation-context');
+    }
     const measure = () => {
       if(disposed||(scheduler.suspended&&plan))return;
       // Mobile browser bars change available height frequently. Preserve the
@@ -77,6 +97,8 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       diagrams=[...document.querySelectorAll('[data-source-diagram]:not([data-source-diagram="library"])')].map(element=>({element,index:Math.max(0,sections.indexOf(element.closest('[data-story-chapter]')))}));
       for(const element of choreography.keys())if(!element.isConnected||element.closest('[data-information-window]'))choreography.delete(element);
       offsets=sections.map(naturalY);offsets.push(naturalY(sections.at(-1))+sections.at(-1).offsetHeight);
+      projectStart=Math.max(0,offsets[0]-(parseFloat(getComputedStyle(sections[0]).scrollMarginTop)||0));
+      presentContext(scrollY,{remeasure:false});
       windowPresenter.measure({naturalY,viewportHeight:innerHeight,docY:scrollY});
       libraryPresenter.measure({naturalY,viewportHeight:innerHeight});
       liquidPresenter.measure({opaque:opaqueGlass()});
@@ -105,6 +127,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       let state=input.get();
       if(state.sceneEnabled&&!state.sceneFailed)lifecycle.heartbeat();
       const readingScore=readingManager.advance(scrollY,dt,{reducedMotion:state.reduced,resumed,seek:seekPending}),u=readingScore.nativeU;
+      presentContext(reading.nativeDocY);
       // Native reading selects a semantic chapter. It never supplies scene time.
       const chapter=cinematicChapter(u);
       if(lastChapter!==chapter.id&&state.modelInteractionChapter&&state.modelInteractionChapter!==chapter.id){
@@ -132,9 +155,9 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       choreography.forEach((item,element)=>{if(item.stickyStudy&&!item.last?.settled)stickyRects.set(element,element.getBoundingClientRect());});
       const hoveredPlane=pointerMoved?planeMap.get(hovered):null;
       if(hoveredPlane){const r=hoveredPlane.element.getBoundingClientRect();hoveredPlane.target={x:Math.min(1,Math.max(-1,(pointerClient.x-r.left)/Math.max(1,r.width)*2-1)),y:Math.min(1,Math.max(-1,(pointerClient.y-r.top)/Math.max(1,r.height)*2-1)),press:0};}
-      publisher.attribute(document.documentElement,'data-active-chapter',chapter.id);
+      publisher.attribute(document.documentElement,'data-active-chapter',presentationContext==='project'?chapter.id:null);
       publisher.attribute(document.documentElement,'data-chapter-beat',playbackScore.beat);
-      links.forEach(link=>publisher.attribute(link,'aria-current',link.dataset.chapterLink===chapter.id?'location':null));
+      links.forEach(link=>publisher.attribute(link,'aria-current',presentationContext==='project'&&link.dataset.chapterLink===chapter.id?'location':null));
 
       const decorate=fine.matches&&!state.reduced,alpha=1-Math.exp(-10*Math.min(dt,1)),next=decorate?pointerTarget:{x:0,y:0};
       pointer={x:pointer.x+(next.x-pointer.x)*alpha,y:pointer.y+(next.y-pointer.y)*alpha};
@@ -143,7 +166,8 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       moving=publishEditorial({choreography,stickyRects,reading,playbackScore,state,didSeek,didResume,sections,planes,hovered,focused,fine,dt,publisher,viewportHeight:innerHeight,chapter})||moving;
       moving=windowPresenter.publish({docY:scrollY,dt,reduced:state.reduced,seek:didSeek,resumed:didResume,canvasPlacement})||moving;
       moving=input.entry.advance(dt,{resumed:didResume,hidden:state.hidden,systemReduced:state.systemReduced})||moving;
-      moving=libraryPresenter.publish({docY:scrollY,dt,reduced:state.systemReduced,resumed:didResume,hidden:state.hidden||input.entry.inspect().phase!=='entered'})||moving;
+      presentNavigation();
+      moving=libraryPresenter.publish({docY:scrollY,dt,reduced:state.systemReduced,resumed:didResume,hidden:state.hidden||presentationContext==='home'||input.entry.inspect().phase!=='entered'})||moving;
       moving=liquidPresenter.publish({dt,reduced:state.reduced,resumed:didResume,hidden:state.hidden,opaque:opaqueGlass(),keyboardFocus:liquidKeyboardFocus})||moving;
 
       // Chapter boundaries own the viewport hold. Information rectangles never
@@ -153,7 +177,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       const canvasChapter=canvasPlacement.chapter;
       const authoredViewport=viewportStageSourceViewport(canvasSurface.width/canvasSurface.height,canvasSurface.width);
       const informationViewport=modelInformationLayout(canvasSurface.width/canvasSurface.height,canvasSurface.width).information;
-      const modelUIVisible=canvasPlacement.visible&&['form','system','pattern'].includes(canvasPlacement.chapter);
+      const modelUIVisible=presentationContext==='project'&&input.entry.inspect().phase==='entered'&&canvasPlacement.visible&&['form','system','pattern'].includes(canvasPlacement.chapter);
       if(modelOverlay){
         publisher.style(modelOverlay,'height',`${canvasSurface.height}px`);
         for(const [prefix,rect] of [['slot',authoredViewport],['info',informationViewport]]){
@@ -181,7 +205,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       publisher.attribute(stage.current,'data-canvas-mode',canvasPlacement.mode);
       moving=moving||!canvasPlacement.settled||canvasAwaitingPaint;
       for(const id of ['form','system','pattern']){
-        const weight=canvasPlacement.visible&&id===canvasChapter?1:0;
+        const weight=presentationContext==='project'&&canvasPlacement.visible&&id===canvasChapter?1:0;
         modelViewports[id]={viewport:authoredViewport,weight};
         if(id===chapter.id){inspectionWeight=weight;inspectionViewport=authoredViewport;}
       }
@@ -225,12 +249,13 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       publisher.style(root,'--scene-rim-rgb',neutral.map((v,i)=>Math.round(v*.88+tint[i]*255*.12)).join(' '));
       publisher.style(root,'--scene-rim-strength',Math.round(Math.min(1,Math.max(0,.35+(latestScene.light.rimEnergy-1)*1.5))*20)/20);
       publisher.style(root,'--scene-rim-x',Math.round(50+latestScene.light.areaAzimuthDeg*2+pointer.x*15)+'%');
-      if(progress.current)publisher.style(progress.current,'transform','scaleX('+Math.min(1,reading.visualDocY/Math.max(1,plan.maxScroll))+')');
-      publisher.text(status.current,String(chapter.index+1).padStart(2,'0')+' / 07');
+      const projectProgress=Math.max(0,Math.min(1,(reading.visualDocY-offsets[0])/Math.max(1,plan.maxScroll-offsets[0])));
+      if(progress.current)publisher.style(progress.current,'transform','scaleX('+projectProgress+')');
+      publisher.text(status.current,presentationContext==='home'?'HOME':String(chapter.index+1).padStart(2,'0')+' / 07');
       const stageU=playbackScore.chapterWeights.reduce((sum,weight,index)=>sum+weight*(index+.5)/7,0);
       if(state.modelRecovering!==recovering)input.commands.execute('model.interact',{modelRecovering:recovering});
       input.publishFrame({
-        controllerFrame,u,...reading,...readingScore,readingStageU:readingScore.stageU,stageU,playback:playbackScore,chapterScene:latestScene,
+        controllerFrame,u,...reading,...readingScore,readingStageU:readingScore.stageU,stageU,playback:playbackScore,chapterScene:latestScene,presentationContext,
         editorial:{lightSweep:0,materialLift:0},pointer,modelHover,hidden:false,
         inspection:{...inspection.value,lightMix:0},inspectionSettled:inspection.settled,
         inspectionActive:inspectionWeight>0,inspectionWeight,inspectionViewport,modelViewports,
@@ -299,6 +324,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
     const resizeWindow=()=>layout.invalidate('viewport',true);
     input.events.on(scope,'layoutInvalidated',request=>layout.invalidate(request.reason,request.resumed));
     const resize=new ResizeObserver(()=>layout.invalidate('element-size'));sections.forEach(el=>resize.observe(el));
+    if(home)resize.observe(home);
     if(stage.current)resize.observe(stage.current);
     const listen=(target,type,handler,options)=>input.events.listen(scope,target,type,handler,options);
     listen(window,'scroll',scroll,{passive:true});listen(window,'wheel',wheel,{passive:true});listen(window,'popstate',pop);listen(document,'pointerdown',press);listen(document,'pointerup',press);listen(document,'pointercancel',press);listen(window,'resize',resizeWindow);listen(window,'pointermove',move,{passive:true});
@@ -312,9 +338,9 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       if(state.reduced!==wasReduced){wasReduced=state.reduced;seekPending=true;schedule();}
       const key=[state.systemReduced,state.sceneEnabled,state.sceneFailed,state.sceneReady].join('/');if(key!==preferenceKey){preferenceKey=key;schedule();}
     });
-    window.__story={inspect:()=>({...reading,...sampleReadingScore(reading,plan),controllerFrame,frameDelta,readingPending:seekPending||resumed||Math.abs(reading.nativeDocY-scrollY)>.01,playback:sampleChapterPlayback(playback),chapterScene:latestScene,informationChapter:lastChapter,pageField:pageField.inspect(),canvasPlacement:canvasPlacement?{...canvasPlacement}:null,canvasSurface,canvasAwaitingPaint,canvasTransitions:canvasEvents.inspect(),informationWindows:windowPresenter.inspect(),liquidGlass:liquidPresenter.inspect(),entry:input.entry.inspect(),libraryDiagram:libraryPresenter.inspect(),history:[...history],stops:plan.stops,scheduled:scheduler.inspect().scheduled,lifecycle:scheduler.inspect(),domPublication:publisher.inspect(),inspectionActive:!!input.get().inspectionActive,inspectionWeight:input.get().inspectionWeight,modelViewports:input.get().modelViewports,modelEngaged:!!input.get().modelEngaged,modelRecovering:!!input.get().modelRecovering,sourceSelection:input.get().sourceSelection,modelHeldSource:input.get().modelHeldSource,choreography:[...choreography].map(([element,item])=>({kind:item.kind,firstVisibleAt:item.firstVisibleAt,phase:element.dataset.choreographyPhase,settled:item.last?.settled??false})),inspection:{target:{...inspection.target},value:{...inspection.value},lightMix:0,settled:inspection.settled}})};
+    window.__story={inspect:()=>({...reading,...sampleReadingScore(reading,plan),controllerFrame,frameDelta,presentationContext,projectStart,readingPending:seekPending||resumed||Math.abs(reading.nativeDocY-scrollY)>.01,playback:sampleChapterPlayback(playback),chapterScene:latestScene,informationChapter:lastChapter,pageField:pageField.inspect(),canvasPlacement:canvasPlacement?{...canvasPlacement}:null,canvasSurface,canvasAwaitingPaint,canvasTransitions:canvasEvents.inspect(),informationWindows:windowPresenter.inspect(),liquidGlass:liquidPresenter.inspect(),entry:input.entry.inspect(),libraryDiagram:libraryPresenter.inspect(),history:[...history],stops:plan.stops,scheduled:scheduler.inspect().scheduled,lifecycle:scheduler.inspect(),domPublication:publisher.inspect(),inspectionActive:!!input.get().inspectionActive,inspectionWeight:input.get().inspectionWeight,modelViewports:input.get().modelViewports,modelEngaged:!!input.get().modelEngaged,modelRecovering:!!input.get().modelRecovering,sourceSelection:input.get().sourceSelection,modelHeldSource:input.get().modelHeldSource,choreography:[...choreography].map(([element,item])=>({kind:item.kind,firstVisibleAt:item.firstVisibleAt,phase:element.dataset.choreographyPhase,settled:item.last?.settled??false})),inspection:{target:{...inspection.target},value:{...inspection.value},lightMix:0,settled:inspection.settled}})};
     input.publishFrame({hidden:scheduler.suspended});document.documentElement.setAttribute('data-cinematic-ready','');measure();if(location.hash)hash();
-    return()=>{disposed=true;canvasEvents.dispose();windowPresenter.dispose();libraryPresenter.dispose();liquidPresenter.dispose();pageField.dispose();readingManager.dispose();layout.dispose();scheduler.dispose();scope.dispose();resize.disconnect();unsubscribe();document.documentElement.removeAttribute('data-cinematic-ready');delete document.documentElement.dataset.activeChapter;delete document.documentElement.dataset.chapterBeat;delete window.__story;};
+    return()=>{disposed=true;canvasEvents.dispose();windowPresenter.dispose();libraryPresenter.dispose();liquidPresenter.dispose();pageField.dispose();readingManager.dispose();layout.dispose();scheduler.dispose();scope.dispose();resize.disconnect();unsubscribe();publisher.attribute(document.documentElement,'data-presentation-context',null);publisher.attribute(stage.current,'data-presentation-context',null);publisher.attribute(navigation,'inert',null);publisher.attribute(navigation,'aria-hidden',null);homeLinks.forEach(link=>publisher.attribute(link,'aria-current',null));document.documentElement.removeAttribute('data-cinematic-ready');delete document.documentElement.dataset.activeChapter;delete document.documentElement.dataset.chapterBeat;delete window.__story;};
 
   }};
 }

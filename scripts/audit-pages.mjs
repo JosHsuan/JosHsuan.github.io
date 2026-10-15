@@ -37,6 +37,9 @@ export async function auditPages() {
   const html = await readFile(path.join(out, 'index.html'), 'utf8');
   assert(html.includes('Bending-Active')); assert(!html.includes('noindex'));
   assert.equal((html.match(/data-story-chapter=/g) || []).length, 7);
+  assert.equal((html.match(/<h1[ >]/g) || []).length, 1, 'One personal introduction heading');
+  assert(html.includes('data-home-introduction') && html.includes('id="home"'), 'Public introduction is present');
+  assert(html.includes('data-home-project-link') && html.includes('href="#overview"'), 'Native introduction-to-study link');
   assert(html.includes('https://joshsuan.github.io/'));
   console.log(`Public release audit passed: ${files.length} output files, ${manifest.assets.length} approved assets; no private inputs.`);
 }

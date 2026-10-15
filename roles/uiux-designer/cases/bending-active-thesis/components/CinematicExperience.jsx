@@ -54,6 +54,6 @@ export default function CinematicExperience() {
       <LiquidGlassSkin id="reading-controls" />
     </div>}
     <ModelInspector input={input} inspection={inspection} activate={activateStudy} ready={ready} failed={failed}/>
-    <div className={styles.progress} aria-hidden="true"><span ref={progress} /></div>
+    <div className={styles.progress} data-story-progress aria-hidden="true"><span ref={progress} /></div>
   </>;
 }

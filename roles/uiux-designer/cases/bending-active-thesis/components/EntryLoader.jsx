@@ -8,7 +8,7 @@ export default function EntryLoader(){
  const [status,setStatus]=useState({phase:'preparing',progress:0,reason:''});
  useEffect(()=>input.features.connect('entry.presentation',()=>input.entry.connect({element:element.current,content:document.querySelector('[data-project-content]'),document,onChange:setStatus})),[input]);
  const ready=status.progress===100;
- return <><div ref={element} className={styles.loader} data-entry-loader data-phase="preparing" aria-label="Preparing Bending-Active">
+ return <><div ref={element} className={styles.loader} data-entry-loader data-phase="preparing" aria-label="Preparing Bending-Active" hidden>
   <div className={styles.backdrop} aria-hidden="true"><picture>
    <source media="(max-width:780px)" srcSet="/assets/cinematic/model-poster-mobile.webp"/>
    <img src="/assets/cinematic/model-poster.webp" alt="" decoding="async"/>
@@ -23,7 +23,7 @@ export default function EntryLoader(){
      <p role="status" aria-live="polite" aria-atomic="true">{ready?(status.reason?'Ready to read':'Study ready'):'Preparing the study'}</p>
     </div>
    </section>
-   <p className={styles.identity}>JosHsuan Chao</p>
+   <p className={styles.identity}>JosHsuan Chao <a href="#home" data-entry-return>Back to introduction</a></p>
   </div>
  </div><noscript><style>{'[data-entry-loader]{display:none!important}'}</style></noscript></>;
 }

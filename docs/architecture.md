@@ -8,7 +8,7 @@
 |---|---|
 | Owner | JosHsuan Chao |
 | Audience | The owner, collaborating developers, and coding agents |
-| Revision | **2.10 — 13 October 2026; impact-selected CI and verified shared release artifacts** |
+| Revision | **2.11 — 15 October 2026; case-owned personal introduction and native project entry** |
 | Language | English for project documentation and future website content; Traditional Chinese for discussion with the owner |
 | Scope | Portfolio, Research & Development, About/CV, Contact, and selected interactive project stories |
 | Delivery baseline | Next.js static export to GitHub Pages; no paid domain, paid storage, or continuously running backend required for the initial release |
@@ -19,6 +19,8 @@
 | Materials preparation root | `D:\JosHsuan_Website\_private\portfolio-preparation` — designated source for all project, CV, and content preparation |
 
 ## Executive decision
+
+**Personal introduction — 15 October 2026:** The owner requested a friendly English homepage introduction, use of the designated preparation evidence, a transition into Bending-Active, and commit/push/CI-gated publication. [Decision 0010](decisions/0010-case-home-introduction.md) limits this implementation to the existing public case: `#home` precedes its seven chapters and links natively to `#overview`. The existing Director owns presentation context, the single scene clock and project navigation; the introduction remains readable while the original project readiness gate runs. Repository-local, hash-pinned public copy summarizes reviewed evidence without importing private files. The reusable framework, its empty public snapshot and generated entries remain unchanged. [The content record](../roles/uiux-designer/cases/bending-active-thesis/HOME_INTRODUCTION.md) preserves attribution and unknown-fact limits. Publication still requires the successful same-commit tested artifact below.
 
 **Impact-selected CI and latest release authorization — 13 October 2026:** The owner authorized the CI changes, project documentation, and commit/push/Pages publication of the latest native-reading and model-side information implementation. [Decision 0009](decisions/0009-impact-selected-ci.md) records the required selection gate and exact tested-output verification. The migration/shared runtime inputs select full validation for this release; subsequent scoped changes use the explicit conservative impact map.
 

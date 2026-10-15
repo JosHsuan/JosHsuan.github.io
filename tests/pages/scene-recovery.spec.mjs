@@ -15,7 +15,7 @@ async function instrumentContexts(page){
 
 async function expectStaticReading(page){
   await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered',null,{timeout:WAIT});await settle(page);
-  await expect(page.locator('h1')).toHaveAccessibleName('Bending-Active Metal Panel Deformation');
+  await expect(page.locator('#project-title')).toHaveAccessibleName('Bending-Active Metal Panel Deformation');
   await expect(page.locator('[data-story-chapter]')).toHaveCount(7);
   await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(0);
   await expect(page.locator('canvas[data-ascii-field]')).toHaveCount(1);
@@ -85,5 +85,5 @@ test('a known failed scene remains manual after the uncertain-lease time window'
   await page.addInitScript(key=>{
     if(!sessionStorage.getItem(key))sessionStorage.setItem(key,JSON.stringify({status:'failed',at:Date.now()-31*60*1000}));
   },SCENE_RECOVERY_KEY);
-  await page.goto('/');await expectStaticReading(page);await enableExplicitly(page);
+  await page.goto('/#overview');await expectStaticReading(page);await enableExplicitly(page);
 });
