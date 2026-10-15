@@ -101,7 +101,9 @@ export function createLiquidGlassPresenter({publisher,root=globalThis.document,e
  function publish({dt=0,reduced=false,resumed=false,hidden=false,opaque=false,keyboardFocus=true}={}){
   if(disposed)return false;
   ticks++;setMode(opaque);moving=false;
-  const immediate=reduced||resumed||hidden||dt>1||mode==='opaque';
+  // A slow foreground frame must retain the latest user intent. The spring
+  // already snaps long dt to that target; only an actual reset cancels input.
+  const immediate=reduced||resumed||hidden||mode==='opaque';
   if(immediate){hovered=null;pressed=null;}
   for(const item of registry.values()){
    const focused=keyboardFocus&&contained(item.element,doc.activeElement),active=!immediate&&!focused&&item.visible;

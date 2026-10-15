@@ -83,7 +83,7 @@ test('spring consumes active elapsed time consistently, clamps input and settles
  assert.equal(advanceLiquidResponse(fast,1/60,{x:5,y:-5,hover:3,press:-2}),false);
 });
 
-test('spring snap and long resume gaps discard momentum rather than integrating hidden time',()=>{
+test('spring snap and long gaps reach the supplied target without retaining momentum',()=>{
  for(const [dt,settings] of [[0,{snap:true}],[1.01,{}]]){
   const state=createLiquidResponse();advanceLiquidResponse(state,1/3,{x:1,y:0,hover:1,press:1});
   assert.equal(advanceLiquidResponse(state,dt,rest,settings),false);
@@ -165,8 +165,26 @@ test('native pointer focus permits direct press while keyboard focus suppresses 
  assert.equal(f.publish({keyboardFocus:true}),false);item=f.presenter.inspect().items[0];for(const key of Object.keys(rest))assert.equal(item[key],rest[key]);assert.equal(item.settled,true);
 });
 
+test('one long foreground frame preserves the latest stationary pointer intent until an explicit lifecycle reset',()=>{
+ for(const userAgent of [chromium,safari])for(const interruption of ['reset','hidden','resumed']){
+  const f=fixture([{}],{environment:{userAgent}});f.presenter.measure();const maps=f.presenter.inspect().mapGenerations;
+  // A software-rendered foreground frame can exceed a second without a new
+  // pointer event. Snap the existing target; do not invent a pointer departure.
+  assert.equal(f.pointer('pointermove',0,{clientX:96,clientY:36}),true);
+  assert.equal(f.publish({dt:1.2}),false);
+  let item=f.presenter.inspect().items[0];near(item.x,.2);near(item.y,.25);assert.equal(item.hover,1);assert.equal(item.press,0);assert.equal(item.settled,true);
+  f.pointer('pointerdown',0,{clientX:264,clientY:68});assert.equal(f.publish({dt:1.2}),false);
+  item=f.presenter.inspect().items[0];near(item.x,.8);near(item.y,.75);assert.equal(item.hover,1);assert.equal(item.press,1);assert.equal(item.settled,true);
+  f.publish();item=f.presenter.inspect().items[0];assert.equal(item.hover,1);assert.equal(item.press,1);assert.equal(item.settled,true);
+  assert.equal(f.presenter.inspect().mapGenerations,maps,'long frames never regenerate an optical map');
+  if(interruption==='reset')f.presenter.reset();else f.publish({[interruption]:true});
+  item=f.presenter.inspect().items[0];for(const key of Object.keys(rest))assert.equal(item[key],rest[key]);assert.equal(item.settled,true);
+  f.publish();item=f.presenter.inspect().items[0];assert.equal(item.hover,0);assert.equal(item.press,0);assert.equal(f.presenter.inspect().mapGenerations,maps);
+ }
+});
+
 test('focus and lifecycle preference paths immediately restore a stable material on the same clock',()=>{
- for(const option of [{reduced:true},{resumed:true},{hidden:true},{dt:1.2},{opaque:true},{focus:true}]){
+ for(const option of [{reduced:true},{resumed:true},{hidden:true},{opaque:true},{focus:true}]){
   const f=fixture();f.presenter.measure();f.pointer('pointerdown');f.publish();assert(f.presenter.inspect().items[0].press>0);
   if(option.focus)f.document.activeElement=f.child(0);
   assert.equal(f.publish(option),false);const item=f.presenter.inspect().items[0];for(const key of Object.keys(rest))assert.equal(item[key],rest[key]);assert.equal(item.settled,true);

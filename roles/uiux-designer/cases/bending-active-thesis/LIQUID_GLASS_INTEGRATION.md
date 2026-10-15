@@ -43,6 +43,8 @@ The presenter supplies explicit local pixel dimensions to `feImage`: percentage 
 
 Pointer exit/cancel, window blur, hidden/resume, preference changes, removal and disposal release the transient response. Springs settle to a stable rest and do not create a permanent animation workload. No new production dependency, live WebGL context or renderer is introduced. The temporary Canvas2D encoder is explicitly accounted for rather than described as zero new contexts of every kind.
 
+A long foreground frame snaps the response to the latest pointer target and discards spring velocity; it does not cancel that target. Clearing intent on a slow frame lost the only pointer move on software-GPU CI while the pointer remained stationary. Explicit cancellation and lifecycle suspension still clear intent immediately.
+
 ## Measured browser capability and fallback
 
 An isolated capability probe executed 17 baseline/control/optical configurations in each of three fresh browser instances: 51 executions with no recorded crashes. These are capability experiments, not 51 passing application acceptance tests. The committed [capability record](../../verification/liquid-optics-capability.json) preserves measurements and controls. Local raw evidence is `animation-review/.local/liquid-optical-probe-final/{summary,results}.json`, recorded at `2026-10-15T11:22:10.771Z`, Windows, Node 24.19.0, Playwright 1.63.0.
@@ -81,7 +83,7 @@ node roles/uiux-designer/tools/apple-design.mjs fetch /videos/play/wwdc2025/219/
 
 ## Validation and release checkpoint
 
-Local checks on 15 October 2026 passed `pnpm check` (9 framework tests, 14 gate tests and the empty 63-file framework audit), case TypeScript, 306 of 308 case/tooling portable tests with two existing conditional skips, and the public build audit (80 output files, 36 approved assets). The role skill and isolated copy validate with identical hashes, and the CLI completed a real Apple Materials fetch through Sosumi MCP. No new production dependency or lockfile change is required.
+Local checks on 15 October 2026 passed `pnpm check` (9 framework tests, 14 gate tests and the empty 63-file framework audit), case TypeScript, 307 of 309 case/tooling portable tests with two existing conditional skips, and the public build audit (80 output files, 36 approved assets). The role skill and isolated copy validate with identical hashes, and the CLI completed a real Apple Materials fetch through Sosumi MCP. No new production dependency or lockfile change is required.
 
 The built Liquid Glass acceptance covers three scenarios in Chromium, WebKit and mobile Chromium: actual optical rim/neutral-center pixels, shared-clock interaction/lifecycle closure, and native preference/no-JavaScript readability. The optical comparison retains production diffusion and paint while changing only displacement scale; it requires a changed rim, neutral center and opposite top/bottom displacement. The control contrast check also exercises the maximum authored hover/press reflection over white and black backdrops, preserving original text and filters. Actual page/control screenshots are reviewed against the existing presentation.
 
