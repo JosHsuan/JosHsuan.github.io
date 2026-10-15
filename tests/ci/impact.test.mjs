@@ -20,7 +20,11 @@ test('model UI includes drag direction, source synchronization, canvas routing, 
   for (const name of ['public-release', 'model-inspection', 'model-drag', 'source-artwork', 'canvas-motion', 'runtime-lifecycle', 'mobile-stability'])
     assert(plan.browserTests.includes(`tests/pages/${name}.spec.mjs`), name);
   assert(!plan.browserTests.includes('tests/pages/render-resources.spec.mjs'));
-  assert.equal(plan.browserMatrix.length, 3);
+  assert.deepEqual(plan.browserMatrix, [
+    {browser: 'chromium', engine: 'chromium', shard: '1/1'},
+    {browser: 'webkit', engine: 'webkit', shard: '1/1'},
+    {browser: 'mobile-chromium', engine: 'chromium', shard: '1/1'},
+  ]);
 });
 
 test('scoped diagram changes always exercise the event-driven library reveal and linked source interaction',()=>{
@@ -45,7 +49,14 @@ test('core, scene, assets and unknown case modules require every browser spec', 
     'runtime/presentation/LibraryDiagramPresenter.mjs','runtime/motion/library-reveal.mjs']) {
     const plan = classifyChanges([CASE_ROOT + file]);
     assert.equal(plan.framework, false); assert.deepEqual(plan.browserTests, ALL_BROWSER_TESTS);
-    assert.deepEqual(plan.browserMatrix.filter(job => job.browser === 'chromium').map(job => job.shard), ['1/2', '2/2']);
+    assert.deepEqual(plan.browserMatrix, [
+      {browser: 'chromium', engine: 'chromium', shard: '1/4'},
+      {browser: 'chromium', engine: 'chromium', shard: '2/4'},
+      {browser: 'chromium', engine: 'chromium', shard: '3/4'},
+      {browser: 'chromium', engine: 'chromium', shard: '4/4'},
+      {browser: 'webkit', engine: 'webkit', shard: '1/1'},
+      {browser: 'mobile-chromium', engine: 'chromium', shard: '1/1'},
+    ]);
   }
 });
 test('dependencies, workflow and cache/build tooling trigger all checks; root-only changes stay independent', () => {

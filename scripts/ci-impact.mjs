@@ -27,7 +27,7 @@ export function browserMatrix(tests, fullCase) {
   if (!tests.length) return [];
   // Separate runners keep one software-GPU worker per machine. File sharding
   // preserves test-local sequences and does not increase concurrent GL clients.
-  const shards = fullCase ? 2 : 1;
+  const shards = fullCase ? 4 : 1;
   return [
     ...Array.from({length: shards}, (_, i) => ({browser: 'chromium', engine: 'chromium', shard: `${i + 1}/${shards}`})),
     {browser: 'webkit', engine: 'webkit', shard: '1/1'},

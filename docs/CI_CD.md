@@ -41,7 +41,7 @@ Push selection uses the last successful **ancestor push run**, not `event.before
 
 ## Build reuse and caches
 
-`quality` runs fast checks once. `pages-build` creates/audits a new export once and uploads `static-export-pages` plus `pages-build-record`. Case browser jobs download that exact export; each verifies its digest before and after tests. Only the required browser engine is installed. Full-case Chromium uses two file-level shards; WebKit and mobile Chromium each run one shard. Every runner retains `workers: 1` to limit software-GPU contention.
+`quality` runs fast checks once. `pages-build` creates/audits a new export once and uploads `static-export-pages` plus `pages-build-record`. Case browser jobs download that exact export; each verifies its digest before and after tests. Only the required browser engine is installed. Full-case Chromium uses four file-level shards; scoped Chromium, WebKit and mobile Chromium each run one shard. Every runner retains `workers: 1` to limit software-GPU contention. The browser job's 30-minute limit remains unchanged.
 
 The pnpm store cache uses the lockfile. Next cache keys separate framework root/subpath and Pages, with a lockfile-scoped restore prefix and a commit-specific save key. [prepare-pages-workspace.mjs](../scripts/prepare-pages-workspace.mjs) preserves only `.next/cache`; app sources, public files, server output and old exports are removed before assembling the allowlisted build. Cache hits are an optimization, never validation evidence or a reusable deployed output.
 
@@ -80,6 +80,14 @@ To inspect a targeted plan locally, set `CI_BASE_SHA` to a verified ancestor and
 - Built-root and built-subpath Chromium/WebKit/mobile-Chromium checks passed: 9 each. Firefox was not run locally; both hosted framework matrices continue to require it.
 - The broad local case run completed 35 Chromium checks, then exposed an obsolete footer selector in the contrast scenario. It was stopped during the subsequent WebKit run after correcting that selector. The repaired contrast scenario passed on all three projects against the same public output. It measures the new fixed side information over real, white and black backdrops; no assertion was removed. An uninterrupted complete local three-browser matrix is not claimed.
 - Playwright listing confirms full-case Chromium shards contain 19 and 17 tests, covering all 36 Chromium scenarios. The release still requires the complete hosted 108-scenario case matrix and both framework matrices to succeed at the pushed commit before deployment. CI/deployment URLs and public-version verification belong in the delivery record.
+
+### Full-mode partition checkpoint — 14–15 October 2026
+
+The Full-mode suite now contains 45 scenarios per browser. At commit `37d3728`, hosted Chromium shard `1/2` completed 20 of its 24 scenarios and began scenario 21 before the unchanged 30-minute job limit cancelled it. The log records cumulative execution time rather than an assertion failure. All other selected jobs passed; this incomplete run cannot satisfy the publication gate.
+
+Playwright listing showed that three file-level shards would still group the first 21 scenarios together (21/10/14), including both model inspection and the costly canvas/library scenarios. Four shards separate those files and contain 12/12/12/9 scenarios. An exact test-ID union check confirms all 45 Chromium scenarios occur once, with no file split across shards. The 14 selector/gate regression tests also pass.
+
+Full-case Chromium is therefore split across four separate runners, preserving complete files and their local sequences. Scoped Chromium remains unsharded. All 45 scenarios still run on each of Chromium, WebKit and mobile Chromium, with one worker per runner and the same audited output verified before and after every browser job. A successful exact-commit hosted gate remains required before publication. The 13 October counts above remain historical; the listed partition does not claim a hosted runtime improvement before measurement.
 
 Selector/gate tests include cumulative Git histories, rename paths, scope unions, failed/skipped jobs, cached stale-output removal and changed artifact bytes/provenance. Functional browser assertions are unchanged by CI selection. Local Windows browser checks and hosted Linux checks are distinct evidence. Physical iPhone/Safari and Android verification remains unperformed; no device crash resolution or frame-rate improvement is implied. Time savings will be reported only from comparable measured runs.
 
