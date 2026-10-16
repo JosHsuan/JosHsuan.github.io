@@ -176,7 +176,13 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
     publisher.attribute(root,'data-xr-director-ready',null);publisher.attribute(root,'data-xr-active-chapter',null);links.forEach(link=>publisher.attribute(link,'aria-current',null));
    }
    const inspect=()=>({...lifecycle.inspect(),chapter,progress,paused,...policy(),size:{...size},camera:{target:{...target},value:{...value},settled},gesture:press?{id:press.id,pointerId:press.pointerId,locked:press.locked}:null,gestures:[...gestureHistory],frames,frameDelta,lifecycle:scheduler.inspect(),events:events.inspect(),informationWindows:windows.inspect(),domPublication:dom.inspect(),disposed});
-   binding={dispose,inspect,hitTest:(x,y)=>canInspect()&&[x,y].every(Number.isFinite)?resource.hitTest?.(x,y)??false:false,pause(value){if(disposed||paused===value)return;paused=value;notify();if(!scheduler.suspended)scheduler.schedule();}};
+   binding={dispose,inspect,hitTest:(x,y)=>canInspect()&&[x,y].every(Number.isFinite)?resource.hitTest?.(x,y)??false:false,pause(value){
+    if(disposed||paused===value)return;paused=value;
+    // Native media commands acknowledge before the UI, independently of the
+    // next camera frame. A pending first paint reconciles this intent itself.
+    try{resource?.setPaused(paused);}catch(error){lifecycle.fail(error?.message||'render-unavailable');return;}
+    notify();if(!scheduler.suspended)scheduler.schedule();
+   }};
    publisher.attribute(root,'data-xr-director-ready','');scheduler.suspend('visibility',doc.hidden);measure();reading();updateEligibility('initial');scheduler.schedule();
    Promise.resolve(doc.fonts?.ready).then(()=>{if(!disposed)invalidate();},()=>{if(!disposed)invalidate();});
    return()=>dispose();

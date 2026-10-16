@@ -56,8 +56,18 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
   stopFrames();if(phone){scene?.remove(phone.group);releaseObject(phone.group);}phone=null;texture=null;
  }
  function stopMedia(){
-  mediaGeneration++;if(mediaDeadline!==null){win.clearTimeout(mediaDeadline);mediaDeadline=null;}stopFrames();mediaController?.abort();mediaController=null;mediaHandle?.dispose();mediaHandle=null;mediaPending=false;
-  disposePhone();for(const node of nativeNodes.values())delete node.dataset.videoReady;activeStage=null;mediaReason=null;
+  mediaGeneration++;if(mediaDeadline!==null){win.clearTimeout(mediaDeadline);mediaDeadline=null;}stopFrames();
+  // Release both application and VideoTexture frame callbacks before resetting
+  // the native source. The texture must not retain a video being unloaded.
+  disposePhone();const controller=mediaController,handle=mediaHandle;mediaController=null;mediaHandle=null;mediaPending=false;
+  controller?.abort();handle?.dispose();for(const node of nativeNodes.values())delete node.dataset.videoReady;activeStage=null;mediaReason=null;
+ }
+ function applyPaused(next){
+  if(disposed)return;const paused=!!next;if(state.paused===paused)return;state={...state,paused};
+  if(!activeStage||!mediaHandle)return;
+  const video=videos[activeStage.id],generation=mediaGeneration;
+  if(paused){stopFrames();video.pause();}
+  else{void video.play().then(()=>{if(!disposed&&generation===mediaGeneration&&!state.paused)nextFrame();},()=>{if(!disposed&&generation===mediaGeneration&&!state.paused){mediaReason='playback-blocked';announce('native-video',mediaReason);}});}
  }
  function disposeGPU(){
   stopFrames();if(renderer){renderer.domElement.removeEventListener('webglcontextlost',contextListener);renderer.domElement.remove();budget?.dispose();renderer.dispose();renderer.forceContextLoss();}renderer=null;budget=null;
@@ -139,13 +149,16 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
   return {
    resize(width,height){if(disposed||!(width>0&&height>0))return;if(size.width===width&&size.height===height)return;size={width,height};lastPaintKey='';draw();},
    present(next){
-    if(disposed)return;const previous=state;state={...state,...next};const stage=stages.find(item=>item.id===state.chapter);
+    if(disposed)return;const paused=next.paused??state.paused;state={...state,...next,paused:state.paused};const stage=stages.find(item=>item.id===state.chapter);
     if(stage&&activeStage?.id!==stage.id)selection=selectMedia(stage);
     else if(!stage&&activeStage){stopMedia();delete host.dataset.xrScenePainted;successfulPaint=false;if(!renderer)announce('poster',gpuReason??'webgl-unavailable');}
-    if(activeStage&&mediaHandle&&previous.paused!==state.paused){const video=videos[activeStage.id],generation=mediaGeneration;if(state.paused){stopFrames();video.pause();}else{void video.play().then(()=>{if(!disposed&&generation===mediaGeneration&&!state.paused)nextFrame();},()=>{if(!disposed&&generation===mediaGeneration){mediaReason='playback-blocked';announce('native-video',mediaReason);}});}}
+    applyPaused(paused);
     draw();
     if(stage&&mediaPending)return selection;
    },
+   // A semantic media command is acknowledged by the native owner immediately;
+   // it must not wait for the next camera/information animation frame.
+   setPaused:applyPaused,
    hitTest(clientX,clientY){
     if(disposed||!renderer||!successfulPaint||phoneChapter(state.chapter)||!gltf)return false;
     const rect=renderer.domElement.getBoundingClientRect();if(clientX<rect.left||clientX>rect.right||clientY<rect.top||clientY>rect.bottom)return false;ndc.set((clientX-rect.left)/rect.width*2-1,-(clientY-rect.top)/rect.height*2+1);raycaster.setFromCamera(ndc,camera);

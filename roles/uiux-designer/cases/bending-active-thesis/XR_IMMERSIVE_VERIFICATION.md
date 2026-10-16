@@ -112,6 +112,86 @@ inside the configured 390×844 viewport. The raw JSON SHA-256 is
 `2843c327bfabd500e4f75e144a292ad0894b98725f062b8bef74a31013969dfd`.
 This is local rendered-image review, not live or physical-device acceptance.
 
+## First CI contract finding
+
+The first pushed candidate, `2a8cc91`, remains an unsuccessful release candidate.
+CI run `38877332710` finishes with 213 passes and 12 failures out of 225 public
+browser executions, zero skips, and all 14 jobs completed. Ten failures are
+obsolete fixture executions (nine archive clicks and one old full-bleed XR card
+measurement); two are real WebKit command/release failures described below.
+Framework checks pass 24/24 and the portable selection passes 384 with two
+pre-existing conditional skips. The run found three obsolete archive actions in
+`project-previews.spec.mjs`: the mobile second shard records 32 passes and three
+failures while all six new XR cases pass. The failed actions still clicked
+`View the archived four-panel research recording`, which the accepted continuous
+XR presentation removes. The third failure's cleanup navigation initially hid
+the original locator timeout; its retained trace confirms the same obsolete
+click at line 173. These are not video decode or model recovery failures. The
+failed job log and all three error contexts/traces remain immutable locally.
+
+The five project-preview cases are retained. Their recording, motion-preference
+and actual HTTP-failure paths now use native XR chapters and preserve pause,
+no-navigation, fallback, cancellation and resource-disposal assertions. Card
+geometry distinguishes the full-bleed Bending model from the approved 8–12-pixel
+XR image inset. The exact inset excludes the card's actual border; the native
+video source is compared to its exact same-origin absolute URL. An initial
+adapter check retains seven passes and three observation failures before those
+two measurement corrections. No production change, test deletion, skip, retry,
+timeout increase or pixel-tolerance expansion resolves this obsolete-fixture finding. A fresh
+full same-SHA CI and live acceptance remain required before publication.
+
+The corrected adapter check passes all ten executions (five existing cases in
+Chromium and mobile Chromium), with zero failures, skips or retries in 44.3
+seconds against the unchanged v4 export. Its earlier failed logs and traces
+remain separate. Source ESLint and the diff whitespace check pass.
+
+## WebKit command and release correction
+
+The failed WebKit trace proves all three complete recordings decode and paint.
+After the native pause click, React already publishes `Play recording` and
+`aria-pressed=true`, while the first native-video observation is still unpaused;
+the next evaluation does not return before the test ends. A Reduced Motion
+switch fails the original five-second canvas-removal assertion, although a
+later snapshot does show the reduced-motion poster state and released scene.
+The original evidence proves delayed effects, not a permanent leak or a codec
+failure. It does not identify the native/GPU call responsible for the stall.
+
+The Director now forwards pause/play to the same renderer's semantic media
+command synchronously, before publishing its UI acknowledgment. That command
+cancels the application video-frame callback and pauses the native video without
+waiting for a camera RAF or drawing. Presentation and immediate commands share
+one media writer. Pending first acquisition still reconciles the latest intent
+before publishing ready; a rejected stale resume cannot override a newer pause.
+
+Explicit chapter/preference/scene release now disposes the phone and Three's
+VideoTexture callback before aborting/resetting its native source. This removes
+an observed ownership-order risk; it is not asserted to be the proven sole
+cause of the Linux WebKit stall. Native media-error handling retains its own
+existing disposal path. The original failed artifacts remain unmodified.
+
+A ninth production Director test withholds every RAF and checks that native
+pause acknowledgment precedes UI state, no presentation/draw is requested by
+the command itself, repeated values are idempotent and command errors close the
+same resource exactly once. The initial-acquisition test also reconciles a pause
+received during first paint. All nine pass. The new complete portable selection
+discovers 387 checks: 385 pass, zero fail, and the same two conditional skips.
+`pnpm check` and the v5 public build/audit pass with 139 local output files;
+the staged Director and renderer sources match their working-source SHA-256.
+
+An unmodified-v4 Windows WebKit diagnostic retains two failures while awaiting
+the first phone's ready state: its trace shows the native recording-unavailable
+fallback, before either Linux failing action is reached. This is not a local
+reproduction of the Linux pause/release defects and cannot certify their fix.
+Fresh complete Linux CI and actual live checks remain required.
+
+The rebuilt v5 Chromium/mobile selection passes 22/22 (all six XR and five
+project-preview cases per profile), with zero skips, failures or retries in two
+minutes. Its 139-file manifest is unchanged before/after; 22 served initial
+HTML/script/style responses match that export before testing. The retained run
+log SHA-256 is
+`3aca7f538f93e8a52e30e3d26e7b19f44ba2935916c4a4a68b9eaf844444b362`.
+This local result does not replace the required Linux WebKit confirmation.
+
 ## Protected Bending comparison
 
 The frozen published `0012b057` export and v4 output were observed at matching

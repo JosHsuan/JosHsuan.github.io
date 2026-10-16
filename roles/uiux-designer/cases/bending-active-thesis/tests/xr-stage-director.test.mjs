@@ -46,7 +46,7 @@ function fixture({pending=false,firstPaintFailure=false,firstPaint}={}){
  const protectedNode=new Element(doc,{marker:'[data-protect]'});protectedNode.parentElement=root;
  const starts=[],handles=[],states=[],acquired=deferred();let hit={source:true,kind:'model'};
  const makeHandle=()=>{
-  const value={disposed:0,mode:'webgl-model',successfulPaint:true,presents:[],sizes:[],hitTest:()=>hit,resize(w,h){value.sizes.push([w,h]);},present(state){if(firstPaintFailure)throw Error('first-paint-unavailable');value.presents.push({...state});if(value.presents.length===1)return firstPaint;},inspect:()=>({mode:value.mode,successfulPaint:value.successfulPaint,presents:value.presents.length,size:value.sizes.at(-1)}),dispose(){value.disposed++;}};
+  const value={disposed:0,mode:'webgl-model',successfulPaint:true,presents:[],sizes:[],pauseCalls:[],nativePaused:false,hitTest:()=>hit,resize(w,h){value.sizes.push([w,h]);},setPaused(paused){value.pauseCalls.push(paused);value.nativePaused=paused;},present(state){if(firstPaintFailure)throw Error('first-paint-unavailable');value.presents.push({...state});if(value.presents.length===1)return firstPaint;},inspect:()=>({mode:value.mode,successfulPaint:value.successfulPaint,presents:value.presents.length,size:value.sizes.at(-1)}),dispose(){value.disposed++;}};
   handles.push(value);return value;
  };
  const director=createXRStageDirector({root,host,window:win,document:doc,onState:value=>states.push(value),acquire:options=>{starts.push(options);return pending&&starts.length===1?acquired.promise:Promise.resolve(makeHandle());}});
@@ -147,10 +147,28 @@ test('an asynchronous first phone paint stays requested, reconciles native chapt
   const paint=deferred(),f=fixture({firstPaint:paint.promise});t.after(f.cleanup);f.site('entered');f.scroll('adapt');await flush();
   assert.equal(f.director.inspect().phase,'requested');assert.equal(f.states.some(s=>s.phase==='ready'),false);assert.equal(f.handles[0].presents.length,1);
   if(cancelled){f.doc.hidden=true;f.doc.fire('visibilitychange');assert.equal(f.handles[0].disposed,1,'Cancellation releases the acquired scene while first paint is still awaiting native media');}
-  else{f.scroll('join');f.host.clientWidth=700;f.win.innerWidth=700;f.win.fire('resize');f.frame();}
+  else{f.scroll('join');f.director.setPaused(true);f.host.clientWidth=700;f.win.innerWidth=700;f.win.fire('resize');f.frame();}
   paint.resolve();await f.settle();
   if(cancelled){assert.equal(f.states.some(s=>s.phase==='ready'),false);assert.equal(f.handles[0].disposed,1);assert.equal(f.director.inspect().resource,null);}
-  else{assert.equal(f.director.inspect().phase,'ready');assert.equal(f.handles[0].presents.at(-1).chapter,'join');assert.deepEqual(f.handles[0].sizes.at(-1),[700,1000]);assert.equal(f.states.filter(s=>s.phase==='ready').length,1);}
+  else{assert.equal(f.director.inspect().phase,'ready');assert.equal(f.handles[0].presents.at(-1).chapter,'join');assert.equal(f.handles[0].presents.at(-1).paused,true,'An unbound first paint reconciles the latest pause intent before readiness');assert.deepEqual(f.handles[0].pauseCalls,[]);assert.deepEqual(f.handles[0].sizes.at(-1),[700,1000]);assert.equal(f.states.filter(s=>s.phase==='ready').length,1);}
   closed(f.director.inspect().history);
  }
+});
+
+test('native pause commands acknowledge before UI state without waiting for a camera RAF and failures close the same resource',async t=>{
+ const f=fixture();t.after(f.cleanup);f.site('entered');f.scroll('adapt');await f.settle();
+ const handle=f.handles[0],initial={frames:f.director.inspect().frames,presents:handle.presents.length},applyPause=handle.setPaused;
+ handle.setPaused=next=>{assert.equal(f.states.at(-1).paused,!next,'The renderer receives the semantic command before the UI acknowledges it');applyPause(next);};
+ f.director.setPaused(true);
+ assert.equal(handle.nativePaused,true);assert.equal(f.states.at(-1).paused,true);assert.deepEqual(handle.pauseCalls,[true]);
+ assert.equal(f.director.inspect().frames,initial.frames);assert.equal(handle.presents.length,initial.presents,'Native pause does not draw or await a demand frame');assert.equal(f.raf.size,1);
+ const acknowledged=f.states.length;
+ f.director.setPaused(true);assert.deepEqual(handle.pauseCalls,[true]);assert.equal(f.states.length,acknowledged);assert.equal(f.raf.size,1);
+ f.director.setPaused(false);
+ assert.equal(handle.nativePaused,false);assert.equal(f.states.at(-1).paused,false);assert.deepEqual(handle.pauseCalls,[true,false]);assert.equal(handle.presents.length,initial.presents);assert.equal(f.director.inspect().frames,initial.frames);
+ await f.settle();assert.equal(handle.presents.length,initial.presents,'Coalesced semantic commands preserve the idle camera paint cache');
+ handle.setPaused=()=>{throw Error('native-pause-unavailable');};
+ f.director.setPaused(true);
+ const failed=f.director.inspect();assert.equal(failed.phase,'failed');assert.equal(failed.reason,'native-pause-unavailable');assert.equal(failed.resource,null);assert.equal(handle.disposed,1);assert.equal(f.raf.size,0);assert.equal(handle.presents.length,initial.presents);closed(failed.history);
+ assert.deepEqual(failed.resourceFailures,[{id:failed.id,phase:'resource-failed',reason:'native-pause-unavailable'}]);
 });
