@@ -5,16 +5,20 @@ import {acquireVideo} from '../runtime/site/video-resource.mjs';
 import {collectResearchSupport,createResearchPhoneGeometry,fitResearchCamera,fitResearchPhoneCamera,RESEARCH_MODEL_PIXELS,RESEARCH_PHONE_PIXELS} from './research-scene-geometry.mjs';
 
 const aborted=()=>new DOMException('Research display released','AbortError');
+class ResearchContextLostError extends Error{
+ constructor(cause){super('context-lost',{cause});}
+}
+const renderFailure=error=>error instanceof ResearchContextLostError?'context-lost':'render-unavailable';
 function disposeObject(root,{geometries:extraGeometries=[],textures:extraTextures=[]}={}){
  const geometries=new Set(extraGeometries),materials=new Set(),textures=new Set(extraTextures);
  root?.traverse(node=>{if(node.geometry)geometries.add(node.geometry);for(const material of(Array.isArray(node.material)?node.material:node.material?[node.material]:[])){materials.add(material);for(const value of Object.values(material))if(value?.isTexture)textures.add(value);}});
  geometries.forEach(value=>value.dispose());materials.forEach(value=>value.dispose());textures.forEach(value=>value.dispose());
 }
 
-function createSurface(host,pixels,onLost){
+function createSurface(host,pixels,onLost,createRenderer=options=>new T.WebGLRenderer(options)){
  let renderer=null,budget=null,disposed=false,draws=0,shaderError=null;
  try{
-  renderer=new T.WebGLRenderer({alpha:false,antialias:true,powerPreference:'default'});
+  renderer=createRenderer({alpha:false,antialias:true,powerPreference:'default'});
   renderer.setClearColor('#101b22',1);renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1;
   renderer.debug.onShaderError=()=>{shaderError=Error('Research display shader unavailable');};
   const canvas=renderer.domElement;canvas.setAttribute('aria-hidden','true');canvas.setAttribute('data-xr-webgl-canvas','');
@@ -26,8 +30,18 @@ function createSurface(host,pixels,onLost){
    renderer,
    draw(scene,camera,width,height){
     if(disposed)throw Error('Research display disposed');
-    budget.sync(width,height);renderer.render(scene,camera);
-    if(shaderError)throw shaderError;if(renderer.getContext().isContextLost()||renderer.info.render.calls<1)throw Error('Research display did not draw');
+    const context=renderer.getContext();
+    try{
+     // A decoded-frame callback or explicit draw can observe loss before the
+     // queued webglcontextlost event. Classify before disposing that context.
+     if(context.isContextLost())throw new ResearchContextLostError();
+     budget.sync(width,height);renderer.render(scene,camera);
+     if(context.isContextLost())throw new ResearchContextLostError();
+     if(shaderError)throw shaderError;if(renderer.info.render.calls<1)throw Error('Research display did not draw');
+    }catch(error){
+     if(context.isContextLost()&&!(error instanceof ResearchContextLostError))throw new ResearchContextLostError(error);
+     throw error;
+    }
     draws++;if(!canvas.parentNode)host.appendChild(canvas);
    },
    inspect:()=>({draws,pixelBudget:pixels,budget:budget.inspect(),calls:renderer.info.render.calls,disposed}),
@@ -74,7 +88,7 @@ export async function acquireXRModelStudy({host,signal,model,onFailure=()=>{}}){
   const key=new T.DirectionalLight('#fff0df',2.2);key.position.set(2,4,3);scene.add(key);
   const fill=new T.DirectionalLight('#90b9d8',.8);fill.position.set(-3,1,-2);scene.add(fill);
   surface=createSurface(host,RESEARCH_MODEL_PIXELS,reason=>{if(!closed)onFailure(reason);});
-  const interact=change=>{if(closed)return;try{change();draw();}catch{onFailure('render-unavailable');}};
+  const interact=change=>{if(closed)return;try{change();draw();}catch(error){onFailure(renderFailure(error));}};
   return {
    resize(width,height){if(closed)throw Error('XR study disposed');if(!(width>0&&height>0))return;if(lastSize?.width===width&&lastSize?.height===height)return;lastSize={width,height};draw();},
    rotate(x,y){interact(()=>{yaw+=Math.max(-1,Math.min(1,x));pitch=Math.max(-.1,Math.min(1.15,pitch+y));});},
@@ -90,7 +104,7 @@ export async function acquireXRModelStudy({host,signal,model,onFailure=()=>{}}){
  * low-cost phone scene; no RAF, JS playback timer or React frame state exists.
  * A missing/lost WebGL context retains the same playing video in the DOM shell.
  */
-export async function acquireXRPhoneStudy({host,video,signal,stage,position=0,onPosition=()=>{},onFailure=()=>{},onMode=()=>{}}){
+export async function acquireXRPhoneStudy({host,video,signal,stage,position=0,onPosition=()=>{},onFailure=()=>{},onMode=()=>{},createRenderer}){
  if(signal.aborted)throw aborted();
  let closed=false,surface=null,scene=null,camera=null,phone=null,texture=null,videoHandle=null;
  let lastSize=null,front=false,frameCallback=null,mode='native-video',reason=null,mediaFrames=0,renderedMediaTime=null;
@@ -110,7 +124,7 @@ export async function acquireXRPhoneStudy({host,video,signal,stage,position=0,on
   if(closed||!surface)return;
   frameCallback=video.requestVideoFrameCallback((_now,metadata)=>{
    frameCallback=null;if(closed||!surface)return;
-   try{draw();mediaFrames++;renderedMediaTime=metadata.mediaTime;nextFrame();}catch{fallback('render-unavailable');}
+   try{draw();mediaFrames++;renderedMediaTime=metadata.mediaTime;nextFrame();}catch(error){fallback(renderFailure(error));}
   });
  };
  try{
@@ -125,11 +139,11 @@ export async function acquireXRPhoneStudy({host,video,signal,stage,position=0,on
    scene.add(new T.Mesh(phone.body,bodyMaterial),new T.Mesh(phone.screen,screenMaterial));
    scene.add(new T.HemisphereLight('#e0ebf1','#172028',2.3));
    const key=new T.DirectionalLight('#fff0dd',3);key.position.set(-2,3,4);scene.add(key);
-   surface=createSurface(host,RESEARCH_PHONE_PIXELS,value=>fallback(value));mode='webgl-phone';onMode(mode,null);
+   surface=createSurface(host,RESEARCH_PHONE_PIXELS,value=>fallback(value),createRenderer);mode='webgl-phone';onMode(mode,null);
   }catch(error){fallback(error.message||'webgl-unavailable');}
   return {
-   resize(width,height){if(closed)throw Error('Phone display disposed');if(!(width>0&&height>0))return;if(lastSize?.width===width&&lastSize?.height===height)return;lastSize={width,height};if(surface){try{draw();if(frameCallback===null)nextFrame();}catch{fallback('render-unavailable');}}},
-   faceScreen(value){if(closed)return;front=!!value;try{draw();}catch{fallback('render-unavailable');}},
+   resize(width,height){if(closed)throw Error('Phone display disposed');if(!(width>0&&height>0))return;if(lastSize?.width===width&&lastSize?.height===height)return;lastSize={width,height};if(surface){try{draw();if(frameCallback===null)nextFrame();}catch(error){fallback(renderFailure(error));}}},
+   faceScreen(value){if(closed)return;front=!!value;try{draw();}catch(error){fallback(renderFailure(error));}},
    inspect:()=>({mode,fallbackReason:reason,fallbacks:[...fallbacks],stage:stage.id,mediaFrames,renderedMediaTime,front,screenAspect:stage.width/stage.height,device:phone?.dimensions??null,surface:surface?.inspect()??null,video:videoHandle?.inspect()??null,disposed:closed}),
    dispose,
   };

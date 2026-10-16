@@ -95,9 +95,42 @@ the corrected source poster and the source assembly. It found no additional
 visible publication blocker: branches and interfaces remain fully framed,
 phone controls/home indicators are unobscured, mobile text is complete, and the
 XR card retains the original dual-phone composition. This is rendered-image
-review, not physical-device acceptance. The new and modified scoped browser
-checks pass across the reviewed local builds; the broader local suite is in
-progress at this checkpoint.
+review, not physical-device acceptance. Earlier scoped browser checks pass across
+the reviewed local builds. The broader 148-case Chromium/mobile run completed
+53 passing cases before it was deliberately interrupted when the first CI found
+an ordinary-background Reduced Motion scheduling defect. Its original log,
+partial artifacts and interruption proof remain intact; this is not a completed
+148-case pass.
+
+The first CI, run `38859743050`, is not accepted. WebKit shard 1/2 records
+39 passes and one frozen Reduced Motion failure. Separate pre-fix native-input
+reproductions fail in Chromium and WebKit; they establish ineffective scheduling
+without proving the original CI's exact event caller. The architecture group
+gated ordinary input/reset scheduling and unchanged resizes while preserving the
+necessary preference-clearing and actual-size static updates. All seven
+background portable checks and the 31-check related selection pass without
+skips. The reduced-fix run reports 369 passes, zero failures and two existing
+conditional skips out of 371 discovered. `pnpm check` and the local
+public build/audit also pass; the corrected background browser selection passes
+12/12 across Chromium, mobile Chromium and WebKit. Exact frozen time/frame/draw
+assertions remain in place, and the Bending Director is unchanged.
+
+Chromium shard 4/4 of that first CI separately records 16 passes and one XR phone
+context-loss classification failure. Native video and zero Canvas elements are
+correctly reached, but the reported reason races to `render-unavailable` instead
+of `context-lost`. The architecture group corrected production render-path loss
+classification before disposal and retained ordinary-error classification.
+Three new adapter regressions and the 21-check related selection pass without
+skips; the original CI's particular event ordering remains unproven. The rebuilt
+actual XR selection passes 10/10 desktop/mobile executions in 32.8 seconds,
+including genuine phone context loss and continuing native-video playback. The
+final complete portable run reports 372 passes, zero failures and two existing
+conditional skips out of 374 discovered; its public build/audit passes with
+138 local files and 57 approved asset/license files. The
+[verification record](GLOBAL_BACKGROUND_XR_VERIFICATION.md) preserves the
+failed checkpoints, corrected local evidence and remaining 19-file /
+222-execution same-SHA CI, deployment and live comparison gate. Neither original
+CI failure is replaced by the corrective local passes.
 
 Still required at this recorded pre-publication checkpoint: pass the complete
 same-SHA CI artifact gate, deploy that tested output and repeat live matched

@@ -89,6 +89,62 @@ test('coarse browser chrome keeps field allocation stable; width changes update 
  driver.dispose();
 });
 
+test('ordinary Reduced Motion stays idle through native input and unchanged resize, but updates a real size once and resumes',()=>{
+ for(const coarse of [false,true]){
+  const env=environment(),runtime=createBackgroundRuntime({createRenderer:fieldFactory}),surface=canvas();
+  env.win.matchMedia('(pointer:coarse)').matches=coarse;
+  const fine=env.win.matchMedia('(hover: hover) and (pointer: fine)');fine.matches=true;
+  const reduced=env.win.matchMedia('(prefers-reduced-motion: reduce)');
+  const driver=createSiteBackgroundDriver({window:env.win,document:env.doc,runtime,canvas:surface,backdrop:{style:{getPropertyValue(){return'';},setProperty(){}}}});
+  const sample=()=>{const state=driver.inspect();return{frames:state.frames,time:state.playback.activeSeconds,draws:state.pageField.draws,size:state.size};};
+  const nativeInput=[
+   ['mouse',()=>env.win.fire('pointermove',{pointerType:'mouse',clientX:700,clientY:500})],
+   ['pen',()=>env.win.fire('pointermove',{pointerType:'pen',clientX:720,clientY:540})],
+   ['touchstart',()=>env.win.fire('touchstart',{touches:[{clientY:500}]})],
+   ['touchmove',()=>env.win.fire('touchmove',{touches:[{clientY:350}]})],
+   ['touchend',()=>env.win.fire('touchend',{touches:[]})],
+   ['touchcancel',()=>env.win.fire('touchcancel',{touches:[]})],
+   ['wheel',()=>env.win.fire('wheel',{deltaY:300,deltaMode:0,ctrlKey:false,preventDefault(){throw Error('Native scrolling intercepted');}})],
+   ['blur',()=>env.win.fire('blur')],
+   ['pointerleave',()=>env.html.fire('pointerleave')],
+   ['fine-pointer change',()=>{fine.matches=false;fine.fire('change');fine.matches=true;fine.fire('change');}],
+   ['same-size resize',()=>env.win.fire('resize')],
+  ];
+  const assertIdle=reason=>{
+   const expected=sample();
+   for(const [name,fire] of nativeInput){
+    fire();assert.equal(env.pending.size,0,`${reason}: ${name} cannot schedule an ineffective frame`);
+    env.frame(1800);assert.deepEqual(sample(),expected,`${reason}: ${name} cannot deliver a frame or advance/draw`);
+   }
+  };
+  env.frame(100);assertIdle('entry pending');
+  env.siteReady();env.frame(200);env.frame(1200);
+  env.win.fire('pointermove',{pointerType:'mouse',clientX:700,clientY:500});env.frame(1250);
+  assert.equal(driver.inspect().chapterScene.field.fieldPointerStrength,.35);
+  const beforeReduced=sample();reduced.matches=true;reduced.fire('change');
+  assert.equal(env.pending.size,1,'The preference change itself must deliver its clearing frame');env.frame(1300);
+  const frozen=sample();assert.equal(frozen.frames,beforeReduced.frames+1);assert.equal(frozen.time,beforeReduced.time);
+  assert.equal(driver.inspect().chapterScene.field.fieldWeight,0);assert.equal(env.pending.size,0);
+  assertIdle('Reduced Motion');
+  if(coarse){
+   env.win.innerHeight-=100;env.win.fire('resize');assert.equal(env.pending.size,0,'Coarse browser-chrome height does not change stable dimensions');env.frame(2000);assert.deepEqual(sample(),frozen);
+  }
+  env.win.innerWidth+=80;env.win.innerHeight-=40;env.win.fire('resize');
+  assert.equal(env.pending.size,1,'A real dimension change can update the static presentation once');
+  env.win.fire('resize');assert.equal(env.pending.size,1);env.frame(3000);
+  const resized=sample();assert.equal(resized.frames,frozen.frames+1);assert.equal(resized.time,frozen.time);assert.equal(resized.draws,frozen.draws);
+  assert.deepEqual(resized.size,{width:env.win.innerWidth,height:env.win.innerHeight});assert.equal(env.pending.size,0);
+  assertIdle('resized Reduced Motion');
+  reduced.matches=false;reduced.fire('change');assert.equal(env.pending.size,1);env.frame(4000);env.frame(4100);
+  assert.ok(driver.inspect().playback.activeSeconds>frozen.time,'Disabling Reduced Motion restores normal time');
+  assert.ok(driver.inspect().pageField.draws>frozen.draws);assert.equal(driver.inspect().chapterScene.field.fieldPointerStrength,0,'Blocked input cannot leak a pointer into resume');
+  env.win.fire('pointermove',{pointerType:'pen',clientX:700,clientY:500});env.frame(4200);assert.equal(driver.inspect().chapterScene.field.fieldPointerStrength,.35);
+  env.doc.hidden=true;env.doc.fire('visibilitychange');assertIdle('hidden');
+  driver.dispose();driver.dispose();assert.equal(runtime.inspect().activeBindings,0);assert.equal(runtime.inspect().releases,1);
+  assert.equal(driver.inspect().events.nativeListeners,0);assert.equal(env.pending.size,0);assert.equal(surface.width,1);assert.equal(surface.height,1);
+ }
+});
+
 test('absent optional 2D leaves static atmosphere and stops background scheduling',()=>{
  const env=environment(),surface=canvas();surface.getContext=()=>null;
  const runtime=createBackgroundRuntime({createRenderer:fieldFactory});

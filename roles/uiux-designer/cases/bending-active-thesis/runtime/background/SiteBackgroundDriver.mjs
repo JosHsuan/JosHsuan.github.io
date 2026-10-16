@@ -22,11 +22,13 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
   scheduler.suspend('visibility',doc.hidden);
   const listen=(target,type,handler,options)=>events.listen(scope,target,type,handler,options);
   const ready=()=>['entered','failed'].includes(doc.documentElement.getAttribute('data-site-entry-state'));
+  const motionAllowed=()=>!scheduler.suspended&&ready()&&!reduced.matches;
   const measure=()=>{
     // Same coarse-pointer browser-chrome stability rule as the case Director.
-    if(!win.matchMedia('(pointer:coarse)').matches||stableWidth!==win.innerWidth){
-      stableWidth=win.innerWidth;size={width:win.innerWidth,height:win.innerHeight};
-    }
+    if(win.matchMedia('(pointer:coarse)').matches&&stableWidth===win.innerWidth)return false;
+    stableWidth=win.innerWidth;
+    if(size.width===win.innerWidth&&size.height===win.innerHeight)return false;
+    size={width:win.innerWidth,height:win.innerHeight};return true;
   };
   function tick(now) {
     if(disposed||scheduler.suspended)return;
@@ -41,7 +43,7 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
     if(score.needsFrame&&binding.inspect().ready&&!binding.inspect().failed)scheduler.schedule();
     else previous=0;
   }
-  const reset=()=>{pointer={x:0,y:0,active:false};pendingImpulse=0;touchY=null;scheduler.schedule();};
+  const reset=()=>{pointer={x:0,y:0,active:false};pendingImpulse=0;touchY=null;if(motionAllowed())scheduler.schedule();};
   const suspend=(reason,value)=>{
     const before=scheduler.suspended;scheduler.suspend(reason,value);
     if(before===scheduler.suspended)return;
@@ -52,26 +54,27 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
   const visibility=()=>suspend('visibility',doc.hidden);
   const siteState=()=>{previous=0;resumed=true;scheduler.schedule();};
   const wheel=event=>{
-    if(event.ctrlKey||scheduler.suspended||!ready()||reduced.matches)return;
+    if(event.ctrlKey||!motionAllowed())return;
     const delta=event.deltaY*(event.deltaMode===1?16:event.deltaMode===2?win.innerHeight:1);
     pendingImpulse=Math.max(-1,Math.min(1,pendingImpulse+delta/600));scheduler.schedule();
   };
   listen(win,'wheel',wheel,{passive:true});
-  listen(win,'touchstart',event=>{touchY=event.touches.length===1?event.touches[0].clientY:null;},{passive:true});
+  listen(win,'touchstart',event=>{touchY=motionAllowed()&&event.touches.length===1?event.touches[0].clientY:null;},{passive:true});
   listen(win,'touchmove',event=>{
+    if(!motionAllowed()){touchY=null;return;}
     if(touchY===null||event.touches.length!==1)return;
     const y=event.touches[0].clientY;
-    if(!scheduler.suspended&&ready()&&!reduced.matches)pendingImpulse=Math.max(-1,Math.min(1,pendingImpulse+(touchY-y)/500));
+    pendingImpulse=Math.max(-1,Math.min(1,pendingImpulse+(touchY-y)/500));
     touchY=y;scheduler.schedule();
   },{passive:true});
   for(const type of ['touchend','touchcancel'])listen(win,type,()=>{touchY=null;},{passive:true});
   listen(win,'pointermove',event=>{
-    if(scheduler.suspended||!['mouse','pen'].includes(event.pointerType))return;
+    if(!motionAllowed()||!['mouse','pen'].includes(event.pointerType))return;
     pointer={x:event.clientX,y:event.clientY,active:fine.matches&&!reduced.matches};scheduler.schedule();
   },{passive:true});
   listen(doc.documentElement,'pointerleave',reset);listen(win,'blur',reset);listen(fine,'change',reset);
   listen(reduced,'change',()=>{reset();previous=0;resumed=true;scheduler.schedule();});
-  listen(win,'resize',()=>{measure();scheduler.schedule();},{passive:true});
+  listen(win,'resize',()=>{if(measure())scheduler.schedule();},{passive:true});
   listen(doc,'visibilitychange',visibility);
   // A retained BFCache document may resume the same resource. A real document
   // exit releases backing storage, observation and listeners immediately.

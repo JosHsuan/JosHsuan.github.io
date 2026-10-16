@@ -83,9 +83,17 @@ Visibility, pagehide/pageshow and freeze/resume compose suspension reasons.
 Hidden intervals are not replayed into active time. A native non-persisted
 `pagehide` releases the ordinary driver's backing storage, listeners, observation
 and lease immediately; a persisted BFCache departure retains a suspended resource.
-Live Reduced Motion clears
-the optional field and returns the driver to idle; disabling it resumes from
-the retained active time. An unavailable or failed optional Canvas 2D context
+Live Reduced Motion publishes one clearing frame for the optional field and
+returns the driver to idle; disabling it resumes from the retained active time.
+Ordinary pointer, wheel, touch and reset-driven scheduling is gated by readable
+entry, active lifecycle and motion preference. Thus native input and fine-pointer
+capability changes cannot deliver ineffective frames while entry is pending,
+Reduced Motion is active or the document is suspended. Reset still clears held
+pointer/input facts. An unchanged resize, including a coarse-pointer browser-chrome
+height change, does not request a frame. A real measured dimension change may
+publish one static update under Reduced Motion without advancing active time or
+field draws. These guards belong to the ordinary driver; Bending retains its
+original Director. An unavailable or failed optional Canvas 2D context
 leaves the static CSS atmosphere and readable native content without an ongoing
 background frame request. Disposal cancels scheduled frames, disconnects
 observation, removes scoped listeners, releases the field and atlas, and
@@ -127,7 +135,7 @@ this is not a claim of twelve independent human reviews.
 
 ## Verification at implementation checkpoint
 
-Six portable checks in `tests/global-background.test.mjs` pass without skips:
+Seven portable checks in `tests/global-background.test.mjs` pass without skips:
 
 1. All seven chapter samples at desktop and portrait dimensions produce exactly
    the same CSS publication strings, actual Canvas 2D drawing calls and original
@@ -141,16 +149,46 @@ Six portable checks in `tests/global-background.test.mjs` pass without skips:
    native listeners and pending frames.
 4. Coarse browser-chrome height changes retain dimensions/allocation, while
    width changes resize the same acquired resource.
-5. An unavailable optional 2D context leaves the static atmosphere and returns
+5. Native input, reset and unchanged resize leave the driver idle while entry
+   is pending, Reduced Motion is active or the document is hidden. The preference
+   change delivers its clearing frame, an actual dimension change delivers one
+   static frame without changing time/draw count, and disabling Reduced Motion
+   resumes without leaking blocked pointer/input. Fine and coarse paths are tested.
+6. An unavailable optional 2D context leaves the static atmosphere and returns
    the frame scheduler to idle.
-6. A non-persisted document exit immediately releases field backing, scoped
+7. A non-persisted document exit immediately releases field backing, scoped
    listeners and the lease; later notifications cannot restart that disposed
    driver. The portable persisted branch is a controller test, not a claim that
    a real browser actually retained the document in BFCache.
 
 The related chapter-playback, chapter-scene-score and original page-field suites
-pass with these checks: 30 passed, zero failed, zero skipped. Focused role ESLint
+pass with these checks: 31 passed, zero failed, zero skipped. Focused role ESLint
 also passes on the new modules and modified background integration files.
+
+The reduced-fix portable run discovers 371 checks: 369 pass and two existing
+conditional browser-only checks skip. The subsequent complete corrections run,
+including three new XR adapter regressions, discovers 374: 372 pass, zero fail
+and the same two conditional checks skip. `pnpm check` passes its nine
+framework tests, fifteen CI tests and unchanged 63-file framework audit; the
+public local build passes its 138-file / 57-approved-file audit. These actual
+results are recorded in the root `*-reduced-fix.log` and `*-corrections.log` files.
+The rebuilt four background scenarios pass all 12 Chromium/mobile Chromium/WebKit
+executions. The latest XR model/phone selection passes all 10 desktop/mobile
+executions, including genuine context loss with continuing native-video playback;
+its 21 related CPU checks, including three new lifecycle checks, also pass without
+skips. These XR corrections retain project-owned resource boundaries and do not
+change the delegated Bending Director.
+
+The first CI run `38859743050` remains a failed checkpoint: WebKit shard 1/2
+records 39 passes and an ordinary Reduced Motion freeze failure. Pre-fix native
+input reproductions establish the ineffective scheduling path in Chromium and
+WebKit, but the original CI's exact event caller was not recorded. The initial
+53 completed passes from the deliberately interrupted 148-case local run are
+retained separately. That CI's separate Chromium 4/4 phone-fallback classification
+failure (16 passes / 1 failure) is likewise retained after its CPU and browser
+correction. Corrective local passes neither replace these raw records nor certify
+the final 19-file / 222-execution CI, deployment or live comparison; see the
+[verification record](GLOBAL_BACKGROUND_XR_VERIFICATION.md).
 
 `tests/pages/global-background.spec.mjs` adds four built-artifact scenarios for
 the six-route single-background boundary, real autonomous time and native
@@ -159,8 +197,8 @@ pointer/wheel response, live Reduced Motion and render budgets, isolated optiona
 and a live Bending scene's delegated driver and original sibling order. The native
 departure check records the browser's actual `persisted` value and validates that
 observed branch. It does not synthesize BFCache events or claim retention when
-the browser discarded the document. Authoring these checks does not establish
-that their browser execution has passed; actual results belong to the integrator.
+the browser discarded the document. The 12 executions above establish the
+recorded local corrected-build result; final exact-artifact CI remains separate.
 
 Required final acceptance remains the protected pre-change baseline and matched
 post-change/post-deployment Bending desktop/mobile comparison, all built routes,

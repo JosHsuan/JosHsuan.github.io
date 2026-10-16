@@ -51,7 +51,10 @@ test('ordinary background animates from native time and input, preserves scroll 
  await page.emulateMedia({reducedMotion:'reduce'});
  await page.waitForFunction(()=>{const value=window.__globalBackground.inspect().driver;return value.chapterScene.field.fieldWeight===0&&!value.lifecycle.scheduled;},null,{timeout:WAIT});
  const sample=()=>page.evaluate(()=>{const value=window.__globalBackground.inspect().driver;return{time:value.playback.activeSeconds,frames:value.frames,draws:value.pageField.draws};});
- const frozen=await sample();await page.evaluate(async()=>{for(let i=0;i<4;i++)await new Promise(requestAnimationFrame);});expect(await sample()).toEqual(frozen);
+ const frozen=await sample(),reducedY=await page.evaluate(()=>scrollY);
+ await page.mouse.move(screen.width*.25,screen.height*.2);await page.mouse.wheel(0,80);await page.mouse.move(-8,-8);
+ await expect.poll(()=>page.evaluate(()=>scrollY)).toBeGreaterThan(reducedY);
+ await page.evaluate(async()=>{for(let i=0;i<4;i++)await new Promise(requestAnimationFrame);});expect(await sample()).toEqual(frozen);
  await page.emulateMedia({reducedMotion:'no-preference'});
  await expect.poll(async()=>(await facts(page)).driver.pageField.draws,{timeout:WAIT}).toBeGreaterThan(frozen.draws);
  expect((await facts(page)).activeBindings).toBe(1);
