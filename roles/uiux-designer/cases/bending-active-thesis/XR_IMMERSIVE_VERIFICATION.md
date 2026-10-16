@@ -223,3 +223,53 @@ deployment and actual live routes/assets/
 scene checks. Physical iPhone/Safari decoding and sustained performance remain
 unmeasured. Windows WebKit's known native H.264 decoder limitation does not waive
 positive playback assertions in Linux WebKit CI.
+
+## Pinned Linux WebKit media backend
+
+The `f20a2ec` candidate passes 223/225 public browser executions, all 24
+framework executions and 385 portable checks, with the same two conditional
+portable skips. Its two WebKit failures retain the release hold. Neither failed
+candidate has been deployed; their complete logs and traces remain unchanged.
+
+An isolated native-video control in the pinned Linux engine reproduces a
+13.242-second synchronous `pause()` and a subsequent 13.242648-second difference
+between the cached paused DOM position and trusted resumed playback. Without a
+pause call, removing `src` and calling `load()` also blocks for 13.236 seconds.
+Neither control creates application WebGL. A separate passive application probe
+locates an 11.171-second delay inside native `video.pause()`; callback
+cancellation, texture deletion and canvas removal are not that measured delay.
+Unloading is therefore not a proven fast replacement for pausing.
+
+The supported `WEBKIT_GST_DISABLE_GL_SINK=1` diagnostic still fails continuity
+and is not adopted. The distinct `WEBKIT_GST_USE_PLAYBIN3=1` setting selects the
+engine's native playbin3 pipeline for regular media. The same native-only control
+then passes: pause returns within the recorded 0 ms resolution, paused time is
+stable, and the trusted resume gap is 0.000805591 seconds, without seeks or
+recorded errors. Process evidence confirms WebKit 2359/26.6, GStreamer 1.24.2.0,
+an available playbin3 factory and the actual inherited setting. See the
+[pinned engine implementation](https://github.com/WebKit/WebKit/blob/4d05d732e5a84f32675bef4cc135a2e7a9269a87/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp#L3170-L3180).
+
+The test configuration now supplies that setting only to Linux WebKit's browser
+launch environment, preserving the existing environment. It changes no public
+runtime, source recording, WebGL path, media clock, assertion, timeout, retry or
+continuity tolerance. Chromium, mobile Chromium and other operating systems
+retain their existing launch configuration. This is a pinned Linux Playwright
+WebKit backend configuration, not a claim of repairing production Safari.
+
+The initial two-case application diagnostic passes the original Reduced Motion
+five-second release assertion. Its normal-recording case fails earlier at site
+entry, before phone assertions. Passive cold-entry probes identify
+`reveal-timeout`: fonts and the critical image are ready, but neither native
+`animationend` nor the exact root animation's `finished` promise completes before
+the existing deadline. The document remains visible. Cancellation rejects that
+promise after the failed terminal. This does not prove a lost event after a
+completed animation. The existing failure terminal releases the loader and
+content guard correctly; shared entry code and its deadline are unchanged.
+This Docker cold-entry limitation is retained, not relabeled as a passing test.
+
+The ignored `linux-webkit-f20/2026-10-16T09-53-06.295Z` directory retains the
+native controls, passive probes and original failures as distinct checkpoints
+03–06 and 08–11. The unchanged complete WebKit shard is the next application
+check. Publication still requires fresh complete same-SHA CI, its exact-artifact
+gate and actual live acceptance. Physical Safari/iPhone verification remains
+unavailable.
