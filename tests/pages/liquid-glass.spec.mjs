@@ -175,7 +175,16 @@ test('built glass bends the real background only at its rim and leaves foregroun
 });
 
 test('pointer lighting and press share the Director clock and cancel, focus and page lifecycle close them',async({page,context,isMobile},testInfo)=>{
- test.setTimeout(scenarioTimeout(120000));await loadScene(page);await backdropFixture(page);
+ test.setTimeout(scenarioTimeout(120000));await loadScene(page);
+ // Start with a real Full scene, then use the authored MAKE reading absence.
+ // The retained renderer sleeps through its production visibility policy;
+ // the same Director and fixed DOM controls still own every interaction below.
+ await page.locator('#make').evaluate(element=>element.scrollIntoView({block:'start',behavior:'instant'}));await settle(page);
+ const readingRegion=await page.evaluate(()=>({placement:window.__story.inspect().canvasPlacement,renderSuspended:window.__thesis.inspect().renderSuspended,glassCount:window.__story.inspect().liquidGlass.count}));
+ expect(readingRegion.placement).toMatchObject({chapter:'make',mode:'absent',visible:false});
+ expect(readingRegion.renderSuspended).toBe(true);expect(readingRegion.glassCount).toBe(3);
+ await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);
+ await backdropFixture(page);
  const surface=page.locator(identity),rect=await surface.boundingBox();expect(rect).not.toBeNull();
  const read=()=>page.evaluate(()=>window.__story.inspect().liquidGlass.items.find(item=>item.kind==='identity'));
  const maps=(await liquid(page)).mapGenerations;

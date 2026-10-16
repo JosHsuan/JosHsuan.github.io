@@ -23,6 +23,7 @@ test('all portfolio categories and both selected projects have direct readable n
    await expect(loader(page)).toBeHidden();await expect(page.locator('main')).not.toHaveAttribute('inert','');
    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href','https://joshsuan.github.io'+route);
    await expect(page.locator('canvas')).toHaveCount(0);
+   await expect(page.locator('[data-animation-toggle]')).toBeHidden();
   }
   await page.goto('http://127.0.0.1:4186/');
   await page.locator('[data-home-project-link]').click();await expect(page).toHaveURL(/\/#projects$/);
@@ -35,12 +36,14 @@ test('all portfolio categories and both selected projects have direct readable n
 
 test('Home has no project model and scrolls directly into the nine-grid project index',async({page,isMobile})=>{
  const modelRequests=[],errors=[];
- page.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)|model-poster/.test(request.url()))modelRequests.push(request.url());});
+ page.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)/.test(request.url()))modelRequests.push(request.url());});
  page.on('pageerror',error=>errors.push(error.message));
  await page.goto('/');await entered(page);
  await expect(page.locator('[data-home-introduction] h1')).toHaveText('Hi, I’m JosHsuan.');
  expect(await page.locator('main>section').evaluateAll(sections=>sections.map(section=>section.id))).toEqual(['about','projects','contact']);
  await expect(page.locator('canvas,[data-cinematic-stage],[data-story-chapter]')).toHaveCount(0);
+ await expect(page.locator('[data-portfolio-background] img,[data-portfolio-background] canvas,[data-home-introduction] canvas')).toHaveCount(0);
+ expect(modelRequests).toEqual([]);
  const first=await page.evaluate(()=>scrollY);await page.mouse.wheel(0,130);
  await expect.poll(()=>page.evaluate(()=>scrollY)).toBeGreaterThan(first);
  await page.locator('[data-home-project-link]').click();await expect(page).toHaveURL(/\/#projects$/);
@@ -48,14 +51,14 @@ test('Home has no project model and scrolls directly into the nine-grid project 
  const geometry=await page.locator('[data-project-grid]').evaluate(element=>{const css=getComputedStyle(element);return{columns:css.gridTemplateColumns.split(' ').length,rows:css.gridTemplateRows.split(' ').length};});
  expect(geometry.columns).toBe(isMobile?1:3);if(!isMobile)expect(geometry.rows).toBe(3);
  await expect(page.locator('[data-project-card]')).toHaveCount(2);
- const cards=await page.locator('[data-project-card] img').evaluateAll(images=>images.map(image=>({loaded:image.complete&&image.naturalWidth>0,alt:image.alt})));
- expect(cards.every(card=>card.loaded&&card.alt.length>15)).toBe(true);
- expect(modelRequests).toEqual([]);expect(errors).toEqual([]);
+ const cards=await page.locator('[data-project-tile]').evaluateAll(tiles=>tiles.map(tile=>{const image=tile.querySelector('img');const rect=tile.getBoundingClientRect();return{loaded:image.complete&&image.naturalWidth>0,alt:image.alt,square:Math.abs(rect.width-rect.height)<1};}));
+ expect(cards.every(card=>card.loaded&&card.alt.length>15&&card.square)).toBe(true);
+ expect(errors).toEqual([]);
 });
 
 test('site loading waits for actual critical images and same-page movement does not start another lifecycle',async({page})=>{
  let release;const imageGate=new Promise(resolve=>{release=resolve;});
- await page.route('**/assets/xr/research-environment.webp',async route=>{await imageGate;await route.continue();});
+ await page.route('**/assets/xr/background-poster.webp',async route=>{await imageGate;await route.continue();});
  try{
   await page.goto('/',{waitUntil:'domcontentloaded'});
   await expect(loader(page)).toBeVisible();
@@ -97,7 +100,7 @@ test('native internal routes display loading and close the correlated request ac
 });
 
 test('a failed image releases readable content with one explicit failure terminal',async({page})=>{
- await page.route('**/assets/xr/research-environment.webp',route=>route.abort());
+ await page.route('**/assets/xr/background-poster.webp',route=>route.abort());
  await page.goto('/');const state=await entered(page,{failed:true});expect(state.reason).toContain('critical-image-unavailable');
  await expect(page.locator('[data-portfolio-root]')).not.toHaveAttribute('inert','');
  await expect(page.locator('[data-home-project-link]')).toBeVisible();

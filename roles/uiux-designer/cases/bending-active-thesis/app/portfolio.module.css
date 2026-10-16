@@ -52,19 +52,24 @@
 .projectHeading .sectionTitle{max-width:42rem;margin-bottom:0}
 .projectCount{flex:none;margin:0 0 .3rem;color:var(--portfolio-muted);font: .59rem/1.9 var(--mono);letter-spacing:.045em;text-align:right}
 /* Nine visible cells are editorial space. Only real projects are list items. */
-.projectGrid{--grid-row:clamp(27rem,33vw,32rem);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,var(--grid-row));gap:0;margin:0;padding:0;list-style:none;border-top:1px solid var(--portfolio-line);border-left:1px solid var(--portfolio-line);background-image:linear-gradient(90deg,transparent calc(100% - 1px),var(--portfolio-line) 0),linear-gradient(0deg,var(--portfolio-line) 1px,transparent 1px);background-size:calc(100% / 3) 100%,100% var(--grid-row)}
-.projectCard{min-width:0;min-height:0;background:rgb(12 23 29 / .52)}
-.projectCard>a{display:flex;flex-direction:column;min-width:0;height:100%;padding:1.1rem;text-decoration:none;transition:background .18s}
-.projectCard>a:hover,.projectCard>a:focus-visible{background:rgb(208 224 220 / .055)}
-.projectImage{position:relative;flex:0 0 42%;min-height:0;overflow:hidden;background:#172125}
-.projectImage img{display:block;width:100%;height:100%;object-fit:contain;filter:none;mix-blend-mode:normal;opacity:1}
-.cardNumber{position:absolute;left:.65rem;top:.65rem;padding:.35rem .45rem;background:#101b22e8;border:1px solid #b4c8bc65;border-radius:5px;color:#e3e9e4;font: .55rem/1 var(--mono)}
-.cardCopy{display:flex;flex:1;flex-direction:column;padding:1.1rem .2rem .2rem}
-.cardCategory{margin:0 0 .65rem;color:#d1ded8;font: .51rem/1.6 var(--mono);letter-spacing:.055em}
-.cardCopy :is(h2,h3){margin:0 0 .75rem;font-size:clamp(1.05rem,1.6vw,1.55rem);font-weight:400;line-height:1.2;letter-spacing:-.035em}
-.cardDescription{display:-webkit-box;overflow:hidden;-webkit-line-clamp:2;-webkit-box-orient:vertical;margin:0 0 1rem;color:var(--portfolio-muted);font-size:.82rem;line-height:1.6}
-.cardAction{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-top:auto;color:var(--portfolio-copper);font-size:.8rem;line-height:1.4}
+.projectGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));aspect-ratio:1;gap:0;margin:0;padding:0;list-style:none;border-top:1px solid var(--portfolio-line);border-left:1px solid var(--portfolio-line);background-image:linear-gradient(90deg,transparent calc(100% - 1px),var(--portfolio-line) 0),linear-gradient(0deg,var(--portfolio-line) 1px,transparent 1px);background-size:calc(100% / 3) 100%,100% calc(100% / 3)}
+.projectCard{position:relative;isolation:isolate;aspect-ratio:1;min-width:0;min-height:0;margin:.5rem;overflow:hidden;border:1px solid var(--material-reading-border);border-radius:22px;background:var(--material-reading-fill);box-shadow:var(--material-reading-shadow);-webkit-backdrop-filter:var(--material-reading-backdrop);backdrop-filter:var(--material-reading-backdrop)}
+.projectCard::after{content:'';position:absolute;z-index:5;inset:0;border-radius:inherit;box-shadow:inset 0 1px 0 rgb(255 255 255 / .2),inset 0 -1px 0 rgb(0 0 0 / .2);pointer-events:none}
+.projectImage{position:absolute;inset:1px;overflow:hidden;border-radius:inherit;background:#172125}
+.projectImage>div{position:absolute;inset:0}
+.projectImage img,.projectImage canvas,.projectImage video{display:block;width:100%;height:100%;object-fit:cover;filter:none;mix-blend-mode:normal}
+.projectImage img{object-position:55% center}
+.projectImage [hidden]{display:none!important}
+.projectImage [data-project-model-preview] img{object-position:76% center}
+.projectLink{position:absolute;z-index:2;inset:0;display:block;text-decoration:none;outline-offset:-4px}
+.cardCopy{position:absolute;inset:auto 0 0;display:flex;flex-direction:column;padding:4rem 1.5rem 1.5rem;background:linear-gradient(transparent,#0b141cf0 47%,#0b141c);color:#f1f3ec;opacity:0;translate:0 8px;transition:opacity .22s,translate .22s}
+.projectCard:hover .cardCopy,.projectCard:focus-within .cardCopy{opacity:1;translate:0 0}
+.cardCategory{display:block;margin:0 0 .65rem;color:#d1ded8;font: .51rem/1.6 var(--mono);letter-spacing:.055em}
+.cardCopy :is(h2,h3){margin:0 0 1.2rem;font-size:clamp(1.2rem,1.7vw,1.7rem);font-weight:400;line-height:1.15;letter-spacing:-.035em;text-wrap:balance}
+.cardAction{display:flex;align-items:center;justify-content:space-between;gap:1rem;color:var(--portfolio-copper);font-size:.8rem;line-height:1.4}
 .cardAction>span{font-size:1.25rem}
+.accessibleOnly{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.projectImage button{position:absolute;z-index:4;top:.75rem;right:.75rem;display:grid;place-items:center;min-width:44px;min-height:44px;padding:.6rem;border:1px solid #c7d5cd80;border-radius:50%;background:#101b22e8;color:#f1f3ec;font-size:1rem;cursor:pointer}
 .gridNote{max-width:37rem;margin:1.3rem 0 0;color:var(--portfolio-muted);font-size:.8rem;line-height:1.6}
 .contact{display:flex;align-items:center;justify-content:space-between;gap:4rem;padding-top:6rem;padding-bottom:7rem}
 .contact .sectionTitle{margin-bottom:1.1rem}
@@ -82,8 +87,8 @@
 .footer>span:nth-child(2){font: .52rem/1.5 var(--mono);letter-spacing:.1em}
 .footer a{display:flex;align-items:center;gap:1rem;min-height:44px;text-decoration:none}
 @media(min-width:1800px){.introductionInner,.section{padding-left:108px;padding-right:108px}.section::before{left:108px;right:108px}}
-@media(max-width:1100px){.introductionCopy{grid-column:1/10}.identityDiscipline,.identityDivider{display:none}.projectGrid{--grid-row:26rem}.cardCopy :is(h2,h3){font-size:1.2rem}}
-@media(max-width:900px){.projectGrid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:27rem;background-size:50% 100%,100% 27rem}.sectionLead{grid-template-columns:1fr 2.5fr}.projectCount{max-width:11rem}.contact{gap:2rem}.approaches{gap:2rem}}
+@media(max-width:1100px){.introductionCopy{grid-column:1/10}.identityDiscipline,.identityDivider{display:none}.cardCopy :is(h2,h3){font-size:1.2rem}}
+@media(max-width:900px){.projectGrid{aspect-ratio:auto;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:auto;background-size:50% 100%,100% 100%}.sectionLead{grid-template-columns:1fr 2.5fr}.projectCount{max-width:11rem}.contact{gap:2rem}.approaches{gap:2rem}}
 @media(max-width:640px){
   .navigation{inset:1rem 1rem auto;gap:.6rem;align-items:center}
   .identity{min-height:46px;padding:.6rem .75rem;font-size:.72rem}
@@ -114,13 +119,10 @@
   .projectHeading{display:block;margin-bottom:2rem}
   .projectCount{max-width:none;margin:1.2rem 0 0;text-align:left}
   .projectGrid{grid-template-columns:1fr;grid-auto-rows:auto;background-size:100% 100%,100% 100%;border-bottom:1px solid var(--portfolio-line)}
-  .projectCard{border-bottom:1px solid var(--portfolio-line)}
-  .projectCard>a{padding:1rem}
-  .projectImage{flex:none;aspect-ratio:16/10}
-  .cardCopy{padding:1.3rem .2rem .5rem}
+  .projectCard{aspect-ratio:1;border-radius:18px}
+  .cardCopy{padding:4rem 1.2rem 1.2rem}
   .cardCategory{font-size:.52rem}
   .cardCopy :is(h2,h3){font-size:1.6rem}
-  .cardDescription{display:block;font-size:.9rem;line-height:1.7;margin-bottom:1.4rem}
   .cardAction{font-size:.85rem}
   .contact{display:block;padding-bottom:4.5rem}
   .contactPage{min-height:85svh;padding-top:10rem}
@@ -131,7 +133,8 @@
   .footer>span:nth-child(2){display:none}
 }
 @media(max-width:360px){.identity{font-size:.65rem;padding:.6rem .55rem}.navigationLinks a{font-size:.63rem;padding:.6rem .5rem}.introductionInner{padding-left:1.25rem;padding-right:1.25rem}.homeTitle{font-size:4rem}}
-@media(prefers-reduced-motion:reduce){.navigationLinks a,.invitationArrow,.projectCard>a{transition:none}}
+@media(hover:none){.cardCopy{opacity:1;translate:0 0}.cardCategory,.cardAction{display:none}.cardCopy :is(h2,h3){margin-bottom:0;font-size:1.35rem}.cardCopy{padding-top:3rem}}
+@media(prefers-reduced-motion:reduce){.navigationLinks a,.invitationArrow,.cardCopy{transition:none}}
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){.projectCard{background:#142128}.asciiField{opacity:.06}.portfolio{--portfolio-line:#a2b5ab}}
-@media(forced-colors:active){.portfolio{background:Canvas;color:CanvasText;--portfolio-line:CanvasText;--portfolio-muted:CanvasText;--portfolio-copper:LinkText}.ambient{display:none}.identity,.navigationLinks,.projectCard,.projectImage{background:Canvas;color:CanvasText}.eyebrow,.invitationLabel,.projectCount,.cardCategory,.footer{color:CanvasText}.cardNumber{background:Canvas;color:CanvasText;border-color:CanvasText}}
-@media print{.portfolio{background:#fff;color:#151b17;--portfolio-muted:#333b35;--portfolio-copper:#813e26;--portfolio-line:#8b9991}.ambient,.navigation,.skip,.notation,.signature{display:none}.introduction,.introductionInner,.standalone,.contactPage{min-height:0;padding-top:2rem}.homeTitle{font-size:4rem}.projectGrid{grid-template-rows:none;grid-auto-rows:auto;grid-template-columns:repeat(2,minmax(0,1fr));background:none}.projectCard{break-inside:avoid;background:transparent}.projectImage{flex:none;aspect-ratio:16/10}.section{padding-top:2rem;padding-bottom:2rem}.eyebrow,.invitationLabel,.cardCategory,.footer{color:#333b35}}
+@media(forced-colors:active){.portfolio{background:Canvas;color:CanvasText;--portfolio-line:CanvasText;--portfolio-muted:CanvasText;--portfolio-copper:LinkText}.ambient{display:none}.identity,.navigationLinks,.projectCard,.projectImage{background:Canvas;color:CanvasText}.eyebrow,.invitationLabel,.projectCount,.cardCategory,.footer{color:CanvasText}.cardCopy{opacity:1;translate:none;background:Canvas;color:CanvasText}.cardAction{color:LinkText}}
+@media print{.portfolio{background:#fff;color:#151b17;--portfolio-muted:#333b35;--portfolio-copper:#813e26;--portfolio-line:#8b9991}.ambient,.navigation,.skip,.notation,.signature{display:none}.introduction,.introductionInner,.standalone,.contactPage{min-height:0;padding-top:2rem}.homeTitle{font-size:4rem}.projectGrid{grid-template-rows:none;grid-auto-rows:auto;grid-template-columns:repeat(2,minmax(0,1fr));background:none}.projectCard{break-inside:avoid;aspect-ratio:1;background:transparent}.cardCopy{opacity:1;translate:none;background:#fff;color:#151b17;padding:1rem}.projectImage button{display:none}.section{padding-top:2rem;padding-bottom:2rem}.eyebrow,.invitationLabel,.cardCategory,.footer{color:#333b35}}

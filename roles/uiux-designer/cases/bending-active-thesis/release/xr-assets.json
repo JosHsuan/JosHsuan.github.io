@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "xr-bending-active-selected-media-v1",
   "selectionAuthorization": "The current owner request explicitly selects a real XR detail page with narrowly relevant source processing/publication; unrelated preparation records remain private.",
-  "reviewScope": "Four individually inspected source derivatives without identifiable faces, contact details, source code, configuration, raw CV or full private documents.",
+  "reviewScope": "Four initially inspected image derivatives plus an owner-selected Background.mp4 continuous excerpt and its exact first-frame poster; no raw CV, source code, configuration or whole source video is published. The video contains original recorded people and UI, with shared-project attribution rather than invented individual recording authorship.",
   "assets": [
     {
       "path": "assets/xr/research-environment.webp",
@@ -27,6 +27,18 @@
       "bytes": 637446,
       "sha256": "ffdbee5f6bdae697601be8a0465e3746966f97ca7422a5a6189d0fbc3da237f0",
       "source": "Owner-authorized selected Chao / Nomura XR research derivative; individual image creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/background-preview.mp4",
+      "bytes": 959385,
+      "sha256": "2c9efd96634395452d71cd9f7fd800529dae5dc838f8c4b6c597fb3ee94afa29",
+      "source": "Owner-selected Background.mp4 continuous 0.000\u20138.000s excerpt; shared Chao/Nomura project, individual recording credit not separately recorded"
+    },
+    {
+      "path": "assets/xr/background-poster.webp",
+      "bytes": 338694,
+      "sha256": "96b3d295f576ceb1d66bceb4ec510d3c2521ce6f27465183b68265b067a9607c",
+      "source": "Owner-selected Background.mp4 continuous 0.000\u20138.000s excerpt; shared Chao/Nomura project, individual recording credit not separately recorded"
     }
   ],
   "provenance": [
@@ -97,6 +109,50 @@
       "sourceUnchanged": true,
       "individualImageCreator": "Not separately recorded; team-project attribution only",
       "timeSeconds": 14.8833165
+    },
+    {
+      "assetId": "xr-background-preview",
+      "publicPath": "assets/xr/background-preview.mp4",
+      "sourceLocator": "T3/Presentation/video/Background.mp4",
+      "sourceSHA256": "2bc911abfd627e61bc0202706a567238eeded0de03f02f9de0306c9162fc9ee3",
+      "sourceBytes": 2388703270,
+      "publicSHA256": "2c9efd96634395452d71cd9f7fd800529dae5dc838f8c4b6c597fb3ee94afa29",
+      "dimensions": [
+        960,
+        540
+      ],
+      "exactRangeSeconds": {
+        "startInclusive": 0,
+        "endExclusive": 8
+      },
+      "fps": 24,
+      "processing": "Original continuous 0.000\u20138.000s at 24fps, 960\u00d7540 full-frame Lanczos, H264 CRF24, yuv420p, faststart, silent; no grade or generated frames",
+      "sourceUnchanged": true,
+      "individualImageCreator": "Original recording/presentation edit not separately credited; shared project attribution",
+      "toolBinarySHA256": "2ce797a0f88d7f067180338fb227f7b1928ea727bd9a4d7a1d022f7c52af71a3",
+      "verification": "Full 192-frame decode; repeat encode byte-identical; poster decoded pixels exact to output first frame"
+    },
+    {
+      "assetId": "xr-background-poster",
+      "publicPath": "assets/xr/background-poster.webp",
+      "sourceLocator": "T3/Presentation/video/Background.mp4",
+      "sourceSHA256": "2bc911abfd627e61bc0202706a567238eeded0de03f02f9de0306c9162fc9ee3",
+      "sourceBytes": 2388703270,
+      "publicSHA256": "96b3d295f576ceb1d66bceb4ec510d3c2521ce6f27465183b68265b067a9607c",
+      "dimensions": [
+        960,
+        540
+      ],
+      "exactRangeSeconds": {
+        "startInclusive": 0,
+        "endExclusive": 8
+      },
+      "fps": null,
+      "processing": "Decode the derivative first frame to PNG in memory, then Pillow RGB lossless WebP; decoded pixels checked exactly equal",
+      "sourceUnchanged": true,
+      "individualImageCreator": "Original recording/presentation edit not separately credited; shared project attribution",
+      "toolBinarySHA256": "2ce797a0f88d7f067180338fb227f7b1928ea727bd9a4d7a1d022f7c52af71a3",
+      "verification": "Full 192-frame decode; repeat encode byte-identical; poster decoded pixels exact to output first frame"
     }
   ]
 }

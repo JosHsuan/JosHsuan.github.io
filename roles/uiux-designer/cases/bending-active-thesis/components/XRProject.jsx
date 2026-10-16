@@ -1,4 +1,5 @@
 import PortfolioNavigation from './PortfolioNavigation';
+import ProjectAnimationPreview from './ProjectAnimationPreview';
 import study from '../release/xr-study.json';
 import styles from './XRProject.module.css';
 
@@ -17,6 +18,15 @@ function SectionHeading({ number, label, title, id }) {
     <p className={styles.eyebrow}>{number} / {label}</p>
     <h2 id={id}>{title}</h2>
   </div>;
+}
+
+function MotionFigure({item}) {
+  return <figure className={styles.figure} data-xr-recording>
+    <ProjectAnimationPreview animation={item} poster={item.poster} label="Archived XR research recording"
+      controlPlacement="outside" controlLabel="04 / ARCHIVED RESEARCH — RECORDING EXCERPT"
+      className={styles.motionPreview} mediaClassName={styles.motionMedia}/>
+    <figcaption><p>{item.caption}</p><span>{item.credit}</span></figcaption>
+  </figure>;
 }
 
 export default function XRProject() {
@@ -61,7 +71,7 @@ export default function XRProject() {
         <section className={styles.section} aria-labelledby="xr-prototype">
           <SectionHeading number="03" label="PROTOTYPE" title={study.sections.prototype.title} id="xr-prototype" />
           <div className={styles.sectionBody}>{study.sections.prototype.paragraphs.map(text => <p key={text}>{text}</p>)}</div>
-          <EvidenceFigure item={study.media.prototype} label="04 / ARCHIVED PROTOTYPE — RECORDING FRAME" />
+          <MotionFigure item={study.media.motion}/>
         </section>
 
         <section className={styles.section} aria-labelledby="xr-contribution">

@@ -1,4 +1,6 @@
 import PortfolioNavigation from './PortfolioNavigation';
+import ProjectModelPreview from './ProjectModelPreview';
+import ProjectAnimationPreview from './ProjectAnimationPreview';
 import introduction from '../release/introduction.json';
 import contact from '../release/contact.json';
 import review from '../release/story.json';
@@ -10,7 +12,7 @@ const projects=[
     id:'bending-active',href:'/projects/bending-active/',title:review.title,
     category:'COMPUTATIONAL DESIGN / MATERIAL RESEARCH',
     description:'A study connecting geometric representation, metal-panel openings and physical assembly.',
-    image:review.cinematic.media.prototype,
+    image:{src:'/assets/cinematic/model-poster.webp',width:1440,height:1000,alt:'The approved Bending-Active metal-panel model, shown in its original exhibition scene.'},
   },
   {
     id:'xr-bending-active',href:'/projects/xr-bending-active/',title:xrStudy.shortTitle,
@@ -80,10 +82,17 @@ function Projects({standalone=false}){
       <p className={styles.projectCount}>{String(projects.length).padStart(2,'0')} projects<br/>Geometry / interaction / making</p>
     </div>
     <ul className={styles.projectGrid} data-project-grid>
-      {projects.map((project,index)=><li key={project.id} className={styles.projectCard}>
-        <a href={project.href} data-project-card={project.id}>
-          <div className={styles.projectImage}><img src={project.image.src} width={project.image.width} height={project.image.height} alt={project.image.alt} loading="eager" decoding="async" data-site-critical/><span className={styles.cardNumber} aria-hidden="true">{String(index+1).padStart(2,'0')}</span></div>
-          <div className={styles.cardCopy}><p className={styles.cardCategory}>{project.category}</p><CardHeading>{project.title}</CardHeading><p className={styles.cardDescription}>{project.description}</p><span className={styles.cardAction}>Explore project <Arrow diagonal/></span></div>
+      {projects.map(project=><li key={project.id} className={styles.projectCard} data-project-tile={project.id}>
+        <div className={styles.projectImage}>
+          {project.id==='bending-active'
+            ?<ProjectModelPreview poster={project.image}/>
+            :<ProjectAnimationPreview animation={xrStudy.media.motion} poster={xrStudy.media.motion.poster} label={project.title}/>}
+        </div>
+        <a className={styles.projectLink} href={project.href} data-project-card={project.id} aria-labelledby={`project-card-${project.id}`} aria-describedby={`project-description-${project.id}`}>
+          <div className={styles.cardCopy} data-project-card-title>
+            <span className={styles.cardCategory}>{project.category}</span><CardHeading id={`project-card-${project.id}`}>{project.title}</CardHeading><span className={styles.cardAction}>Explore project <Arrow diagonal/></span>
+          </div>
+          <span className={styles.accessibleOnly} id={`project-description-${project.id}`}>{project.description}</span>
         </a>
       </li>)}
     </ul>

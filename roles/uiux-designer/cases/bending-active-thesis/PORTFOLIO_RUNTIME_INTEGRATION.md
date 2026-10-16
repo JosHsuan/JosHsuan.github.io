@@ -12,15 +12,22 @@ and XR motion-capture detail routes. This selected public application remains
 inside the existing case publication boundary. The reusable root `src` framework,
 generated entries and empty public-content snapshot are unchanged.
 
+The subsequent card request explicitly authorizes a real, card-scoped Bending
+model and the source XR animation encoded as a silent MP4. The Home introduction
+and atmospheric background remain model-free. Only an actually visible project
+card may acquire its optional model/video resources. This supersedes the preceding
+whole-Home zero-Canvas statement for that card; it does not authorize a model in
+the introduction, a full-page scene, or the full case RuntimeRoot on Home.
+
 ## Five-role implementation decisions
 
 | Role | Recommendation and implemented boundary |
 | --- | --- |
-| Software Architect | Keep native, full-document anchors for static routes. A small site readiness controller owns site loader DOM and discrete facts; it imports no scene, camera, case score, model or Theatre runtime. Same-document fragment links remain native. |
-| Experience Director | Every locally owned request has one terminal: `entered`, `cancelled` or `failed`. A tracked native departure transfers its request identity to the destination document; the source does not fabricate completion during unload. Scene entry facts are delegated rather than driven again. |
-| Motion Designer | Generic pages use the existing entry presentation and a 0.72-second CSS reveal whose actual `animationend` supplies completion. Reduced Motion skips that movement. Bending's existing Director remains the only scene-entry clock and still owns its reveal. |
-| Performance Engineer | Home mounts no case RuntimeRoot, Canvas, renderer or JavaScript RAF. One shared document service waits only for DOM readiness, fonts and explicitly marked current-page images, with bounded deadlines and reference-counted cleanup. Native CSS activity is limited to the pending loader. No sustained frame-rate or physical-device claim follows from these functional checks. |
-| Animation Cinematographer | Preserve Bending's camera, source materials, scene-light score and composition. Generic route loading shares the panel hierarchy and a static neutral CSS atmosphere, without loading the case poster or placing a model on Home. |
+| Software Architect | Keep native, full-document anchors and a small site loader controller. Optional card previews share `PreviewLifecycle`, separate from site readiness and the full case RuntimeRoot. Only the visible model card dynamically imports its own narrow Three renderer; same-document fragments remain native. |
+| Experience Director | Every site request has one `entered`, `cancelled` or `failed` terminal. Preview acquisition separately has one `ready`, `cancelled` or `failed` terminal; a later resource fault cannot rewrite a successful acquisition. Case scene entry is delegated, never driven again. |
+| Motion Designer | Generic entry uses the existing 0.72-second CSS reveal; Reduced Motion skips it. Model cards are fixed-pose demand renders with no motion clock. XR playback uses the native video clock, with a real pause button, visible-only lifetime and Reduced Motion/Save Data poster fallback. The case Director remains the sole case animation clock. |
+| Performance Engineer | The introduction/background mounts no model, case RuntimeRoot or Canvas. One shared optional-preview eligibility service responds to actual intersection, document visibility, site entry and preferences. Offscreen/hidden/pagehide abort and release model contexts or video sources. A shared model lease permits at most one model-card renderer; no JavaScript RAF is added. Functional evidence does not prove physical-device performance. |
+| Animation Cinematographer | Card rendering reuses the verified three-layer assembly, source satin/base treatment, HDR PMREM, ACES/SRGB, frozen overview lighting and the existing exhibition light wash. The overview direction is refit to the card's aspect; it is not claimed as pixel-identical to the full case, whose camera, compositor and source remain unchanged. |
 
 ## Files and ownership
 
@@ -116,6 +123,83 @@ counts. It is an inspection port, not a renderer or navigation API. Existing
 download and new-tab activations retain their browser behavior.
 
 ## Portable verification
+
+### Visible project-card resources
+
+`runtime/site/PreviewLifecycle.mjs` supplies both the real model card and native
+MP4 preview with a 15-second acquisition bound, AbortSignal, generation checks,
+bounded 64-fact request history, cleanup and shared eligibility. Eligibility
+requires actual positive intersection, a visible document, completed site entry,
+and no Reduced Motion or Save Data preference. It uses IntersectionObserver,
+document/policy/page lifecycle events, and a MutationObserver for the existing site
+state attribute. No wheel interception, frame callback, iframe or JavaScript
+animation loop is introduced. A zero-size model surface releases resources and
+can reacquire when its eligible dimensions return.
+
+`ProjectModelPreview.jsx` dynamically imports `project-model-scene.mjs` only after
+eligibility. The helper verifies the same source GLB SHA and three layer/count
+records, preserves original source transforms/units, and reuses the cinematic
+satin treatment, frozen surface emphasis, base multiplier, HDR PMREM, existing
+directional/area lights and exhibition light wash. Its camera preserves the existing
+overview orientation and FOV, fits every actual mesh vertex transformed by its
+native `matrixWorld`, and centers the perspective silhouette at 90% width in the
+square card. Both bases and the shell remain inside the inset frustum; empty AABB
+corners do not enlarge this card-only fit. Source vertices/transforms are never
+scaled for framing. ACES exposure 1 and sRGB
+output match the case; the card omits its full compositor, source-diagram assets,
+annotations and interactive case runtime. A 262,144-physical-pixel output cap and
+512-pixel contact-shadow map are card budgets, not a hardware capability claim.
+
+Preview GLB, metadata and HDR transport use the same native `fetch` and owned
+AbortSignal, with HTTP status validation. HDR bytes are parsed through pinned
+Three 0.186.1's public `HDRLoader.createDataTexture(buffer)`, which calls the same
+`_applyTexData(parse(buffer))` path as `load()`. The default half-float data,
+linear-sRGB colour space, filtering and orientation remain unchanged. Aborted or
+disposed generations do not parse a late body; any already-created HDR texture
+is released by the existing HDR/PMREM owner. The original case loader is unchanged.
+This reduces transport/cancellation ownership to one preview request path. Earlier
+capture evidence included intermittent HDR `ERR_ABORTED` while the generation
+became ready, without correlating a failed request ID to the bytes actually
+consumed. Its cause remains unproven; this change does not relabel those receipts
+or establish that the earlier network error has been fixed.
+
+The card renders only on successful acquisition or changed nonzero dimensions.
+Its canvas is appended after the first successful renderer draw and context check;
+only then does acquisition become `ready`. This is a real draw acknowledgment,
+not proof that the browser compositor has presented that frame. Built pixel and
+idle-frame checks remain required. Scroll departure, hidden state, pagehide,
+preference changes and disposal abort pending work, release geometry/materials,
+HDR/PMREM, lights, targets and renderer, and explicitly lose the context. A shared
+model lease permits at most one model-card resource at a time. Returning may
+rebuild it; a disposed canvas's pixels are never relied on as a fallback.
+
+The SSR poster is eager, marked site-critical and readable without JavaScript.
+The model/video enhancement is optional and cannot hold essential links or site
+entry waiting on an offscreen resource. Load/GPU/context/playback failures keep
+the original poster and surrounding native project link usable. Native MP4
+playback owns its own media time, supports a separate accessible pause/play button,
+and releases its source/decoder while inactive; no GIF/JavaScript playback clock
+is created. Title visibility on fine-pointer hover must also include keyboard
+focus, while coarse-pointer/print presentation retains a visible title and the
+link's accessible name remains present in every mode.
+
+Acquisition facts have one terminal: `requested → ready`, `cancelled`, or `failed`.
+`ready` means that acquisition succeeded, not that the resource cannot later fail.
+The public controller `fail(reason)` releases a subsequently lost context/decoder
+and sets visual state to `failed`; a separate bounded `resourceFailures` record
+describes that later fault without appending a second acquisition terminal.
+Repeated failure notification is idempotent. A failed eligible generation does not
+restart merely because of resize or unchanged eligibility; a new eligibility
+epoch or explicit user retry is required.
+
+The model inspection port is `window.__projectModelPreview.inspect()` or the same
+port on the `[data-project-model-preview]` element. It includes eligibility,
+acquisition/resource-failure history, actual scene draw count, source revision,
+geometry counts, material and output-allocation diagnostics. The scene remains
+static between demand events; these diagnostics do not establish a physical
+device's memory cost, sustained frame rate or visual identity to the full case.
+
+### Controller and page-readiness tests
 
 `tests/site-navigation.test.mjs` exercises the actual production controllers with
 injected DOM, resource promises, storage and deadline ports. It checks independent

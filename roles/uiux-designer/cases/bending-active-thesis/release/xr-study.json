@@ -7,7 +7,10 @@
   "type": "Collaborative research / XR prototype",
   "summary": "Connecting measured physical positions, an adaptive digital model and XR guidance for the assembly of bending-active bamboo modules.",
   "introduction": "Natural materials do not always behave like a predetermined digital model. This collaborative study explored how motion capture could bring conditions measured during assembly back into the design process, then return an updated model to an XR application.",
-  "authors": ["Chia-Hsuan Chao", "Wataru Nomura"],
+  "authors": [
+    "Chia-Hsuan Chao",
+    "Wataru Nomura"
+  ],
   "context": "MAS in Architecture and Digital Fabrication, ETH Zürich · 2024 research project",
   "hero": {
     "src": "/assets/xr/research-environment.webp",
@@ -41,6 +44,20 @@
       "alt": "Archived prototype recording frame showing a coloured digital module, module-selection control and FetchFoots and FetchMidPoints buttons.",
       "caption": "An archived module-selection prototype recording at 14.883 seconds. The original player controls are retained. A single recorded frame documents the interface rather than proving continuous operation or performance.",
       "credit": "Chia-Hsuan Chao / Wataru Nomura project; individual recording credit not separately recorded."
+    },
+    "motion": {
+      "src": "/assets/xr/background-preview.mp4",
+      "width": 960,
+      "height": 540,
+      "poster": {
+        "src": "/assets/xr/background-poster.webp",
+        "width": 960,
+        "height": 540,
+        "alt": "First frame of the archived four-panel XR prototype presentation, with digital geometry, bamboo assembly and Adapt, Assemble and Join controls."
+      },
+      "alt": "Archived four-panel XR prototype footage with bamboo assembly, tracked digital geometry and Adapt, Assemble and Join controls.",
+      "caption": "An eight-second excerpt from the original project presentation montage, showing recorded XR interface and assembly states. The original four-panel layout is preserved. This is archived footage, not a live tracking application on this website.",
+      "credit": "Chia-Hsuan Chao / Wataru Nomura research, 2024; individual recording and original presentation-edit authorship not separately recorded."
     }
   },
   "sections": {
@@ -62,19 +79,40 @@
       "title": "From module selection to assembly guidance.",
       "paragraphs": [
         "The prototype connected module selection with measurement and assembly controls. The research distinguished adapting the global form, assembling an individual module and joining modules into the larger structure.",
-        "The recording frame preserves an actual interface state. It does not establish that every interaction worked reliably, nor does it assign all interface, geometry or fabrication work to one researcher."
+        "The archived presentation excerpt preserves the original four-panel montage of recorded interface and assembly states. It is not one continuous tracking experiment, and does not establish that every interaction worked reliably or assign the whole application to one researcher."
       ]
     }
   },
   "workflow": [
-    {"label": "Capture", "title": "Measure the physical setup", "description": "Marker positions describe selected physical reference points and measuring tools."},
-    {"label": "Adapt", "title": "Update the digital model", "description": "A computational workflow translates measured parameters into model updates."},
-    {"label": "Guide", "title": "Return a visual reference", "description": "The XR application displays the updated geometry alongside assembly controls."}
+    {
+      "label": "Capture",
+      "title": "Measure the physical setup",
+      "description": "Marker positions describe selected physical reference points and measuring tools."
+    },
+    {
+      "label": "Adapt",
+      "title": "Update the digital model",
+      "description": "A computational workflow translates measured parameters into model updates."
+    },
+    {
+      "label": "Guide",
+      "title": "Return a visual reference",
+      "description": "The XR application displays the updated geometry alongside assembly controls."
+    }
   ],
   "contributions": [
-    {"title": "MoCap interface and events", "description": "I contributed code changes for interface events and data updates in the shared Unity / C# project."},
-    {"title": "Measurement visualisation", "description": "I contributed changes to the frame and circle visualisation used for measurement feedback."},
-    {"title": "Rod data output", "description": "I modified Rhino / COMPAS rod-coordinate and colour-output logic connecting geometry data with its downstream representation."}
+    {
+      "title": "MoCap interface and events",
+      "description": "I contributed code changes for interface events and data updates in the shared Unity / C# project."
+    },
+    {
+      "title": "Measurement visualisation",
+      "description": "I contributed changes to the frame and circle visualisation used for measurement feedback."
+    },
+    {
+      "title": "Rod data output",
+      "description": "I modified Rhino / COMPAS rod-coordinate and colour-output logic connecting geometry data with its downstream representation."
+    }
   ],
   "contributionNote": "These contributions are supported by source-code changes and Git history. The research, overall application, geometry and fabrication are collaborative work with Wataru Nomura; the sources do not resolve every task between the two researchers. The tracking SDKs and upstream COMPAS XR framework are third-party foundations.",
   "limitations": [
@@ -84,12 +122,24 @@
     "This case documents a 2024 research prototype. The original app and tracking hardware have not been re-run or benchmarked for this website."
   ],
   "credits": [
-    {"role": "Research", "names": "Chia-Hsuan Chao and Wataru Nomura"},
-    {"role": "Tutors / advisers", "names": "Alexandra Moisi; Daniela Mitterberger"},
-    {"role": "Acknowledged support", "names": "Kevin Seav — laser cutting and technical assistance; Fabio Scotto — model data and equipment; Nijat Mahamaliyev — equipment and environment model."},
-    {"role": "Frameworks and tools", "names": "COMPAS XR and its prior research at Gramazio Kohler Research, ETH Zürich / TUM; OptiTrack, Motive and NatNet; Rhino, Grasshopper, Python, COMPAS, Kangaroo and Mola; Unity; MQTT / EMQX and Firebase."}
+    {
+      "role": "Research",
+      "names": "Chia-Hsuan Chao and Wataru Nomura"
+    },
+    {
+      "role": "Tutors / advisers",
+      "names": "Alexandra Moisi; Daniela Mitterberger"
+    },
+    {
+      "role": "Acknowledged support",
+      "names": "Kevin Seav — laser cutting and technical assistance; Fabio Scotto — model data and equipment; Nijat Mahamaliyev — equipment and environment model."
+    },
+    {
+      "role": "Frameworks and tools",
+      "names": "COMPAS XR and its prior research at Gramazio Kohler Research, ETH Zürich / TUM; OptiTrack, Motive and NatNet; Rhino, Grasshopper, Python, COMPAS, Kangaroo and Mola; Unity; MQTT / EMQX and Firebase."
+    }
   ],
-  "sourceNote": "Prepared from the co-authored project report, its methods and discussion sections, the 2025 portfolio's project chapter and selected code-history evidence. Images retain project-level attribution; individual image or recording authorship is not separately assigned where the source does not identify it. Only selected derivatives are included; the private report, CV, code and source media are not published.",
+  "sourceNote": "Prepared from the co-authored project report, its methods and discussion sections, the 2025 portfolio's project chapter and selected code-history evidence. Selected images and an owner-selected eight-second presentation excerpt retain project-level attribution; individual image, recording or original presentation-edit authorship is not separately assigned where the source does not identify it. The private report, CV, code and full source media are not published.",
   "metadataTitle": "Motion capture × bending-active — JosHsuan Chao",
   "metadataDescription": "A collaborative 2024 XR research prototype connecting motion capture, adaptive digital geometry and bending-active bamboo assembly, with contributions, process and limits."
 }

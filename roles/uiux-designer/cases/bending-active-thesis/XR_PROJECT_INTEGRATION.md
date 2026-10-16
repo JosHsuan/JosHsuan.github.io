@@ -1,6 +1,6 @@
 # XR project: content, source media and review boundaries
 
-Date: 16 October 2026. Status: local implementation; built-artifact browser verification and publication have not been completed at this checkpoint.
+Date: 16 October 2026. Current status: the owner subsequently requested full-bleed project-card media and explicitly selected the original `Background.mp4` for the XR preview. A bounded video excerpt and matching poster are prepared locally; their new card/player integration and rebuilt-artifact browser acceptance remain pending. The earlier image-only handoff and validation notes below are historical checkpoints. Publication of the `6a926aa` implementation is held while this follow-up is completed; no deployment of the new media is claimed.
 
 The owner's current request authorizes About / Projects / Contact, a nine-cell project-index composition and a substantive page for **An Extended-Reality App Using Motion Capture for Bending-Active Structure**. It authorizes narrowly relevant content preparation and selected image publication for that page. This supersedes the old Markdown-only preparation boundary for this selected work; it does not release every private project, raw CV, report, source-code repository or source-media directory. The existing reusable empty framework remains separate. Commit, push and deployment are handled by the root task under the current owner authorization and same-artifact CI/CD gate; this role performs none of those actions.
 
@@ -16,7 +16,7 @@ The preparation root is `D:/JosHsuan_Website/_private/portfolio-preparation`. Th
 | A loop from physical measurement through adaptive modelling to XR guidance | Actual prepared page images of `D:/JosHsuan_D/ETH_MAS_DFab/T3/Thesis_Writing/FinalThesis_JosHsuan_Wataru.pdf`, physical pp9 and 14; current pack locators for pp9–16 | Team method built on COMPAS XR and other third-party tools, not the invention of an entire tracking or XR framework by one person. |
 | Personal changes to MoCap UI/events, measurement frame/circle display and rod-coordinate/colour output | Actual source excerpts from `C:/Users/JosHsuan/Documents/GitHub/MAS_T3_MoCap/Assets/Scripts/MoCap Scripts/Eventmanager_MoCap.cs`, lines 51–105; `InstantiateObject_MoCap.cs`, lines 226–268; `RH+GH+PY/Main_Files/scripts/Rodmodules.py`, lines 23–111; five existing Git commits listed below | Source and history support bounded code contributions; other authors also changed the shared application. The original application was not executed for this page. |
 | Delays, registration differences and image-target instability remained; no controlled UX evaluation was established | Actual prepared report pages23–25, including discussion and conclusion | No measured productivity gain, current tracking benchmark or validated usability improvement is claimed. |
-| The prototype had module-selection and assembly-related interface states | Individually inspected archived recording frame at 14.8833165 seconds and the prepared UI composite | Only the selected recording frame is published. A still does not establish every interaction, a continuous assembly sequence or reliability. |
+| The prototype had module-selection and assembly-related interface states | Individually inspected archived recording frame at 14.8833165 seconds and the prepared UI composite | The initial allowlist selected one recording frame. The subsequent owner-selected presentation excerpt is recorded below. Neither establishes every interaction, a continuous assembly sequence or reliability. |
 
 The read-only Git check resolved these existing commits to author `JosHsuan`: `cdc43ac14ac1326749b59c7a6b8fb2e950a21a75` (8 August 2024), `fc681eb7e26b9de420b69bfbe6d43093a2c17145` (12 August 2024), `243551d5f7296d19fa912256af5bd62691242a15` (15 July 2024), `4a78b369ce9aeeb0c8fb1ce81cfbd5f13506399f` (10 August 2024), and `621bd8c8f9e875515ace8450407f8663e03ea8a2` (19 August 2024). It does not assign all work in those files to this author.
 
@@ -30,7 +30,7 @@ Public copy is an original English synthesis in [release/xr-study.json](release/
 
 **3D Animation Designer.** Read [the role README](../../../3d-animation-designer/README.md) and [source-element contract](../../../3d-animation-designer/research/ELEMENT_CONTRACT.md). The archived snapshot lacks defensible element groups and a time sequence. Do not manufacture a bending simulation, exploded assembly or construction order. The static research images are truthful evidence; the separate metal-panel animation is not an XR demonstration. New geometry or animation would require a separately verified element/units/ownership handoff.
 
-## Selected image handoff
+## Initial selected image handoff
 
 [release/xr-assets.json](release/xr-assets.json) is the role-owned merge input for the shared release manifest. It contains four relative public paths, sizes, SHA256 values, source-relative locators and processing history; no private absolute path or source configuration enters that JSON. The root build must consume only repository-local allowlisted copies and must not depend on the preparation drive.
 
@@ -43,7 +43,7 @@ Public copy is an original English synthesis in [release/xr-study.json](release/
 
 The four files total 810,856 bytes. Existing prepared derivatives were copied byte-for-byte; no new crop, colour adjustment, generated illustration, temporal compositing or re-encoding was performed. Their original source files were hashed before and after the copy and remained unchanged. All four outputs were decoded/reopened and their dimensions and hashes checked. The three WebP files match the canonical preparation manifest's recorded derivative hashes. The video still's hash is recorded freshly because its canonical record did not pin that field. None of these checks settle individual creator identity or third-party rights beyond the owner's narrowly selected publication instruction. That unresolved attribution is retained in public credits and the source record.
 
-No whole PDF, CV page, original video, raw geometry snapshot, SDK, code, connection string, portrait or contact document is copied into public assets. The UI composite and report-page renders were inspected as evidence but not selected for publication.
+No whole PDF, CV page, complete original video, raw geometry snapshot, SDK, code, connection string, standalone portrait or contact document is copied into public assets. The UI composite and report-page renders were inspected as evidence but not selected for publication. The later bounded video excerpt contains people and interface recordings already present in the owner-selected presentation; it does not expand the scope to unrelated portrait or source-video publication.
 
 ## Project index and contact boundaries
 
@@ -57,10 +57,45 @@ The owner-designated `JosHsuan_CV&Portfolio_2025.VerFacade.pdf` also contains th
 
 The current `cv-draft.md` intentionally omits email, telephone and address, and its older contact gate remains historical for the directly confirmed email and social links. No private CV, telephone, address, birthday or portrait is released by this contact selection. No 2026 current employment, current city, degree-award date, unverified professional level or publication DOI is added.
 
-## Validation checkpoint
+## Initial validation checkpoint
 
 The role completed source/claim review, individual inspection of the selected images and five relevant report pages, the original-file preservation check and derivative decode/dimension/hash checks. The new SSR article has one H1, ordered sections, native image links, descriptive alternatives, a native project-index return link and a related-project link. It has no per-frame or client state.
 
 The two new JSX files pass a TypeScript syntax parse, both new JSON files parse, all four referenced public image files exist, and the shared XR stylesheet parses with all 21 JSX class bindings present. Focused ESLint completes with zero errors and one existing-pattern advisory for a native `<img>`; these allowlisted static images retain explicit dimensions and do not depend on a runtime image service. These checks used Node 24.19.0. A first package-runner attempt found an unpinned pnpm on this shell's PATH and did not execute ESLint; the successful focused check invoked the installed ESLint directly without installing or changing dependencies.
 
 The clean public build, route/asset allowlist checks, responsive readability, accessibility, browser/device behaviour, navigation and visual acceptance remain pending until the root task tests the rebuilt artifact. No commit, push, CI pass or deployment is claimed for this new work at this checkpoint.
+
+## Owner-selected presentation-video follow-up
+
+The owner explicitly selected `D:/ETH_MAS_DFab/T3/Presentation/video/Background.mp4` and authorized a faithful lightweight GIF or edited video derivative. That exact path exists and was used; the alternate preparation-root source path was not substituted. The source is 2,388,703,270 bytes, 1920×1080, H.264 at 30000/1001 fps, approximately 915.014 seconds, with an AAC audio track. Its SHA256 is `2bc911abfd627e61bc0202706a567238eeded0de03f02f9de0306c9162fc9ee3`, unchanged before and after processing. Neither the complete file nor its audio enters the public release.
+
+The source was actually inspected at one-minute intervals from 0 to 900 seconds, then at 0–10 seconds and selected points through 45 seconds. Its opening is an existing four-panel XR-interface montage with measurement, hands-on bamboo assembly and Adapt / Assemble / Join controls. Later material includes physical-model imagery and assembly documentation. The selected **original continuous interval `[0.000, 8.000)` seconds** preserves all four panels, their original order and the original frame proportions. It does not create a new composite, tracking animation, deformation simulation or apparent single continuous construction process. The loop boundary is an ordinary editorial cut between different operation states, not a claimed seamless physical cycle.
+
+| Selected output | Technical record |
+| --- | --- |
+| `assets/xr/background-preview.mp4` | 960×540, 24 fps, 192 frames, 8.000 seconds; H.264 High / Level 3.1, yuv420p, CRF24, silent, faststart; 959,385 bytes; SHA256 `2c9efd96634395452d71cd9f7fd800529dae5dc838f8c4b6c597fb3ee94afa29`. |
+| `assets/xr/background-poster.webp` | 960×540, lossless RGB WebP from the encoded video's first decoded frame; decoded pixels match that frame exactly; 338,694 bytes; SHA256 `96b3d295f576ceb1d66bceb4ec510d3c2521ce6f27465183b68265b067a9607c`. |
+
+The root task provided a portable FFmpeg 7.1 executable extracted from the hash-verified `imageio-ffmpeg 0.6.0` wheel. The wheel SHA256 is `02fa47c83703c37df6bfe4896aab339013f62bf02c5ebf2dce6da56af04ffc0a`; the actual executable SHA256 is `2ce797a0f88d7f067180338fb227f7b1928ea727bd9a4d7a1d022f7c52af71a3`. No application dependency, global installation, browser, GPU renderer or AI frame generation was introduced. Processing output stays in the repository's ignored `animation-review/.local/xr-background/`; only the two selected derivatives are copied to `release/public/assets/xr/`.
+
+The encoding operation is reproducible with the pinned executable:
+
+```text
+ffmpeg -hide_banner -loglevel error -ss 0.000 -i <owner-selected Background.mp4>
+  -t 8.000 -map 0:v:0 -an
+  -vf fps=24,scale=960:540:flags=lanczos,setsar=1
+  -c:v libx264 -preset medium -crf 24 -pix_fmt yuv420p
+  -profile:v high -level:v 3.1 -map_metadata -1 -map_chapters -1
+  -metadata encoder= -movflags +faststart -fflags +bitexact -flags:v +bitexact
+  -y <ignored-output>/background-preview.mp4
+```
+
+This operation performs chronological frame-rate sampling and full-frame Lanczos downscaling, without grading, cropping, fading, reversing, synthesizing or speeding up the action. The poster is prepared by decoding the derivative's first frame to an in-memory PNG and saving that RGB image with Pillow's lossless WebP mode. The initial FFmpeg WebP attempt did not meet a pixel-exact RGB comparison and was replaced before the selected release handoff; the selected poster passes that comparison. Two independent encodes produced identical MP4 bytes. All 192 output frames decode successfully; the MP4's `moov` atom precedes `mdat`, and the output has only the selected video stream. Source-versus-derivative first/middle/end samples at 0, 4 and 7.958333 seconds were actually inspected. These are media-preservation checks, not a re-run of the original app, a tracking benchmark or browser playback acceptance.
+
+The ignored [media receipt](animation-review/.local/xr-background/media-provenance.json) records the exact source path and hash, full argument array, tool identity, processing checks, selected asset hashes and the `motion` API handoff. The ignored [preparation script](animation-review/.local/xr-background/prepare-preview.py) performs the bounded conversion and preservation checks. [release/xr-assets.json](release/xr-assets.json) adds both selected outputs and sanitized source-relative provenance as the root manifest's merge input. The role did not edit the shared `manifest.json` or `xr-study.json`; the root task owns their synchronized hash changes.
+
+**Role acceptance.** Information Designer requires the caption to identify an excerpt from the original presentation montage and recorded interface states, with Chia-Hsuan Chao / Wataru Nomura project attribution and no invented individual recording/edit authorship. Geometry Engineer treats the visible digital overlays as source-recorded representations, not new verified physical measurements. 3D Animation Designer preserves the source's action and timeline rather than manufacturing a loop through reverse motion or generated frames. A square index card may make an explicitly editorial cover crop; the project-detail player must preserve the complete frame with `contain`.
+
+**Interaction boundary.** The root task owns native-video play, pause, leaving the viewport, reduced-motion and static-poster behaviour. The card's title may appear on fine-pointer hover, but must also appear on keyboard focus; its native link retains an accessible name. Touch / no-hover visitors need a visible title or equally direct identification without a guess tap. Browser autoplay policies, lifecycle cancellation, readability, responsive cropping and the new built artifact remain to be verified. No new material/publication pass is inferred from the earlier image-only tests or captures.
+
+**Detail-control visual correction.** Six desktop/mobile method, prototype and credits views from `animation-review/.local/portfolio-card-final/2026-10-15T23-34-28.152Z/` were actually inspected. Their visible source labels, montage explanation and shared credits were correct; however, the prototype's pause overlay covered the original fourth panel's Load data / Sync controls. The detail-only presentation now places the same native Pause / Play button in a responsive label row above the complete video frame. Card overlays, button ARIA names/icons, preference rules and preview lifecycle ownership remain unchanged. The existing native-recording browser case is extended to check the real button/video rectangles do not overlap and that detail Pause / Play does not navigate; no new case is added. Source/CSS/test syntax and focused lint are checked, while the rebuilt-artifact interaction/visual rerun remains pending. This scoped correction does not turn the older capture's unrelated raw network failures into a pass.

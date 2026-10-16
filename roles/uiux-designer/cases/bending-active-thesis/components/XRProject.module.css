@@ -14,6 +14,13 @@
 .figureIndex{margin:0 0 .8rem;color:#d0ddd6;font: .54rem/1.7 var(--mono);letter-spacing:.07em}
 .figure>a{display:block;overflow:hidden;border:1px solid var(--xr-line);border-radius:3px;background:#202a2d}
 .figure img{display:block;width:100%;height:auto;max-height:80svh;object-fit:contain;filter:none;mix-blend-mode:normal;opacity:1}
+.motionPreview{position:relative;min-width:0}
+.motionPreview [data-animation-control-row]{display:flex;align-items:center;justify-content:space-between;gap:.75rem;min-height:44px;margin-bottom:.8rem}
+.motionPreview [data-animation-label]{min-width:0;color:#d0ddd6;font:.54rem/1.7 var(--mono);letter-spacing:.07em}
+.motionPreview [data-animation-toggle]{display:grid;place-items:center;flex-shrink:0;min-width:44px;min-height:44px;padding:.6rem;border:1px solid #c7d5cd80;border-radius:50%;background:#101b22e8;color:#f1f3ec;font-size:1rem;cursor:pointer}
+.motionMedia{position:relative;aspect-ratio:16/9;overflow:hidden;border:1px solid var(--xr-line);border-radius:8px;background:#172125}
+.motionMedia :is(img,video){display:block;width:100%;height:100%;max-height:none;object-fit:contain;filter:none;mix-blend-mode:normal}
+.motionMedia [hidden]{display:none!important}
 .figure figcaption{display:flex;justify-content:space-between;gap:2rem;margin-top:.85rem;color:#c7d4cf;font-size:.78rem;line-height:1.7}
 .figure figcaption p{max-width:45rem;margin:0}
 .figure figcaption>span{max-width:20rem;font-size:.7rem}
@@ -61,6 +68,7 @@
   .metadata dt{margin-bottom:.4rem}
   .heroMedia{margin-bottom:3rem}
   .figureIndex{font-size:.48rem}
+  .motionPreview [data-animation-label]{font-size:.48rem}
   .figure figcaption{display:block;font-size:.75rem}
   .figure figcaption>span{display:block;max-width:none;margin-top:.6rem;font-size:.67rem}
   .figure img{max-height:none}
@@ -81,5 +89,5 @@
   .nextProject strong{font-size:1.5rem}
 }
 @media(prefers-contrast:more){.page{--xr-line:#a2b5ab;background:#14232b}.metadata dd,.sectionBody p,.workflowStep p,.contributionList p,.credits dd,.sourceNote,.figure figcaption{color:#e6ede8}}
-@media(forced-colors:active){.page{--xr-line:CanvasText;background:Canvas;color:CanvasText}.figure>a{background:Canvas}.eyebrow,.intro,.metadata dd,.metadata dt,.credits dt,.sectionBody p,.sectionBody ul,.workflowStep>span,.workflowStep p,.contributionList h3,.contributionList p,.credits dd,.sourceNote,.figure figcaption,.nextProject strong,.nextProject>span,.backLink{color:CanvasText}}
-@media print{.page{--xr-line:#8b9991;background:#fff;color:#151b17;padding:1rem}.title{font-size:3rem}.section{padding:2rem 0}.eyebrow,.intro,.metadata dd,.metadata dt,.credits dt,.sectionBody p,.sectionBody ul,.workflowStep>span,.workflowStep p,.contributionList p,.credits dd,.sourceNote,.figure figcaption,.nextProject>span{color:#333b35}.contributionList h3{color:#151b17}.nextProject strong{color:#813e26}.figure img{max-height:none}.figure,.workflowStep{break-inside:avoid}}
+@media(forced-colors:active){.page{--xr-line:CanvasText;background:Canvas;color:CanvasText}.figure>a{background:Canvas}.eyebrow,.intro,.metadata dd,.metadata dt,.credits dt,.sectionBody p,.sectionBody ul,.workflowStep>span,.workflowStep p,.contributionList h3,.contributionList p,.credits dd,.sourceNote,.figure figcaption,.nextProject strong,.nextProject>span,.backLink,.motionPreview [data-animation-label]{color:CanvasText}.motionPreview [data-animation-toggle]{background:ButtonFace;color:ButtonText;border-color:ButtonText}}
+@media print{.page{--xr-line:#8b9991;background:#fff;color:#151b17;padding:1rem}.title{font-size:3rem}.section{padding:2rem 0}.eyebrow,.intro,.metadata dd,.metadata dt,.credits dt,.sectionBody p,.sectionBody ul,.workflowStep>span,.workflowStep p,.contributionList p,.credits dd,.sourceNote,.figure figcaption,.nextProject>span,.motionPreview [data-animation-label]{color:#333b35}.contributionList h3{color:#151b17}.nextProject strong{color:#813e26}.figure img{max-height:none}.figure,.workflowStep{break-inside:avoid}}

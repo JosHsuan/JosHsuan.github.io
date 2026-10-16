@@ -1,0 +1,101 @@
+import * as T from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {HDRLoader} from 'three/addons/loaders/HDRLoader.js';
+import {createCinematicMaterial} from './materials/cinematic-material.js';
+import {createExhibitionStage} from './exhibition-stage.mjs';
+import {createRendererBudget} from './renderer-budget.mjs';
+import {PROJECT_MODEL_REVISION,PROJECT_MODEL_PIXEL_BUDGET,collectProjectModelSupport,sampleProjectModelRecipe,validateProjectModelMetadata} from './project-model-recipe.mjs';
+
+function disposeObject(object,excludedMaterials=new Set()){
+ const geometries=new Set(),materials=new Set(),textures=new Set();
+ object?.traverse(node=>{if(node.geometry)geometries.add(node.geometry);for(const material of (Array.isArray(node.material)?node.material:node.material?[node.material]:[])){materials.add(material);for(const value of Object.values(material))if(value?.isTexture)textures.add(value);}});
+ geometries.forEach(value=>value.dispose());materials.forEach(value=>{if(!excludedMaterials.has(value))value.dispose();});textures.forEach(value=>value.dispose());
+}
+
+/** Only imported after actual card visibility. No Fiber, scene runtime, DOM
+ * annotations, source diagrams, compositor, RAF or autonomous animation. */
+export function acquireProjectModelScene({host,signal,onFailure=()=>{}}){
+ if(signal.aborted)return Promise.reject(new DOMException('Preview aborted','AbortError'));
+ const manager=new T.LoadingManager();let renderer=null,budget=null,scene=null,camera=null,gltf=null,hdr=null,environment=null,exhibition=null;
+ let disposed=false,frames=0,meta=null,supportPoints=null,lastSize=null,shaderFailure=null;const adapters=[],bases=[];
+ const dispose=()=>{
+  if(disposed)return;disposed=true;supportPoints=null;signal.removeEventListener('abort',abort);
+  manager.abort();
+  renderer?.domElement.removeEventListener('webglcontextlost',lost);
+  exhibition?.dispose();gltf?.scene.removeFromParent();disposeObject(gltf?.scene,new Set(adapters.map(adapter=>adapter.material)));adapters.forEach(adapter=>adapter.dispose());hdr?.dispose();environment?.dispose();
+  if(scene){scene.traverse(node=>{if(node.isLight)node.dispose?.();});disposeObject(scene);scene.clear();scene.environment=null;}
+  budget?.dispose();if(renderer){renderer.domElement.remove();renderer.dispose();renderer.forceContextLoss();}
+ };
+ let rejectAbort;
+ const aborted=new Promise((_,reject)=>{rejectAbort=reject;});
+ const abort=()=>{dispose();rejectAbort(new DOMException('Preview aborted','AbortError'));};
+ const lost=event=>{event.preventDefault();if(!disposed)onFailure('context-lost');};
+ signal.addEventListener('abort',abort,{once:true});if(signal.aborted)abort();
+ const read=async url=>{const response=await fetch(url,{signal});if(!response.ok)throw Error('Project model asset unavailable');return response;};
+ const initialize=async()=>{
+  const results=await Promise.allSettled([
+   read('/assets/source-layers.glb').then(response=>response.arrayBuffer()).then(async bytes=>{
+    const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),value=>value.toString(16).padStart(2,'0')).join('');
+    if(digest!==PROJECT_MODEL_REVISION)throw Error('Project model revision differs');
+    if(signal.aborted)throw new DOMException('Preview aborted','AbortError');
+    const result=await new GLTFLoader(manager).parseAsync(bytes,'');if(disposed)disposeObject(result.scene);else gltf=result;return result;
+   }),
+   // Own all preview network requests through the same native AbortSignal.
+   // This public Three path applies the same parse/defaults as HDRLoader.load.
+   read('/assets/studio-small.hdr').then(response=>response.arrayBuffer()).then(bytes=>{
+    if(disposed||signal.aborted)throw new DOMException('Preview aborted','AbortError');
+    const value=new HDRLoader().createDataTexture(bytes);
+    if(disposed||signal.aborted){value.dispose();throw new DOMException('Preview aborted','AbortError');}
+    hdr=value;return value;
+   }),
+   read('/assets/source-layers.json').then(response=>response.json()),
+  ]);
+  if(disposed)return null;
+  if(results.some(value=>value.status==='rejected'))throw Error('Project model assets unavailable');
+  meta=validateProjectModelMetadata(results[2].value);
+  const roles=new Set();
+  gltf.scene.traverse(node=>{
+   if(!node.isMesh)return;
+   const role=node.userData.role,record=meta.layers.find(layer=>layer.id===role);
+   if(!record||roles.has(role)||node.geometry.attributes.position.count!==record.vertices||(node.geometry.index?.count??node.geometry.attributes.position.count)/3!==record.triangles)throw Error('Project source geometry differs');
+   roles.add(role);(Array.isArray(node.material)?node.material:[node.material]).forEach(value=>value.dispose());
+   if(role==='shell'){const adapter=createCinematicMaterial({bounds:meta.bounds});adapters.push(adapter);node.material=adapter.material;}
+   else{node.material=new T.MeshStandardMaterial({color:'#535b5b',roughness:.7,metalness:.12,side:T.DoubleSide});bases.push({node,color:node.material.color.clone()});}
+   node.castShadow=true;node.receiveShadow=true;
+  });
+  if(roles.size!==3)throw Error('Missing project source geometry');
+  supportPoints=collectProjectModelSupport(gltf.scene);if(supportPoints.length!==meta.vertices*3)throw Error('Project source support differs');
+  renderer=new T.WebGLRenderer({antialias:false,alpha:false,powerPreference:'default'});
+  renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1;renderer.outputColorSpace=T.SRGBColorSpace;renderer.setClearColor('#090d0d',1);
+  renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFShadowMap;renderer.shadowMap.autoUpdate=false;
+  renderer.debug.onShaderError=()=>{shaderFailure=Error('Project shader unavailable');};
+  renderer.domElement.setAttribute('aria-hidden','true');renderer.domElement.setAttribute('data-project-model-canvas','');
+  Object.assign(renderer.domElement.style,{position:'absolute',inset:'0',width:'100%',height:'100%',display:'block',pointerEvents:'none'});
+  renderer.domElement.addEventListener('webglcontextlost',lost);
+  budget=createRendererBudget(renderer,()=>({deviceDpr:host.ownerDocument.defaultView.devicePixelRatio||1,pixelBudget:PROJECT_MODEL_PIXEL_BUDGET}));
+  scene=new T.Scene();camera=new T.PerspectiveCamera();scene.background=new T.Color('#090d0d');scene.fog=new T.FogExp2('#091217',.03);
+  const generator=new T.PMREMGenerator(renderer);try{environment=generator.fromEquirectangular(hdr);}finally{generator.dispose();hdr.dispose();hdr=null;}
+  scene.environment=environment.texture;scene.add(gltf.scene);exhibition=createExhibitionStage({bounds:meta.bounds});scene.add(exhibition.group);
+  const lights={};for(const id of ['key','fill','rim']){lights[id]=new T.DirectionalLight();scene.add(lights[id],lights[id].target);}
+  lights.hemisphere=new T.HemisphereLight();scene.add(lights.hemisphere);lights.key.castShadow=true;lights.key.shadow.mapSize.set(512,512);
+  return{
+   resize(width,height){
+    if(disposed||signal.aborted)throw Error('Project preview disposed');
+    if(lastSize?.width===width&&lastSize?.height===height)return;
+    const recipe=sampleProjectModelRecipe(meta,width,height,supportPoints),{pose,direction,stage,chapterScene}=recipe;
+    adapters.forEach(adapter=>adapter.update(recipe.material));bases.forEach(({node,color})=>node.material.color.copy(color).multiplyScalar(recipe.baseMultiplier));
+    budget.sync(width,height);camera.position.fromArray(pose.position);camera.up.fromArray(pose.up);camera.aspect=width/height;camera.fov=pose.fov;camera.near=pose.near;camera.far=pose.far;camera.lookAt(...pose.target);camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
+    for(const id of ['key','fill','rim']){const light=lights[id],spec=direction[id];light.position.fromArray(spec.position.map((value,i)=>value+stage.center[i]));light.target.position.fromArray(stage.lightTarget);light.color.fromArray(spec.color);light.intensity=spec.intensity;}
+    lights.hemisphere.color.fromArray(direction.hemisphere.sky);lights.hemisphere.groundColor.fromArray(direction.hemisphere.ground);lights.hemisphere.intensity=direction.hemisphere.intensity;
+    const shadow=lights.key.shadow;shadow.camera.left=shadow.camera.bottom=-stage.shadowHalfExtent;shadow.camera.right=shadow.camera.top=stage.shadowHalfExtent;shadow.camera.near=.05;shadow.camera.far=Math.max(20,stage.radius*10);shadow.camera.updateProjectionMatrix();shadow.bias=direction.stage.shadow.bias;shadow.normalBias=direction.stage.shadow.normalBias;
+    exhibition.update({direction,camera,reducedMotion:false,lightSweep:0,backdrop:chapterScene.backdrop});scene.environmentIntensity=direction.environmentIntensity;scene.fog.color.fromArray(direction.haze.color);scene.fog.density=direction.haze.density;
+    renderer.shadowMap.needsUpdate=true;renderer.render(scene,camera);
+    if(shaderFailure)throw shaderFailure;if(renderer.getContext().isContextLost()||renderer.info.render.calls<1)throw Error('Project preview did not draw');
+    lastSize={width,height};frames++;if(!renderer.domElement.parentNode)host.appendChild(renderer.domElement);
+   },
+   inspect:()=>({frames,sourceRevision:meta.revision,vertices:meta.vertices,triangles:meta.triangles,canvasCount:disposed?0:1,pixelBudget:PROJECT_MODEL_PIXEL_BUDGET,budget:budget.inspect(),calls:renderer.info.render.calls,materials:adapters.map(value=>value.inspect()),toneMapping:'ACESFilmic',exposure:1,output:'srgb',compositor:false,disposed}),
+   dispose,
+  };
+ };
+ return Promise.race([initialize(),aborted]).catch(error=>{dispose();throw error;});
+}
