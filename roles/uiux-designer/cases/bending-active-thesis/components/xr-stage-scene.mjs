@@ -3,10 +3,20 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {createRendererBudget} from './renderer-budget.mjs';
 import {collectResearchSupport,createResearchPhoneGeometry,fitResearchCamera,RESEARCH_MODEL_PIXELS,RESEARCH_PHONE_PIXELS} from './research-scene-geometry.mjs';
 import {acquireVideo} from '../runtime/site/video-resource.mjs';
+import {createXRStageEnvironment} from './xr-stage-environment.mjs';
 
 const abortError=()=>new DOMException('XR stage released','AbortError');
 const phoneChapter=chapter=>['adapt','assemble','join'].includes(chapter);
-const sourcePoses={overview:[.72,.36,1],context:[.52,.29,1],method:[.92,.28,1],model:[.72,.36,1],making:[.55,.3,1],contribution:[.72,.36,1.1],limits:[.72,.36,1.1],credits:[.72,.36,1.1]};
+const sourcePoses={overview:[.72,.36,1],context:[.52,.29,1],method:[.92,.28,1],model:[.72,.36,1],making:[.55,.3,1],credits:[.72,.36,1.1]};
+
+/** Editorial set draws cannot acknowledge the source or recorded screen. The
+ * pinned assembly has one primitive; the original device has one casing and
+ * one screen. Counters come from each real mesh's onBeforeRender callback.
+ */
+export function xrStagePaintReady({phone=false,shaderError=false,calls,source,phoneBody,phoneScreen,stage}){
+ return !shaderError&&source===(phone?0:1)&&phoneBody===(phone?1:0)&&phoneScreen===(phone?1:0)
+  &&stage>=1&&stage<=3&&calls===source+phoneBody+phoneScreen+stage;
+}
 
 /** Camera presentation only: source positions, normals, units and materials are
  * untouched. Fit source support into the reading layout's clear viewport slot. */
@@ -37,19 +47,26 @@ function releaseObject(root){
  root?.traverse(node=>{if(node.geometry)geometries.add(node.geometry);for(const material of(Array.isArray(node.material)?node.material:node.material?[node.material]:[])){materials.add(material);for(const value of Object.values(material))if(value?.isTexture)textures.add(value);}});
  geometries.forEach(v=>v.dispose());materials.forEach(v=>v.dispose());textures.forEach(v=>v.dispose());
 }
+function supportBounds(points){
+ const min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];
+ for(let i=0;i<points.length;i++){const axis=i%3;min[axis]=Math.min(min[axis],points[i]);max[axis]=Math.max(max[axis],points[i]);}
+ return{min,max};
+}
 
 /** One project renderer/camera. Director supplies chapter and interaction facts;
  * native video supplies decoded frames. Neither owns another animation clock. */
 export async function acquireXRStage({host,signal,model,stages,videos,positions=new Map(),onMode=()=>{},createRenderer=options=>new T.WebGLRenderer(options)}){
  if(signal.aborted)throw abortError();
  const win=host.ownerDocument.defaultView;
- let disposed=false,renderer=null,budget=null,scene=null,camera=null,gltf=null,support=null,phone=null,texture=null;
+ let disposed=false,renderer=null,budget=null,scene=null,camera=null,gltf=null,support=null,phone=null,texture=null,environment=null;
  let mediaController=null,mediaHandle=null,frameCallback=null,mediaGeneration=0,mediaDeadline=null,activeStage=null;
  let state={chapter:'overview',azimuth:0,elevation:0,paused:false},size={width:0,height:0},pose=null;
  let gpuReason=null,mediaReason=null,draws=0,mediaFrames=0,lastPaintKey='',revision=null,vertices=0,triangles=0,shaderError=false,mode='poster';
  let contextListener=null,mediaTime=null,mediaPending=false,successfulPaint=false,selection=null,renderView=null;
+ let drawCounts={source:0,phoneBody:0,phoneScreen:0,stage:0};
  const raycaster=new T.Raycaster(),ndc=new T.Vector2(),manager=new T.LoadingManager();
  const nativeNodes=new Map(stages.map(stage=>[stage.id,host.querySelector(`[data-xr-native-phone="${stage.id}"]`)]));
+ const countDraws=(root,kind)=>root.traverse(node=>{if(!node.isMesh)return;const original=node.onBeforeRender;node.onBeforeRender=function(...args){drawCounts[kind]++;original.apply(this,args);};});
  const announce=(next,reason='')=>{const changed=mode!==next||host.dataset.xrFallback!==reason;mode=next;host.dataset.xrRendering=next;host.dataset.xrFallback=reason;if(changed)onMode(next,reason);};
  const stopFrames=()=>{if(frameCallback!==null&&activeStage){videos[activeStage.id]?.cancelVideoFrameCallback?.(frameCallback);frameCallback=null;}};
  function disposePhone(){
@@ -71,7 +88,7 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
  }
  function disposeGPU(){
   stopFrames();if(renderer){renderer.domElement.removeEventListener('webglcontextlost',contextListener);renderer.domElement.remove();budget?.dispose();renderer.dispose();renderer.forceContextLoss();}renderer=null;budget=null;
-  disposePhone();releaseObject(gltf?.scene);gltf=null;support=null;scene?.clear();scene=null;camera=null;successfulPaint=false;delete host.dataset.xrScenePainted;
+  disposePhone();environment?.dispose();environment=null;releaseObject(gltf?.scene);gltf=null;support=null;scene?.clear();scene=null;camera=null;successfulPaint=false;delete host.dataset.xrScenePainted;
  }
  function fallbackGPU(reason){
   if(disposed)return;gpuReason=reason;disposeGPU();announce(activeStage&&mediaHandle?'native-video':'poster',reason);
@@ -93,9 +110,12 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
   try{
    if(renderer.getContext().isContextLost())return fallbackGPU('context-lost');
    gltf.scene.visible=!isPhone;if(phone)phone.group.visible=isPhone;
-   applyPose(isPhone?phone.support:support);budget.sync(renderView.width,renderView.height);renderer.render(scene,camera);
+   applyPose(isPhone?phone.support:support);
+   budget.sync(renderView.width,renderView.height);
+   environment?.update({camera,chapter:state.chapter,bounds:isPhone?phone.bounds:model.bounds,viewportWidth:size.width,renderView,drawingBuffer:{width:renderer.domElement.width,height:renderer.domElement.height}});
+   drawCounts={source:0,phoneBody:0,phoneScreen:0,stage:0};renderer.render(scene,camera);
    if(renderer.getContext().isContextLost())return fallbackGPU('context-lost');
-   if(shaderError||renderer.info.render.calls<1)throw Error('XR stage did not paint');
+   if(!xrStagePaintReady({phone:isPhone,shaderError,calls:renderer.info.render.calls,...drawCounts}))throw Error('XR source or recorded screen did not paint');
    lastPaintKey=key;draws++;successfulPaint=true;host.dataset.xrScenePainted=isPhone?'phone':'model';announce(isPhone?'webgl-phone':'webgl-model');
   }catch{fallbackGPU(renderer?.getContext().isContextLost()?'context-lost':'render-unavailable');}
  }
@@ -119,8 +139,9 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
    if(state.paused)video.pause();
    if(renderer){
     const geometry=createResearchPhoneGeometry(stage.width/stage.height);texture=new T.VideoTexture(video);texture.colorSpace=T.SRGBColorSpace;texture.generateMipmaps=false;
-    const group=new T.Group();group.add(new T.Mesh(geometry.body,new T.MeshStandardMaterial({color:'#292e30',metalness:.65,roughness:.33})),new T.Mesh(geometry.screen,new T.MeshBasicMaterial({map:texture,toneMapped:false})));
-    phone={group,support:geometry.support,dimensions:geometry.dimensions};scene.add(group);draw(true);nextFrame();
+    const group=new T.Group(),body=new T.Mesh(geometry.body,new T.MeshStandardMaterial({color:'#292e30',metalness:.65,roughness:.33})),screen=new T.Mesh(geometry.screen,new T.MeshBasicMaterial({map:texture,toneMapped:false}));
+    group.add(body,screen);countDraws(body,'phoneBody');countDraws(screen,'phoneScreen');
+    phone={group,support:geometry.support,dimensions:geometry.dimensions,bounds:supportBounds(geometry.support)};scene.add(group);draw(true);nextFrame();
    }else announce('native-video',gpuReason??'webgl-unavailable');
   }catch(error){
    if(disposed||generation!==mediaGeneration)return;mediaPending=false;if(mediaDeadline!==null)win.clearTimeout(mediaDeadline);mediaDeadline=null;
@@ -143,7 +164,9 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
    if(disposed||signal.aborted)throw abortError();
    const parsed=await new GLTFLoader(manager).parseAsync(bytes,'');if(disposed||signal.aborted){releaseObject(parsed.scene);throw abortError();}gltf=parsed;
    gltf.scene.traverse(node=>{if(node.isMesh){vertices+=node.geometry.getAttribute('position').count;triangles+=(node.geometry.index?.count??node.geometry.getAttribute('position').count)/3;}});
-   if(vertices!==model.vertices||triangles!==model.triangles)throw Error('XR source geometry differs');support=collectResearchSupport(gltf.scene);scene.add(gltf.scene);host.appendChild(renderer.domElement);
+   if(vertices!==model.vertices||triangles!==model.triangles)throw Error('XR source geometry differs');support=collectResearchSupport(gltf.scene);countDraws(gltf.scene,'source');scene.add(gltf.scene);
+   environment=createXRStageEnvironment({bounds:model.bounds});countDraws(environment.group,'stage');scene.add(environment.group);
+   (host.querySelector('[data-xr-scene-surface]')??host).appendChild(renderer.domElement);
   }
   if(disposed||signal.aborted)throw abortError();
   return {
@@ -164,7 +187,7 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
     const rect=renderer.domElement.getBoundingClientRect();if(clientX<rect.left||clientX>rect.right||clientY<rect.top||clientY>rect.bottom)return false;ndc.set((clientX-rect.left)/rect.width*2-1,-(clientY-rect.top)/rect.height*2+1);raycaster.setFromCamera(ndc,camera);
     return raycaster.intersectObject(gltf.scene,true).length?{source:true,kind:'model'}:false;
    },
-   inspect:()=>({mode,chapter:state.chapter,successfulPaint,sourceRevision:revision,sourceUnits:model.sourceUnits,webUnits:model.webUnits,vertices,triangles,pose,view:{azimuth:state.azimuth,elevation:state.elevation},sourceTransforms:gltf?.scene.children.map(node=>({position:node.position.toArray(),scale:node.scale.toArray(),quaternion:node.quaternion.toArray()})),surface:renderer?{draws,calls:renderer.info.render.calls,clearAlpha:renderer.getClearAlpha(),budget:budget.inspect(),pixelBudget:phoneChapter(state.chapter)?RESEARCH_PHONE_PIXELS:RESEARCH_MODEL_PIXELS}:null,media:{stage:activeStage?.id??null,pending:mediaPending,frames:mediaFrames,time:mediaTime,native:mediaHandle?.inspect()??null,reason:mediaReason,position:activeStage?videos[activeStage.id].currentTime:null},fallbackReason:gpuReason,paused:state.paused,disposed}),
+   inspect:()=>({mode,chapter:state.chapter,successfulPaint,sourceRevision:revision,sourceUnits:model.sourceUnits,webUnits:model.webUnits,vertices,triangles,pose,view:{azimuth:state.azimuth,elevation:state.elevation},sourceTransforms:gltf?.scene.children.map(node=>({position:node.position.toArray(),scale:node.scale.toArray(),quaternion:node.quaternion.toArray()})),surface:renderer?{draws,calls:renderer.info.render.calls,sourceCalls:drawCounts.source,phoneCalls:drawCounts.phoneBody+drawCounts.phoneScreen,phoneBodyCalls:drawCounts.phoneBody,phoneScreenCalls:drawCounts.phoneScreen,stageCalls:drawCounts.stage,environment:environment?.inspect()??null,clearAlpha:renderer.getClearAlpha(),budget:budget.inspect(),pixelBudget:phoneChapter(state.chapter)?RESEARCH_PHONE_PIXELS:RESEARCH_MODEL_PIXELS}:null,media:{stage:activeStage?.id??null,pending:mediaPending,frames:mediaFrames,time:mediaTime,native:mediaHandle?.inspect()??null,reason:mediaReason,position:activeStage?videos[activeStage.id].currentTime:null},fallbackReason:gpuReason,paused:state.paused,disposed}),
    dispose,
   };
  }catch(error){dispose();throw error;}

@@ -49,6 +49,9 @@ export async function auditPages() {
   const introduction=html.match(/<section id="about"[\s\S]*?<\/section>/)?.[0];
   assert(introduction&&!/model-poster|<canvas|data-project-model-preview/.test(introduction), 'Home introduction stays model-free');
   assert.equal((html.match(/data-project-card=/g)||[]).length,2,'Only selected evidence-backed projects');
+  assert.equal((html.match(/data-site-preview-required(?:=|[ >])/g)||[]).length,1,'Home declares its live card before component effects');
+  assert(html.includes('data-project-grid-cells="9"'),'Current two projects occupy a minimum nine-cell index');
+  assert(html.includes('data-home-scroll-window="introduction"'),'Home declares its material scrolling owner');
   for(const route of ['about','projects','contact','projects/bending-active','projects/xr-bending-active']){
     const page=await readFile(path.join(out,route,'index.html'),'utf8');
     auditBackground(page,route);
@@ -62,7 +65,9 @@ export async function auditPages() {
     }
   }
   const xr=await readFile(path.join(out,'projects/xr-bending-active/index.html'),'utf8');
-  for(const marker of ['data-xr-study','xr-context','xr-method','xr-prototype','xr-contribution','xr-limits','xr-credits','Wataru Nomura'])assert(xr.includes(marker),`XR: ${marker}`);
+  for(const marker of ['data-xr-study','xr-context','xr-method','xr-prototype','xr-making','xr-credits','Wataru Nomura'])assert(xr.includes(marker),`XR: ${marker}`);
+  for(const removed of ['xr-contribution','xr-limits'])assert(!xr.includes(`id="${removed}"`)&&!xr.includes(`href="#${removed}"`),`XR removed section: ${removed}`);
+  assert(xr.includes('data-xr-opening="true"')&&xr.includes('data-xr-opening-visual'),'XR SSR opens with the project visual');
   const study=JSON.parse(await readFile(path.join(root,'roles/uiux-designer/cases/bending-active-thesis/release/xr-study.json'),'utf8'));
   for(const marker of ['data-xr-stage','data-xr-chapter','data-xr-model-control','data-information-window','data-xr-native-phone',study.model.poster.src,'adapt-interface.mp4','assemble-interface.mp4','join-interface.mp4'])assert(xr.includes(marker),`XR immersive integration: ${marker}`);
   assert(!xr.includes('data-phone-front-toggle')&&!xr.includes('data-phone-stage='),'XR recording chapters must not depend on view/stage buttons');

@@ -12,12 +12,23 @@ function disposeObject(object,excludedMaterials=new Set()){
  geometries.forEach(value=>value.dispose());materials.forEach(value=>{if(!excludedMaterials.has(value))value.dispose();});textures.forEach(value=>value.dispose());
 }
 
-/** Only imported after actual card visibility. No Fiber, scene runtime, DOM
+/** Submit and validate a real draw before exposing the model canvas. This is
+ * renderer completion evidence, not a browser-compositor paint acknowledgment. */
+export function commitProjectModelDraw({renderer,scene,camera,host,shaderFailure=()=>null}){
+ renderer.render(scene,camera);
+ const failure=shaderFailure();if(failure)throw failure;
+ if(renderer.getContext().isContextLost()||renderer.info.render.calls<1)throw Error('Project preview did not draw');
+ if(!renderer.domElement.parentNode)host.appendChild(renderer.domElement);
+ return{calls:renderer.info.render.calls};
+}
+
+/** Prepared on page opening while the site loader still covers the document.
+ * No Fiber, scene runtime, DOM
  * annotations, source diagrams, compositor, RAF or autonomous animation. */
 export function acquireProjectModelScene({host,signal,onFailure=()=>{}}){
  if(signal.aborted)return Promise.reject(new DOMException('Preview aborted','AbortError'));
  const manager=new T.LoadingManager();let renderer=null,budget=null,scene=null,camera=null,gltf=null,hdr=null,environment=null,exhibition=null;
- let disposed=false,frames=0,meta=null,supportPoints=null,lastSize=null,shaderFailure=null;const adapters=[],bases=[];
+ let disposed=false,frames=0,meta=null,supportPoints=null,lastSize=null,firstDraw=null,shaderFailure=null;const adapters=[],bases=[];
  const dispose=()=>{
   if(disposed)return;disposed=true;supportPoints=null;signal.removeEventListener('abort',abort);
   manager.abort();
@@ -89,11 +100,12 @@ export function acquireProjectModelScene({host,signal,onFailure=()=>{}}){
     lights.hemisphere.color.fromArray(direction.hemisphere.sky);lights.hemisphere.groundColor.fromArray(direction.hemisphere.ground);lights.hemisphere.intensity=direction.hemisphere.intensity;
     const shadow=lights.key.shadow;shadow.camera.left=shadow.camera.bottom=-stage.shadowHalfExtent;shadow.camera.right=shadow.camera.top=stage.shadowHalfExtent;shadow.camera.near=.05;shadow.camera.far=Math.max(20,stage.radius*10);shadow.camera.updateProjectionMatrix();shadow.bias=direction.stage.shadow.bias;shadow.normalBias=direction.stage.shadow.normalBias;
     exhibition.update({direction,camera,reducedMotion:false,lightSweep:0,backdrop:chapterScene.backdrop});scene.environmentIntensity=direction.environmentIntensity;scene.fog.color.fromArray(direction.haze.color);scene.fog.density=direction.haze.density;
-    renderer.shadowMap.needsUpdate=true;renderer.render(scene,camera);
-    if(shaderFailure)throw shaderFailure;if(renderer.getContext().isContextLost()||renderer.info.render.calls<1)throw Error('Project preview did not draw');
-    lastSize={width,height};frames++;if(!renderer.domElement.parentNode)host.appendChild(renderer.domElement);
+    renderer.shadowMap.needsUpdate=true;
+    const draw=commitProjectModelDraw({renderer,scene,camera,host,shaderFailure:()=>shaderFailure});
+    lastSize={width,height};frames++;
+    firstDraw??=Object.freeze({completed:true,width,height,calls:draw.calls,sourceRevision:meta.revision,environmentReady:!!scene.environment});
    },
-   inspect:()=>({frames,sourceRevision:meta.revision,vertices:meta.vertices,triangles:meta.triangles,canvasCount:disposed?0:1,pixelBudget:PROJECT_MODEL_PIXEL_BUDGET,budget:budget.inspect(),calls:renderer.info.render.calls,materials:adapters.map(value=>value.inspect()),toneMapping:'ACESFilmic',exposure:1,output:'srgb',compositor:false,disposed}),
+   inspect:()=>({frames,firstDraw:firstDraw?{...firstDraw}:null,sourceRevision:meta.revision,vertices:meta.vertices,triangles:meta.triangles,canvasCount:disposed?0:1,pixelBudget:PROJECT_MODEL_PIXEL_BUDGET,budget:budget.inspect(),calls:renderer.info.render.calls,materials:adapters.map(value=>value.inspect()),toneMapping:'ACESFilmic',exposure:1,output:'srgb',compositor:false,disposed}),
    dispose,
   };
  };

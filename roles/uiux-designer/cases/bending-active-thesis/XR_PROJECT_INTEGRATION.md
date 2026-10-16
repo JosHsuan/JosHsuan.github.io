@@ -1,12 +1,46 @@
 # XR project: content, source media and review boundaries
 
-## Current immersive presentation — 16 October 2026
+## Current opening, stage and article revision — 16 October 2026
+
+[Decision 0014](../../../../docs/decisions/0014-prepared-page-home.md) and the
+[prepared-page/Home contract](PREPARED_PAGE_HOME_INTEGRATION.md) supersede only
+the presentation details identified here. XR's opening displays the approved
+`portfolio-main-visual.webp`; an existing model renderer may prepare behind it,
+with canvas and scene controls hidden. This does not require zero downloads or
+zero GPU acquisition. Context, method, Adapt, Assemble, Join and physical study
+retain their real 3D. The XR-owned exhibition surround and finite entry/exit
+reuse existing pure stage/motion references under the single `XRStageDirector`
+scheduler. The shared Layer 1 lease and Bending's protected presentation are not
+changed to achieve this effect. Actual paint is required before a new model/phone
+entry, while native video retains the three original recordings' time.
+
+The current rendered chapter order is **overview → context → method → Adapt →
+Assemble → Join → physical making → credits**. The owner removes the separate
+`xr-contribution` and `xr-limits` sections and their navigation targets. Credits
+& Sources is section **05**, directly linked by `#xr-credits`; it retains the
+existing attribution/source note and source statements that no controlled metrics
+were established and the original hardware was not reexecuted for this website.
+The complete approved `release/xr-study.json`, including its source contribution
+and limitation records, remains unchanged. No sole-authorship, evaluated
+usability gain, live tracking or new hardware-performance claim is introduced.
+
+The nine principal source figures, complete recording files/direct links,
+verified assembly/model transform and all approved source bytes remain. The
+preceding 74-string/ten-chapter SSR audit below is a historical checkpoint; it
+cannot be reused as acceptance for the explicitly shorter current article.
+Current source/build/browser/CI/live evidence belongs to
+[the new verification record](PREPARED_PAGE_HOME_VERIFICATION.md), which does not
+claim completed publication at its implementation checkpoint. The XR-only
+centered/inset card image remains the current card treatment; the owner's new
+page-open model preparation concerns the Bending card on Home/Projects.
+
+## Preceding immersive presentation checkpoint — 16 October 2026
 
 The owner's subsequent request accepts the existing XR research narrative and source selection while replacing its boxed model/phone presentation with Bending-inspired background 3D and directly readable 2D information windows. [Decision 0013](../../../../docs/decisions/0013-xr-immersive-stage.md) and the [actual team review](XR_IMMERSIVE_TEAM_REVIEW.md) supersede the earlier standalone-viewer, stage-tab and disclosure-first presentation below. They do not change Bending's content, case runtime, camera, material, card or interaction; the shared Layer 1 background and reusable empty framework also retain their separate ownership. The published `0012b05720c3feb7969c78513831f54009a701f3` remains the preceding reference, not a claim that this new presentation has been deployed.
 
 `XRProject` now mounts one project-local `XRSceneStage` before its native article. Its transparent fixed stage shares one renderer/camera between the verified bamboo assembly and recorded phone screen. `XRStageDirector` reads native chapter geometry and coordinates finite camera/inspection response, information skins and resource lifecycle; it does not replace the common background driver or use Bending's scene. Native video remains the playback clock and decoded frames request drawing on that same stage. Source vertices, normals, material, units and model transform do not change; no bending simulation, exploded module sequence, tracking connection or new measured result is introduced.
 
-The native chapter order is **overview → context → method → Adapt → Assemble → Join → physical making → contribution → limits → credits**. All existing `xr-context`, `xr-method`, `xr-prototype`, `xr-making`, `xr-contribution`, `xr-limits` and `xr-credits` anchors remain. The prototype parent contains three real recording sections, rather than a required tab selection. The model aperture provides scoped direct inspection and keyboard input; ordinary reading keeps its native keys and vertical touch scrolling. The old Face screen / Perspective / zoom / reset button clusters and separate foreground viewers are absent. One meaningful recording pause/play control belongs to the stage; it does not advance or scrub source time from scroll position.
+At that preceding checkpoint, the native chapter order was **overview → context → method → Adapt → Assemble → Join → physical making → contribution → limits → credits** and the existing contribution/limits anchors were retained. Decision 0014 now removes those two sections/targets as recorded above. The prototype parent still contains three real recording sections rather than a required tab selection. The model aperture provides scoped direct inspection and keyboard input; ordinary reading keeps its native keys and vertical touch scrolling. The old Face screen / Perspective / zoom / reset button clusters and separate foreground viewers are absent. One meaningful recording pause/play control belongs to the stage; it does not advance or scrub source time from scroll position.
 
 The 2D article uses the existing `InformationSkin` and regular reading-material tokens. Material tint and bounded edge response belong to the decorative skin; native text, focus targets, opaque paper diagrams, photographs and recorded interface pixels are outside that distortion. Every principal figure is directly available without a disclosure: the opening Fig4-01 visual; adaptive-method, communication and data-category diagrams; three real capture/assembly/result photographs; and the two existing measurement/module illustrations, still labelled as illustrations. The archived presentation montage retains its original excerpt link, caption and credit without adding a fourth foreground video player. Three NoJS source posters and three direct full-recording links accompany the same complete 13.000 / 24.960 / 20.300-second files.
 
@@ -147,7 +181,7 @@ No whole PDF, CV page, complete original video, raw geometry snapshot, SDK, code
 
 ## Project index and contact boundaries
 
-The preparation index contains 25 candidates, all with historical `publishable:false`; some are explicitly restricted. The already authorized metal-panel case and this newly selected XR case are the **two** projects supported by the current publication scope. The visual index may use a 3×3 grid with empty space; it must not add seven fictional works, expose restricted titles/media or imply nine finished public projects. Project Caschlatsch is explicitly not public; the related Voxel NDA boundary remains unresolved. Other personal/coursework and company cases are not released merely because they occur in a private portfolio.
+The preparation index contains 25 candidates, all with historical `publishable:false`; some are explicitly restricted. The already authorized metal-panel case and this selected XR case are the **two** projects supported by the current publication scope. Under decision 0014, desktop layout starts with nine conceptual cells and can grow to 12, 15 and onward by complete rows as approved project count grows. Empty conceptual space is layout, not fictional works; no restricted titles/media or additional project publication is authorized. Project Caschlatsch is explicitly not public; the related Voxel NDA boundary remains unresolved. Other personal/coursework and company cases are not released merely because they occur in a private portfolio.
 
 On 16 October 2026 the owner directly confirmed the public email `chiahsuanchao@icloud.com` and all three exact social destinations: [LinkedIn](https://www.linkedin.com/in/joshsuan/), [Instagram](https://www.instagram.com/joshsuan.chao/) and [GitHub](https://github.com/JosHsuan). This explicit owner confirmation is the current publication authority, recorded in [release/contact.json](release/contact.json). No contact handle remains pending, and the email was not inferred from a private CV.
 

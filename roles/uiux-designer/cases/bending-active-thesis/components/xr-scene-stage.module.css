@@ -1,8 +1,14 @@
 .stage{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden;contain:layout paint}
+.sceneSurface{position:absolute;inset:0;pointer-events:none}
 .stage canvas{opacity:0}
 .stage[data-xr-scene-painted] canvas{opacity:1}
+.openingVisual{position:absolute;left:48%;top:14%;width:50%;height:78%;object-fit:contain;visibility:hidden}
+.stage[data-xr-opening=true]>.openingVisual{visibility:visible}
+/* Preserve the stage's measured dimensions and prepared resources. Only the
+   opening's presentation changes; later chapters keep their original 3D pose. */
+.stage[data-xr-opening=true]>.sceneSurface{visibility:hidden}
 .modelPoster{position:absolute;left:48%;top:14%;width:50%;height:78%;object-fit:contain}
-.stage[data-xr-scene-painted=model]>.modelPoster,.stage:has([data-xr-native-phone]:not([hidden]))>.modelPoster{visibility:hidden}
+.stage[data-xr-scene-painted=model] .modelPoster,.stage:has([data-xr-native-phone]:not([hidden])) .modelPoster{visibility:hidden}
 .nativePhone{position:absolute;left:calc(73.5% - 17%);top:12%;width:34%;height:76%;display:grid;place-items:center;pointer-events:none}
 .nativePhone[hidden]{display:none}
 .screen{position:relative;height:95%;max-width:100%;border:10px solid #292e30;border-radius:26px;background:#16191b;box-shadow:0 14px 35px #0005;overflow:hidden}
@@ -14,7 +20,7 @@
 .controls>span{font:.5rem/1.5 var(--mono);letter-spacing:.06em}
 .controls button{min-width:88px;min-height:44px;padding:.5rem .8rem;background:var(--material-inner-fill);border-color:var(--material-inner-border);font-size:.72rem}
 .controls[hidden]{display:none}
-@media(max-width:799px){.modelPoster{left:3%;top:9.5%;width:94%;height:45%}.nativePhone{left:3%;top:13%;width:94%;height:76%}.screen{height:95%;border-width:8px;border-radius:24px}.controls{right:12px;bottom:max(12px,env(safe-area-inset-bottom));gap:8px;padding:5px 6px 5px 12px}.controls>span{font-size:.42rem;max-width:140px}.controls button{min-width:80px;font-size:.66rem}}
+@media(max-width:799px){.openingVisual,.modelPoster{left:3%;top:9.5%;width:94%;height:45%}.nativePhone{left:3%;top:13%;width:94%;height:76%}.screen{height:95%;border-width:8px;border-radius:24px}.controls{right:12px;bottom:max(12px,env(safe-area-inset-bottom));gap:8px;padding:5px 6px 5px 12px}.controls>span{font-size:.42rem;max-width:140px}.controls button{min-width:80px;font-size:.66rem}}
 @media(prefers-contrast:more){.controls{background:#152127;border-color:#bdc9c9;color:#fff}}
 @media(forced-colors:active){.stage{display:none}.controls{background:Canvas;border-color:CanvasText;color:CanvasText}}
 @media print{.stage,.controls{display:none}}

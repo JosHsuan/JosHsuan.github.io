@@ -1,5 +1,8 @@
+/* eslint-disable @next/next/no-img-element -- Approved documentary preview pixels use native images with exact public asset identity. */
 import PortfolioNavigation from './PortfolioNavigation';
 import ProjectModelPreview from './ProjectModelPreview';
+import InformationSkin from './InformationSkin';
+import {projectGridRows} from './project-grid-layout.mjs';
 import introduction from '../release/introduction.json';
 import contact from '../release/contact.json';
 import review from '../release/story.json';
@@ -31,12 +34,14 @@ function Introduction(){
   return <section id="about" tabIndex={-1} className={styles.introduction} data-home-introduction aria-labelledby="home-title">
     <div className={styles.introductionInner}>
       <div className={styles.introductionCopy}>
-        <p className={styles.eyebrow}>{introduction.discipline}</p>
-        <h1 id="home-title" className={styles.homeTitle}><span>{introduction.greeting}{' '}</span><span>{introduction.name}<span className={styles.period}>.</span></span></h1>
-        <p className={styles.statement}>{introduction.statement}</p>
-        <p className={styles.description}>{introduction.description}</p>
-        <a href="#projects" className={styles.projectInvitation} data-home-project-link>
-          <span><span className={styles.invitationLabel}>SELECTED WORK / {String(projects.length).padStart(2,'0')}</span><span className={styles.invitationTitle}>Ideas, systems and things made.</span><span className={styles.invitationAction}>Explore the projects</span></span>
+        <div className={styles.scrollCopy} data-information-window="home-introduction" data-home-scroll-window="introduction"><InformationSkin/>
+          <p className={styles.eyebrow}>{introduction.discipline}</p>
+          <h1 id="home-title" className={styles.homeTitle}><span>{introduction.greeting}{' '}</span><span>{introduction.name}<span className={styles.period}>.</span></span></h1>
+          <p className={styles.statement}>{introduction.statement}</p>
+          <p className={styles.description}>{introduction.description}</p>
+        </div>
+        <a href="#projects" className={`${styles.projectInvitation} ${styles.scrollCopy}`} data-home-project-link data-information-window="home-invitation" data-home-scroll-window="invitation"><InformationSkin/>
+          <span className={styles.invitationCopy}><span className={styles.invitationLabel}>SELECTED WORK / {String(projects.length).padStart(2,'0')}</span><span className={styles.invitationTitle}>Ideas, systems and things made.</span><span className={styles.invitationAction}>Explore the projects</span></span>
           <span className={styles.invitationArrow}><Arrow/></span>
         </a>
       </div>
@@ -65,16 +70,18 @@ function About({standalone=false}){
   </section>;
 }
 
-function Projects({standalone=false}){
+function Projects({standalone=false,scrolling=false}){
   const Heading=standalone?'h1':'h2';
   const CardHeading=standalone?'h2':'h3';
   return <section id="projects" className={[styles.section,styles.projects,standalone?styles.standalone:''].join(' ')} aria-labelledby="projects-title" data-portfolio-projects>
-    <div className={styles.projectHeading}>
+    <div className={scrolling?`${styles.projectHeading} ${styles.scrollCopy}`:styles.projectHeading} data-information-window={scrolling?'home-project-heading':undefined} data-home-scroll-window={scrolling?'project-heading':undefined}>
+      {scrolling&&<InformationSkin/>}
       <div><p className={styles.eyebrow}>02 / SELECTED PROJECTS</p><Heading id="projects-title" className={styles.sectionTitle}>A closer look at the work.</Heading></div>
       <p className={styles.projectCount}>{String(projects.length).padStart(2,'0')} projects<br/>Geometry / interaction / making</p>
     </div>
-    <ul className={styles.projectGrid} data-project-grid>
-      {projects.map(project=><li key={project.id} className={project.id==='xr-bending-active'?`${styles.projectCard} ${styles.xrProjectCard}`:styles.projectCard} data-project-tile={project.id}>
+    <ul className={styles.projectGrid} style={{'--project-grid-rows':projectGridRows(projects.length)}} data-project-grid data-project-grid-cells={projectGridRows(projects.length)*3}>
+      {projects.map(project=><li key={project.id} className={project.id==='xr-bending-active'?`${styles.projectCard} ${styles.xrProjectCard}`:styles.projectCard} data-project-tile={project.id} data-information-window={scrolling?'home-project-card':undefined} data-home-scroll-window={scrolling?project.id:undefined}>
+        {scrolling&&<InformationSkin/>}
         <div className={styles.projectImage}>
           {project.id==='bending-active'
             ?<ProjectModelPreview poster={project.image}/>
@@ -88,15 +95,15 @@ function Projects({standalone=false}){
         </a>
       </li>)}
     </ul>
-    <p className={styles.gridNote}>Two connected studies, from material geometry to an extended-reality research prototype.</p>
+    <p className={scrolling?`${styles.gridNote} ${styles.scrollCopy}`:styles.gridNote} data-information-window={scrolling?'home-project-note':undefined} data-home-scroll-window={scrolling?'project-note':undefined}>{scrolling&&<InformationSkin/>}Two connected studies, from material geometry to an extended-reality research prototype.</p>
   </section>;
 }
 
-function Contact({standalone=false}){
+function Contact({standalone=false,scrolling=false}){
   const Heading=standalone?'h1':'h2';
   return <section id="contact" className={[styles.section,styles.contact,standalone?styles.contactPage:''].join(' ')} aria-labelledby="contact-title" data-portfolio-contact>
-    <div><p className={styles.eyebrow}>03 / CONTACT</p><Heading id="contact-title" className={styles.sectionTitle}>Let’s connect.</Heading><p className={styles.prose}>Have a question about the work or an idea to share? I’d be happy to hear from you.</p></div>
-    <div className={styles.contactChannels}>
+    <div className={scrolling?styles.scrollCopy:undefined} data-information-window={scrolling?'home-contact':undefined} data-home-scroll-window={scrolling?'contact':undefined}>{scrolling&&<InformationSkin/>}<p className={styles.eyebrow}>03 / CONTACT</p><Heading id="contact-title" className={styles.sectionTitle}>Let’s connect.</Heading><p className={styles.prose}>Have a question about the work or an idea to share? I’d be happy to hear from you.</p></div>
+    <div className={scrolling?`${styles.contactChannels} ${styles.scrollCopy}`:styles.contactChannels} data-information-window={scrolling?'home-contact-channels':undefined} data-home-scroll-window={scrolling?'contact-channels':undefined}>{scrolling&&<InformationSkin/>}
       <a href={`mailto:${contact.email}`} className={styles.contactLink} data-contact-email><span><span className={styles.invitationLabel}>EMAIL</span><span className={styles.contactHandle}>{contact.email}</span></span><Arrow diagonal/></a>
       <nav className={styles.socialLinks} aria-label="Public profiles" data-contact-social-links>{contact.socialLinks.map(link=><a key={link.id} href={link.href} target="_blank" rel="noreferrer">{link.label}<Arrow diagonal/></a>)}</nav>
     </div>
@@ -108,7 +115,7 @@ export default function PortfolioHome({section='home'}){
   return <div className={styles.portfolio}>
     <PortfolioNavigation current={section}/>
     <main id="portfolio-main" tabIndex={-1} className={styles.main} data-portfolio-root data-portfolio-section={section}>
-      {section==='home'&&<><Introduction/><Projects/><Contact/></>}
+      {section==='home'&&<><Introduction/><Projects scrolling/><Contact scrolling/></>}
       {section==='about'&&<><About standalone/><Contact/></>}
       {section==='projects'&&<><Projects standalone/><Contact/></>}
       {section==='contact'&&<Contact standalone/>}

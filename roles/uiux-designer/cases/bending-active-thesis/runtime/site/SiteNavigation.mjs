@@ -1,5 +1,6 @@
 import {EventManager} from '../core/EventManager.ts';
 import {acquireSiteReadiness} from './SiteReadiness.mjs';
+import {acquirePagePreviewReadiness} from './PagePreviewReadiness.mjs';
 import {subscribeSceneEntry} from './site-entry-bridge.mjs';
 
 export const BENDING_ROUTE='/projects/bending-active/';
@@ -14,13 +15,13 @@ const attr=(node,key,value)=>{if(value===null)node?.removeAttribute(key);else no
 /** Native documents own navigation. This controller owns only site loader DOM
  * and discrete request facts; the Bending Director owns its scene reveal. */
 export function createSiteNavigation({window:win,document:doc,element,onChange=()=>{},
- acquireReadiness=acquireSiteReadiness,subscribeScene=subscribeSceneEntry,
+ acquireReadiness=acquireSiteReadiness,acquirePreviews=acquirePagePreviewReadiness,subscribeScene=subscribeSceneEntry,
  setTimeout:setTimer=win.setTimeout.bind(win),clearTimeout:clearTimer=win.clearTimeout.bind(win),
  now=()=>Date.now(),deadline=15000,revealDeadline=1600}={}){
  const events=new EventManager(),scope=events.createScope('site-navigation');
  const history=[],guarded=new Map();
  let active=null,serial=0,connected=false,disposed=false,deadlineTimer=null,revealTimer=null,resource=null,releaseScene=null;
- let handedOff=false,sceneId=null,documentResult=null,pendingScene=null,lastScenePhase='preparing';
+ let handedOff=false,sceneId=null,documentResult=null,pendingScene=null,lastScenePhase='preparing',previewResource=null;
  let revealGeneration=0,revealMode=null,revealAnimations=[],revealFrame=null,revealExpiresAt=null,startupExpiresAt=null,completePreparation=null;
  const sceneRoute=path(win.location.pathname)===BENDING_ROUTE;
  const reduced=win.matchMedia?.('(prefers-reduced-motion: reduce)');
@@ -38,7 +39,7 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
   attr(element,'data-site-reveal',null);
  };
  const snapshot=()=>({id:active?.id??null,phase:active?.phase??'idle',kind:active?.kind??null,url:active?.url??win.location.href,
-  reason:active?.reason??'',delegated:sceneRoute,handedOff,readiness:documentResult,history:[...history],events:events.inspect()});
+  reason:active?.reason??'',delegated:sceneRoute,handedOff,readiness:documentResult,previews:previewResource?.inspect?.()??null,history:[...history],events:events.inspect()});
  const notify=()=>onChange(snapshot());
  const paint=phase=>{
   attr(doc.documentElement,'data-site-entry-state',phase);
@@ -66,7 +67,13 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
    guarded.set(node,{inert:node.getAttribute('inert'),busy:node.getAttribute('aria-busy')});attr(node,'inert','');attr(node,'aria-busy','true');
   }
  };
- const cancel=reason=>{if(active&&!terminal.has(active.phase))record('cancelled',reason);};
+ const cancel=reason=>{
+  if(active&&!terminal.has(active.phase)){
+   // A prevented or interrupted navigation can uncover this same document.
+   // Pending enhancement must close before that cancellation exposes its poster.
+   previewResource?.fallback?.(reason);record('cancelled',reason);
+  }
+ };
  const request=(kind,url,{id,previous=[]}={})=>{
   cancel('superseded');clearDeadlines();releaseReveal();restoreContent();handedOff=false;
   active={id:id??`site-${now()}-${++serial}`,phase:'idle',kind,url,reason:''};
@@ -74,7 +81,12 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
   else record('requested');
  };
  const enter=reason=>record('entered',reason);
- const fail=reason=>record('failed',reason);
+ const fail=reason=>{
+  // A failed loader is fail-open for reading, not permission for an unfinished
+  // card to pop into 3D after uncovering. Its owner aborts and latches the poster
+  // synchronously before the failed terminal hides this loading surface.
+  previewResource?.fallback?.(reason);return record('failed',reason);
+ };
  const startupExpired=()=>{
   if(startupExpiresAt===null||monotonic()<startupExpiresAt)return false;
   fail(documentResult?.ready?'presentation-timeout':'readiness-timeout');return true;
@@ -161,7 +173,7 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
  };
  const arrival=({restored=false}={})=>{
   const startedAt=monotonic();
-  resource?.release();resource=null;documentResult=null;pendingScene=null;sceneId=null;
+  resource?.release();resource=null;previewResource=null;documentResult=null;pendingScene=null;sceneId=null;
   const handoff=storageRead(SITE_HANDOFF_KEY),url=new URL(win.location.href);
   const receipt=storageRead(SITE_TERMINAL_KEY);
   // Consume even empty/malformed storage; it cannot remain an open handoff.
@@ -195,7 +207,17 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
    },Math.max(0,Math.ceil(startupExpiresAt-monotonic())));};
    armStartup();
   }
-  resource=acquireReadiness(doc,{setTimeout:setTimer,clearTimeout:clearTimer,deadline:sceneRoute?deadline:Math.ceil(Math.max(0,startupExpiresAt-monotonic()))});
+  const documentResource=acquireReadiness(doc,{setTimeout:setTimer,clearTimeout:clearTimer,deadline:sceneRoute?deadline:Math.ceil(Math.max(0,startupExpiresAt-monotonic()))});
+  if(sceneRoute)resource=documentResource;
+  else{
+   // Marked card preparation starts independently of loader entry. Actual first
+   // draw or an explicit static fallback must settle before reveal can start.
+   const previews=acquirePreviews(doc);previewResource=previews;
+   resource={promise:Promise.all([documentResource.promise,previews.promise]).then(([document,preview])=>Object.freeze({
+    ready:document.ready&&preview.ready,failures:Object.freeze([...document.failures,...preview.failures]),
+    pending:Object.freeze([...document.pending,...preview.pending]),previews:preview.previews,
+   })),release(){documentResource.release();previews.release();}};
+  }
   resource.promise.then(result=>{
    if(disposed||current!==active?.id||terminal.has(active.phase))return;
    documentResult=result;notify();

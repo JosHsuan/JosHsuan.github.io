@@ -8,6 +8,14 @@ const stage=page=>page.locator('[data-xr-stage]');
 const control=page=>page.locator('[data-xr-model-control]');
 const video=(page,id)=>stage(page).locator(`[data-xr-stage-video="${id}"]`);
 const facts=page=>stage(page).evaluate(node=>node.__xrStage.inspect());
+async function openingVisible(page){
+ await expect(stage(page)).toHaveAttribute('data-xr-opening','true');
+ const visual=stage(page).locator('[data-xr-opening-visual]');await expect(visual).toBeVisible();
+ await expect.poll(()=>visual.evaluate(node=>node.complete&&node.naturalWidth===2000&&node.naturalHeight===1125)).toBe(true);
+ await expect(visual).toHaveAttribute('src','/assets/xr/portfolio-main-visual.webp');
+ await expect(stage(page).locator('canvas')).toBeHidden();await expect(stage(page).locator('[data-xr-model-poster]')).toBeHidden();
+ await expect(page.locator('[data-xr-scene-controls]')).toBeHidden();
+}
 async function viewportFits(page){
  const viewport=page.viewportSize(),actual=await page.evaluate(()=>({clientWidth:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth,innerWidth,innerHeight,visualWidth:visualViewport?.width,visualHeight:visualViewport?.height}));
  expect(actual.clientWidth).toBe(viewport.width);expect(actual.scrollWidth).toBeLessThanOrEqual(actual.clientWidth);expect(actual.innerWidth).toBe(viewport.width);expect(actual.innerHeight).toBe(viewport.height);expect(actual.visualWidth).toBeCloseTo(viewport.width,0);expect(actual.visualHeight).toBeCloseTo(viewport.height,0);
@@ -21,9 +29,10 @@ async function enter(page,origin='http://127.0.0.1:4186'){
 }
 function closed(state){
  for(const id of new Set(state.history.map(fact=>fact.id))){const own=state.history.filter(fact=>fact.id===id);expect(own.filter(fact=>fact.phase==='requested')).toHaveLength(1);expect(own.filter(fact=>['ready','failed','cancelled'].includes(fact.phase))).toHaveLength(1);}
+ for(const id of new Set(state.scene.history.map(fact=>fact.id))){const own=state.scene.history.filter(fact=>fact.id===id);expect(own.filter(fact=>fact.status==='requested')).toHaveLength(1);expect(own.filter(fact=>['completed','cancelled'].includes(fact.status))).toHaveLength(1);}
 }
 async function settled(page,chapter){
- await page.waitForFunction(chapter=>{const state=document.querySelector('[data-xr-stage]')?.__xrStage?.inspect();return state?.chapter===chapter&&state.camera.settled&&state.informationWindows.settled&&!state.lifecycle.scheduled;},chapter,{timeout:WAIT});
+ await page.waitForFunction(chapter=>{const state=document.querySelector('[data-xr-stage]')?.__xrStage?.inspect();return state?.chapter===chapter&&state.scene.chapter===chapter&&state.scene.mode===(chapter==='overview'?'absent':'hold')&&state.scene.settled&&!state.scene.paintPending&&state.camera.settled&&state.informationWindows.settled&&!state.lifecycle.scheduled;},chapter,{timeout:WAIT});
  await frames(page,2);
 }
 async function scrollChapter(page,chapter){
@@ -55,18 +64,32 @@ async function nativeArrowScroll(page){
  await control(page).press('ArrowDown');await expect.poll(()=>page.evaluate(()=>scrollY)).toBeGreaterThan(before);
 }
 
-test('one transparent background source stage preserves geometry, stays idle, and follows real hit-based keyboard and pointer inspection',async({page,isMobile,browserName})=>{
+test('one project background stage preserves source geometry, stays idle, and follows finite entries and real hit-based inspection',async({page,isMobile,browserName})=>{
  const requests=[],errors=[];page.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)/.test(request.url()))requests.push(request.url());});page.on('pageerror',error=>errors.push(error.message));
- await enter(page);await modelReady(page);
+ await enter(page);await modelReady(page);await openingVisible(page);
  await expect(stage(page)).toHaveCSS('position','fixed');await expect(stage(page).locator('canvas')).toHaveCount(1);
  await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);await expect(page.locator('canvas')).toHaveCount(2);
  const initial=await facts(page),source=initial.resource;closed(initial);
  expect(source.sourceRevision).toBe('82e9679c1e47e93cc1a7bbea588eb0f2c8af142d6f7facc6fe5ffaa6148fdc04');expect(source.vertices).toBe(96312);expect(source.triangles).toBe(190320);
  expect(source.sourceUnits).toBe('Millimeters');expect(source.webUnits).toBe('Metres');expect(source.sourceTransforms.every(value=>value.scale.every(n=>n===1))).toBe(true);
- expect(source.surface.calls).toBe(1);expect(source.surface.clearAlpha).toBe(0);expect(source.surface.budget.budget.pixels).toBeLessThanOrEqual(524288);
+ expect(source.surface.sourceCalls).toBe(1);expect(source.surface.phoneCalls).toBe(0);expect(source.surface.phoneBodyCalls).toBe(0);expect(source.surface.phoneScreenCalls).toBe(0);expect(source.surface.stageCalls).toBeGreaterThan(0);
+ expect(source.surface.calls).toBe(source.surface.sourceCalls+source.surface.phoneCalls+source.surface.stageCalls);expect(source.surface.clearAlpha).toBe(0);expect(source.surface.budget.budget.pixels).toBeLessThanOrEqual(524288);
+ expect(source.surface.environment.edgeFeather.owner).toBe('xr-editorial-materials-only');expect(source.surface.environment.edgeFeather.cssPixels).toBe(isMobile?32:80);
+ expect(source.surface.environment.edgeFeather.drawingBuffer).toEqual(await stage(page).locator('canvas').evaluate(node=>[node.width,node.height]));
  expect(source.pose.near).toBeGreaterThan(0);expect(source.pose.far).toBeGreaterThan(source.pose.near);expect(source.pose.slot.x-source.pose.slot.width/2).toBeGreaterThanOrEqual(0);expect(source.pose.slot.x+source.pose.slot.width/2).toBeLessThanOrEqual(1);
  const idle={frames:initial.frames,draws:source.surface.draws};await frames(page,8);const afterIdle=await facts(page);expect({frames:afterIdle.frames,draws:afterIdle.resource.surface.draws}).toEqual(idle);
+ const passage=await stage(page).evaluateHandle(node=>{
+  const samples=[];const observer=new MutationObserver(()=>{const scene=node.__xrStage.inspect().scene;if(['entry','exit'].includes(scene.mode)&&scene.opacity>0&&scene.opacity<1&&samples.length<256)samples.push({...scene});});
+  observer.observe(node,{attributes:true,subtree:true,attributeFilter:['style','data-xr-scene-mode']});return{samples,dispose(){observer.disconnect();}};
+ });
+ await scrollChapter(page,'context');await modelReady(page,'context');await expect(stage(page).locator('canvas')).toBeVisible();
+ const chapterNav=await page.getByRole('navigation',{name:'XR project sections',exact:true}).boundingBox(),masthead=await page.locator('[data-portfolio-navigation]').boundingBox();
+ expect(chapterNav.y).toBeGreaterThanOrEqual(masthead.y+masthead.height+8);
+ if(isMobile){expect(chapterNav.height).toBeLessThan(56);await expect(page.getByRole('navigation',{name:'XR project sections',exact:true})).toHaveCSS('flex-wrap','nowrap');}
  await scrollChapter(page,'method');await modelReady(page,'method');await control(page).evaluate(node=>node.focus({preventScroll:true}));await control(page).press('ArrowRight');
+ const transitions=await passage.evaluate(value=>value.samples);await passage.evaluate(value=>value.dispose());await passage.dispose();
+ expect(transitions.some(sample=>sample.mode==='entry'&&sample.chapter==='context')).toBe(true);expect(transitions.some(sample=>sample.mode==='exit'&&sample.chapter==='context')).toBe(true);
+ expect((await facts(page)).scene.mode).toBe('hold');
  await expect.poll(async()=>(await facts(page)).camera.value.azimuth).toBeLessThan(0);await settled(page,'method');expect((await facts(page)).resource.view.azimuth).toBeLessThan(0);
  await control(page).press('Home');await settled(page,'method');expect((await facts(page)).camera.value).toEqual({azimuth:0,elevation:0});
  const point=await hitPoint(page);
@@ -87,6 +110,7 @@ test('one transparent background source stage preserves geometry, stays idle, an
   await page.mouse.up();await settled(page,'method');expect((await facts(page)).camera.value).toEqual({azimuth:0,elevation:0});
  }
  const final=await facts(page);expect(final.gesture).toBeNull();for(const id of new Set(final.gestures.map(item=>item.id))){const own=final.gestures.filter(item=>item.id===id);expect(own.filter(item=>item.phase==='requested')).toHaveLength(1);expect(own.filter(item=>['released','cancelled'].includes(item.phase))).toHaveLength(1);}
+ await scrollChapter(page,'overview');await modelReady(page);await openingVisible(page);closed(await facts(page));
  expect(final.acquisitions).toBe(1);expect(requests).toEqual([expect.stringContaining('/assets/xr/xr-research-assembly.glb')]);expect(errors).toEqual([]);
 });
 
@@ -99,6 +123,7 @@ test('native scrolling selects all three complete recordings in the same scene a
   await expect(stage(page).locator('canvas')).toHaveCount(1);await expect(stage(page).locator('video[src]')).toHaveCount(1);
   expect(await originalCanvas.evaluate(node=>node.isConnected&&node===document.querySelector('[data-xr-stage] canvas'))).toBe(true);
   expect(state.resource.surface.budget.budget.pixels).toBeLessThanOrEqual(393216);expect(await video(page,id).evaluate(node=>node.muted&&node.loop&&node.playsInline&&!node.paused)).toBe(true);expect(await video(page,id).evaluate(node=>node.duration)).toBeCloseTo(duration,2);
+  const draw=state.resource.surface;expect(draw.sourceCalls).toBe(0);expect(draw.phoneBodyCalls).toBe(1);expect(draw.phoneScreenCalls).toBe(1);expect(draw.phoneCalls).toBe(2);expect(draw.stageCalls).toBeGreaterThan(0);expect(draw.calls).toBe(draw.sourceCalls+draw.phoneCalls+draw.stageCalls);
   const first=await stage(page).locator('canvas').screenshot(),count=state.resource.media.frames;
   await expect.poll(async()=>(await facts(page)).resource.media.frames).toBeGreaterThan(count+2);expect((await stage(page).locator('canvas').screenshot()).equals(first)).toBe(false);
  }
@@ -113,13 +138,13 @@ test('native scrolling selects all three complete recordings in the same scene a
  }finally{await resume.evaluate(value=>value.dispose());await resume.dispose();}
  const controls=await page.locator('[data-xr-scene-controls]').evaluate(node=>({rect:node.getBoundingClientRect().toJSON(),buttons:[...node.querySelectorAll('button')].map(button=>button.getBoundingClientRect().toJSON())})),viewport=page.viewportSize();
  expect(controls.rect.left).toBeGreaterThanOrEqual(0);expect(controls.rect.top).toBeGreaterThanOrEqual(0);expect(controls.rect.right).toBeLessThanOrEqual(viewport.width);expect(controls.rect.bottom).toBeLessThanOrEqual(viewport.height);expect(controls.buttons.every(rect=>rect.width>=44&&rect.height>=44)).toBe(true);
- await scrollChapter(page,'overview');await modelReady(page);await expect(stage(page).locator('video[src]')).toHaveCount(0);expect((await facts(page)).resource.media.stage).toBeNull();expect((await facts(page)).acquisitions).toBe(1);expect(errors).toEqual([]);
+ await scrollChapter(page,'overview');await modelReady(page);await openingVisible(page);await expect(stage(page).locator('video[src]')).toHaveCount(0);expect((await facts(page)).resource.media.stage).toBeNull();expect((await facts(page)).acquisitions).toBe(1);expect(errors).toEqual([]);
 });
 
 test('Reduced Motion preserves the selected source posters, native reading and recording links and cancels an active enhancement',async({page})=>{
  await page.emulateMedia({reducedMotion:'reduce'});const requests=[];page.on('request',request=>{if(/\.(glb|mp4)(?:\?|$)/.test(request.url()))requests.push(request.url());});
- await enter(page);await expect(stage(page).locator('[data-xr-model-poster]')).toBeVisible();await expect(stage(page).locator('canvas')).toHaveCount(0);
- await scrollChapter(page,'method');await nativeArrowScroll(page);
+ await enter(page);await openingVisible(page);await expect(stage(page).locator('canvas')).toHaveCount(0);
+ await scrollChapter(page,'method');await expect(stage(page).locator('[data-xr-model-poster]')).toBeVisible();await nativeArrowScroll(page);
  for(const id of ['adapt','assemble','join']){await scrollChapter(page,id);await expect(stage(page).locator(`[data-xr-native-phone="${id}"] img`)).toBeVisible();await expect(page.locator(`[data-xr-recording="${id}"] a[href="/assets/xr/${id}-interface.mp4"]`)).toBeVisible();}
  expect(requests).toEqual([]);await expect(stage(page).locator('video[src]')).toHaveCount(0);
  await page.emulateMedia({reducedMotion:'no-preference'});await phoneReady(page,'join');await page.emulateMedia({reducedMotion:'reduce'});
@@ -130,7 +155,7 @@ test('Reduced Motion preserves the selected source posters, native reading and r
 test('unavailable WebGL and genuine context loss retain native recording playback and model fallback keeps reading keys native',async({page,browser})=>{
  await page.addInitScript(()=>{const original=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,...args){return /^webgl/.test(type)?null:original.call(this,type,...args);};});
  const errors=[];page.on('pageerror',error=>errors.push(error.message));await enter(page);
- await expect.poll(async()=>(await facts(page)).phase).toBe('ready');expect((await facts(page)).resource.mode).toBe('poster');await expect(stage(page).locator('canvas')).toHaveCount(0);await expect(stage(page).locator('[data-xr-model-poster]')).toBeVisible();
+ await expect.poll(async()=>(await facts(page)).phase).toBe('ready');expect((await facts(page)).resource.mode).toBe('poster');await expect(stage(page).locator('canvas')).toHaveCount(0);await openingVisible(page);
  await phoneReady(page,'adapt',{native:true});const before=await video(page,'adapt').evaluate(node=>node.currentTime);await expect.poll(()=>video(page,'adapt').evaluate(node=>node.currentTime)).toBeGreaterThan(before);
  await scrollChapter(page,'method');expect((await facts(page)).resource.mode).toBe('poster');await nativeArrowScroll(page);expect(errors).toEqual([]);
  // A fresh actual document obtains an unmodified native GPU context.
@@ -149,7 +174,7 @@ test('actual HTTP model and recording failures remain readable, do not retry the
  const server=createServer((request,response)=>{const pathname=request.url.split('?')[0],kind=pathname==='/assets/xr/xr-research-assembly.glb'&&denyModel?'model':pathname==='/assets/xr/adapt-interface.mp4'?'media':null;if(kind){denied[kind]++;response.writeHead(404,{'Content-Type':'text/plain','Cache-Control':'no-store'}).end('Unavailable test source');return;}handler(request,response);});
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const port=server.address().port;handler=createPagesPreviewHandler({root:fileURLToPath(new URL('../../.pages-workspace/out/',import.meta.url)),port});
  try{
-  await enter(page,`http://127.0.0.1:${port}`);await expect(stage(page)).toHaveAttribute('data-research-phase','failed',{timeout:WAIT});await expect(stage(page).locator('[data-xr-model-poster]')).toBeVisible();closed(await facts(page));const modelCount=denied.model;expect(modelCount).toBeGreaterThan(0);await frames(page,8);expect(denied.model).toBe(modelCount);
+  await enter(page,`http://127.0.0.1:${port}`);await expect(stage(page)).toHaveAttribute('data-research-phase','failed',{timeout:WAIT});await openingVisible(page);closed(await facts(page));const modelCount=denied.model;expect(modelCount).toBeGreaterThan(0);await frames(page,8);expect(denied.model).toBe(modelCount);
   denyModel=false;await enter(page,`http://127.0.0.1:${port}`);await modelReady(page);await scrollChapter(page,'adapt');
   await expect.poll(async()=>{const r=(await facts(page)).resource;return r?.media.stage==='adapt'&&!r.media.pending&&r.mode==='poster'&&!!r.media.reason;}).toBe(true);
   await expect(stage(page).locator('[data-xr-native-phone="adapt"] img')).toBeVisible();await expect(stage(page).locator('video[src]')).toHaveCount(0);closed(await facts(page));const mediaCount=denied.media;expect(mediaCount).toBeGreaterThan(0);await frames(page,8);expect(denied.media).toBe(mediaCount);

@@ -50,13 +50,78 @@ test('a document lease rejects a second driver and releases idempotently without
 });
 
 class Target{constructor(){this.listeners=new Map();}addEventListener(type,fn,options){const list=this.listeners.get(type)??[];list.push({fn,options});this.listeners.set(type,list);}removeEventListener(type,fn){this.listeners.set(type,(this.listeners.get(type)??[]).filter(item=>item.fn!==fn));}fire(type,event={}){for(const {fn} of [...this.listeners.get(type)??[]])fn(event);}}
-function environment(){
- const win=new Target(),doc=new Target(),html=new Target(),pending=new Map(),queries=new Map();let next=0,observer;
+function environment({home=false}={}){
+ const win=new Target(),doc=new Target(),html=new Target(),pending=new Map(),queries=new Map(),observers=[];
+ const frameStats={requested:0,cancelled:0,delivered:0,maxPending:0};let next=0;
  html.phase='requested';html.getAttribute=()=>html.phase;doc.documentElement=html;doc.hidden=false;
- Object.assign(win,{innerWidth:1440,innerHeight:1000,requestAnimationFrame:fn=>{pending.set(++next,fn);return next;},cancelAnimationFrame:id=>pending.delete(id),matchMedia(query){if(!queries.has(query))queries.set(query,Object.assign(new Target(),{matches:false}));return queries.get(query);},MutationObserver:class{constructor(fn){observer=fn;}observe(){}disconnect(){observer=null;}}});
- const frame=now=>{const work=[...pending.values()];pending.clear();for(const fn of work)fn(now);};
- return{win,doc,html,queries,pending,frame,siteReady(){html.phase='entered';observer?.();}};
+ Object.assign(win,{innerWidth:1440,innerHeight:1000,scrollY:0,
+  requestAnimationFrame:fn=>{pending.set(++next,fn);frameStats.requested++;frameStats.maxPending=Math.max(frameStats.maxPending,pending.size);return next;},
+  cancelAnimationFrame:id=>{if(pending.delete(id))frameStats.cancelled++;},
+  matchMedia(query){if(!queries.has(query))queries.set(query,Object.assign(new Target(),{matches:false}));return queries.get(query);},
+  MutationObserver:class{constructor(fn){this.fn=fn;this.target=null;this.disconnected=false;observers.push(this);}observe(target){this.target=target;}disconnect(){this.disconnected=true;}}});
+ let homeRoot=null,homeWindow=null;
+ if(home){
+  const element=()=>Object.assign(new Target(),{attributes:new Map(),properties:new Map(),
+   getAttribute(key){return this.attributes.get(key)??null;},setAttribute(key,value){this.attributes.set(key,String(value));},removeAttribute(key){this.attributes.delete(key);},
+   get style(){const properties=this.properties;return{getPropertyValue:key=>properties.get(key)??'',setProperty:(key,value)=>properties.set(key,String(value))};},
+   closest:()=>null,contains:()=>false,offsetTop:0,offsetParent:null,ownerDocument:doc,
+  });
+  homeRoot=element();homeWindow=element();Object.assign(homeWindow,{parentElement:homeRoot,clientWidth:480,clientHeight:300,tagName:'DIV',offsetTop:100,
+   querySelector:selector=>selector===':scope > [data-information-skin]'?{}:null,
+  });homeWindow.setAttribute('data-information-window','home-introduction');
+  homeRoot.querySelectorAll=()=>[homeWindow];doc.querySelector=selector=>selector==='[data-portfolio-root][data-portfolio-section="home"]'?homeRoot:null;
+  doc.defaultView=win;doc.activeElement=null;doc.fonts={ready:Promise.resolve()};
+  win.navigator={connection:Object.assign(new Target(),{saveData:false})};
+  win.getComputedStyle=()=>({background:'transparent',borderTopWidth:'0px',borderRightWidth:'0px',borderBottomWidth:'0px',borderLeftWidth:'0px',
+   borderTopColor:'transparent',borderRightColor:'transparent',borderBottomColor:'transparent',borderLeftColor:'transparent',
+   outlineStyle:'none',outlineWidth:'0px',boxShadow:'none',borderTopLeftRadius:'0px'});
+ }
+ const frame=now=>{const work=[...pending.values()];pending.clear();for(const fn of work){frameStats.delivered++;fn(now);}};
+ return{win,doc,html,queries,pending,observers,frameStats,homeRoot,homeWindow,frame,
+  siteReady(){html.phase='entered';for(const observer of observers)if(!observer.disconnected&&observer.target===html)observer.fn();}};
 }
+
+test('Home native scroll uses the single site scheduler, resets on policy and suspension, and closes every source on exit',async()=>{
+ const env=environment({home:true}),surface=canvas();surface.getContext=()=>null;
+ // With optional ASCII unavailable, any continuing frame is attributable to
+ // Home's finite material response rather than a background animation loop.
+ const runtime=createBackgroundRuntime({createRenderer:fieldFactory});
+ const driver=createSiteBackgroundDriver({window:env.win,document:env.doc,runtime,canvas:surface,backdrop:{style:{getPropertyValue(){return'';},setProperty(){}}}});
+ await Promise.resolve();env.frame(100);
+ const home=()=>driver.inspect().homeScrolling,window=()=>home().informationWindows.items[0];
+ assert.equal(home().enabled,false);assert.equal(window().y,0);assert.equal(env.pending.size,0);
+ env.win.scrollY=180;env.win.fire('scroll');assert.equal(env.pending.size,0,'Preparing content cannot start material motion');
+ env.siteReady();assert.equal(env.pending.size,1);env.frame(200);assert.equal(home().enabled,true);assert.equal(window().y,0);assert.equal(env.pending.size,0);
+ const initialFrames=driver.inspect().frames;
+ env.win.scrollY=380;env.win.fire('scroll');env.win.fire('scroll');assert.equal(env.pending.size,1,'Native scroll coalesces on the existing site scheduler');
+ env.frame(216);assert.equal(driver.inspect().frames,initialFrames+1);assert.equal(home().informationWindows.moving,true);assert.ok(window().edgeMaximum>0);assert.equal(env.pending.size,1);
+ assert.equal(env.win.listeners.get('scroll')[0].options.passive,true);
+ const reduced=env.queries.get('(prefers-reduced-motion: reduce)');reduced.matches=true;reduced.fire('change');env.frame(232);
+ assert.equal(home().enabled,false);assert.equal(window().y,0);assert.equal(window().edgeMaximum,0);assert.equal(env.pending.size,0);
+ const reducedFrames=driver.inspect().frames;env.win.scrollY=420;env.win.fire('scroll');env.frame(248);assert.equal(driver.inspect().frames,reducedFrames);
+ reduced.matches=false;reduced.fire('change');env.frame(264);assert.equal(home().enabled,true);assert.equal(window().y,0);
+ env.win.scrollY=280;env.win.fire('scroll');env.frame(280);assert.equal(home().informationWindows.moving,true);
+ const stale=[...env.pending.values()][0],beforeHidden=driver.inspect().frames;
+ env.doc.hidden=true;env.doc.fire('visibilitychange');assert.equal(home().enabled,false);assert.equal(window().y,0);assert.equal(window().edgeMaximum,0);assert.equal(env.pending.size,0);
+ stale(10280);assert.equal(driver.inspect().frames,beforeHidden,'An already queued callback cannot publish after suspension');
+ env.win.fire('pagehide',{persisted:true});env.doc.hidden=false;env.doc.fire('visibilitychange');assert.equal(env.pending.size,0);
+ env.win.fire('pageshow',{persisted:true});assert.equal(env.pending.size,1);env.frame(20280);assert.equal(home().enabled,true);assert.equal(window().y,0);assert.equal(env.pending.size,0);
+ let time=20280;const nextFrame=()=>env.frame(time+=16);
+ for(const [policy,value] of [[env.win.navigator.connection,'saveData'],[env.queries.get('(forced-colors: active)'),'matches']]){
+  env.win.scrollY-=100;env.win.fire('scroll');nextFrame();assert.equal(home().informationWindows.moving,true);
+  policy[value]=true;policy.fire('change');nextFrame();assert.equal(home().enabled,false);assert.equal(window().y,0);assert.equal(env.pending.size,0);
+  env.win.scrollY-=20;env.win.fire('scroll');assert.equal(env.pending.size,0);
+  policy[value]=false;policy.fire('change');nextFrame();assert.equal(home().enabled,true);assert.equal(window().y,0);
+ }
+ env.win.scrollY+=100;env.win.fire('scroll');nextFrame();assert.equal(home().informationWindows.moving,true);
+ const beforeExit=driver.inspect().frames;env.win.fire('pagehide',{persisted:false});
+ assert.equal(driver.inspect().disposed,true);assert.equal(home().disposed,true);assert.equal(home().informationWindows.count,0);assert.equal(env.homeRoot.getAttribute('data-home-scrolling-ready'),null);
+ assert.equal(env.homeWindow.getAttribute('data-information-ready'),null);assert.equal(env.homeWindow.style.getPropertyValue('--information-y'),'');
+ assert.equal(env.pending.size,0);assert.equal(driver.inspect().events.nativeListeners,0);assert(env.observers.every(observer=>observer.disconnected));assert.equal(runtime.inspect().activeBindings,0);assert.equal(runtime.inspect().releases,1);
+ env.win.fire('scroll');env.win.fire('pageshow',{persisted:true});env.doc.fire('visibilitychange');env.frame(30344);await Promise.resolve();assert.equal(driver.inspect().frames,beforeExit);assert.equal(env.pending.size,0);
+ assert.equal(env.frameStats.maxPending,1,'Home and the shared background never own simultaneous RAF requests');
+ assert.equal(env.frameStats.delivered,driver.inspect().frames,'Every delivered RAF belongs to the existing site driver');driver.dispose();assert.equal(runtime.inspect().releases,1);
+});
 
 test('ordinary pages use the real score, native input envelope, scoped suspension and live Reduced Motion',()=>{
  const env=environment(),runtime=createBackgroundRuntime({createRenderer:fieldFactory});

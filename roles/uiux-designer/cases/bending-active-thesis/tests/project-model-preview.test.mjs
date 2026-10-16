@@ -6,7 +6,7 @@ import * as T from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {HDRLoader} from 'three/addons/loaders/HDRLoader.js';
 import {validateProjectModelMetadata,collectProjectModelSupport,sampleProjectModelRecipe,PROJECT_MODEL_PIXEL_BUDGET,PROJECT_MODEL_FRAME_FILL} from '../components/project-model-recipe.mjs';
-import {acquireProjectModelScene} from '../components/project-model-scene.mjs';
+import {acquireProjectModelScene,commitProjectModelDraw} from '../components/project-model-scene.mjs';
 import {sampleCinematicPose} from '../components/vendor/cinematic-plan.mjs';
 import {resolveRenderBudget} from '../components/render-budget.mjs';
 
@@ -82,6 +82,19 @@ test('preview allocation stays below its smaller cap and rejects unaudited metad
 test('an already aborted acquisition does not access host, import assets or create a GPU context',async()=>{
  const abort=new AbortController();abort.abort();
  await assert.rejects(acquireProjectModelScene({host:null,signal:abort.signal}),error=>error.name==='AbortError');
+});
+
+test('the visible model commit requires a successful draw, live context and valid shaders before canvas attachment',()=>{
+ const events=[],canvas={parentNode:null},scene={},camera={},host={appendChild(value){assert.equal(value,canvas);events.push('append');canvas.parentNode=host;}};
+ let lost=false,shader=null,renderError=null;
+ const renderer={domElement:canvas,info:{render:{calls:0}},render(actualScene,actualCamera){assert.equal(actualScene,scene);assert.equal(actualCamera,camera);events.push('render');if(renderError)throw renderError;},getContext:()=>({isContextLost:()=>lost})};
+ const draw=()=>commitProjectModelDraw({renderer,scene,camera,host,shaderFailure:()=>shader});
+ assert.throws(draw,/did not draw/);assert.equal(canvas.parentNode,null);
+ renderer.info.render.calls=12;lost=true;assert.throws(draw,/did not draw/);assert.equal(canvas.parentNode,null);
+ lost=false;shader=Error('Shader failed');assert.throws(draw,/Shader failed/);assert.equal(canvas.parentNode,null);
+ shader=null;renderError=Error('Renderer failed');assert.throws(draw,/Renderer failed/);assert.equal(canvas.parentNode,null);
+ renderError=null;events.length=0;assert.deepEqual(draw(),{calls:12});assert.deepEqual(events,['render','append']);
+ events.length=0;draw();assert.deepEqual(events,['render'],'later demand draws reuse the same canvas');
 });
 test('owned native HDR bytes preserve the old loader texture data/defaults and release after a peer asset fails',async t=>{
  const file=await readFile(new URL('../release/public/assets/studio-small.hdr',import.meta.url)),buffer=file.buffer.slice(file.byteOffset,file.byteOffset+file.byteLength);

@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-import {WAIT,scenarioTimeout} from './case-helpers.mjs';
+import {WAIT,frames,scenarioTimeout} from './case-helpers.mjs';
 
 const loader=page=>page.locator('[data-site-loader]');
 async function entered(page,{failed=false}={}){
@@ -39,18 +39,22 @@ test('all portfolio categories and both selected projects have direct readable n
  }finally{await context.close();}
 });
 
-test('Home has no project model and scrolls directly into the nine-grid project index',async({page,isMobile})=>{
+test('Home keeps its introduction model-free and enters with its live project card already prepared',async({page,isMobile})=>{
  const modelRequests=[],errors=[];
  page.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)/.test(request.url()))modelRequests.push(request.url());});
  page.on('pageerror',error=>errors.push(error.message));
  await page.goto('/');await entered(page);
  await expect(page.locator('[data-home-introduction] h1')).toHaveText('Hi, I’m JosHsuan.');
  expect(await page.locator('main>section').evaluateAll(sections=>sections.map(section=>section.id))).toEqual(['about','projects','contact']);
- await expect(page.locator('[data-cinematic-stage],[data-story-chapter],canvas[data-project-model-canvas]')).toHaveCount(0);
- await expect(page.locator('canvas')).toHaveCount(1);
+ await expect(page.locator('[data-cinematic-stage],[data-story-chapter]')).toHaveCount(0);
+ await expect(page.locator('canvas[data-project-model-canvas]')).toHaveCount(1);
+ await expect(page.locator('canvas')).toHaveCount(2);
  await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);
  await expect(page.locator('[data-global-background] img,[data-home-introduction] canvas')).toHaveCount(0);
- expect(modelRequests).toEqual([]);
+ expect(modelRequests.sort()).toEqual([new URL('/assets/source-layers.glb',page.url()).href,new URL('/assets/studio-small.hdr',page.url()).href].sort());
+ const prepared=await page.locator('[data-project-model-preview]').evaluate(node=>node.__projectModelPreview.inspect());
+ expect(prepared.phase).toBe('ready');expect(prepared.resource.firstDraw.completed).toBe(true);expect(prepared.acquisitions).toBe(1);
+ expect((await page.evaluate(()=>window.__site.inspect())).readiness.previews).toEqual([{mode:'model',reason:''}]);
  const first=await page.evaluate(()=>scrollY);await page.mouse.wheel(0,130);
  await expect.poll(()=>page.evaluate(()=>scrollY)).toBeGreaterThan(first);
  await page.locator('[data-home-project-link]').click();await expect(page).toHaveURL(/\/#projects$/);
@@ -61,6 +65,69 @@ test('Home has no project model and scrolls directly into the nine-grid project 
  const cards=await page.locator('[data-project-tile]').evaluateAll(tiles=>tiles.map(tile=>{const image=tile.querySelector('img');const rect=tile.getBoundingClientRect();return{loaded:image.complete&&image.naturalWidth>0,alt:image.alt,square:Math.abs(rect.width-rect.height)<1};}));
  expect(cards.every(card=>card.loaded&&card.alt.length>15&&card.square)).toBe(true);
  expect(errors).toEqual([]);
+});
+
+test('Home native scrolling uses the shared material clock, settles, returns and respects Reduced Motion',async({page})=>{
+ await page.goto('/');await entered(page);
+ const introduction=page.locator('[data-home-scroll-window="introduction"]');
+ const canvas=await page.locator('canvas[data-project-model-canvas]').elementHandle();
+ await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.enabled)).toBe(true);
+ const observation=await introduction.evaluateHandle(node=>{
+  const samples=[];
+  const observer=new MutationObserver(()=>{
+   const moving=node.getAttribute('data-information-moving')==='true',transform=getComputedStyle(node).transform;
+   if(moving&&samples.length<64)samples.push({transform,displaced:transform!=='none'&&!new DOMMatrix(transform).isIdentity,y:scrollY,width:document.documentElement.scrollWidth,client:document.documentElement.clientWidth});
+  });
+  observer.observe(node,{attributes:true,attributeFilter:['style','data-information-moving']});
+  return{samples,dispose(){observer.disconnect();}};
+ });
+ try{
+  await page.mouse.wheel(0,260);
+  await expect.poll(()=>observation.evaluate(value=>value.samples.some(sample=>sample.y>0&&sample.displaced))).toBe(true);
+  await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.informationWindows.settled)).toBe(true);
+  expect(await observation.evaluate(value=>value.samples.every(sample=>sample.width<=sample.client))).toBe(true);
+  await page.locator('footer a[href="#portfolio-main"]').scrollIntoViewIfNeeded();
+  expect(await introduction.evaluate(node=>node.getBoundingClientRect().bottom<0)).toBe(true);
+  await page.locator('footer a[href="#portfolio-main"]').click();
+  await expect.poll(()=>page.evaluate(()=>scrollY)).toBe(0);
+  await expect(introduction).toBeInViewport();
+  await page.locator('[data-home-project-link]').focus();
+  await expect(page.locator('[data-home-project-link]')).toHaveCSS('transform','none');
+  expect(await canvas.evaluate(node=>node.isConnected&&node===document.querySelector('canvas[data-project-model-canvas]'))).toBe(true);
+  expect(await page.locator('[data-project-model-preview]').evaluate(node=>node.__projectModelPreview.inspect().acquisitions)).toBe(1);
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.policy.reduced)).toBe(true);
+  await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.informationWindows.settled)).toBe(true);
+  await expect(introduction).toHaveCSS('transform','none');
+  await frames(page,8);const before=await page.evaluate(()=>window.__globalBackground.inspect().driver.frames);
+  await page.mouse.wheel(0,200);await expect.poll(()=>page.evaluate(()=>scrollY)).toBeGreaterThan(0);await frames(page,8);
+  expect(await page.evaluate(()=>window.__globalBackground.inspect().driver.frames)).toBe(before);
+  expect(await page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.enabled)).toBe(false);
+ }finally{await observation.evaluate(value=>value.dispose());await observation.dispose();}
+});
+
+test('the project grid retains aligned square cards without lines and supports complete rows of nine, twelve and fifteen',async({page,isMobile})=>{
+ await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/projects/');await entered(page);
+ const grid=page.locator('[data-project-grid]');
+ await expect(grid).toHaveAttribute('data-project-grid-cells','9');await expect(page.locator('[data-project-tile]')).toHaveCount(2);
+ const measure=()=>grid.evaluate(node=>{
+  const style=getComputedStyle(node),rect=node.getBoundingClientRect();
+  return{width:rect.width,height:rect.height,columns:style.gridTemplateColumns.split(' ').length,rows:style.gridTemplateRows.split(' ').length,
+   background:style.backgroundImage,borders:[style.borderTopColor,style.borderLeftColor],
+   cards:[...node.children].map(card=>{const r=card.getBoundingClientRect();return{x:r.left-rect.left,y:r.top-rect.top,width:r.width,height:r.height};})};
+ });
+ const base=await measure();expect(base.background).toBe('none');expect(base.borders).toEqual(['rgba(0, 0, 0, 0)','rgba(0, 0, 0, 0)']);
+ expect(base.columns).toBe(isMobile?1:3);for(const card of base.cards)expect(Math.abs(card.width-card.height)).toBeLessThan(1);
+ if(!isMobile){
+  for(const rows of [3,4,5]){
+   // Exercise the real layout's row parameter without inventing public projects.
+   // Project-count mapping is separately checked against 9/10/13 source records.
+   await grid.evaluate((node,value)=>node.style.setProperty('--project-grid-rows',String(value)),rows);
+   const current=await measure();expect(current.rows).toBe(rows);expect(current.height/current.width).toBeCloseTo(rows/3,2);
+   for(let i=0;i<base.cards.length;i++)for(const key of ['x','y','width','height'])expect(current.cards[i][key]).toBeCloseTo(base.cards[i][key],1);
+  }
+  await grid.evaluate(node=>node.style.setProperty('--project-grid-rows','3'));
+ }
 });
 
 test('site loading waits for actual critical images and same-page movement does not start another lifecycle',async({page})=>{
@@ -177,7 +244,8 @@ test('XR detail preserves real evidence, shared authorship and a native related-
  expect(xrViewport.client).toBe(viewport.width);expect(xrViewport.scroll).toBeLessThanOrEqual(xrViewport.client);expect(xrViewport.inner).toBe(viewport.width);expect(xrViewport.visual).toBeCloseTo(viewport.width,0);
  await expect(page.locator('h1')).toHaveText('An Extended-Reality App Using Motion Capture for Bending-Active Structure');
  await expect(page.locator('[data-xr-study]')).toContainText('Wataru Nomura');
- for(const id of ['xr-context','xr-method','xr-prototype','xr-contribution','xr-limits','xr-credits'])await expect(page.locator('#'+id)).toBeVisible();
+ for(const id of ['xr-context','xr-method','xr-prototype','xr-making','xr-credits'])await expect(page.locator('#'+id)).toBeVisible();
+ await expect(page.locator('#xr-contribution,#xr-limits,a[href="#xr-contribution"],a[href="#xr-limits"]')).toHaveCount(0);
  await expect(page.locator('[data-xr-study] details')).toHaveCount(0);
  const expectedImages=['portfolio-main-visual.webp','adaptive-method.webp','physical-capture.webp','communication-system.webp','data-categories.webp','measuring-tools.webp','module-assembly.webp','physical-assembly.webp','physical-result.webp'].map(name=>'/assets/xr/'+name).sort();
  expect(await page.locator('[data-xr-study] figure img').evaluateAll(images=>images.map(image=>image.getAttribute('src')).sort())).toEqual(expectedImages);
@@ -205,6 +273,6 @@ test('Bending page retains one original scene gate and publishes its terminal in
   await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered'&&window.__thesis?.inspect().ready,null,{timeout:WAIT});
   const state=await entered(page);expect(state.delegated).toBe(true);
   await expect(page.locator('[data-entry-loader]')).toBeHidden();await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);
-  await page.locator('[data-home-link]').click();await entered(page);await expect(page.locator('canvas')).toHaveCount(1);await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);
+  await page.locator('[data-home-link]').click();await entered(page);await expect(page.locator('canvas')).toHaveCount(2);await expect(page.locator('canvas[data-project-model-canvas]')).toHaveCount(1);await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);
  }finally{release();await page.unrouteAll({behavior:'wait'});}
 });

@@ -20,12 +20,12 @@ function EvidenceFigure({item,label,eager=false}) {
     <figcaption data-information-window="evidence-caption"><InformationSkin/><p>{item.caption}</p><span>{item.credit}</span></figcaption>
   </figure>;
 }
-function SceneSlot({stage,inspect=false}) {
-  const poster=stage?.poster??study.model.poster;
-  return <div className={styles.sceneSlot} data-xr-scene-slot data-xr-scene-kind={stage?'phone':'model'}
+function SceneSlot({stage,inspect=false,opening=false}) {
+  const poster=opening?study.hero:stage?.poster??study.model.poster;
+  return <div className={styles.sceneSlot} data-xr-scene-slot data-xr-scene-kind={opening?'visual':stage?'phone':'model'}
     data-xr-model-control={inspect?'':undefined} tabIndex={inspect?0:undefined} role={inspect?'group':undefined}
     aria-label={inspect?'Original bamboo assembly. When 3D is available, drag horizontally or use arrow keys to inspect. Home resets; Escape returns to the chapter view.':undefined}>
-    <noscript><figure className={styles.staticFigure}><img src={poster.src} width={poster.width} height={poster.height} alt={poster.alt} loading="lazy"/><figcaption>{stage?stage.caption:study.model.caption}</figcaption></figure></noscript>
+    <noscript><figure className={styles.staticFigure}><img src={poster.src} width={poster.width} height={poster.height} alt={poster.alt} loading="lazy"/><figcaption>{opening?study.hero.caption:stage?stage.caption:study.model.caption}</figcaption></figure></noscript>
   </div>;
 }
 function PhoneChapter({stage,index}) {
@@ -45,12 +45,12 @@ function PhoneChapter({stage,index}) {
 export default function XRProject() {
   return <>
     <PortfolioNavigation current="projects"/>
-    <XRSceneStage model={study.model} stages={study.phoneStages}/>
+    <XRSceneStage model={study.model} stages={study.phoneStages} openingVisual={study.hero}/>
     <main id="portfolio-main" tabIndex={-1} className={styles.page} data-xr-study data-portfolio-root data-portfolio-section="xr-project">
       <article aria-labelledby="xr-title">
         <header id="xr-overview" className={`${styles.chapter} ${styles.hero}`} data-xr-chapter="overview">
           <div className={styles.chapterInner}>
-            <SceneSlot/>
+            <SceneSlot opening/>
             <Panel className={`${styles.narrative} ${styles.heroCopy}`}>
               <a className={styles.backLink} href="/projects/">← All projects</a>
               <p className={styles.eyebrow}>2024 / RESEARCH / PHYSICAL ↔ DIGITAL</p>
@@ -65,7 +65,7 @@ export default function XRProject() {
           <div className={styles.evidenceBand} data-xr-hero><EvidenceFigure item={study.hero} label="PROJECT VISUAL / PHYSICAL STRUCTURE + RECORDED INTERFACE" eager/></div>
         </header>
         <nav className={styles.chapterNavigation} aria-label="XR project sections" data-information-window="editorial"><InformationSkin/>
-          <a href="#xr-context">Physical ↔ digital</a><a href="#xr-method">Method</a><a href="#xr-prototype">App in use</a><a href="#xr-making">Physical study</a><a href="#xr-contribution">Research & credits</a>
+          <a href="#xr-context">Physical ↔ digital</a><a href="#xr-method">Method</a><a href="#xr-prototype">App in use</a><a href="#xr-making">Physical study</a><a href="#xr-credits">Credits & sources</a>
         </nav>
         <section id="xr-context" className={styles.chapter} data-xr-chapter="context" aria-labelledby="xr-context-heading">
           <div className={styles.chapterInner}><SceneSlot/><Panel className={styles.narrative}>
@@ -98,16 +98,10 @@ export default function XRProject() {
             <EvidenceFigure item={study.media.physicalResult} label="BAMBOO DEMONSTRATOR / PHYSICAL RECORD"/>
           </div>
         </section>
-        <section id="xr-contribution" className={styles.readingChapter} data-xr-chapter="contribution" aria-labelledby="xr-contribution-heading"><Panel>
-          <Heading number="05" label="CONTRIBUTION" title="My work within a shared research project." id="xr-contribution-heading"/>
-          <ul className={styles.contributionList}>{study.contributions.map(item=><li key={item.title}><h3>{item.title}</h3><p>{item.description}</p></li>)}</ul><p>{study.contributionNote}</p>
-        </Panel></section>
-        <section id="xr-limits" className={styles.readingChapter} data-xr-chapter="limits" aria-labelledby="xr-limits-heading"><Panel>
-          <Heading number="06" label="LIMITS" title="A prototype, with open questions." id="xr-limits-heading"/><ul className={styles.limitations}>{study.limitations.map(text=><li key={text}>{text}</li>)}</ul>
-        </Panel></section>
         <footer id="xr-credits" className={styles.readingChapter} data-xr-chapter="credits" aria-labelledby="xr-credits-heading"><Panel>
-          <Heading number="07" label="CREDITS & SOURCES" title="A collaborative foundation." id="xr-credits-heading"/>
+          <Heading number="05" label="CREDITS & SOURCES" title="A collaborative foundation." id="xr-credits-heading"/>
           <dl className={styles.credits}>{study.credits.map(item=><div key={item.role}><dt>{item.role}</dt><dd>{item.names}</dd></div>)}</dl><p className={styles.sourceNote}>{study.sourceNote}</p>
+          <p className={styles.caption}>{study.limitations[1]} {study.limitations[3]}</p>
           <div className={styles.recordingSource}><a className={styles.recordingLink} href={study.media.motion.src} target="_blank" rel="noreferrer">Original presentation excerpt <span aria-hidden="true">↗</span></a><p>{study.media.motion.caption}</p><p className={styles.credit}>{study.media.motion.credit}</p></div>
           <a className={styles.nextProject} href="/projects/bending-active/"><span>RELATED STUDY</span><strong>Bending-Active Metal Panel Deformation</strong><span aria-hidden="true">↗</span></a>
         </Panel></footer>

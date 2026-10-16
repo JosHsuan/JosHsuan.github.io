@@ -3,6 +3,7 @@ import {DOMPresenter} from '../presentation/DOMPresenter.ts';
 import {createInformationWindowPresenter} from '../presentation/InformationWindowPresenter.mjs';
 import {createFrameScheduler} from '../../components/runtime-scheduler.mjs';
 import {createPreviewLifecycle} from '../site/PreviewLifecycle.mjs';
+import {createXRStageMotion,advanceXRStageMotion,cancelXRStageMotion} from './XRStageMotion.mjs';
 
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const BLOCKED='a,button,input,select,textarea,summary,[data-protect],[data-information-window]';
@@ -22,32 +23,35 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
    const events=new EventManager(),scope=events.createScope('xr-stage');
    const dom=new DOMPresenter(),publisher=dom.forOwner('xr-director');
    const windows=createInformationWindowPresenter({root,publisher:dom.forOwner('xr-information')});
+   const sceneMotion=createXRStageMotion(),sceneSurface=host.querySelector('[data-xr-scene-surface]')??host;
    const reduced=win.matchMedia('(prefers-reduced-motion: reduce)'),connection=win.navigator?.connection;
    const observerList=[],observed=new Set(),gestureHistory=[];
    let disposed=false,away=false,visible=true,dirty=true,resumed=true,previous=0,frames=0,frameDelta=0;
    let chapters=[],links=[],chapter='overview',progress=0,size={width:0,height:0},resource=null,windowSize={width:win.innerWidth,height:win.innerHeight};
    let target=zero(),value=zero(),velocity=zero(),settled=true,press=null,gestureId=0,lastState='',lastPaint='';
+   let paintedChapter=null,paintPending=false,paintGeneration=0;
    const scheduler=createFrameScheduler({request:fn=>win.requestAnimationFrame(fn),cancel:id=>win.cancelAnimationFrame(id),onFrame:tick});
    const listen=(node,type,fn,options)=>events.listen(scope,node,type,fn,options);
    const policy=()=>({reduced:!!reduced.matches,saveData:!!connection?.saveData,hidden:!!doc.hidden,siteReady:doc.documentElement.getAttribute('data-site-entry-state')==='entered'});
-   const canInspect=()=>{const p=policy(),painted=resource?.inspect();return!!resource&&painted?.mode==='webgl-model'&&painted.successfulPaint&&!disposed&&!scheduler.suspended&&!away&&visible&&!p.hidden&&!p.reduced&&!p.saveData&&p.siteReady;};
-   const state=()=>{const p=policy(),s=lifecycle.inspect();return{phase:s.phase,reason:s.reason,chapter,reduced:p.reduced,saveData:p.saveData,paused};};
+   const canInspect=()=>{const p=policy(),painted=resource?.inspect();return chapter!=='overview'&&sceneMotion.chapter===chapter&&sceneMotion.mode==='hold'&&sceneMotion.settled&&!!resource&&painted?.mode==='webgl-model'&&painted.successfulPaint&&!disposed&&!scheduler.suspended&&!away&&visible&&!p.hidden&&!p.reduced&&!p.saveData&&p.siteReady;};
+   const state=()=>{const p=policy(),s=lifecycle.inspect();return{phase:s.phase,reason:s.reason,chapter,sceneChapter:sceneMotion.chapter,sceneMode:sceneMotion.mode,reduced:p.reduced,saveData:p.saveData,paused};};
    const notify=()=>{if(disposed)return;const next=state(),key=JSON.stringify(next);if(key!==lastState){lastState=key;onState(next);}};
-   const presentation=()=>({chapter,progress,azimuth:value.azimuth,elevation:value.elevation,paused,reduced:policy().reduced});
+   const presentation=()=>({chapter:sceneMotion.chapter,progress,azimuth:value.azimuth,elevation:value.elevation,paused,reduced:policy().reduced});
    const paint=()=>{
     if(!resource)return;
     const next=presentation(),key=JSON.stringify(next);if(key===lastPaint)return;
-    const current=resource;
-    try{const result=current.present(next);lastPaint=key;if(result?.then)result.catch(error=>{if(!disposed&&resource===current)lifecycle.fail(error?.message||'render-unavailable');});}catch(error){lifecycle.fail(error?.message||'render-unavailable');}
+    const current=resource,generation=++paintGeneration;paintPending=true;
+    const acknowledge=()=>{if(disposed||resource!==current||paintGeneration!==generation)return;paintPending=false;paintedChapter=next.chapter;scheduler.schedule();};
+    try{const result=current.present(next);lastPaint=key;if(result?.then)result.then(acknowledge,error=>{if(!disposed&&resource===current&&paintGeneration===generation)lifecycle.fail(error?.message||'render-unavailable');});else acknowledge();}catch(error){lifecycle.fail(error?.message||'render-unavailable');}
    };
    const lifecycle=createPreviewLifecycle({
     setTimeout:win.setTimeout?.bind(win)??globalThis.setTimeout,clearTimeout:win.clearTimeout?.bind(win)??globalThis.clearTimeout,
-    onState(){if(disposed)return;const phase=lifecycle.inspect().phase;if(phase==='failed')closeGesture('resource-unavailable',true);notify();if(phase==='ready')scheduler.schedule();},
+    onState(){if(disposed)return;const phase=lifecycle.inspect().phase;if(phase==='failed'){closeGesture('resource-unavailable',true);advanceXRStageMotion(sceneMotion,0,{chapter,reduced:true});publishScene();}notify();if(phase==='ready')scheduler.schedule();},
     start:async({signal,width,height})=>{
      const handle=await acquire({signal,onFailure:reason=>lifecycle.fail(reason)});
      if(signal.aborted||disposed){handle.dispose();throw new DOMException('XR scene released','AbortError');}
      let released=false;
-     const release=()=>{if(released)return;released=true;if(resource===handle){resource=null;lastPaint='';}handle.dispose();};
+     const release=()=>{if(released)return;released=true;if(resource===handle){resource=null;lastPaint='';paintedChapter=null;paintPending=false;paintGeneration++;}handle.dispose();};
      signal.addEventListener('abort',release,{once:true});
      let painted='';
      try{
@@ -60,7 +64,7 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
       }while(!signal.aborted&&!disposed&&painted!==JSON.stringify(presentation()));
      }catch(error){signal.removeEventListener('abort',release);release();throw error;}
      if(signal.aborted||disposed){signal.removeEventListener('abort',release);release();throw new DOMException('XR scene released','AbortError');}
-     resource=handle;lastPaint=painted;
+     resource=handle;lastPaint=painted;paintedChapter=JSON.parse(painted).chapter;paintPending=false;
      return{
       resize(width,height){handle.resize(width,height);},
       inspect:()=>handle.inspect(),
@@ -117,14 +121,23 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
      if(Math.abs(value[key]-target[key])<.00001&&Math.abs(velocity[key])<.0001){value[key]=target[key];velocity[key]=0;}else settled=false;
     }
    }
+   function publishScene(){
+    publisher.style(sceneSurface,'transform',`translate3d(${sceneMotion.pose.x*size.width}px,${sceneMotion.pose.y*size.height}px,0)`);
+    publisher.style(sceneSurface,'opacity',sceneMotion.pose.opacity);
+    publisher.attribute(host,'data-xr-scene-mode',sceneMotion.mode);
+    publisher.attribute(host,'data-xr-presented-chapter',sceneMotion.chapter);
+   }
    function tick(now){
     if(disposed||scheduler.suspended)return;
     if(dirty)measure();reading();
     const dt=previous?Math.max(0,(now-previous)/1000):1/60;previous=now;frames++;frameDelta=dt;
     advance(dt);
+    const p=policy();
+    advanceXRStageMotion(sceneMotion,dt,{chapter,readyChapter:paintedChapter,reduced:p.reduced||p.saveData||lifecycle.inspect().phase==='failed',resumed});
+    publishScene();
     const moving=windows.publish({docY:win.scrollY,dt,reduced:policy().reduced,seek:resumed,resumed});
-    resumed=false;paint();
-    if(!settled||moving)scheduler.schedule();else previous=0;
+    resumed=false;paint();notify();
+    if(!settled||moving||sceneMotion.transition)scheduler.schedule();else previous=0;
    }
    function invalidate(){if(disposed)return;dirty=true;scheduler.schedule();}
    function down(event){
@@ -153,7 +166,7 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
    }
    function suspend(reason,flag){
     scheduler.suspend(reason,flag);previous=0;resumed=true;
-    if(flag){closeGesture(reason,true);windows.publish({docY:win.scrollY,dt:0,reduced:true,resumed:true});}
+    if(flag){closeGesture(reason,true);cancelXRStageMotion(sceneMotion,reason);advanceXRStageMotion(sceneMotion,0,{chapter,reduced:true});publishScene();windows.publish({docY:win.scrollY,dt:0,reduced:true,resumed:true});}
     updateEligibility(reason);if(!scheduler.suspended){dirty=true;scheduler.schedule();}
    }
    const resize=win.ResizeObserver?new win.ResizeObserver(invalidate):null;if(resize)observerList.push(resize);
@@ -171,11 +184,12 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
    listen(reduced,'change',()=>{closeGesture('preference-change',true);previous=0;resumed=true;updateEligibility('preference-change');scheduler.schedule();});
    if(connection?.addEventListener)listen(connection,'change',()=>{closeGesture('preference-change',true);updateEligibility('preference-change');scheduler.schedule();});
    function dispose(){
-    if(disposed)return;closeGesture('disposed',true);disposed=true;lifecycle.dispose();scheduler.dispose();windows.dispose();
+    if(disposed)return;closeGesture('disposed',true);cancelXRStageMotion(sceneMotion,'disposed');disposed=true;lifecycle.dispose();scheduler.dispose();windows.dispose();
     observerList.forEach(observer=>observer.disconnect());observed.clear();scope.dispose();events.dispose();
     publisher.attribute(root,'data-xr-director-ready',null);publisher.attribute(root,'data-xr-active-chapter',null);links.forEach(link=>publisher.attribute(link,'aria-current',null));
+    publisher.style(sceneSurface,'transform','');publisher.style(sceneSurface,'opacity','');publisher.attribute(host,'data-xr-scene-mode',null);publisher.attribute(host,'data-xr-presented-chapter',null);
    }
-   const inspect=()=>({...lifecycle.inspect(),chapter,progress,paused,...policy(),size:{...size},camera:{target:{...target},value:{...value},settled},gesture:press?{id:press.id,pointerId:press.pointerId,locked:press.locked}:null,gestures:[...gestureHistory],frames,frameDelta,lifecycle:scheduler.inspect(),events:events.inspect(),informationWindows:windows.inspect(),domPublication:dom.inspect(),disposed});
+   const inspect=()=>({...lifecycle.inspect(),chapter,progress,paused,...policy(),size:{...size},scene:{chapter:sceneMotion.chapter,requestedChapter:sceneMotion.requestedChapter,mode:sceneMotion.mode,settled:sceneMotion.settled,visible:sceneMotion.visible,...sceneMotion.pose,paintPending,paintedChapter,history:sceneMotion.history.map(item=>({...item}))},camera:{target:{...target},value:{...value},settled},gesture:press?{id:press.id,pointerId:press.pointerId,locked:press.locked}:null,gestures:[...gestureHistory],frames,frameDelta,lifecycle:scheduler.inspect(),events:events.inspect(),informationWindows:windows.inspect(),domPublication:dom.inspect(),disposed});
    binding={dispose,inspect,hitTest:(x,y)=>canInspect()&&[x,y].every(Number.isFinite)?resource.hitTest?.(x,y)??false:false,pause(value){
     if(disposed||paused===value)return;paused=value;
     // Native media commands acknowledge before the UI, independently of the

@@ -8,7 +8,7 @@ export function createExclusivePreviewLease(){
 
 /** One asynchronous acquisition, one terminal, no rendering clock. start must
  * release partial resources on signal abort; late fulfilled handles are disposed. */
-export function createPreviewLifecycle({start,onState=()=>{},deadline=15000,setTimeout:setTimer=globalThis.setTimeout,clearTimeout:clearTimer=globalThis.clearTimeout,lease}={}){
+export function createPreviewLifecycle({start,onState=()=>{},deadline=15000,setTimeout:setTimer=globalThis.setTimeout,clearTimeout:clearTimer=globalThis.clearTimeout,lease,retainWhenInactive=false}={}){
  if(typeof start!=='function')throw TypeError('Preview requires an acquisition factory');
  let active=false,disposed=false,generation=0,operation=null,handle=null,abort=null,timer=null,releaseLease=null,pending=false;
  let phase='poster',reason='initial',size={width:1,height:1},acquisitions=0,disposals=0,renders=0;
@@ -54,13 +54,26 @@ export function createPreviewLifecycle({start,onState=()=>{},deadline=15000,setT
  return{
   setActive(value,eventReason='offscreen'){
    if(disposed)return;const next=!!value;if(next===active)return;
-   if(!next){stop(eventReason);return;}active=true;if(phase==='failed')phase='poster';begin();
+   if(!next){
+    if(retainWhenInactive&&handle&&phase==='ready'){
+     active=false;reason=eventReason;
+     try{handle.suspend?.();}catch(error){fail(error?.message||'suspend-unavailable');return;}
+     notify();return;
+    }
+    stop(eventReason);return;
+   }
+   active=true;
+   if(retainWhenInactive&&handle&&phase==='ready'){
+    reason='';try{handle.resume?.();if(size.width&&size.height&&handle.resize){handle.resize(size.width,size.height);renders++;}}catch(error){fail(error?.message||'render-unavailable');return;}
+    notify();return;
+   }
+   if(phase==='failed')phase='poster';begin();
   },
   resize(width,height){
    if(disposed)return;if(![width,height].every(value=>Number.isFinite(value)&&value>=0))throw RangeError('Preview size must be finite and nonnegative');
    if(width===size.width&&height===size.height)return;size={width,height};
-   if(!width||!height){if(pending||handle)stop('zero-size',true);return;}
-   if(handle&&phase==='ready'){try{handle.resize?.(width,height);renders++;}catch(error){fail(error?.message||'render-unavailable');}}
+   if(!width||!height){if(pending||handle&&!retainWhenInactive)stop('zero-size',true);return;}
+   if(handle&&phase==='ready'){if(active)try{handle.resize?.(width,height);renders++;}catch(error){fail(error?.message||'render-unavailable');}}
    else begin();
   },
   stop,
@@ -72,15 +85,16 @@ export function createPreviewLifecycle({start,onState=()=>{},deadline=15000,setT
 
 /** Shared eligibility for model/GIF enhancement. Native document/policy/size
  * events supply all work; there is no scroll handler, timer or animation loop. */
-export function observePreviewEligibility({element,window:win,document:doc,onChange,onSize}={}){
+export function observePreviewEligibility({element,window:win,document:doc,onChange,onSize,mode='visible'}={}){
+ if(!['visible','page'].includes(mode))throw TypeError('Unknown preview eligibility mode');
  const events=new EventManager(),scope=events.createScope('preview-eligibility');
  const reduced=win.matchMedia?.('(prefers-reduced-motion: reduce)'),connection=win.navigator?.connection;
  let visible=false,pageAway=false,disposed=false,last='';
  const inspect=()=>{
   const hidden=!!doc.hidden,reduce=!!reduced?.matches,saveData=!!connection?.saveData,siteReady=doc.documentElement.getAttribute('data-site-entry-state')==='entered';
-  const active=visible&&!hidden&&!pageAway&&!reduce&&!saveData&&siteReady;
-  const reason=pageAway?'page-exit':hidden?'hidden':reduce?'reduced-motion':saveData?'save-data':!siteReady?'entry-pending':!visible?'offscreen':'visible';
-  return{active,reason,visible,hidden,pageAway,reduced:reduce,saveData,siteReady};
+  const active=!hidden&&!pageAway&&!reduce&&!saveData&&(mode==='page'||visible&&siteReady);
+  const reason=pageAway?'page-exit':hidden?'hidden':reduce?'reduced-motion':saveData?'save-data':mode==='page'?'page-ready':!siteReady?'entry-pending':!visible?'offscreen':'visible';
+  return{active,reason,visible,hidden,pageAway,reduced:reduce,saveData,siteReady,mode};
  };
  const publish=()=>{if(disposed)return;const state=inspect(),key=JSON.stringify(state);if(key!==last){last=key;onChange(state);}};
  events.listen(scope,doc,'visibilitychange',publish);

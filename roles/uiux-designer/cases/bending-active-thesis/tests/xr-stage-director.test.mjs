@@ -36,7 +36,7 @@ function fixture({pending=false,firstPaintFailure=false,firstPaint}={}){
  const observer=kind=>class{constructor(fn){this.fn=fn;this.kind=kind;this.nodes=new Set();this.disconnected=false;observers.push(this);}observe(node){this.nodes.add(node);}unobserve(node){this.nodes.delete(node);}disconnect(){this.nodes.clear();this.disconnected=true;}};
  Object.assign(win,{ResizeObserver:observer('resize'),IntersectionObserver:observer('intersection'),MutationObserver:observer('mutation')});
  win.getComputedStyle=()=>({background:'rgba(24, 29, 30, .72)',borderTopWidth:'1px',borderRightWidth:'1px',borderBottomWidth:'1px',borderLeftWidth:'1px',outlineStyle:'none',outlineWidth:'0px',borderTopColor:'#fff',borderRightColor:'#fff',borderBottomColor:'#fff',borderLeftColor:'#fff',borderTopLeftRadius:'18px',boxShadow:'0 8px 20px #0003'});
- const root=new Element(doc,{height:11000}),host=new Element(doc,{width:1440,height:1000}),keys=['overview','context','method','adapt','assemble','join','making','contribution','limits','credits'];
+ const root=new Element(doc,{height:11000}),host=new Element(doc,{width:1440,height:1000}),keys=['overview','context','method','adapt','assemble','join','making','credits'];
  const chapters=keys.map((key,index)=>{const node=new Element(doc,{id:`xr-${key}`,top:index*1100,height:1100});node.dataset.xrChapter=key;node.parentElement=root;return node;});
  const links=chapters.map(node=>{const link=new Element(doc,{marker:'a'});link.setAttribute('href',`#${node.id}`);return link;});
  const info=new Element(doc,{top:1200,width:500,height:160,marker:'[data-information-window]'}),skin=new Element(doc);info.parentElement=root;info.setAttribute('data-information-window','editorial');info.querySelector=selector=>selector===':scope > [data-information-skin]'?skin:null;
@@ -67,12 +67,31 @@ test('native XR chapters, real information presenter and first paint compose one
  f.site('entered');await f.settle();assert.equal(f.starts.length,1);assert.equal(f.director.inspect().phase,'ready');assert.ok(f.handles[0].presents.length>=1);closed(f.director.inspect().history);
  assert.ok(f.states.findIndex(s=>s.phase==='ready')>f.states.findIndex(s=>s.phase==='requested'));
  const baseline=f.director.inspect(),draws=f.handles[0].presents.length,count=f.states.length;
- assert.deepEqual(f.director.hitTest(600,400),{source:true,kind:'model'});assert.equal(f.director.hitTest(NaN,400),false);assert.equal(f.raf.size,0,'Read-only source hit diagnostics cannot schedule or mutate the scene');
+ assert.equal(f.director.hitTest(600,400),false,'The opening main visual cannot expose the prepared, invisible model');assert.equal(f.director.hitTest(NaN,400),false);assert.equal(f.raf.size,0,'Read-only source hit diagnostics cannot schedule or mutate the scene');
  f.win.fire('resize');f.pointer('pointermove');f.win.fire('wheel',{deltaY:300});await f.settle();
  assert.equal(f.director.inspect().frames,baseline.frames);assert.equal(f.handles[0].presents.length,draws);assert.equal(f.states.length,count);
  f.scroll('adapt');await f.settle();assert.equal(f.director.inspect().chapter,'adapt');assert.equal(f.handles[0].presents.at(-1).chapter,'adapt');assert.equal(f.links[3].getAttribute('aria-current'),'location');assert.equal(f.starts.length,1);
  f.director.setPaused(true);await f.settle();assert.equal(f.handles[0].presents.at(-1).paused,true);assert.equal(f.states.at(-1).paused,true);
  const pausedDraws=f.handles[0].presents.length;f.director.setPaused(true);await f.settle();assert.equal(f.handles[0].presents.length,pausedDraws);
+});
+
+test('the opening visual keeps a prepared model inert; later chapters reuse it and returning closes inspection',async t=>{
+ const f=fixture();t.after(f.cleanup);f.site('entered');await f.settle();
+ assert.equal(f.director.inspect().chapter,'overview');assert.equal(f.starts.length,1);
+ const resource=f.handles[0],frames=f.director.inspect().frames;
+ f.pointer('pointerdown');assert.equal(f.director.inspect().gesture,null);
+ assert.equal(f.key('ArrowRight').prevented,0);assert.equal(f.director.hitTest(600,400),false);
+ await f.settle();assert.equal(f.director.inspect().frames,frames,'An invisible source never acquires a motion frame');
+ f.scroll('context');await f.settle();
+ assert.deepEqual(f.director.hitTest(600,400),{source:true,kind:'model'});
+ f.pointer('pointerdown');f.pointer('pointermove',{clientX:680});await f.settle();
+ assert.ok(f.director.inspect().camera.value.azimuth<0);
+ f.scroll('overview');await f.settle();
+ assert.equal(f.director.inspect().gesture,null);assert.deepEqual(f.director.inspect().camera.value,{azimuth:0,elevation:0});
+ assert.equal(f.director.hitTest(600,400),false);assert.equal(f.control.captured.size,0);
+ assert.equal(f.starts.length,1);assert.equal(resource.disposed,0,'Native reading reuses the already prepared scene');
+ f.scroll('method');await f.settle();assert.equal(f.key('ArrowRight').prevented,1);
+ await f.settle();assert.ok(f.director.inspect().camera.value.azimuth<0);assert.equal(f.starts.length,1);
 });
 
 test('source-hit gestures follow Bending camera direction, keep vertical touch native and close on release/cancellation',async t=>{
@@ -150,8 +169,32 @@ test('an asynchronous first phone paint stays requested, reconciles native chapt
   else{f.scroll('join');f.director.setPaused(true);f.host.clientWidth=700;f.win.innerWidth=700;f.win.fire('resize');f.frame();}
   paint.resolve();await f.settle();
   if(cancelled){assert.equal(f.states.some(s=>s.phase==='ready'),false);assert.equal(f.handles[0].disposed,1);assert.equal(f.director.inspect().resource,null);}
-  else{assert.equal(f.director.inspect().phase,'ready');assert.equal(f.handles[0].presents.at(-1).chapter,'join');assert.equal(f.handles[0].presents.at(-1).paused,true,'An unbound first paint reconciles the latest pause intent before readiness');assert.deepEqual(f.handles[0].pauseCalls,[]);assert.deepEqual(f.handles[0].sizes.at(-1),[700,1000]);assert.equal(f.states.filter(s=>s.phase==='ready').length,1);}
+  else{assert.equal(f.director.inspect().phase,'ready');assert.equal(f.handles[0].presents.at(-1).chapter,'join');assert.equal(f.handles[0].presents.at(-1).paused,true,'An unbound first paint reconciles the latest pause intent before readiness');assert.deepEqual(f.handles[0].pauseCalls,[]);assert.deepEqual(f.handles[0].sizes.at(-1),[700,1000]);assert.equal(f.states.filter((s,index)=>s.phase==='ready'&&f.states[index-1]?.phase!=='ready').length,1,'Scene-mode UI updates do not create a second acquisition readiness transition');}
   closed(f.director.inspect().history);
+ }
+});
+
+test('chapter passage keeps the old scene until exit, waits for actual new paint, and closes superseded or disposed requests',async t=>{
+ for(const superseded of [false,true]){
+  const f=fixture();t.after(f.cleanup);f.site('entered');f.scroll('adapt');await f.settle();
+  assert.equal(f.director.inspect().scene.mode,'hold');assert.equal(f.director.inspect().scene.chapter,'adapt');
+  const paint=deferred(),handle=f.handles[0],original=handle.present;
+  handle.present=state=>{const result=original(state);return state.chapter==='join'?paint.promise:result;};
+  f.scroll('join');f.frame();
+  let scene=f.director.inspect().scene;
+  assert.equal(scene.mode,'exit');assert.equal(scene.chapter,'adapt');assert.equal(handle.presents.at(-1).chapter,'adapt');
+  f.pointer('pointerdown');assert.equal(f.director.inspect().gesture,null);
+  await f.settle();scene=f.director.inspect().scene;
+  assert.equal(scene.mode,'waiting');assert.equal(scene.chapter,'join');assert.equal(scene.opacity,0);assert.equal(scene.paintPending,true);
+  assert.equal(f.raf.size,0,'A pending native paint does not spin the Director clock');
+  if(superseded){f.scroll('method');await f.settle();assert.equal(f.director.inspect().scene.chapter,'method');assert.equal(f.director.inspect().scene.mode,'hold');}
+  paint.resolve();await f.settle();scene=f.director.inspect().scene;
+  assert.equal(scene.chapter,superseded?'method':'join');assert.equal(scene.mode,'hold');assert.equal(scene.opacity,1);assert.equal(scene.settled,true);
+  const history=scene.history;
+  for(const id of new Set(history.map(item=>item.id))){const own=history.filter(item=>item.id===id);assert.equal(own.filter(item=>item.status==='requested').length,1);assert.equal(own.filter(item=>['completed','cancelled'].includes(item.status)).length,1);}
+  f.scroll('making');f.frame();f.cleanup();
+  const final=f.director.inspect().scene.history;
+  assert.equal(final.at(-1).status,'cancelled');assert.equal(final.at(-1).reason,'disposed');
  }
 });
 

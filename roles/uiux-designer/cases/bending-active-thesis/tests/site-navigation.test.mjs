@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createSiteNavigation,SITE_HANDOFF_KEY,SITE_TERMINAL_KEY} from '../runtime/site/SiteNavigation.mjs';
 import {acquireSiteReadiness} from '../runtime/site/SiteReadiness.mjs';
+import {registerPagePreviewReadiness} from '../runtime/site/PagePreviewReadiness.mjs';
+import {createPreviewLifecycle} from '../runtime/site/PreviewLifecycle.mjs';
 import {createRuntimeInput} from '../runtime/RuntimeInput.ts';
 import {createEntryManager} from '../runtime/features/EntryManager.mjs';
 
@@ -14,9 +16,9 @@ class Element extends EventTarget{
  getAttribute(name){return this.attributes.get(name)??null;}
  hasAttribute(name){return this.attributes.has(name);}
 }
-function environment({url='https://example.test/',storage=new Map(),images=[],readyState='complete',fonts=Promise.resolve()}={}){
+function environment({url='https://example.test/',storage=new Map(),images=[],previews=[],readyState='complete',fonts=Promise.resolve()}={}){
  const loader=new Element(),content=new Element(),navigation=new Element(),doc=new EventTarget(),win=new EventTarget(),media=new EventTarget();
- Object.assign(doc,{documentElement:new Element(),readyState,hidden:false,fonts:{ready:fonts},querySelectorAll:selector=>selector.includes('img')?images:[content,navigation]});
+ Object.assign(doc,{documentElement:new Element(),readyState,hidden:false,fonts:{ready:fonts},querySelectorAll:selector=>selector.includes('img')?images:selector==='[data-site-preview-required]'?previews:[content,navigation]});
  let clock=0,serial=0;const timers=new Map();
  Object.assign(media,{matches:false});
  Object.assign(win,{location:new URL(url),sessionStorage:{getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,value),removeItem:key=>storage.delete(key)},matchMedia:()=>media,
@@ -52,6 +54,93 @@ function nativeReveal(f,{throwAt=-1,invalidAt=-1,invalidReadyAt=-1,manualReady=f
  return{content,calls,owned,frames,requested,cancelled,frame(){const next=frames.entries().next().value;assert.ok(next,'Expected one native presentation callback');frames.delete(next[0]);next[1](f.now());}};
 }
 async function presented(native){await flush();native.frame();await flush();}
+
+test('generic arrival cannot reveal before every SSR-declared model has actually prepared',async t=>{
+ const nodes=[new Element(),new Element()],f=environment({previews:nodes}),native=nativeReveal(f),manager=connect(t,f);
+ await flush();assert.deepEqual(phases(manager),['requested']);assert.equal(native.frames.size,0);assert.deepEqual(manager.inspect().previews.pending,['preview-1','preview-2']);
+ const first=registerPagePreviewReadiness(f.doc,nodes[0]);first.report({mode:'model'});await flush();assert.equal(native.frames.size,0);
+ const second=registerPagePreviewReadiness(f.doc,nodes[1]);second.report({mode:'model'});await flush();assert.deepEqual(phases(manager),['requested']);assert.equal(native.frames.size,1);
+ assert.equal(manager.inspect().readiness.ready,true);native.frame();await flush();assert.equal(manager.inspect().phase,'revealing');
+ native.owned.forEach(item=>item.finish());await flush();assert.equal(manager.inspect().phase,'entered');
+});
+
+test('preview preparation consumes the existing arrival budget instead of receiving a new deadline',async t=>{
+ const node=new Element(),f=environment({previews:[node]}),native=nativeReveal(f),manager=connect(t,f);await flush();
+ const registration=registerPagePreviewReadiness(f.doc,node);f.advance(14000);registration.report({mode:'model'});await flush();
+ assert.equal([...f.timers.values()][0].at,15000);f.advance(999);native.frame();await flush();assert.equal(manager.inspect().phase,'revealing');assert.equal([...f.timers.values()][0].at,16599);
+ native.owned.forEach(item=>item.finish());await flush();assert.equal(manager.inspect().phase,'entered');
+});
+
+test('explicit static preview policy still waits for critical poster decoding before static entry',async t=>{
+ const poster=new Element(),decoded=deferred(),node=new Element();Object.assign(poster,{complete:true,naturalWidth:100,decode:()=>decoded.promise});
+ const f=environment({previews:[node],images:[poster]}),native=nativeReveal(f);f.media.matches=true;const manager=connect(t,f);
+ registerPagePreviewReadiness(f.doc,node).report({mode:'static',reason:'reduced-motion'});await flush();assert.deepEqual(phases(manager),['requested']);assert.equal(f.content.hasAttribute('inert'),true);
+ decoded.resolve();await flush();assert.deepEqual(phases(manager),['requested','ready','revealing','entered']);assert.deepEqual(manager.inspect().readiness.previews,[{mode:'static',reason:'reduced-motion'}]);
+ assert.equal(native.calls.length,0);assert.equal(native.requested.length,0);
+});
+
+test('unknown preview markers fail open at the original startup endpoint without fabricating ready or entered',async t=>{
+ const node=new Element(),f=environment({previews:[node]}),native=nativeReveal(f),manager=connect(t,f);await flush();f.advance(15000);await flush();
+ assert.deepEqual(phases(manager),['requested','failed']);assert.equal(manager.inspect().reason,'readiness-timeout');assert.equal(native.frames.size,0);assert.equal(f.content.hasAttribute('inert'),false);
+ registerPagePreviewReadiness(f.doc,node).report({mode:'model'});await flush();assert.deepEqual(phases(manager),['requested','failed']);assert.equal(f.timers.size,0);
+});
+
+test('global startup expiry aborts unfinished card enhancement before exposing its explicit static fallback',async t=>{
+ const node=new Element(),f=environment({previews:[node]}),native=nativeReveal(f),events=[],manager=connect(t,f);let registration;
+ registration=registerPagePreviewReadiness(f.doc,node,{onFallback:reason=>{
+  assert.equal(f.loader.hasAttribute('hidden'),false);assert.equal(f.content.hasAttribute('inert'),true);
+  events.push('abort');registration.report({mode:'static',reason});
+ }});
+ manager.onReadiness(fact=>{if(fact.phase==='failed'){events.push('uncovered');assert.equal(f.loader.hasAttribute('hidden'),true);assert.equal(manager.inspect().previews.previews[0].mode,'static');}});
+ await flush();f.advance(15000);await flush();assert.deepEqual(events,['abort','uncovered']);assert.deepEqual(phases(manager),['requested','failed']);assert.equal(native.calls.length,0);
+ assert.equal(registration.report({mode:'model'}),false);assert.equal(f.timers.size,0);
+});
+
+test('expired preview completion cannot receive a fresh reveal budget or enter after a delayed deadline callback',async t=>{
+ const node=new Element(),f=environment({previews:[node]}),native=nativeReveal(f),manager=connect(t,f),registration=registerPagePreviewReadiness(f.doc,node);await flush();
+ f.elapse(15000);registration.report({mode:'model'});await flush();assert.deepEqual(phases(manager),['requested','failed']);assert.equal(manager.inspect().reason,'presentation-timeout');
+ assert.equal(native.calls.length,0);assert.equal(native.frames.size,0);assert.equal(f.timers.size,0);
+});
+
+test('pending cancellation releases acquisition and lease before uncovering; a prevented activation cannot introduce a late model',async t=>{
+ for(const action of ['prevented-activation','pagehide','dispose']){
+  const node=new Element(),f=environment({previews:[node]}),native=nativeReveal(f),manager=connect(t,f),acquired=deferred(),events=[];
+  let signal,leases=0,lateDisposals=0,registration;
+  const lifecycle=createPreviewLifecycle({start:options=>{signal=options.signal;signal.addEventListener('abort',()=>events.push('abort'),{once:true});return acquired.promise;},
+   lease:{acquire(){leases++;return()=>{leases--;events.push('lease-released');};}},setTimeout:f.win.setTimeout,clearTimeout:f.win.clearTimeout,
+   onState:snapshot=>{if(snapshot.phase==='ready')registration.report({mode:'model'});}});
+  t.after(()=>lifecycle.dispose());
+  registration=registerPagePreviewReadiness(f.doc,node,{onFallback:reason=>{
+   assert.equal(f.loader.hasAttribute('hidden'),false);lifecycle.stop(reason);registration.report({mode:'static',reason});events.push('static');
+  }});
+  manager.onReadiness(fact=>{if(fact.phase==='cancelled'){assert.equal(signal.aborted,true);assert.equal(leases,0);assert.equal(f.loader.hasAttribute('hidden'),true);events.push(`uncovered:${fact.reason}`);}});
+  lifecycle.setActive(true);await flush();assert.equal(leases,1);assert.equal(native.frames.size,0);
+  if(action==='prevented-activation'){
+   f.doc.addEventListener('click',event=>event.preventDefault());f.click('https://example.test/about/');await flush();assert.equal(manager.inspect().reason,'activation-prevented');
+  }else if(action==='pagehide')f.page('pagehide',true);else manager.dispose();
+  assert.deepEqual(events.slice(0,4),['abort','lease-released','static',`uncovered:${action==='prevented-activation'?'superseded':action==='pagehide'?'page-hidden':'disconnected'}`]);
+  acquired.resolve({dispose(){lateDisposals++;},resize(){assert.fail('A cancelled late handle cannot draw');}});await flush();assert.equal(lateDisposals,1);
+  assert.equal(lifecycle.inspect().phase,'poster');assert.equal(registration.report({mode:'model'}),false);assert.equal(native.calls.length,0);assert.equal(native.frames.size,0);assert.equal(f.timers.size,0);
+  const lateReasons=[];const late=registerPagePreviewReadiness(f.doc,node,{onFallback:reason=>lateReasons.push(reason)});
+  assert.equal(lateReasons.length,1);assert.equal(late.report({mode:'model'}),false);late.release();registration.release();
+ }
+});
+
+test('cancelling pending preview composition prevents stale completion and BFCache starts a distinct bounded arrival',async t=>{
+ const node=new Element(),f=environment({previews:[node]}),native=nativeReveal(f),manager=connect(t,f);await flush();const original=manager.inspect().id;
+ f.page('pagehide',true);const reasons=[],registration=registerPagePreviewReadiness(f.doc,node,{onFallback:reason=>reasons.push(reason)});
+ assert.deepEqual(reasons,['page-hidden']);assert.equal(registration.report({mode:'model'}),false);registration.report({mode:'static',reason:'page-hidden'});
+ await flush();assert.equal(manager.inspect().phase,'cancelled');assert.equal(native.frames.size,0);
+ f.advance(1);f.page('pageshow',true);await flush();assert.notEqual(manager.inspect().id,original);assert.equal(manager.inspect().phase,'entered');
+ assert.deepEqual(manager.inspect().history.filter(fact=>fact.id===original).map(fact=>fact.phase),['requested','cancelled']);assert.equal(f.timers.size,0);
+});
+
+test('delegated Bending entry does not acquire generic page-preview readiness or native reveal ownership',async t=>{
+ const f=environment({url:'https://example.test/projects/bending-active/',previews:[new Element()]}),native=nativeReveal(f);let scene,previewAcquisitions=0;
+ const manager=connect(t,f,{acquirePreviews(){previewAcquisitions++;throw Error('Bending must not acquire card readiness');},subscribeScene(listener){scene=listener;return()=>{};}});await flush();
+ scene({id:1,phase:'ready'});scene({id:1,phase:'revealing'});scene({id:1,phase:'entered'});await flush();assert.equal(manager.inspect().phase,'entered');
+ assert.equal(previewAcquisitions,0);assert.equal(native.requested.length,0);assert.equal(native.calls.length,0);
+});
 
 test('resources, finite presentation and both native play acknowledgements share the original arrival budget',async t=>{
  const font=deferred(),f=environment({fonts:font.promise}),native=nativeReveal(f,{manualReady:true}),manager=connect(t,f);
