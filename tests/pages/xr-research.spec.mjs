@@ -117,28 +117,56 @@ test('one project background stage preserves source geometry, stays idle, and fo
 test('native scrolling selects all three complete recordings in the same scene and pause preserves native media time',async({page})=>{
  const errors=[];page.on('pageerror',error=>errors.push(error.message));await enter(page);await modelReady(page);
  const originalCanvas=await stage(page).locator('canvas').elementHandle();
+ // Keep the same retained canvas and native screenshot action. Batch related
+ // observations at one instant instead of resolving the same locator for each
+ // assertion while the recording and the real scene clock continue to run.
+ const decodedFrames=()=>page.evaluate(()=>{
+  const hosts=document.querySelectorAll('[data-xr-stage]');if(hosts.length!==1)throw Error('Expected exactly one XR stage');
+  return hosts[0].__xrStage.inspect().resource.media.frames;
+ });
+ const frameSample=count=>originalCanvas.evaluate(async(_canvas,count)=>{
+  for(let index=0;index<count;index++)await new Promise(requestAnimationFrame);
+  const hosts=document.querySelectorAll('[data-xr-stage]');if(hosts.length!==1)throw Error('Expected exactly one XR stage');
+  return hosts[0].__xrStage.inspect();
+ },count);
  await expect(page.locator('[data-phone-stage],[data-phone-front-toggle]')).toHaveCount(0);
  for(const [id,duration]of[['adapt',13],['assemble',24.96],['join',20.3]]){
-  await phoneReady(page,id);const state=await facts(page);closed(state);expect(state.acquisitions).toBe(1);expect(state.resource.media.reason).toBeNull();expect(state.resource.fallbackReason).toBeNull();
-  await expect(stage(page).locator('canvas')).toHaveCount(1);await expect(stage(page).locator('video[src]')).toHaveCount(1);
-  expect(await originalCanvas.evaluate(node=>node.isConnected&&node===document.querySelector('[data-xr-stage] canvas'))).toBe(true);
-  expect(state.resource.surface.budget.budget.pixels).toBeLessThanOrEqual(393216);expect(await video(page,id).evaluate(node=>node.muted&&node.loop&&node.playsInline&&!node.paused)).toBe(true);expect(await video(page,id).evaluate(node=>node.duration)).toBeCloseTo(duration,2);
+  await phoneReady(page,id);
+  const sample=await originalCanvas.evaluate((canvas,id)=>{
+   const hosts=document.querySelectorAll('[data-xr-stage]');if(hosts.length!==1)throw Error('Expected exactly one XR stage');
+   const host=hosts[0],videos=host.querySelectorAll(`[data-xr-stage-video="${id}"]`);if(videos.length!==1)throw Error('Expected exactly one selected recording');
+   const recording=videos[0];return{state:host.__xrStage.inspect(),canvasCount:host.querySelectorAll('canvas').length,videoSources:host.querySelectorAll('video[src]').length,
+    originalCanvas:canvas.isConnected&&canvas===host.querySelector('canvas'),nativePlaying:recording.muted&&recording.loop&&recording.playsInline&&!recording.paused,duration:recording.duration};
+  },id);
+  const {state}=sample;closed(state);expect(state.acquisitions).toBe(1);expect(state.resource.media.reason).toBeNull();expect(state.resource.fallbackReason).toBeNull();
+  expect(sample.canvasCount).toBe(1);expect(sample.videoSources).toBe(1);expect(sample.originalCanvas).toBe(true);
+  expect(state.resource.surface.budget.budget.pixels).toBeLessThanOrEqual(393216);expect(sample.nativePlaying).toBe(true);expect(sample.duration).toBeCloseTo(duration,2);
   const draw=state.resource.surface;expect(draw.sourceCalls).toBe(0);expect(draw.phoneBodyCalls).toBe(1);expect(draw.phoneScreenCalls).toBe(1);expect(draw.phoneCalls).toBe(2);expect(draw.stageCalls).toBeGreaterThan(0);expect(draw.calls).toBe(draw.sourceCalls+draw.phoneCalls+draw.stageCalls);
-  const first=await stage(page).locator('canvas').screenshot(),count=state.resource.media.frames;
-  await expect.poll(async()=>(await facts(page)).resource.media.frames).toBeGreaterThan(count+2);expect((await stage(page).locator('canvas').screenshot()).equals(first)).toBe(false);
+  const first=await originalCanvas.screenshot(),count=await decodedFrames();
+  await expect.poll(decodedFrames).toBeGreaterThan(count+2);expect((await originalCanvas.screenshot()).equals(first)).toBe(false);
  }
  const url=page.url();await page.getByRole('button',{name:'Pause recording',exact:true}).click();
- await expect.poll(()=>video(page,'join').evaluate(node=>node.paused)).toBe(true);await settled(page,'join');const frozen=await facts(page);await frames(page,8);const still=await facts(page);
+ await expect.poll(()=>originalCanvas.evaluate(()=>{
+  const hosts=document.querySelectorAll('[data-xr-stage]');if(hosts.length!==1)throw Error('Expected exactly one XR stage');
+  const videos=hosts[0].querySelectorAll('[data-xr-stage-video="join"]');if(videos.length!==1)throw Error('Expected exactly one Join recording');return videos[0].paused;
+ })).toBe(true);await settled(page,'join');const frozen=await frameSample(0),still=await frameSample(8);
  expect(still.resource.media.position).toBe(frozen.resource.media.position);expect(still.resource.media.frames).toBe(frozen.resource.media.frames);expect(still.resource.surface.draws).toBe(frozen.resource.surface.draws);
- const resume=await video(page,'join').evaluateHandle(node=>{const events=[];const record=event=>events.push({time:node.currentTime,trusted:event.isTrusted});node.addEventListener('play',record,{once:true});return{events,dispose(){node.removeEventListener('play',record);}};});
+ const resume=await originalCanvas.evaluateHandle(()=>{
+  const hosts=document.querySelectorAll('[data-xr-stage]');if(hosts.length!==1)throw Error('Expected exactly one XR stage');
+  const videos=hosts[0].querySelectorAll('[data-xr-stage-video="join"]');if(videos.length!==1)throw Error('Expected exactly one Join recording');
+  const node=videos[0],events=[];const record=event=>events.push({time:node.currentTime,trusted:event.isTrusted,duration:node.duration});node.addEventListener('play',record,{once:true});return{events,dispose(){node.removeEventListener('play',record);}};
+ });
  try{
-  await page.getByRole('button',{name:'Play recording',exact:true}).click();await expect.poll(()=>resume.evaluate(value=>value.events.length)).toBe(1);
-  const played=await resume.evaluate(value=>value.events[0]),duration=await video(page,'join').evaluate(node=>node.duration),delta=Math.abs(played.time-frozen.resource.media.position);
-  expect(played.trusted).toBe(true);expect(Math.min(delta,Math.abs(duration-delta))).toBeLessThan(.3);await expect.poll(async()=>(await facts(page)).resource.media.frames).toBeGreaterThan(frozen.resource.media.frames);expect(page.url()).toBe(url);
+  await page.getByRole('button',{name:'Play recording',exact:true}).click();let played;
+  await expect.poll(async()=>{const events=await resume.evaluate(value=>value.events);if(events.length===1)played=events[0];return events.length;}).toBe(1);
+  const delta=Math.abs(played.time-frozen.resource.media.position);
+  expect(played.trusted).toBe(true);expect(Math.min(delta,Math.abs(played.duration-delta))).toBeLessThan(.3);await expect.poll(decodedFrames).toBeGreaterThan(frozen.resource.media.frames);expect(page.url()).toBe(url);
  }finally{await resume.evaluate(value=>value.dispose());await resume.dispose();}
- const controls=await page.locator('[data-xr-scene-controls]').evaluate(node=>({rect:node.getBoundingClientRect().toJSON(),buttons:[...node.querySelectorAll('button')].map(button=>button.getBoundingClientRect().toJSON())})),viewport=page.viewportSize();
+ const controls=await originalCanvas.evaluate(()=>{const nodes=document.querySelectorAll('[data-xr-scene-controls]');if(nodes.length!==1)throw Error('Expected exactly one XR scene control group');const node=nodes[0];return{rect:node.getBoundingClientRect().toJSON(),buttons:[...node.querySelectorAll('button')].map(button=>button.getBoundingClientRect().toJSON())};}),viewport=page.viewportSize();
  expect(controls.rect.left).toBeGreaterThanOrEqual(0);expect(controls.rect.top).toBeGreaterThanOrEqual(0);expect(controls.rect.right).toBeLessThanOrEqual(viewport.width);expect(controls.rect.bottom).toBeLessThanOrEqual(viewport.height);expect(controls.buttons.every(rect=>rect.width>=44&&rect.height>=44)).toBe(true);
- await scrollChapter(page,'overview');await modelReady(page);await openingVisible(page);await expect(stage(page).locator('video[src]')).toHaveCount(0);expect((await facts(page)).resource.media.stage).toBeNull();expect((await facts(page)).acquisitions).toBe(1);expect(errors).toEqual([]);
+ await scrollChapter(page,'overview');await modelReady(page);await openingVisible(page);
+ const returned=await originalCanvas.evaluate(()=>{const hosts=document.querySelectorAll('[data-xr-stage]');if(hosts.length!==1)throw Error('Expected exactly one XR stage');return{state:hosts[0].__xrStage.inspect(),videoSources:hosts[0].querySelectorAll('video[src]').length};});
+ expect(returned.videoSources).toBe(0);expect(returned.state.resource.media.stage).toBeNull();expect(returned.state.acquisitions).toBe(1);expect(errors).toEqual([]);
 });
 
 test('Reduced Motion preserves the selected source posters, native reading and recording links and cancels an active enhancement',async({page})=>{

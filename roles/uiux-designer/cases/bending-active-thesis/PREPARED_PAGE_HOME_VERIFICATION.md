@@ -2,8 +2,10 @@
 
 Date: 16 October 2026 (Europe/Berlin).
 
-Status: local functional and visual review complete; exact-commit CI, publication
-and live acceptance remain pending. Auxiliary strict transport and independent
+Status: local functional and visual review complete; the first exact-commit CI
+failed and correctly blocked publication. The test-observation correction passes
+two local browser executions; new exact-commit CI validation, publication and live
+acceptance remain pending. Auxiliary strict transport and independent
 normal-time pixel comparisons retain their nonpassing flags below. This record
 belongs to [decision 0014](../../../../docs/decisions/0014-prepared-page-home.md)
 and [its integration contract](PREPARED_PAGE_HOME_INTEGRATION.md). Earlier XR
@@ -136,7 +138,7 @@ deployment and live acceptance remain pending for every requirement.
 | Home has the Bending scroll response | Same production presenter sampled on one existing site scheduler; actual native wheel/touch/anchor/keyboard movement, visible entry/exit, focus/static policies, idle and teardown. Optional field failure does not block Home motion. | Earlier mobile moving overflow remains a failed checkpoint; corrected affected checks now pass native moving-width assertions. Complete new visuals pending. |
 | XR main visual opens, later 3D remains and gains stage transitions | Opening visual visible and hidden prepared canvas/controls; actual later model/phone paint, source projection/hits, project-local background and complete entry/exit under native scrolling/reversal. Original Pause/Play, full durations and source-frame timing stay intact. | Corrected-export affected checks pass the stage-only feather/navigation and native stage/media assertions; complete reviewed visual capture pending. |
 | Remove Contribution/Limits sections while keeping truthful credits | Eight chapter markers; removed section IDs/nav/heading blocks absent; section 05 credits, all approved source data/pins, authorship, source note and retained benchmark/hardware limits verified directly. | Current public artifact audit and earlier exported checks pass; final capture/CI acceptance remains separate. |
-| Complete deployment | Successful exact-commit required CI, validated export digest, existing workflow consuming that artifact without rebuild, then matching live release/routes/assets and actual live screenshots/interactions. | Not committed, CI-gated or deployed for this revision at this checkpoint. |
+| Complete deployment | Successful exact-commit required CI, validated export digest, existing workflow consuming that artifact without rebuild, then matching live release/routes/assets and actual live screenshots/interactions. | Candidate `1b46df6` was committed and built by CI; the required gate failed on one desktop Chromium execution. Publication is held; corrected-test revalidation and live acceptance remain pending. |
 
 ## Final records to append after execution
 
@@ -190,6 +192,81 @@ was used, and no normal-time zero-RGB-match claim is made.
 Earlier failed or incomplete local receipts remain immutable. No auxiliary
 aggregate has been edited to make it green. The existing required CI gate and
 same-artifact deployment remain mandatory before publication.
+
+### First exact-commit CI: failed, publication held
+
+[CI run 38919616325](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/38919616325)
+tested commit `1b46df69fac390a2f0cc923fd094b8d6da0d8386`. The public build
+receipt records export digest
+`b60a0ea64ba3e164b5d2424d6a45362548007c2efee328dc5ca59ec5f730249e`.
+This identifies the failed candidate, not a validated release. Actual results:
+
+| Selection | Result |
+| --- | --- |
+| Quality / portable | 451 discovered: 449 pass, zero fail, two existing conditional skips. |
+| Empty framework, root and `/portfolio-test` | 12/12 pass in each build. |
+| Public desktop Chromium | 76/77 pass; the native three-recording XR case fails at its 60-second test deadline. |
+| Public WebKit | 77/77 pass. |
+| Public mobile Chromium | 77/77 pass. |
+| Public total / required validation gate | 230/231 pass. The required gate fails, so this candidate is not published. |
+
+The sole failing execution is in
+[desktop Chromium shard 4/4, job 117036494792](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/38919616325/job/117036494792):
+`native scrolling selects all three complete recordings in the same scene and
+pause preserves native media time`. That shard retains 17 passes and one failure.
+It reaches Join, then exceeds the existing 60000 ms test timeout at the first
+actual stage-canvas screenshot, `tests/pages/xr-research.spec.mjs:127`. The failed
+test does not establish successful completion of its remaining captures or
+Pause/Play assertions. Its call log reaches loaded fonts and the element-stability
+wait; it contains no reported "not stable" retry sequence.
+
+The retained trace records the test start at monotonic `979755.784` ms. The
+first Join screenshot's locator acquisition starts at `1037703.159` ms, already
+**57.947 seconds** into the 60-second test. That acquisition takes `1064.134` ms
+and completes at `1038767.293` ms, leaving approximately **988 ms** for the
+screenshot and all remaining work. This timing supports reducing sequential
+test-observation round trips; it does not prove an unstable scene. Across three
+retained snapshots after the stage enters `hold`, the canvas bounds remain
+left `691.1875`, top `140`, right `1425.578125`, bottom `920`, and its presented
+surface remains `translate3d(0px, 0px, 0px)` with opacity `1`. These sampled facts
+do not certify every instant between snapshots, but they provide no basis for a
+runtime motion change.
+
+The downloaded failure artifact is `public-case-failures-chromium-3`, ID
+`12055032713`; its uploaded ZIP SHA-256 is
+`b20d311bacad5aa9ae2cc5b82e3985a6dbf9ab1d8156e3c7498ad284b2e4f196`.
+Retained local evidence and SHA-256 values:
+
+- [Failing job log](animation-review/.local/github-job-117036494792.log):
+  `808cd99951dbe328459e9d28f5f96b338f55b8f5caedf620793543927aa6705b`.
+- [Test-runner trace](animation-review/.local/prepared-page-ci-1b46df6/trace-chromium4/test.trace):
+  `45d177ecfa0cf80c67d74fbc34266d6a1bec5470121ce6eef4b9bf2e47ffd12d`.
+- [Browser trace](animation-review/.local/prepared-page-ci-1b46df6/trace-chromium4/1-trace.trace):
+  `1f393387c9cd52d8dc63c650c3255029377efacf0d02425da498a1ff634ab81a`.
+- [CI build receipt](animation-review/.local/prepared-page-ci-1b46df6/build/ci-build.json):
+  `b23ee51ea4c382276e8c5214e85af04590b97fc851c645291fc280a8a686b398`.
+
+No runtime edit is warranted by this evidence. The failed candidate's raw
+evidence remains unchanged, and a new passing required gate plus same-artifact
+deployment and live acceptance are still required.
+
+### Test-observation correction: local execution only
+
+The implemented test-only correction batches related observations in browser
+RPCs while preserving the 60-second deadline, all three complete recordings,
+every actual canvas capture and all existing assertion thresholds. With Node
+24.19.0 / pnpm 11.19.0, the same native-recording case passes on the existing
+local `.pages-workspace/out/` artifact in desktop Chromium (**21.7 seconds**) and
+mobile Chromium (**13.7 seconds**): **2/2 pass, 36.9 seconds total**. The retained
+[local browser log](animation-review/.local/prepared-page-native-observation-browser.log)
+has SHA-256
+`e0a77a5a7ff9927a1b9307715fac51bbfbf2ae7b13edbea24a4937e60ae23627`.
+Source syntax and ESLint checks also pass. This local Windows checkpoint is not
+Linux CI evidence or a full browser-matrix pass. A new exact-commit CI run and
+its successful required gate, same-artifact deployment and live acceptance are
+**pending**; the earlier `1b46df6` failure retains its original result.
+
+### Remaining final evidence
 
 - Final source commit and clean build identity; `pnpm check`, portable discovery
   and scoped/full results, with actual skipped/failed checks retained.
