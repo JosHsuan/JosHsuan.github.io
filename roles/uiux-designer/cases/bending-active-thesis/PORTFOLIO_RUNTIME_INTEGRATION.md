@@ -25,7 +25,7 @@ the introduction, a full-page scene, or the full case RuntimeRoot on Home.
 | --- | --- |
 | Software Architect | Keep native, full-document anchors and a small site loader controller. Optional card previews share `PreviewLifecycle`, separate from site readiness and the full case RuntimeRoot. Only the visible model card dynamically imports its own narrow Three renderer; same-document fragments remain native. |
 | Experience Director | Every site request has one `entered`, `cancelled` or `failed` terminal. Preview acquisition separately has one `ready`, `cancelled` or `failed` terminal; a later resource fault cannot rewrite a successful acquisition. Case scene entry is delegated, never driven again. |
-| Motion Designer | Generic entry uses the existing 0.72-second CSS reveal; Reduced Motion skips it. Model cards are fixed-pose demand renders with no motion clock. XR playback uses the native video clock, with a real pause button, visible-only lifetime and Reduced Motion/Save Data poster fallback. The case Director remains the sole case animation clock. |
+| Motion Designer | Generic entry uses a 0.72-second reveal on the native document timeline. SiteNavigation owns the opacity/lift handles and waits for both native `finished` promises; API-absent engines retain the CSS-event fallback. The two writers never run together. Reduced Motion skips the reveal. Model cards are fixed-pose demand renders with no motion clock. XR playback uses the native video clock, with a real pause button, visible-only lifetime and Reduced Motion/Save Data poster fallback. The case Director remains the sole case animation clock. |
 | Performance Engineer | The introduction/background mounts no model, case RuntimeRoot or Canvas. One shared optional-preview eligibility service responds to actual intersection, document visibility, site entry and preferences. Offscreen/hidden/pagehide abort and release model contexts or video sources. A shared model lease permits at most one model-card renderer; no JavaScript RAF is added. Functional evidence does not prove physical-device performance. |
 | Animation Cinematographer | Card rendering reuses the verified three-layer assembly, source satin/base treatment, HDR PMREM, ACES/SRGB, frozen overview lighting and the existing exhibition light wash. The overview direction is refit to the card's aspect; it is not claimed as pixel-identical to the full case, whose camera, compositor and source remain unchanged. |
 
@@ -36,6 +36,22 @@ the introduction, a full-page scene, or the full case RuntimeRoot on Home.
 - `runtime/site/SiteNavigation.mjs` owns `[data-site-loader]` visibility,
   `data-site-phase`, `html[data-site-entry-state]`, and temporary generic-page
   `inert` / `aria-busy` attributes. It uses the existing scoped EventManager.
+  For generic arrivals it also owns the finite native reveal handles on the
+  loader and `[data-site-loader-content]`. The native path disables the CSS
+  reveal, ignores CSS completion events and requires both `finished` promises.
+  Missing native APIs retain the CSS-event path; a failed native acquisition
+  cannot silently start a second writer. Cancellation, terminal state and
+  disposal cancel all owned handles, including their retained fill effects.
+  Generic native preparation stays `requested` while it awaits one finite
+  presentation opportunity and both original `Animation.ready` promises. The
+  same effects may already be running during this preparation; they are not
+  paused and replayed. `ready` means that document resources and both native play
+  tasks have been accepted, not that a GPU paint has been acknowledged. The
+  preparation uses the remaining original 15-second arrival budget; resource
+  completion never restarts it. Only then does the original 1.6-second reveal
+  completion budget begin. Terminal/preference changes cancel the callback and
+  animation handles. No recurring render loop or JavaScript animation clock is
+  introduced.
 - `runtime/site/SiteReadiness.mjs` shares one resource check per document. Only
   `img[data-site-critical]` or images inside a marked container are critical.
   Their selected source is awaited through load/error and `decode()`; no image
@@ -59,11 +75,19 @@ The case's ReadingManager retains all Bending chapter fragment/history ownership
 The site trace uses `requested → ready → revealing → entered`. Cancellation and
 failure are terminal alternatives, never followed by `entered` for the same
 request. Missing or broken fonts, critical images, decoding and the 15-second
-document deadline produce `failed` and release generic content. A missing generic
-reveal completion produces `failed` after 1.6 seconds rather than asserting that
-an unseen animation completed. Hidden or Reduced generic arrivals choose a
-readable static completion. Live Reduced Motion also ends a running generic
-reveal. These deadlines are bounded event waits, not another render loop.
+document deadline produce `failed` and release generic content. Generic native
+preparation, including pending play acceptance, shares that arrival's original
+15-second budget. A missing reveal completion produces `failed` after 1.6 seconds
+from `ready`; it cannot assert that an unseen animation completed. This changes
+the earlier resource-only definition of `ready` and the budget allocation: pending
+presentation/play now belongs to preparation rather than consuming the reveal
+budget. Success remains eligible for at most 16.6 seconds from controller arrival,
+not from HTML download. Browser main-thread blocking can delay terminal dispatch.
+Hidden or Reduced generic arrivals choose a readable static completion only after
+successful document readiness. Live changes close pending native preparation or
+reveal explicitly. Every asynchronous boundary checks its monotonic expiry; a
+delayed timer cannot permit a late success. These are bounded event waits, not
+another render loop. The shared readiness service and Bending gate are unchanged.
 
 Native `FontFaceSet.ready` fulfills after font loading settles, including failure;
 it is not a successful-font proof and does not reject for ordinary network errors.

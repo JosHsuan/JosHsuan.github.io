@@ -77,17 +77,48 @@ test('site loading waits for actual critical images and same-page movement does 
   revealAssay=await page.evaluateHandle(()=>{
    const candidates=[...document.styleSheets].flatMap(sheet=>[...sheet.cssRules]).filter(rule=>rule.selectorText?.includes('[data-entry-context]')&&rule.style?.cssText.includes('entry-fail-open'));
    if(candidates.length!==1)throw Error(`Expected one compiled case fallback, found ${candidates.length}`);
-   const element=document.querySelector('[data-site-loader]'),style=document.createElement('style'),events=[];
+   const element=document.querySelector('[data-site-loader]'),content=element.querySelector('[data-site-loader-content]'),style=document.createElement('style');
    style.textContent=candidates[0].cssText;document.head.append(style);
-   const ended=event=>{if(event.target===element)events.push({name:event.animationName,trusted:event.isTrusted,elapsed:event.elapsedTime});};
-   element.addEventListener('animationend',ended);
-   return{events,dispose(){element.removeEventListener('animationend',ended);style.remove();}};
+   const nativeAnimate=Element.prototype.animate,started=[],fulfilled=[],rejected=[];
+   if(typeof nativeAnimate!=='function'||!content)throw Error('Expected native reveal targets');
+   const snapshot=(animation,target)=>{
+    const timing=animation.effect.getComputedTiming();
+    return{target:target===element?'loader':'content',exactTarget:animation.effect.target===target,
+     duration:timing.duration,easing:timing.easing,fill:timing.fill,currentTime:animation.currentTime,
+     progress:timing.progress,localTime:timing.localTime,playState:animation.playState,
+     cssAnimationName:getComputedStyle(target).animationName,
+     cssRevealWriters:element.getAnimations({subtree:true}).filter(effect=>/site-(?:reveal|lift)/.test(effect.animationName??'')).length};
+   };
+   // Observe the exact native promises before the controller subscribes. Its
+   // terminal cleanup may cancel fill-both handles before finish events dispatch.
+   const observedAnimate=function(...args){
+    const animation=Reflect.apply(nativeAnimate,this,args);
+    if(this===element||this===content){
+     const finished=animation.finished;
+     started.push(snapshot(animation,this));
+     finished.then(()=>fulfilled.push(snapshot(animation,this)),error=>rejected.push({target:this===element?'loader':'content',name:error.name}));
+    }
+    return animation;
+   };
+   Element.prototype.animate=observedAnimate;
+   return{started,fulfilled,rejected,dispose(){if(Element.prototype.animate===observedAnimate)Element.prototype.animate=nativeAnimate;style.remove();}};
   });
   release();await page.unrouteAll({behavior:'wait'});
   const ready=await entered(page);
   expect(ready.history.filter(fact=>fact.id===ready.id).map(fact=>fact.phase)).toEqual(['requested','ready','revealing','entered']);
-  const animations=await revealAssay.evaluate(assay=>assay.events);
-  expect(animations.filter(event=>event.trusted&&event.name.includes('site-reveal')&&event.elapsed>0)).toHaveLength(1);
+  const animations=await revealAssay.evaluate(assay=>({started:assay.started,fulfilled:assay.fulfilled,rejected:assay.rejected}));
+  expect(animations.started.map(animation=>animation.target).sort()).toEqual(['content','loader']);
+  expect(animations.fulfilled.map(animation=>animation.target).sort()).toEqual(['content','loader']);
+  expect(animations.rejected).toEqual([]);
+  for(const animation of [...animations.started,...animations.fulfilled]){
+   expect(animation.exactTarget).toBe(true);expect(animation.duration).toBe(720);
+   expect(animation.easing).toBe('cubic-bezier(0.45, 0, 0.15, 1)');expect(animation.fill).toBe('both');
+   expect(animation.cssAnimationName).toBe('none');expect(animation.cssRevealWriters).toBe(0);
+  }
+  for(const animation of animations.fulfilled){
+   expect(animation.playState).toBe('finished');expect(animation.currentTime).toBe(720);
+   expect(animation.localTime).toBe(720);expect(animation.progress).toBe(1);
+  }
   await page.locator('[data-home-project-link]').click();
   const after=await page.evaluate(()=>window.__site.inspect());expect(after.id).toBe(ready.id);expect(after.history).toEqual(ready.history);
   await expect(page.locator('[data-portfolio-root]')).not.toHaveAttribute('inert','');

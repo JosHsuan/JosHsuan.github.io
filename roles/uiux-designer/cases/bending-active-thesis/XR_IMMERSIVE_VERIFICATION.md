@@ -273,3 +273,141 @@ native controls, passive probes and original failures as distinct checkpoints
 check. Publication still requires fresh complete same-SHA CI, its exact-artifact
 gate and actual live acceptance. Physical Safari/iPhone verification remains
 unavailable.
+
+## Generic reveal completion correction
+
+The `6578cee` full CI run positively verifies the original XR three-recording,
+pause/resume continuity and live Reduced Motion assertions in Linux WebKit. Its
+WebKit second shard nevertheless fails one project-card test at site entry,
+before card interaction: `requested → ready → revealing → failed`, reason
+`reveal-timeout`. Fonts, critical posters and document readiness are successful.
+This reproduces the entry limitation in actual CI, so it is no longer treated
+as a Docker-only condition. Publication remains held. The complete original log
+SHA-256 is
+`3e563d6b4de16834f72b928d0bebb713bda39b2402f5ddb2695efe0ee3666349`.
+
+In the isolated same-loader native comparison, the CSS baseline still fails.
+The alternative changes only root opacity and content lift to native
+`Element.animate` handles with the same 720 ms duration and easing. Both original
+native `finished` promises naturally resolve at 1771 ms, before the unchanged
+manager deadline at 1954 ms; their native current time is 720 ms, progress is 1
+and root opacity is 0. No time setter, synthetic completion event or entered
+state is used. The unchanged old controller still fails because it only listens
+for a CSS event. That diagnostic remains a raw failure, not a passing application
+test, and motivates the completion-owner correction.
+
+The generic site controller now acquires those two native handles when the APIs
+are available and waits for both actual completions before entering. It is the
+only reveal property writer; the CSS reveal is then disabled. CSS events cannot
+complete the native path. API-absent engines retain the existing CSS fallback.
+The 720 ms visual recipe and 1600 ms failure deadline are unchanged. Generation
+and terminal guards reject stale completions; cancellation, preference changes,
+handoff and disposal release owned handles and fill effects. Native acquisition
+or completion failure cannot become a successful entry or start a second writer.
+The Bending EntryManager, Director and scene-entry delegation are unchanged.
+
+Pinned engine source confirms that `running` can coexist with a pending play
+task and unresolved start time; a CSS `animationstart` event alone does not prove
+the animation is advancing. These mechanisms do not identify the unobserved
+upstream branch responsible for a given failure. The new application path still
+requires positive built-artifact browser checks and fresh complete same-SHA CI
+before deployment.
+
+The first production-only cold check of the native port still fails. Its two
+real handles are created at 360/361 ms but stay pending with current time zero
+and unresolved start times until the unchanged deadline. They reject only after
+the failed terminal hides the loader and cancels them. There are no transport,
+page or console errors and no pending requests at close. The raw failure receipt
+SHA-256 is
+`5da962acc1c34ed9310ad29c1d353364bec0d7d9856e8d36fd24db7db64ca48d`;
+the planned 19 browser cases were not run at this failed checkpoint. This proves
+that changing API/completion ownership alone is insufficient.
+
+The next candidate retains `ready` across two finite native presentation
+callbacks. Its 32 controller tests and full 400-check portable selection pass
+(398 passed, two existing conditional skips), but the actual cold check still
+fails. Unwrapped original project-card and XR tests also fail; explicitly
+activating the page changes neither failure, with native focus already true.
+A passive cadence probe locates the cost: resources are ready at 364 ms, the
+first callback arrives at 1001 ms and the second at 1776 ms. Native effects are
+then created at 1776/1777 ms, leaving only about 189 ms before the original
+1965 ms deadline. A 720 ms animation cannot finish in that remaining budget.
+Observed native frame intervals are 783 and 398 ms; no fixed 1 Hz rate is claimed.
+The barrier-failure receipt SHA-256 is
+`e1983aae75248eb7c35101fb7810f6e6a48eed2b398239a50b7d9318fa348713`.
+
+The subsequent smaller candidate requests one finite native presentation callback
+before creating the explicit native keyframes. The same 1600 ms deadline starts
+at `ready`, includes that callback and is never moved or extended. One pending
+callback is owned and cancelled with the request. Hidden/Reduced/static and
+stale-callback paths close explicitly, while Bending's delegated entry schedules
+no callback. This is a presentation opportunity, not a GPU paint fence or a
+second motion clock. Its production-only cold observer still fails, with resource
+readiness at 341 ms and the failed terminal at 1942 ms. It observes no native
+animation acquisition; because it does not observe RAF delivery, this does not
+prove that no callback ran. The original unwrapped project-card test also fails
+at `reveal-timeout`, this time after `revealing`. The original unwrapped XR
+scrolling case passes, including the actual model/phone canvas, all three source
+durations, decoded frames, native pause/resume continuity and source release.
+Thus neither universal failure nor an observer-only explanation fits the evidence.
+There are no retries or skipped tests. The frozen 20–21 receipt SHA-256 is
+`b41b49bbfbe351a995dae0fb81aabaec7e5b32849cf899a8e19dda438c94d2b4`.
+
+The next candidate changes the generic preparation boundary rather than treating
+a frame callback as animation readiness. Document resources, one finite native
+presentation opportunity and both original `Animation.ready` promises share the
+remaining original 15-second arrival budget. Both effects are acquired once and
+may already run while the lifecycle is `requested`; they are never paused,
+replayed or moved in time. `ready` now means resources and native play acceptance,
+not GPU paint acknowledgment or a promise of another full 720 ms afterward. It
+starts the original 1600 ms completion budget, and both original `finished`
+promises remain required for `entered`. This is an explicit preparation-policy
+change, not evidence that the prior deadline already covered cold native play.
+The shared readiness service and Bending's delegated scene gate are unchanged.
+Actual browser, full same-SHA CI and live publication acceptance remain pending.
+
+This preparation candidate passes all 40 controller tests, retaining the prior
+32 and adding eight cases for original-budget consumption, withheld/rejected or
+missing native play acceptance, completion arriving before acceptance, resource
+prerequisites for static policies, and early/late deadline delivery. An early
+deadline callback re-arms only the remaining time to the same endpoint and does
+not prematurely release resources. The complete portable selection discovers
+408 checks: 406 pass, zero fail and the same two conditional skips. Runtime and
+fixture SHA-256 are respectively
+`78012b3f08b4514ad3581ee5bab24fecde9a4aa5caa4e759e7f1a1f4c6b87bbe`
+and `acaf8172c36af40822a5ba191dcf4bcfa025c106d3d563c7de73a28f9767b2d0`.
+The generic caller also rounds its remaining resource timeout upward to avoid
+native integer conversion expiring it a fraction of a millisecond early; the
+unchanged generic monotonic endpoint still rejects late success. The shared
+service and Bending timeout input remain unchanged. These CPU results do not
+certify actual browser entry or publication.
+
+The rebuilt preparation candidate passes the unchanged production-only cold
+Linux WebKit observer. Both actual effects are acquired at 2569 ms while still
+`requested`; both original `ready` and `finished` promises naturally fulfill at
+3357 ms, with current time 720 ms and progress 1. The lifecycle then records
+`ready → revealing → entered` at 3358 ms, and hides the loader before releasing
+the fill effects. Same-turn mutation observations are not claimed as distinct
+paint timestamps. There are no parallel CSS reveal writers, warnings, errors,
+failed requests or pending requests at context close; the actual XR WebGL model
+also reaches ready. The unchanged observer SHA-256 is
+`4bac9cbd4d093951083c18acc9d6c5b5488ea51e2075dcf45acd4cdbbece347a`;
+its raw result SHA-256 is
+`982e3fa1fd9a724f1fcf3deb5b352314bcd5f173bbe0701ef43d45bfd66ca1ba`.
+Full original browser coverage and same-SHA CI remain separately required.
+The two unchanged, unwrapped original cases then pass together: the project-card
+entry case and XR's native scrolling/three-recording/pause-resume case, 2/2 with
+zero retries or skips. The separate original 19-case related selection is still
+running at this checkpoint. This is local Linux evidence, not a completed CI
+gate or authorization to deploy a failed earlier run.
+
+The first native-port local checkpoint passes `pnpm check`, including the empty
+63-file framework, and all 26 site-navigation tests. The complete portable
+selection discovers 394 checks: 392 pass, zero fail and the same two conditional
+skips. The public build/audit passes with 139 local files and all 57 approved
+assets. The rebuilt output digest is
+`71c7e74d557f963195dad0cf567489110da32d22b0c8e6fe1393d7f8d39df5d4`.
+Its release metadata still names the preceding `6578cee` HEAD; this is an
+uncommitted corrective-source build, not the failed commit's CI export. Runtime
+and fixture SHA-256 receipts bind it to the new implementation before browser
+checks; it cannot be used as a deployment artifact.

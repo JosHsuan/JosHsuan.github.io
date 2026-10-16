@@ -29,12 +29,280 @@ function environment({url='https://example.test/',storage=new Map(),images=[],re
   doc.dispatchEvent(event);return event;
  };
  const page=(type,persisted=false)=>{const event=new Event(type);Object.defineProperty(event,'persisted',{value:persisted});win.dispatchEvent(event);};
- return{win,doc,media,loader,content,navigation,timers,advance,click,page,storage,now:()=>clock};
+ return{win,doc,media,loader,content,navigation,timers,advance,elapse:delta=>{clock+=delta;},click,page,storage,now:()=>clock};
 }
 function connect(t,f,options={}){
  const manager=createSiteNavigation({window:f.win,document:f.doc,element:f.loader,now:f.now,...options});manager.start();t.after(()=>manager.dispose());return manager;
 }
 function phases(manager){return manager.inspect().history.map(fact=>fact.phase);}
+function nativeReveal(f,{throwAt=-1,invalidAt=-1,invalidReadyAt=-1,manualReady=false}={}){
+ const content=new Element(),calls=[],owned=[],frames=new Map(),requested=[],cancelled=[];let serial=0;
+ f.win.requestAnimationFrame=callback=>{const id=++serial;frames.set(id,callback);requested.push({id,callback});return id;};
+ f.win.cancelAnimationFrame=id=>{cancelled.push(id);frames.delete(id);};
+ f.loader.querySelector=selector=>selector==='[data-site-loader-content]'?content:null;
+ for(const target of [f.loader,content])target.animate=function(keyframes,options){
+  assert.equal(this,target);const index=calls.length;calls.push({target,keyframes,options});
+  if(index===throwAt)throw Error('Native animation unavailable');
+  const completion=index===invalidAt?null:deferred(),preparation=index===invalidReadyAt?null:manualReady?deferred():{promise:Promise.resolve()};let preparationRead=false;
+  const item={cancels:0,hiddenAtCancel:[],finish:()=>completion?.resolve(),reject:()=>completion?.reject(new DOMException('Cancelled','AbortError')),
+   accept:()=>preparation?.resolve?.(),rejectReady:()=>preparation?.reject?.(new DOMException('Cancelled','AbortError'))};
+  item.handle={...(completion?{finished:completion.promise}:{}),get ready(){preparationRead=true;return preparation?.promise;},cancel(){item.cancels++;item.hiddenAtCancel.push(f.loader.hasAttribute('hidden'));item.reject();if(preparationRead)item.rejectReady();}};
+  owned.push(item);return item.handle;
+ };
+ return{content,calls,owned,frames,requested,cancelled,frame(){const next=frames.entries().next().value;assert.ok(next,'Expected one native presentation callback');frames.delete(next[0]);next[1](f.now());}};
+}
+async function presented(native){await flush();native.frame();await flush();}
+
+test('resources, finite presentation and both native play acknowledgements share the original arrival budget',async t=>{
+ const font=deferred(),f=environment({fonts:font.promise}),native=nativeReveal(f,{manualReady:true}),manager=connect(t,f);
+ const [[timerId,timer]]=f.timers;assert.equal(timer.at,15000);f.advance(2000);font.resolve();await flush();
+ assert.deepEqual(phases(manager),['requested']);assert.equal(manager.inspect().readiness.ready,true);assert.equal(native.calls.length,0);assert.equal(native.frames.size,1);
+ assert.equal(f.timers.get(timerId),timer);assert.equal(f.timers.size,1);
+ f.advance(350);native.frame();await flush();assert.equal(manager.inspect().phase,'requested');assert.equal(native.calls.length,2);assert.equal(native.frames.size,0);
+ native.requested[0].callback(f.now());assert.equal(native.calls.length,2);f.advance(4000);native.owned[0].accept();await flush();assert.equal(manager.inspect().phase,'requested');
+ native.owned[1].accept();await flush();assert.equal(manager.inspect().phase,'revealing');assert.equal(f.timers.has(timerId),false);
+ assert.equal([...f.timers.values()][0].at,7950);assert.equal(f.timers.size,1);
+ native.owned.forEach(item=>item.finish());await flush();assert.equal(manager.inspect().phase,'entered');assert.equal(f.timers.size,0);assert.equal(native.requested.length,1);
+});
+
+test('withheld presentation uses startup expiry while accepted but unfinished effects use the separate reveal deadline',async t=>{
+ for(const delivered of [0,1]){
+  const f=environment(),native=nativeReveal(f),manager=connect(t,f);await flush();if(delivered){native.frame();await flush();}
+  const pending=native.requested.at(-1);f.advance((delivered?1600:15000)-1);assert.equal(manager.inspect().phase,delivered?'revealing':'requested');f.advance(1);
+  assert.deepEqual(phases(manager),['requested',...(delivered?['ready','revealing']:[]),'failed']);assert.equal(manager.inspect().reason,delivered?'reveal-timeout':'presentation-timeout');
+  assert.equal(native.calls.length,delivered?2:0);assert.equal(native.frames.size,0);assert.deepEqual(native.cancelled,delivered?[]:[pending.id]);assert.equal(f.timers.size,0);
+  for(const item of native.owned)assert.equal(item.cancels,1);
+  pending.callback(f.now());assert.equal(native.requested.length,1);assert.equal(native.calls.length,delivered?2:0);assert.equal(manager.inspect().phase,'failed');
+ }
+});
+
+test('every interrupted presentation barrier cancels its sole pending frame and ignores a late delivery',async t=>{
+ for(const delivered of [0,1])for(const action of ['navigation','pagehide','dispose','restored']){
+  const f=environment(),native=nativeReveal(f),manager=connect(t,f);await flush();if(delivered){native.frame();await flush();}
+  const id=manager.inspect().id,pending=native.requested.at(-1);
+  if(action==='navigation')f.click('https://example.test/about/');
+  else if(action==='dispose')manager.dispose();
+  else{f.page('pagehide',action==='restored');if(action==='restored'){f.advance(1);f.page('pageshow',true);}}
+  pending.callback(f.now());await flush();
+  assert.deepEqual(manager.inspect().history.filter(fact=>fact.id===id).map(fact=>fact.phase),['requested',...(delivered?['ready','revealing']:[]),'cancelled']);
+  assert.deepEqual(native.cancelled,delivered?[]:[pending.id]);assert.equal(native.frames.size,0);assert.equal(native.calls.length,delivered?2:0);assert.equal(native.requested.length,1);
+  for(const item of native.owned){assert.equal(item.cancels,1);assert.deepEqual(item.hiddenAtCancel,[true]);}
+  if(action==='restored'){assert.equal(manager.inspect().phase,'entered');assert.notEqual(manager.inspect().id,id);}
+  if(action==='dispose')assert.equal(manager.inspect().events.nativeListeners,0);
+  if(action!=='navigation')assert.equal(f.timers.size,0);
+ }
+});
+
+test('Reduced or hidden before presentation or during the effects closes the existing visual owner statically',async t=>{
+ for(const delivered of [0,1])for(const mode of ['reduced','hidden']){
+  const f=environment(),native=nativeReveal(f),manager=connect(t,f);await flush();if(delivered){native.frame();await flush();}const pending=native.requested.at(-1);
+  if(mode==='reduced'){f.media.matches=true;f.media.dispatchEvent(new Event('change'));}else{f.doc.hidden=true;f.doc.dispatchEvent(new Event('visibilitychange'));}
+  assert.deepEqual(phases(manager),['requested','ready','revealing','entered']);assert.equal(manager.inspect().reason,mode==='reduced'?'reduced-motion':'hidden-static');
+  assert.deepEqual(native.cancelled,delivered?[]:[pending.id]);assert.equal(native.frames.size,0);assert.equal(native.calls.length,delivered?2:0);assert.equal(f.timers.size,0);
+  for(const item of native.owned){assert.equal(item.cancels,1);assert.deepEqual(item.hiddenAtCancel,[true]);}
+  pending.callback(f.now());assert.equal(native.requested.length,1);assert.equal(native.calls.length,delivered?2:0);
+ }
+});
+
+test('overdue preparation, native completions, CSS events and policy changes cannot beat undelivered deadline timers',async t=>{
+ for(const signal of ['presentation-frame','native-ready','preparation-policy','post-presentation-policy','native-finished','css-event','reduced']){
+  const preparing=['presentation-frame','native-ready','preparation-policy'].includes(signal);
+  const f=environment(),native=signal==='css-event'?null:nativeReveal(f,{manualReady:preparing}),manager=connect(t,f);await flush();
+  if(signal==='native-ready'){native.frame();native.owned.forEach(item=>item.accept());}
+  else if(signal==='post-presentation-policy'||signal==='native-finished'||signal==='reduced'){native.frame();await flush();}
+  if(signal==='native-finished')native.owned.forEach(item=>item.finish());
+  f.elapse(preparing?15000:1600);assert.equal(f.timers.size,1);
+  if(signal==='presentation-frame')native.frame();
+  else if(signal==='post-presentation-policy'||signal==='preparation-policy'){f.doc.hidden=true;f.doc.dispatchEvent(new Event('visibilitychange'));}
+  else if(signal==='css-event')f.loader.dispatchEvent(new Event('animationend'));
+  else if(signal==='reduced'){f.media.matches=true;f.media.dispatchEvent(new Event('change'));}
+  await flush();assert.equal(manager.inspect().phase,'failed',signal);assert.equal(manager.inspect().reason,preparing?'presentation-timeout':'reveal-timeout',signal);
+  assert.equal(phases(manager).includes('entered'),false);assert.equal(f.timers.size,0);if(native)assert.equal(native.frames.size,0);
+ }
+});
+
+test('synchronous ready observers consume the same deadline budget instead of postponing its start',async t=>{
+ const f=environment(),native=nativeReveal(f),manager=connect(t,f);manager.onReadiness(fact=>{if(fact.phase==='ready')f.elapse(450);});await flush();
+ native.frame();await flush();
+ assert.equal(f.now(),450);assert.equal([...f.timers.values()][0].at,1600);
+ f.advance(1149);assert.equal(manager.inspect().phase,'revealing');f.advance(1);
+ assert.deepEqual(phases(manager),['requested','ready','revealing','failed']);assert.equal(native.calls.length,2);assert.equal(native.frames.size,0);assert.equal(f.timers.size,0);
+});
+
+test('startup starts at arrival rather than resource settlement and bounds the full dynamic lifetime to 15 seconds plus reveal',async t=>{
+ for(const overdue of [false,true]){
+  const font=deferred(),f=environment({fonts:font.promise}),native=nativeReveal(f,{manualReady:true});
+  const manager=createSiteNavigation({window:f.win,document:f.doc,element:f.loader,now:f.now});
+  manager.onReadiness(fact=>{if(fact.phase==='requested')f.elapse(4000);});manager.start();t.after(()=>manager.dispose());
+  assert.equal(f.timers.size,2);for(const timer of f.timers.values())assert.equal(timer.at,15000);
+  f.advance(10000);font.resolve();await flush();assert.equal(manager.inspect().phase,'requested');assert.equal([...f.timers.values()][0].at,15000);
+  f.advance(500);native.frame();await flush();f.advance(499);native.owned.forEach(item=>item.accept());await flush();
+  assert.equal(manager.inspect().phase,'revealing');assert.equal([...f.timers.values()][0].at,16599);
+  f.elapse(overdue?1600:1599);native.owned.forEach(item=>item.finish());await flush();
+  assert.equal(manager.inspect().phase,overdue?'failed':'entered');assert.equal(manager.inspect().reason,overdue?'reveal-timeout':'');assert.equal(f.timers.size,0);
+ }
+});
+
+test('actual finished signals arriving before play readiness are retained but cannot create an early terminal',async t=>{
+ for(const overdue of [false,true]){
+  const f=environment(),native=nativeReveal(f,{manualReady:true}),manager=connect(t,f);await presented(native);
+  assert.deepEqual(phases(manager),['requested']);native.owned.forEach(item=>item.finish());await flush();assert.equal(manager.inspect().phase,'requested');
+  native.owned[0].accept();await flush();assert.equal(manager.inspect().phase,'requested');
+  if(overdue)f.elapse(15000);native.owned[1].accept();await flush();
+  assert.deepEqual(phases(manager),overdue?['requested','failed']:['requested','ready','revealing','entered']);
+  assert.equal(manager.inspect().reason,overdue?'presentation-timeout':'');assert.equal(f.timers.size,0);
+  for(const item of native.owned){assert.equal(item.cancels,1);assert.deepEqual(item.hiddenAtCancel,[true]);}
+ }
+});
+
+test('missing or rejected native play-readiness stays bounded without a CSS writer or unhandled finished rejection',async t=>{
+ for(const index of [0,1])for(const missing of [false,true]){
+  const f=environment(),native=nativeReveal(f,{manualReady:true,...(missing?{invalidReadyAt:index}:{})}),manager=connect(t,f);await presented(native);
+  if(!missing)native.owned[index].rejectReady();native.owned.forEach(item=>{item.accept();item.reject();});await flush();
+  f.loader.dispatchEvent(new Event('animationend'));assert.equal(manager.inspect().phase,'requested');assert.equal(f.loader.getAttribute('data-site-reveal'),'native');
+  f.advance(14999);assert.equal(manager.inspect().phase,'requested');f.advance(1);await flush();
+  assert.deepEqual(phases(manager),['requested','failed']);assert.equal(manager.inspect().reason,'presentation-timeout');assert.equal(f.timers.size,0);
+ }
+});
+
+test('two fulfilled effects cannot bypass a withheld, rejected or missing second native play acknowledgement',async t=>{
+ for(const mode of ['withheld','rejected','missing']){
+  const f=environment(),native=nativeReveal(f,{manualReady:true,...(mode==='missing'?{invalidReadyAt:1}:{})}),manager=connect(t,f);await presented(native);
+  assert.equal(native.owned.length,2);native.owned.forEach(item=>item.finish());native.owned[0].accept();if(mode==='rejected')native.owned[1].rejectReady();await flush();
+  assert.deepEqual(phases(manager),['requested']);f.advance(14999);assert.equal(manager.inspect().phase,'requested');f.advance(1);await flush();
+  assert.deepEqual(phases(manager),['requested','failed']);assert.equal(manager.inspect().reason,'presentation-timeout');assert.equal(f.timers.size,0);
+  native.owned.forEach(item=>{item.accept();item.finish();});await flush();assert.deepEqual(phases(manager),['requested','failed']);
+ }
+});
+
+test('Reduced and hidden policies cannot bypass unfinished or expired document resources',async t=>{
+ for(const mode of ['reduced','hidden'])for(const expired of [false,true]){
+  const font=deferred(),f=environment({fonts:font.promise}),native=nativeReveal(f),manager=connect(t,f);await flush();
+  if(mode==='reduced'){f.media.matches=true;f.media.dispatchEvent(new Event('change'));}else{f.doc.hidden=true;f.doc.dispatchEvent(new Event('visibilitychange'));}
+  assert.deepEqual(phases(manager),['requested']);assert.equal(f.content.hasAttribute('inert'),true);
+  if(expired)f.elapse(15000);else f.advance(4000);font.resolve();await flush();
+  assert.deepEqual(phases(manager),expired?['requested','failed']:['requested','ready','revealing','entered']);
+  assert.equal(manager.inspect().reason,expired?'presentation-timeout':mode==='hidden'?'hidden-static':'');
+  assert.equal(native.calls.length,0);assert.equal(native.requested.length,0);assert.equal(f.timers.size,0);assert.equal(f.content.hasAttribute('inert'),false);
+ }
+});
+
+test('native pending-play handles release before any ready fact on cancellation and ignore all late promises',async t=>{
+ for(const action of ['navigation','pagehide','dispose','restored']){
+  const f=environment(),native=nativeReveal(f,{manualReady:true}),manager=connect(t,f);await presented(native);const id=manager.inspect().id;
+  assert.deepEqual(phases(manager),['requested']);
+  if(action==='navigation')f.click('https://example.test/about/');else if(action==='dispose')manager.dispose();
+  else{f.page('pagehide',action==='restored');if(action==='restored'){f.advance(1);f.page('pageshow',true);}}
+  native.owned.forEach(item=>{item.accept();item.finish();});await flush();
+  assert.deepEqual(manager.inspect().history.filter(fact=>fact.id===id).map(fact=>fact.phase),['requested','cancelled']);
+  for(const item of native.owned){assert.equal(item.cancels,1);assert.deepEqual(item.hiddenAtCancel,[true]);}
+  assert.equal(native.requested.length,1);assert.equal(native.calls.length,2);assert.equal(native.frames.size,0);
+  if(action==='restored')assert.equal(manager.inspect().phase,'entered');if(action!=='navigation')assert.equal(f.timers.size,0);
+ }
+});
+
+test('static policy during native pending play closes only the resource-ready request and cancels both owned effects',async t=>{
+ for(const mode of ['reduced','hidden']){
+  const f=environment(),native=nativeReveal(f,{manualReady:true}),manager=connect(t,f);await presented(native);assert.equal(manager.inspect().phase,'requested');
+  if(mode==='reduced'){f.media.matches=true;f.media.dispatchEvent(new Event('change'));}else{f.doc.hidden=true;f.doc.dispatchEvent(new Event('visibilitychange'));}
+  assert.deepEqual(phases(manager),['requested','ready','revealing','entered']);assert.equal(manager.inspect().reason,mode==='reduced'?'reduced-motion':'hidden-static');
+  native.owned.forEach(item=>{item.accept();item.finish();assert.equal(item.cancels,1);assert.deepEqual(item.hiddenAtCancel,[true]);});await flush();
+  assert.equal(manager.inspect().phase,'entered');assert.equal(phases(manager).filter(phase=>phase==='entered').length,1);assert.equal(f.timers.size,0);
+ }
+});
+
+test('an early startup timer preserves prerequisites and re-arms only the remaining original endpoint',async t=>{
+ const font=deferred(),f=environment({fonts:font.promise}),native=nativeReveal(f,{manualReady:true}),manager=connect(t,f);
+ const [[id,timer]]=f.timers;f.timers.delete(id);f.elapse(14999.25);timer.callback();await flush();
+ assert.equal(manager.inspect().phase,'requested');assert.equal(manager.inspect().readiness,null);assert.equal(f.timers.size,2);
+ font.resolve();await flush();assert.equal(manager.inspect().readiness.ready,true);assert.equal(manager.inspect().phase,'requested');
+ assert.equal(f.timers.size,1);assert.equal([...f.timers.values()][0].at,15000.25);
+ f.elapse(.75);native.frame();await flush();assert.deepEqual(phases(manager),['requested','failed']);
+ assert.equal(manager.inspect().reason,'presentation-timeout');assert.equal(native.calls.length,0);assert.equal(f.timers.size,0);
+});
+
+test('native reveal waits for both actual completions, ignores CSS events and releases fill effects after hiding',async t=>{
+ for(const order of [[0,1],[1,0]]){
+  const f=environment(),native=nativeReveal(f),manager=connect(t,f);await presented(native);
+  assert.equal(f.loader.getAttribute('data-site-reveal'),'native');assert.equal(native.calls.length,2);
+  assert.equal(native.calls[0].target,f.loader);assert.equal(native.calls[1].target,native.content);
+  for(const call of native.calls)assert.deepEqual(call.options,{duration:720,easing:'cubic-bezier(.45,0,.15,1)',fill:'both'});
+  assert.deepEqual(native.calls[0].keyframes,[{opacity:1},{opacity:0}]);
+  assert.deepEqual(native.calls[1].keyframes,[{transform:'translateY(0)'},{transform:'translateY(-12px)'}]);
+  f.loader.dispatchEvent(new Event('animationend'));assert.equal(manager.inspect().phase,'revealing');
+  native.owned[order[0]].finish();await flush();assert.equal(manager.inspect().phase,'revealing');
+  native.owned[order[1]].finish();await flush();assert.deepEqual(phases(manager),['requested','ready','revealing','entered']);
+  f.loader.dispatchEvent(new Event('animationend'));await flush();assert.equal(phases(manager).filter(phase=>phase==='entered').length,1);
+  assert.equal(f.timers.size,0);assert.equal(f.content.hasAttribute('inert'),false);assert.equal(f.loader.hasAttribute('data-site-reveal'),false);
+  for(const item of native.owned){assert.equal(item.cancels,1);assert.deepEqual(item.hiddenAtCancel,[true]);}
+ }
+});
+
+test('pending or rejected native completion keeps the unchanged failure deadline and never becomes a late success',async t=>{
+ for(const reject of [false,true]){
+  const f=environment(),native=nativeReveal(f),manager=connect(t,f);await presented(native);
+  if(reject)native.owned[0].reject();await flush();
+  f.loader.dispatchEvent(new Event('animationend'));f.advance(1599);assert.equal(manager.inspect().phase,'revealing');
+  f.advance(1);assert.equal(manager.inspect().phase,'failed');assert.equal(manager.inspect().reason,'reveal-timeout');
+  native.owned.forEach(item=>item.finish());await flush();
+  assert.deepEqual(phases(manager),['requested','ready','revealing','failed']);assert.equal(f.timers.size,0);assert.equal(f.content.hasAttribute('inert'),false);
+  for(const item of native.owned){assert.equal(item.cancels,1);assert.deepEqual(item.hiddenAtCancel,[true]);}
+ }
+});
+
+test('native API exceptions and missing completion promises cannot synthesize success or start a CSS writer',async t=>{
+ for(const options of [{throwAt:0},{throwAt:1},{invalidAt:0},{invalidAt:1}]){
+  const f=environment(),native=nativeReveal(f,options),manager=connect(t,f);await presented(native);
+  assert.equal(f.loader.getAttribute('data-site-reveal'),'native');f.loader.dispatchEvent(new Event('animationend'));
+  native.owned.forEach(item=>item.finish());await flush();assert.equal(manager.inspect().phase,'requested');
+  f.advance(15000);await flush();assert.equal(manager.inspect().phase,'failed');assert.equal(manager.inspect().reason,'presentation-timeout');
+  assert.equal(f.timers.size,0);for(const item of native.owned)assert.equal(item.cancels,1);
+ }
+});
+
+test('one missing animation API retains the original CSS completion path without partially creating native effects',async t=>{
+ const f=environment(),native=nativeReveal(f);delete native.content.animate;
+ const manager=connect(t,f);await flush();assert.equal(native.calls.length,0);assert.equal(f.loader.hasAttribute('data-site-reveal'),false);
+ f.loader.dispatchEvent(new Event('animationend'));assert.equal(manager.inspect().phase,'entered');assert.equal(f.timers.size,0);
+});
+
+test('queued native completion cannot escape supersession, pagehide, disposal or a fresh BFCache arrival',async t=>{
+ for(const action of ['navigation','pagehide','dispose','restored']){
+  const f=environment(),native=nativeReveal(f),manager=connect(t,f);await presented(native);const id=manager.inspect().id;
+  native.owned.forEach(item=>item.finish());
+  if(action==='navigation')f.click('https://example.test/about/');
+  else if(action==='dispose')manager.dispose();
+  else{f.page('pagehide',action==='restored');if(action==='restored'){f.advance(1);f.page('pageshow',true);}}
+  await flush();
+  assert.deepEqual(manager.inspect().history.filter(fact=>fact.id===id).map(fact=>fact.phase),['requested','ready','revealing','cancelled']);
+  for(const item of native.owned){assert.equal(item.cancels,1);assert.deepEqual(item.hiddenAtCancel,[true]);}
+  assert.equal(native.calls.length,2);
+  if(action==='navigation'){assert.equal(manager.inspect().phase,'requested');assert.notEqual(manager.inspect().id,id);}
+  else if(action==='restored'){assert.equal(manager.inspect().phase,'entered');assert.notEqual(manager.inspect().id,id);assert.equal(f.timers.size,0);}
+  else{assert.equal(manager.inspect().phase,'cancelled');assert.equal(f.timers.size,0);}
+  if(action==='dispose')assert.equal(manager.inspect().events.nativeListeners,0);
+ }
+});
+
+test('native-capable Reduced and hidden arrivals stay static and live policy changes release both effects',async t=>{
+ for(const mode of ['reduced','hidden']){
+  const initial=environment(),available=nativeReveal(initial);if(mode==='reduced')initial.media.matches=true;else initial.doc.hidden=true;
+  const staticManager=connect(t,initial);await flush();assert.equal(staticManager.inspect().phase,'entered');assert.equal(available.calls.length,0);assert.equal(available.requested.length,0);assert.equal(initial.timers.size,0);
+  const f=environment(),native=nativeReveal(f),manager=connect(t,f);await presented(native);
+  if(mode==='reduced'){f.media.matches=true;f.media.dispatchEvent(new Event('change'));}else{f.doc.hidden=true;f.doc.dispatchEvent(new Event('visibilitychange'));}
+  assert.equal(manager.inspect().phase,'entered');await flush();f.advance(1600);
+  assert.deepEqual(phases(manager),['requested','ready','revealing','entered']);assert.equal(f.timers.size,0);
+  for(const item of native.owned){assert.equal(item.cancels,1);assert.deepEqual(item.hiddenAtCancel,[true]);}
+ }
+});
+
+test('Bending entry remains delegated without native reveal APIs, effects or another completion owner',async t=>{
+ let scene;const f=environment({url:'https://example.test/projects/bending-active/'}),native=nativeReveal(f);
+ const manager=connect(t,f,{subscribeScene:listener=>{scene=listener;return()=>{};}});await flush();
+ scene({id:1,phase:'ready'});scene({id:1,phase:'revealing'});f.loader.dispatchEvent(new Event('animationend'));assert.equal(manager.inspect().phase,'revealing');
+ assert.equal(native.calls.length,0);assert.equal(native.requested.length,0);assert.equal(f.loader.hasAttribute('data-site-reveal'),false);assert.equal(f.timers.size,0);
+ scene({id:1,phase:'entered'});assert.deepEqual(phases(manager),['requested','ready','revealing','entered']);
+});
 
 test('generic arrival waits for DOM, fonts and selected critical-image decode, then one real CSS completion enters',async t=>{
  const font=deferred(),decode=deferred(),image=new Element();Object.assign(image,{complete:false,naturalWidth:0,decode:()=>decode.promise});

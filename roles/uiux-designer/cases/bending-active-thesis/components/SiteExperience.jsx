@@ -17,7 +17,7 @@ export default function SiteExperience(){
  const ready=status.phase==='ready'||status.phase==='revealing'||status.phase==='entered';
  return <><div ref={element} className={`${entry.loader} ${styles.loader}`} data-site-loader data-site-phase="requested" aria-label="Preparing this page">
   <div className={`${entry.backdrop} ${styles.backdrop}`} aria-hidden="true"/>
-  <div className={entry.content}>
+  <div className={entry.content} data-site-loader-content>
    <section className={entry.panel} aria-labelledby="site-entry-title" aria-describedby="site-entry-description">
     <p className={entry.eyebrow}>Portfolio</p>
     <h2 id="site-entry-title" className={entry.title}>JosHsuan Chao</h2>
@@ -29,5 +29,5 @@ export default function SiteExperience(){
    </section>
    <p className={entry.identity}>JosHsuan Chao <a href="/">Return to home</a></p>
   </div>
- </div><p className={styles.status} role="status" aria-live="polite">{status.phase==='failed'?'This page is available. Some resources could not be prepared.':''}</p><noscript><style>{'[data-site-loader]{display:none!important}'}</style></noscript></>;
+ </div><p className={styles.status} role="status" aria-live="polite">{status.phase==='failed'?'This page is available. Some preparation steps could not finish.':''}</p><noscript><style>{'[data-site-loader]{display:none!important}'}</style></noscript></>;
 }

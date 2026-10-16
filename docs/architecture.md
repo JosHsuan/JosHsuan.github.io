@@ -8,7 +8,7 @@
 |---|---|
 | Owner | JosHsuan Chao |
 | Audience | The owner, collaborating developers, and coding agents |
-| Revision | **2.14 — 16 October 2026; project-local XR background stage and continuous glass narrative** |
+| Revision | **2.16 — 16 October 2026; bounded native-entry preparation and project-local XR background stage** |
 | Language | English for project documentation and future website content; Traditional Chinese for discussion with the owner |
 | Scope | Portfolio, Research & Development, About/CV, Contact, and selected interactive project stories |
 | Delivery baseline | Next.js static export to GitHub Pages; no paid domain, paid storage, or continuously running backend required for the initial release |
@@ -19,6 +19,8 @@
 | Materials preparation root | `D:\JosHsuan_Website\_private\portfolio-preparation` — designated source for all project, CV, and content preparation |
 
 ## Executive decision
+
+**Generic entry completion — 16 October 2026:** A real Linux WebKit CI failure after successful document readiness requires an explicit completion owner. SiteNavigation owns the finite 720 ms native opacity/lift effects and requires both actual `finished` promises. Native preparation stays `requested` until document resources and both original `Animation.ready` promises accept play within the remaining original 15-second arrival budget; effects may already run during preparation. This explicitly changes the earlier resource-only `ready` boundary: pending presentation/play consumes startup preparation, then `ready` starts the original 1600 ms reveal-completion budget. Native play acceptance is not a GPU paint acknowledgment. A mutually exclusive CSS-event path remains for API-absent engines. Cancellation/static policies remain explicit, with no JavaScript frame clock or synthetic completion. Bending's shared resource prerequisite, EntryManager and Director remain unchanged. The [runtime integration](../roles/uiux-designer/cases/bending-active-thesis/PORTFOLIO_RUNTIME_INTEGRATION.md) and [retained verification](../roles/uiux-designer/cases/bending-active-thesis/XR_IMMERSIVE_VERIFICATION.md) distinguish preparation policy, native control evidence and required application/CI/live acceptance.
 
 **XR immersive presentation — 16 October 2026:** The owner accepts the source-backed XR narrative and requests Bending-inspired background 3D with continuous, readable 2D glass information. [Decision 0013](decisions/0013-xr-immersive-stage.md) supersedes only the XR boxed-viewer/tab/disclosure presentation and its card framing. One project-local transparent fixed `XRSceneStage` owns the XR renderer/camera, original bamboo assembly and phone display. `XRStageDirector` selects native reading chapters and coordinates one demand scheduler, scoped inspection and the existing information-window presenter. Adapt, Assemble and Join are three real sections; the complete recordings retain native video time, with decoded frames invalidating the same stage. Native source diagrams, photographs, text, credits and limits remain directly readable outside material distortion. All 57 approved asset/license files, source transforms and research claims are unchanged. This Layer 3 presentation does not change the shared Layer 1 background, Bending's protected case/card or the empty reusable framework. Build, browser, same-artifact CI/deployment and live evidence remain separately required; implementation authorization does not certify them.
 
