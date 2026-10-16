@@ -1,6 +1,6 @@
 .loader{position:fixed;inset:0;z-index:1000;isolation:isolate;color:var(--glass-foreground,#f2f4f0);background:#0b1112;--entry-reveal:0;--entry-angle:0deg;overflow:auto;opacity:calc(1 - var(--entry-reveal))}
 .loader[hidden]{display:none}
-.loader:not([data-entry-context]){animation:entry-fail-open 30s step-end forwards}
+.loader[data-entry-loader]:not([data-entry-context]){animation:entry-fail-open 30s step-end forwards}
 @keyframes entry-fail-open{to{visibility:hidden;pointer-events:none}}
 .backdrop{position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none;background:#0b1112}
 .backdrop picture,.backdrop img{display:block;width:100%;height:100%}

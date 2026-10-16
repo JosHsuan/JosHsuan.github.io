@@ -58,19 +58,36 @@ test('Home has no project model and scrolls directly into the nine-grid project 
 
 test('site loading waits for actual critical images and same-page movement does not start another lifecycle',async({page})=>{
  let release;const imageGate=new Promise(resolve=>{release=resolve;});
+ let revealAssay;
  await page.route('**/assets/xr/background-poster.webp',async route=>{await imageGate;await route.continue();});
  try{
   await page.goto('/',{waitUntil:'domcontentloaded'});
   await expect(loader(page)).toBeVisible();
   await expect(page.locator('[data-portfolio-root]')).toHaveAttribute('inert','');
   await page.waitForFunction(()=>window.__site?.inspect().phase==='requested');
+  // Reinsert the real compiled case fallback last. Its ownership must remain
+  // correct even when stylesheet arrival order would otherwise win a tie.
+  revealAssay=await page.evaluateHandle(()=>{
+   const candidates=[...document.styleSheets].flatMap(sheet=>[...sheet.cssRules]).filter(rule=>rule.selectorText?.includes('[data-entry-context]')&&rule.style?.cssText.includes('entry-fail-open'));
+   if(candidates.length!==1)throw Error(`Expected one compiled case fallback, found ${candidates.length}`);
+   const element=document.querySelector('[data-site-loader]'),style=document.createElement('style'),events=[];
+   style.textContent=candidates[0].cssText;document.head.append(style);
+   const ended=event=>{if(event.target===element)events.push({name:event.animationName,trusted:event.isTrusted,elapsed:event.elapsedTime});};
+   element.addEventListener('animationend',ended);
+   return{events,dispose(){element.removeEventListener('animationend',ended);style.remove();}};
+  });
   release();await page.unrouteAll({behavior:'wait'});
   const ready=await entered(page);
   expect(ready.history.filter(fact=>fact.id===ready.id).map(fact=>fact.phase)).toEqual(['requested','ready','revealing','entered']);
+  const animations=await revealAssay.evaluate(assay=>assay.events);
+  expect(animations.filter(event=>event.trusted&&event.name.includes('site-reveal')&&event.elapsed>0)).toHaveLength(1);
   await page.locator('[data-home-project-link]').click();
   const after=await page.evaluate(()=>window.__site.inspect());expect(after.id).toBe(ready.id);expect(after.history).toEqual(ready.history);
   await expect(page.locator('[data-portfolio-root]')).not.toHaveAttribute('inert','');
- }finally{release();await page.unrouteAll({behavior:'wait'});}
+ }finally{
+  release();await page.unrouteAll({behavior:'wait'});
+  if(revealAssay){await revealAssay.evaluate(assay=>assay.dispose());await revealAssay.dispose();}
+ }
 });
 
 test('native internal routes display loading and close the correlated request across navigation and history',async({page})=>{

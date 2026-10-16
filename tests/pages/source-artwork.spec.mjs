@@ -1,6 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {WAIT,scenarioTimeout,loadScene,settle,frames,centerStudy} from './case-helpers.mjs';
 import {renderedTextContrast} from './reading-contrast.mjs';
+import {SOURCE_COMPARISON_SECONDS} from '../../roles/uiux-designer/cases/bending-active-thesis/components/source-scene-score.mjs';
 
 test('IBM Plex, rounded shadowboxes and orange photos retain an accessible original',async({page,isMobile})=>{
  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/projects/bending-active/#overview');await page.waitForFunction(()=>window.__story?.inspect().entry?.phase==='entered',null,{timeout:WAIT});await page.evaluate(()=>document.fonts.ready);
@@ -46,9 +47,24 @@ test('zero-wheel chapter loops advance field and workflow selections while OS Re
  // The SVG controls sit below the source surface. Finish their native focus
  // relocation and the reading response before the real pointer click, rather
  // than clicking while Playwright's autoscroll and the document are settling.
- await choice.focus();await settle(page);await choice.click();await settle(page);
- await expect(choice).toHaveAttribute('aria-pressed','true');
- expect(await page.evaluate(()=>window.__story.inspect().sourceSelection)).toMatchObject({chapterId:'system',index:2});
+ await choice.focus();await settle(page);
+ // Observe the actual pointer click after React's root handler has accepted
+ // the comparison. Later software-GPU round trips can outlive its eight-second
+ // lifetime; the receipt keeps DOM selection and source state in one event.
+ await page.evaluate(()=>{
+  window.__testSourceSelectionReceipt=null;
+  const observe=event=>{
+   const button=event.target.closest('[data-source-diagram="workflow"] button[data-diagram-index="2"]');if(!button)return;
+   const state=window.__story.inspect(),selection=state.sourceSelection;
+   window.__testSourceSelectionReceipt={trusted:event.isTrusted,pressed:button.getAttribute('aria-pressed'),diagram:button.closest('[data-source-diagram]').dataset.diagramSelection,selection:selection?{...selection}:null,activeSeconds:state.playback.activeSeconds,age:selection?state.playback.activeSeconds-selection.selectedAt:null};
+   document.removeEventListener('click',observe);
+  };
+  document.addEventListener('click',observe);
+ });
+ await choice.click();await settle(page);
+ const selectionReceipt=await page.evaluate(()=>window.__testSourceSelectionReceipt);
+ expect(selectionReceipt).toMatchObject({trusted:true,pressed:'true',diagram:'bending',selection:{chapterId:'system',index:2}});
+ expect(Number.isFinite(selectionReceipt.activeSeconds)).toBe(true);expect(Number.isFinite(selectionReceipt.selection.selectedAt)).toBe(true);expect(Number.isFinite(selectionReceipt.age)).toBe(true);expect(selectionReceipt.age).toBeGreaterThanOrEqual(0);expect(selectionReceipt.age).toBeLessThan(SOURCE_COMPARISON_SECONDS);
  await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(()=>window.__story.inspect().playback.reducedMotion,null,{timeout:WAIT});await settle(page);const frozen=await page.evaluate(()=>window.__story.inspect().playback.activeSeconds);await frames(page,10);expect(await page.evaluate(()=>window.__story.inspect().playback.activeSeconds)).toBe(frozen);
 });
 

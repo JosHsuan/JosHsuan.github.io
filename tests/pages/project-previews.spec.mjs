@@ -6,8 +6,31 @@ import {WAIT,scenarioTimeout} from './case-helpers.mjs';
 
 const model=page=>page.locator('[data-project-model-preview]');
 const movie=page=>page.locator('[data-project-animation-preview]');
+const entryFacts=page=>page.evaluate(()=>{
+ const element=document.querySelector('[data-site-loader]'),style=element&&getComputedStyle(element);
+ return{
+  at:performance.now(),url:location.href,documentState:document.readyState,visibility:document.visibilityState,
+  site:window.__site?.inspect()??null,
+  loader:element?{phase:element.dataset.sitePhase,connected:element.hasAttribute('data-site-connected'),hidden:element.hidden,
+   animation:style.animationName,duration:style.animationDuration,playState:style.animationPlayState,display:style.display,visibility:style.visibility}:null,
+  images:[...document.querySelectorAll('img[data-site-critical], [data-site-critical] img')].slice(0,12).map(image=>({
+   src:image.getAttribute('src'),selected:image.currentSrc,complete:image.complete,width:image.naturalWidth,height:image.naturalHeight,decoding:image.decoding,
+  })),
+  fonts:{status:document.fonts?.status,faces:[...document.fonts??[]].slice(0,16).map(face=>({family:face.family,weight:face.weight,status:face.status}))},
+  resources:performance.getEntriesByType('resource').filter(resource=>/\.(woff2|webp|css)(?:\?|$)/.test(resource.name)).slice(-24).map(resource=>({
+   url:resource.name,type:resource.initiatorType,start:resource.startTime,end:resource.responseEnd,duration:resource.duration,
+   transferred:resource.transferSize,encoded:resource.encodedBodySize,decoded:resource.decodedBodySize,
+  })),
+ };
+});
 async function entered(page){
- await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});
+ let waitError;
+ try{await page.waitForFunction(()=>['entered','failed'].includes(window.__site?.inspect().phase),null,{timeout:WAIT});}
+ catch(error){waitError=error;}
+ const facts=await entryFacts(page);
+ if(waitError||facts.site?.phase!=='entered')await test.info().attach('site-entry-diagnostics',{body:JSON.stringify(facts,null,2),contentType:'application/json'});
+ if(waitError)throw waitError;
+ expect(facts.site?.phase,JSON.stringify(facts,null,2)).toBe('entered');
  await expect(page.locator('[data-site-loader]')).toBeHidden();
 }
 async function openGrid(page){await page.goto('/projects/');await entered(page);}
