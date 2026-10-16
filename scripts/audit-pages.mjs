@@ -64,7 +64,9 @@ export async function auditPages() {
   const xr=await readFile(path.join(out,'projects/xr-bending-active/index.html'),'utf8');
   for(const marker of ['data-xr-study','xr-context','xr-method','xr-prototype','xr-contribution','xr-limits','xr-credits','Wataru Nomura'])assert(xr.includes(marker),`XR: ${marker}`);
   const study=JSON.parse(await readFile(path.join(root,'roles/uiux-designer/cases/bending-active-thesis/release/xr-study.json'),'utf8'));
-  for(const marker of ['data-xr-model-study','data-xr-phone-study','portfolio-main-visual.webp',study.model.poster.src,'adapt-interface.mp4','assemble-interface.mp4','join-interface.mp4'])assert(xr.includes(marker),`XR research integration: ${marker}`);
+  for(const marker of ['data-xr-stage','data-xr-chapter','data-xr-model-control','data-information-window','data-xr-native-phone',study.model.poster.src,'adapt-interface.mp4','assemble-interface.mp4','join-interface.mp4'])assert(xr.includes(marker),`XR immersive integration: ${marker}`);
+  assert(!xr.includes('data-phone-front-toggle')&&!xr.includes('data-phone-stage='),'XR recording chapters must not depend on view/stage buttons');
+  assert(!xr.includes('<details'),'XR core evidence remains directly readable');
   const modelPin=manifest.assets.find(asset=>'/'+asset.path===study.model.src);
   assert(modelPin&&modelPin.sha256===study.model.sha256,'XR main source model must match the approved asset');
   const release=JSON.parse(await readFile(path.join(out,'release.json'),'utf8'));

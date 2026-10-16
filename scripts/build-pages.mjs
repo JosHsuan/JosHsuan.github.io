@@ -66,6 +66,8 @@ const sources = [
   'components/GlobalBackground.jsx', 'runtime/background/BackgroundRuntime.mjs', 'runtime/background/SiteBackgroundDriver.mjs',
   'components/XRModelStudy.jsx', 'components/XRPhoneStudy.jsx', 'components/research-media.module.css',
   'components/research-scene.mjs', 'components/research-scene-geometry.mjs',
+  'components/XRSceneStage.jsx', 'components/xr-stage-scene.mjs', 'components/xr-scene-stage.module.css',
+  'runtime/xr/XRStageDirector.mjs',
   'components/ProjectAnimationPreview.jsx', 'runtime/site/PreviewLifecycle.mjs', 'runtime/site/video-resource.mjs',
   'components/XRProject.jsx', 'components/XRProject.module.css', 'release/xr-study.json', 'release/contact.json',
   'components/SiteExperience.jsx', 'components/site-experience.module.css',

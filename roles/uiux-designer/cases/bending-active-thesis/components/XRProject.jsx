@@ -1,139 +1,116 @@
+/* eslint-disable @next/next/no-img-element -- Pinned documentary pixels and source posters use native images with exact public asset identity. */
 import PortfolioNavigation from './PortfolioNavigation';
-import ProjectAnimationPreview from './ProjectAnimationPreview';
-import XRModelStudy from './XRModelStudy';
-import XRPhoneStudy from './XRPhoneStudy';
+import InformationSkin from './InformationSkin';
+import XRSceneStage from './XRSceneStage';
 import study from '../release/xr-study.json';
 import styles from './XRProject.module.css';
 
-function EvidenceFigure({ item, label, eager = false }) {
+function Panel({children,className=''}) {
+  return <div className={`${styles.panel} ${className}`} data-information-window="editorial"><InformationSkin/>{children}</div>;
+}
+function Heading({number,label,title,id}) {
+  return <><p className={styles.eyebrow}>{number} / {label}</p><h2 id={id}>{title}</h2></>;
+}
+function EvidenceFigure({item,label,eager=false}) {
   return <figure className={styles.figure} data-xr-evidence={item.src}>
-    <div className={styles.figureIndex}><span>{label}</span><a href={item.src} target="_blank" rel="noreferrer">Open full image <span aria-hidden="true">↗</span></a></div>
-    <a href={item.src} target="_blank" rel="noreferrer" aria-label={`View full image: ${item.alt}`}>
-      <img src={item.src} width={item.width} height={item.height} alt={item.alt} loading={eager ? 'eager' : 'lazy'} data-site-critical={eager ? '' : undefined} />
+    <div className={styles.figureIndex}>{label}</div>
+    <a className={styles.mediaFrame} data-information-window="evidence-image" href={item.src} target="_blank" rel="noreferrer" aria-label={`View full image: ${item.alt}`}>
+      <InformationSkin/><span className={styles.mediaPlane}><img src={item.src} width={item.width} height={item.height} alt={item.alt} loading={eager?'eager':'lazy'} decoding="async" data-site-critical={eager?'':undefined}/></span>
     </a>
-    <figcaption><p>{item.caption}</p><span>{item.credit}</span></figcaption>
+    <figcaption data-information-window="evidence-caption"><InformationSkin/><p>{item.caption}</p><span>{item.credit}</span></figcaption>
   </figure>;
 }
-
-function SectionHeading({ number, label, title, id }) {
-  return <div className={styles.sectionHeading}>
-    <p className={styles.eyebrow}>{number} / {label}</p>
-    <h2 id={id}>{title}</h2>
+function SceneSlot({stage,inspect=false}) {
+  const poster=stage?.poster??study.model.poster;
+  return <div className={styles.sceneSlot} data-xr-scene-slot data-xr-scene-kind={stage?'phone':'model'}
+    data-xr-model-control={inspect?'':undefined} tabIndex={inspect?0:undefined} role={inspect?'group':undefined}
+    aria-label={inspect?'Original bamboo assembly. When 3D is available, drag horizontally or use arrow keys to inspect. Home resets; Escape returns to the chapter view.':undefined}>
+    <noscript><figure className={styles.staticFigure}><img src={poster.src} width={poster.width} height={poster.height} alt={poster.alt} loading="lazy"/><figcaption>{stage?stage.caption:study.model.caption}</figcaption></figure></noscript>
   </div>;
 }
-
-function MotionFigure({item}) {
-  return <figure className={styles.figure} data-xr-recording>
-    <ProjectAnimationPreview animation={item} poster={item.poster} label="Archived XR research recording"
-      controlPlacement="outside" controlLabel="ARCHIVED RESEARCH — ORIGINAL PRESENTATION EXCERPT" critical={false}
-      className={styles.motionPreview} mediaClassName={styles.motionMedia}/>
-    <figcaption><p>{item.caption}</p><span>{item.credit}</span></figcaption>
-  </figure>;
+function PhoneChapter({stage,index}) {
+  return <section id={`xr-${stage.id}`} className={`${styles.chapter} ${styles.phoneChapter}`} data-xr-chapter={stage.id} data-xr-recording={stage.id} aria-labelledby={`xr-${stage.id}-heading`}>
+    <div className={styles.chapterInner}>
+      <SceneSlot stage={stage}/>
+      <Panel className={styles.narrative}>
+        <Heading number={String(index+1).padStart(2,'0')} label={`${stage.id.toUpperCase()} / RECORDED APP INTERFACE`} title={stage.title} id={`xr-${stage.id}-heading`}/>
+        <p>{stage.description}</p><p className={styles.caption}>{stage.caption}</p>
+        <a className={styles.recordingLink} href={stage.src} target="_blank" rel="noreferrer">Open full recording <span aria-hidden="true">↗</span></a>
+        <p className={styles.recordingNote}>Original interface recording, presented on an iPhone display model. The website does not connect to tracking hardware.</p>
+        <p className={styles.credit}>{stage.credit}</p>
+      </Panel>
+    </div>
+  </section>;
 }
-
 export default function XRProject() {
   return <>
-    <PortfolioNavigation current="projects" />
+    <PortfolioNavigation current="projects"/>
+    <XRSceneStage model={study.model} stages={study.phoneStages}/>
     <main id="portfolio-main" tabIndex={-1} className={styles.page} data-xr-study data-portfolio-root data-portfolio-section="xr-project">
       <article aria-labelledby="xr-title">
-        <header className={styles.hero}>
-          <div className={styles.heroCopy}>
-            <a className={styles.backLink} href="/projects/">← All projects</a>
-            <p className={styles.eyebrow}>2024 / RESEARCH / PHYSICAL ↔ DIGITAL</p>
-            <h1 id="xr-title" className={styles.title}>{study.title}</h1>
+        <header id="xr-overview" className={`${styles.chapter} ${styles.hero}`} data-xr-chapter="overview">
+          <div className={styles.chapterInner}>
+            <SceneSlot/>
+            <Panel className={`${styles.narrative} ${styles.heroCopy}`}>
+              <a className={styles.backLink} href="/projects/">← All projects</a>
+              <p className={styles.eyebrow}>2024 / RESEARCH / PHYSICAL ↔ DIGITAL</p>
+              <h1 id="xr-title">{study.title}</h1><p className={styles.introduction}>{study.introduction}</p>
+              <dl className={styles.metadata}>
+                <div><dt>Context</dt><dd>{study.context}</dd></div><div><dt>Research</dt><dd>{study.authors.join(' / ')}</dd></div>
+                <div><dt>Practice</dt><dd>Computational design / XR / Digital fabrication</dd></div>
+              </dl>
+              <a className={styles.readingLink} href="#xr-context">Scroll to follow the research <span aria-hidden="true">↓</span></a>
+            </Panel>
           </div>
-          <div className={styles.heroVisual} data-xr-hero>
-            <EvidenceFigure item={study.hero} label="PROJECT VISUAL / PHYSICAL STRUCTURE + RECORDED INTERFACE" eager />
-          </div>
-          <p className={`${styles.intro} ${styles.heroIntro}`}>{study.introduction}</p>
-          <dl className={styles.metadata}>
-            <div><dt>Context</dt><dd>{study.context}</dd></div>
-            <div><dt>Research</dt><dd>{study.authors.join(' / ')}</dd></div>
-            <div><dt>Practice</dt><dd>Computational design / XR / Digital fabrication</dd></div>
-          </dl>
-          <nav className={styles.wide} aria-label="XR project sections">
-            <ul className={styles.chapterNavigation}>
-              <li><a href="#xr-context">01 / Physical ↔ digital</a></li>
-              <li><a href="#xr-method">02 / Method + model</a></li>
-              <li><a href="#xr-prototype">03 / App in use</a></li>
-              <li><a href="#xr-making">04 / Physical study</a></li>
-              <li><a href="#xr-credits">Credits & sources</a></li>
-            </ul>
-          </nav>
+          <div className={styles.evidenceBand} data-xr-hero><EvidenceFigure item={study.hero} label="PROJECT VISUAL / PHYSICAL STRUCTURE + RECORDED INTERFACE" eager/></div>
         </header>
-
-        <section className={styles.section} aria-labelledby="xr-context">
-          <SectionHeading number="01" label="CONTEXT" title={study.sections.context.title} id="xr-context" />
-          <div className={styles.sectionBody}>{study.sections.context.paragraphs.map(text => <p key={text}>{text}</p>)}</div>
-          <div className={styles.physicalMedia}>
-            <EvidenceFigure item={study.media.adaptiveMethod} label="01 / ADAPTIVE DESIGN — ORIGINAL METHOD DIAGRAM" />
-            <EvidenceFigure item={study.media.physicalCapture} label="02 / MEASUREMENT — PHYSICAL RECORD" />
+        <nav className={styles.chapterNavigation} aria-label="XR project sections" data-information-window="editorial"><InformationSkin/>
+          <a href="#xr-context">Physical ↔ digital</a><a href="#xr-method">Method</a><a href="#xr-prototype">App in use</a><a href="#xr-making">Physical study</a><a href="#xr-contribution">Research & credits</a>
+        </nav>
+        <section id="xr-context" className={styles.chapter} data-xr-chapter="context" aria-labelledby="xr-context-heading">
+          <div className={styles.chapterInner}><SceneSlot/><Panel className={styles.narrative}>
+            <Heading number="01" label="CONTEXT" title={study.sections.context.title} id="xr-context-heading"/>
+            {study.sections.context.paragraphs.map(text=><p key={text}>{text}</p>)}
+          </Panel></div>
+          <div className={styles.evidenceBand}>
+            <EvidenceFigure item={study.media.adaptiveMethod} label="ADAPTIVE DESIGN / ORIGINAL METHOD DIAGRAM"/>
+            <div className={styles.mediaPair}><EvidenceFigure item={study.media.physicalCapture} label="MEASUREMENT / PHYSICAL RECORD"/><EvidenceFigure item={study.media.measurement} label="MEASUREMENT TOOLS / PROJECT ILLUSTRATION"/></div>
           </div>
         </section>
-
-        <section className={styles.section} aria-labelledby="xr-method">
-          <SectionHeading number="02" label="METHOD" title={study.sections.method.title} id="xr-method" />
-          <div className={styles.sectionBody}>{study.sections.method.paragraphs.map(text => <p key={text}>{text}</p>)}</div>
-          <ol className={styles.workflow} aria-label="Research feedback workflow">
-            {study.workflow.map((step, index) => <li className={styles.workflowStep} key={step.label}>
-              <span>{String(index + 1).padStart(2, '0')} / {step.label}</span>
-              <h3>{step.title}</h3><p>{step.description}</p>
-            </li>)}
-          </ol>
-          <div className={styles.wide}>
-            <EvidenceFigure item={study.media.communication} label="03 / MEASUREMENT → MODEL → XR — ORIGINAL SYSTEM DIAGRAM" />
-          </div>
-          <div className={styles.modelStage} data-xr-model-section>
-            <EvidenceFigure item={study.media.dataCategories} label="DATA FLOW / LIVE GEOMETRY, CONFIGURATION + ASSEMBLY" />
-            <XRModelStudy model={study.model} />
-          </div>
-          <details className={styles.archive}>
-            <summary>Measurement tools and module setup / project illustrations</summary>
-            <div className={styles.mediaPair}>
-              <EvidenceFigure item={study.media.measurement} label="MEASUREMENT TOOLS — RENDERING" />
-              <EvidenceFigure item={study.media.assembly} label="MODULE ASSEMBLY — RENDERING" />
-            </div>
-          </details>
+        <section id="xr-method" className={styles.chapter} data-xr-chapter="method" aria-labelledby="xr-method-heading">
+          <div className={styles.chapterInner}><SceneSlot inspect/><Panel className={styles.narrative}>
+            <Heading number="02" label="METHOD" title={study.sections.method.title} id="xr-method-heading"/>
+            {study.sections.method.paragraphs.map(text=><p key={text}>{text}</p>)}
+            <ol className={styles.workflow} aria-label="Research feedback workflow">{study.workflow.map((step,index)=><li key={step.label}><span>{String(index+1).padStart(2,'0')} / {step.label}</span><h3>{step.title}</h3><p>{step.description}</p></li>)}</ol>
+            <div className={styles.modelExplanation}><h3>{study.model.title}</h3><p>{study.model.description}</p></div>
+            <p className={styles.caption}>{study.model.caption}</p><p className={styles.credit}>{study.model.credit}</p>
+          </Panel></div>
+          <div className={styles.evidenceBand}><EvidenceFigure item={study.media.communication} label="MEASUREMENT → MODEL → XR / ORIGINAL SYSTEM DIAGRAM"/><EvidenceFigure item={study.media.dataCategories} label="DATA FLOW / LIVE GEOMETRY, CONFIGURATION + ASSEMBLY"/></div>
         </section>
-
-        <section className={styles.section} aria-labelledby="xr-prototype">
-          <SectionHeading number="03" label="PROTOTYPE" title={study.sections.prototype.title} id="xr-prototype" />
-          <div className={styles.sectionBody}>{study.sections.prototype.paragraphs.map(text => <p key={text}>{text}</p>)}</div>
-          <div className={styles.phoneStage} data-xr-phone-section>
-            <XRPhoneStudy stages={study.phoneStages} />
-          </div>
-          <details className={styles.archive}>
-            <summary>View the archived four-panel research recording</summary>
-            <MotionFigure item={study.media.motion}/>
-          </details>
+        <section id="xr-prototype" className={styles.prototype} aria-labelledby="xr-prototype-heading">
+          <div className={styles.sectionIntroduction}><Panel><Heading number="03" label="PROTOTYPE" title={study.sections.prototype.title} id="xr-prototype-heading"/>{study.sections.prototype.paragraphs.map(text=><p key={text}>{text}</p>)}</Panel></div>
+          {study.phoneStages.map((stage,index)=><PhoneChapter key={stage.id} stage={stage} index={index}/>)}
         </section>
-
-        <section className={styles.section} aria-labelledby="xr-making">
-          <SectionHeading number="04" label="PHYSICAL STUDY" title={study.sections.making.title} id="xr-making" />
-          <div className={styles.sectionBody}>{study.sections.making.paragraphs.map(text => <p key={text}>{text}</p>)}</div>
-          <div className={styles.physicalMedia}>
-            <EvidenceFigure item={study.media.physicalAssembly} label="04 / APP-ASSISTED ASSEMBLY — PHYSICAL RECORD" />
-            <EvidenceFigure item={study.media.physicalResult} label="05 / BAMBOO DEMONSTRATOR — PHYSICAL RECORD" />
+        <section id="xr-making" className={styles.chapter} data-xr-chapter="making" aria-labelledby="xr-making-heading">
+          <div className={styles.chapterInner}><SceneSlot/><Panel className={styles.narrative}><Heading number="04" label="PHYSICAL STUDY" title={study.sections.making.title} id="xr-making-heading"/>{study.sections.making.paragraphs.map(text=><p key={text}>{text}</p>)}</Panel></div>
+          <div className={styles.evidenceBand}>
+            <div className={styles.mediaPair}><EvidenceFigure item={study.media.physicalAssembly} label="APP-ASSISTED ASSEMBLY / PHYSICAL RECORD"/><EvidenceFigure item={study.media.assembly} label="MODULE ASSEMBLY / PROJECT ILLUSTRATION"/></div>
+            <EvidenceFigure item={study.media.physicalResult} label="BAMBOO DEMONSTRATOR / PHYSICAL RECORD"/>
           </div>
         </section>
-
-        <section className={styles.section} aria-labelledby="xr-contribution">
-          <SectionHeading number="05" label="CONTRIBUTION" title="My work within a shared research project." id="xr-contribution" />
-          <ul className={styles.contributionList}>{study.contributions.map(item => <li key={item.title}><h3>{item.title}</h3><p>{item.description}</p></li>)}</ul>
-          <div className={styles.sectionBody}><p>{study.contributionNote}</p></div>
-        </section>
-
-        <section className={`${styles.section} ${styles.limits}`} aria-labelledby="xr-limits">
-          <SectionHeading number="06" label="LIMITS" title="A prototype, with open questions." id="xr-limits" />
-          <div className={styles.sectionBody}><ul>{study.limitations.map(text => <li key={text}>{text}</li>)}</ul></div>
-        </section>
-
-        <footer className={styles.section} aria-labelledby="xr-credits">
-          <SectionHeading number="07" label="CREDITS & SOURCES" title="A collaborative foundation." id="xr-credits" />
-          <dl className={styles.credits}>{study.credits.map(item => <div key={item.role}><dt>{item.role}</dt><dd>{item.names}</dd></div>)}</dl>
-          <p className={styles.sourceNote}>{study.sourceNote}</p>
+        <section id="xr-contribution" className={styles.readingChapter} data-xr-chapter="contribution" aria-labelledby="xr-contribution-heading"><Panel>
+          <Heading number="05" label="CONTRIBUTION" title="My work within a shared research project." id="xr-contribution-heading"/>
+          <ul className={styles.contributionList}>{study.contributions.map(item=><li key={item.title}><h3>{item.title}</h3><p>{item.description}</p></li>)}</ul><p>{study.contributionNote}</p>
+        </Panel></section>
+        <section id="xr-limits" className={styles.readingChapter} data-xr-chapter="limits" aria-labelledby="xr-limits-heading"><Panel>
+          <Heading number="06" label="LIMITS" title="A prototype, with open questions." id="xr-limits-heading"/><ul className={styles.limitations}>{study.limitations.map(text=><li key={text}>{text}</li>)}</ul>
+        </Panel></section>
+        <footer id="xr-credits" className={styles.readingChapter} data-xr-chapter="credits" aria-labelledby="xr-credits-heading"><Panel>
+          <Heading number="07" label="CREDITS & SOURCES" title="A collaborative foundation." id="xr-credits-heading"/>
+          <dl className={styles.credits}>{study.credits.map(item=><div key={item.role}><dt>{item.role}</dt><dd>{item.names}</dd></div>)}</dl><p className={styles.sourceNote}>{study.sourceNote}</p>
+          <div className={styles.recordingSource}><a className={styles.recordingLink} href={study.media.motion.src} target="_blank" rel="noreferrer">Original presentation excerpt <span aria-hidden="true">↗</span></a><p>{study.media.motion.caption}</p><p className={styles.credit}>{study.media.motion.credit}</p></div>
           <a className={styles.nextProject} href="/projects/bending-active/"><span>RELATED STUDY</span><strong>Bending-Active Metal Panel Deformation</strong><span aria-hidden="true">↗</span></a>
-        </footer>
+        </Panel></footer>
       </article>
     </main>
   </>;

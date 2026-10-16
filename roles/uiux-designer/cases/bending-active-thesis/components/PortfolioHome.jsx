@@ -74,7 +74,7 @@ function Projects({standalone=false}){
       <p className={styles.projectCount}>{String(projects.length).padStart(2,'0')} projects<br/>Geometry / interaction / making</p>
     </div>
     <ul className={styles.projectGrid} data-project-grid>
-      {projects.map(project=><li key={project.id} className={styles.projectCard} data-project-tile={project.id}>
+      {projects.map(project=><li key={project.id} className={project.id==='xr-bending-active'?`${styles.projectCard} ${styles.xrProjectCard}`:styles.projectCard} data-project-tile={project.id}>
         <div className={styles.projectImage}>
           {project.id==='bending-active'
             ?<ProjectModelPreview poster={project.image}/>

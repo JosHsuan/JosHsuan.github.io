@@ -32,9 +32,9 @@ test('all portfolio categories and both selected projects have direct readable n
   await expect(page.locator('[data-project-card]')).toHaveCount(2);
   await page.locator('[data-project-card="xr-bending-active"]').click();
   await expect(page.locator('[data-xr-study]')).toBeVisible();
-  for(const button of await page.locator('[data-xr-model-study] button,[data-xr-phone-study] button').all())await expect(button).toBeHidden();
-  const nativeRecordings=page.locator('[data-xr-phone-study] a[href$="-interface.mp4"]');
-  expect(await nativeRecordings.evaluateAll(links=>links.map(link=>link.getAttribute('href')).sort())).toEqual(['/assets/xr/adapt-interface.mp4','/assets/xr/adapt-interface.mp4','/assets/xr/assemble-interface.mp4','/assets/xr/join-interface.mp4']);
+  await expect(page.locator('[data-xr-scene-controls]')).toBeHidden();
+  const nativeRecordings=page.locator('[data-xr-recording] a[href$="-interface.mp4"]');
+  expect(await nativeRecordings.evaluateAll(links=>links.map(link=>link.getAttribute('href')).sort())).toEqual(['/assets/xr/adapt-interface.mp4','/assets/xr/assemble-interface.mp4','/assets/xr/join-interface.mp4']);
   for(const link of await nativeRecordings.all())await expect(link).toBeVisible();
  }finally{await context.close();}
 });
@@ -142,11 +142,13 @@ test('real unavailable webfonts settle to one explicit failure and readable syst
 test('XR detail preserves real evidence, shared authorship and a native related-project route',async({page})=>{
  const requests=[],errors=[];page.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)/.test(request.url()))requests.push(request.url());});page.on('pageerror',error=>errors.push(error.message));
  await page.goto('/projects/xr-bending-active/');await entered(page);
+ const viewport=page.viewportSize(),xrViewport=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth,inner:innerWidth,visual:visualViewport?.width}));
+ expect(xrViewport.client).toBe(viewport.width);expect(xrViewport.scroll).toBeLessThanOrEqual(xrViewport.client);expect(xrViewport.inner).toBe(viewport.width);expect(xrViewport.visual).toBeCloseTo(viewport.width,0);
  await expect(page.locator('h1')).toHaveText('An Extended-Reality App Using Motion Capture for Bending-Active Structure');
  await expect(page.locator('[data-xr-study]')).toContainText('Wataru Nomura');
  for(const id of ['xr-context','xr-method','xr-prototype','xr-contribution','xr-limits','xr-credits'])await expect(page.locator('#'+id)).toBeVisible();
- for(const summary of await page.locator('[data-xr-study] details summary').all())await summary.click();
- const expectedImages=['portfolio-main-visual.webp','adaptive-method.webp','physical-capture.webp','communication-system.webp','data-categories.webp','xr-research-assembly-poster.webp','measuring-tools.webp','module-assembly.webp','adapt-poster.webp','background-poster.webp','physical-assembly.webp','physical-result.webp'].map(name=>'/assets/xr/'+name).sort();
+ await expect(page.locator('[data-xr-study] details')).toHaveCount(0);
+ const expectedImages=['portfolio-main-visual.webp','adaptive-method.webp','physical-capture.webp','communication-system.webp','data-categories.webp','measuring-tools.webp','module-assembly.webp','physical-assembly.webp','physical-result.webp'].map(name=>'/assets/xr/'+name).sort();
  expect(await page.locator('[data-xr-study] figure img').evaluateAll(images=>images.map(image=>image.getAttribute('src')).sort())).toEqual(expectedImages);
  for(const image of await page.locator('[data-xr-study] figure img').all()){await image.scrollIntoViewIfNeeded();await expect.poll(()=>image.evaluate(element=>element.complete&&element.naturalWidth>0)).toBe(true);}
  const entryId=await page.evaluate(()=>window.__site.inspect().id);
