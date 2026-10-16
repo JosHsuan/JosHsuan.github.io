@@ -5,7 +5,7 @@ import {acquireVideo} from '../runtime/site/video-resource.mjs';
 
 /** Optional project media. The surrounding project link is a sibling, so this
  * native pause button never creates nested interactive content. */
-export default function ProjectAnimationPreview({animation,poster,className,label,controlPlacement='overlay',controlLabel,mediaClassName}){
+export default function ProjectAnimationPreview({animation,poster,className,label,controlPlacement='overlay',controlLabel,mediaClassName,critical=true}){
  const host=useRef(null),video=useRef(null),manager=useRef(null),eligibility=useRef(null);
  const paused=useRef(false),position=useRef(0),videoId=useId();
  const [view,setView]=useState({phase:'poster',reason:'initial',id:null});
@@ -55,7 +55,7 @@ export default function ProjectAnimationPreview({animation,poster,className,labe
  const pauseAction=!blocked&&['loading','playing'].includes(view.phase);
  const actionLabel=pauseAction?'Pause animation':'Play animation';
  const media=<>
-  <img src={poster.src} width={poster.width} height={poster.height} alt={poster.alt} loading="eager" decoding="async" data-site-critical data-animation-poster hidden={view.phase==='playing'} style={{position:'absolute',inset:0,width:'100%',height:'100%',zIndex:1,pointerEvents:'none'}}/>
+  <img src={poster.src} width={poster.width} height={poster.height} alt={poster.alt} loading={critical?'eager':'lazy'} decoding="async" data-site-critical={critical?'':undefined} data-animation-poster hidden={view.phase==='playing'} style={{position:'absolute',inset:0,width:'100%',height:'100%',zIndex:1,pointerEvents:'none'}}/>
   <video ref={video} id={videoId} width={animation.width} height={animation.height} muted loop playsInline preload="none" aria-hidden="true" data-animation-video hidden={!['loading','playing'].includes(view.phase)} style={{position:'absolute',inset:0,width:'100%',height:'100%',zIndex:0,pointerEvents:'none'}}/>
  </>;
  const control=<button type="button" data-animation-toggle aria-controls={videoId} aria-label={actionLabel} disabled={blocked}

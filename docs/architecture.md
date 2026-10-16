@@ -8,7 +8,7 @@
 |---|---|
 | Owner | JosHsuan Chao |
 | Audience | The owner, collaborating developers, and coding agents |
-| Revision | **2.12 — 16 October 2026; selected multi-page portfolio, XR case and site readiness** |
+| Revision | **2.13 — 16 October 2026; shared background, protected Bending presentation and XR research extension** |
 | Language | English for project documentation and future website content; Traditional Chinese for discussion with the owner |
 | Scope | Portfolio, Research & Development, About/CV, Contact, and selected interactive project stories |
 | Delivery baseline | Next.js static export to GitHub Pages; no paid domain, paid storage, or continuously running backend required for the initial release |
@@ -19,6 +19,8 @@
 | Materials preparation root | `D:\JosHsuan_Website\_private\portfolio-preparation` — designated source for all project, CV, and content preparation |
 
 ## Executive decision
+
+**Shared background and XR research — 16 October 2026:** The latest owner request authorizes implementation through same-artifact CI-gated publication of a shared background and an evidence-backed XR revision. [Decision 0012](decisions/0012-global-background-xr-research.md) promotes the actual Bending CSS light field, vignette and independent Canvas 2D ASCII implementation into Layer 1; native page content is Layer 2 and each project's 3D/interaction remains Layer 3. The published Bending `6288286` baseline is protected: necessary extraction must preserve its final content, model, materials, lighting, camera, motion and input behavior, with matched pre/post and live regression. The XR extension uses the latest verified portfolio narrative and selected original media, the explicitly named `only_interior.3dm` model, an interface mapped into the project-specific phone presentation, and the first-page XR card visual. No raw/private source becomes a runtime/build dependency. Implementation authorization is not a claim of completed browser acceptance or deployment; those receipts remain separate.
 
 **Personal introduction — 15 October 2026:** The owner requested a friendly English homepage introduction, use of the designated preparation evidence, a transition into Bending-Active, and commit/push/CI-gated publication. [Decision 0010](decisions/0010-case-home-introduction.md) limits this implementation to the existing public case: `#home` precedes its seven chapters and links natively to `#overview`. The existing Director owns presentation context, the single scene clock and project navigation; the introduction remains readable while the original project readiness gate runs. Repository-local, hash-pinned public copy summarizes reviewed evidence without importing private files. The reusable framework, its empty public snapshot and generated entries remain unchanged. [The content record](../roles/uiux-designer/cases/bending-active-thesis/HOME_INTRODUCTION.md) preserves attribution and unknown-fact limits. Publication still requires the successful same-commit tested artifact below.
 
@@ -69,7 +71,8 @@ This follows Theatre's documented framework-agnostic integration model, but the 
 | Need | Read |
 |---|---|
 | Understand future visual direction and its current authorization boundary | [Website Design Guidelines](WEBSITE_DESIGN_GUIDELINES.md) and [decision 0002](decisions/0002-design-guidelines-integration.md) |
-| Resolve source authority, language, and the current documentation-only scope | [Section 00](#00-current-project-baseline-and-source-authority) |
+| Resolve source authority, language, and current authorization versus historical checkpoints | [Section 00](#00-current-project-baseline-and-source-authority) |
+| Integrate the selected application's shared background without changing Bending | [Section 8.6](#86-selected-public-application-background-and-project-ownership) and [decision 0012](decisions/0012-global-background-xr-research.md) |
 | Locate private materials and understand their future mapping into the website | [Section 12](#12-content-architecture-and-materials-preparation) |
 | Understand the selected stack and system boundaries | [Sections 01–06](#01-product-goals-and-non-negotiable-principles) |
 | Design, edit, play, and maintain Theatre motion | [Sections 07–11](#07-motion-design-specification) |
@@ -82,7 +85,9 @@ This follows Theatre's documented framework-agnostic integration model, but the 
 
 ## 00. Current project baseline and source authority
 
-**Current owner-authorized public application:** [Decision 0011](decisions/0011-selected-portfolio-navigation.md) extends the selected release to About / Project / Contact and two project detail routes. Home now scrolls into a nine-cell index instead of the thesis; its introduction and fixed background contain no project model. The subsequent explicit card revision authorizes square full-bleed cards, restrained rounded regular-glass foundations, a visibility-gated live preview of the original Bending model, a reviewed excerpt from the owner's specified XR `Background.mp4`, and hover/focus titles. Card previews share scoped event lifetimes and static posters; they add no animation clock or case RuntimeRoot to Home. A root-layout discrete readiness/navigation service composes current-document assets with the existing Bending EntryManager; its Director remains the only case animation clock. The XR case uses a pinned authored public summary and selected reviewed derivatives. This request supersedes decision 0010's direct home-to-thesis transition and the original static-card proposal. The reusable `src` framework, public snapshot and generated entry directory stay empty; older documentation-only scope statements below describe their dated checkpoints.
+**Current owner-authorized extension:** [Decision 0012](decisions/0012-global-background-xr-research.md) supersedes the selected application's static common-background proposal and earlier XR presentation/card selection. Reuse the original Bending background implementation and inputs through one exclusive service binding; retain its original Director on the Bending route. Keep all project models, cameras, lighting and interaction in their own Layer 3. The protected Bending baseline is `6288286`; source equivalence alone cannot establish final visual equivalence. The latest XR source selection and public derivative review belong to [the XR record](../roles/uiux-designer/cases/bending-active-thesis/XR_PROJECT_INTEGRATION.md). Commit, push and deployment are authorized after the required tests and same-SHA artifact gate, without a new approval at each stage.
+
+**Selected portfolio baseline:** [Decision 0011](decisions/0011-selected-portfolio-navigation.md) extends the selected release to About / Project / Contact and two project detail routes. Home scrolls into a nine-cell index instead of the thesis; its introduction and common background contain no project model. The subsequent explicit card revision authorizes square full-bleed cards, restrained rounded regular-glass foundations, a visibility-gated live preview of the original Bending model, a reviewed excerpt from the owner's specified XR `Background.mp4`, and hover/focus titles. Card previews share scoped event lifetimes and static posters; they add no animation clock or case RuntimeRoot to Home. A root-layout discrete readiness/navigation service composes current-document assets with the existing Bending EntryManager; its Director remains the only case animation clock. The original XR publication used a pinned authored public summary and selected reviewed derivatives; the current extension is governed above. This request superseded decision 0010's direct home-to-thesis transition and the original static-card proposal. The reusable `src` framework, public snapshot and generated entry directory stay empty; older documentation-only scope statements below describe their dated checkpoints.
 
 ### 0.1 Designated locations
 
@@ -112,13 +117,13 @@ The preparation folder's architecture suggestions cannot change the software sta
 
 English is the primary language for maintained project documentation, identifiers, comments, future interface text, metadata and reviewed website copy. Discuss choices, questions and progress with the owner in Traditional Chinese. Original source documents, quotations, official titles and proper names may retain their source language; translated text must preserve the original meaning and evidence references.
 
-The private candidate file currently declares `zh-Hant`, and the existing empty UI also uses Traditional Chinese. These are recorded current states, not the new default language policy. Translation and an `en` document language belong to the later, explicitly discussed implementation step. A bilingual interface remains an option to discuss; this documentation pass does not add locale routing, translate private drafts or alter UI strings.
+The private candidate file declares `zh-Hant`, and the unchanged reusable framework's empty UI uses Traditional Chinese. These are recorded scaffold/preparation states, not the language policy for the separately authorized English public application. Adapting that reusable UI or adding bilingual routing remains a separate choice. Current selected-project authorization does not authorize translation or publication of unrelated private drafts.
 
 ### 0.4 Current implementation and scope
 
 The repository already has a Next.js/React/TypeScript static framework, five empty sections and a 404 page, validated empty content, an empty scene registry, motion controller/adapters, and CI/manual deployment definitions. The installed toolchain and earlier verification results are recorded in [compatibility.md](compatibility.md), not inferred from the architectural examples below.
 
-The production portfolio remains at the framework baseline restored by the **Markdown-only integration in revision 2.2**. No projects, private drafts, CVs or professional assets are selected/imported, no preparation drive is wired into build/runtime, and no guide implementation or deployment is activated. Revision 2.3 adds separately authorized UI/UX tools and local proposal specimens under `roles/uiux-designer/`, as scoped in the executive note and decision 0003. Public content arrays remain empty and the profile remains `null`. The existing Chinese scaffold UI and Projects/Research routes remain in place; future English copy and logical Work/Lab routes are deferred.
+The reusable `src` framework remains at the baseline restored by the **Markdown-only integration in revision 2.2**. Its public content arrays remain empty, its profile remains `null`, and no preparation drive is wired into build/runtime. Revision 2.3 added separately authorized UI/UX tools and local proposal specimens under `roles/uiux-designer/`, as scoped in decision 0003. Later selected-publication decisions authorize the separate public application recorded above; they do not populate this framework or import unrelated private drafts/CVs. The Chinese scaffold UI and Projects/Research routes remain in the reusable framework; unrelated Work/Lab changes are deferred.
 
 The owner will discuss how to use the materials step by step. Sections 07–20 retain design requirements and future acceptance criteria; they are not an instruction to begin those phases now. The full P0 scene/Studio proof has not been completed.
 
@@ -586,6 +591,24 @@ Keep native document scrolling. Do not add a smooth-scroll framework initially. 
 Refresh scroll measurements after relevant layout changes. Test deep links, history restoration, resizing, images/fonts arriving, and a model becoming ready after the visitor has already scrolled. ScrollTrigger supplies progress and lifecycle mechanisms; the content-to-time mapping remains application logic. [S16]
 
 Avoid stealing mouse-wheel input from reading. Touch interaction should be intentionally activated and should not trap the page inside the viewer.
+
+### 8.6 Selected public application: background and project ownership
+
+The selected application under `roles/uiux-designer/cases/bending-active-thesis` applies [decision 0012](decisions/0012-global-background-xr-research.md) through three explicit layers:
+
+| Layer | Owner and boundary |
+|---|---|
+| Global Background | `GlobalBackground` provides the original CSS atmosphere/vignette and bounded independent Canvas 2D ASCII renderer. `BackgroundRuntime` grants one exclusive `site` or `bending-director` binding; it has no clock, WebGL context, camera or native input listeners. |
+| Page Content | Native semantic content, documentary media, navigation, reading surfaces and project cards; a transparent ordinary-page container exposes the common background without moving Bending's original reading frame. |
+| Project-specific 3D / Interaction | Each project owns its source models, materials, lighting, camera, controls and resources. Bending retains its exhibition stage, HDR, source-depth ASCII, compositor, scene readiness and existing Director; these are not global background assets. |
+
+On ordinary routes, `SiteBackgroundDriver` uses one scoped scheduler with the existing overview playback/scene score, original native input envelope and field renderer. On Bending, that driver is absent: the existing Director supplies its original seven-chapter sample, timestamp, dimensions and pause/preference inputs to the shared binding. The extraction retains the original surface classes and backdrop/stage/field sibling order, five quantized CSS writes and field draw inputs. The context provider introduces no DOM wrapper or stacking context. Model hit testing, pointer capture and project commands remain with their original owners; decorative background listeners do not intercept native scrolling or project actions. Per-frame values remain outside React state.
+
+The independent field retains its 900,000-physical-pixel, 12,000-cell and 30-draw-delivery-per-second bounds. These are configured limits, not measurements of physical-device performance. Reduced Motion clears optional field motion, unavailable Canvas 2D leaves the static CSS atmosphere, and background failure never becomes a new content-readiness prerequisite. Disposal releases the binding, listeners, observation, scheduled work and field resources; stale handles cannot publish.
+
+Native full-document navigation intentionally gives each new document one background lifetime; no canvas is claimed to persist across document replacement. An ordinary page's non-persisted `pagehide` disposes that lifetime; a browser-retained BFCache document suspends and resumes the same resource without replaying hidden time. Actual BFCache retention is browser-dependent. Bending retains its existing document suspension/teardown behavior and single Director clock. Site readiness/navigation remains the existing discrete lifecycle, not a second reveal or frame driver.
+
+The [integration record](../roles/uiux-designer/cases/bending-active-thesis/GLOBAL_BACKGROUND_INTEGRATION.md) records implementation details and scoped portable evidence. Required acceptance includes matched pre-change, post-change and live Bending desktop/mobile states and native interactions, plus the built routes, preferences, resource lifecycle and existing case regressions. Source review or portable equality does not establish that final acceptance or deployment has occurred.
 
 
 ---

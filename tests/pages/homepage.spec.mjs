@@ -22,7 +22,8 @@ test('all portfolio categories and both selected projects have direct readable n
    await expect(page.locator('main')).toHaveCount(1);await expect(page.locator('h1')).toHaveCount(1);
    await expect(loader(page)).toBeHidden();await expect(page.locator('main')).not.toHaveAttribute('inert','');
    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href','https://joshsuan.github.io'+route);
-   await expect(page.locator('canvas')).toHaveCount(0);
+   await expect(page.locator('canvas')).toHaveCount(1);
+   await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);
    await expect(page.locator('[data-animation-toggle]')).toBeHidden();
   }
   await page.goto('http://127.0.0.1:4186/');
@@ -31,6 +32,10 @@ test('all portfolio categories and both selected projects have direct readable n
   await expect(page.locator('[data-project-card]')).toHaveCount(2);
   await page.locator('[data-project-card="xr-bending-active"]').click();
   await expect(page.locator('[data-xr-study]')).toBeVisible();
+  for(const button of await page.locator('[data-xr-model-study] button,[data-xr-phone-study] button').all())await expect(button).toBeHidden();
+  const nativeRecordings=page.locator('[data-xr-phone-study] a[href$="-interface.mp4"]');
+  expect(await nativeRecordings.evaluateAll(links=>links.map(link=>link.getAttribute('href')).sort())).toEqual(['/assets/xr/adapt-interface.mp4','/assets/xr/adapt-interface.mp4','/assets/xr/assemble-interface.mp4','/assets/xr/join-interface.mp4']);
+  for(const link of await nativeRecordings.all())await expect(link).toBeVisible();
  }finally{await context.close();}
 });
 
@@ -41,8 +46,10 @@ test('Home has no project model and scrolls directly into the nine-grid project 
  await page.goto('/');await entered(page);
  await expect(page.locator('[data-home-introduction] h1')).toHaveText('Hi, I’m JosHsuan.');
  expect(await page.locator('main>section').evaluateAll(sections=>sections.map(section=>section.id))).toEqual(['about','projects','contact']);
- await expect(page.locator('canvas,[data-cinematic-stage],[data-story-chapter]')).toHaveCount(0);
- await expect(page.locator('[data-portfolio-background] img,[data-portfolio-background] canvas,[data-home-introduction] canvas')).toHaveCount(0);
+ await expect(page.locator('[data-cinematic-stage],[data-story-chapter],canvas[data-project-model-canvas]')).toHaveCount(0);
+ await expect(page.locator('canvas')).toHaveCount(1);
+ await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);
+ await expect(page.locator('[data-global-background] img,[data-home-introduction] canvas')).toHaveCount(0);
  expect(modelRequests).toEqual([]);
  const first=await page.evaluate(()=>scrollY);await page.mouse.wheel(0,130);
  await expect.poll(()=>page.evaluate(()=>scrollY)).toBeGreaterThan(first);
@@ -59,7 +66,7 @@ test('Home has no project model and scrolls directly into the nine-grid project 
 test('site loading waits for actual critical images and same-page movement does not start another lifecycle',async({page})=>{
  let release;const imageGate=new Promise(resolve=>{release=resolve;});
  let revealAssay;
- await page.route('**/assets/xr/background-poster.webp',async route=>{await imageGate;await route.continue();});
+ await page.route('**/assets/xr/portfolio-main-visual.webp',async route=>{await imageGate;await route.continue();});
  try{
   await page.goto('/',{waitUntil:'domcontentloaded'});
   await expect(loader(page)).toBeVisible();
@@ -117,7 +124,7 @@ test('native internal routes display loading and close the correlated request ac
 });
 
 test('a failed image releases readable content with one explicit failure terminal',async({page})=>{
- await page.route('**/assets/xr/background-poster.webp',route=>route.abort());
+ await page.route('**/assets/xr/portfolio-main-visual.webp',route=>route.abort());
  await page.goto('/');const state=await entered(page,{failed:true});expect(state.reason).toContain('critical-image-unavailable');
  await expect(page.locator('[data-portfolio-root]')).not.toHaveAttribute('inert','');
  await expect(page.locator('[data-home-project-link]')).toBeVisible();
@@ -138,10 +145,19 @@ test('XR detail preserves real evidence, shared authorship and a native related-
  await expect(page.locator('h1')).toHaveText('An Extended-Reality App Using Motion Capture for Bending-Active Structure');
  await expect(page.locator('[data-xr-study]')).toContainText('Wataru Nomura');
  for(const id of ['xr-context','xr-method','xr-prototype','xr-contribution','xr-limits','xr-credits'])await expect(page.locator('#'+id)).toBeVisible();
- await expect(page.locator('[data-xr-study] figure img')).toHaveCount(4);
+ for(const summary of await page.locator('[data-xr-study] details summary').all())await summary.click();
+ const expectedImages=['portfolio-main-visual.webp','adaptive-method.webp','physical-capture.webp','communication-system.webp','data-categories.webp','xr-research-assembly-poster.webp','measuring-tools.webp','module-assembly.webp','adapt-poster.webp','background-poster.webp','physical-assembly.webp','physical-result.webp'].map(name=>'/assets/xr/'+name).sort();
+ expect(await page.locator('[data-xr-study] figure img').evaluateAll(images=>images.map(image=>image.getAttribute('src')).sort())).toEqual(expectedImages);
  for(const image of await page.locator('[data-xr-study] figure img').all()){await image.scrollIntoViewIfNeeded();await expect.poll(()=>image.evaluate(element=>element.complete&&element.naturalWidth>0)).toBe(true);}
+ const entryId=await page.evaluate(()=>window.__site.inspect().id);
+ await page.locator('a[href="#xr-prototype"]').click();
+ await expect.poll(()=>page.evaluate(()=>{const heading=document.querySelector('#xr-prototype').getBoundingClientRect(),masthead=document.querySelector('[data-portfolio-navigation]').getBoundingClientRect();return heading.top>=masthead.bottom&&heading.top<innerHeight;})).toBe(true);
+ expect(await page.evaluate(()=>window.__site.inspect().id)).toBe(entryId);
  await expect(page.locator('[data-xr-study] a[href="/projects/bending-active/"]')).toBeVisible();
- await page.reload();await entered(page);expect(requests).toEqual([]);expect(errors).toEqual([]);
+ await page.reload();await entered(page);
+ expect(requests.length).toBeGreaterThan(0);
+ expect(requests.every(url=>url.endsWith('/assets/xr/xr-research-assembly.glb'))).toBe(true);
+ expect(errors).toEqual([]);
 });
 
 test('Bending page retains one original scene gate and publishes its terminal into site readiness',async({page})=>{
@@ -156,6 +172,6 @@ test('Bending page retains one original scene gate and publishes its terminal in
   await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered'&&window.__thesis?.inspect().ready,null,{timeout:WAIT});
   const state=await entered(page);expect(state.delegated).toBe(true);
   await expect(page.locator('[data-entry-loader]')).toBeHidden();await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);
-  await page.locator('[data-home-link]').click();await entered(page);await expect(page.locator('canvas')).toHaveCount(0);
+  await page.locator('[data-home-link]').click();await entered(page);await expect(page.locator('canvas')).toHaveCount(1);await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);
  }finally{release();await page.unrouteAll({behavior:'wait'});}
 });

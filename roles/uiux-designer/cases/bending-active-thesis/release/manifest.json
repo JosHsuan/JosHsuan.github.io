@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "joshsuan-selected-portfolio-v1",
   "authorizedAt": "2026-10-16",
-  "authorization": "Owner explicitly requested About/Project/Contact, a model-free introduction/background, a nine-cell square full-bleed rounded-glass project grid, visibility-gated live Bending model, the selected Background.mp4 XR excerpt, hover/focus titles, event-driven entry and route loading, and the selected XR case. Commit, push and completed deployment are authorized through completion.",
+  "authorization": "Owner authorizes the shared original Bending background, protected unchanged Bending presentation, latest-portfolio XR narrative, original opening-page card visual, true project media and geometry, and iPhone 3D playback of source app recordings, including tests, commit, push and same-artifact CI-gated deployment. The reusable empty framework and unrelated private materials remain outside scope.",
   "origin": "https://joshsuan.github.io",
   "storySHA256": "4df944efbfca4421457eb2205cdaad9d8c2990adc921c5e95415f9012f77ad32",
   "introductionSHA256": "2763f86f5f0a813da583df0f1d84ae2b3a39f68bdb788e26d32538b48e3d384e",
@@ -258,6 +258,96 @@
       "bytes": 338694,
       "sha256": "96b3d295f576ceb1d66bceb4ec510d3c2521ce6f27465183b68265b067a9607c",
       "source": "Owner-selected Background.mp4 continuous 0.000–8.000s excerpt; shared Chao/Nomura project, individual recording credit not separately recorded"
+    },
+    {
+      "path": "assets/xr/portfolio-main-visual.webp",
+      "bytes": 262832,
+      "sha256": "ad0cd748e71afefeb67b79b33f28f08620619875117dc2ef4e45f7cafee179ec",
+      "source": "Owner-selected Chao / Nomura XR research derivative; original portfolio narrative and source data retained, individual media creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/physical-capture.webp",
+      "bytes": 129352,
+      "sha256": "181907c832fd046c645ba7ee7b9a4294bdf3dc1d792a825328d4b44167f79f0a",
+      "source": "Owner-selected Chao / Nomura XR research derivative; original portfolio narrative and source data retained, individual media creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/physical-assembly.webp",
+      "bytes": 721236,
+      "sha256": "c07f14152ca297d668b1dfdafbac41d2ffef134d1583753e4c66669208d84b6d",
+      "source": "Owner-selected Chao / Nomura XR research derivative; original portfolio narrative and source data retained, individual media creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/physical-result.webp",
+      "bytes": 363456,
+      "sha256": "0885013c40cb9215c6995bd4d7ed7952e1cd878f755fec53bd6e74645c7c73a7",
+      "source": "Owner-selected Chao / Nomura XR research derivative; original portfolio narrative and source data retained, individual media creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/adaptive-method.webp",
+      "bytes": 175870,
+      "sha256": "d5f92adf7db6f7bbd65664e92c309a4d031846cf7eab9944a464c62b36afe267",
+      "source": "Owner-selected Chao / Nomura XR research derivative; original portfolio narrative and source data retained, individual media creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/communication-system.webp",
+      "bytes": 109466,
+      "sha256": "990a20f06e48b4cee051ae263a586e4b24d886b1826c84aad7439b0db63744de",
+      "source": "Owner-selected Chao / Nomura XR research derivative; original portfolio narrative and source data retained, individual media creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/data-categories.webp",
+      "bytes": 112744,
+      "sha256": "9bb49c60a316df522c5bd05ad842f4a6a279a2479f0fb4a36c14694c6ffb7c9a",
+      "source": "Owner-selected Chao / Nomura XR research derivative; original portfolio narrative and source data retained, individual media creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/adapt-interface.mp4",
+      "bytes": 793477,
+      "sha256": "c7a3ae4da483fe24830463d57882e8723b2a557b21732db2358d07587a2db845",
+      "source": "Owner-selected Chao / Nomura XR research derivative; original portfolio narrative and source data retained, individual media creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/adapt-poster.webp",
+      "bytes": 442954,
+      "sha256": "24bb4ab66d4fdd30650a0fc9f7704241de66012f3941692e5e0479fb58b5e428",
+      "source": "Owner-selected Chao / Nomura XR research derivative; original portfolio narrative and source data retained, individual media creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/assemble-interface.mp4",
+      "bytes": 2143502,
+      "sha256": "6bd92eb307fb65f17c71ce1b6196c7ddf4d834dd1fd924ce67050867ce62d2e8",
+      "source": "Owner-selected Chao / Nomura XR research derivative; original portfolio narrative and source data retained, individual media creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/assemble-poster.webp",
+      "bytes": 336200,
+      "sha256": "b65ec1fd919863e94b5ce757d624eb86535d07ba840ba80a224b801076e78ede",
+      "source": "Owner-selected Chao / Nomura XR research derivative; original portfolio narrative and source data retained, individual media creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/join-interface.mp4",
+      "bytes": 2475241,
+      "sha256": "360ecc723f6b2adeeb919a8dd580b69ea6e34d7ec1877c3bca7d0c8a9903911c",
+      "source": "Owner-selected Chao / Nomura XR research derivative; original portfolio narrative and source data retained, individual media creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/join-poster.webp",
+      "bytes": 576204,
+      "sha256": "1e7b1f6482616c1ef47661c9155c43b70fc8030053367ced0cbb19ea2aaf28c0",
+      "source": "Owner-selected Chao / Nomura XR research derivative; original portfolio narrative and source data retained, individual media creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/xr-research-assembly.glb",
+      "bytes": 4597000,
+      "sha256": "82e9679c1e47e93cc1a7bbea588eb0f2c8af142d6f7facc6fe5ffaa6148fdc04",
+      "source": "Owner-designated only_interior.3dm; complete assembled bamboo geometry selected by native source groups; shared Chao / Nomura research"
+    },
+    {
+      "path": "assets/xr/xr-research-assembly-poster.webp",
+      "bytes": 101448,
+      "sha256": "c5297673fdbe7316157e1b21b76127c05eb9129fc3f3298d30bbb3ba329f4c59",
+      "source": "Owner-designated only_interior.3dm; complete assembled bamboo geometry selected by native source groups; shared Chao / Nomura research"
     }
   ],
   "limits": [
@@ -265,6 +355,6 @@
     "Publication of this presentation does not approve unrelated source documents or private audit records.",
     "Geometry and mobile transfer budgets remain above the earlier targets; no physical-phone performance certification."
   ],
-  "xrStudySHA256": "ca8eb3ee4251f941c3d4778c3c9065fcb4ebd8eddb617a0db6ac6c355ab147cf",
+  "xrStudySHA256": "a5edc97bb895c9427ed2457e918b143a05f1a7a91d4cfda9327a3e1e848648b0",
   "contactSHA256": "c68b4bc45a3ecc13eeee55bae43f3cab75f2085a095a5084e1494f90c5695882"
 }

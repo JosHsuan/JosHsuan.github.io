@@ -1,6 +1,7 @@
 import './globals.css';
 import introduction from '../release/introduction.json';
 import SiteExperience from '../components/SiteExperience';
+import GlobalBackground from '../components/GlobalBackground';
 
 export const metadata = {
   title: introduction.metadataTitle,
@@ -11,5 +12,5 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  return <html lang="en"><head><link rel="preload" href="/assets/fonts/ibm-plex-sans-variable.woff2" as="font" type="font/woff2" crossOrigin="anonymous" /></head><body><SiteExperience/>{children}</body></html>;
+  return <html lang="en"><head><link rel="preload" href="/assets/fonts/ibm-plex-sans-variable.woff2" as="font" type="font/woff2" crossOrigin="anonymous" /></head><body><GlobalBackground><SiteExperience/>{children}</GlobalBackground></body></html>;
 }

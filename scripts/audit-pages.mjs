@@ -35,6 +35,11 @@ export async function auditPages() {
   }
   assert.equal(expected.size, 0, 'Missing approved public assets');
   const html = await readFile(path.join(out, 'index.html'), 'utf8');
+  const auditBackground=(page,route)=>{
+    assert.equal((page.match(/data-global-background(?:=|[ >])/g)||[]).length,1,`${route}: one shared backdrop`);
+    assert.equal((page.match(/data-global-background-field(?:=|[ >])/g)||[]).length,1,`${route}: one shared 2D field`);
+  };
+  auditBackground(html,'/');
   assert(html.includes('Bending-Active')); assert(!html.includes('noindex'));
   assert.equal((html.match(/data-story-chapter=/g) || []).length, 0, 'Home must not scroll into a case');
   assert.equal((html.match(/<h1[ >]/g) || []).length, 1, 'One personal introduction heading');
@@ -46,17 +51,25 @@ export async function auditPages() {
   assert.equal((html.match(/data-project-card=/g)||[]).length,2,'Only selected evidence-backed projects');
   for(const route of ['about','projects','contact','projects/bending-active','projects/xr-bending-active']){
     const page=await readFile(path.join(out,route,'index.html'),'utf8');
+    auditBackground(page,route);
     assert.equal((page.match(/<h1[ >]/g)||[]).length,1,`${route}: one heading`);
     assert(!page.includes('noindex'),route);
     assert(page.includes(`${manifest.origin}/${route}/`),`${route}: canonical`);
     if(route==='projects/bending-active')assert.equal((page.match(/data-story-chapter=/g)||[]).length,7);
     else {
       assert(!page.includes('data-cinematic-stage'),`${route}: no case runtime stage`);
-      if(route!=='projects')assert(!page.includes('model-poster'),`${route}: no unrelated model`);
+      if(route!=='projects')assert(!page.includes('/assets/cinematic/model-poster'),`${route}: no unrelated Bending model`);
     }
   }
   const xr=await readFile(path.join(out,'projects/xr-bending-active/index.html'),'utf8');
   for(const marker of ['data-xr-study','xr-context','xr-method','xr-prototype','xr-contribution','xr-limits','xr-credits','Wataru Nomura'])assert(xr.includes(marker),`XR: ${marker}`);
+  const study=JSON.parse(await readFile(path.join(root,'roles/uiux-designer/cases/bending-active-thesis/release/xr-study.json'),'utf8'));
+  for(const marker of ['data-xr-model-study','data-xr-phone-study','portfolio-main-visual.webp',study.model.poster.src,'adapt-interface.mp4','assemble-interface.mp4','join-interface.mp4'])assert(xr.includes(marker),`XR research integration: ${marker}`);
+  const modelPin=manifest.assets.find(asset=>'/'+asset.path===study.model.src);
+  assert(modelPin&&modelPin.sha256===study.model.sha256,'XR main source model must match the approved asset');
+  const release=JSON.parse(await readFile(path.join(out,'release.json'),'utf8'));
+  assert.equal(release.xrModelRevision,study.model.sha256,'Public XR model revision');
+  assert.equal(release.xrStudyRevision,manifest.xrStudySHA256,'Public XR narrative revision');
   assert(html.includes('https://joshsuan.github.io/'));
   console.log(`Public release audit passed: ${files.length} output files, ${manifest.assets.length} approved assets; no private inputs.`);
 }

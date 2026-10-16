@@ -17,7 +17,9 @@ const manifest = JSON.parse(await readFile(path.join(release, 'manifest.json'), 
 const story = await readFile(path.join(release, 'story.json'));
 assert.equal(digest(story), manifest.storySHA256);
 assert.equal(digest(await readFile(path.join(release, 'introduction.json'))), manifest.introductionSHA256);
-assert.equal(digest(await readFile(path.join(release, 'xr-study.json'))), manifest.xrStudySHA256);
+const xrStudyBytes = await readFile(path.join(release, 'xr-study.json'));
+assert.equal(digest(xrStudyBytes), manifest.xrStudySHA256);
+const xrStudy = JSON.parse(xrStudyBytes);
 assert.equal(digest(await readFile(path.join(release, 'contact.json'))), manifest.contactSHA256);
 // Verify the complete public handoff before replacing generated workspace files.
 for (const asset of manifest.assets) {
@@ -61,6 +63,9 @@ const sources = [
   'app/projects/bending-active/page.jsx', 'app/projects/xr-bending-active/page.jsx',
   'components/BendingProject.jsx', 'components/PortfolioHome.jsx', 'components/PortfolioNavigation.jsx',
   'components/ProjectModelPreview.jsx', 'components/project-model-scene.mjs', 'components/project-model-recipe.mjs',
+  'components/GlobalBackground.jsx', 'runtime/background/BackgroundRuntime.mjs', 'runtime/background/SiteBackgroundDriver.mjs',
+  'components/XRModelStudy.jsx', 'components/XRPhoneStudy.jsx', 'components/research-media.module.css',
+  'components/research-scene.mjs', 'components/research-scene-geometry.mjs',
   'components/ProjectAnimationPreview.jsx', 'runtime/site/PreviewLifecycle.mjs', 'runtime/site/video-resource.mjs',
   'components/XRProject.jsx', 'components/XRProject.module.css', 'release/xr-study.json', 'release/contact.json',
   'components/SiteExperience.jsx', 'components/site-experience.module.css',
@@ -101,7 +106,7 @@ await writeFile(path.join(work, 'public/robots.txt'), `User-agent: *\nAllow: /\n
 const routes=['/','/about/','/projects/','/contact/','/projects/bending-active/','/projects/xr-bending-active/'];
 await writeFile(path.join(work, 'public/sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${routes.map(route=>`<url><loc>${manifest.origin}${route}</loc></url>`).join('')}</urlset>\n`);
 const commit = process.env.GITHUB_SHA || execFileSync('git', ['rev-parse', 'HEAD'], {cwd: root, encoding: 'utf8'}).trim();
-await writeFile(path.join(work, 'public/release.json'), JSON.stringify({release: manifest.id, commit, modelRevision: 'ff112b90be104cca7e3705b5eee481ba3973d25e2f3d4a7350faa2f732cae47e', diagramRevision: manifest.assets.find(asset => asset.path === 'assets/thesis/source-diagrams.glb').sha256, typography: 'IBM Plex'}) + '\n');
+await writeFile(path.join(work, 'public/release.json'), JSON.stringify({release: manifest.id, commit, modelRevision: 'ff112b90be104cca7e3705b5eee481ba3973d25e2f3d4a7350faa2f732cae47e', diagramRevision: manifest.assets.find(asset => asset.path === 'assets/thesis/source-diagrams.glb').sha256, xrModelRevision: xrStudy.model.sha256, xrStudyRevision: manifest.xrStudySHA256, typography: 'IBM Plex'}) + '\n');
 const result = spawnSync(process.execPath, [path.join(root, 'node_modules/next/dist/bin/next'), 'build', work, '--webpack'], {cwd: root, stdio: 'inherit', env: {...process.env, THESIS_PUBLIC_RELEASE: '1', NEXT_PUBLIC_BASE_PATH: '', NEXT_TELEMETRY_DISABLED: '1'}});
 if (result.error) throw result.error;
 assert.equal(result.status, 0, 'Public static build failed');

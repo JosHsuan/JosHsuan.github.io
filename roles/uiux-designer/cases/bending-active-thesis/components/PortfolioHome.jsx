@@ -1,6 +1,5 @@
 import PortfolioNavigation from './PortfolioNavigation';
 import ProjectModelPreview from './ProjectModelPreview';
-import ProjectAnimationPreview from './ProjectAnimationPreview';
 import introduction from '../release/introduction.json';
 import contact from '../release/contact.json';
 import review from '../release/story.json';
@@ -25,13 +24,6 @@ const approaches=[
   {name:'SYSTEM',title:'Code, tools and interactive systems',description:'Digital methods connect representations and make a process easier to explore.'},
   {name:'MAKE',title:'Digital methods and physical materials',description:'Making brings the digital description into conversation with a physical result.'},
 ];
-
-// An original static typographic field, not a rendering of project geometry.
-const asciiField=Array.from({length:44},(_,row)=>Array.from({length:86},(_,column)=>{
-  const distance=Math.hypot((column-54)/42,(row-21)/24);
-  const value=Math.max(0,Math.min(.999,(1-distance)*.5+(Math.sin(column*.12+row*.09)+1)*.19));
-  return ' .:+ox#'[Math.floor(value*7)];
-}).join('')).join('\n');
 
 function Arrow({diagonal=false}){return <span aria-hidden="true">{diagonal?'↗':'↘'}</span>;}
 
@@ -86,7 +78,7 @@ function Projects({standalone=false}){
         <div className={styles.projectImage}>
           {project.id==='bending-active'
             ?<ProjectModelPreview poster={project.image}/>
-            :<ProjectAnimationPreview animation={xrStudy.media.motion} poster={xrStudy.media.motion.poster} label={project.title}/>}
+            :<img src={xrStudy.hero.src} width={xrStudy.hero.width} height={xrStudy.hero.height} alt={xrStudy.hero.alt} loading="eager" decoding="async" data-site-critical data-project-card-image/>}
         </div>
         <a className={styles.projectLink} href={project.href} data-project-card={project.id} aria-labelledby={`project-card-${project.id}`} aria-describedby={`project-description-${project.id}`}>
           <div className={styles.cardCopy} data-project-card-title>
@@ -114,7 +106,6 @@ function Contact({standalone=false}){
 /** Shared static portfolio pages. SiteExperience alone owns event-driven entry. */
 export default function PortfolioHome({section='home'}){
   return <div className={styles.portfolio}>
-    <div className={styles.ambient} aria-hidden="true" data-portfolio-background><span className={styles.asciiField}>{asciiField}</span></div>
     <PortfolioNavigation current={section}/>
     <main id="portfolio-main" tabIndex={-1} className={styles.main} data-portfolio-root data-portfolio-section={section}>
       {section==='home'&&<><Introduction/><Projects/><Contact/></>}

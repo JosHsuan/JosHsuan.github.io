@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "xr-bending-active-selected-media-v1",
-  "selectionAuthorization": "The current owner request explicitly selects a real XR detail page with narrowly relevant source processing/publication; unrelated preparation records remain private.",
-  "reviewScope": "Four initially inspected image derivatives plus an owner-selected Background.mp4 continuous excerpt and its exact first-frame poster; no raw CV, source code, configuration or whole source video is published. The video contains original recorded people and UI, with shared-project attribution rather than invented individual recording authorship.",
+  "id": "xr-bending-active-selected-media-v3",
+  "selectionAuthorization": "The 16 October owner request authorizes the selected latest-portfolio XR narrative, exact opening-page visual, genuine project media, independently verified archived geometry and iPhone display of the original app GIF recordings; unrelated sources remain private.",
+  "reviewScope": "Existing six XR derivatives retained unchanged. New selections use the exact opening portfolio visual, genuine photos, original method/system diagrams, three complete phone GIF recordings without changing resolution/action/timing, and the owner-designated native Rhino scene’s complete assembled bamboo geometry. The earlier numeric adaptive snapshot is not used as the primary model. Raw source documents, source JSON/configuration, native CAD files and whole original videos do not enter the browser.",
   "assets": [
     {
       "path": "assets/xr/research-environment.webp",
@@ -32,13 +32,103 @@
       "path": "assets/xr/background-preview.mp4",
       "bytes": 959385,
       "sha256": "2c9efd96634395452d71cd9f7fd800529dae5dc838f8c4b6c597fb3ee94afa29",
-      "source": "Owner-selected Background.mp4 continuous 0.000\u20138.000s excerpt; shared Chao/Nomura project, individual recording credit not separately recorded"
+      "source": "Owner-selected Background.mp4 continuous 0.000–8.000s excerpt; shared Chao/Nomura project, individual recording credit not separately recorded"
     },
     {
       "path": "assets/xr/background-poster.webp",
       "bytes": 338694,
       "sha256": "96b3d295f576ceb1d66bceb4ec510d3c2521ce6f27465183b68265b067a9607c",
-      "source": "Owner-selected Background.mp4 continuous 0.000\u20138.000s excerpt; shared Chao/Nomura project, individual recording credit not separately recorded"
+      "source": "Owner-selected Background.mp4 continuous 0.000–8.000s excerpt; shared Chao/Nomura project, individual recording credit not separately recorded"
+    },
+    {
+      "path": "assets/xr/portfolio-main-visual.webp",
+      "bytes": 262832,
+      "sha256": "ad0cd748e71afefeb67b79b33f28f08620619875117dc2ef4e45f7cafee179ec",
+      "source": "Owner-selected Chao / Nomura XR research derivative; original portfolio narrative and source data retained, individual media creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/physical-capture.webp",
+      "bytes": 129352,
+      "sha256": "181907c832fd046c645ba7ee7b9a4294bdf3dc1d792a825328d4b44167f79f0a",
+      "source": "Owner-selected Chao / Nomura XR research derivative; original portfolio narrative and source data retained, individual media creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/physical-assembly.webp",
+      "bytes": 721236,
+      "sha256": "c07f14152ca297d668b1dfdafbac41d2ffef134d1583753e4c66669208d84b6d",
+      "source": "Owner-selected Chao / Nomura XR research derivative; original portfolio narrative and source data retained, individual media creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/physical-result.webp",
+      "bytes": 363456,
+      "sha256": "0885013c40cb9215c6995bd4d7ed7952e1cd878f755fec53bd6e74645c7c73a7",
+      "source": "Owner-selected Chao / Nomura XR research derivative; original portfolio narrative and source data retained, individual media creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/adaptive-method.webp",
+      "bytes": 175870,
+      "sha256": "d5f92adf7db6f7bbd65664e92c309a4d031846cf7eab9944a464c62b36afe267",
+      "source": "Owner-selected Chao / Nomura XR research derivative; original portfolio narrative and source data retained, individual media creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/communication-system.webp",
+      "bytes": 109466,
+      "sha256": "990a20f06e48b4cee051ae263a586e4b24d886b1826c84aad7439b0db63744de",
+      "source": "Owner-selected Chao / Nomura XR research derivative; original portfolio narrative and source data retained, individual media creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/data-categories.webp",
+      "bytes": 112744,
+      "sha256": "9bb49c60a316df522c5bd05ad842f4a6a279a2479f0fb4a36c14694c6ffb7c9a",
+      "source": "Owner-selected Chao / Nomura XR research derivative; original portfolio narrative and source data retained, individual media creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/adapt-interface.mp4",
+      "bytes": 793477,
+      "sha256": "c7a3ae4da483fe24830463d57882e8723b2a557b21732db2358d07587a2db845",
+      "source": "Owner-selected Chao / Nomura XR research derivative; original portfolio narrative and source data retained, individual media creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/adapt-poster.webp",
+      "bytes": 442954,
+      "sha256": "24bb4ab66d4fdd30650a0fc9f7704241de66012f3941692e5e0479fb58b5e428",
+      "source": "Owner-selected Chao / Nomura XR research derivative; original portfolio narrative and source data retained, individual media creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/assemble-interface.mp4",
+      "bytes": 2143502,
+      "sha256": "6bd92eb307fb65f17c71ce1b6196c7ddf4d834dd1fd924ce67050867ce62d2e8",
+      "source": "Owner-selected Chao / Nomura XR research derivative; original portfolio narrative and source data retained, individual media creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/assemble-poster.webp",
+      "bytes": 336200,
+      "sha256": "b65ec1fd919863e94b5ce757d624eb86535d07ba840ba80a224b801076e78ede",
+      "source": "Owner-selected Chao / Nomura XR research derivative; original portfolio narrative and source data retained, individual media creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/join-interface.mp4",
+      "bytes": 2475241,
+      "sha256": "360ecc723f6b2adeeb919a8dd580b69ea6e34d7ec1877c3bca7d0c8a9903911c",
+      "source": "Owner-selected Chao / Nomura XR research derivative; original portfolio narrative and source data retained, individual media creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/join-poster.webp",
+      "bytes": 576204,
+      "sha256": "1e7b1f6482616c1ef47661c9155c43b70fc8030053367ced0cbb19ea2aaf28c0",
+      "source": "Owner-selected Chao / Nomura XR research derivative; original portfolio narrative and source data retained, individual media creator not separately recorded"
+    },
+    {
+      "path": "assets/xr/xr-research-assembly.glb",
+      "bytes": 4597000,
+      "sha256": "82e9679c1e47e93cc1a7bbea588eb0f2c8af142d6f7facc6fe5ffaa6148fdc04",
+      "source": "Owner-designated only_interior.3dm; complete assembled bamboo geometry selected by native source groups; shared Chao / Nomura research"
+    },
+    {
+      "path": "assets/xr/xr-research-assembly-poster.webp",
+      "bytes": 101448,
+      "sha256": "c5297673fdbe7316157e1b21b76127c05eb9129fc3f3298d30bbb3ba329f4c59",
+      "source": "Owner-designated only_interior.3dm; complete assembled bamboo geometry selected by native source groups; shared Chao / Nomura research"
     }
   ],
   "provenance": [
@@ -126,7 +216,7 @@
         "endExclusive": 8
       },
       "fps": 24,
-      "processing": "Original continuous 0.000\u20138.000s at 24fps, 960\u00d7540 full-frame Lanczos, H264 CRF24, yuv420p, faststart, silent; no grade or generated frames",
+      "processing": "Original continuous 0.000–8.000s at 24fps, 960×540 full-frame Lanczos, H264 CRF24, yuv420p, faststart, silent; no grade or generated frames",
       "sourceUnchanged": true,
       "individualImageCreator": "Original recording/presentation edit not separately credited; shared project attribution",
       "toolBinarySHA256": "2ce797a0f88d7f067180338fb227f7b1928ea727bd9a4d7a1d022f7c52af71a3",
@@ -153,6 +243,210 @@
       "individualImageCreator": "Original recording/presentation edit not separately credited; shared project attribution",
       "toolBinarySHA256": "2ce797a0f88d7f067180338fb227f7b1928ea727bd9a4d7a1d022f7c52af71a3",
       "verification": "Full 192-frame decode; repeat encode byte-identical; poster decoded pixels exact to output first frame"
+    },
+    {
+      "publicPath": "assets/xr/portfolio-main-visual.webp",
+      "sourceLocator": "T3/Presentation/Photo&GIF/螢幕擷取畫面 2025-01-20 154600.png",
+      "sourceSHA256": "a1a0aa1c56d090e14367b43548984369176495b965593d544ccb2d24f86c6d6c",
+      "derivativeSHA256": "ad0cd748e71afefeb67b79b33f28f08620619875117dc2ef4e45f7cafee179ec",
+      "dimensions": [
+        2000,
+        1125
+      ],
+      "durationSeconds": null,
+      "processing": "EXIF orientation, proportional Lanczos fit, WebP92; no crop, colour grade, compositing or generated imagery; metadata omitted",
+      "sourceOriginalUnchanged": true,
+      "creditBoundary": "Chia-Hsuan Chao / Wataru Nomura research, 2024; individual image or recording creator not separately recorded."
+    },
+    {
+      "publicPath": "assets/xr/physical-capture.webp",
+      "sourceLocator": "T3/Presentation/Photo&GIF/GlobalShapeAssembly-19.jpg",
+      "sourceSHA256": "7e767e091fe071bcaa6525c12e23569c46f9527afda4fc7262271583a9d20032",
+      "derivativeSHA256": "181907c832fd046c645ba7ee7b9a4294bdf3dc1d792a825328d4b44167f79f0a",
+      "dimensions": [
+        1800,
+        1200
+      ],
+      "durationSeconds": null,
+      "processing": "EXIF orientation, proportional Lanczos fit, WebP92; no crop, colour grade, compositing or generated imagery; metadata omitted",
+      "sourceOriginalUnchanged": true,
+      "creditBoundary": "Chia-Hsuan Chao / Wataru Nomura research, 2024; individual image or recording creator not separately recorded."
+    },
+    {
+      "publicPath": "assets/xr/physical-assembly.webp",
+      "sourceLocator": "T3/Presentation/Photo&GIF/ModuleAssembly-15.jpg",
+      "sourceSHA256": "02078ea82dd996ed46c64983abdf78d6f27c68a29a64d7bdd77b547fe49a0474",
+      "derivativeSHA256": "c07f14152ca297d668b1dfdafbac41d2ffef134d1583753e4c66669208d84b6d",
+      "dimensions": [
+        1800,
+        1200
+      ],
+      "durationSeconds": null,
+      "processing": "EXIF orientation, proportional Lanczos fit, WebP92; no crop, colour grade, compositing or generated imagery; metadata omitted",
+      "sourceOriginalUnchanged": true,
+      "creditBoundary": "Chia-Hsuan Chao / Wataru Nomura research, 2024; individual image or recording creator not separately recorded."
+    },
+    {
+      "publicPath": "assets/xr/physical-result.webp",
+      "sourceLocator": "T3/Presentation/Photo&GIF/GlobalShape-05.jpg",
+      "sourceSHA256": "d410b6dd9fd93778c4b2ed5761d81fc329ff9cd614d8fa51bf3f381d024ee92c",
+      "derivativeSHA256": "0885013c40cb9215c6995bd4d7ed7952e1cd878f755fec53bd6e74645c7c73a7",
+      "dimensions": [
+        2000,
+        1333
+      ],
+      "durationSeconds": null,
+      "processing": "EXIF orientation, proportional Lanczos fit, WebP92; no crop, colour grade, compositing or generated imagery; metadata omitted",
+      "sourceOriginalUnchanged": true,
+      "creditBoundary": "Chia-Hsuan Chao / Wataru Nomura research, 2024; individual image or recording creator not separately recorded."
+    },
+    {
+      "publicPath": "assets/xr/adaptive-method.webp",
+      "sourceLocator": "T3/Presentation/Diagram_materials/Method_Diagram_工作區域 1.png",
+      "sourceSHA256": "bdfd37979bb70bd6f81e24f298f55167a592e6be9d22df6e0163844e15695c25",
+      "derivativeSHA256": "d5f92adf7db6f7bbd65664e92c309a4d031846cf7eab9944a464c62b36afe267",
+      "dimensions": [
+        2800,
+        1574
+      ],
+      "durationSeconds": null,
+      "processing": "EXIF orientation, proportional Lanczos fit, WebP92; no crop, colour grade, compositing or generated imagery; metadata omitted",
+      "sourceOriginalUnchanged": true,
+      "creditBoundary": "Chia-Hsuan Chao / Wataru Nomura research, 2024; individual image or recording creator not separately recorded."
+    },
+    {
+      "publicPath": "assets/xr/communication-system.webp",
+      "sourceLocator": "T3/Presentation/Diagram_materials/Data_Workflow_工作區域 1 複本 2_工作區域 1 複本 2.png",
+      "sourceSHA256": "93e6f7df01127466e86d7615ef2252b237008ff247d75a3156545e62aec58780",
+      "derivativeSHA256": "990a20f06e48b4cee051ae263a586e4b24d886b1826c84aad7439b0db63744de",
+      "dimensions": [
+        2800,
+        1574
+      ],
+      "durationSeconds": null,
+      "processing": "EXIF orientation, proportional Lanczos fit, WebP92; no crop, colour grade, compositing or generated imagery; metadata omitted",
+      "sourceOriginalUnchanged": true,
+      "creditBoundary": "Chia-Hsuan Chao / Wataru Nomura research, 2024; individual image or recording creator not separately recorded."
+    },
+    {
+      "publicPath": "assets/xr/data-categories.webp",
+      "sourceLocator": "T3/Presentation/Diagram_materials/Data_Workflow_checked_工作區域 1 複本 5.png",
+      "sourceSHA256": "9e3462ed43831d0f7c7e1be418f995f2e6d05b92bd040fbd6ccc3a16b6063422",
+      "derivativeSHA256": "9bb49c60a316df522c5bd05ad842f4a6a279a2479f0fb4a36c14694c6ffb7c9a",
+      "dimensions": [
+        2800,
+        1574
+      ],
+      "durationSeconds": null,
+      "processing": "EXIF orientation, proportional Lanczos fit, WebP92; no crop, colour grade, compositing or generated imagery; metadata omitted",
+      "sourceOriginalUnchanged": true,
+      "creditBoundary": "Chia-Hsuan Chao / Wataru Nomura research, 2024; individual image or recording creator not separately recorded."
+    },
+    {
+      "publicPath": "assets/xr/adapt-interface.mp4",
+      "sourceLocator": "T3/Presentation/Photo&GIF/GlobalShapeDesign_MoveFeet.gif",
+      "sourceSHA256": "9c9084fcc4e3d6fe22b553d47e4eef031851e628dba3941f5e12d928f7a12beb",
+      "derivativeSHA256": "c7a3ae4da483fe24830463d57882e8723b2a557b21732db2358d07587a2db845",
+      "dimensions": [
+        666,
+        1440
+      ],
+      "durationSeconds": 13.0,
+      "processing": "Entire original GIF once; original resolution, frame count and presentation durations retained; at most one black pixel padded right/bottom for even coded dimensions, H264High3.2/yuv420p CRF32 silent faststart. No scale, crop, grade, retime, reorder, reverse, generated frame or composite.",
+      "sourceOriginalUnchanged": true,
+      "creditBoundary": "Chia-Hsuan Chao / Wataru Nomura research, 2024; individual image or recording creator not separately recorded."
+    },
+    {
+      "publicPath": "assets/xr/adapt-poster.webp",
+      "sourceLocator": "T3/Presentation/Photo&GIF/GlobalShapeDesign_MoveFeet.gif",
+      "sourceSHA256": "9c9084fcc4e3d6fe22b553d47e4eef031851e628dba3941f5e12d928f7a12beb",
+      "derivativeSHA256": "24bb4ab66d4fdd30650a0fc9f7704241de66012f3941692e5e0479fb58b5e428",
+      "dimensions": [
+        666,
+        1440
+      ],
+      "durationSeconds": 13.0,
+      "processing": "LosslessWebP of first decoded selected MP4 frame; exactdecodedRGBA comparison passed.",
+      "sourceOriginalUnchanged": true,
+      "creditBoundary": "Chia-Hsuan Chao / Wataru Nomura research, 2024; individual image or recording creator not separately recorded."
+    },
+    {
+      "publicPath": "assets/xr/assemble-interface.mp4",
+      "sourceLocator": "T3/Presentation/Photo&GIF/ModuleAssembly_TrackDeformation.gif",
+      "sourceSHA256": "eeaa58e782bb6630a6f0d004c011c3d523273c1938bac0bfcf4da1ed2f72ba41",
+      "derivativeSHA256": "6bd92eb307fb65f17c71ce1b6196c7ddf4d834dd1fd924ce67050867ce62d2e8",
+      "dimensions": [
+        534,
+        1152
+      ],
+      "durationSeconds": 24.96,
+      "processing": "Entire original GIF once; original resolution, frame count and presentation durations retained; at most one black pixel padded right/bottom for even coded dimensions, H264High3.2/yuv420p CRF32 silent faststart. No scale, crop, grade, retime, reorder, reverse, generated frame or composite.",
+      "sourceOriginalUnchanged": true,
+      "creditBoundary": "Chia-Hsuan Chao / Wataru Nomura research, 2024; individual image or recording creator not separately recorded."
+    },
+    {
+      "publicPath": "assets/xr/assemble-poster.webp",
+      "sourceLocator": "T3/Presentation/Photo&GIF/ModuleAssembly_TrackDeformation.gif",
+      "sourceSHA256": "eeaa58e782bb6630a6f0d004c011c3d523273c1938bac0bfcf4da1ed2f72ba41",
+      "derivativeSHA256": "b65ec1fd919863e94b5ce757d624eb86535d07ba840ba80a224b801076e78ede",
+      "dimensions": [
+        534,
+        1152
+      ],
+      "durationSeconds": 24.96,
+      "processing": "LosslessWebP of first decoded selected MP4 frame; exactdecodedRGBA comparison passed.",
+      "sourceOriginalUnchanged": true,
+      "creditBoundary": "Chia-Hsuan Chao / Wataru Nomura research, 2024; individual image or recording creator not separately recorded."
+    },
+    {
+      "publicPath": "assets/xr/join-interface.mp4",
+      "sourceLocator": "T3/Presentation/Photo&GIF/GlobalShapeAssembly_UI.gif",
+      "sourceSHA256": "ed755f4e9e128f02cf2e235991bdc0bb9b0a76677fc3946902da4e3a395199e4",
+      "derivativeSHA256": "360ecc723f6b2adeeb919a8dd580b69ea6e34d7ec1877c3bca7d0c8a9903911c",
+      "dimensions": [
+        666,
+        1440
+      ],
+      "durationSeconds": 20.3,
+      "processing": "Entire original GIF once; original resolution, frame count and presentation durations retained; at most one black pixel padded right/bottom for even coded dimensions, H264High3.2/yuv420p CRF32 silent faststart. No scale, crop, grade, retime, reorder, reverse, generated frame or composite.",
+      "sourceOriginalUnchanged": true,
+      "creditBoundary": "Chia-Hsuan Chao / Wataru Nomura research, 2024; individual image or recording creator not separately recorded."
+    },
+    {
+      "publicPath": "assets/xr/join-poster.webp",
+      "sourceLocator": "T3/Presentation/Photo&GIF/GlobalShapeAssembly_UI.gif",
+      "sourceSHA256": "ed755f4e9e128f02cf2e235991bdc0bb9b0a76677fc3946902da4e3a395199e4",
+      "derivativeSHA256": "1e7b1f6482616c1ef47661c9155c43b70fc8030053367ced0cbb19ea2aaf28c0",
+      "dimensions": [
+        666,
+        1440
+      ],
+      "durationSeconds": 20.3,
+      "processing": "LosslessWebP of first decoded selected MP4 frame; exactdecodedRGBA comparison passed.",
+      "sourceOriginalUnchanged": true,
+      "creditBoundary": "Chia-Hsuan Chao / Wataru Nomura research, 2024; individual image or recording creator not separately recorded."
+    },
+    {
+      "publicPath": "assets/xr/xr-research-assembly.glb",
+      "sourceLocator": "T3/Presentation/3D_Files/only_interior.3dm; complete native assembled groups, source layer Bamboo Strips",
+      "sourceSHA256": "52a2c77039977c612afd05d1179410927cbe0a48b83439aa55ac98a9eaef666b",
+      "derivativeSHA256": "82e9679c1e47e93cc1a7bbea588eb0f2c8af142d6f7facc6fe5ffaa6148fdc04",
+      "processing": "Original352authored meshes merged under the identical source layer material; original96312positions/normals and95160quads retained, eachquad triangulated identically; documented mm-to-m and(x,z,-y) rigidconversion; no simplification, animation, unrelated scene content or copied bitmap.",
+      "sourceUnits": "Millimeters",
+      "webUnits": "Metres",
+      "sourceOriginalUnchanged": true,
+      "creditBoundary": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024; exact individual model author not separately recorded."
+    },
+    {
+      "publicPath": "assets/xr/xr-research-assembly-poster.webp",
+      "sourceLocator": "T3/Presentation/3D_Files/only_interior.3dm; complete native assembled groups, source layer Bamboo Strips",
+      "sourceSHA256": "52a2c77039977c612afd05d1179410927cbe0a48b83439aa55ac98a9eaef666b",
+      "derivativeSHA256": "c5297673fdbe7316157e1b21b76127c05eb9129fc3f3298d30bbb3ba329f4c59",
+      "processing": "Orthographic CPU; right-handed GLB(x,y,z) to Matplotlib(x,-z,y), determinant+1; Three yaw.72/pitch.36 mapped to Matplotlib azimuth(degrees(.72)-90)/elevation(degrees(.36)); original layer diffuse with neutral face-normal lighting; no synthetic parts, textures, source deformation or new physical measurement",
+      "sourceUnits": "Millimeters",
+      "webUnits": "Metres",
+      "sourceOriginalUnchanged": true,
+      "creditBoundary": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024; exact individual model author not separately recorded."
     }
   ]
 }

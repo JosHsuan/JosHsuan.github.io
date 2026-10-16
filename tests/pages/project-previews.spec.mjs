@@ -45,7 +45,7 @@ test('project cards are full-bleed squares and reveal their real title on hover 
  await openGrid(page);
  const cards=page.locator('[data-project-tile]');await expect(cards).toHaveCount(2);
  for(const card of await cards.all()){
-  const geometry=await card.evaluate(node=>{const rect=node.getBoundingClientRect(),media=node.querySelector('[data-project-model-preview],[data-project-animation-preview]').getBoundingClientRect();return{width:rect.width,height:rect.height,mediaWidth:media.width,mediaHeight:media.height,radius:parseFloat(getComputedStyle(node).borderRadius)};});
+  const geometry=await card.evaluate(node=>{const rect=node.getBoundingClientRect(),media=node.querySelector('[data-project-model-preview],[data-project-card-image]').getBoundingClientRect();return{width:rect.width,height:rect.height,mediaWidth:media.width,mediaHeight:media.height,radius:parseFloat(getComputedStyle(node).borderRadius)};});
   expect(Math.abs(geometry.width-geometry.height)).toBeLessThan(1);expect(geometry.radius).toBeGreaterThan(0);
   expect(geometry.mediaWidth/geometry.width).toBeGreaterThan(.97);expect(geometry.mediaHeight/geometry.height).toBeGreaterThan(.97);
  }
@@ -57,9 +57,11 @@ test('project cards are full-bleed squares and reveal their real title on hover 
   await page.mouse.move(0,0);await expect(title).toHaveCSS('opacity','0');
  }
  await link.focus();await expect(title).toHaveCSS('opacity','1');
- const button=page.locator('[data-animation-toggle]');
- expect(await button.evaluate(node=>node.closest('a'))).toBeNull();
- expect(await button.evaluate(node=>{const rect=node.getBoundingClientRect();return rect.width>=44&&rect.height>=44;})).toBe(true);
+ const xr=page.locator('[data-project-card="xr-bending-active"]');
+ await expect(xr).toHaveAccessibleName('Motion capture × bending-active');
+ await expect(xr).toHaveAttribute('href','/projects/xr-bending-active/');
+ await expect(page.locator('[data-project-card-image]')).toHaveAttribute('src','/assets/xr/portfolio-main-visual.webp');
+ await expect(page.locator('[data-project-animation-preview],[data-animation-toggle]')).toHaveCount(0);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
 });
 
@@ -67,7 +69,7 @@ test('the real model loads only inside a visible card, sleeps at rest, and relea
  test.setTimeout(scenarioTimeout(150000));
  const requests=[];page.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)/.test(request.url()))requests.push(request.url());});
  await page.goto('/');await entered(page);
- expect(requests).toEqual([]);await expect(page.locator('canvas')).toHaveCount(0);
+ expect(requests).toEqual([]);await expect(page.locator('canvas')).toHaveCount(1);await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);
  await page.locator('[data-home-project-link]').click();
  await expect(model(page)).toHaveAttribute('data-preview-phase','ready',{timeout:WAIT});
  await expect(model(page).locator('canvas')).toHaveCount(1);await expect(page.locator('[data-cinematic-stage]')).toHaveCount(0);
@@ -90,11 +92,13 @@ test('the real model loads only inside a visible card, sleeps at rest, and relea
  await page.locator('[data-portfolio-navigation] a[href="/contact/"]').click();await entered(page);
  const departed=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('test-preview-departure')));
  expect(departed.resource).toBeNull();expect(departed.disposals).toBe(departed.acquisitions);closedRequests(departed);
- await expect(page.locator('canvas')).toHaveCount(0);
+ await expect(page.locator('canvas')).toHaveCount(1);await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);
 });
 
 test('the selected native recording plays only while eligible and a pause click does not navigate',async({page})=>{
- await page.goto('/');await entered(page);await movie(page).scrollIntoViewIfNeeded();
+ await page.goto('/projects/xr-bending-active/');await entered(page);
+ await page.getByText('View the archived four-panel research recording',{exact:true}).click();
+ await movie(page).scrollIntoViewIfNeeded();
  await expect(movie(page)).toHaveAttribute('data-animation-state','playing',{timeout:WAIT});
  const video=page.locator('[data-animation-video]');
  expect(await video.evaluate(node=>node.muted&&node.loop&&node.playsInline&&!node.paused&&node.readyState>=2)).toBe(true);
@@ -104,11 +108,10 @@ test('the selected native recording plays only while eligible and a pause click 
  expect(await video.getAttribute('src')).toBeNull();closedRequests(await movieFacts(page));
  await page.getByRole('button',{name:'Play animation',exact:true}).click();
  await expect(movie(page)).toHaveAttribute('data-animation-state','playing',{timeout:WAIT});
- await page.locator('[data-home-introduction] h1').scrollIntoViewIfNeeded();
+ await page.locator('h1').scrollIntoViewIfNeeded();
  expect(await movie(page).evaluate(node=>{const rect=node.getBoundingClientRect();return rect.bottom<=0||rect.top>=innerHeight;})).toBe(true);
  await expect(video).not.toHaveAttribute('src',/.+/);
  expect((await movieFacts(page)).resource).toBeNull();closedRequests(await movieFacts(page));
- await page.goto('/projects/xr-bending-active/');await entered(page);
  const detail=page.locator('[data-xr-recording] [data-project-animation-preview]');
  await detail.scrollIntoViewIfNeeded();
  await expect(detail).toHaveAttribute('data-animation-state','playing',{timeout:WAIT});
@@ -133,14 +136,16 @@ test('motion preference changes close active previews and preserve the same-fram
  await expect(model(page)).toHaveAttribute('data-preview-phase','ready',{timeout:WAIT});
  await page.emulateMedia({reducedMotion:'reduce'});await expect(model(page).locator('canvas')).toHaveCount(0);
  closedRequests(await modelFacts(page));
- await page.emulateMedia({reducedMotion:'no-preference'});await movie(page).scrollIntoViewIfNeeded();
+ await page.emulateMedia({reducedMotion:'no-preference'});
+ await page.goto('/projects/xr-bending-active/');await entered(page);
+ await page.getByText('View the archived four-panel research recording',{exact:true}).click();await movie(page).scrollIntoViewIfNeeded();
  await expect(movie(page)).toHaveAttribute('data-animation-state','playing',{timeout:WAIT});
  await page.emulateMedia({reducedMotion:'reduce'});
- await expect(model(page).locator('canvas')).toHaveCount(0);
+ await expect(page.locator('[data-project-model-preview] canvas')).toHaveCount(0);
  await expect(page.locator('[data-animation-video]')).not.toHaveAttribute('src',/.+/);
  await expect(page.locator('[data-animation-poster]')).toBeVisible();
  await expect(page.locator('[data-animation-toggle]')).toBeDisabled();
- closedRequests(await modelFacts(page));closedRequests(await movieFacts(page));
+ closedRequests(await movieFacts(page));
  await page.emulateMedia({reducedMotion:'no-preference'});
  await expect(movie(page)).toHaveAttribute('data-animation-state','playing',{timeout:WAIT});
 });
@@ -162,13 +167,17 @@ test('failed optional model and video assets leave native links and truthful pos
  await page.goto(`http://127.0.0.1:${port}/projects/`);await entered(page);
  await expect(model(page)).toHaveAttribute('data-preview-phase','failed',{timeout:WAIT});
  await expect(page.locator('[data-model-poster]')).toBeVisible();closedRequests(await modelFacts(page));
+ expect(denied.model).toBeGreaterThan(0);
+ await page.locator('[data-project-card="xr-bending-active"]').click();await entered(page);
+ await expect(page.locator('h1')).toHaveText('An Extended-Reality App Using Motion Capture for Bending-Active Structure');
+ await page.getByText('View the archived four-panel research recording',{exact:true}).click();
  await movie(page).scrollIntoViewIfNeeded();
  await expect(movie(page)).toHaveAttribute('data-animation-state','failed',{timeout:WAIT});
  await expect(page.locator('[data-animation-poster]')).toBeVisible();
- await expect(page.locator('canvas')).toHaveCount(0);
+ await expect(page.locator('[data-project-model-preview] canvas')).toHaveCount(0);
+ await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);
  expect(denied.model).toBeGreaterThan(0);expect(denied.video).toBeGreaterThan(0);
- closedRequests(await modelFacts(page));closedRequests(await movieFacts(page));
- await page.locator('[data-project-card="xr-bending-active"]').click();await entered(page);
+ closedRequests(await movieFacts(page));
  await expect(page.locator('h1')).toHaveText('An Extended-Reality App Using Motion Capture for Bending-Active Structure');
  }finally{
   try{await page.goto('about:blank');}finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}

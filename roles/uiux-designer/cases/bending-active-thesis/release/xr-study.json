@@ -1,24 +1,24 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "xr-bending-active",
   "title": "An Extended-Reality App Using Motion Capture for Bending-Active Structure",
   "shortTitle": "Motion capture × bending-active",
   "year": 2024,
   "type": "Collaborative research / XR prototype",
-  "summary": "Connecting measured physical positions, an adaptive digital model and XR guidance for the assembly of bending-active bamboo modules.",
-  "introduction": "Natural materials do not always behave like a predetermined digital model. This collaborative study explored how motion capture could bring conditions measured during assembly back into the design process, then return an updated model to an XR application.",
+  "summary": "A feedback loop between physical bamboo, an adaptive digital model and on-site XR assembly guidance.",
+  "introduction": "Instead of asking natural bamboo to follow a fixed digital overlay, this collaborative study brings measured physical conditions back into the model. Motion capture, adaptive form-finding and a mobile XR interface connect design decisions with module assembly.",
   "authors": [
     "Chia-Hsuan Chao",
     "Wataru Nomura"
   ],
   "context": "MAS in Architecture and Digital Fabrication, ETH Zürich · 2024 research project",
   "hero": {
-    "src": "/assets/xr/research-environment.webp",
-    "width": 1800,
-    "height": 1273,
-    "alt": "Project rendering of a modular bending-active structure, marker tools and XR assembly workspace.",
-    "caption": "A rendered overview of the proposed assembly environment, combining a modular structure, measurement tools and digital guidance. This is a project illustration, not a photograph of a completed installation.",
-    "credit": "Chia-Hsuan Chao / Wataru Nomura research, 2024; individual image creator not separately recorded."
+    "src": "/assets/xr/portfolio-main-visual.webp",
+    "width": 2000,
+    "height": 1125,
+    "alt": "Photographic close-up of woven bamboo modules with two original mobile-app interface views positioned between the strips.",
+    "caption": "The original main visual from the project’s opening portfolio page: a photographic bamboo study with the Adapt and Assemble interfaces.",
+    "credit": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024"
   },
   "media": {
     "measurement": {
@@ -58,46 +58,97 @@
       "alt": "Archived four-panel XR prototype footage with bamboo assembly, tracked digital geometry and Adapt, Assemble and Join controls.",
       "caption": "An eight-second excerpt from the original project presentation montage, showing recorded XR interface and assembly states. The original four-panel layout is preserved. This is archived footage, not a live tracking application on this website.",
       "credit": "Chia-Hsuan Chao / Wataru Nomura research, 2024; individual recording and original presentation-edit authorship not separately recorded."
+    },
+    "adaptiveMethod": {
+      "src": "/assets/xr/adaptive-method.webp",
+      "width": 2800,
+      "height": 1574,
+      "alt": "Original research diagram showing site planes, foundation and anchor controls, branch-radius adjustment, evaluation and modularization.",
+      "caption": "Adaptive form-finding moves from reference planes to control points and branch radius, before converting the chosen form into Y-shaped weaving modules.",
+      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024"
+    },
+    "communication": {
+      "src": "/assets/xr/communication-system.webp",
+      "width": 2800,
+      "height": 1574,
+      "alt": "Original system diagram connecting motion capture and the CAD-adaptive model to the XR application through MQTT and Firebase.",
+      "caption": "Motion data and worker requests travel between CAD and the app through publish–subscribe messages; the database stores geometry and task state.",
+      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024"
+    },
+    "dataCategories": {
+      "src": "/assets/xr/data-categories.webp",
+      "width": 2800,
+      "height": 1574,
+      "alt": "Original serialization diagram separating real-time mesh and rod data, configuration points, frames and radius, assembly data and project autosave.",
+      "caption": "The shared software distinguishes real-time, configuration and assembly data, with JSON serialization between Rhino/Python and Unity/C#.",
+      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024"
+    },
+    "physicalCapture": {
+      "src": "/assets/xr/physical-capture.webp",
+      "width": 1800,
+      "height": 1200,
+      "alt": "Close-up photograph of a green reflective-marker cluster attached to a woven bamboo module.",
+      "caption": "A real reflective-marker cluster attached to bamboo supplies physical reference positions.",
+      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024"
+    },
+    "physicalAssembly": {
+      "src": "/assets/xr/physical-assembly.webp",
+      "width": 1800,
+      "height": 1200,
+      "alt": "Photograph of hands assembling a bamboo module beside a phone showing the original XR guidance interface.",
+      "caption": "The prototype in use during physical module assembly, with the mobile interface beside the work.",
+      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024"
+    },
+    "physicalResult": {
+      "src": "/assets/xr/physical-result.webp",
+      "width": 2000,
+      "height": 1333,
+      "alt": "Photograph of the completed modular bamboo research demonstration in the original motion-capture space.",
+      "caption": "The completed 2024 research demonstration. Individual module assembly and connecting the overall structure were separate stages.",
+      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024"
     }
   },
   "sections": {
     "context": {
-      "title": "Let physical conditions inform the model.",
+      "title": "Physical conditions become design inputs.",
       "paragraphs": [
-        "The project investigated the gap between a designed form and the changing conditions encountered while bending and joining bamboo. A fixed overlay can describe where a part should go, while the material and its contact positions may still require adjustment.",
-        "The team explored a feedback loop between physical measurement, computational modelling and assembly guidance. The research used modular bending-active geometry so that changes could be considered at the level of a plane, a control point or a length parameter."
+        "A fixed XR overlay cannot account for every bend or contact in natural bamboo. The research connects measured site conditions to an adaptive digital model, then returns updated geometry to the assembler."
       ]
     },
     "method": {
-      "title": "Measure. Adapt. Guide.",
+      "title": "A model that can receive and return information.",
       "paragraphs": [
-        "Reflective markers and an OptiTrack / Motive / NatNet workflow supplied position information. Within Rhino and Grasshopper, Python and Kangaroo supported the adaptive model. The project extended an existing COMPAS XR workflow, using MQTT and Firebase to exchange geometry and interaction state with a Unity application.",
-        "The three steps below describe the team's intended data flow. They are an explanatory diagram of the archived research, not a live tracking connection or a simulation running on this page."
+        "Reflective markers and OptiTrack supply position information. Rhino, Grasshopper, Python and Kangaroo support the adaptive geometry; an extension to COMPAS XR connects it to the Unity app through MQTT and Firebase."
       ]
     },
     "prototype": {
-      "title": "From module selection to assembly guidance.",
+      "title": "Adapt. Assemble. Join.",
       "paragraphs": [
-        "The prototype connected module selection with measurement and assembly controls. The research distinguished adapting the global form, assembling an individual module and joining modules into the larger structure.",
-        "The archived presentation excerpt preserves the original four-panel montage of recorded interface and assembly states. It is not one continuous tracking experiment, and does not establish that every interaction worked reliably or assign the whole application to one researcher."
+        "Three original app recordings show different tasks: repositioning a foundation control, viewing rod feedback during module assembly, and guiding connections between modules. Each recording retains its own original action and duration."
+      ]
+    },
+    "making": {
+      "title": "From the digital model to bamboo modules.",
+      "paragraphs": [
+        "The chosen form is divided into Y-shaped units and converted into a strip-weaving pattern. The physical work combines marker-equipped rods, the mobile interface and manual assembly."
       ]
     }
   },
   "workflow": [
     {
       "label": "Capture",
-      "title": "Measure the physical setup",
-      "description": "Marker positions describe selected physical reference points and measuring tools."
+      "title": "Read the physical setup",
+      "description": "Reference planes, points and marker-equipped tools supply measured positions."
     },
     {
       "label": "Adapt",
-      "title": "Update the digital model",
-      "description": "A computational workflow translates measured parameters into model updates."
+      "title": "Update the digital form",
+      "description": "Control-point and radius changes shape an adaptive model before modularization."
     },
     {
       "label": "Guide",
-      "title": "Return a visual reference",
-      "description": "The XR application displays the updated geometry alongside assembly controls."
+      "title": "Return an assembly reference",
+      "description": "The mobile app displays model updates and accepts worker requests."
     }
   ],
   "contributions": [
@@ -116,10 +167,10 @@
   ],
   "contributionNote": "These contributions are supported by source-code changes and Git history. The research, overall application, geometry and fabrication are collaborative work with Wataru Nomura; the sources do not resolve every task between the two researchers. The tracking SDKs and upstream COMPAS XR framework are third-party foundations.",
   "limitations": [
-    "The research report records update delays, virtual-to-physical registration differences and image-target instability that remained unresolved within the study.",
-    "No user-study metrics or controlled usability evaluation were established. Personal assembly experiences are not presented here as a measured productivity gain.",
-    "The archived geometry snapshot has unresolved physical-unit, orientation and module-grouping details. It is not used here to invent an exploded assembly, a deformation sequence or a new simulation.",
-    "This case documents a 2024 research prototype. The original app and tracking hardware have not been re-run or benchmarked for this website."
+    "The original research records update delays, virtual-to-physical registration differences and image-target instability.",
+    "No controlled usability study or performance metrics established an improvement in assembly efficiency.",
+    "The CAD model preserves the selected original assembly geometry. It is not a new as-built survey, a stress analysis or a simulated deformation sequence.",
+    "The original app and tracking hardware have not been re-run or benchmarked for this website."
   ],
   "credits": [
     {
@@ -139,7 +190,136 @@
       "names": "COMPAS XR and its prior research at Gramazio Kohler Research, ETH Zürich / TUM; OptiTrack, Motive and NatNet; Rhino, Grasshopper, Python, COMPAS, Kangaroo and Mola; Unity; MQTT / EMQX and Firebase."
     }
   ],
-  "sourceNote": "Prepared from the co-authored project report, its methods and discussion sections, the 2025 portfolio's project chapter and selected code-history evidence. Selected images and an owner-selected eight-second presentation excerpt retain project-level attribution; individual image, recording or original presentation-edit authorship is not separately assigned where the source does not identify it. The private report, CV, code and full source media are not published.",
+  "sourceNote": "Narrative follows the newest inspected portfolio, JosHsuan_CV&Portfolio_2025.VerFacade (physical pp46–53), with the co-authored report and selected code history supporting contributions and limits. The main visual, diagrams, photographs and complete original phone GIF recordings retain shared-project attribution. The primary 3D model comes from the owner-designated only_interior.3dm and preserves its assembled bamboo geometry. Individual media authorship is not assigned where the sources do not identify it. Source documents, code, private configuration, native CAD files and full source videos remain outside the public release.",
   "metadataTitle": "Motion capture × bending-active — JosHsuan Chao",
-  "metadataDescription": "A collaborative 2024 XR research prototype connecting motion capture, adaptive digital geometry and bending-active bamboo assembly, with contributions, process and limits."
+  "metadataDescription": "A collaborative 2024 XR research prototype connecting motion capture, adaptive digital geometry and bending-active bamboo assembly, with contributions, process and limits.",
+  "phoneStages": [
+    {
+      "id": "adapt",
+      "label": "01 / Adapt",
+      "title": "Adjust the form on site.",
+      "description": "A recorded foundation-positioning operation changes a control point while the app displays the global adaptive model.",
+      "src": "/assets/xr/adapt-interface.mp4",
+      "width": 666,
+      "height": 1440,
+      "durationSeconds": 13.0,
+      "poster": {
+        "src": "/assets/xr/adapt-poster.webp",
+        "width": 666,
+        "height": 1440,
+        "alt": "First frame of the original adapt app recording, preserving all screen controls."
+      },
+      "caption": "A thirteen-second original GIF recording of the Adapt interface and foundation-positioning feedback.",
+      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024",
+      "sha256": "c7a3ae4da483fe24830463d57882e8723b2a557b21732db2358d07587a2db845",
+      "bytes": 793477
+    },
+    {
+      "id": "assemble",
+      "label": "02 / Assemble",
+      "title": "Read the rod while assembling.",
+      "description": "The app displays marker and rod feedback beside the physical bamboo during one recorded module-assembly operation.",
+      "src": "/assets/xr/assemble-interface.mp4",
+      "width": 534,
+      "height": 1152,
+      "durationSeconds": 24.96,
+      "poster": {
+        "src": "/assets/xr/assemble-poster.webp",
+        "width": 534,
+        "height": 1152,
+        "alt": "First frame of the original assemble app recording, preserving all screen controls."
+      },
+      "caption": "The complete 24.96-second original GIF recording of rod feedback during module assembly.",
+      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024",
+      "sha256": "6bd92eb307fb65f17c71ce1b6196c7ddf4d834dd1fd924ce67050867ce62d2e8",
+      "bytes": 2143502
+    },
+    {
+      "id": "join",
+      "label": "03 / Join",
+      "title": "Connect modules in context.",
+      "description": "The Join interface relates selected modules to the larger digital structure while bamboo modules are handled in the capture space.",
+      "src": "/assets/xr/join-interface.mp4",
+      "width": 666,
+      "height": 1440,
+      "durationSeconds": 20.3,
+      "poster": {
+        "src": "/assets/xr/join-poster.webp",
+        "width": 666,
+        "height": 1440,
+        "alt": "First frame of the original join app recording, preserving all screen controls."
+      },
+      "caption": "The complete 20.3-second original GIF recording of the Join interface and module-connection guidance.",
+      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024",
+      "sha256": "360ecc723f6b2adeeb919a8dd580b69ea6e34d7ec1877c3bca7d0c8a9903911c",
+      "bytes": 2475241
+    }
+  ],
+  "model": {
+    "src": "/assets/xr/xr-research-assembly.glb",
+    "sha256": "82e9679c1e47e93cc1a7bbea588eb0f2c8af142d6f7facc6fe5ffaa6148fdc04",
+    "bytes": 4597000,
+    "title": "Explore the woven bamboo assembly.",
+    "description": "The original project model makes the connections between Y-shaped modules visible. Rotate the complete assembly to follow how the woven strips define the larger structure.",
+    "poster": {
+      "src": "/assets/xr/xr-research-assembly-poster.webp",
+      "width": 1200,
+      "height": 1000,
+      "alt": "Source-derived view of the complete woven bamboo assembly from the original XR project Rhino scene.",
+      "sha256": "c5297673fdbe7316157e1b21b76127c05eb9129fc3f3298d30bbb3ba329f4c59",
+      "bytes": 101448
+    },
+    "caption": "The assembled bamboo geometry from the original research scene, retaining its proportions, woven strips and source layer colour. This CAD model documents the design rather than a new survey of the built prototype.",
+    "credit": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024",
+    "sourceUnits": "Millimeters",
+    "webUnits": "Metres",
+    "units": "Metres",
+    "vertices": 96312,
+    "triangles": 190320,
+    "sourceObjectCount": 352,
+    "materialCount": 1,
+    "bounds": {
+      "min": [
+        -0.6986924409866333,
+        0.008801741525530815,
+        -3.6913561820983887
+      ],
+      "max": [
+        0.8051480054855347,
+        1.6584364175796509,
+        -2.1224451065063477
+      ]
+    },
+    "sourceNumericBounds": {
+      "min": [
+        -698.6924277924354,
+        2122.445103259912,
+        8.801741500973304
+      ],
+      "max": [
+        805.148010383042,
+        3691.3561153468668,
+        1658.436355634141
+      ]
+    },
+    "conversionMatrixRowMajor": [
+      0.001,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0.001,
+      0,
+      0,
+      -0.001,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "displayMaterial": "Original source layer diffuse colour and opacity; neutral conversion of legacy shininess to roughness. No source UV or bitmap exists on the selected meshes, and no texture mapping is invented."
+  }
 }

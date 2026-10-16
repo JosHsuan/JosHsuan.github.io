@@ -10,14 +10,13 @@ import {createCanvasMotion, advanceCanvasMotion} from '../../components/canvas-m
 import {viewportStageSourceViewport,SOURCE_COMPARISON_SECONDS} from '../../components/source-scene-score.mjs';
 import {expireSourceSelection} from '../features/ModelManager.mjs';
 import {modelInformationLayout} from '../../components/model-information.mjs';
-import {createPageFieldRenderer} from '../../components/page-field-renderer.mjs';
 import {createCanvasTransitionEvents} from './CanvasTransitionEvents.mjs';
 import {createInformationWindowPresenter} from '../presentation/InformationWindowPresenter.mjs';
 import {createLibraryDiagramPresenter} from '../presentation/LibraryDiagramPresenter.mjs';
 import {createLiquidGlassPresenter} from '../presentation/LiquidGlassPresenter.mjs';
 
 /** Owns chapter time and frame coordination, independently of React presentation. */
-export function createExperienceDirector({input,inspection,lifecycle,stage,fieldCanvas,progress,status}){
+export function createExperienceDirector({input,inspection,lifecycle,stage,fieldCanvas,progress,status,background}){
   return {connect(){
     const modelOverlay=document.querySelector('[data-model-overlay]');
     const root = document.querySelector('[data-story-root]');
@@ -33,7 +32,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
     const opaqueGlass=()=>glassPreferences.some(query=>query.matches);
     const links = [...document.querySelectorAll('[data-chapter-link]')];
     const planeMap = new Map(), publisher = input.dom.forOwner('director');
-    const pageField=createPageFieldRenderer(fieldCanvas.current);
+    const pageField=background.acquire({owner:'bending-director',canvas:fieldCanvas.current,backdrop,publisher});
     const windowPresenter=createInformationWindowPresenter({publisher:input.dom.forOwner('information-windows')});
     const libraryPresenter=createLibraryDiagramPresenter({publisher:input.dom.forOwner('library-diagram'),emit:value=>input.events.emit('diagramReveal',value)});
     const liquidPresenter=createLiquidGlassPresenter({publisher:input.dom.forOwner('liquid-glass')});
@@ -232,13 +231,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       latestScene=sampleChapterScene(playbackScore,{reducedMotion:!!state.systemReduced,aspect:canvasSurface.width/canvasSurface.height,pointer:{...pointer,uv:fieldUv,active:fieldActive,strength:modelHover.strength||.35}});
       // Same chapter weights as the scene, quantized to avoid repainting a
       // stationary light field for autonomous camera/ASCII beats.
-      const lightField=latestScene.backdrop;
-      publisher.style(backdrop,'--backdrop-cool-rgb',lightField.coolRgb.join(' '));
-      publisher.style(backdrop,'--backdrop-warm-rgb',lightField.warmRgb.join(' '));
-      publisher.style(backdrop,'--backdrop-cool-energy',Math.round(lightField.coolEnergy*100)/100);
-      publisher.style(backdrop,'--backdrop-warm-energy',Math.round(lightField.warmEnergy*100)/100);
-      publisher.style(backdrop,'--backdrop-warm-x',Math.round(63-lightField.warmSide*45)+'%');
-      pageField.render({field:latestScene.field,frameTimeMs:now,paused:!state.sceneEnabled||state.sceneFailed,hidden:state.hidden,systemReduced:state.systemReduced},canvasSurface.width,canvasSurface.height);
+      pageField.present(latestScene,{frameTimeMs:now,paused:!state.sceneEnabled||state.sceneFailed,hidden:state.hidden,systemReduced:state.systemReduced},canvasSurface.width,canvasSurface.height);
       diagrams.forEach(({element:diagram,index})=>{
         const count=Math.max(1,Number(diagram.dataset.diagramCount)||4),phase=playbackScore.phases[index];
         // The discrete index owns source highlighting. The old continuously
