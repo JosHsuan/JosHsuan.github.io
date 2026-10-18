@@ -1,6 +1,7 @@
 # Six project studies — current integration contract
 
-Date: 18 October 2026 (Europe/Berlin).
+Owner-scope date: 18 October 2026 (Europe/Berlin).
+Final release verification: 19 October 2026 (Europe/Berlin).
 Status: source/CPU checks, the preceding 233-file/110-pin local export, 72 chapter
 views, five supplementary mobile source-model views and 105 focused browser
 checks are recorded. The later 114-execution integration run records 112 passes
@@ -14,8 +15,14 @@ combines Caustics B, nine chapter camera presets and Dot/Special contrast fields
 its 232-file/109-pin build, 22 CPU checks and 72+5 native captures also pass their
 operational checks. The scoped complete visual-direction review and separate
 Caustics material review are now accepted with the documented display limits.
-The fresh 105-check browser run is running; CI and same-artifact live publication
-remain pending. Visual acceptance does not establish the publication gate.
+The fresh local browser run passes 105 checks. Exact-commit CI passes 366 browser
+executions, the reviewed artifact is deployed, and HTTP verification matches
+all 109 pins. Corrected standard-route live study/mobile captures pass; Bending's
+14 saved protected states match the preceding DD release, while the original 628
+strict aggregate remains false. The final live visual director accepts the scoped
+six-case presentation with no new important blocker and the stated display
+limits. CI, same-artifact deployment, HTTP, native capture and scoped live visual
+evidence are complete; their distinct limits remain explicit below.
 
 ## Scope and evidence
 
@@ -567,12 +574,168 @@ Both receipt digests above are independently reread from their actual files.
 
 The complete scoped visual/art review is therefore finished. It does not replace
 interaction/lifecycle tests, protected-case regression, CI provenance or live
-acceptance. The fresh **105-check browser run is running**, without a completed
-result recorded here.
+acceptance. The final local directed-presentation browser run now completes with
+**105/105 passed in 8.0 min**, exit 0: **35 each** in Chromium, WebKit and mobile
+Chromium. Per profile it covers 19 native/no-JavaScript/failure/interaction/history
+study cases and 16 actual-font/header cases. Raw
+`animation-review/.local/three-projects/browser-direction-final.log` is
+**19,636 bytes**, SHA256
+`12273c210e4573d622904417af5bf89c43b95ed6a638bf7e804b70e291dbbed8`.
+This is the completed final local focused run; the earlier 105-check A run remains
+a separate historical receipt. It does not reclassify the earlier 112-pass/two-fail
+integration run or the Windows WebKit XR-video diagnostic as passing; those
+recorded failures and their scope remain above.
 
-Pending: completion of that browser run for the directed spread/material/camera
-revision; resolution or accurate recording of the WebKit media failures; the
-exact-commit CI gate, same-artifact deployment and live
-route/byte/native verification. The earlier 105 completed checks, 112/114 integration
-outcome and separate native/history receipts remain preserved; earlier three-case
-or published-release receipts do not satisfy the remaining stages.
+### Exact-commit CI, deployment and HTTP verification
+
+Commit **`7ccff6d6bdc89cd8574023e23ea2f1848ff1716b`** is pushed. CI run
+[39169380999](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39169380999)
+finishes **completed/success**, including quality, build, all eight Pages browser
+shards, both framework jobs and the required validation gate. Exact raw-log union
+against the pinned local Playwright inventory establishes **342 Pages executions**
+(114 each Chromium, WebKit and mobile Chromium), **12 root-framework executions**
+and **12 `/portfolio-test` framework executions**: **366 passed in total**.
+Every expected case/profile is accounted for without retry/failure/skip or missing
+and duplicate cases. The independent ignored
+`six-ci-7ccff6d/union-audit-final.json` is **530,101 bytes**, SHA256
+`55012bb18ec49372f0aece1ecf2cf82eecffc0f7582aabe1aa54e7e156d80c9b`.
+
+The first auxiliary union attempt is retained as `union-audit.json`: its strict
+parser initially mistakes the native `Slow test file:` diagnostic for an unknown
+case. The ignored parser is corrected to explicitly identify that diagnostic
+boundary, then the exact full inventory union passes. This is a local audit-parser
+failure, not a failed CI test or product run; the initial raw false is not erased.
+Likewise, the earlier 112/114 Windows run and cancelled `6dcb159` CI remain the
+separate historical outcomes recorded above.
+
+The final CI export contains **230 observed files / 109 source pins**, six
+studies, 41 unique images / 42 uses, five original-model GLBs and the canonical
+complete Mode/s spread. Its sealed artifact digest is
+**`8c44c2effb1bf0243439920f55a0de4d0d5c44e344a0d066073c76463132c72e`**.
+The preceding Windows local export's 232-file count is independently observed;
+cross-platform file-count or whole-artifact equality is not inferred or forced.
+Source records, SSR routes, custom404, actual font revisions, asset pins and the
+validated-release gate are verified in `six-ci-7ccff6d/gate-summary.json`, SHA256
+`e3658012514603ac1455e767b54d20627b1ba351096e3595160cc13d0f2666e7`.
+
+Deployment run
+[39171781875](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39171781875)
+finishes **completed/success** for the same commit. Raw deploy job 117806177000
+explicitly sets `RUN_ID=39169380999` and
+`EXPECTED_SHA=7ccff6d6bdc89cd8574023e23ea2f1848ff1716b`, verifies the successful
+push CI run, downloads its original `static-export-pages` and `validated-release`,
+verifies the seal, then publishes those bytes without rebuilding. The raw log is
+`animation-review/.local/github-job-117806177000.log`, **46,244 bytes**, SHA256
+`a280d3f7e8b58ebb5f741d938178c2b8fd638031fca200d5ae96c28c0279de4c`.
+The dispatch receives HTTP 204 before the local Node process reports a UV-cleanup
+assertion and exit 1. It is dispatched only once; a subsequent GET identifies the
+single successful run. That client-cleanup outcome is not recorded as a failed
+deployment or used to dispatch a duplicate run.
+
+Post-deployment [live-site](https://joshsuan.github.io/) HTTP verification matches
+**176 exact responses and eight video byte-range responses**, including all 109
+pinned assets and the CI release identity/digest. The final receipt sets
+`verified=true`, `gateVerified=true` and `liveExact=true`:
+`six-ci-7ccff6d/six-project-verification-live-2026-10-18T22-22-11.368Z.json`,
+**46,642 bytes**, SHA256
+`d5404fec9717f2350b0807ed773c0ab346759640e20a88971a4da2acc15fee5e`.
+These receipts identify the exact deployed artifact and source bytes, not a
+post-deployment native-paint, physical-device or full-page pixel-equivalence result.
+
+The first live native-capture invocation supplies a trailing slash in
+`BASE=https://joshsuan.github.io/`. The helper concatenates `base + '/projects/…'`,
+opening `https://joshsuan.github.io//projects/mode-s-of-making/`. Its native History
+normalisation then interprets `//projects/…` as `https://projects/…`, records an
+actual cross-origin `replaceState` page error, and reaches the unchanged
+60-second phase deadline with **zero PNGs**. Raw
+`six-native-2026-10-18T22-22-32.620Z/results.json` is **3,798 bytes**, SHA256
+`8c23e95ba2a40a0481652e88f12ff47f1c07f11726ab3d9e91f8147cea5bfec6`,
+with `passed=false` / `browserClosed=true`; launcher `live-native-7ccff6d.log`
+is preserved. This malformed capture-tool URL and its real page error remain
+recorded separately from the successful standard-route CI/HTTP checks. The next
+invocation corrects only the CLI base to `https://joshsuan.github.io` without the
+trailing slash; the helper, assertions and60-second limit are unchanged.
+The corrected invocation subsequently completes as recorded below; the failed
+first invocation and its page error remain separate historical evidence.
+
+### Post-deployment native verification
+
+Corrected standard-route live capture passes **72 views**, 36 desktop and 36
+mobile. Desktop uses DPR 2 / **3840×2160 PNGs** and mobile uses DPR 3 /
+**1170×2532 PNGs**. Both profiles report zero page errors and zero failed/pending
+requests (359 finished per profile), close their browsers, and preserve sealed
+artifact digest `8c44c2effb1bf0243439920f55a0de4d0d5c44e344a0d066073c76463132c72e`
+before/after. Raw `six-native-2026-10-18T22-24-55.097Z/results.json` is
+**2,451,296 bytes**, SHA256
+`4c39440117ef5f7b4f8893c7b6b6b23fa2ea645fbf2fbd6a19618658089e10d8`.
+Its `final-image-qa.json` passes all 72 native PNG decode/dimension/variance checks
+and twelve contacts are produced: **16,826 bytes**, SHA256
+`ffad192eaa46daa46777a745485361cf6334de12c7b5320a34f4261bb57dbf06`.
+These zero-error statements apply to the corrected standard URLs, preserving
+the malformed-URL invocation's real error above.
+
+The five live native source-model first views also pass, with no errors or
+overflow, browsers closed and the same sealed digest before/after. Raw
+`mobile-model-first-2026-10-18T22-28-20.412Z/results.json` is **144,609 bytes**,
+SHA256 `9a9ccf8fb0a70f9dc73aa9c63745f8ed09d45ad766efd22cd217c99b89e562c6`.
+A separate current Caschlatsch mobile opening PNG is retained beside that
+five-model set; it remains documentary and is not counted as a sixth model.
+
+The live Reduced-Motion/manual-Enable3D Bending capture closes all **14 states**
+with `rawCapturePassed=true`, zero page/console/context/HTTP errors and no failed
+or pending requests. Its **original 628 strict comparison remains false**, with
+**7/14 exact rows**, and the command's exit1 is retained. Raw
+`animation-review/.local/ocr-bending-static7-7ccff6d/2026-10-18T22-29-11.772Z/results.json`
+is **5,022,648 bytes**, SHA256
+`706d1ed7fedd0d80ff5302b12742b97db9efabc5458013cf7a0a7ae5e0455545`.
+This does not relabel the prior typography-era 628 comparison as successful.
+
+A separate comparison to the preceding published **DD (`ddafd44`)** capture
+passes **14/14 complete saved protected tuples**, with 14 exact before rows,
+14 exact after rows, 14 stable baseline rows and 14 stable candidate rows. It
+includes material progress, source representation, pose/camera, lights, optics
+and the complete protected compositor fields with **zero numeric tolerance** and
+no field deletion, pixel masking or signed-zero normalisation. Both captures pin
+the same helper SHA256
+`6273806bba26dc90e4c61dd19d718b9d7811e366b54adb3ca12beb4aeb0e7080`;
+the comparator is SHA256
+`e451779c026ae6cc6575f7f73ce4a03e71ba356aa3bb047a190cdbd93ade6467`.
+Desktop/mobile native context options and browser version 153.0.8010.12 agree.
+Raw `six-ci-7ccff6d/bending-dd-postlive-comparison.json` is **26,419 bytes**,
+SHA256 `d9f4f4f49963517b8dc31f3c62f870f06fcb3c1898f2860afc31bc65ebe16a78`.
+
+The DD, candidate, original 628 and comparator files pass before/after integrity
+checks; their actual hashes are independently reread. The same six annotation
+`end.y` differences from 628 and historical signed-zero diagnostic remain in both
+DD and candidate records. Earlier `JSON.stringify` has already erased any live
+negative-zero sign serialised as 0; a parser can preserve literal `-0` still
+present and detect it with `Object.is`, but cannot recover lost signs. Therefore
+the saved-JSON DD equality does not establish 14/14 strict 628 equality, restored
+runtime signs, whole-page pixel identity or full native-motion equivalence.
+
+The final live visual director returns **PASS**, with **no important blocker**,
+for the same public commit and sealed digest. The reviewer actually views all
+**12 desktop/mobile contact sheets** representing72 chapters, **three individual
+desktop PNGs** (Mode/s Context/Making and Caustics System) and all **five mobile
+model-first PNGs**: **20 image files**. This is complete scoped contact review
+with named full-size supplements, not a claim that every one of the72 chapter
+PNGs is individually reviewed at full resolution. The receipt is
+`visual-direction-review/live-final-7ccff6d.json`, **10,514 bytes**, SHA256
+`bb3f1580b84648309901ab543e33b8ebdbde8492d3c8d0bcdccea8d937855401`;
+its actual file bytes/digest are independently reread before recording this result.
+
+The accepted live presentation preserves complete source groupings, the canonical
+Mode/s landscape, chapter viewpoints, project-local calm zones and documentary
+sequence. Its three prior minor limits remain: the small Mode/s active-badge
+overlap, dense Dot mobile point overlap, and Caustics' bright pearlescent web
+response with source-shader/optical limits. No new geometry, point-size, material
+or lighting adjustment is requested. Combined camera/light acceptance remains
+separate from a controlled single-variable light experiment; physical-device,
+every-interactive-state and pixel-equivalence claims are not added.
+
+The root reports the local 4186 server stopped, zero remaining Rhino/Blender
+processes, and all root-owned browser captures closed. The earlier105 completed
+checks, 112/114 integration outcome, malformed live URL attempt, original628
+strict false and cancelled candidate remain preserved as independent historical
+outcomes. Completion of the exact deployed release's scoped checks does not
+rewrite those records or extend their proof beyond the limits stated here.

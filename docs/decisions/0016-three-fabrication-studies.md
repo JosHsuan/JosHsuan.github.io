@@ -59,5 +59,5 @@ cases, within the expandable nine-cell minimum and without fictional filler.
 The model-free introduction, original prepared Bending card, protected Bending/XR
 presentation and empty reusable `src` framework remain intact. Current local
 CPU/build and final native-capture evidence includes completed independent visual
-review. Focused-browser, CI and live publication acceptance remain separate
-requirements in the current integration record.
+review. Focused-browser and CI checks, same-artifact publication and native live
+verification are recorded separately in the current integration record.

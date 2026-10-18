@@ -41,18 +41,77 @@ The completed run provides this first full-run timing sample. Durations below ar
 
 The eight parallel browser-job logs span approximately 31 minutes 22 seconds; summing suite execution times gives approximately 130 minutes 11 seconds. These are different measurements, and neither establishes a p95 or a controlled speedup. The independent [verification record](../roles/uiux-designer/cases/bending-active-thesis/OCR_XR_VIEWPORT_VERIFICATION.md) records the exact log hashes, timestamps, gate and artifact digest. The uneven distribution makes duration-based partitioning the first performance experiment after the bounded capacity repair.
 
-The later six-study work expands the collected public inventory to **114 unique
-cases per profile / 342 executions**, with a further **12 framework executions
-for each of root and subpath**. These are inventory counts, not a completed
-release result. Its [integration record](../roles/uiux-designer/cases/bending-active-thesis/SIX_PROJECT_STUDIES_INTEGRATION.md)
-separates the cancelled `6dcb159` candidate from the owner's subsequent restored
-spread and material/light revision. New source, clone/disposal and light-placement
+The six-study revision at commit
+`7ccff6d6bdc89cd8574023e23ea2f1848ff1716b` completes full
+[CI run 39169380999](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39169380999)
+on 18 October 2026 UTC: **114 unique cases per profile / 342 public executions**
+across three browser profiles (Chromium, WebKit and mobile Chromium), plus
+**12 framework executions each at root and `/portfolio-test`**, all passing.
+The raw-log union contains all 366 expected executions without duplicate,
+missing, skipped, retried or unfinished browser cases. Downloaded run and final
+jobs API records identify that exact SHA, run ID and successful completed jobs;
+the final union binds their job IDs to the original logs and pinned test
+inventory. The successful
+[required gate](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39169380999/job/117805645781)
+and artifact verification bind the same plan/build/run to digest
+`8c44c2effb1bf0243439920f55a0de4d0d5c44e344a0d066073c76463132c72e`.
+The retained `union-audit-final.json` and `gate-summary.json` record that binding;
+their SHA-256 digests are respectively
+`55012bb18ec49372f0aece1ecf2cf82eecffc0f7582aabe1aa54e7e156d80c9b`
+and `e3658012514603ac1455e767b54d20627b1ba351096e3595160cc13d0f2666e7`.
+The [same-artifact deployment](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39171781875)
+succeeds for the same SHA. Live verification confirms 176 exact HTTP byte
+comparisons, all 109 source pins and eight original-video range responses.
+The six-study desktop/mobile native captures and protected Bending regression
+are recorded separately in the [integration record](../roles/uiux-designer/cases/bending-active-thesis/SIX_PROJECT_STUDIES_INTEGRATION.md).
+
+The eight original Playwright suite summaries provide this second full-run
+sample. They exclude job setup, queue time and final artifact checks.
+
+| Browser batch | Passed | Suite duration |
+| --- | ---: | ---: |
+| Chromium 1/4 | 30 | 18.3 min |
+| Chromium 2/4 | 39 | 28.1 min |
+| Chromium 3/4 | 17 | 18.1 min |
+| Chromium 4/4 | 28 | 4.1 min |
+| WebKit 1/2 | 69 | 19.5 min |
+| WebKit 2/2 | 45 | 12.4 min |
+| Mobile Chromium 1/2 | 69 | 13.4 min |
+| Mobile Chromium 2/2 | 45 | 12.9 min |
+
+The workflow was created at **21:47:28 UTC**. API job timestamps put the first
+scope-plan result at **19 seconds**, the completed `quality` result at **74
+seconds**, and the completed public build at **82 seconds** after creation,
+including dependency waits, queue and setup. The quality job itself spans
+**53 seconds**; its validation and portable-test steps span **12 and 14 seconds**
+respectively. The required gate completes at **22:18:13 UTC**, **30 minutes 45
+seconds** after workflow creation. These are distinct observations; the proposed
+complete fast layer, including a dedicated native smoke stage, is not established
+by the quality timing alone.
+
+The eight browser suites range from **4.1 to 28.1 minutes** and sum to approximately
+**126 minutes 48 seconds** using their rounded native summaries. Chromium 2/4 is
+the slowest batch; its raw diagnostics identify `model-inspection.spec.mjs`
+at **15.6 minutes** and `motion-feedback.spec.mjs` at **6.0 minutes**. Chromium
+1/4 and 3/4 also contain **7.4-minute** files, while Chromium 4/4 finishes its
+28 cases in 4.1 minutes. File counts alone therefore remain insufficient for
+balancing GPU work. Framework root/subpath suites take **18.2 / 17.1 seconds**.
+This is one completed sample, not a p95. Coverage expanded from 267 to 342 public
+executions, with changed application/source work and uncontrolled runner
+variation; the two runs do not establish a controlled acceleration. This revision
+does not change the CI workflows. The first offline union-parser attempt mistook
+Playwright's `Slow test file` diagnostic for a case; the corrected ignored parser
+passes against the same unchanged raw logs, and that helper error is not a product
+or CI test failure.
+
+The [integration record](../roles/uiux-designer/cases/bending-active-thesis/SIX_PROJECT_STUDIES_INTEGRATION.md)
+keeps the owner-superseded `6dcb159` candidate separate from this restored-spread
+and material/light revision. New source, clone/disposal and light-placement
 contracts run in the cheap CPU layer; native PMREM/transmission, source first
 draw, interaction and visual acceptance remain browser/release checks. Future
 duration balancing must account for those GPU costs and retain all source
-geometry, original time bounds and the exact scenario union. It must not treat
-an owner-superseded candidate as a production change failure or a timing sample
-for a completed full run.
+geometry, original time bounds and the exact scenario union. A superseded-run
+cancellation is not a production change failure or a completed-run timing sample.
 
 ## Planned feedback and release stages
 
@@ -63,7 +122,7 @@ The table describes the target structure. Existing jobs implement parts of it; t
 | Change plan | Validate scope mapping, cumulative history, renames and required-job rules. Expose the selected reasons. | Immediate visible plan; a missing baseline selects full coverage. |
 | Fast checks | Content/schema/private-path checks, lint/types, portable event/state/readiness/geometry tests, source/font pins and CI gate tests. | Project target: p95 active execution within five minutes; also report queue-inclusive feedback. A failure blocks delivery. |
 | Build and native smoke | Create the complete public artifact once; run a small high-value native browser journey for navigation, entry/fonts, prepared first draw and bounded failure. | Project target: required fast-layer feedback within ten minutes of workflow creation, including queue time. A smoke success is an intermediate result. |
-| Selected acceptance | Existing impact-selected journeys and release baseline across the three engines/profiles, against the same complete artifact. | All selected cases must pass; shared inputs continue to select full coverage. |
+| Selected acceptance | Existing impact-selected journeys and release baseline across three browser profiles (Chromium, WebKit and mobile Chromium), against the same complete artifact. | All selected cases must pass; shared inputs continue to select full coverage. |
 | Full release validation | Required cross-engine WebGL/source fitting, pointer/touch/keyboard, lifecycle/context loss, glass/reading, actual media, responsive and protected-source checks. | Full candidates retain the complete scenario union. Longer acceptance work remains a release condition after fast feedback is available. |
 | Publication and production feedback | Validate push/main/SHA/digest provenance, publish the tested artifact, then check live release/routes/bytes and required native journeys. | Complete only after live verification. Retain the previous verified release identity and recovery evidence. |
 
