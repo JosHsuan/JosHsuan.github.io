@@ -152,6 +152,106 @@ The native room remains proportionally contained, uses the correct 4K source
 for each viewport, and leaves the structure/TV pixels unchanged. These are
 browser-emulated viewports, not physical-device tests.
 
+## Final two-face CI candidate and native observation
+
+The amended source candidate is `813a55397f2a928ed70d31f15aa15039ff1a11f3`,
+pushed to `main` for [CI run 39147112657](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39147112657).
+Its plan selects full validation, all 20 public spec files, 267 public browser
+executions and eight browser runners. The unique CI build contains **145 files
+and 63 pinned sources**, with artifact digest
+`d0885fb13aa40f9b9b74cf3db9dc6def3f66f672f13a92f6ad981fc60b7a26df`.
+Local generated output has two additional files; publication uses this verified
+CI artifact only. Candidate verification checks every source pin, all release
+revision fields, the full native 4K/geometry/TV contract and seven HTML documents.
+Its independent receipt is
+`animation-review/.local/ocr-space-xr-ci-813a553/release-verification-candidate.json`.
+This is candidate provenance, not a successful final CI or publication claim.
+
+CI run `39147112657` is **not publishable**. Seven public browser runners
+complete with **247 passing executions**; Chromium shard 2/4 is cancelled by
+the workflow's 30-minute job wall-clock limit while its twentieth case is
+running. Its raw log shows continued progress through all twenty starts, with
+no reported assertion failure, but lacks a terminal result for the last case
+and the post-test artifact check. No complete 267-pass claim is made for it.
+The final case starts at 17:23:32.477 UTC and cancellation occurs at
+17:25:21.886 UTC. Its unchanged CI scenario budget is six minutes; the
+remaining job time is shorter than that valid scenario budget.
+Raw log: `animation-review/.local/github-job-117733294145.log`.
+
+The bounded workflow repair raises only the browser-job wall-clock limit to
+45 minutes, leaving all functional assertions, per-test deadlines, no-retry
+policy, eight-runner selection, single-build provenance and before/after
+artifact checks unchanged. The resulting commit requires its own full CI
+gate and matching tested artifact; this interrupted run cannot authorize
+publication. A separate local run of those same twenty unchanged cases is
+recorded independently, without treating it as the missing CI result.
+
+An independent CPU review verifies all 63 pins between the committed source,
+working files and exact CI export. Original Bending assets are **42/42 identical**
+to `6288286`, and the protected renderer/camera/material/lighting/chapter/ASCII
+relative-import closure remains **24/24 identical Git blobs**. Only two working
+files have CRLF rather than LF; their filtered Git contents are identical.
+The two native room WebPs in CI decode exactly to every original PNG RGBA byte.
+Receipt:
+`animation-review/.local/ocr-bending-protected-cpu/2026-10-18T16-59-05.811Z-independent-ci813/results.json`,
+SHA256 `22e465bc9d432dc01c1a3be38ea7a195f3c9c8f2eaffae0fb99e2d3dc5931938`.
+
+Native observation of the same served CI artifact completes **40/40 semantic
+checks and 36 views**, including both actual font roles/glyphs, Home's prepared
+first draw/offscreen retention, full-viewport XR model hits, whole 4K Context,
+all three real phone recordings, pause/resume, scene exit/re-entry, original
+Bending Full/material/camera facts and a separate Reduced Motion profile.
+The artifact is unchanged afterward. The strict raw result remains **false**:
+one of 447 transports is a cancelled unused desktop poster candidate, with
+446 finished requests. All 18 native departure/close drains and every context
+close have zero pending transports; page, console and HTTP error lists are empty.
+Raw receipt:
+`animation-review/.local/ocr-space-xr-local-813a553/2026-10-18T16-56-19.976Z/results.json`,
+SHA256 `0e060c61968760de9234f6c5be31cd8141878c5ba72d6913e275b3e03b617027`.
+
+The separate transport assessment records that request 162 is cancelled in its
+start millisecond, before any HTTP request/response timing, while matching
+mobile request 161 finishes HTTP 200. Cancellation precedes the page chunk's
+completion by 9ms and source-GLB acquisition by 428ms. This cannot be attributed
+to source-ready React poster removal. Native responsive/shared-image scheduling
+is a bounded inference; browser-internal initiators were not captured. No broad
+abort exclusion or raw-result rewrite is used. Assessment SHA256:
+`78666ede1ad2dc2d3d0d877b05d885d84e4a0976a55b574675857b0040812f02`,
+saved beside that raw receipt as `native-transport-assessment.json`.
+
+Actual 2× desktop/mobile opening, Context and reading captures of the exact CI
+artifact are under
+`animation-review/.local/room4k-page-2026-10-18T17-01-27.292Z/`.
+These are browser-emulated viewports; no physical-phone certification is claimed.
+
+The XR interface/composition reviewer independently inspected those three
+desktop/mobile Context/reading views and both public native images. The level
+central-axis composition retains the architectural room and visible working
+setup; whole-image portrait framing and the native reading-panel overlay are
+consistent with the shared glass presentation. No visible structure/TV aspect
+distortion or publication-blocking composition issue was found. Pixel/UV/source
+identity is established by the separate CPU/native evidence, not visual opinion.
+
+The same CI artifact also has fourteen complete native static Bending chapter
+views under the original Reduced Motion/Enable 3D protocol. Raw capture completes
+without page/console/HTTP errors, failed/pending requests or self-variance, but
+the strict full-tuple result remains **false, 7/14 exact**. Six differences are
+caption-derived `annotation.end.y`; source anchors, screen projections and
+`end.x` are unchanged. The seventh is mobile Credits' derived signed-zero
+comparison, whose runtime sign JSON does not preserve. All fourteen physical
+camera, material **including progress**, lights, optics, source and compositor
+settings match. The unchanged presenter still derives `end.y` from the caption
+DOMRect centre; the authorized fonts and wrapping alter that caption geometry.
+No comparator field is removed, tolerance added or whole-page pixel equality
+claimed. Raw receipt:
+`animation-review/.local/ocr-bending-static7-813a553/2026-10-18T16-59-22.399Z/results.json`,
+SHA256 `c3a7dd9807242b6ef85cc229e7c418de011509aaf8a39b24e5fe1dad115ea18b`.
+Independent assessment:
+`animation-review/.local/ocr-bending-static7-assessment/2026-10-18T17-03-15.558Z-independent-ci813/assessment.json`,
+SHA256 `455f71b648cbe9cdd2ecefa23d1c67464b03a884c6c6b88882845dc855846738`.
+All raw images, warnings, helpers and comparison outputs retain their original
+hashes. Normal dynamic and full publication acceptance remain separate checks.
+
 ## Native room capture acceptance and application shutdown
 
 The source/art-direction and root integrator reviewed the actual native room
