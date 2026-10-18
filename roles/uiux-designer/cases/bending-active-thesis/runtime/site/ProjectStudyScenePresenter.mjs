@@ -1,0 +1,139 @@
+import {EventManager} from '../core/EventManager.ts';
+import {createPreviewLifecycle} from './PreviewLifecycle.mjs';
+import {registerPagePreviewReadiness} from './PagePreviewReadiness.mjs';
+import {CANVAS_ENTRY_SECONDS,CANVAS_EXIT_SECONDS} from '../../components/canvas-motion.mjs';
+
+const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
+const smooth=value=>{const t=clamp(value,0,1);return t*t*t*(10+t*(-15+6*t));};
+const rest=()=>({azimuth:0,elevation:0});
+const outside=direction=>direction>0?{x:-1.08,y:-.05,opacity:0}:{x:.22,y:.035,opacity:0};
+const held=()=>({x:0,y:0,opacity:1});
+const BLOCKED='a,button,input,select,textarea,summary,[data-protect],[data-information-window]';
+const fact=(state,status,reason)=>{
+ if(!state.request)return;
+ state.history.push({id:state.request.id,chapter:state.request.chapter,status,...(reason?{reason}:{})});if(state.history.length>64)state.history.shift();
+};
+const complete=(state,reason)=>{if(state.request&&!state.request.completed){state.request.completed=true;fact(state,'completed',reason);}};
+export function createProjectStudyStageMotion(){return{chapter:'overview',pose:outside(1),mode:'absent',transition:null,request:null,sequence:0,history:[],settled:true};}
+export function cancelProjectStudyStageMotion(state,reason){if(state.request&&!state.request.completed)fact(state,'cancelled',reason);state.request=null;state.transition=null;state.settled=true;}
+/** Finite passages borrow Bending's durations, never its chapter identities.
+ * Only the caller's active seconds advance them. Superseded requests close. */
+export function advanceProjectStudyStageMotion(state,dt,{chapter,chapters,modelChapters,readyChapter=null,snap=false,resumed=false}){
+ if(!Number.isFinite(dt)||dt<0||!chapters.includes(chapter))throw RangeError('A known native chapter and nonnegative active seconds are required');
+ const wanted=modelChapters.includes(chapter),key=chapter+':'+wanted;
+ if(state.request?.key!==key){
+  if(state.request&&!state.request.completed)fact(state,'cancelled','superseded');
+  const direction=Math.sign(chapters.indexOf(chapter)-chapters.indexOf(state.request?.chapter??state.chapter))||1;
+  state.request={id:++state.sequence,key,chapter,wanted,direction,completed:false};fact(state,'requested');
+ }
+ const begin=kind=>{state.transition={kind,elapsed:0,duration:kind==='entry'?CANVAS_ENTRY_SECONDS:CANVAS_EXIT_SECONDS,from:{...state.pose},to:kind==='entry'?held():outside(state.request.direction)};state.mode=kind;state.settled=false;};
+ const reconcile=()=>{
+  if(state.chapter!==chapter){
+   if(state.pose.opacity>0){if(state.transition?.kind!=='exit')begin('exit');return;}
+   state.chapter=chapter;state.pose=outside(-state.request.direction);state.transition=null;
+  }
+  if(!wanted){state.pose=outside(state.request.direction);state.transition=null;state.mode='absent';state.settled=true;complete(state);}
+  else if(readyChapter!==chapter){state.transition=null;state.mode='waiting';state.settled=false;}
+  else if(state.pose.opacity!==1||state.pose.x!==0){if(state.transition?.kind!=='entry')begin('entry');}
+  else{state.transition=null;state.mode='hold';state.settled=true;complete(state);}
+ };
+ if(snap){state.chapter=chapter;state.transition=null;state.pose=wanted?held():outside(state.request.direction);state.mode=wanted?'hold':'absent';state.settled=true;complete(state,'static');}
+ else{
+  reconcile();let remaining=resumed?0:dt;
+  while(state.transition&&remaining>0){const passage=state.transition,step=Math.min(remaining,passage.duration-passage.elapsed);passage.elapsed=Math.min(passage.duration,passage.elapsed+step);remaining-=step;if(passage.duration-passage.elapsed<1e-10)passage.elapsed=passage.duration;const p=smooth(passage.elapsed/passage.duration);for(const name of ['x','y','opacity'])state.pose[name]=passage.from[name]+(passage.to[name]-passage.from[name])*p;if(passage.elapsed===passage.duration){state.pose={...passage.to};state.transition=null;reconcile();}}
+ }
+ return state;
+}
+
+/** One optional scene adapter on the ordinary-page driver's existing clock.
+ * React supplies a host; this owner supplies intent/lifecycle; Three alone owns
+ * source rendering and its camera. No RAF or autonomous animation is created. */
+export function createProjectStudyScenePresenter({root,host,model,window:win,document:doc,publisher,schedule,policy,acquire=async options=>{
+ const sceneModule=await import('../../components/project-study-scene.mjs');return sceneModule.acquireProjectStudyScene(options);
+}}){
+ const events=new EventManager(),scope=events.createScope('project-study-scene'),surface=host.querySelector('[data-project-model-surface]')??host,poster=host.querySelector('[data-project-model-poster]');
+ const chapters=[...root.querySelectorAll('[data-project-chapter]')].map(element=>element.dataset.projectChapter),motion=createProjectStudyStageMotion(),gestures=[];
+ let disposed=false,suspended=false,arrivalStatic=false,staticReason='',resource=null,lifecycle=null,readiness=null;
+ let size={width:win.innerWidth,height:win.innerHeight},chapter=root.dataset.projectActiveChapter??'overview',paintedChapter=null,lastPaint='';
+ let target=rest(),value=rest(),velocity=rest(),settled=true,press=null,gestureSequence=0;
+ const listen=(node,type,fn,options)=>events.listen(scope,node,type,fn,options);
+ const posterReady=()=>publisher.attribute(host,'data-project-model-poster-ready',poster?.complete&&poster.naturalWidth?'':null);
+ if(poster){listen(poster,'load',posterReady);listen(poster,'error',posterReady);posterReady();}
+ const announce=()=>{if(disposed)return;const state=lifecycle?.inspect();publisher.attribute(host,'data-project-model-phase',state?.phase??'poster');publisher.attribute(host,'data-project-model-reason',staticReason||state?.reason||'');publisher.attribute(host,'data-project-model-rendering',!arrivalStatic&&state?.phase==='ready'?'webgl-model':'poster');};
+ const staticReady=()=>readiness?.report({mode:'static',reason:staticReason});
+ const settleStatic=reason=>{if(disposed||arrivalStatic)return;arrivalStatic=true;staticReason=reason;lifecycle?.stop(reason);staticReady();announce();schedule();};
+ readiness=registerPagePreviewReadiness(doc,host,{onFallback:settleStatic});if(arrivalStatic)staticReady();
+ const closeGesture=(reason,immediate=false)=>{
+  if(press){const current=press;press=null;gestures.push({id:current.id,status:reason==='released'?'released':'cancelled',reason});if(gestures.length>32)gestures.shift();if(current.surface.hasPointerCapture?.(current.pointerId))current.surface.releasePointerCapture(current.pointerId);}
+  target=rest();if(immediate){value=rest();velocity=rest();settled=true;}else settled=Object.keys(value).every(key=>value[key]===0&&velocity[key]===0);
+ };
+ lifecycle=createPreviewLifecycle({retainWhenInactive:true,setTimeout:win.setTimeout.bind(win),clearTimeout:win.clearTimeout.bind(win),onState:state=>{
+  if(disposed)return;
+  if(state.phase==='ready'&&state.resource?.firstDraw?.completed)readiness.report({mode:'model'});
+  else if(state.phase==='failed'){arrivalStatic=true;staticReason=state.reason;staticReady();closeGesture('resource-unavailable',true);}
+  announce();schedule();
+ },start:async({signal,width,height})=>{
+  const handle=await acquire({host,model,signal,onFailure:reason=>lifecycle.fail(reason)});
+  if(disposed||signal.aborted){handle.dispose();throw new DOMException('Project study released','AbortError');}
+  try{
+   handle.resize(width,height);handle.present({chapter:model.chapters.includes(chapter)?chapter:model.chapters[0],azimuth:0,elevation:0});
+   if(!handle.inspect().firstDraw?.completed||!handle.inspect().successfulPaint)throw Error('Original project model first draw is unavailable');
+  }catch(error){handle.dispose();throw error;}
+  if(disposed||signal.aborted){handle.dispose();throw new DOMException('Project study released','AbortError');}
+  resource=handle;paintedChapter=handle.inspect().view.chapter;let released=false;
+  return{resize:(width,height)=>handle.resize(width,height),inspect:()=>handle.inspect(),dispose(){if(released)return;released=true;if(resource===handle){resource=null;lastPaint='';paintedChapter=null;}handle.dispose();}};
+ }});
+ if(arrivalStatic)lifecycle.stop(staticReason);
+ function updatePolicy(){
+  if(disposed)return;const p=policy();
+  if(p.hidden||p.reduced||p.saveData||p.paused||suspended)closeGesture(p.hidden?'hidden':p.reduced?'reduced-motion':p.saveData?'save-data':p.paused?'paused':'suspended',true);
+  if(!arrivalStatic&&(p.reduced||p.saveData))settleStatic(p.reduced?'reduced-motion':'save-data');
+  if(!arrivalStatic&&(p.hidden||suspended)&&lifecycle.inspect().phase!=='ready')settleStatic(p.hidden?'hidden':'suspended');
+  if(!arrivalStatic)lifecycle.setActive(!p.hidden&&!suspended,'hidden');
+ }
+ const canInspect=()=>{const p=policy();return!disposed&&!arrivalStatic&&!suspended&&!p.hidden&&!p.reduced&&!p.saveData&&!p.paused&&p.siteReady&&motion.mode==='hold'&&motion.settled&&model.chapters.includes(chapter)&&motion.chapter===chapter&&lifecycle.inspect().phase==='ready'&&resource?.inspect().successfulPaint;};
+ const surfaceFor=event=>event.target.closest?.('[data-project-model-control]')??host;
+ listen(doc,'pointerdown',event=>{
+  if(!canInspect()||event.button!==0||event.isPrimary===false||press||event.target.closest?.(BLOCKED)||!resource.hitTest(event.clientX,event.clientY))return;
+  press={id:++gestureSequence,pointerId:event.pointerId,surface:surfaceFor(event),x:event.clientX,y:event.clientY,azimuth:target.azimuth,elevation:target.elevation,touch:event.pointerType==='touch',locked:false};gestures.push({id:press.id,status:'requested'});if(gestures.length>32)gestures.shift();
+ });
+ listen(doc,'pointermove',event=>{
+  const current=press;if(!current||current.pointerId!==event.pointerId)return;
+  const dx=event.clientX-current.x,dy=event.clientY-current.y;
+  if(!current.locked){if(Math.hypot(dx,dy)<(current.touch?8:4))return;if(current.touch&&Math.abs(dy)>Math.abs(dx)){closeGesture('native-scroll',true);schedule();return;}current.locked=true;current.surface.setPointerCapture?.(event.pointerId);}
+  event.preventDefault();target={azimuth:clamp(current.azimuth-dx*.004,-.9,.9),elevation:clamp(current.elevation+dy*.003,-.4,.5)};settled=false;schedule();
+ },{passive:false});
+ for(const type of ['pointerup','pointercancel','lostpointercapture'])listen(doc,type,event=>{if(press?.pointerId===event.pointerId){closeGesture(type==='pointerup'?'released':type,type!=='pointerup');schedule();}});
+ listen(doc,'keydown',event=>{
+  if(!canInspect()||!event.target.closest?.('[data-project-model-control]'))return;
+  const change={ArrowLeft:{azimuth:.12},ArrowRight:{azimuth:-.12},ArrowUp:{elevation:-.09},ArrowDown:{elevation:.09}}[event.key];
+  if(change){event.preventDefault();for(const [key,delta]of Object.entries(change))target[key]=clamp(target[key]+delta,...(key==='azimuth'?[-.9,.9]:[-.4,.5]));settled=false;schedule();}
+  else if(['Escape','Home'].includes(event.key)){event.preventDefault();closeGesture('keyboard-return',true);schedule();}
+ });
+ listen(win,'blur',()=>{closeGesture('blur',true);schedule();});
+ listen(doc.documentElement,'pointerleave',()=>{if(press){closeGesture('pointer-left',true);schedule();}});
+ listen(root,'focusout',event=>{if(event.target.closest?.('[data-project-model-control]')){closeGesture('focus-left',true);schedule();}});
+ lifecycle.resize(size.width,size.height);updatePolicy();announce();
+ return{
+  measure(width,height){if(disposed)return;size={width,height};lifecycle.resize(width,height);},
+  publish({dt=0,resumed=false}={}){
+   if(disposed)return false;updatePolicy();
+   const next=root.dataset.projectActiveChapter??'overview';if(next!==chapter){chapter=next;closeGesture('chapter-change',true);}
+   const p=policy(),snap=arrivalStatic||p.paused||p.reduced||p.saveData||resumed;
+   if(snap||dt>1){value={...target};velocity=rest();settled=true;}
+   else{const decay=Math.exp(-16*dt);settled=true;for(const key of Object.keys(value)){const distance=value[key]-target[key],coefficient=velocity[key]+16*distance;value[key]=target[key]+(distance+coefficient*dt)*decay;velocity[key]=(velocity[key]-16*coefficient*dt)*decay;if(Math.abs(value[key]-target[key])<.00001&&Math.abs(velocity[key])<.0001){value[key]=target[key];velocity[key]=0;}else settled=false;}}
+   const advance=seconds=>advanceProjectStudyStageMotion(motion,seconds,{chapter,chapters,modelChapters:model.chapters,readyChapter:paintedChapter,snap,resumed});advance(dt);
+   if(resource&&model.chapters.includes(motion.chapter)){
+    const presentation={chapter:motion.chapter,azimuth:value.azimuth,elevation:value.elevation},key=JSON.stringify(presentation);
+    if(key!==lastPaint)try{resource.present(presentation);if(!resource.inspect().successfulPaint)throw Error('Project model draw unavailable');lastPaint=key;paintedChapter=motion.chapter;advance(0);}catch(error){lifecycle.fail(error?.message||'render-unavailable');}
+   }
+   publisher.attribute(host,'data-project-model-active',model.chapters.includes(motion.chapter)&&motion.pose.opacity>0?'':null);publisher.attribute(host,'data-project-model-mode',motion.mode);publisher.attribute(host,'data-project-model-chapter',motion.chapter);
+   publisher.style(surface,'transform',`translate3d(${motion.pose.x*size.width}px,${motion.pose.y*size.height}px,0)`);publisher.style(surface,'opacity',motion.pose.opacity);
+   return!settled||!!motion.transition;
+  },
+  suspend(reason){if(disposed)return;suspended=true;closeGesture(reason,true);cancelProjectStudyStageMotion(motion,reason);updatePolicy();},
+  resume(){if(disposed)return;suspended=false;updatePolicy();},
+  inspect:()=>({...lifecycle.inspect(),arrivalStatic,staticReason,chapter,paintedChapter,motion:{...motion,history:[...motion.history]},camera:{target:{...target},value:{...value},settled},gestures:[...gestures],gesture:press?{id:press.id,locked:press.locked}:null,events:events.inspect(),disposed}),
+  dispose(){if(disposed)return;closeGesture('disposed',true);cancelProjectStudyStageMotion(motion,'disposed');disposed=true;lifecycle.dispose();readiness.release();scope.dispose();events.dispose();for(const name of ['phase','reason','rendering','active','mode','chapter','poster-ready'])publisher.attribute(host,'data-project-model-'+name,null);publisher.style(surface,'transform','');publisher.style(surface,'opacity','');},
+ };
+}

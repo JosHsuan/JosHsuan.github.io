@@ -1,0 +1,2538 @@
+{
+  "schemaVersion": 1,
+  "primaryReference": {
+    "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+    "bytes": 22624290,
+    "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+    "pages": 86,
+    "locatorPolicy": "Physical pages are one-based; printed page = physical page - 5 in these chapters."
+  },
+  "scope": "Six owner-selected project studies. Source image and geometry provenance only; build consumes verified repository derivatives without accessing source drives.",
+  "assets": [
+    {
+      "id": "mode-s-of-making-hero",
+      "projectId": "mode-s-of-making",
+      "path": "assets/projects/mode-s-of-making/hero.webp",
+      "src": "/assets/projects/mode-s-of-making/hero.webp",
+      "width": 2267,
+      "height": 3200,
+      "bytes": 422762,
+      "sha256": "9a0beb28153b96b9b2f8e074fb7091e3e2043033494d5ceb3245d7ac3cb1c7e4",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025_Print.pdf",
+        "bytes": 361589115,
+        "sha256": "fdaf47a2df174e73d698a72c362b0644240bfd39448042ffcb3f1024fd27bd71",
+        "locator": {
+          "physicalPage": 31,
+          "printedPage": 26,
+          "figure": "4-01"
+        },
+        "imageObject": {
+          "index": 0,
+          "name": "Im0.jpg",
+          "width": 2485,
+          "height": 3508,
+          "bytes": 750265,
+          "sha256": "8b1d5778173dcab60e48afbc1a0ee36af08f3798d522019a6988bd2d6f3fd5d2"
+        },
+        "narrativeReference": {
+          "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+          "bytes": 22624290,
+          "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+          "locator": {
+            "physicalPage": 55,
+            "printedPage": 50,
+            "figure": "Simulation detail"
+          }
+        },
+        "identityReview": "Same composition, geometry, diagram connections or photograph group as the primary reference. Selected only for higher native image resolution; no old copy adopted."
+      },
+      "processing": {
+        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          2485,
+          3508
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          2485,
+          3508
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": false,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Design study: Chia-Hsuan Chao / National Cheng Kung University.",
+      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
+    },
+    {
+      "id": "mode-s-of-making-design-workflow",
+      "projectId": "mode-s-of-making",
+      "path": "assets/projects/mode-s-of-making/design-workflow.webp",
+      "src": "/assets/projects/mode-s-of-making/design-workflow.webp",
+      "width": 2251,
+      "height": 2618,
+      "bytes": 1354306,
+      "sha256": "8330a0695b738831254982f3c3ec8246f70ec7619d6279bb84d8d1294fe2a82b",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025_Print.pdf",
+        "bytes": 361589115,
+        "sha256": "fdaf47a2df174e73d698a72c362b0644240bfd39448042ffcb3f1024fd27bd71",
+        "locator": {
+          "physicalPage": 32,
+          "printedPage": 27,
+          "figure": "4-02"
+        },
+        "imageObject": {
+          "index": 0,
+          "name": "Im0.png",
+          "width": 2485,
+          "height": 3508,
+          "bytes": 2456496,
+          "sha256": "aa5f15b53e421e97f434dda84c644b2a6d7dbbb6505325802dd173bbc847a625"
+        },
+        "narrativeReference": {
+          "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+          "bytes": 22624290,
+          "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+          "locator": {
+            "physicalPage": 56,
+            "printedPage": 51,
+            "figure": "5-02"
+          }
+        },
+        "identityReview": "Same composition, geometry, diagram connections or photograph group as the primary reference. Selected only for higher native image resolution; no old copy adopted."
+      },
+      "processing": {
+        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          2485,
+          3508
+        ],
+        "cropPixels": [
+          123,
+          132,
+          2374,
+          2750
+        ],
+        "preResizePixels": [
+          2251,
+          2618
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": true,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Design study: Chia-Hsuan Chao / National Cheng Kung University.",
+      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
+    },
+    {
+      "id": "mode-s-of-making-machine-system",
+      "projectId": "mode-s-of-making",
+      "path": "assets/projects/mode-s-of-making/machine-system.webp",
+      "src": "/assets/projects/mode-s-of-making/machine-system.webp",
+      "width": 1783,
+      "height": 2606,
+      "bytes": 312024,
+      "sha256": "8695d585ea84fe7a317eb4709373d8c187adcb9389087da6034e0b82f20c14ff",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025_Print.pdf",
+        "bytes": 361589115,
+        "sha256": "fdaf47a2df174e73d698a72c362b0644240bfd39448042ffcb3f1024fd27bd71",
+        "locator": {
+          "physicalPage": 33,
+          "printedPage": 28,
+          "figure": "4-03"
+        },
+        "imageObject": {
+          "index": 0,
+          "name": "Im0.png",
+          "width": 2485,
+          "height": 3508,
+          "bytes": 947506,
+          "sha256": "4b33e5282d505995cb7697fe82bace66dda187e943207777db803b2902bca951"
+        },
+        "narrativeReference": {
+          "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+          "bytes": 22624290,
+          "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+          "locator": {
+            "physicalPage": 57,
+            "printedPage": 52,
+            "figure": "5-03"
+          }
+        },
+        "identityReview": "Same composition, geometry, diagram connections or photograph group as the primary reference. Selected only for higher native image resolution; no old copy adopted."
+      },
+      "processing": {
+        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          2485,
+          3508
+        ],
+        "cropPixels": [
+          351,
+          133,
+          2134,
+          2739
+        ],
+        "preResizePixels": [
+          1783,
+          2606
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": true,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Design study: Chia-Hsuan Chao / National Cheng Kung University.",
+      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
+    },
+    {
+      "id": "mode-s-of-making-assembly-visualization",
+      "projectId": "mode-s-of-making",
+      "path": "assets/projects/mode-s-of-making/assembly-visualization.webp",
+      "src": "/assets/projects/mode-s-of-making/assembly-visualization.webp",
+      "width": 2267,
+      "height": 3200,
+      "bytes": 510550,
+      "sha256": "43028d489879647685e4c0102d97a88f148247f64c838b0013bf0d3e52a8cb31",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025_Print.pdf",
+        "bytes": 361589115,
+        "sha256": "fdaf47a2df174e73d698a72c362b0644240bfd39448042ffcb3f1024fd27bd71",
+        "locator": {
+          "physicalPage": 34,
+          "printedPage": 29,
+          "figure": "4-04"
+        },
+        "imageObject": {
+          "index": 0,
+          "name": "Im0.jpg",
+          "width": 2485,
+          "height": 3508,
+          "bytes": 800596,
+          "sha256": "5d8d924ba92e425dd408baa61ba4b36970e42e4752d4326ab318e0b856d111b6"
+        },
+        "narrativeReference": {
+          "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+          "bytes": 22624290,
+          "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+          "locator": {
+            "physicalPage": 58,
+            "printedPage": 53,
+            "figure": "5-04"
+          }
+        },
+        "identityReview": "Same composition, geometry, diagram connections or photograph group as the primary reference. Selected only for higher native image resolution; no old copy adopted."
+      },
+      "processing": {
+        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          2485,
+          3508
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          2485,
+          3508
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": false,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Design study: Chia-Hsuan Chao / National Cheng Kung University.",
+      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
+    },
+    {
+      "id": "mode-s-of-making-machine-exploded",
+      "projectId": "mode-s-of-making",
+      "path": "assets/projects/mode-s-of-making/machine-exploded.webp",
+      "src": "/assets/projects/mode-s-of-making/machine-exploded.webp",
+      "width": 2267,
+      "height": 3200,
+      "bytes": 512116,
+      "sha256": "a44c52183bd37123dcd5caf1f792602baa17d8c4a0393c8f1121962ae47d314f",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025_Print.pdf",
+        "bytes": 361589115,
+        "sha256": "fdaf47a2df174e73d698a72c362b0644240bfd39448042ffcb3f1024fd27bd71",
+        "locator": {
+          "physicalPage": 35,
+          "printedPage": 30,
+          "figure": "4-05"
+        },
+        "imageObject": {
+          "index": 0,
+          "name": "Im0.jpg",
+          "width": 2485,
+          "height": 3508,
+          "bytes": 862412,
+          "sha256": "1c2b47e51f9cee44ca4836d4712cdecfb57781ee4ecd3dec056374cad2d1f24f"
+        },
+        "narrativeReference": {
+          "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+          "bytes": 22624290,
+          "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+          "locator": {
+            "physicalPage": 59,
+            "printedPage": 54,
+            "figure": "5-05"
+          }
+        },
+        "identityReview": "Same composition, geometry, diagram connections or photograph group as the primary reference. Selected only for higher native image resolution; no old copy adopted."
+      },
+      "processing": {
+        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          2485,
+          3508
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          2485,
+          3508
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": false,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Design study: Chia-Hsuan Chao / National Cheng Kung University.",
+      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
+    },
+    {
+      "id": "mode-s-of-making-machine-prototype",
+      "projectId": "mode-s-of-making",
+      "path": "assets/projects/mode-s-of-making/machine-prototype.webp",
+      "src": "/assets/projects/mode-s-of-making/machine-prototype.webp",
+      "width": 3200,
+      "height": 2400,
+      "bytes": 949594,
+      "sha256": "e047c663c1fdc0698b73a39a0c71a62f4b4fd2e340207f131d4059cf257104a2",
+      "source": {
+        "file": "IMG_20171219_141348.jpg",
+        "bytes": 1443290,
+        "sha256": "27eea3b1af6c8fa3819626ee43d05d44072f15f45d600f4c0cb7ea55ad863d66",
+        "locator": {
+          "physicalPage": 60,
+          "printedPage": 55,
+          "figure": "Related machine-process record",
+          "supplementaryRecord": "rotate_cuttung / Design studio pic+vid / IMG_20171219_141348.jpg"
+        }
+      },
+      "processing": {
+        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          4160,
+          3120
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          4160,
+          3120
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": false,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Studio fabrication record. Photographer not individually identified.",
+      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
+    },
+    {
+      "id": "mode-s-of-making-toolpath-textures",
+      "projectId": "mode-s-of-making",
+      "path": "assets/projects/mode-s-of-making/toolpath-textures.webp",
+      "src": "/assets/projects/mode-s-of-making/toolpath-textures.webp",
+      "width": 2235,
+      "height": 2546,
+      "bytes": 1248488,
+      "sha256": "548932813915ed78445d1e7030313029da5da8d1c4e4b8e707cff3e48522fa35",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025_Print.pdf",
+        "bytes": 361589115,
+        "sha256": "fdaf47a2df174e73d698a72c362b0644240bfd39448042ffcb3f1024fd27bd71",
+        "locator": {
+          "physicalPage": 37,
+          "printedPage": 32,
+          "figure": "4-09–4-13"
+        },
+        "imageObject": {
+          "index": 0,
+          "name": "Im0.jpg",
+          "width": 2485,
+          "height": 3508,
+          "bytes": 1160496,
+          "sha256": "70607ed0d401bd6e9d9178a4959ed1b09d1a667ff7db4b392ff91085fa72c95f"
+        },
+        "narrativeReference": {
+          "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+          "bytes": 22624290,
+          "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+          "locator": {
+            "physicalPage": 61,
+            "printedPage": 56,
+            "figure": "5-09–5-13"
+          }
+        },
+        "identityReview": "Same composition, geometry, diagram connections or photograph group as the primary reference. Selected only for higher native image resolution; no old copy adopted."
+      },
+      "processing": {
+        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          2485,
+          3508
+        ],
+        "cropPixels": [
+          125,
+          146,
+          2360,
+          2692
+        ],
+        "preResizePixels": [
+          2235,
+          2546
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": false,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Jan Kyselý (Figs. 5-09 and 5-10); other photographs not individually credited.",
+      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
+    },
+    {
+      "id": "entrance-installation-art-hero",
+      "projectId": "entrance-installation-art",
+      "path": "assets/projects/entrance-installation-art/hero.webp",
+      "src": "/assets/projects/entrance-installation-art/hero.webp",
+      "width": 2400,
+      "height": 3200,
+      "bytes": 984646,
+      "sha256": "b71730a977ec934fb1303ab3f7504b3c37f5a62db0c6da4d9663ce238c2d794f",
+      "source": {
+        "file": "IMG_9927.JPG",
+        "bytes": 4514380,
+        "sha256": "80a3784830e29ccdccfd164007766eb2ee7fd170744bbe06143a6e0028eff944",
+        "locator": {
+          "physicalPage": 7,
+          "printedPage": 2,
+          "figure": "1-01",
+          "supplementaryRecord": "PHOTO / IMG_9927.JPG"
+        }
+      },
+      "processing": {
+        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          3456,
+          4608
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          3456,
+          4608
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": false,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Project: PKD Engineering Consultants. Photographer not individually identified.",
+      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
+    },
+    {
+      "id": "entrance-installation-art-pattern-development",
+      "projectId": "entrance-installation-art",
+      "path": "assets/projects/entrance-installation-art/pattern-development.webp",
+      "src": "/assets/projects/entrance-installation-art/pattern-development.webp",
+      "width": 1107,
+      "height": 783,
+      "bytes": 36404,
+      "sha256": "819dcb41ba6bf72d0eaf2afe855c1741f01052018c3a4720d2ebaea0ee1fa6f7",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+        "bytes": 22624290,
+        "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+        "locator": {
+          "physicalPage": 8,
+          "printedPage": 3,
+          "figure": "1-02"
+        },
+        "imageObject": {
+          "index": 6,
+          "name": "Im0.jp2",
+          "width": 1107,
+          "height": 783,
+          "bytes": 255019,
+          "sha256": "0c5d816baf7536710fa3221395f8fd4d9247f8452b36ecdf05429a34174c2166"
+        }
+      },
+      "processing": {
+        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          1107,
+          783
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          1107,
+          783
+        ],
+        "maxLongEdge": 2560,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": false,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Project documentation: PKD Engineering Consultants. Individual image author not separately identified.",
+      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
+    },
+    {
+      "id": "entrance-installation-art-pattern-variations",
+      "projectId": "entrance-installation-art",
+      "path": "assets/projects/entrance-installation-art/pattern-variations.webp",
+      "src": "/assets/projects/entrance-installation-art/pattern-variations.webp",
+      "width": 1107,
+      "height": 782,
+      "bytes": 137766,
+      "sha256": "b54277be32b54b8eaaf210c81d8e0e95f6e8e64ab3e1db1eaf405203e1bbc43d",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+        "bytes": 22624290,
+        "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+        "locator": {
+          "physicalPage": 8,
+          "printedPage": 3,
+          "figure": "1-04"
+        },
+        "imageObject": {
+          "index": 11,
+          "name": "Im5.jp2",
+          "width": 1107,
+          "height": 782,
+          "bytes": 720526,
+          "sha256": "14cc5590b1f32f4b4d9c9fe09484b829128d2ebf5765c8efd0e342e9dba6300c"
+        }
+      },
+      "processing": {
+        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          1107,
+          782
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          1107,
+          782
+        ],
+        "maxLongEdge": 2560,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": false,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Project documentation: PKD Engineering Consultants. Individual image author not separately identified.",
+      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
+    },
+    {
+      "id": "entrance-installation-art-panel-system",
+      "projectId": "entrance-installation-art",
+      "path": "assets/projects/entrance-installation-art/panel-system.webp",
+      "src": "/assets/projects/entrance-installation-art/panel-system.webp",
+      "width": 1545,
+      "height": 1300,
+      "bytes": 504240,
+      "sha256": "aafe7ac58b3781dd9becb4c73f43232dcec1534b388c2b9912149fb5eabe051f",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+        "bytes": 22624290,
+        "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+        "locator": {
+          "physicalPage": 9,
+          "printedPage": 4,
+          "figure": "1-05–1-09"
+        },
+        "rasterization": {
+          "engine": "Poppler pdftoppm",
+          "dpi": 200,
+          "renderedPageSize": [
+            1654,
+            2339
+          ],
+          "renderSHA256": "b9d989dc8ea8eac5688fdac6c835c647ca42f3645dc5b4b8af86605ce2b58ca1"
+        }
+      },
+      "processing": {
+        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          1654,
+          2339
+        ],
+        "cropPixels": [
+          53,
+          33,
+          1598,
+          1333
+        ],
+        "preResizePixels": [
+          1545,
+          1300
+        ],
+        "maxLongEdge": 2560,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": true,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Project documentation: PKD Engineering Consultants. Individual image author not separately identified.",
+      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
+    },
+    {
+      "id": "entrance-installation-art-fabrication-drawings",
+      "projectId": "entrance-installation-art",
+      "path": "assets/projects/entrance-installation-art/fabrication-drawings.webp",
+      "src": "/assets/projects/entrance-installation-art/fabrication-drawings.webp",
+      "width": 1546,
+      "height": 594,
+      "bytes": 56288,
+      "sha256": "cd8226c55a9aa1707771b8800f78e54d5b928ba7a7ab6e3333c1a4dc47c374c9",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+        "bytes": 22624290,
+        "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+        "locator": {
+          "physicalPage": 9,
+          "printedPage": 4,
+          "figure": "1-10"
+        },
+        "rasterization": {
+          "engine": "Poppler pdftoppm",
+          "dpi": 200,
+          "renderedPageSize": [
+            1654,
+            2339
+          ],
+          "renderSHA256": "b9d989dc8ea8eac5688fdac6c835c647ca42f3645dc5b4b8af86605ce2b58ca1"
+        }
+      },
+      "processing": {
+        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          1654,
+          2339
+        ],
+        "cropPixels": [
+          58,
+          1354,
+          1604,
+          1948
+        ],
+        "preResizePixels": [
+          1546,
+          594
+        ],
+        "maxLongEdge": 2560,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": true,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Project documentation: PKD Engineering Consultants. Individual image author not separately identified.",
+      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
+    },
+    {
+      "id": "entrance-installation-art-workshop-assembly",
+      "projectId": "entrance-installation-art",
+      "path": "assets/projects/entrance-installation-art/workshop-assembly.webp",
+      "src": "/assets/projects/entrance-installation-art/workshop-assembly.webp",
+      "width": 1110,
+      "height": 1130,
+      "bytes": 370062,
+      "sha256": "7b3d5717c8f033001b8660d5b222a35a92e8009b2bb77e176549337a3b674ffe",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+        "bytes": 22624290,
+        "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+        "locator": {
+          "physicalPage": 12,
+          "printedPage": 7,
+          "figure": "1-16–1-20"
+        },
+        "imageObject": {
+          "index": 0,
+          "name": "Im0.jp2",
+          "width": 1193,
+          "height": 1684,
+          "bytes": 1594401,
+          "sha256": "dbe8d14692a9fffa60d76d512e449c1bf43c0bbaf64c032bacadfef91d91a2a3"
+        }
+      },
+      "processing": {
+        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          1193,
+          1684
+        ],
+        "cropPixels": [
+          44,
+          60,
+          1154,
+          1190
+        ],
+        "preResizePixels": [
+          1110,
+          1130
+        ],
+        "maxLongEdge": 2560,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": false,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Project documentation: PKD Engineering Consultants. Individual image author not separately identified.",
+      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
+    },
+    {
+      "id": "entrance-installation-art-built-installation",
+      "projectId": "entrance-installation-art",
+      "path": "assets/projects/entrance-installation-art/built-installation.webp",
+      "src": "/assets/projects/entrance-installation-art/built-installation.webp",
+      "width": 1109,
+      "height": 1548,
+      "bytes": 476318,
+      "sha256": "13edd67d75e4b5065b1b5af7b63d9782eccfa31fd76cfd1abf8737bdd99be3bc",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+        "bytes": 22624290,
+        "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+        "locator": {
+          "physicalPage": 13,
+          "printedPage": 8,
+          "figure": "1-21"
+        },
+        "imageObject": {
+          "index": 0,
+          "name": "Im0.jp2",
+          "width": 1193,
+          "height": 1684,
+          "bytes": 2018571,
+          "sha256": "e4c2277a63fe0d255716db68e20aa721bc540caeb0896915b09899c06bcf88a8"
+        }
+      },
+      "processing": {
+        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          1193,
+          1684
+        ],
+        "cropPixels": [
+          42,
+          61,
+          1151,
+          1609
+        ],
+        "preResizePixels": [
+          1109,
+          1548
+        ],
+        "maxLongEdge": 2560,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": false,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Project documentation: PKD Engineering Consultants. Individual image author not separately identified.",
+      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
+    },
+    {
+      "id": "dot-based-3d-printing-hero",
+      "projectId": "dot-based-3d-printing",
+      "path": "assets/projects/dot-based-3d-printing/hero.webp",
+      "src": "/assets/projects/dot-based-3d-printing/hero.webp",
+      "width": 2560,
+      "height": 1661,
+      "bytes": 398830,
+      "sha256": "486a4538294f2c81c6c1fb41a97820bdb71c73d18d817b8fb32f17ee24e82fb2",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+        "bytes": 22624290,
+        "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+        "locator": {
+          "physicalPage": 71,
+          "printedPage": 66,
+          "figure": "7-02"
+        },
+        "imageObject": {
+          "index": 0,
+          "name": "Im0.jp2",
+          "width": 2595,
+          "height": 1684,
+          "bytes": 2937993,
+          "sha256": "94d2514d1675358774fcf6ee6615cbf03d63bb7bc271ad7f7b917ac462e2bd18"
+        }
+      },
+      "processing": {
+        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          2595,
+          1684
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          2595,
+          1684
+        ],
+        "maxLongEdge": 2560,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": false,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie. Photographer not individually identified.",
+      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
+    },
+    {
+      "id": "dot-based-3d-printing-parameter-study",
+      "projectId": "dot-based-3d-printing",
+      "path": "assets/projects/dot-based-3d-printing/parameter-study.webp",
+      "src": "/assets/projects/dot-based-3d-printing/parameter-study.webp",
+      "width": 1067,
+      "height": 603,
+      "bytes": 206750,
+      "sha256": "637ac3c6df780e54f9a0304d750ff1cb4baf94a5f6f6f2c6f54a917fdeeeac61",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+        "bytes": 22624290,
+        "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+        "locator": {
+          "physicalPage": 72,
+          "printedPage": 67,
+          "figure": "7-03"
+        },
+        "rasterization": {
+          "engine": "Poppler pdftoppm",
+          "dpi": 200,
+          "renderedPageSize": [
+            1654,
+            2339
+          ],
+          "renderSHA256": "b6e11c537f4f4d179784fcec5f51a3ae55310844702935576f6af3d2cdf6e788"
+        }
+      },
+      "processing": {
+        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          1654,
+          2339
+        ],
+        "cropPixels": [
+          562,
+          94,
+          1629,
+          697
+        ],
+        "preResizePixels": [
+          1067,
+          603
+        ],
+        "maxLongEdge": 2560,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": true,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie. Photographer not individually identified.",
+      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
+    },
+    {
+      "id": "dot-based-3d-printing-path-strategies",
+      "projectId": "dot-based-3d-printing",
+      "path": "assets/projects/dot-based-3d-printing/path-strategies.webp",
+      "src": "/assets/projects/dot-based-3d-printing/path-strategies.webp",
+      "width": 1524,
+      "height": 860,
+      "bytes": 338560,
+      "sha256": "0026b91b1b92baa0736eaec6bce2b21417feb3135f2b2ea91f0c5f974b955c94",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+        "bytes": 22624290,
+        "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+        "locator": {
+          "physicalPage": 73,
+          "printedPage": 68,
+          "figure": "7-05"
+        },
+        "rasterization": {
+          "engine": "Poppler pdftoppm",
+          "dpi": 200,
+          "renderedPageSize": [
+            1654,
+            2339
+          ],
+          "renderSHA256": "01bbb396f82754b939b5c1bd544b7a59442ee58f79711917c60401758a284422"
+        }
+      },
+      "processing": {
+        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          1654,
+          2339
+        ],
+        "cropPixels": [
+          74,
+          94,
+          1598,
+          954
+        ],
+        "preResizePixels": [
+          1524,
+          860
+        ],
+        "maxLongEdge": 2560,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": true,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie. Photographer not individually identified.",
+      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
+    },
+    {
+      "id": "dot-based-3d-printing-form-development",
+      "projectId": "dot-based-3d-printing",
+      "path": "assets/projects/dot-based-3d-printing/form-development.webp",
+      "src": "/assets/projects/dot-based-3d-printing/form-development.webp",
+      "width": 1121,
+      "height": 611,
+      "bytes": 326368,
+      "sha256": "11433df85f98278619196f8f139b371b27573d46bfc5d97d852892efbf6361c4",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+        "bytes": 22624290,
+        "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+        "locator": {
+          "physicalPage": 73,
+          "printedPage": 68,
+          "figure": "7-06"
+        },
+        "imageObject": {
+          "index": 9,
+          "name": "Im9.jp2",
+          "width": 1121,
+          "height": 611,
+          "bytes": 476394,
+          "sha256": "f1b8431e63aa78743cd2b263ba2559fa920438d5c1fe8b3478fdea2ab73e50f3"
+        }
+      },
+      "processing": {
+        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          1121,
+          611
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          1121,
+          611
+        ],
+        "maxLongEdge": 2560,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": true,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie. Photographer not individually identified.",
+      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
+    },
+    {
+      "id": "dot-based-3d-printing-printing-process",
+      "projectId": "dot-based-3d-printing",
+      "path": "assets/projects/dot-based-3d-printing/printing-process.webp",
+      "src": "/assets/projects/dot-based-3d-printing/printing-process.webp",
+      "width": 2500,
+      "height": 1304,
+      "bytes": 734890,
+      "sha256": "29ea28ffa3f66bc89daf382228e659bcbd4a6464c578cb8bc7eef73b48c9503e",
+      "source": {
+        "file": "image61.gif",
+        "bytes": 40264322,
+        "sha256": "61a575b1c3863cb6b1becbef6cf9c7fa279778deccc94f3dfea30c26739fac68",
+        "locator": {
+          "physicalPage": 74,
+          "printedPage": 69,
+          "figure": "Related process record",
+          "supplementaryRecord": "JosHsuan_Group01_PrintingArchitecture.pptx / slide 10 / ppt/media/image61.gif / frame 0"
+        },
+        "container": {
+          "file": "JosHsuan_Group01_PrintingArchitecture.pptx",
+          "bytes": 131691431,
+          "sha256": "30f048ec92f7e539d5ffbc9fc51c54fa573674ee0424ed3d6b614aac3f68e117",
+          "zipMember": "ppt/media/image61.gif",
+          "slide": 10
+        }
+      },
+      "processing": {
+        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          2500,
+          1304
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          2500,
+          1304
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "selectedFrame": 0,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": false,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie. Photographer not individually identified.",
+      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
+    },
+    {
+      "id": "dot-based-3d-printing-prototype-family",
+      "projectId": "dot-based-3d-printing",
+      "path": "assets/projects/dot-based-3d-printing/prototype-family.webp",
+      "src": "/assets/projects/dot-based-3d-printing/prototype-family.webp",
+      "width": 1024,
+      "height": 683,
+      "bytes": 88518,
+      "sha256": "1dc30086d8489d679e72c3da104fce77fd728f69d7dac52942ad63f37bdec7e0",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+        "bytes": 22624290,
+        "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+        "locator": {
+          "physicalPage": 75,
+          "printedPage": 70,
+          "figure": "7-13"
+        },
+        "imageObject": {
+          "index": 4,
+          "name": "Im1.jp2",
+          "width": 1024,
+          "height": 683,
+          "bytes": 576865,
+          "sha256": "3a500d44709e221aa12d9190b28faf3081bc34b5077cacb69a8ffbd73578eeea"
+        }
+      },
+      "processing": {
+        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          1024,
+          683
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          1024,
+          683
+        ],
+        "maxLongEdge": 2560,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": false,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie. Photographer not individually identified.",
+      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
+    },
+    {
+      "id": "dot-based-3d-printing-translucent-prototypes",
+      "projectId": "dot-based-3d-printing",
+      "path": "assets/projects/dot-based-3d-printing/translucent-prototypes.webp",
+      "src": "/assets/projects/dot-based-3d-printing/translucent-prototypes.webp",
+      "width": 1024,
+      "height": 758,
+      "bytes": 95912,
+      "sha256": "f1979a54f373e549fd2db99907d0dd5cac9689c3e2ec3f3f48461876a0d8ab2d",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+        "bytes": 22624290,
+        "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+        "locator": {
+          "physicalPage": 75,
+          "printedPage": 70,
+          "figure": "7-14"
+        },
+        "imageObject": {
+          "index": 3,
+          "name": "Im0.jp2",
+          "width": 1024,
+          "height": 758,
+          "bytes": 594224,
+          "sha256": "ef2a9ba15b06b892ef27d1feccb1e20a0130411f956bf088edb4fb0b345af335"
+        }
+      },
+      "processing": {
+        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          1024,
+          758
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          1024,
+          758
+        ],
+        "maxLongEdge": 2560,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": false,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie. Photographer not individually identified.",
+      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
+    },
+    {
+      "id": "hc3dp-caustics-hero",
+      "projectId": "hc3dp-caustics",
+      "path": "assets/projects/hc3dp-caustics/hero.webp",
+      "src": "/assets/projects/hc3dp-caustics/hero.webp",
+      "width": 2048,
+      "height": 1365,
+      "bytes": 426206,
+      "sha256": "21ea5094ba8cc606ceb5aa8a73cbda033161de2435a28c5baff04c7e29cbc70e",
+      "source": {
+        "file": "Final Presentation Group-Red.pptx",
+        "bytes": 112035652,
+        "sha256": "9016edfcd197cf268531f4074c6c26bd420fd581fb8783944e33b440c622ff55",
+        "locator": {
+          "slide": 1,
+          "zipMember": "ppt/media/image19.jpg"
+        },
+        "imageObject": {
+          "file": "image19.jpg",
+          "bytes": 266683,
+          "sha256": "d1e24251a24e11d437bfd140505162d857d224934957a206472c5f402b88b174",
+          "width": 2048,
+          "height": 1365,
+          "frameCount": 1
+        }
+      },
+      "processing": {
+        "method": "Decode complete native source picture or selected animation frame, preserve aspect ratio, encode WebP. No AI, retouching or recolouring.",
+        "inputPixels": [
+          2048,
+          1365
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          2048,
+          1365
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": false,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao. Individual media authors are not separately identified.",
+      "authorStatus": "Source deck names the project team; individual media authors and task assignments remain unspecified."
+    },
+    {
+      "id": "hc3dp-caustics-layer-system",
+      "projectId": "hc3dp-caustics",
+      "path": "assets/projects/hc3dp-caustics/layer-system.webp",
+      "src": "/assets/projects/hc3dp-caustics/layer-system.webp",
+      "width": 2048,
+      "height": 1448,
+      "bytes": 183954,
+      "sha256": "90bd8534db57a6a3c2d978e2b0fcc92bdaaac07859ed4483ab39efcfa198b747",
+      "source": {
+        "file": "Final Presentation Group-Red.pptx",
+        "bytes": 112035652,
+        "sha256": "9016edfcd197cf268531f4074c6c26bd420fd581fb8783944e33b440c622ff55",
+        "locator": {
+          "slide": 8,
+          "zipMember": "ppt/media/image28.jpg"
+        },
+        "imageObject": {
+          "file": "image28.jpg",
+          "bytes": 95600,
+          "sha256": "51b9817b52f09c8aaef8098427dfff40ecf6518131a0708e14b9b1f50d9aa195",
+          "width": 2048,
+          "height": 1448,
+          "frameCount": 1
+        }
+      },
+      "processing": {
+        "method": "Decode complete native source picture or selected animation frame, preserve aspect ratio, encode WebP. No AI, retouching or recolouring.",
+        "inputPixels": [
+          2048,
+          1448
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          2048,
+          1448
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": true,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao. Individual media authors are not separately identified.",
+      "authorStatus": "Source deck names the project team; individual media authors and task assignments remain unspecified."
+    },
+    {
+      "id": "hc3dp-caustics-path-logic",
+      "projectId": "hc3dp-caustics",
+      "path": "assets/projects/hc3dp-caustics/path-logic.webp",
+      "src": "/assets/projects/hc3dp-caustics/path-logic.webp",
+      "width": 2048,
+      "height": 1448,
+      "bytes": 232146,
+      "sha256": "76206f25664bbe61fd9e42835b931a5fab196e3eb6ca52e884c4f601af0a625b",
+      "source": {
+        "file": "Final Presentation Group-Red.pptx",
+        "bytes": 112035652,
+        "sha256": "9016edfcd197cf268531f4074c6c26bd420fd581fb8783944e33b440c622ff55",
+        "locator": {
+          "slide": 9,
+          "zipMember": "ppt/media/image25.jpg"
+        },
+        "imageObject": {
+          "file": "image25.jpg",
+          "bytes": 98385,
+          "sha256": "ac36782e9d76520efe8e83d8a7765aaa9fd8ba6695eedb2a0731e5289a40af6b",
+          "width": 2048,
+          "height": 1448,
+          "frameCount": 1
+        }
+      },
+      "processing": {
+        "method": "Decode complete native source picture or selected animation frame, preserve aspect ratio, encode WebP. No AI, retouching or recolouring.",
+        "inputPixels": [
+          2048,
+          1448
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          2048,
+          1448
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": true,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao. Individual media authors are not separately identified.",
+      "authorStatus": "Source deck names the project team; individual media authors and task assignments remain unspecified."
+    },
+    {
+      "id": "hc3dp-caustics-frame-arrangement",
+      "projectId": "hc3dp-caustics",
+      "path": "assets/projects/hc3dp-caustics/frame-arrangement.webp",
+      "src": "/assets/projects/hc3dp-caustics/frame-arrangement.webp",
+      "width": 2048,
+      "height": 1448,
+      "bytes": 288180,
+      "sha256": "d0a12edb61da1511e92630daf06454ecd3a1bb0a2f15fcf88bb0c941e7a8b4d0",
+      "source": {
+        "file": "Final Presentation Group-Red.pptx",
+        "bytes": 112035652,
+        "sha256": "9016edfcd197cf268531f4074c6c26bd420fd581fb8783944e33b440c622ff55",
+        "locator": {
+          "slide": 10,
+          "zipMember": "ppt/media/image26.jpg"
+        },
+        "imageObject": {
+          "file": "image26.jpg",
+          "bytes": 108885,
+          "sha256": "9ef219bf5c46d2e91c319df9954aac74b38024a48b76366825be42432e942d11",
+          "width": 2048,
+          "height": 1448,
+          "frameCount": 1
+        }
+      },
+      "processing": {
+        "method": "Decode complete native source picture or selected animation frame, preserve aspect ratio, encode WebP. No AI, retouching or recolouring.",
+        "inputPixels": [
+          2048,
+          1448
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          2048,
+          1448
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": true,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao. Individual media authors are not separately identified.",
+      "authorStatus": "Source deck names the project team; individual media authors and task assignments remain unspecified."
+    },
+    {
+      "id": "hc3dp-caustics-fabrication-path",
+      "projectId": "hc3dp-caustics",
+      "path": "assets/projects/hc3dp-caustics/fabrication-path.webp",
+      "src": "/assets/projects/hc3dp-caustics/fabrication-path.webp",
+      "width": 2307,
+      "height": 2500,
+      "bytes": 191362,
+      "sha256": "0300d66baa974306d3bf0d9c206ed11c517545951bc9cc8977b33a4fb6c14770",
+      "source": {
+        "file": "Final Presentation Group-Red.pptx",
+        "bytes": 112035652,
+        "sha256": "9016edfcd197cf268531f4074c6c26bd420fd581fb8783944e33b440c622ff55",
+        "locator": {
+          "slide": 14,
+          "zipMember": "ppt/media/image68.gif"
+        },
+        "imageObject": {
+          "file": "image68.gif",
+          "bytes": 3033958,
+          "sha256": "f69592248ba9e63c044d87dc5ed5978f2c3acb57960d402361c4908509cdafc5",
+          "width": 2307,
+          "height": 2500,
+          "frameCount": 31
+        }
+      },
+      "processing": {
+        "method": "Decode complete native source picture or selected animation frame, preserve aspect ratio, encode WebP. No AI, retouching or recolouring.",
+        "inputPixels": [
+          2307,
+          2500
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          2307,
+          2500
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "selectedFrame": 30,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": true,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao. Individual media authors are not separately identified.",
+      "authorStatus": "Source deck names the project team; individual media authors and task assignments remain unspecified."
+    },
+    {
+      "id": "hc3dp-caustics-caustic-observation",
+      "projectId": "hc3dp-caustics",
+      "path": "assets/projects/hc3dp-caustics/caustic-observation.webp",
+      "src": "/assets/projects/hc3dp-caustics/caustic-observation.webp",
+      "width": 2048,
+      "height": 1365,
+      "bytes": 218704,
+      "sha256": "03f8efd3fe37bf149315440165dfde62a539234ec1293238e293a5eb8705152d",
+      "source": {
+        "file": "Final Presentation Group-Red.pptx",
+        "bytes": 112035652,
+        "sha256": "9016edfcd197cf268531f4074c6c26bd420fd581fb8783944e33b440c622ff55",
+        "locator": {
+          "slide": 23,
+          "zipMember": "ppt/media/image45.jpg"
+        },
+        "imageObject": {
+          "file": "image45.jpg",
+          "bytes": 168898,
+          "sha256": "5a9975b5b8dd4d3a8c99de6a9b950114e83a14ec49a05031c1a6e9947484722d",
+          "width": 2048,
+          "height": 1365,
+          "frameCount": 1
+        }
+      },
+      "processing": {
+        "method": "Decode complete native source picture or selected animation frame, preserve aspect ratio, encode WebP. No AI, retouching or recolouring.",
+        "inputPixels": [
+          2048,
+          1365
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          2048,
+          1365
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": false,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao. Individual media authors are not separately identified.",
+      "authorStatus": "Source deck names the project team; individual media authors and task assignments remain unspecified."
+    },
+    {
+      "id": "hc3dp-caustics-overinflation",
+      "projectId": "hc3dp-caustics",
+      "path": "assets/projects/hc3dp-caustics/overinflation.webp",
+      "src": "/assets/projects/hc3dp-caustics/overinflation.webp",
+      "width": 2048,
+      "height": 1365,
+      "bytes": 251744,
+      "sha256": "ad49b67a1a9239998866509ed213d3f1321d26d6635c4ade987e5335fb5539cf",
+      "source": {
+        "file": "Final Presentation Group-Red.pptx",
+        "bytes": 112035652,
+        "sha256": "9016edfcd197cf268531f4074c6c26bd420fd581fb8783944e33b440c622ff55",
+        "locator": {
+          "slide": 18,
+          "zipMember": "ppt/media/image36.jpg"
+        },
+        "imageObject": {
+          "file": "image36.jpg",
+          "bytes": 173554,
+          "sha256": "ee30d5dc310d10becb33ab85a1f2882789145fe9f58d512cd61cfb2acdc05e81",
+          "width": 2048,
+          "height": 1365,
+          "frameCount": 1
+        }
+      },
+      "processing": {
+        "method": "Decode complete native source picture or selected animation frame, preserve aspect ratio, encode WebP. No AI, retouching or recolouring.",
+        "inputPixels": [
+          2048,
+          1365
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          2048,
+          1365
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": false,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao. Individual media authors are not separately identified.",
+      "authorStatus": "Source deck names the project team; individual media authors and task assignments remain unspecified."
+    },
+    {
+      "id": "special-assemblies-hero",
+      "projectId": "special-assemblies",
+      "path": "assets/projects/special-assemblies/hero.webp",
+      "src": "/assets/projects/special-assemblies/hero.webp",
+      "width": 3120,
+      "height": 2080,
+      "bytes": 944918,
+      "sha256": "ff6f2b328f37319aca763c5d45e44f87d2958a5458f410f2049aef4116157adb",
+      "source": {
+        "file": "DSCF0699.JPG",
+        "bytes": 3652847,
+        "sha256": "e65727b6a0bf25a95fa59a7544334388fdb6107505883a5bf52bbc8fe19cac6b",
+        "locator": {
+          "physicalPage": 69,
+          "printedPage": 64,
+          "figure": "6-17",
+          "supplementaryRecord": "Original Group6 image archive / DSCF0699.JPG"
+        }
+      },
+      "processing": {
+        "method": "Original source decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          3120,
+          2080
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          3120,
+          2080
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": false,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani. Photographer not individually identified.",
+      "authorStatus": "Group6 attribution retained. Individual media authors are not separately established by the selected sources."
+    },
+    {
+      "id": "special-assemblies-prototype-study",
+      "projectId": "special-assemblies",
+      "path": "assets/projects/special-assemblies/prototype-study.webp",
+      "src": "/assets/projects/special-assemblies/prototype-study.webp",
+      "width": 3120,
+      "height": 2080,
+      "bytes": 826826,
+      "sha256": "be723b3d9c0b3c0fbce65a3f0c0c0b5a594b4af3c41d07eb01ba9af5b526e51d",
+      "source": {
+        "file": "DSCF0687.JPG",
+        "bytes": 3491661,
+        "sha256": "d1a4a32698127dbb292ec36d23cacf2f5cb52f7ab958cf83c956a92d1cc10fb9",
+        "locator": {
+          "physicalPage": 69,
+          "printedPage": 64,
+          "figure": "6-14",
+          "supplementaryRecord": "Original Group6 image archive / DSCF0687.JPG"
+        }
+      },
+      "processing": {
+        "method": "Original source decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          3120,
+          2080
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          3120,
+          2080
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": false,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani. Photographer not individually identified.",
+      "authorStatus": "Group6 attribution retained. Individual media authors are not separately established by the selected sources."
+    },
+    {
+      "id": "special-assemblies-module-aggregation",
+      "projectId": "special-assemblies",
+      "path": "assets/projects/special-assemblies/module-aggregation.webp",
+      "src": "/assets/projects/special-assemblies/module-aggregation.webp",
+      "width": 1546,
+      "height": 2029,
+      "bytes": 449804,
+      "sha256": "0d23984e36aed538890bdba95c4d0178718a728b671165a40b0e864b37d535c2",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+        "bytes": 22624290,
+        "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+        "locator": {
+          "physicalPage": 66,
+          "printedPage": 61,
+          "figure": "6-06 and 6-07"
+        },
+        "rasterization": {
+          "engine": "Poppler pdftoppm",
+          "dpi": 200,
+          "renderedPageSize": [
+            1654,
+            2339
+          ],
+          "renderSHA256": "aeb006ffc2c4d3d04b3c02cc6031c8ab802e42729a1629c2dccfef083329a832"
+        }
+      },
+      "processing": {
+        "method": "Original source decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          1654,
+          2339
+        ],
+        "cropPixels": [
+          52,
+          35,
+          1598,
+          2064
+        ],
+        "preResizePixels": [
+          1546,
+          2029
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": true,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani. Original portfolio diagram.",
+      "authorStatus": "Group6 attribution retained. Individual media authors are not separately established by the selected sources."
+    },
+    {
+      "id": "special-assemblies-planning-workflow",
+      "projectId": "special-assemblies",
+      "path": "assets/projects/special-assemblies/planning-workflow.webp",
+      "src": "/assets/projects/special-assemblies/planning-workflow.webp",
+      "width": 1536,
+      "height": 1903,
+      "bytes": 100558,
+      "sha256": "efbd1a82556bb41fe531059ab73e2c483b36ae2c6b5691867d1e5a2b085b1154",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+        "bytes": 22624290,
+        "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+        "locator": {
+          "physicalPage": 65,
+          "printedPage": 60,
+          "figure": "6-04 and 6-05"
+        },
+        "rasterization": {
+          "engine": "Poppler pdftoppm",
+          "dpi": 200,
+          "renderedPageSize": [
+            1654,
+            2339
+          ],
+          "renderSHA256": "961d6a0a02ec1f0ac70c79792224b03959d42243f06a8a807040d0af53dbd45f"
+        }
+      },
+      "processing": {
+        "method": "Original source decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          1654,
+          2339
+        ],
+        "cropPixels": [
+          58,
+          110,
+          1594,
+          2013
+        ],
+        "preResizePixels": [
+          1536,
+          1903
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": true,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani. Original portfolio diagram.",
+      "authorStatus": "Group6 attribution retained. Individual media authors are not separately established by the selected sources."
+    },
+    {
+      "id": "special-assemblies-robot-trajectories",
+      "projectId": "special-assemblies",
+      "path": "assets/projects/special-assemblies/robot-trajectories.webp",
+      "src": "/assets/projects/special-assemblies/robot-trajectories.webp",
+      "width": 1542,
+      "height": 1375,
+      "bytes": 299612,
+      "sha256": "07dddc5c9e56279e7c9e639a9779d44904305a5e748b12875f6e8ad7c792c97e",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+        "bytes": 22624290,
+        "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+        "locator": {
+          "physicalPage": 67,
+          "printedPage": 62,
+          "figure": "6-08"
+        },
+        "rasterization": {
+          "engine": "Poppler pdftoppm",
+          "dpi": 200,
+          "renderedPageSize": [
+            1654,
+            2339
+          ],
+          "renderSHA256": "6dbfdedf6b279511aa2b2cb30fcbcce26921bb81d4e442078b6d0bf898327fdf"
+        }
+      },
+      "processing": {
+        "method": "Original source decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          1654,
+          2339
+        ],
+        "cropPixels": [
+          54,
+          0,
+          1596,
+          1375
+        ],
+        "preResizePixels": [
+          1542,
+          1375
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": true,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani. Original portfolio diagram.",
+      "authorStatus": "Group6 attribution retained. Individual media authors are not separately established by the selected sources."
+    },
+    {
+      "id": "special-assemblies-front-prototype",
+      "projectId": "special-assemblies",
+      "path": "assets/projects/special-assemblies/front-prototype.webp",
+      "src": "/assets/projects/special-assemblies/front-prototype.webp",
+      "width": 3120,
+      "height": 2080,
+      "bytes": 977090,
+      "sha256": "66d0aa1d9fa8509e0966c24c942d1d4eb5d8fa621a431d560ad31c97c295fd1f",
+      "source": {
+        "file": "DSCF0695.JPG",
+        "bytes": 3680349,
+        "sha256": "28a83aee3e2c3aa960e3a29f895fbf2d170ace7f0554beddb9ddcd8dccd79adf",
+        "locator": {
+          "physicalPage": 69,
+          "printedPage": 64,
+          "figure": "6-16",
+          "supplementaryRecord": "Original Group6 image archive / DSCF0695.JPG"
+        }
+      },
+      "processing": {
+        "method": "Original source decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          3120,
+          2080
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          3120,
+          2080
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": false,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani. Photographer not individually identified.",
+      "authorStatus": "Group6 attribution retained. Individual media authors are not separately established by the selected sources."
+    },
+    {
+      "id": "special-assemblies-assembly-detail",
+      "projectId": "special-assemblies",
+      "path": "assets/projects/special-assemblies/assembly-detail.webp",
+      "src": "/assets/projects/special-assemblies/assembly-detail.webp",
+      "width": 3120,
+      "height": 2080,
+      "bytes": 872982,
+      "sha256": "b84c385c3016218bc31a55e8e6adef40dc4f1c0bc922d3ecd56f21c651207fb9",
+      "source": {
+        "file": "DSCF0734.JPG",
+        "bytes": 3592286,
+        "sha256": "90898f109d5735dac102368ebb1239b3ccc615ffd017cd7fb9468129802b5825",
+        "locator": {
+          "physicalPage": 69,
+          "printedPage": 64,
+          "figure": "6-15",
+          "supplementaryRecord": "Original Group6 image archive / DSCF0734.JPG"
+        }
+      },
+      "processing": {
+        "method": "Original source decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          3120,
+          2080
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          3120,
+          2080
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": false,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani. Photographer not individually identified.",
+      "authorStatus": "Group6 attribution retained. Individual media authors are not separately established by the selected sources."
+    },
+    {
+      "id": "project-caschlatsch-hero",
+      "projectId": "project-caschlatsch",
+      "path": "assets/projects/project-caschlatsch/hero.webp",
+      "src": "/assets/projects/project-caschlatsch/hero.webp",
+      "width": 2000,
+      "height": 1333,
+      "bytes": 1277128,
+      "sha256": "b25f15cdec11b036cbab780d8d80002c15610116f24a62ed4b1e8bc463efcdd6",
+      "source": {
+        "file": "hero.jpg",
+        "url": "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch/_jcr_content/par/image/image.imageformat.1286.dpr3.290151008.jpg",
+        "sourcePage": "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch.html",
+        "bytes": 1498668,
+        "sha256": "c1046900306a3c63991eb4ecf7a967e70498a70ca7c31a95fccb6b7515f7b472",
+        "retrievedAt": "2026-10-18T19:56:59.368494+00:00",
+        "rendition": "Official highest HTML srcset option (3x); this is a published rendition, not a claimed original master.",
+        "credit": "Wataru Nomura",
+        "locator": {
+          "officialImageAlt": "caschlatsch pavillion as installed in Disentis/Muster"
+        }
+      },
+      "processing": {
+        "method": "Decode the complete official public photograph, apply orientation, encode WebP. No crop, enlargement, AI, recolouring or retouching.",
+        "inputPixels": [
+          2000,
+          1333
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          2000,
+          1333
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": false,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Photo: Wataru Nomura / ETH Zurich.",
+      "authorStatus": "Official ETH project page attributes this photograph to Wataru Nomura. Public availability is not asserted to be an open reuse license."
+    },
+    {
+      "id": "project-caschlatsch-cnc-fabrication",
+      "projectId": "project-caschlatsch",
+      "path": "assets/projects/project-caschlatsch/cnc-fabrication.webp",
+      "src": "/assets/projects/project-caschlatsch/cnc-fabrication.webp",
+      "width": 2000,
+      "height": 1333,
+      "bytes": 253756,
+      "sha256": "34504a98da70ddff2b2af2ddd4ef48bc3b8bae038aa2d7202233f517151705f1",
+      "source": {
+        "file": "cnc-fabrication.jpg",
+        "url": "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch/_jcr_content/par/twocolumn/par_left/image/image.imageformat.1286.dpr3.1422750991.jpg",
+        "sourcePage": "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch.html",
+        "bytes": 482800,
+        "sha256": "c2476dd41b6e4ef0a99d70fd1566f3b867df78bfcfa83d2c8986c92d654b476f",
+        "retrievedAt": "2026-10-18T19:56:55.087148+00:00",
+        "rendition": "Official highest HTML srcset option (3x); this is a published rendition, not a claimed original master.",
+        "credit": "Wataru Nomura",
+        "locator": {
+          "officialImageAlt": "CNC machine cutting a timber beam"
+        }
+      },
+      "processing": {
+        "method": "Decode the complete official public photograph, apply orientation, encode WebP. No crop, enlargement, AI, recolouring or retouching.",
+        "inputPixels": [
+          2000,
+          1333
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          2000,
+          1333
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": false,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Photo: Wataru Nomura / ETH Zurich.",
+      "authorStatus": "Official ETH project page attributes this photograph to Wataru Nomura. Public availability is not asserted to be an open reuse license."
+    },
+    {
+      "id": "project-caschlatsch-mountain-setting",
+      "projectId": "project-caschlatsch",
+      "path": "assets/projects/project-caschlatsch/mountain-setting.webp",
+      "src": "/assets/projects/project-caschlatsch/mountain-setting.webp",
+      "width": 1365,
+      "height": 2048,
+      "bytes": 930516,
+      "sha256": "66ddc65f11127f75b59f772cc36c39c3de729ad8066dcb5ef353394ac70555f2",
+      "source": {
+        "file": "mountain-setting.jpg",
+        "url": "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch/_jcr_content/par/twocolumn/par_left/image_1638742688/image.imageformat.1286.dpr3.1342049301.jpg",
+        "sourcePage": "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch.html",
+        "bytes": 1170602,
+        "sha256": "e06d802ddbe9541766426d37fda2d1d3438b06dd906e05bfa8d4e58192f09b82",
+        "retrievedAt": "2026-10-18T19:56:57.626613+00:00",
+        "rendition": "Official highest HTML srcset option (3x); this is a published rendition, not a claimed original master.",
+        "credit": "Wataru Nomura",
+        "locator": {
+          "officialImageAlt": "caschlatsch structure with backdrop of mountains"
+        }
+      },
+      "processing": {
+        "method": "Decode the complete official public photograph, apply orientation, encode WebP. No crop, enlargement, AI, recolouring or retouching.",
+        "inputPixels": [
+          1365,
+          2048
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          1365,
+          2048
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": false,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Photo: Wataru Nomura / ETH Zurich.",
+      "authorStatus": "Official ETH project page attributes this photograph to Wataru Nomura. Public availability is not asserted to be an open reuse license."
+    },
+    {
+      "id": "project-caschlatsch-module-assembly",
+      "projectId": "project-caschlatsch",
+      "path": "assets/projects/project-caschlatsch/module-assembly.webp",
+      "src": "/assets/projects/project-caschlatsch/module-assembly.webp",
+      "width": 2000,
+      "height": 1333,
+      "bytes": 579684,
+      "sha256": "c4593f2996c2afef769e859d7577c3e70503bde5ba6832e09c60fd104f093734",
+      "source": {
+        "file": "module-assembly.jpg",
+        "url": "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch/_jcr_content/par/twocolumn/par_right/image/image.imageformat.1286.dpr3.1961350012.jpg",
+        "sourcePage": "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch.html",
+        "bytes": 820346,
+        "sha256": "8fa706d455538e103f6a19287562c4af055c36faac4f4691a43829301c45058a",
+        "retrievedAt": "2026-10-18T19:56:57.626613+00:00",
+        "rendition": "Official highest HTML srcset option (3x); this is a published rendition, not a claimed original master.",
+        "credit": "Wataru Nomura",
+        "locator": {
+          "officialImageAlt": "MAS DFAB students installing the modules of the caschlatsch pavillion"
+        }
+      },
+      "processing": {
+        "method": "Decode the complete official public photograph, apply orientation, encode WebP. No crop, enlargement, AI, recolouring or retouching.",
+        "inputPixels": [
+          2000,
+          1333
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          2000,
+          1333
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": false,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Photo: Wataru Nomura / ETH Zurich.",
+      "authorStatus": "Official ETH project page attributes this photograph to Wataru Nomura. Public availability is not asserted to be an open reuse license."
+    },
+    {
+      "id": "project-caschlatsch-timber-steps",
+      "projectId": "project-caschlatsch",
+      "path": "assets/projects/project-caschlatsch/timber-steps.webp",
+      "src": "/assets/projects/project-caschlatsch/timber-steps.webp",
+      "width": 1365,
+      "height": 2048,
+      "bytes": 876108,
+      "sha256": "087549f8dfbe26639e4f9e3ff091b670a6c55f2dcc39ee918a03492632105e54",
+      "source": {
+        "file": "timber-steps.jpg",
+        "url": "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch/_jcr_content/par/twocolumn/par_right/image_1362255624/image.imageformat.1286.dpr3.787207185.jpg",
+        "sourcePage": "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch.html",
+        "bytes": 1120713,
+        "sha256": "5007c436d0b52a9e0817a9c4fde5dea63327b33f35cd41b391e794cde16c7821",
+        "retrievedAt": "2026-10-18T19:56:58.662239+00:00",
+        "rendition": "Official highest HTML srcset option (3x); this is a published rendition, not a claimed original master.",
+        "credit": "Wataru Nomura",
+        "locator": {
+          "officialImageAlt": "timber steps of the caschlatsch structure"
+        }
+      },
+      "processing": {
+        "method": "Decode the complete official public photograph, apply orientation, encode WebP. No crop, enlargement, AI, recolouring or retouching.",
+        "inputPixels": [
+          1365,
+          2048
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          1365,
+          2048
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": false,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Photo: Wataru Nomura / ETH Zurich.",
+      "authorStatus": "Official ETH project page attributes this photograph to Wataru Nomura. Public availability is not asserted to be an open reuse license."
+    },
+    {
+      "id": "project-caschlatsch-timber-interior",
+      "projectId": "project-caschlatsch",
+      "path": "assets/projects/project-caschlatsch/timber-interior.webp",
+      "src": "/assets/projects/project-caschlatsch/timber-interior.webp",
+      "width": 2000,
+      "height": 1333,
+      "bytes": 314530,
+      "sha256": "253f17805bf21c443ab63db679db12cbe0cba9660d0068bc07d2ea838be53257",
+      "source": {
+        "file": "timber-interior.jpg",
+        "url": "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch/_jcr_content/par/twocolumn/par_right/image_278832838/image.imageformat.1286.dpr3.1880643882.jpg",
+        "sourcePage": "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch.html",
+        "bytes": 526416,
+        "sha256": "bd9778137d901ab2cceaad8524202d5ff0ad02161743bf92f025c02b1da09a2b",
+        "retrievedAt": "2026-10-18T19:56:59.208882+00:00",
+        "rendition": "Official highest HTML srcset option (3x); this is a published rendition, not a claimed original master.",
+        "credit": "Wataru Nomura",
+        "locator": {
+          "officialImageAlt": "complex beams assembling the interiors of caschlatsch"
+        }
+      },
+      "processing": {
+        "method": "Decode the complete official public photograph, apply orientation, encode WebP. No crop, enlargement, AI, recolouring or retouching.",
+        "inputPixels": [
+          2000,
+          1333
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          2000,
+          1333
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": false,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Photo: Wataru Nomura / ETH Zurich.",
+      "authorStatus": "Official ETH project page attributes this photograph to Wataru Nomura. Public availability is not asserted to be an open reuse license."
+    },
+    {
+      "id": "project-caschlatsch-workflow",
+      "projectId": "project-caschlatsch",
+      "path": "assets/projects/project-caschlatsch/workflow.webp",
+      "src": "/assets/projects/project-caschlatsch/workflow.webp",
+      "width": 3200,
+      "height": 1000,
+      "bytes": 34108,
+      "sha256": "25a1b8b7dcedb07b9b4a8ad853917753389ef22877b974005a8a8f4b38318d0a",
+      "source": {
+        "file": "caschlatsch-workflow.svg",
+        "bytes": 126609,
+        "sha256": "d199df49f6f1b001c3c9fbf224803586146745a19f25b98919fc9896cc4a89eb",
+        "sourcePages": [
+          "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch.html",
+          "https://arch.ethz.ch/en/news-und-veranstaltungen/news-kanal/2024/09/how-humans-and-robots-built-a-wooden-tower-in-disentismustr.html"
+        ],
+        "locator": {
+          "kind": "Original conceptual workflow authored from public descriptions"
+        },
+        "fontSources": [
+          {
+            "file": "portfolio-ocr-b.woff2",
+            "sha256": "b46ba3f38b89bcbf7fd688eafe40c435a93dcf6cbadf7fdb43ad3cbc9973e703"
+          },
+          {
+            "file": "space-grotesk-variable.woff2",
+            "sha256": "8e085aa438094f11487a836652edd5c054fa6a96f63fc7c282105ee3a4b08c07"
+          }
+        ]
+      },
+      "processing": {
+        "method": "Original SVG paths and outlined OCR/Space Grotesk glyphs rasterized with CPU sharp/libvips to lossless WebP. No private model, dimensions, joint or engineering details reconstructed.",
+        "inputPixels": [
+          3200,
+          1000
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          3200,
+          1000
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "encoding": {
+          "format": "WebP",
+          "lossless": true,
+          "effort": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Original website diagram based on public ETH Zurich descriptions.",
+      "authorStatus": "Original website process diagram; source facts from ETH Zurich. This is not a source engineering drawing."
+    }
+  ],
+  "highResolutionReferences": [
+    {
+      "file": "JosHsuan_CV&Portfolio_2025_Print.pdf",
+      "bytes": 361589115,
+      "sha256": "fdaf47a2df174e73d698a72c362b0644240bfd39448042ffcb3f1024fd27bd71",
+      "pages": 70,
+      "purpose": "Matching Mode/s image objects only. Text, dates, role and figure-specific photography credits remain based on the primary VerFacade reference."
+    }
+  ],
+  "models": [
+    {
+      "projectId": "mode-s-of-making",
+      "src": "/assets/projects/mode-s-of-making/model.glb",
+      "bytes": 13987056,
+      "sha256": "0a6963f5a206d0dc11b5fd9b0d9fc5e2a09085058d86bca62f3fb435a237cee0",
+      "source": {
+        "file": "HeatRotateCuttingSimulation.3dm",
+        "bytes": 99884074,
+        "sha256": "3259a6ac24d82757d92f4ba06c956b451950c062869b103f5ed866bed8effd6f"
+      },
+      "selection": "All 800 original visible normal-mode meshes. The 2690 hidden meshes are alternate studies/groups; two points are excluded. Stable object IDs are recorded. No spatial crop or inferred assembly.",
+      "credit": "JosHsuan Chao / National Cheng Kung University studio study.",
+      "representation": "Study model of the rotary-cut assembly. Drag to inspect the simulated units.",
+      "geometry": {
+        "vertices": 699860,
+        "triangles": 1026294,
+        "renderables": 1,
+        "primitive": "triangles",
+        "bounds": {
+          "min": [
+            -0.5270478129386902,
+            -0.0006727245054207742,
+            -0.025371963158249855
+          ],
+          "max": [
+            -0.029924577102065086,
+            0.20992499589920044,
+            0.2976084053516388
+          ]
+        },
+        "sourceUnits": "millimeters",
+        "webUnits": "meters",
+        "upAxis": "Y"
+      },
+      "processing": {
+        "decimation": false,
+        "deformation": false,
+        "maxFloat32PositionErrorMeters": 2.95639037695139e-8,
+        "compression": {
+          "encoding": "EXT_meshopt_compression v0",
+          "decodedByteExact": true,
+          "quantization": false,
+          "reorder": false
+        },
+        "method": "Original stored mesh positions and faces converted once to the verified web coordinate convention; no procedural replacement."
+      }
+    },
+    {
+      "projectId": "entrance-installation-art",
+      "src": "/assets/projects/entrance-installation-art/model.glb",
+      "bytes": 18828876,
+      "sha256": "cb7b5ea27a47c9451bd4220c835fb158aa3e65be19deff684f40eb076c43376c",
+      "source": {
+        "file": "20210623_台中南山藝術柱_圓管、固定件、版片、編號_ver03.3dm",
+        "bytes": 185772733,
+        "sha256": "56df16f327bb0061024b53e4ea1b9aea3cb1cc28189d36669cdb6712af29abbc"
+      },
+      "selection": "All 2245 original visible normal-mode Breps: 600 panels, 1620 fixings, 23 pipes and two original Layer 02 column/base solids. Exactly 600 Text and six DimLinear objects are excluded. No spatial crop, hidden replacement or inferred assembly. Original scheme CAD, not certification of the final built installation.",
+      "credit": "PKD Engineering Consultants project team; scheme modelling and fabrication-drawing work by JosHsuan Chao.",
+      "representation": "Scheme model of the folded-panel installation, with its connections, supports, core and base.",
+      "geometry": {
+        "vertices": 897015,
+        "triangles": 997599,
+        "renderables": 1,
+        "primitive": "triangles",
+        "bounds": {
+          "min": [
+            -1.3475615978240967,
+            0.5,
+            -3.3572912216186523
+          ],
+          "max": [
+            3.3843789100646973,
+            8.350000381469727,
+            1.3718626499176025
+          ]
+        },
+        "sourceUnits": "millimeters",
+        "webUnits": "meters",
+        "upAxis": "Y"
+      },
+      "processing": {
+        "decimation": false,
+        "deformation": false,
+        "maxFloat32PositionErrorMeters": 4.730224603122224e-7,
+        "compression": {
+          "encoding": "EXT_meshopt_compression v0",
+          "decodedByteExact": true,
+          "quantization": false,
+          "reorder": false
+        },
+        "method": "Original stored mesh positions and faces converted once to the verified web coordinate convention; no procedural replacement."
+      }
+    },
+    {
+      "projectId": "dot-based-3d-printing",
+      "src": "/assets/projects/dot-based-3d-printing/model.glb",
+      "bytes": 122884,
+      "sha256": "60d49fe978cf0fb552c39f7188a9811dc39aa2e163b3a3388b192dbae502e891",
+      "source": {
+        "file": "out_printpoints.json",
+        "bytes": 43386985,
+        "sha256": "affe5abbde9b3160596cf69994020c002687a4613a08d5e970c59db7312e9437",
+        "revision": "da8f34bacd8e4aab22a290fab013206ec10d191d"
+      },
+      "selection": "Every velocity=2 record, selected by recorded explicit field rather than bounding box; 14810 original path sample points. This is not an inferred finished solid.",
+      "credit": "MAS DFab Group 1 / JosHsuan Chao, Namdev Talluru and JunJie. Individual path-code authorship is not assigned.",
+      "representation": "Recorded low-speed dot-path sample positions from Group 1. This point study describes the path rather than a finished solid.",
+      "geometry": {
+        "vertices": 14810,
+        "triangles": 0,
+        "renderables": 1,
+        "primitive": "points",
+        "bounds": {
+          "min": [
+            0.3549739420413971,
+            0.018722420558333397,
+            -0.14110539853572845
+          ],
+          "max": [
+            0.5148345828056335,
+            0.2012317180633545,
+            -0.002877586055546999
+          ]
+        },
+        "sourceUnits": "millimeters (source robot wrapper converts frame points by 1/1000)",
+        "webUnits": "meters",
+        "upAxis": "Y"
+      },
+      "processing": {
+        "decimation": false,
+        "deformation": false,
+        "maxFloat32PositionErrorMeters": 2.9739873563805475e-8,
+        "compression": {
+          "encoding": "EXT_meshopt_compression v0",
+          "decodedByteExact": true,
+          "quantization": false,
+          "reorder": false
+        },
+        "method": "Original velocity=2 sample positions converted once to web coordinates; native point primitive, no reconstructed surface."
+      }
+    },
+    {
+      "projectId": "hc3dp-caustics",
+      "src": "/assets/projects/hc3dp-caustics/model.glb",
+      "bytes": 50438508,
+      "sha256": "0dd22b441c422f2a9c2406d79288284ee7fc56f1f3028ae453015b3add40bb4a",
+      "source": {
+        "file": "Four Lamps_Simulation_1.blend",
+        "bytes": 1871493824,
+        "sha256": "a0017b6531d671f14dadcd781e19607609929c01dfea00391b05b17302be346a"
+      },
+      "selection": "Original visible Lamp_mesh.001, the complete patterned lamp shade; source object name selected, no spatial crop. Surrounding architecture, props, fog, other lamp placements and lighting are excluded. This geometry display is not a caustics solver.",
+      "credit": "Group-Red / Paul Jaeggi, Behnur Baiju, Kevin Seav and JosHsuan Chao.",
+      "representation": "Original patterned lamp-shade model from the lighting study. The photographed light patterns remain the project evidence.",
+      "geometry": {
+        "vertices": 1894748,
+        "triangles": 2360266,
+        "renderables": 1,
+        "primitive": "triangles",
+        "bounds": {
+          "min": [
+            -0.5265482969693305,
+            1.9507327777447439,
+            5.312554589282478
+          ],
+          "max": [
+            -0.09243401815698798,
+            2.311166207416292,
+            5.746669524182563
+          ]
+        },
+        "sourceUnits": "meters in the original Blender scene; authored object transform retained",
+        "webUnits": "meters",
+        "upAxis": "Y"
+      },
+      "processing": {
+        "decimation": false,
+        "deformation": false,
+        "maxFloat32PositionErrorMeters": 1.217454592664719e-15,
+        "compression": {
+          "encoding": "EXT_meshopt_compression v0",
+          "decodedByteExact": true,
+          "quantization": false,
+          "reorder": false
+        },
+        "method": "Original complete shade exported by Blender 4.0.2 glTF exporter; original node transform, normal/UV seams and exported material retained. Exact raw buffer compression. The original procedural shader and IOR graph are not equivalent to the glTF material; this is not a new optical simulation."
+      }
+    },
+    {
+      "projectId": "special-assemblies",
+      "src": "/assets/projects/special-assemblies/model.glb",
+      "bytes": 117672,
+      "sha256": "43de5ca2dd8095a125d7f29e58851b5a80dc9588625912918d75dbadae8e28df",
+      "source": {
+        "file": "stick_assembly.json",
+        "bytes": 1851776,
+        "sha256": "f95ec30b3656f4838fa5d785a0e30c2cbb85d7a324fe91dedd5ff5e2fce54128"
+      },
+      "selection": "All sixty explicitly stored Part.shape meshes, with exact source face lists. Part frames are metadata only and are not reapplied to world-coordinate shape vertices.",
+      "credit": "MAS DFab / JosHsuan Chao, Kevin Seav and Megi Sinani; original course assembly data.",
+      "representation": "Original reciprocal stick-assembly data study. Drag to inspect its spatial relationships.",
+      "geometry": {
+        "vertices": 2040,
+        "triangles": 3840,
+        "renderables": 60,
+        "primitive": "triangles",
+        "bounds": {
+          "min": [
+            -0.06726571655273438,
+            -0.005378779411315917,
+            -0.09462184143066396
+          ],
+          "max": [
+            0.42978576660156254,
+            0.44841986083984375,
+            0.16873770141601568
+          ]
+        },
+        "sourceUnits": "millimeters (same source assembly and documented upstream conversion)",
+        "webUnits": "meters",
+        "upAxis": "Y"
+      },
+      "processing": {
+        "decimation": false,
+        "deformation": false,
+        "maxFloat32PositionErrorMeters": 1.5255199002695008e-8,
+        "compression": {
+          "encoding": "none",
+          "decodedByteExact": true,
+          "quantization": false,
+          "reorder": false
+        },
+        "method": "Original stored mesh positions and faces converted once to the verified web coordinate convention; no procedural replacement."
+      }
+    }
+  ],
+  "supplementaryReferences": [
+    {
+      "projectId": "hc3dp-caustics",
+      "primaryReference": {
+        "file": "Final Presentation Group-Red.pptx",
+        "bytes": 112035652,
+        "sha256": "9016edfcd197cf268531f4074c6c26bd420fd581fb8783944e33b440c622ff55",
+        "slides": 27
+      }
+    },
+    {
+      "projectId": "special-assemblies",
+      "primaryReference": {
+        "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+        "bytes": 22624290,
+        "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+        "pages": 86,
+        "locatorPolicy": "Physical pages are one-based; printed page = physical page - 5 in this chapter."
+      }
+    },
+    {
+      "projectId": "project-caschlatsch",
+      "primaryReference": {
+        "title": "Caschlatsch — MAS ETH DFAB",
+        "url": "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch.html",
+        "sourceHTMLBytes": 51049,
+        "sourceHTMLSHA256": "2b372b32a7b4c2e94486661b78826d12001e891ec05e584ce53b04c672c50a45",
+        "retrievedAt": "2026-10-18"
+      },
+      "publicReferences": [
+        {
+          "title": "Caschlatsch — MAS ETH DFAB",
+          "url": "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch.html",
+          "supports": "Project workflow, photography and credits"
+        },
+        {
+          "title": "Humans and robots build a wooden tower in Disentis/Mustér",
+          "url": "https://arch.ethz.ch/en/news-und-veranstaltungen/news-kanal/2024/09/how-humans-and-robots-built-a-wooden-tower-in-disentismustr.html",
+          "publishedAt": "2024-09-13",
+          "supports": "2024 project, cohort participation and phone-based AR assembly"
+        }
+      ]
+    }
+  ]
+}

@@ -7,7 +7,7 @@ GitHub-sourced font for titles, together with a site-wide review of tracking and
 leading against Apple's UI guidance. **Portfolio OCR B** supplies body text,
 navigation, controls, captions and generated diagram labels. **Space Grotesk**
 supplies headings and explicitly marked logical titles. This covers Home,
-About, Projects, Contact, Bending-Active, XR and the not-found page.
+About, Projects, Contact, Bending-Active, XR, the [six selected studies](SIX_PROJECT_STUDIES_INTEGRATION.md) and the not-found page.
 
 This revision supersedes the earlier same-day one-face OCR implementation before
 publication, as well as the earlier IBM Plex selection for active typography.
@@ -35,15 +35,15 @@ independent of commercial OCR-B redistributions and their unrelated licences.
 | Original font | `OCRB.otf`, 18,324 bytes, internal family `OCR B`, Regular |
 | Original font SHA-256 | `87c8d5bfd541d28023d2ba3383169c49f565e10d487ebb027ea0d735ef558707` |
 | Original retained copy | [`ocr-b-original.otf`](../../assets/fonts/ocr-b-original.otf) |
-| Browser font | `assets/fonts/portfolio-ocr-b.woff2`, 12,840 bytes |
-| Browser font SHA-256 | `8806e9a6ed3260df742c43ef996dc1d82ab090f899de08cc486fe3882b0f7d79` |
-| Published notice | `licenses/ocr-b-NOTICE.txt`, 1,845 bytes, UTF-8 with LF line endings |
-| Published notice SHA-256 | `8676f6ac15567452d394a4576c41bb8a28eb37e8b14dabdcc973cbf91e60076b` |
+| Browser font | `assets/fonts/portfolio-ocr-b.woff2`, 12,952 bytes, derivative 2.003 |
+| Browser font SHA-256 | `a3fdc31584a87ed2c612a9c0243241c0d44a65b0a22efaf2297d083712f03d5b` |
+| Published notice | `licenses/ocr-b-NOTICE.txt`, 2,161 bytes, UTF-8 with LF line endings |
+| Published notice SHA-256 | `4aa5a5712130c58178b00d518d422ccb96845ed59cd09b1155a7087acebd7ebc` |
 
 ## Local font adaptation
 
-The original font supports the entire basic Latin alphabet and the currently
-published personal names. The published HTML pages also use nine
+The original font supports the entire basic Latin alphabet and the personal
+names in the preceding release. Those HTML pages also use nine
 characters missing from its original character map: `· × – — ← → ↔ ↗ ↘`.
 Allowing those to fall back would produce a mixed family despite the OCR rule.
 The explicitly named **Portfolio OCR B** derivative preserves every original
@@ -65,6 +65,43 @@ has the same text and 37 LF sequences. The WOFF2 is unchanged by this correction
 The original glyph advance is 723 units in a 1,000-unit em. Original embedding
 permissions are unrestricted (`OS/2.fsType = 0`). The derivative retains those
 permissions and adds no restriction. The twelve project additions use CC0 1.0.
+
+The later [three-project request](THREE_PROJECT_STUDIES_INTEGRATION.md) preserves
+the photographer's actual name **Jan Kyselý**. Derivative 2.002 adds only U+00FD,
+using the unchanged original `y` and original `acute` shifted (-27, +50) font
+units. The acute's lower edge is fifteen units above the y outline; all original
+advance/vertical metrics are retained. An independent comparison against the
+published 2.001 WOFF2 verifies all **157 preceding glyph outlines and metrics**
+and their character mappings remain exact. The original 145 source programs
+also pass the preparation script's unchanged preservation checks. The old
+2.001 font hash was `8806e9a6ed3260df742c43ef996dc1d82ab090f899de08cc486fe3882b0f7d79`;
+its 1,845-byte notice hash was
+`8676f6ac15567452d394a4576c41bb8a28eb37e8b14dabdcc973cbf91e60076b`.
+The new notice adds two project-authored lines explaining this name coverage;
+the original copyright/licence text and CC0 terms remain unchanged. This is a
+glyph-coverage amendment, not a redesign of existing Bending/XR typography.
+The ignored CPU receipt is
+`animation-review/.local/three-projects/ocr-credited-name-proof.json`.
+
+The current six-project revision adds **é** in **Disentis/Mustér** and **è** in
+**Aurèle Gheyselinck**. Derivative **2.003** composes the original `e` with the
+original acute shifted (-27, +58) or grave shifted (+27, -25) font units. Both
+accents remain fifteen units above the unchanged e; the 723-unit advance is
+retained. Independent CPU comparison proves all **158 preceding GIDs, outlines,
+Type 2 programs, horizontal metrics and prior Unicode/Macintosh cmap entries**
+exact, as well as the complete `hhea`, `OS/2` and `post` table bytes. All 145
+original source glyphs remain exact. The current face contains **160 glyphs /
+155 Unicode entries**; no preceding character or line metric is redesigned.
+The complete 2.002 notice remains an exact prefix, with only two project-authored
+coverage lines appended; original rights and CC0 terms are unchanged. The prior
+2.002 font/notice hashes are `b46ba3f38b89bcbf7fd688eafe40c435a93dcf6cbadf7fdb43ad3cbc9973e703`
+and `f60ad281b72a5bb13f287ed7ffad931d2dd4fcc497a0a5b78b04b299b9325286`.
+The ignored independent receipt is
+`animation-review/.local/ocr-caschlatsch-names/2026-10-18T19-58-53.943167Z/font-2.003-proof.json`,
+SHA256 `31c3018fb87f1d3a3c5a2c709f2aeacd68e37d9ff92d4ac769e840b8111a9adf`.
+This source proof is distinct from browser font-rasterization and final release
+acceptance. Space Grotesk and all existing typography-role/spacing rules remain
+unchanged by these two added characters.
 
 ## Display source and rights
 

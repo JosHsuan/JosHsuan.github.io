@@ -7,6 +7,7 @@ import introduction from '../release/introduction.json';
 import contact from '../release/contact.json';
 import review from '../release/story.json';
 import xrStudy from '../release/xr-study.json';
+import projectStudies from '../release/project-studies.json';
 import styles from '../app/portfolio.module.css';
 
 const projects=[
@@ -20,6 +21,7 @@ const projects=[
     id:'xr-bending-active',href:'/projects/xr-bending-active/',title:xrStudy.shortTitle,
     category:'EXTENDED REALITY / RESEARCH PROTOTYPE',description:xrStudy.summary,image:xrStudy.hero,
   },
+  ...projectStudies.projects.map(project=>({id:project.id,href:`/projects/${project.slug}/`,title:project.shortTitle,category:project.category,description:project.summary,image:project.hero})),
 ];
 
 const approaches=[
@@ -85,7 +87,7 @@ function Projects({standalone=false,scrolling=false}){
         <div className={styles.projectImage}>
           {project.id==='bending-active'
             ?<ProjectModelPreview poster={project.image}/>
-            :<img src={xrStudy.hero.src} width={xrStudy.hero.width} height={xrStudy.hero.height} alt={xrStudy.hero.alt} loading="eager" decoding="async" data-site-critical data-project-card-image/>}
+            :<img src={project.image.src} width={project.image.width} height={project.image.height} alt={project.image.alt} loading="eager" decoding="async" data-site-critical data-project-card-image/>}
         </div>
         <a className={styles.projectLink} href={project.href} data-project-card={project.id} aria-labelledby={`project-card-${project.id}`} aria-describedby={`project-description-${project.id}`}>
           <div className={styles.cardCopy} data-project-card-title>
@@ -95,7 +97,7 @@ function Projects({standalone=false,scrolling=false}){
         </a>
       </li>)}
     </ul>
-    <p className={scrolling?`${styles.gridNote} ${styles.scrollCopy}`:styles.gridNote} data-information-window={scrolling?'home-project-note':undefined} data-home-scroll-window={scrolling?'project-note':undefined}>{scrolling&&<InformationSkin/>}Two connected studies, from material geometry to an extended-reality research prototype.</p>
+    <p className={scrolling?`${styles.gridNote} ${styles.scrollCopy}`:styles.gridNote} data-information-window={scrolling?'home-project-note':undefined} data-home-scroll-window={scrolling?'project-note':undefined}>{scrolling&&<InformationSkin/>}Studies connecting computational design, spatial interaction and physical fabrication.</p>
   </section>;
 }
 

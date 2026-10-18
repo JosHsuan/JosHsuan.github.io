@@ -3,6 +3,8 @@ import {readFile} from 'node:fs/promises';
 import {WAIT,frames,scenarioTimeout} from './case-helpers.mjs';
 
 const xrWorkspace=JSON.parse(await readFile(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/xr-workspace.json',import.meta.url),'utf8'));
+const studies=JSON.parse(await readFile(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/project-studies.json',import.meta.url),'utf8')).projects;
+const cardCount=studies.length+2;
 
 const loader=page=>page.locator('[data-site-loader]');
 async function entered(page,{failed=false}={}){
@@ -16,7 +18,7 @@ async function entered(page,{failed=false}={}){
  return state;
 }
 
-test('all portfolio categories and both selected projects have direct readable no-JavaScript pages',async({browser})=>{
+test('all portfolio categories and selected projects have direct readable no-JavaScript pages',async({browser})=>{
  const context=await browser.newContext({javaScriptEnabled:false});
  try{
   const page=await context.newPage();
@@ -32,7 +34,7 @@ test('all portfolio categories and both selected projects have direct readable n
   await page.goto('http://127.0.0.1:4186/');
   await page.locator('[data-home-project-link]').click();await expect(page).toHaveURL(/\/#projects$/);
   await expect(page.locator('[data-project-grid]')).toBeInViewport();
-  await expect(page.locator('[data-project-card]')).toHaveCount(2);
+  await expect(page.locator('[data-project-card]')).toHaveCount(cardCount);
   await page.locator('[data-project-card="xr-bending-active"]').click();
   await expect(page.locator('[data-xr-study]')).toBeVisible();
   await expect(page.locator('[data-xr-scene-controls]')).toBeHidden();
@@ -66,7 +68,7 @@ test('Home keeps its introduction model-free and enters with its live project ca
  await expect(page.locator('[data-project-grid]')).toBeInViewport();
  const geometry=await page.locator('[data-project-grid]').evaluate(element=>{const css=getComputedStyle(element);return{columns:css.gridTemplateColumns.split(' ').length,rows:css.gridTemplateRows.split(' ').length};});
  expect(geometry.columns).toBe(isMobile?1:3);if(!isMobile)expect(geometry.rows).toBe(3);
- await expect(page.locator('[data-project-card]')).toHaveCount(2);
+ await expect(page.locator('[data-project-card]')).toHaveCount(cardCount);
  const cards=await page.locator('[data-project-tile]').evaluateAll(tiles=>tiles.map(tile=>{const image=tile.querySelector('img');const rect=tile.getBoundingClientRect();return{loaded:image.complete&&image.naturalWidth>0,alt:image.alt,square:Math.abs(rect.width-rect.height)<1};}));
  expect(cards.every(card=>card.loaded&&card.alt.length>15&&card.square)).toBe(true);
  expect(errors).toEqual([]);
@@ -114,7 +116,7 @@ test('Home native scrolling uses the shared material clock, settles, returns and
 test('the project grid retains aligned square cards without lines and supports complete rows of nine, twelve and fifteen',async({page,isMobile})=>{
  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/projects/');await entered(page);
  const grid=page.locator('[data-project-grid]');
- await expect(grid).toHaveAttribute('data-project-grid-cells','9');await expect(page.locator('[data-project-tile]')).toHaveCount(2);
+ await expect(grid).toHaveAttribute('data-project-grid-cells',String(Math.max(9,Math.ceil(cardCount/3)*3)));await expect(page.locator('[data-project-tile]')).toHaveCount(cardCount);
  const measure=()=>grid.evaluate(node=>{
   const style=getComputedStyle(node),rect=node.getBoundingClientRect();
   return{width:rect.width,height:rect.height,columns:style.gridTemplateColumns.split(' ').length,rows:style.gridTemplateRows.split(' ').length,
@@ -218,7 +220,7 @@ test('native internal routes display loading and close the correlated request ac
   expect(destination.history.filter(fact=>fact.id===destination.id).map(fact=>fact.phase)).toEqual(['requested','ready','revealing','entered']);
   await expect(page.locator('h1')).toHaveText('Between physical and digital.');
   await page.locator('[data-portfolio-navigation] a[href="/projects/"]').click();await entered(page);
-  await expect(page.locator('[data-project-card]')).toHaveCount(2);
+  await expect(page.locator('[data-project-card]')).toHaveCount(cardCount);
   await page.locator('[data-portfolio-navigation] a[href="/contact/"]').click();await entered(page);
   await expect(page.locator('[data-portfolio-contact] a[href="https://github.com/JosHsuan"]')).toBeVisible();
   for(const href of ['mailto:chiahsuanchao@icloud.com','https://www.linkedin.com/in/joshsuan/','https://www.instagram.com/joshsuan.chao/'])await expect(page.locator(`[data-portfolio-contact] a[href="${href}"]`)).toBeVisible();

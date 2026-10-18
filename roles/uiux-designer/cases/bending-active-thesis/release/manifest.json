@@ -351,14 +351,14 @@
     },
     {
       "path": "assets/fonts/portfolio-ocr-b.woff2",
-      "bytes": 12840,
-      "sha256": "8806e9a6ed3260df742c43ef996dc1d82ab090f899de08cc486fe3882b0f7d79",
+      "bytes": 12952,
+      "sha256": "a3fdc31584a87ed2c612a9c0243241c0d44a65b0a22efaf2297d083712f03d5b",
       "source": "Portfolio OCR B derivative of Matthew Skala OCR B 0.3.1; original Norbert Schwarz unrestricted notices and source provenance retained in OCR_TYPOGRAPHY_INTEGRATION.md; retrieved 2026-10-18"
     },
     {
       "path": "licenses/ocr-b-NOTICE.txt",
-      "bytes": 1845,
-      "sha256": "8676f6ac15567452d394a4576c41bb8a28eb37e8b14dabdcc973cbf91e60076b",
+      "bytes": 2161,
+      "sha256": "4aa5a5712130c58178b00d518d422ccb96845ed59cd09b1155a7087acebd7ebc",
       "source": "Original Norbert Schwarz / Matthew Skala OCR B notices plus explicitly identified public-domain project symbol additions; source package 0.3.1, retrieved 2026-10-18"
     },
     {
@@ -384,6 +384,241 @@
       "bytes": 4402,
       "sha256": "c6dec685825f73b18c20926fddc65e8315642e12986f15db0699170940a09efc",
       "source": "Original Space Grotesk Project Authors copyright and SIL Open Font License 1.1 from GitHub commit 03507d024a01282884232081fc6011c09ff4e849; identical text normalized from CRLF to LF for portable public bytes, retrieved 2026-10-18."
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/hero.webp",
+      "bytes": 422762,
+      "sha256": "9a0beb28153b96b9b2f8e074fb7091e3e2043033494d5ceb3245d7ac3cb1c7e4"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/design-workflow.webp",
+      "bytes": 1354306,
+      "sha256": "8330a0695b738831254982f3c3ec8246f70ec7619d6279bb84d8d1294fe2a82b"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/machine-system.webp",
+      "bytes": 312024,
+      "sha256": "8695d585ea84fe7a317eb4709373d8c187adcb9389087da6034e0b82f20c14ff"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/assembly-visualization.webp",
+      "bytes": 510550,
+      "sha256": "43028d489879647685e4c0102d97a88f148247f64c838b0013bf0d3e52a8cb31"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/machine-exploded.webp",
+      "bytes": 512116,
+      "sha256": "a44c52183bd37123dcd5caf1f792602baa17d8c4a0393c8f1121962ae47d314f"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/machine-prototype.webp",
+      "bytes": 949594,
+      "sha256": "e047c663c1fdc0698b73a39a0c71a62f4b4fd2e340207f131d4059cf257104a2"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/toolpath-textures.webp",
+      "bytes": 1248488,
+      "sha256": "548932813915ed78445d1e7030313029da5da8d1c4e4b8e707cff3e48522fa35"
+    },
+    {
+      "path": "assets/projects/entrance-installation-art/hero.webp",
+      "bytes": 984646,
+      "sha256": "b71730a977ec934fb1303ab3f7504b3c37f5a62db0c6da4d9663ce238c2d794f"
+    },
+    {
+      "path": "assets/projects/entrance-installation-art/pattern-development.webp",
+      "bytes": 36404,
+      "sha256": "819dcb41ba6bf72d0eaf2afe855c1741f01052018c3a4720d2ebaea0ee1fa6f7"
+    },
+    {
+      "path": "assets/projects/entrance-installation-art/pattern-variations.webp",
+      "bytes": 137766,
+      "sha256": "b54277be32b54b8eaaf210c81d8e0e95f6e8e64ab3e1db1eaf405203e1bbc43d"
+    },
+    {
+      "path": "assets/projects/entrance-installation-art/panel-system.webp",
+      "bytes": 504240,
+      "sha256": "aafe7ac58b3781dd9becb4c73f43232dcec1534b388c2b9912149fb5eabe051f"
+    },
+    {
+      "path": "assets/projects/entrance-installation-art/fabrication-drawings.webp",
+      "bytes": 56288,
+      "sha256": "cd8226c55a9aa1707771b8800f78e54d5b928ba7a7ab6e3333c1a4dc47c374c9"
+    },
+    {
+      "path": "assets/projects/entrance-installation-art/workshop-assembly.webp",
+      "bytes": 370062,
+      "sha256": "7b3d5717c8f033001b8660d5b222a35a92e8009b2bb77e176549337a3b674ffe"
+    },
+    {
+      "path": "assets/projects/entrance-installation-art/built-installation.webp",
+      "bytes": 476318,
+      "sha256": "13edd67d75e4b5065b1b5af7b63d9782eccfa31fd76cfd1abf8737bdd99be3bc"
+    },
+    {
+      "path": "assets/projects/dot-based-3d-printing/hero.webp",
+      "bytes": 398830,
+      "sha256": "486a4538294f2c81c6c1fb41a97820bdb71c73d18d817b8fb32f17ee24e82fb2"
+    },
+    {
+      "path": "assets/projects/dot-based-3d-printing/parameter-study.webp",
+      "bytes": 206750,
+      "sha256": "637ac3c6df780e54f9a0304d750ff1cb4baf94a5f6f6f2c6f54a917fdeeeac61"
+    },
+    {
+      "path": "assets/projects/dot-based-3d-printing/path-strategies.webp",
+      "bytes": 338560,
+      "sha256": "0026b91b1b92baa0736eaec6bce2b21417feb3135f2b2ea91f0c5f974b955c94"
+    },
+    {
+      "path": "assets/projects/dot-based-3d-printing/form-development.webp",
+      "bytes": 326368,
+      "sha256": "11433df85f98278619196f8f139b371b27573d46bfc5d97d852892efbf6361c4"
+    },
+    {
+      "path": "assets/projects/dot-based-3d-printing/printing-process.webp",
+      "bytes": 734890,
+      "sha256": "29ea28ffa3f66bc89daf382228e659bcbd4a6464c578cb8bc7eef73b48c9503e"
+    },
+    {
+      "path": "assets/projects/dot-based-3d-printing/prototype-family.webp",
+      "bytes": 88518,
+      "sha256": "1dc30086d8489d679e72c3da104fce77fd728f69d7dac52942ad63f37bdec7e0"
+    },
+    {
+      "path": "assets/projects/dot-based-3d-printing/translucent-prototypes.webp",
+      "bytes": 95912,
+      "sha256": "f1979a54f373e549fd2db99907d0dd5cac9689c3e2ec3f3f48461876a0d8ab2d"
+    },
+    {
+      "path": "assets/projects/hc3dp-caustics/hero.webp",
+      "bytes": 426206,
+      "sha256": "21ea5094ba8cc606ceb5aa8a73cbda033161de2435a28c5baff04c7e29cbc70e"
+    },
+    {
+      "path": "assets/projects/hc3dp-caustics/layer-system.webp",
+      "bytes": 183954,
+      "sha256": "90bd8534db57a6a3c2d978e2b0fcc92bdaaac07859ed4483ab39efcfa198b747"
+    },
+    {
+      "path": "assets/projects/hc3dp-caustics/path-logic.webp",
+      "bytes": 232146,
+      "sha256": "76206f25664bbe61fd9e42835b931a5fab196e3eb6ca52e884c4f601af0a625b"
+    },
+    {
+      "path": "assets/projects/hc3dp-caustics/frame-arrangement.webp",
+      "bytes": 288180,
+      "sha256": "d0a12edb61da1511e92630daf06454ecd3a1bb0a2f15fcf88bb0c941e7a8b4d0"
+    },
+    {
+      "path": "assets/projects/hc3dp-caustics/fabrication-path.webp",
+      "bytes": 191362,
+      "sha256": "0300d66baa974306d3bf0d9c206ed11c517545951bc9cc8977b33a4fb6c14770"
+    },
+    {
+      "path": "assets/projects/hc3dp-caustics/caustic-observation.webp",
+      "bytes": 218704,
+      "sha256": "03f8efd3fe37bf149315440165dfde62a539234ec1293238e293a5eb8705152d"
+    },
+    {
+      "path": "assets/projects/hc3dp-caustics/overinflation.webp",
+      "bytes": 251744,
+      "sha256": "ad49b67a1a9239998866509ed213d3f1321d26d6635c4ade987e5335fb5539cf"
+    },
+    {
+      "path": "assets/projects/special-assemblies/hero.webp",
+      "bytes": 944918,
+      "sha256": "ff6f2b328f37319aca763c5d45e44f87d2958a5458f410f2049aef4116157adb"
+    },
+    {
+      "path": "assets/projects/special-assemblies/prototype-study.webp",
+      "bytes": 826826,
+      "sha256": "be723b3d9c0b3c0fbce65a3f0c0c0b5a594b4af3c41d07eb01ba9af5b526e51d"
+    },
+    {
+      "path": "assets/projects/special-assemblies/module-aggregation.webp",
+      "bytes": 449804,
+      "sha256": "0d23984e36aed538890bdba95c4d0178718a728b671165a40b0e864b37d535c2"
+    },
+    {
+      "path": "assets/projects/special-assemblies/planning-workflow.webp",
+      "bytes": 100558,
+      "sha256": "efbd1a82556bb41fe531059ab73e2c483b36ae2c6b5691867d1e5a2b085b1154"
+    },
+    {
+      "path": "assets/projects/special-assemblies/robot-trajectories.webp",
+      "bytes": 299612,
+      "sha256": "07dddc5c9e56279e7c9e639a9779d44904305a5e748b12875f6e8ad7c792c97e"
+    },
+    {
+      "path": "assets/projects/special-assemblies/front-prototype.webp",
+      "bytes": 977090,
+      "sha256": "66d0aa1d9fa8509e0966c24c942d1d4eb5d8fa621a431d560ad31c97c295fd1f"
+    },
+    {
+      "path": "assets/projects/special-assemblies/assembly-detail.webp",
+      "bytes": 872982,
+      "sha256": "b84c385c3016218bc31a55e8e6adef40dc4f1c0bc922d3ecd56f21c651207fb9"
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/hero.webp",
+      "bytes": 1277128,
+      "sha256": "b25f15cdec11b036cbab780d8d80002c15610116f24a62ed4b1e8bc463efcdd6"
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/cnc-fabrication.webp",
+      "bytes": 253756,
+      "sha256": "34504a98da70ddff2b2af2ddd4ef48bc3b8bae038aa2d7202233f517151705f1"
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/mountain-setting.webp",
+      "bytes": 930516,
+      "sha256": "66ddc65f11127f75b59f772cc36c39c3de729ad8066dcb5ef353394ac70555f2"
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/module-assembly.webp",
+      "bytes": 579684,
+      "sha256": "c4593f2996c2afef769e859d7577c3e70503bde5ba6832e09c60fd104f093734"
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/timber-steps.webp",
+      "bytes": 876108,
+      "sha256": "087549f8dfbe26639e4f9e3ff091b670a6c55f2dcc39ee918a03492632105e54"
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/timber-interior.webp",
+      "bytes": 314530,
+      "sha256": "253f17805bf21c443ab63db679db12cbe0cba9660d0068bc07d2ea838be53257"
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/workflow.webp",
+      "bytes": 34108,
+      "sha256": "25a1b8b7dcedb07b9b4a8ad853917753389ef22877b974005a8a8f4b38318d0a"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/model.glb",
+      "bytes": 13987056,
+      "sha256": "0a6963f5a206d0dc11b5fd9b0d9fc5e2a09085058d86bca62f3fb435a237cee0"
+    },
+    {
+      "path": "assets/projects/entrance-installation-art/model.glb",
+      "bytes": 18828876,
+      "sha256": "cb7b5ea27a47c9451bd4220c835fb158aa3e65be19deff684f40eb076c43376c"
+    },
+    {
+      "path": "assets/projects/dot-based-3d-printing/model.glb",
+      "bytes": 122884,
+      "sha256": "60d49fe978cf0fb552c39f7188a9811dc39aa2e163b3a3388b192dbae502e891"
+    },
+    {
+      "path": "assets/projects/hc3dp-caustics/model.glb",
+      "bytes": 50438508,
+      "sha256": "0dd22b441c422f2a9c2406d79288284ee7fc56f1f3028ae453015b3add40bb4a"
+    },
+    {
+      "path": "assets/projects/special-assemblies/model.glb",
+      "bytes": 117672,
+      "sha256": "43de5ca2dd8095a125d7f29e58851b5a80dc9588625912918d75dbadae8e28df"
     }
   ],
   "limits": [
@@ -393,5 +628,7 @@
   ],
   "xrStudySHA256": "a5edc97bb895c9427ed2457e918b143a05f1a7a91d4cfda9327a3e1e848648b0",
   "contactSHA256": "c68b4bc45a3ecc13eeee55bae43f3cab75f2085a095a5084e1494f90c5695882",
-  "xrWorkspaceSHA256": "d912d9a204f66df5380d9d2f00cc954a6484ee9da18a8bdf362095405a4ed8ec"
+  "xrWorkspaceSHA256": "d912d9a204f66df5380d9d2f00cc954a6484ee9da18a8bdf362095405a4ed8ec",
+  "projectStudiesSHA256": "e02c3205063d500ee1ba4968097112fa09eee2c32a39819d7248a5aa35f08706",
+  "projectAssetsSHA256": "ba192fa51e8b460886fc6f9fb398c8b55aec6e3929823fcafc2dcb685a199e4c"
 }

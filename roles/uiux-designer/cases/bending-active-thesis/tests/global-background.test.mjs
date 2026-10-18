@@ -123,6 +123,38 @@ test('Home native scroll uses the single site scheduler, resets on policy and su
  assert.equal(env.frameStats.delivered,driver.inspect().frames,'Every delivered RAF belongs to the existing site driver');driver.dispose();assert.equal(runtime.inspect().releases,1);
 });
 
+test('documentary studies share one clock, pause decorative time and release their extra control ownership on native exit',async()=>{
+ const env=environment({home:true});
+ env.doc.querySelector=selector=>selector==='[data-project-study]'?env.homeRoot:null;
+ env.doc.querySelectorAll=()=>[];
+ env.homeRoot.hasAttribute=key=>env.homeRoot.attributes.has(key);
+ const runtime=createBackgroundRuntime({createRenderer:fieldFactory});
+ const driver=createSiteBackgroundDriver({window:env.win,document:env.doc,runtime,canvas:canvas(),backdrop:{style:{getPropertyValue(){return'';},setProperty(){}}}});
+ await Promise.resolve();env.siteReady();env.frame(100);env.frame(1100);
+ assert.equal(driver.inspect().homeScrolling.enabled,true);
+ assert.equal(driver.inspect().projectStudy.paused,false);
+ assert.equal(driver.inspect().projectStudy.liquidGlass.ticks,driver.inspect().frames);
+ const changePause=value=>{
+  if(value)env.homeRoot.setAttribute('data-study-paused','');else env.homeRoot.removeAttribute('data-study-paused');
+  for(const observer of env.observers)if(observer.target===env.homeRoot)observer.fn();
+ };
+ changePause(true);env.frame(1200);
+ const time=driver.inspect().playback.activeSeconds;
+ assert.equal(driver.inspect().projectStudy.paused,true);assert.equal(driver.inspect().homeScrolling.enabled,false);
+ env.win.scrollY=300;env.win.fire('scroll');env.win.fire('wheel',{deltaY:100,deltaMode:0});env.frame(6200);
+ assert.equal(driver.inspect().playback.activeSeconds,time,'Paused native reading cannot advance decorative elapsed time');
+ assert.equal(driver.inspect().homeScrolling.informationWindows.settled,true);
+ changePause(false);env.frame(6300);env.frame(7300);
+ assert.equal(driver.inspect().projectStudy.paused,false);assert.equal(driver.inspect().homeScrolling.enabled,true);
+ assert(driver.inspect().playback.activeSeconds>time);
+ assert.equal(env.frameStats.maxPending,1,'Glass, information and field share one outstanding RAF');
+ env.win.fire('pagehide',{persisted:false});
+ assert.equal(driver.inspect().disposed,true);assert.equal(driver.inspect().projectStudy.liquidGlass.count,0);
+ assert.equal(driver.inspect().events.nativeListeners,0);assert.equal(env.pending.size,0);
+ assert.equal(runtime.inspect().activeBindings,0);assert.equal(runtime.inspect().releases,1);
+ assert(env.observers.every(observer=>observer.disconnected));
+});
+
 test('ordinary pages use the real score, native input envelope, scoped suspension and live Reduced Motion',()=>{
  const env=environment(),runtime=createBackgroundRuntime({createRenderer:fieldFactory});
  const driver=createSiteBackgroundDriver({window:env.win,document:env.doc,runtime,canvas:canvas(),backdrop:{style:{getPropertyValue(){return'';},setProperty(){}}}});

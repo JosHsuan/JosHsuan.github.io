@@ -57,7 +57,7 @@
 /* At least nine conceptual cells, then complete rows of 12, 15 and onward.
    Only approved projects are list items. Transparent outer edges retain the
    accepted card alignment without painting separators or placeholder cells. */
-.projectGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(var(--project-grid-rows,3),minmax(0,1fr));aspect-ratio:3 / var(--project-grid-rows,3);gap:0;margin:0;padding:0;list-style:none;border-top:1px solid transparent;border-left:1px solid transparent}
+.projectGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(var(--project-grid-rows,3),minmax(0,1fr));aspect-ratio:3 / var(--project-grid-rows,3);gap:0;margin:0;padding:0;list-style:none;border:0 solid transparent}
 .projectCard{position:relative;isolation:isolate;aspect-ratio:1;min-width:0;min-height:0;margin:.5rem;overflow:hidden;border:1px solid var(--material-reading-border);border-radius:22px;background:var(--material-reading-fill);box-shadow:var(--material-reading-shadow);-webkit-backdrop-filter:var(--material-reading-backdrop);backdrop-filter:var(--material-reading-backdrop)}
 .projectCard::after{content:'';position:absolute;z-index:5;inset:0;border-radius:inherit;box-shadow:inset 0 1px 0 rgb(255 255 255 / .2),inset 0 -1px 0 rgb(0 0 0 / .2);pointer-events:none}
 .projectImage{position:absolute;inset:1px;overflow:hidden;border-radius:inherit;background:#172125}

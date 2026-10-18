@@ -29,9 +29,13 @@ are retained. Twelve editorial/navigation characters are added using the
 original dot, lowercase o, hyphen, plus and upward-arrow outlines: degree,
 middle dot, multiplication sign, en/em dash, minus, ellipsis, and
 left/right/bidirectional/diagonal arrows.
+The credited name Jan Kyselý adds y with acute, composed from the unchanged
+original y and acute outlines. No existing character mapping or metric changes.
 No source character is retraced or replaced. The derivative is WOFF2 encoded
 and renamed to identify this project adaptation; it is not represented as an
 official Tsukurimashou release or certified machine-recognition font.
 Project additions are dedicated to the public domain under CC0 1.0 Universal:
 https://creativecommons.org/publicdomain/zero/1.0/
 The original font notices above continue to apply to the original work.
+Derivative 2.003 adds e with acute and e with grave for Disentis/Mustér and
+Aurèle Gheyselinck, composed only from the original e, acute and grave outlines.

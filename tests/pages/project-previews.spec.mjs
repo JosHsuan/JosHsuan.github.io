@@ -10,6 +10,7 @@ const xrStage=page=>page.locator('[data-xr-stage]');
 const xrVideo=page=>xrStage(page).locator('[data-xr-stage-video="adapt"]');
 const xrRelease=new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/',import.meta.url);
 const [xrStudy,xrWorkspace]=await Promise.all(['xr-study.json','xr-workspace.json'].map(async name=>JSON.parse(await readFile(new URL(name,xrRelease),'utf8'))));
+const studies=JSON.parse(await readFile(new URL('project-studies.json',xrRelease),'utf8')).projects;
 const entryFacts=page=>page.evaluate(()=>{
  const element=document.querySelector('[data-site-loader]'),style=element&&getComputedStyle(element);
  return{
@@ -58,9 +59,9 @@ function closedRequests(state){
 
 test('square project cards retain the live model and inset XR image and reveal titles on hover or keyboard focus',async({page,isMobile})=>{
  await openGrid(page);
- const cards=page.locator('[data-project-tile]');await expect(cards).toHaveCount(2);
+ const cards=page.locator('[data-project-tile]');await expect(cards).toHaveCount(studies.length+2);
  for(const card of await cards.all()){
-  const geometry=await card.evaluate(node=>{const rect=node.getBoundingClientRect(),image=node.querySelector('[data-project-card-image]'),media=(image?image.parentElement:node.querySelector('[data-project-model-preview]')).getBoundingClientRect(),css=getComputedStyle(node);return{xr:!!image,width:rect.width,height:rect.height,mediaWidth:media.width,mediaHeight:media.height,rim:[media.left-rect.left-parseFloat(css.borderLeftWidth),media.top-rect.top-parseFloat(css.borderTopWidth),rect.right-media.right-parseFloat(css.borderRightWidth),rect.bottom-media.bottom-parseFloat(css.borderBottomWidth)],radius:parseFloat(css.borderRadius)};});
+  const geometry=await card.evaluate(node=>{const rect=node.getBoundingClientRect(),image=node.querySelector('[data-project-card-image]'),media=(image?image.parentElement:node.querySelector('[data-project-model-preview]')).getBoundingClientRect(),css=getComputedStyle(node);return{xr:node.dataset.projectTile==='xr-bending-active',width:rect.width,height:rect.height,mediaWidth:media.width,mediaHeight:media.height,rim:[media.left-rect.left-parseFloat(css.borderLeftWidth),media.top-rect.top-parseFloat(css.borderTopWidth),rect.right-media.right-parseFloat(css.borderRightWidth),rect.bottom-media.bottom-parseFloat(css.borderBottomWidth)],radius:parseFloat(css.borderRadius)};});
   expect(Math.abs(geometry.width-geometry.height)).toBeLessThan(1);expect(geometry.radius).toBeGreaterThan(0);
   if(geometry.xr){for(const inset of geometry.rim){expect(inset).toBeGreaterThanOrEqual(7.9);expect(inset).toBeLessThanOrEqual(12.1);}}
   else{expect(geometry.mediaWidth/geometry.width).toBeGreaterThan(.97);expect(geometry.mediaHeight/geometry.height).toBeGreaterThan(.97);}
@@ -76,7 +77,7 @@ test('square project cards retain the live model and inset XR image and reveal t
  const xr=page.locator('[data-project-card="xr-bending-active"]');
  await expect(xr).toHaveAccessibleName('Motion capture × bending-active');
  await expect(xr).toHaveAttribute('href','/projects/xr-bending-active/');
- await expect(page.locator('[data-project-card-image]')).toHaveAttribute('src','/assets/xr/portfolio-main-visual.webp');
+ await expect(page.locator('[data-project-tile="xr-bending-active"] [data-project-card-image]')).toHaveAttribute('src','/assets/xr/portfolio-main-visual.webp');
  await expect(page.locator('[data-project-animation-preview],[data-animation-toggle]')).toHaveCount(0);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
 });

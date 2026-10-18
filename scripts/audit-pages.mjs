@@ -3,6 +3,7 @@ import {createHash} from 'node:crypto';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import assert from 'node:assert/strict';
+import {assertProjectStudies,assertProjectImage,assertProjectModel,assertProjectAssetRecord,PROJECT_SLUGS} from './project-studies.mjs';
 
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 const OCR_FONT='/assets/fonts/portfolio-ocr-b.woff2',OCR_NOTICE='licenses/ocr-b-NOTICE.txt';
@@ -110,11 +111,13 @@ export async function auditPages() {
   const source=path.join(root,'roles/uiux-designer/cases/bending-active-thesis/release');
   const manifest = JSON.parse(await readFile(path.join(source,'manifest.json'), 'utf8'));
   const records={};
-  for(const [name,revision]of [['story','storySHA256'],['introduction','introductionSHA256'],['xr-study','xrStudySHA256'],['xr-workspace','xrWorkspaceSHA256'],['contact','contactSHA256']]){
+  for(const [name,revision]of [['story','storySHA256'],['introduction','introductionSHA256'],['xr-study','xrStudySHA256'],['xr-workspace','xrWorkspaceSHA256'],['contact','contactSHA256'],['project-studies','projectStudiesSHA256'],['project-assets','projectAssetsSHA256']]){
     const bytes=await readFile(path.join(source,`${name}.json`));
     assert.equal(digest(bytes),manifest[revision],`Approved ${name} source record`);records[name]=JSON.parse(bytes);
   }
   const expected = new Map(manifest.assets.map(asset => [asset.path, asset]));
+  const projectImages=assertProjectStudies(records['project-studies'],manifest);
+  assertProjectAssetRecord(records['project-assets'],projectImages,manifest,records['project-studies']);
   const files = [];
   async function walk(folder) {
     for (const entry of await readdir(folder, {withFileTypes: true})) {
@@ -132,6 +135,10 @@ export async function auditPages() {
       const asset = expected.get(relative); assert(asset, 'Unapproved asset: ' + relative);
       assert.equal(bytes.length, asset.bytes);
       assert.equal(digest(bytes), asset.sha256, relative);
+      const projectImage=projectImages.find(image=>image.src==='/'+relative);
+      if(projectImage)assertProjectImage(bytes,projectImage);
+      const projectModel=records['project-studies'].projects.find(project=>project.model?.src==='/'+relative)?.model;
+      if(projectModel)assertProjectModel(bytes,projectModel);
       expected.delete(relative);
     }
     if (/\.(html|js|json|txt|css)$/.test(relative)) {
@@ -198,9 +205,9 @@ export async function auditPages() {
   assert(!html.includes('data-cinematic-stage'), 'Home does not mount the case stage');
   const introduction=html.match(/<section id="about"[\s\S]*?<\/section>/)?.[0];
   assert(introduction&&!/model-poster|<canvas|data-project-model-preview/.test(introduction), 'Home introduction stays model-free');
-  assert.equal((html.match(/data-project-card=/g)||[]).length,2,'Only selected evidence-backed projects');
+  assert.equal((html.match(/data-project-card=/g)||[]).length,2+PROJECT_SLUGS.length,'The two existing and six newly selected evidence-backed projects');
   assert.equal((html.match(/data-site-preview-required(?:=|[ >])/g)||[]).length,1,'Home declares its live card before component effects');
-  assert(html.includes('data-project-grid-cells="9"'),'Current two projects occupy a minimum nine-cell index');
+  assert(html.includes('data-project-grid-cells="9"'),'Five projects occupy the existing minimum nine-cell index');
   assert(html.includes('data-home-scroll-window="introduction"'),'Home declares its material scrolling owner');
   for(const route of ['', 'about/']){
     const page=await readFile(path.join(out,route,'index.html'),'utf8');
@@ -208,7 +215,7 @@ export async function auditPages() {
     assert(page.includes('data-introduction-statement')&&page.includes('data-introduction-description'),`${route||'/'}: visible introduction owners`);
   }
   assert(html.includes(suppliedIntroduction.metadataTitle)&&html.includes(suppliedIntroduction.metadataDescription),'Home metadata follows the supplied design-technology direction');
-  for(const route of ['about','projects','contact','projects/bending-active','projects/xr-bending-active']){
+  for(const route of ['about','projects','contact','projects/bending-active','projects/xr-bending-active',...PROJECT_SLUGS.map(slug=>`projects/${slug}`)]){
     const page=await readFile(path.join(out,route,'index.html'),'utf8');
     auditBackground(page,route);
     assert.equal((page.match(/<h1[ >]/g)||[]).length,1,`${route}: one heading`);
@@ -219,6 +226,20 @@ export async function auditPages() {
       assert(!page.includes('data-cinematic-stage'),`${route}: no case runtime stage`);
       if(route!=='projects')assert(!page.includes('/assets/cinematic/model-poster'),`${route}: no unrelated Bending model`);
     }
+  }
+  const sitemap=await readFile(path.join(out,'sitemap.xml'),'utf8');
+  for(const project of records['project-studies'].projects){
+    const route=`/projects/${project.slug}/`,page=await readFile(path.join(out,route.slice(1),'index.html'),'utf8');
+    assert(html.includes(`data-project-card="${project.id}"`)&&html.includes(`href="${route}"`),'Selected project has a real Home card');
+    assert(sitemap.includes(manifest.origin+route),'Selected project is discoverable in the sitemap');
+    assert.equal(tagAttribute(tagWith(page,'main','data-project-study'),'data-project-study'),project.id);
+    assert.equal(markerCount(page,'data-project-chapter'),6,'Opening, four actual chapters and credits');
+    assert.equal(markerCount(page,'data-project-chapter-link'),6,'Every chapter has a native direct link');
+    for(const group of ['identity','chapter-navigation','reading-controls'])assert.equal((page.match(new RegExp(`data-liquid-glass="${group}"`,'g'))??[]).length,1,'One shared study control group: '+group);
+    assert(page.includes(project.title)&&page.includes(project.role),'Actual title and individual/team role');
+    for(const credit of project.credits)assert(page.includes(credit.names.replaceAll('&','&amp;')),'Preserved source credit: '+credit.names);
+    for(const image of [project.hero,...project.sections.flatMap(section=>section.media)])assert(page.includes(image.src),'Source image stays readable in the native document');
+    assert(!page.includes('data-xr-stage')&&!page.includes('data-cinematic-stage'),'Documentary evidence does not acquire an unrelated 3D scene');
   }
   const xr=await readFile(path.join(out,'projects/xr-bending-active/index.html'),'utf8');
   for(const marker of ['data-xr-study','xr-context','xr-method','xr-prototype','xr-making','xr-credits','Wataru Nomura'])assert(xr.includes(marker),`XR: ${marker}`);
@@ -261,6 +282,8 @@ export async function auditPages() {
   assert.equal(release.xrModelRevision,study.model.sha256,'Public XR model revision');
   assert.equal(release.xrStudyRevision,manifest.xrStudySHA256,'Public XR narrative revision');
   assert.equal(release.xrWorkspaceRevision,manifest.xrWorkspaceSHA256,'Public complete-workspace capture revision');
+  assert.equal(release.projectStudiesRevision,manifest.projectStudiesSHA256,'Public selected-project narrative revision');
+  assert.equal(release.projectAssetsRevision,manifest.projectAssetsSHA256,'Public image provenance revision');
   assert.equal(release.typography,'Portfolio OCR B');assert.equal(release.typographyRevision,typography.sha256);assert.equal(release.typographyNoticeRevision,notice.sha256);
   assert.equal(release.displayTypography,'Space Grotesk');assert.equal(release.displayTypographyRevision,displayTypography.sha256);assert.equal(release.displayTypographyNoticeRevision,displayNotice.sha256);
   assert.equal(release.diagramRevision,manifest.assets.find(asset=>asset.path==='assets/thesis/source-diagrams.glb').sha256,'Protected source diagram revision');

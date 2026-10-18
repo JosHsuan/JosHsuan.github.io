@@ -1,6 +1,8 @@
 import {test,expect} from '@playwright/test';
+import {readFile} from 'node:fs/promises';
 import {WAIT,scenarioTimeout,loadScene} from './case-helpers.mjs';
 
+const studies=JSON.parse(await readFile(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/project-studies.json',import.meta.url),'utf8')).projects;
 const facts=page=>page.evaluate(()=>window.__globalBackground?.inspect());
 async function entered(page){
  await page.waitForFunction(()=>['entered','failed'].includes(window.__site?.inspect().phase),null,{timeout:WAIT});
@@ -9,13 +11,13 @@ async function entered(page){
  await page.waitForFunction(()=>window.__globalBackground?.inspect().activeBindings===1,null,{timeout:WAIT});
 }
 
-test('all six direct routes share exactly one background surface and one active owner',async({page})=>{
+test('all direct portfolio routes share exactly one background surface and one active owner',async({page})=>{
  test.setTimeout(scenarioTimeout(180000));
  // Static policy avoids optional project models; it still exercises each real
  // exported layout, current-document entry and the delegated Bending Director.
  await page.emulateMedia({reducedMotion:'reduce'});
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
- for(const route of ['/','/about/','/projects/','/contact/','/projects/xr-bending-active/','/projects/bending-active/']){
+ for(const route of ['/','/about/','/projects/','/contact/','/projects/xr-bending-active/','/projects/bending-active/',...studies.map(project=>`/projects/${project.slug}/`)]){
   const response=await page.goto(route);expect(response.status()).toBe(200);await entered(page);
   await expect(page.locator('[data-global-background]')).toHaveCount(1);
   await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);

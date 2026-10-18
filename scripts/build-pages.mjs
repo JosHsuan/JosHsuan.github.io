@@ -6,6 +6,7 @@ import {fileURLToPath} from 'node:url';
 import assert from 'node:assert/strict';
 import {auditPages,assertXRWorkspaceRecord,assertXRWorkspaceImage} from './audit-pages.mjs';
 import {preparePagesWorkspace} from './prepare-pages-workspace.mjs';
+import {assertProjectStudies,assertProjectImage,assertProjectModel,assertProjectAssetRecord,PROJECT_SLUGS} from './project-studies.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const source = path.join(root, 'roles/uiux-designer/cases/bending-active-thesis');
@@ -20,6 +21,13 @@ assert.equal(digest(await readFile(path.join(release, 'introduction.json'))), ma
 const xrStudyBytes = await readFile(path.join(release, 'xr-study.json'));
 assert.equal(digest(xrStudyBytes), manifest.xrStudySHA256);
 const xrStudy = JSON.parse(xrStudyBytes);
+const projectStudyBytes=await readFile(path.join(release,'project-studies.json'));
+assert.equal(digest(projectStudyBytes),manifest.projectStudiesSHA256,'Approved selected project narratives');
+const projectAssetBytes=await readFile(path.join(release,'project-assets.json'));
+assert.equal(digest(projectAssetBytes),manifest.projectAssetsSHA256,'Selected public image provenance');
+const projectStudies=JSON.parse(projectStudyBytes);
+const projectImages=assertProjectStudies(projectStudies,manifest);
+assertProjectAssetRecord(JSON.parse(projectAssetBytes),projectImages,manifest,projectStudies);
 const xrWorkspaceBytes=await readFile(path.join(release,'xr-workspace.json'));
 assert.equal(digest(xrWorkspaceBytes),manifest.xrWorkspaceSHA256,'Approved full-workspace source record');
 const xrWorkspace=JSON.parse(xrWorkspaceBytes);
@@ -49,6 +57,10 @@ for (const asset of manifest.assets) {
   assert.equal(bytes.length, asset.bytes); assert.equal(digest(bytes), asset.sha256, asset.path);
   const workspaceImage=[xrWorkspace.image,xrWorkspace.image.mobile].find(image=>image.src==='/'+asset.path);
   if(workspaceImage)assertXRWorkspaceImage(bytes,workspaceImage);
+  const projectImage=projectImages.find(image=>image.src==='/'+asset.path);
+  if(projectImage)assertProjectImage(bytes,projectImage);
+  const projectModel=projectStudies.projects.find(project=>project.model?.src==='/'+asset.path)?.model;
+  if(projectModel)assertProjectModel(bytes,projectModel);
 }
 assert.equal(path.dirname(path.resolve(work)), path.resolve(root));
 assert.equal(path.basename(work), '.pages-workspace');
@@ -83,6 +95,11 @@ const sources = [
   'app/projects/bending-active/page.jsx', 'app/projects/xr-bending-active/page.jsx',
   'components/BendingProject.jsx', 'components/PortfolioHome.jsx', 'components/PortfolioNavigation.jsx',
   'components/ProjectStudyChrome.jsx', 'release/xr-workspace.json',
+  'components/ProjectCaseStudy.jsx', 'components/ProjectCaseStudy.module.css',
+  'components/ProjectCaseStudyControls.jsx', 'release/project-studies.json',
+  'components/ProjectCaseStudyStage.jsx', 'components/project-study-scene.mjs',
+  'runtime/site/ProjectStudyStageRegistry.mjs', 'runtime/site/ProjectStudyScenePresenter.mjs',
+  ...PROJECT_SLUGS.map(slug=>`app/projects/${slug}/page.jsx`),
   'components/ProjectModelPreview.jsx', 'components/project-model-scene.mjs', 'components/project-model-recipe.mjs', 'components/project-grid-layout.mjs',
   'components/GlobalBackground.jsx', 'runtime/background/BackgroundRuntime.mjs', 'runtime/background/SiteBackgroundDriver.mjs',
   'components/XRModelStudy.jsx', 'components/XRPhoneStudy.jsx', 'components/research-media.module.css',
@@ -127,10 +144,10 @@ for (const asset of manifest.assets) {
 await writeFile(path.join(work, 'next.config.mjs'), `import config from '../roles/uiux-designer/cases/bending-active-thesis/next.config.mjs';\nimport {fileURLToPath} from 'node:url';\nexport default {...config, outputFileTracingRoot:fileURLToPath(new URL('../',import.meta.url))};\n`);
 await writeFile(path.join(work, 'public/.nojekyll'), '');
 await writeFile(path.join(work, 'public/robots.txt'), `User-agent: *\nAllow: /\nSitemap: ${manifest.origin}/sitemap.xml\n`);
-const routes=['/','/about/','/projects/','/contact/','/projects/bending-active/','/projects/xr-bending-active/'];
+const routes=['/','/about/','/projects/','/contact/','/projects/bending-active/','/projects/xr-bending-active/',...PROJECT_SLUGS.map(slug=>`/projects/${slug}/`)];
 await writeFile(path.join(work, 'public/sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${routes.map(route=>`<url><loc>${manifest.origin}${route}</loc></url>`).join('')}</urlset>\n`);
 const commit = process.env.GITHUB_SHA || execFileSync('git', ['rev-parse', 'HEAD'], {cwd: root, encoding: 'utf8'}).trim();
-await writeFile(path.join(work, 'public/release.json'), JSON.stringify({release: manifest.id, commit, storyRevision:manifest.storySHA256, introductionRevision:manifest.introductionSHA256, modelRevision: 'ff112b90be104cca7e3705b5eee481ba3973d25e2f3d4a7350faa2f732cae47e', diagramRevision: manifest.assets.find(asset => asset.path === 'assets/thesis/source-diagrams.glb').sha256, xrModelRevision: xrStudy.model.sha256, xrStudyRevision: manifest.xrStudySHA256, xrWorkspaceRevision:manifest.xrWorkspaceSHA256, typography: 'Portfolio OCR B',typographyRevision:typographyAsset.sha256,typographyNoticeRevision:typographyNotice.sha256,displayTypography:'Space Grotesk',displayTypographyRevision:displayTypographyAsset.sha256,displayTypographyNoticeRevision:displayTypographyNotice.sha256}) + '\n');
+await writeFile(path.join(work, 'public/release.json'), JSON.stringify({release: manifest.id, commit, storyRevision:manifest.storySHA256, introductionRevision:manifest.introductionSHA256, modelRevision: 'ff112b90be104cca7e3705b5eee481ba3973d25e2f3d4a7350faa2f732cae47e', diagramRevision: manifest.assets.find(asset => asset.path === 'assets/thesis/source-diagrams.glb').sha256, xrModelRevision: xrStudy.model.sha256, xrStudyRevision: manifest.xrStudySHA256, xrWorkspaceRevision:manifest.xrWorkspaceSHA256,projectStudiesRevision:manifest.projectStudiesSHA256,projectAssetsRevision:manifest.projectAssetsSHA256, typography: 'Portfolio OCR B',typographyRevision:typographyAsset.sha256,typographyNoticeRevision:typographyNotice.sha256,displayTypography:'Space Grotesk',displayTypographyRevision:displayTypographyAsset.sha256,displayTypographyNoticeRevision:displayTypographyNotice.sha256}) + '\n');
 const result = spawnSync(process.execPath, [path.join(root, 'node_modules/next/dist/bin/next'), 'build', work, '--webpack'], {cwd: root, stdio: 'inherit', env: {...process.env, THESIS_PUBLIC_RELEASE: '1', NEXT_PUBLIC_BASE_PATH: '', NEXT_TELEMETRY_DISABLED: '1'}});
 if (result.error) throw result.error;
 assert.equal(result.status, 0, 'Public static build failed');

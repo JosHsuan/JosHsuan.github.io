@@ -1,7 +1,9 @@
 import {test,expect} from '@playwright/test';
+import {readFile} from 'node:fs/promises';
 import {WAIT} from './case-helpers.mjs';
 
-const routes=['/','/about/','/projects/','/contact/','/projects/bending-active/','/projects/xr-bending-active/','/404.html'];
+const studies=JSON.parse(await readFile(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/project-studies.json',import.meta.url),'utf8')).projects;
+const routes=['/','/about/','/projects/','/contact/','/projects/bending-active/','/projects/xr-bending-active/',...studies.map(project=>`/projects/${project.slug}/`),'/404.html'];
 const families={body:'Portfolio OCR B',display:'Space Grotesk'};
 
 // A separate native document per route keeps the existing 60-second scenario
@@ -11,6 +13,9 @@ for(const route of routes)test(`the published ${route} document renders Space Gr
  const fonts=[],errors=[];page.on('request',request=>{if(request.resourceType()==='font')fonts.push(request.url());});page.on('pageerror',error=>errors.push(error.message));
  const response=await page.goto(route);expect(response.status()).toBe(200);
  await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});
+ // New documentary openings show the complete source image before their glass
+ // copy on mobile. Inspect actual reading glyphs after native movement to h1.
+ if(await page.locator('[data-project-study]').count())await page.locator('h1').scrollIntoViewIfNeeded();
  for(const [family,href]of [[families.body,'/assets/fonts/portfolio-ocr-b.woff2'],[families.display,'/assets/fonts/space-grotesk-variable.woff2']])await expect(page.locator(`link[rel="preload"][as="font"][data-site-font-family="${family}"]`)).toHaveAttribute('href',href);
  const reading=await page.evaluate(async expected=>{
   await document.fonts.ready;

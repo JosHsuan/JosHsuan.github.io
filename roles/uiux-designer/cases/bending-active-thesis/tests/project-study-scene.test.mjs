@@ -1,0 +1,152 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {DOMPresenter} from '../runtime/presentation/DOMPresenter.ts';
+import {registerProjectStudyStage,observeProjectStudyStage} from '../runtime/site/ProjectStudyStageRegistry.mjs';
+import {acquirePagePreviewReadiness} from '../runtime/site/PagePreviewReadiness.mjs';
+import {createProjectStudyScenePresenter,createProjectStudyStageMotion,advanceProjectStudyStageMotion,cancelProjectStudyStageMotion} from '../runtime/site/ProjectStudyScenePresenter.mjs';
+import {createSiteBackgroundDriver} from '../runtime/background/SiteBackgroundDriver.mjs';
+import {createBackgroundRuntime} from '../runtime/background/BackgroundRuntime.mjs';
+import {acquireProjectStudyScene} from '../components/project-study-scene.mjs';
+import {createHash} from 'node:crypto';
+
+const keys=['overview','context','system','making','results','credits'],models=['context','system'];
+const flush=async()=>{for(let i=0;i<16;i++)await Promise.resolve();};
+const deferred=()=>{let resolve;const promise=new Promise(done=>{resolve=done;});return{promise,resolve};};
+const closed=history=>{for(const id of new Set(history.map(item=>item.id))){const facts=history.filter(item=>item.id===id);assert.equal(facts.filter(item=>(item.status??item.phase)==='requested').length,1);assert.equal(facts.filter(item=>['ready','failed','cancelled','completed'].includes(item.status??item.phase)).length,1);}};
+class Target{
+ constructor(){this.listeners=new Map();this.attributes=new Map();this.dataset={};this.styles=new Map();this.style={getPropertyValue:key=>this.styles.get(key)??'',setProperty:(key,value)=>this.styles.set(key,String(value))};this.captured=new Set();}
+ addEventListener(type,fn){const rows=this.listeners.get(type)??[];rows.push(fn);this.listeners.set(type,rows);}
+ removeEventListener(type,fn){this.listeners.set(type,(this.listeners.get(type)??[]).filter(value=>value!==fn));}
+ fire(type,event={}){for(const fn of [...this.listeners.get(type)??[]])fn(event);}
+ getAttribute(name){return this.attributes.get(name)??null;}setAttribute(name,value){this.attributes.set(name,String(value));}removeAttribute(name){this.attributes.delete(name);}
+ querySelector(){return null;}querySelectorAll(){return[];}closest(selector){return this.marker&&selector.includes(this.marker)?this:null;}
+ setPointerCapture(id){this.captured.add(id);}hasPointerCapture(id){return this.captured.has(id);}releasePointerCapture(id){this.captured.delete(id);}
+}
+function fixture({pending=false,firstDraw=true,reduced=false}={}){
+ const doc=new Target(),win=new Target(),root=new Target(),host=new Target(),surface=new Target(),control=new Target(),timers=new Map(),policy={hidden:false,reduced,saveData:false,paused:false,siteReady:false},waiting=deferred();
+ let timerId=0,schedules=0,disposed=0,starts=0,fixtureSignal,failResource;const presentations=[],sizes=[];
+ doc.documentElement=new Target();doc.querySelectorAll=()=>[host];root.dataset.projectActiveChapter='overview';root.querySelectorAll=()=>keys.map(key=>({dataset:{projectChapter:key}}));host.querySelector=selector=>selector==='[data-project-model-surface]'?surface:null;control.marker='[data-project-model-control]';
+ Object.assign(win,{innerWidth:1440,innerHeight:1000,setTimeout:(fn,delay)=>{timers.set(++timerId,{fn,delay});return timerId;},clearTimeout:id=>timers.delete(id)});
+ const model={chapters:models,alt:'Verified source geometry'},handle={resize(w,h){sizes.push([w,h]);},present(value){presentations.push({...value});},inspect:()=>({firstDraw:firstDraw?{completed:true}:null,successfulPaint:firstDraw,view:presentations.at(-1)}),hitTest:()=>true,dispose(){disposed++;}};
+ const scene=createProjectStudyScenePresenter({root,host,model,window:win,document:doc,publisher:new DOMPresenter().forOwner('test-scene'),schedule:()=>schedules++,policy:()=>policy,acquire:options=>{starts++;fixtureSignal=options.signal;failResource=options.onFailure;return pending?waiting.promise:Promise.resolve(handle);}});
+ const step=(dt=.016,resumed=false)=>scene.publish({dt,resumed});
+ const settle=()=>{let remaining=240;while(step()&&remaining-->0);assert(remaining>0,'Finite work settles on supplied active seconds');};
+ const select=key=>{root.dataset.projectActiveChapter=key;step();settle();};
+ const pointer=(type,overrides={})=>{const event={type,target:control,pointerId:1,pointerType:'mouse',isPrimary:true,button:0,clientX:600,clientY:400,prevented:0,preventDefault(){this.prevented++;},...overrides};doc.fire(type,event);return event;};
+ return{doc,win,root,host,surface,control,policy,timers,waiting,handle,scene,step,settle,select,pointer,presentations,sizes,fail:reason=>failResource(reason),get starts(){return starts;},get disposed(){return disposed;},get schedules(){return schedules;},get signal(){return fixtureSignal;}};
+}
+
+test('document registration handles both effect orders and releases only its own stage',()=>{
+ const doc={},seen=[],release=registerProjectStudyStage(doc,{model:'real-source'}),stop=observeProjectStudyStage(doc,value=>seen.push(value?.model??null));
+ assert.deepEqual(seen,['real-source']);assert.throws(()=>registerProjectStudyStage(doc,{}),/already owns/);release();release();assert.deepEqual(seen,['real-source',null]);
+ const next=registerProjectStudyStage(doc,{model:'next-source'});release();assert.deepEqual(seen,['real-source',null,'next-source']);stop();next();assert.equal(seen.length,3);
+});
+
+test('chapter passages wait for source paint, preserve reversal continuity and close every request',()=>{
+ const state=createProjectStudyStageMotion(),advance=(dt,chapter,readyChapter=null,snap=false)=>advanceProjectStudyStageMotion(state,dt,{chapter,chapters:keys,modelChapters:models,readyChapter,snap});
+ advance(.5,'context');assert.equal(state.mode,'waiting');assert.equal(state.pose.opacity,0);advance(.4,'context','context');assert(state.pose.opacity>0&&state.pose.opacity<1);
+ const opacity=state.pose.opacity;advance(0,'system','context');assert.equal(state.pose.opacity,opacity,'Retargeting starts from the actual displayed pose');
+ advance(3,'system','system');assert.equal(state.mode,'hold');assert.equal(state.chapter,'system');assert.equal(state.pose.opacity,1);closed(state.history);
+ advance(.1,'credits','system');advance(.1,'context','context');advance(4,'context','context');closed(state.history);assert.equal(state.mode,'hold');
+ advance(.1,'results');cancelProjectStudyStageMotion(state,'page-exit');closed(state.history);assert.equal(state.transition,null);
+});
+
+test('preparation requires an actual first draw before entry and retains the same resource through reading and suspension',async()=>{
+ const f=fixture(),entry=acquirePagePreviewReadiness(f.doc);assert.equal(entry.inspect().ready,false);await flush();
+ assert.equal(f.starts,1);assert.equal(f.scene.inspect().phase,'ready');assert.equal((await entry.promise).previews[0].mode,'model');assert.equal(f.timers.size,0);closed(f.scene.inspect().history);
+ f.policy.siteReady=true;f.select('context');assert.equal(f.scene.inspect().motion.mode,'hold');assert.equal(f.host.getAttribute('data-project-model-rendering'),'webgl-model');
+ f.pointer('pointerdown',{pointerType:'touch'});const vertical=f.pointer('pointermove',{pointerType:'touch',clientX:602,clientY:470});assert.equal(vertical.prevented,0);assert.equal(f.scene.inspect().gesture,null);
+ f.pointer('pointerdown');f.pointer('pointermove',{clientX:680});f.settle();assert(f.scene.inspect().camera.value.azimuth<0);assert.equal(f.control.captured.size,1);
+ f.pointer('pointerup');assert(f.scene.inspect().camera.value.azimuth<0,'Release closes capture while retaining the composed camera for finite recovery');f.settle();assert.equal(f.scene.inspect().camera.value.azimuth,0);assert.equal(f.control.captured.size,0);
+ f.pointer('pointerdown');f.pointer('pointermove',{clientX:680});f.settle();
+ f.policy.paused=true;f.step();assert.equal(f.scene.inspect().gesture,null);assert.equal(f.control.captured.size,0);assert.deepEqual(f.scene.inspect().camera.value,{azimuth:0,elevation:0});
+ f.policy.paused=false;f.select('results');assert.equal(f.host.getAttribute('data-project-model-active'),null);assert.equal(f.disposed,0);f.select('system');assert.equal(f.starts,1);
+ f.policy.hidden=true;f.scene.suspend('page');assert.equal(f.disposed,0);f.policy.hidden=false;f.scene.resume();f.step(100,true);assert.equal(f.scene.inspect().motion.mode,'hold');assert.equal(f.starts,1);
+ f.scene.measure(390,844);assert.deepEqual(f.sizes.at(-1),[390,844]);f.scene.dispose();f.scene.dispose();assert.equal(f.disposed,1);assert.equal(f.timers.size,0);closed(f.scene.inspect().motion.history);
+ assert([...f.doc.listeners.values(),...f.win.listeners.values()].every(rows=>rows.length===0));
+ assert.equal(f.scene.inspect().events.nativeListeners,0);
+});
+
+test('missing first paint closes preparation as an explicit static fallback',async()=>{
+ const f=fixture({firstDraw:false}),entry=acquirePagePreviewReadiness(f.doc);await flush();assert.equal(f.scene.inspect().phase,'failed');assert.equal((await entry.promise).previews[0].mode,'static');assert.equal(f.disposed,1);assert.equal(f.timers.size,0);closed(f.scene.inspect().history);f.select('context');assert.equal(f.host.getAttribute('data-project-model-rendering'),'poster');f.scene.dispose();
+});
+
+test('context loss after a genuine ready terminal releases the source and preserves a separate resource-failure fact',async()=>{
+ const f=fixture(),entry=acquirePagePreviewReadiness(f.doc);await flush();assert.equal((await entry.promise).previews[0].mode,'model');f.policy.siteReady=true;f.select('context');f.pointer('pointerdown');f.pointer('pointermove',{clientX:670});
+ f.fail('context-lost');f.step();assert.equal(f.disposed,1);assert.equal(f.control.captured.size,0);assert.equal(f.scene.inspect().phase,'failed');assert.equal(f.scene.inspect().arrivalStatic,true);assert.equal(f.host.getAttribute('data-project-model-rendering'),'poster');
+ closed(f.scene.inspect().history);assert.deepEqual(f.scene.inspect().resourceFailures.map(value=>value.reason),['context-lost']);assert.equal(entry.inspect().previews[0].mode,'model','Completed preparation is an immutable historical fact, not rewritten after a later resource failure');f.scene.dispose();assert.equal(f.disposed,1);
+});
+
+test('initial reduced policy and startup deadline latch static, abort work and reject late upgrades',async()=>{
+ const reduced=fixture({reduced:true}),reducedEntry=acquirePagePreviewReadiness(reduced.doc);await flush();assert.equal(reduced.starts,0);assert.equal((await reducedEntry.promise).previews[0].mode,'static');reduced.policy.reduced=false;reduced.step();await flush();assert.equal(reduced.starts,0);reduced.scene.dispose();
+ const f=fixture({pending:true}),entry=acquirePagePreviewReadiness(f.doc);await flush();assert.equal(f.starts,1);entry.fallback('startup-timeout');assert.equal(f.signal.aborted,true);assert.equal(f.timers.size,0);assert.equal((await entry.promise).previews[0].mode,'static');f.waiting.resolve(f.handle);await flush();assert.equal(f.disposed,1);assert.equal(f.scene.inspect().arrivalStatic,true);assert.equal(f.scene.inspect().phase,'poster');closed(f.scene.inspect().history);f.scene.dispose();
+});
+
+test('a hidden pending arrival and true departure close partial work without late DOM publication',async()=>{
+ for(const action of ['hide','dispose']){
+  const f=fixture({pending:true});await flush();if(action==='hide'){f.policy.hidden=true;f.scene.suspend('visibility');}else f.scene.dispose();
+  assert.equal(f.signal.aborted,true);assert.equal(f.timers.size,0);const writes=[...f.host.attributes];f.waiting.resolve(f.handle);await flush();assert.equal(f.disposed,1);assert.deepEqual([...f.host.attributes],writes);closed(f.scene.inspect().history);f.scene.dispose();
+ }
+});
+
+test('the actual site driver composes source drawing, information and glass with one outstanding frame and retained BFCache resource',async()=>{
+ const doc=new Target(),win=new Target(),root=new Target(),host=new Target(),surface=new Target(),observers=[],raf=new Map(),timers=new Map(),queries=new Map();let id=0,now=100,maxPending=0,disposed=0,acquisitions=0;
+ root.dataset.projectActiveChapter='context';root.hasAttribute=key=>root.attributes.has(key);root.querySelectorAll=selector=>selector==='[data-project-chapter]'?keys.map(key=>({dataset:{projectChapter:key}})):[];
+ host.querySelector=selector=>selector==='[data-project-model-surface]'?surface:null;doc.querySelector=selector=>selector==='[data-project-study]'?root:null;doc.querySelectorAll=selector=>selector==='[data-site-preview-required]'?[host]:[];
+ doc.documentElement=new Target();doc.documentElement.setAttribute('data-site-entry-state','entered');doc.hidden=false;doc.defaultView=win;doc.fonts={ready:Promise.resolve()};
+ Object.assign(win,{innerWidth:1440,innerHeight:1000,scrollY:0,navigator:{userAgent:'test',connection:Object.assign(new Target(),{saveData:false})},CSS:{supports:()=>false},
+  matchMedia(query){if(!queries.has(query))queries.set(query,Object.assign(new Target(),{matches:false}));return queries.get(query);},
+  requestAnimationFrame(fn){raf.set(++id,fn);maxPending=Math.max(maxPending,raf.size);return id;},cancelAnimationFrame:key=>raf.delete(key),
+  setTimeout(fn){timers.set(++id,fn);return id;},clearTimeout:key=>timers.delete(key),
+  MutationObserver:class{constructor(fn){this.fn=fn;observers.push(this);}observe(target){this.target=target;}disconnect(){this.closed=true;}}
+ });
+ const source={view:{chapter:'context'},resize(){},present(value){this.view={...value};},inspect(){return{firstDraw:{completed:true},successfulPaint:true,view:this.view};},hitTest:()=>true,dispose(){disposed++;}};
+ const release=registerProjectStudyStage(doc,{root,host,model:{chapters:models},acquire:async()=>{acquisitions++;return source;}});
+ const field={render(){},inspect:()=>({ready:false,failed:false}),dispose(){}},runtime=createBackgroundRuntime({createRenderer:()=>field}),backdrop=new Target();
+ const driver=createSiteBackgroundDriver({window:win,document:doc,runtime,canvas:{},backdrop});
+ const frame=(seconds=.016)=>{now+=seconds*1000;const callbacks=[...raf.values()];raf.clear();for(const fn of callbacks)fn(now);};
+ await flush();for(let i=0;i<150&&raf.size;i++)frame();assert.equal(raf.size,0);assert.equal(acquisitions,1);assert.equal(driver.inspect().projectStudy.scene.motion.mode,'hold');
+ assert.equal(driver.inspect().projectStudy.liquidGlass.ticks,driver.inspect().frames);assert.equal(maxPending,1);assert.equal(timers.size,0);
+ root.setAttribute('data-study-paused','');for(const observer of observers)if(observer.target===root)observer.fn([{attributeName:'data-study-paused'}]);frame();const activeSeconds=driver.inspect().playback.activeSeconds;
+ win.fire('wheel',{deltaY:100,deltaMode:0});win.fire('scroll');frame(10);assert.equal(driver.inspect().playback.activeSeconds,activeSeconds);assert.equal(maxPending,1);
+ doc.hidden=true;doc.fire('visibilitychange');win.fire('pagehide',{persisted:true});assert.equal(raf.size,0);assert.equal(disposed,0);
+ doc.hidden=false;doc.fire('visibilitychange');assert.equal(raf.size,0);win.fire('pageshow',{persisted:true});frame(100);assert.equal(acquisitions,1);assert.equal(disposed,0);assert.equal(driver.inspect().playback.activeSeconds,activeSeconds);
+ win.fire('pagehide',{persisted:false});assert.equal(driver.inspect().disposed,true);assert.equal(disposed,1);assert.equal(runtime.inspect().activeBindings,0);assert.equal(raf.size,0);assert.equal(timers.size,0);assert(observers.every(observer=>observer.closed));release();assert.equal(disposed,1);
+});
+
+function sourceGLB(points=false){
+ const positions=new Float32Array([-1,0,0,1,0,0,0,1,0]),geometry=Buffer.from(positions.buffer);
+ const json={asset:{version:'2.0'},scene:0,scenes:[{nodes:[0]}],nodes:[{mesh:0}],meshes:[{primitives:[{attributes:{POSITION:0},material:0,mode:points?0:4}]}],materials:[{pbrMetallicRoughness:{baseColorFactor:[.7,.8,.9,1]}}],buffers:[{byteLength:geometry.length}],bufferViews:[{buffer:0,byteOffset:0,byteLength:geometry.length}],accessors:[{bufferView:0,componentType:5126,count:3,type:'VEC3',min:[-1,0,0],max:[1,1,0]}]};
+ let text=Buffer.from(JSON.stringify(json));text=Buffer.concat([text,Buffer.alloc((4-text.length%4)%4,32)]);
+ const header=Buffer.alloc(12),jHeader=Buffer.alloc(8),bHeader=Buffer.alloc(8);header.writeUInt32LE(0x46546c67);header.writeUInt32LE(2,4);header.writeUInt32LE(12+8+text.length+8+geometry.length,8);jHeader.writeUInt32LE(text.length);jHeader.writeUInt32LE(0x4e4f534a,4);bHeader.writeUInt32LE(geometry.length);bHeader.writeUInt32LE(0x004e4942,4);
+ return{bytes:Buffer.concat([header,jHeader,text,bHeader,geometry]),positions:[...positions]};
+}
+function rendererFixture({omitSource=false}={}){
+ const canvas=new Target();canvas.dataset={};canvas.width=1;canvas.height=1;canvas.remove=()=>{canvas.parentNode=null;};
+ const report={renders:0,disposals:0,losses:0,positions:[],primitive:null,pointSize:null,attenuation:null};let width=0,height=0,dpr=1;
+ const renderer={domElement:canvas,debug:{},info:{render:{calls:0}},capabilities:{maxTextureSize:4096},xr:{isPresenting:false},
+  setClearColor(){},getContext:()=>({isContextLost:()=>false}),setSize(){},setPixelRatio(){},setViewport(){},getPixelRatio:()=>dpr,getSize:value=>value.set(width,height),
+  setDrawingBufferSize(w,h,ratio){width=w;height=h;dpr=ratio;canvas.width=Math.floor(w*ratio);canvas.height=Math.floor(h*ratio);},
+  render(scene,camera){report.renders++;this.info.render.calls=0;scene.traverse(node=>{if(!node.isMesh&&!node.isPoints)return;report.positions=[...node.geometry.getAttribute('position').array];report.primitive=node.isPoints?'points':'triangles';report.pointSize=node.material.size;report.attenuation=node.material.sizeAttenuation;if(!omitSource)node.onBeforeRender(this,scene,camera,node.geometry,node.material,null);this.info.render.calls++;});},
+  dispose(){report.disposals++;},forceContextLoss(){report.losses++;},
+ };
+ const surface={appendChild(node){node.parentNode=this;}},host={ownerDocument:{defaultView:{location:{origin:'https://portfolio.test'},devicePixelRatio:2}},querySelector:()=>surface};
+ return{renderer,report,canvas,host};
+}
+test('real GLTF parsing retains triangle and point POSITION buffers and validates actual source participation before readiness',async t=>{
+ const originalFetch=globalThis.fetch;t.after(()=>{globalThis.fetch=originalFetch;});
+ for(const points of [false,true]){
+  const {bytes,positions}=sourceGLB(points),f=rendererFixture(),controller=new AbortController();
+  globalThis.fetch=async()=>({ok:true,arrayBuffer:async()=>bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength)});
+  const model={src:'/assets/projects/test/source.glb',sha256:createHash('sha256').update(bytes).digest('hex'),bytes:bytes.length,sourceUnits:'millimeters',webUnits:'meters',upAxis:'Y',primitive:points?'points':'triangles',vertices:3,triangles:points?0:1,meshes:1,bounds:{min:[-1,0,0],max:[1,1,0]},chapters:models};
+  const scene=await acquireProjectStudyScene({host:f.host,model,signal:controller.signal,createRenderer:()=>f.renderer});
+  assert.equal(scene.inspect().firstDraw,null);scene.resize(4096,2160);assert.equal(scene.inspect().firstDraw.completed,true);assert.equal(scene.inspect().drawnMeshes,1);assert.equal(scene.inspect().sourcePoints,points?3:0);assert.deepEqual(f.report.positions,positions,'No geometry is generated, rescaled or rewritten');
+  assert.equal(f.report.primitive,model.primitive);if(points){assert.equal(f.report.pointSize,2);assert.equal(f.report.attenuation,false);}
+  assert(f.canvas.width*f.canvas.height<=524288);assert.deepEqual(scene.inspect().size,{width:4096,height:2160});
+  const draws=f.report.renders;scene.present({chapter:'context',azimuth:0,elevation:0});assert.equal(f.report.renders,draws,'Identical intent is demand-only');scene.present({chapter:'system',azimuth:.1,elevation:0});assert.equal(f.report.renders,draws+1);
+  controller.abort();scene.dispose();assert.equal(f.report.disposals,1);assert.equal(f.report.losses,1);assert.equal(f.canvas.parentNode,null);
+ }
+ const {bytes}=sourceGLB(),f=rendererFixture({omitSource:true}),model={src:'/assets/projects/test/source.glb',sha256:createHash('sha256').update(bytes).digest('hex'),bytes:bytes.length,webUnits:'meters',upAxis:'Y',vertices:3,triangles:1,meshes:1,bounds:{min:[-1,0,0],max:[1,1,0]},chapters:models};
+ globalThis.fetch=async()=>({ok:true,arrayBuffer:async()=>bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength)});
+ const scene=await acquireProjectStudyScene({host:f.host,model,signal:new AbortController().signal,createRenderer:()=>f.renderer});assert.throws(()=>scene.resize(1440,1000),/complete original project model did not draw/);assert.equal(scene.inspect().firstDraw,null);scene.dispose();
+});
