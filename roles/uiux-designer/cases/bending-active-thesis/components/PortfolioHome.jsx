@@ -41,7 +41,7 @@ function Introduction(){
           <p className={styles.description} data-introduction-description>{introduction.description}</p>
         </div>
         <a href="#projects" className={`${styles.projectInvitation} ${styles.scrollCopy}`} data-home-project-link data-information-window="home-invitation" data-home-scroll-window="invitation"><InformationSkin/>
-          <span className={styles.invitationCopy}><span className={styles.invitationLabel}>SELECTED WORK / {String(projects.length).padStart(2,'0')}</span><span className={styles.invitationTitle}>Between physical and digital.</span><span className={styles.invitationAction}>Explore the projects</span></span>
+          <span className={styles.invitationCopy}><span className={styles.invitationLabel}>SELECTED WORK / {String(projects.length).padStart(2,'0')}</span><span className={styles.invitationTitle} data-display-type>Between physical and digital.</span><span className={styles.invitationAction}>Explore the projects</span></span>
           <span className={styles.invitationArrow}><Arrow/></span>
         </a>
       </div>

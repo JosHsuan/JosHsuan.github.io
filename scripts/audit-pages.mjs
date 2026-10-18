@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 const OCR_FONT='/assets/fonts/portfolio-ocr-b.woff2',OCR_NOTICE='licenses/ocr-b-NOTICE.txt';
+const DISPLAY_FONT='/assets/fonts/space-grotesk-variable.woff2',DISPLAY_NOTICE='licenses/space-grotesk-OFL.txt';
 const INTRO_STATEMENT='I am a computational designer and developer working at the intersection of design technology, digital fabrication, and spatial interaction.';
 const INTRO_DESCRIPTION='My work bridges the physical and digital through computational tools, interactive interfaces, and workflows that translate design and engineering information into fabrication-ready, machine-readable data.';
 const markerCount=(html,name)=>(html.match(new RegExp(`\\b${name}(?:=|(?=[\\s>]))`,'g'))??[]).length;
@@ -144,17 +145,41 @@ export async function auditPages() {
   assert.equal((await readFile(path.join(out,typography.path))).subarray(0,4).toString(),'wOF2','A real WOFF2 is published');
   const fontNotice=await readFile(path.join(out,OCR_NOTICE),'utf8');
   for(const text of ['Matthew Skala','Norbert Schwarz','0.3.1','Portfolio OCR B','without limitation','CC0'])assert(fontNotice.includes(text),`Original font notices: ${text}`);
+  const displayTypography=manifest.assets.find(asset=>'/'+asset.path===DISPLAY_FONT),displayNotice=manifest.assets.find(asset=>asset.path===DISPLAY_NOTICE);
+  assert(displayTypography&&displayNotice,'The actual Space Grotesk font and its original OFL are approved');
+  assert.equal(displayTypography.sha256,'8e085aa438094f11487a836652edd5c054fa6a96f63fc7c282105ee3a4b08c07','Unmodified upstream Space Grotesk variable font');
+  assert.equal((await readFile(path.join(out,displayTypography.path))).subarray(0,4).toString(),'wOF2','A real display WOFF2 is published');
+  const displayFontNotice=await readFile(path.join(out,DISPLAY_NOTICE),'utf8');
+  for(const text of ['Space Grotesk Project Authors','floriankarsten/space-grotesk','SIL Open Font License, Version 1.1','Reserved Font Name'])assert(displayFontNotice.includes(text),`Original display font notice: ${text}`);
   const css=(await Promise.all(files.filter(file=>file.endsWith('.css')).map(file=>readFile(file,'utf8')))).join('\n');
   assert(/@font-face\s*\{[^}]*font-family\s*:\s*["']?Portfolio OCR B["']?\s*;[^}]*\/assets\/fonts\/portfolio-ocr-b\.woff2/.test(css),'Built CSS uses the actual self-hosted OCR B face');
-  for(const token of ['sans','mono','serif'])assert(new RegExp(`--${token}\\s*:\\s*var\\(--ocr\\)`).test(css),`${token} aliases the one OCR family`);
+  assert(/@font-face\s*\{[^}]*font-family\s*:\s*["']?Space Grotesk["']?\s*;[^}]*\/assets\/fonts\/space-grotesk-variable\.woff2/.test(css),'Built CSS uses the actual self-hosted Space Grotesk face');
+  assert(/--display\s*:\s*["']?Space Grotesk["']?\s*,\s*sans-serif/.test(css),'The display role names the actual Space Grotesk font');
+  for(const token of ['sans','mono','serif'])assert(new RegExp(`--${token}\\s*:\\s*var\\(--ocr\\)`).test(css),`${token} retains OCR body/control ownership`);
+  const loadedFaceFamilies=new Set([...css.matchAll(/@font-face\s*\{[^}]*font-family\s*:\s*([^;}]+)/g)].map(match=>match[1].trim().replaceAll(/["']/g,'')));
+  assert.deepEqual([...loadedFaceFamilies].sort(),['Portfolio OCR B','Space Grotesk'],'Only the two approved website typefaces are declared');
+  for(const [token,value]of Object.entries({
+    'leading-display':1.12,'leading-heading':1.18,'leading-subheading':1.3,'leading-body':1.65,'leading-caption':1.55,'leading-control':1.4,'leading-label':1.45,
+    'tracking-display':-.025,'tracking-subheading':-.015,'tracking-body':0,'tracking-caption':.01,'tracking-control':.02,'tracking-label':.06,
+  })){
+    const declared=css.match(new RegExp(`--type-${token}\\s*:\\s*([^;}]+)`))?.[1];
+    assert.equal(Number.parseFloat(declared),value,`The reviewed ${token} project role value is retained`);
+  }
   assert(!/IBM Plex|ibm-plex-[a-z-]+\.woff2|font-family\s*:\s*["']?(?:Arial|system-ui|Georgia|Times New Roman|Courier New)/i.test(css),'Built styles do not select a replaced type family');
   const auditTypography=(page,route)=>{
-    const preload=[...page.matchAll(/<link\b[^>]*>/g)].map(match=>match[0]).find(tag=>tagAttribute(tag,'href')===OCR_FONT&&tagAttribute(tag,'as')==='font');
-    assert(preload&&tagAttribute(preload,'type')==='font/woff2'&&/\bcrossorigin(?:=|[ >])/i.test(preload),`${route}: actual OCR B preload and CORS policy`);
+    for(const [font,family]of [[OCR_FONT,'Portfolio OCR B'],[DISPLAY_FONT,'Space Grotesk']]){
+      // React can add an equivalent automatic preload without custom data.
+      // Only the explicit marker is the document's required-family owner.
+      const owners=[...page.matchAll(/<link\b[^>]*>/g)].map(match=>match[0]).filter(tag=>tagAttribute(tag,'href')===font&&tagAttribute(tag,'as')==='font'&&tagAttribute(tag,'data-site-font-family')===family);
+      assert.equal(owners.length,1,`${route}: one explicit ${family} readiness declaration`);
+      const [preload]=owners;
+      assert(preload&&tagAttribute(preload,'type')==='font/woff2'&&/\bcrossorigin(?:=|[ >])/i.test(preload),`${route}: actual ${font} preload and CORS policy`);
+      assert.equal(tagAttribute(preload,'data-site-font-family'),family,`${route}: explicit actual font readiness owner`);
+    }
     assert(!/style="[^"]*font-family\s*:\s*(?:system-ui|Arial|Georgia|Times New Roman|Courier New)/i.test(page),`${route}: no inline replacement font`);
   };
   // Include every exported error-page alias as well as the six selected routes.
-  // The custom 404 cannot silently retain Next's former system-font document.
+  // The custom 404 retains the same display/body roles as the six routes.
   for(const file of files.filter(file=>file.endsWith('.html')))auditTypography(await readFile(file,'utf8'),path.relative(out,file));
   const suppliedIntroduction=records.introduction;
   assert.equal(suppliedIntroduction.statement,INTRO_STATEMENT,'Exact owner-supplied introduction first sentence');
@@ -237,6 +262,7 @@ export async function auditPages() {
   assert.equal(release.xrStudyRevision,manifest.xrStudySHA256,'Public XR narrative revision');
   assert.equal(release.xrWorkspaceRevision,manifest.xrWorkspaceSHA256,'Public complete-workspace capture revision');
   assert.equal(release.typography,'Portfolio OCR B');assert.equal(release.typographyRevision,typography.sha256);assert.equal(release.typographyNoticeRevision,notice.sha256);
+  assert.equal(release.displayTypography,'Space Grotesk');assert.equal(release.displayTypographyRevision,displayTypography.sha256);assert.equal(release.displayTypographyNoticeRevision,displayNotice.sha256);
   assert.equal(release.diagramRevision,manifest.assets.find(asset=>asset.path==='assets/thesis/source-diagrams.glb').sha256,'Protected source diagram revision');
   assert.equal(release.modelRevision,manifest.assets.find(asset=>asset.path==='assets/source-layers.glb').sha256,'Protected original Bending model revision');
   const missing=await readFile(path.join(out,'404.html'),'utf8');assert(missing.includes('data-portfolio-section="not-found"')&&missing.includes('This page is not available.')&&missing.includes('href="/"'),'The exported 404 uses the shared OCR/native navigation document');

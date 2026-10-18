@@ -2,20 +2,24 @@ import {test,expect} from '@playwright/test';
 import {WAIT} from './case-helpers.mjs';
 
 const routes=['/','/about/','/projects/','/contact/','/projects/bending-active/','/projects/xr-bending-active/','/404.html'];
-const family='Portfolio OCR B';
+const families={body:'Portfolio OCR B',display:'Space Grotesk'};
 
 // A separate native document per route keeps the existing 60-second scenario
 // budget. Reduced Motion isolates font/reading acceptance from optional 3D.
-for(const route of routes)test(`the published ${route} document actually loads OCR and keeps its text readable`,async({page,browserName})=>{
+for(const route of routes)test(`the published ${route} document renders Space Grotesk headings and OCR reading text without clipping`,async({page,browserName})=>{
  await page.emulateMedia({reducedMotion:'reduce'});
  const fonts=[],errors=[];page.on('request',request=>{if(request.resourceType()==='font')fonts.push(request.url());});page.on('pageerror',error=>errors.push(error.message));
  const response=await page.goto(route);expect(response.status()).toBe(200);
  await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});
+ for(const [family,href]of [[families.body,'/assets/fonts/portfolio-ocr-b.woff2'],[families.display,'/assets/fonts/space-grotesk-variable.woff2']])await expect(page.locator(`link[rel="preload"][as="font"][data-site-font-family="${family}"]`)).toHaveAttribute('href',href);
  const reading=await page.evaluate(async expected=>{
   await document.fonts.ready;
   const text=[...document.querySelectorAll('body *')].filter(node=>!['SCRIPT','STYLE','NOSCRIPT'].includes(node.tagName)&&[...node.childNodes].some(child=>child.nodeType===Node.TEXT_NODE&&child.textContent.trim()));
-  const wrong=text.filter(node=>{const css=getComputedStyle(node);return css.display!=='none'&&css.visibility!=='hidden'&&css.fontFamily.split(',')[0].replaceAll(/['"]/g,'').trim()!==expected;}).map(node=>({tag:node.tagName,text:node.textContent.slice(0,80),font:getComputedStyle(node).fontFamily}));
-  const heading=document.querySelector('h1'),leaf=[heading,...heading.querySelectorAll('*')].find(node=>[...node.childNodes].some(child=>child.nodeType===Node.TEXT_NODE&&child.textContent.trim()));
+  const displaySelector='h1,h2,h3,h4,h5,h6,[data-display-type]';
+  const wrong=text.filter(node=>{const css=getComputedStyle(node),role=node.closest(displaySelector)?'display':'body';return css.display!=='none'&&css.visibility!=='hidden'&&css.fontFamily.split(',')[0].replaceAll(/['"]/g,'').trim()!==expected[role];}).map(node=>({tag:node.tagName,role:node.closest(displaySelector)?'display':'body',text:node.textContent.slice(0,80),font:getComputedStyle(node).fontFamily}));
+  const heading=document.querySelector('h1');
+  const body=text.find(node=>node.tagName==='P'&&node.closest('main')&&!node.closest(displaySelector+', [aria-hidden="true"]')&&node.checkVisibility({visibilityProperty:true,opacityProperty:true})&&node.getBoundingClientRect().bottom>0&&node.getBoundingClientRect().top<innerHeight);
+  const selector=node=>{const parts=[];for(let element=node;element&&element!==document.body;element=element.parentElement)parts.unshift(`${element.localName}:nth-child(${[...element.parentElement.children].indexOf(element)+1})`);return 'body > '+parts.join(' > ');};
   const clipped=[];
   for(const node of text){
    const css=getComputedStyle(node),box=node.getBoundingClientRect();
@@ -24,22 +28,42 @@ for(const route of routes)test(`the published ${route} document actually loads O
    if(scrollable(node))continue;
    for(const child of node.childNodes){if(child.nodeType!==Node.TEXT_NODE||!child.textContent.trim())continue;const range=document.createRange();range.selectNodeContents(child);for(const rect of range.getClientRects())if(rect.width>2&&(rect.left<-.5||rect.right>document.documentElement.clientWidth+.5))clipped.push({tag:node.tagName,text:child.textContent.trim().slice(0,80),left:rect.left,right:rect.right});}
   }
-  const parts=[];for(let node=leaf;node&&node!==heading;node=node.parentElement)parts.unshift(`${node.localName}:nth-child(${[...node.parentElement.children].indexOf(node)+1})`);
-  return{faces:[...document.fonts].filter(face=>face.status==='loaded').map(face=>face.family.replaceAll(/['"]/g,'')),loaded:document.fonts.check(`16px "${expected}"`,'Computational design ↗ fabrication-ready × 01'),wrong,clipped,textNodes:text.length,headingVisible:heading.checkVisibility({visibilityProperty:true,opacityProperty:true}),headingFamily:getComputedStyle(heading).fontFamily,probeSelector:'h1'+(parts.length?' > '+parts.join(' > '):''),clientWidth:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth};
- },family);
- expect(reading.faces).toContain(family);expect(reading.loaded).toBe(true);expect(reading.wrong).toEqual([]);expect(reading.clipped).toEqual([]);expect(reading.textNodes).toBeGreaterThan(10);expect(reading.headingVisible).toBe(true);expect(reading.headingFamily).toContain(family);expect(reading.scrollWidth).toBeLessThanOrEqual(reading.clientWidth);
- expect(fonts.some(url=>/\/assets\/fonts\/.*ocr.*\.woff2$/.test(url))).toBe(true);expect(fonts.some(url=>/plex|arial|serif/i.test(url))).toBe(false);
+  const spacing=node=>{const css=getComputedStyle(node),size=parseFloat(css.fontSize);return{tag:node.tagName,text:node.textContent.trim().slice(0,80),size,leading:parseFloat(css.lineHeight)/size,tracking:(css.letterSpacing==='normal'?0:parseFloat(css.letterSpacing))/size};};
+  // About's three approach titles keep their compact subheading role when
+  // standalone-page semantics promote their native elements from h3 to h2.
+  const roles={body:spacing(document.body),display:[...document.querySelectorAll(displaySelector)].map(node=>({...spacing(node),compact:node.matches('[data-portfolio-about] article h2')})),controls:[...document.querySelectorAll('header nav a,button,input,select,textarea,summary')].map(spacing),captions:[...document.querySelectorAll('figcaption,[data-diagram-caption]')].map(spacing),labels:[...document.querySelectorAll('[data-project-section-label]')].map(spacing)};
+  const fontProbes=text.filter(node=>node.checkVisibility({visibilityProperty:true,opacityProperty:true})&&node.getBoundingClientRect().width>0&&node.getBoundingClientRect().height>0).map(node=>({selector:selector(node),role:node.closest(displaySelector)?'display':'body',mainHeading:!!node.closest('h1'),text:[...node.childNodes].filter(child=>child.nodeType===Node.TEXT_NODE).map(child=>child.textContent).join('').trim().slice(0,80)}));
+  return{faces:[...document.fonts].filter(face=>face.status==='loaded').map(face=>face.family.replaceAll(/['"]/g,'')),loaded:{body:document.fonts.check(`16px "${expected.body}"`,'Computational design ↗ fabrication-ready × 01'),display:document.fonts.check(`400 16px "${expected.display}"`,'Design technology and spatial interaction')},wrong,clipped,roles,fontProbes,textNodes:text.length,headingVisible:heading.checkVisibility({visibilityProperty:true,opacityProperty:true}),headingFamily:getComputedStyle(heading).fontFamily,bodyFamily:body?getComputedStyle(body).fontFamily:null,bodyProbeSelector:body?selector(body):null,clientWidth:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth};
+ },families);
+ for(const family of Object.values(families))expect(reading.faces).toContain(family);
+ expect(reading.loaded).toEqual({body:true,display:true});expect(reading.wrong).toEqual([]);expect(reading.clipped).toEqual([]);expect(reading.textNodes).toBeGreaterThan(10);expect(reading.headingVisible).toBe(true);expect(reading.headingFamily).toContain(families.display);expect(reading.bodyFamily).toContain(families.body);expect(reading.bodyProbeSelector).toBeTruthy();expect(reading.scrollWidth).toBeLessThanOrEqual(reading.clientWidth);
+ const spacing=(value,leading,tracking)=>{const context=`${route}: ${value.tag} ${value.text}`;expect(value.leading,context+' leading').toBeCloseTo(leading,2);expect(value.tracking,context+' tracking').toBeCloseTo(tracking,3);};
+ spacing(reading.roles.body,1.65,0);
+ for(const role of reading.roles.display)spacing(role,role.tag==='H1'?1.12:role.tag==='H2'&&!role.compact?1.18:1.3,['H1','H2'].includes(role.tag)&&!role.compact?-.025:-.015);
+ for(const [kind,leading,tracking]of [['controls',1.4,.02],['captions',1.55,.01],['labels',1.45,.06]])for(const role of reading.roles[kind])spacing(role,leading,tracking);
+ for(const suffix of ['/assets/fonts/portfolio-ocr-b.woff2','/assets/fonts/space-grotesk-variable.woff2'])expect(fonts.some(url=>url.endsWith(suffix))).toBe(true);
+ expect(fonts.some(url=>/plex|arial|serif/i.test(url))).toBe(false);
  if(browserName==='chromium'){
   // Chromium's actual platform-font report catches a fallback face even when
-  // computed CSS names the desired family. Other engines still check the real
-  // FontFace load, all DOM font ownership and native reading geometry above.
+  // computed CSS names the desired family. Target actual text-owning elements,
+  // including heading spans/em/strong: a parent with no direct Text children
+  // can return no platform-font usage. Body and display glyphs stay distinct.
   const session=await page.context().newCDPSession(page);
   try{
    await session.send('DOM.enable');await session.send('CSS.enable');
-   const {root}=await session.send('DOM.getDocument'),{nodeId}=await session.send('DOM.querySelector',{nodeId:root.nodeId,selector:reading.probeSelector});
-   const usage=await session.send('CSS.getPlatformFontsForNode',{nodeId});
-   expect(usage.fonts.some(font=>font.isCustomFont&&font.glyphCount>0&&/OCR/i.test(font.familyName))).toBe(true);
-   expect(usage.fonts.filter(font=>font.glyphCount>0&&!/OCR/i.test(font.familyName))).toEqual([]);
+   const {root}=await session.send('DOM.getDocument'),{nodeIds}=await session.send('DOM.querySelectorAll',{nodeId:root.nodeId,selector:reading.fontProbes.map(probe=>probe.selector).join(',')});
+   expect(nodeIds).toHaveLength(reading.fontProbes.length);
+   let mainHeadingGlyphs=0;
+   for(let index=0;index<nodeIds.length;index++){
+    const probe=reading.fontProbes[index],usage=await session.send('CSS.getPlatformFontsForNode',{nodeId:nodeIds[index]}),used=usage.fonts.filter(font=>font.glyphCount>0),expected=probe.role==='display'?/Space Grotesk/i:/OCR/i;
+    if(probe.mainHeading)mainHeadingGlyphs+=used.reduce((sum,font)=>sum+font.glyphCount,0);
+    expect(used.filter(font=>!font.isCustomFont||!expected.test(font.familyName)),`${route}: actual ${probe.role} glyphs for ${probe.text}`).toEqual([]);
+   }
+   expect(mainHeadingGlyphs).toBeGreaterThan(0);
+   const {nodeId}=await session.send('DOM.querySelector',{nodeId:root.nodeId,selector:reading.bodyProbeSelector});
+   const bodyUsage=await session.send('CSS.getPlatformFontsForNode',{nodeId});
+   expect(bodyUsage.fonts.some(font=>font.isCustomFont&&font.glyphCount>0&&/OCR/i.test(font.familyName))).toBe(true);
+   expect(bodyUsage.fonts.filter(font=>font.glyphCount>0&&(!font.isCustomFont||!/OCR/i.test(font.familyName)))).toEqual([]);
   }finally{await session.detach();}
  }
  expect(errors).toEqual([]);

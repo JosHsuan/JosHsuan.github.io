@@ -1,5 +1,8 @@
 import {test,expect} from '@playwright/test';
+import {readFile} from 'node:fs/promises';
 import {WAIT,frames,scenarioTimeout} from './case-helpers.mjs';
+
+const xrWorkspace=JSON.parse(await readFile(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/xr-workspace.json',import.meta.url),'utf8'));
 
 const loader=page=>page.locator('[data-site-loader]');
 async function entered(page,{failed=false}={}){
@@ -249,12 +252,18 @@ test('XR detail preserves real evidence, shared authorship and a native related-
  for(const id of ['xr-context','xr-method','xr-prototype','xr-making','xr-credits'])await expect(page.locator('#'+id)).toBeVisible();
  await expect(page.locator('#xr-contribution,#xr-limits,a[href="#xr-contribution"],a[href="#xr-limits"]')).toHaveCount(0);
  await expect(page.locator('[data-xr-study] details')).toHaveCount(0);
- const expectedImages=['portfolio-main-visual.webp','adaptive-method.webp','physical-capture.webp','communication-system.webp','data-categories.webp','measuring-tools.webp','module-assembly.webp','physical-assembly.webp','physical-result.webp'].map(name=>'/assets/xr/'+name).sort();
+ await expect(page.locator('[data-xr-opening-visual],[data-xr-hero]')).toHaveCount(0);
+ const expectedImages=['adaptive-method.webp','physical-capture.webp','communication-system.webp','data-categories.webp','measuring-tools.webp','module-assembly.webp','physical-assembly.webp','physical-result.webp'].map(name=>'/assets/xr/'+name).sort();
  expect(await page.locator('[data-xr-study] figure img').evaluateAll(images=>images.map(image=>image.getAttribute('src')).sort())).toEqual(expectedImages);
  for(const image of await page.locator('[data-xr-study] figure img').all()){await image.scrollIntoViewIfNeeded();await expect.poll(()=>image.evaluate(element=>element.complete&&element.naturalWidth>0)).toBe(true);}
  const entryId=await page.evaluate(()=>window.__site.inspect().id);
- await page.locator('a[href="#xr-prototype"]').click();
- await expect.poll(()=>page.evaluate(()=>{const heading=document.querySelector('#xr-prototype').getBoundingClientRect(),masthead=document.querySelector('[data-portfolio-navigation]').getBoundingClientRect();return heading.top>=masthead.bottom&&heading.top<innerHeight;})).toBe(true);
+ await page.locator('[data-xr-chapter-link="context"]').click();
+ await expect.poll(()=>page.locator('[data-xr-stage]').evaluate(node=>node.__xrStage.inspect().workspace.phase)).toBe('ready');
+ const expectedWorkspace=viewport.width<800?xrWorkspace.image.mobile:xrWorkspace.image;
+ await expect(page.locator('[data-xr-workspace-visual]')).toBeVisible();
+ expect(await page.locator('[data-xr-workspace-visual]').evaluate(node=>({src:new URL(node.currentSrc).pathname,width:node.naturalWidth,height:node.naturalHeight,complete:node.complete,fit:getComputedStyle(node).objectFit}))).toEqual({src:expectedWorkspace.src,width:expectedWorkspace.width,height:expectedWorkspace.height,complete:true,fit:'contain'});
+ await page.locator('[data-xr-chapter-link="adapt"]').click();
+ await expect.poll(()=>page.evaluate(()=>{const heading=document.querySelector('#xr-adapt').getBoundingClientRect(),masthead=document.querySelector('[data-portfolio-navigation]').getBoundingClientRect();return heading.top>=masthead.bottom&&heading.top<innerHeight;})).toBe(true);
  expect(await page.evaluate(()=>window.__site.inspect().id)).toBe(entryId);
  await expect(page.locator('[data-xr-study] a[href="/projects/bending-active/"]')).toBeVisible();
  await page.reload();await entered(page);

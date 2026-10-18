@@ -19,7 +19,7 @@
 .glyph svg{display:block;width:100%;height:100%;stroke:currentColor;stroke-width:1.2;stroke-linejoin:round;stroke-linecap:round}
 .chapterHeading{font-weight:400;font-size:clamp(2.7rem,4.6vw,5.4rem);line-height:.99;letter-spacing:-.065em;margin:0 0 2.4rem;color:var(--paper);max-width:42rem}
 .chapterHeading>span{display:block}
-.headingLast{font-family:var(--sans);font-style:normal;letter-spacing:-.02em}
+.headingLast{font-family:var(--display);font-style:normal;letter-spacing:-.02em}
 .overview{min-height:135svh}
 .openingCopy{grid-column:1/8;align-self:center;max-width:53rem;position:relative;z-index:3;padding-bottom:5svh}
 .openingLabel{display:flex;align-items:center;gap:.85rem;color:var(--accent);margin-bottom:2.4rem}
@@ -88,7 +88,7 @@
 .mediaAction{position:absolute;right:.75rem;bottom:.75rem;padding:.6rem .8rem;background:#0d1514eb;color:#f1f2ec;font: .61rem/1.4 var(--mono);border:1px solid #b8c9bf70;transform:translateY(4px);opacity:0;transition:opacity .18s,transform .18s}
 .mediaFrame:hover,.mediaFrame:focus-visible{outline-color:var(--accent);box-shadow:0 0 25px #ff946920}
 .mediaFrame:hover .mediaAction,.mediaFrame:focus-visible .mediaAction{opacity:1;transform:translateY(0)}
-.layerCaption{font: .62rem/1.6 var(--mono)!important;color:var(--accent)!important}
+.layerCaption{font:var(--type-size-caption)/var(--type-leading-caption) var(--mono)!important;letter-spacing:var(--type-tracking-caption)!important;color:var(--accent)!important}
 .layerCaption:global([data-layer-caption-sized]){display:grid;grid-template-columns:minmax(0,1fr)}
 .layerCaption>:global([data-layer-caption-current]),.layerCaption>:global([data-layer-caption-sizer]){grid-area:1/1;min-width:0}
 .layerCaption>:global([data-layer-caption-sizer]){visibility:hidden;pointer-events:none;user-select:none}
@@ -439,3 +439,16 @@
   .closingCopy .chapterHeading{font-size:clamp(2.25rem,9vw,3.4rem)}
 }
 @media print{.openingCopy h1{font-size:4rem}.chapterHeading,.closingCopy .chapterHeading{font-size:2.5rem}}
+
+/* The paired display face and OCR reading roles share the site type scale. */
+.openingCopy h1,.homeCopy h1,.homeCopy h1>span:first-child{font-family:var(--display);font-weight:500;line-height:var(--type-leading-display);letter-spacing:var(--type-tracking-display)}
+.chapterHeading,.pattern .chapterHeading,.validation .chapterHeading,.closingCopy .chapterHeading{font-family:var(--display);font-weight:500;line-height:var(--type-leading-heading);letter-spacing:var(--type-tracking-display)}
+.headingLast{font-family:var(--display);line-height:var(--type-leading-heading);letter-spacing:var(--type-tracking-display)}
+.copy>p,.closingCopy>p,.openingText,.subtitle,.measurements dd,.methodSequence li,.homeStatement,.homeDescription{line-height:var(--type-leading-body);letter-spacing:var(--type-tracking-body)}
+.discipline,.openingLabel,.chapterLabel,.projectType,.scrollCue,.spatialNotation,.methodSequence li>span,.measurements dt,.endnote,.figureIndex,.homeEyebrow,.homeNotation,.homeProjectIndex,.homeSignature{font-size:var(--type-size-label);line-height:var(--type-leading-label);letter-spacing:var(--type-tracking-label)}
+.evidence figcaption,.evidence figcaption>p,.copy .marginNote,.copy .smallNote,.closingCopy .smallNote,.sourceNotes,.methodSequence details p{line-height:var(--type-leading-caption);letter-spacing:var(--type-tracking-caption)}
+.evidence figcaption>p,.copy .smallNote,.closingCopy .smallNote,.sourceNotes{font-size:max(var(--type-size-caption),.75rem)}
+.evidence figcaption>span{font-size:var(--type-size-label);line-height:var(--type-leading-label);letter-spacing:var(--type-tracking-label)}
+.owner,.siteLinks,.siteLinks a,.chapterRail,.railLabel,.sourceLinks a,.sourceNotes summary,.sourceComparison>summary,.mediaAction,.methodSequence summary{line-height:var(--type-leading-control);letter-spacing:var(--type-tracking-control)}
+.siteLinks,.chapterRail,.sourceLinks a,.mediaAction{font-size:var(--type-size-control)}
+@media(max-width:780px){.siteLinks{font-size:var(--type-size-label)}}

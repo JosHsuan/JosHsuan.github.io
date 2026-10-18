@@ -9,3 +9,5 @@
 @media(max-width:780px){.inspector{padding:.65rem}.inspector header{gap:.5rem}}
 
 .inspector{border-radius:20px;box-shadow:var(--glass-shadow)}.inspector button{border-radius:12px}.inspector img{border-radius:12px;forced-color-adjust:none}.inspector>a{border-radius:8px}
+
+.inspector header,.inspector button,.inspector>a{font-size:var(--type-size-control);line-height:var(--type-leading-control);letter-spacing:var(--type-tracking-control)}

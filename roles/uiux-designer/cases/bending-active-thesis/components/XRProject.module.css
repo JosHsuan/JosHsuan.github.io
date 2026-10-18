@@ -43,7 +43,7 @@
 @media(max-width:1000px) and (min-width:781px){.panel{padding:1.5rem}.narrative{grid-column:1/7}.heroCopy{grid-column:1/10}.heroCopy h1{font-size:3.4rem}.panel h2{font-size:2.5rem}.mediaPair{gap:1.5rem}}
 @media(max-width:780px){
  .chapterRail{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;scroll-padding-inline:5px;max-width:calc(100vw - 2rem)}.chapterRail::-webkit-scrollbar{display:none}.chapterRail a{flex:0 0 max(44px,calc((100vw - 2rem - 12px)/8));min-width:44px;min-height:44px}
- .page{padding:0 0 5rem}.chapter,.readingChapter{scroll-margin-top:6.5rem}
+ .page{padding:0 0 5rem}.chapter,.readingChapter,.prototype{scroll-margin-top:8rem}.page :is(h1,h2,h3){scroll-margin-top:8rem}
  .chapterInner{display:flex;flex-direction:column;align-items:stretch;gap:1.5rem;min-height:0;padding:8.5rem 1.5rem 6rem}.sceneSlot{order:-1;flex:none;width:100%;min-height:350px}.hero .chapterInner{min-height:100svh;padding-top:9rem;justify-content:center}.narrative{width:100%;max-width:none}
  .panel{padding:1.5rem;border-radius:21px}.heroCopy h1{font-size:clamp(2rem,7.6vw,3.2rem);line-height:1.1;letter-spacing:-.02em}.panel h2{font-size:clamp(1.9rem,6.8vw,2.8rem);line-height:1.12}.panel>p{font-size:.96rem;line-height:1.8}.panel>.eyebrow{font-size:.5rem;margin-bottom:1.2rem}
  .metadata{gap:1.1rem}.metadata dd{font-size:.76rem}
@@ -53,3 +53,12 @@
 @media(prefers-reduced-motion:reduce){.page:global([data-xr-director-ready]) :global([data-information-window][data-information-ready]){transform:none!important}}
 @media(forced-colors:active){.page{color:CanvasText;--xr-line:CanvasText}.figureIndex,.staticFigure{color:CanvasText}.sceneSlot:focus-visible,.page :focus-visible{outline-color:Highlight}.mediaPlane{border:1px solid CanvasText}}
 @media print{.page{color:#151b17;padding:1rem;--xr-line:#8b9991}.chapterInner,.hero .chapterInner,.phoneChapter .chapterInner{display:block;min-height:0;padding:1rem 0}.sceneSlot{display:none}.panel{max-width:none;break-inside:avoid;padding:1rem!important}.panel h1,.panel h2{font-size:2rem}.chapterNavigation,.backLink,.readingLink{display:none}.evidenceBand{padding:1rem 0;gap:1.5rem}.figure{break-inside:avoid}.figureIndex{color:#333}.mediaPair{gap:1rem}.readingChapter{max-width:none;padding:1rem 0}.page:global([data-xr-director-ready]) :global([data-information-window][data-information-ready]){transform:none!important}}
+
+/* XR uses the same display, reading and annotation roles as the other pages. */
+.heroCopy h1{font-weight:500;line-height:var(--type-leading-display);letter-spacing:var(--type-tracking-display)}
+.panel h2{font-weight:500;line-height:var(--type-leading-heading);letter-spacing:var(--type-tracking-display)}
+.panel h3,.workflow h3,.modelExplanation h3,.nextProject strong{font-family:var(--display);font-weight:500;line-height:var(--type-leading-subheading);letter-spacing:var(--type-tracking-subheading)}
+.panel>p,.metadata dd,.workflow p,.modelExplanation p,.credits dd{line-height:var(--type-leading-body);letter-spacing:var(--type-tracking-body)}
+.panel>.eyebrow,.eyebrow,.metadata dt,.credits dt,.figureIndex,.workflow li>span,.nextProject>span:first-child{font-size:var(--type-size-label);line-height:var(--type-leading-label);letter-spacing:var(--type-tracking-label)}
+.figure figcaption,.figure figcaption p,.figure figcaption>span,.panel>.caption,.panel>.credit,.credit,.panel>.recordingNote,.staticFigure figcaption,.panel>.sourceNote,.recordingSource>p{font-size:var(--type-size-caption);line-height:var(--type-leading-caption);letter-spacing:var(--type-tracking-caption)}
+.backLink,.readingLink,.recordingLink{line-height:var(--type-leading-control);letter-spacing:var(--type-tracking-control)}

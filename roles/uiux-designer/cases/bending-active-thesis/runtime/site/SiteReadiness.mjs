@@ -32,17 +32,32 @@ export function acquireSiteReadiness(document,{setTimeout:setTimer=globalThis.se
     if(image.complete)finishImage(!image.naturalWidth);
    }))).then(()=>complete('images'));
   };
-  const domReady=()=>{complete('document');images();};
+  const fonts=()=>{
+   Promise.resolve().then(async()=>{
+    if(settled)return;
+    const set=document.fonts;
+    const families=[...new Set([...document.querySelectorAll('link[rel="preload"][as="font"][data-site-font-family]')]
+     .map(link=>link.getAttribute('data-site-font-family')).filter(Boolean))];
+    // An initial FontFaceSet.ready may fulfill before the document's text has
+    // requested its faces. After DOM readiness, load only the explicitly
+    // declared critical families; native font caching shares the preloads.
+    if(families.length){
+     if(typeof set?.load!=='function')throw Error('Required font loading unavailable');
+     const loaded=await Promise.all(families.map(family=>set.load(`16px "${family.replaceAll('\\','\\\\').replaceAll('"','\\"')}"`,'Aa0')));
+     if(loaded.some(faces=>!faces.length||faces.some(face=>face.status!=='loaded')))throw Error('Required font face unavailable');
+    }
+    await set?.ready;
+    if(settled)return;
+    // Native ready also fulfills after errors. Unused, undeclared faces are
+    // observed but never requested by this service.
+    const faces=typeof set?.[Symbol.iterator]==='function'?set:[];
+    complete('fonts',[...faces].some(face=>face.status==='error')?'fonts-unavailable':undefined);
+   }).catch(()=>complete('fonts','fonts-unavailable'));
+  };
+  const domReady=()=>{complete('document');images();fonts();};
   if(document.readyState==='loading'){
    const release=listen(document,'DOMContentLoaded',()=>{release();domReady();});
   }else domReady();
-  Promise.resolve(document.fonts?.ready).then(()=>{
-   if(settled)return;
-   // Native FontFaceSet.ready fulfills even after a requested font fails.
-   // Inspect settled faces; unused `unloaded` faces do not start new requests.
-   const faces=typeof document.fonts?.[Symbol.iterator]==='function'?document.fonts:[];
-   complete('fonts',[...faces].some(face=>face.status==='error')?'fonts-unavailable':undefined);
-  },()=>complete('fonts','fonts-unavailable'));
   timer=setTimer(()=>finish('readiness-timeout'),deadline);
   task={promise,retain(){references++;},release(){if(--references<=0&&!settled){finish('readiness-cancelled');documents.delete(document);}}};
   documents.set(document,task);

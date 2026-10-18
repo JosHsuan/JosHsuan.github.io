@@ -16,20 +16,34 @@ Website theme copy and metadata reflect design technology, computational tools,
 digital fabrication, spatial interaction and fabrication-ready data. Do not
 infer new employment, clients, results or sole-authorship claims from that text.
 
-All published website routes, including both project pages, use one actual OCR
-family. OCR B's source is the Tsukurimashou OCR package; preserve original legal
+All published website routes, including both project pages and the 404 document,
+use actual OCR B for body text and Space Grotesk for headings. This is the owner's
+latest amendment to the earlier single-face checkpoint. OCR B's source is the
+Tsukurimashou OCR package; preserve original legal
 notices, retrieval date, exact package/font hashes and documented project-named
-derivatives. Titles, body, controls, generated diagram labels and any font-based
-website canvas text use the family. Native documentary pixels and analytic
+derivatives. Space Grotesk comes from the author's GitHub project under OFL;
+retain its source/license and pin both browser font assets and notices. Heading
+descendants inherit the heading face; body, controls, navigation, captions,
+generated diagram labels and any font-based website canvas text use OCR.
+Native documentary pixels and analytic
 ASCII geometry retain their source identity. Typography may change hierarchy,
 spacing and wrapping to remain readable; this does not authorize changing
 Bending's models, material, lighting, camera or motion.
+
+Apply a coherent set of type-role letter-spacing and line-height values across
+the application, informed by [Apple's Typography guidance](https://developer.apple.com/design/human-interface-guidelines/typography)
+and [UI design tips](https://developer.apple.com/design/tips/). Preserve clear
+hierarchy, comfortable multiline leading and wrapping at narrow widths. These
+custom fonts require their own measured values; Apple's dynamic San Francisco
+tracking tables are not CSS values for OCR or Space Grotesk. Use scalable units
+and actual browser checks, including readable text inside its control's hit area.
 
 Verify actual loaded fonts and glyph coverage in all six published routes and
 the published 404 document,
 including mobile navigation, long reading paragraphs, contact addresses,
 project labels, controls and library/SVG labels. Checking CSS declarations alone
-does not establish that OCR glyphs were rendered. No private source paths or
+does not establish that the intended body and heading glyphs were rendered.
+Verify leading/tracking and all heading descendants as well. No private source paths or
 font research tools enter the build.
 
 ## Shared project interface

@@ -1,13 +1,86 @@
 # OCR identity and XR viewport verification
 
 Date: 18 October 2026 (Europe/Berlin).
-Status: native room, Rhino shutdown, local responsive image review and OCR/shared
-chrome checks verified; exact CI artifact and live publication remain pending.
+Status: native room and Rhino shutdown verified. The later OCR-body /
+Space-Grotesk-heading and Apple-informed spacing amendment is implemented;
+its final built-browser, CI artifact and live acceptance remain pending.
 
 This record covers [decision 0015](../../../../docs/decisions/0015-ocr-identity-xr-workspace.md)
 and the [current integration contract](OCR_XR_VIEWPORT_INTEGRATION.md). It does not
 replace earlier raw receipts or imply that the preceding published artifact
 contains this work.
+
+## Typography amendment and superseded checkpoint
+
+The owner's later instruction separates OCR body text from a GitHub-sourced
+heading face and adds site-wide Apple-informed letter spacing and leading.
+The implementation now uses OCR B and Space Grotesk with explicit reading,
+caption, control, label and heading roles. The source, OFL notice, exact font
+identities and custom spacing decisions are maintained in
+[the typography record](OCR_TYPOGRAPHY_INTEGRATION.md).
+
+The single-face commit `330951bc1f5e1962704177776ae5b832d40ab117` was pushed but
+never deployed. Its CI run `39142455980` is not a publication gate: actual failures
+include a 361px Home navigation hit area extending to 361.375px, a 320 × 700 model
+caption extending below its available reading area, the obsolete opening-photo
+expectation, and WebKit publishing entry before failed native font acquisition.
+The new implementation corrects the layout, aligns the existing evidence test
+with the authorized photo removal/real workspace, and waits for the two declared
+native font families after DOM readiness. It preserves the 15-second deadline,
+all native reading/viewport assertions and the original protected 3D ownership.
+Three new readiness regression cases and all existing cases in that file pass:
+52/52 (`animation-review/.local/ocr-space-required-font-readiness-unit.log`).
+The amended local source checks and focused browser acceptance are recorded
+below; their new CI gate and deployment remain pending.
+
+### Amended two-face local acceptance
+
+The exact toolchain passes `pnpm check` again
+(`animation-review/.local/ocr-space-pnpm-check.log`). Portable case and role
+tests report **458 total, 456 passed, two existing conditional skips, zero
+failures** (`ocr-space-portable.log`). Required-font readiness is 52/52 as
+recorded above. The final selected application build passes its full audit:
+**147 output files, 63 pinned assets**, with the earlier 61 records unchanged
+(`ocr-space-selected-build-responsive.log`).
+
+The first two-face focused run retained its **46 passed / two failed** result
+(`ocr-space-browser-targeted-initial.log` and `ocr-space-initial-traces/`).
+Both failures were measured mobile layout: native XR Adapt anchor clearance
+and the 320 × 700 Bending annotation column. Source CSS now gives XR native
+chapter anchors 8rem of header clearance at narrow widths, and the annotation
+column uses its available width, neutral OCR tracking and smaller paragraph
+gaps without hiding source copy or changing font size. Original assertion
+bounds and deadlines remain unchanged.
+
+The resulting built-output rerun passes **48/48 cases** across Chromium,
+WebKit and mobile Chromium (`ocr-space-browser-targeted-responsive.log`):
+seven actual two-face route/glyph/spacing checks including 404, three responsive
+header cases, source-artwork font roles, real unavailable-font terminal failure,
+native XR evidence navigation, Bending annotation geometry, shared project
+chrome, and actual 4K workspace readiness/error closure per engine. This local
+focused run does not claim the complete CI suite or physical-device acceptance.
+
+The checkpoint's exact CI export has 143 files, 61 pins and digest
+`90ded6eb8038ee896a079e831111f67ca6731d56a097948118673e4e910373fb`.
+Its 40 native interaction checks and 36 views completed, but the strict raw
+capture report remains **false** because one unused desktop responsive-poster
+candidate was cancelled before HTTP transmission. The selected mobile poster
+completed with HTTP 200, every departure/close had zero pending requests, and
+there were no page, console or HTTP errors. A separate timing/source assessment
+records this bounded cancellation and its inference limits without rewriting
+the raw result (`native-transport-assessment.json`, SHA256
+`6de3b89d680e84fc0dd9c5b70af0e4f2f90244ce00b8f898ea885c79a1380f2c`).
+
+Fourteen static Bending chapter captures also retain their strict **7/14 full
+tuple equality, overall false** result. Actual camera parameters, materials
+(including progress), lights, source and compositor agree in all fourteen.
+Six differences are the DOM caption's typography-dependent connector end.y;
+the seventh is a signed-zero distinction in derived composition metadata, whose
+sign JSON does not preserve. The independent assessment records those exact
+limits instead of claiming whole-page pixel equality:
+`animation-review/.local/ocr-bending-static7-assessment/2026-10-18T16-07-41.752Z/assessment.json`,
+SHA256 `74d335b4b8582e69d8632f307ce88d03bd39f50e2c8c82f3ff9f426a0824d2ad`.
+These checkpoint observations do not accept the amended final typography.
 
 ## Completed local checks
 

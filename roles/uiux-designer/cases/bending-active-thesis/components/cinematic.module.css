@@ -26,3 +26,6 @@
 .asciiField{position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
 @media(max-width:780px){.backdrop{--backdrop-warm-y:62%}}
 @media print{.asciiField{display:none}}
+
+.readingTools,.readingTools button{font-size:var(--type-size-control);line-height:var(--type-leading-control);letter-spacing:var(--type-tracking-control)}
+.readingTools [data-scene-fallback]{font-size:var(--type-size-label);line-height:var(--type-leading-caption);letter-spacing:var(--type-tracking-caption)}

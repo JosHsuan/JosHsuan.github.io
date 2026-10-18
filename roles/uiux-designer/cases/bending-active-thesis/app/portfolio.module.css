@@ -173,3 +173,21 @@
 }
 @media(max-width:360px){.identity{font-size:.61rem;padding-inline:.5rem}.navigationLinks a{font-size:.6rem;padding-inline:.3rem}}
 @media print{.homeTitle{font-size:3rem}}
+
+/* Shared display/reading roles; values are project choices, not SF metrics. */
+.homeTitle,.homeTitle>span:first-child{line-height:var(--type-leading-display);letter-spacing:var(--type-tracking-display)}
+.homeTitle{font-weight:500}
+.sectionTitle{font-weight:500;line-height:var(--type-leading-heading);letter-spacing:var(--type-tracking-display)}
+.sectionTitle:is(h1){line-height:var(--type-leading-display)}
+.approaches :is(h2,h3){font-weight:500;line-height:var(--type-leading-subheading);letter-spacing:var(--type-tracking-subheading)}
+.cardCopy h2{font-weight:500;line-height:var(--type-leading-heading);letter-spacing:var(--type-tracking-display)}
+.cardCopy h3{font-weight:500;line-height:var(--type-leading-subheading);letter-spacing:var(--type-tracking-subheading)}
+.statement,.description,.sectionIntro,.prose,.approaches article>p:last-child,.contactHandle{line-height:var(--type-leading-body);letter-spacing:var(--type-tracking-body)}
+.eyebrow,.invitationLabel,.identityDiscipline,.notation,.signature,.projectCount,.cardCategory,.footer>span:nth-child(2){font-size:var(--type-size-label);line-height:var(--type-leading-label);letter-spacing:var(--type-tracking-label)}
+.identity,.navigationLinks,.navigationLinks a,.textLink,.invitationAction,.cardAction,.socialLinks a,.footer a{line-height:var(--type-leading-control);letter-spacing:var(--type-tracking-control)}
+.invitationTitle{font-family:var(--display);font-weight:500;line-height:var(--type-leading-subheading);letter-spacing:var(--type-tracking-subheading)}
+.gridNote,.footer{line-height:var(--type-leading-caption);letter-spacing:var(--type-tracking-caption)}
+@media(max-width:640px){.identity,.navigationLinks a{font-size:var(--type-size-label)}.navigationLinks a{min-width:44px;padding-inline:.4rem}}
+/* CI measured a Contact hit area at 361.375px in a 361px viewport. Native
+   wrapping retains every label and hit area when the two groups need a row. */
+@media(max-width:375px){.navigation{flex-wrap:wrap;row-gap:.5rem}.identity{font-size:var(--type-size-label);padding-inline:.5rem}.navigationLinks a{font-size:var(--type-size-label);padding-inline:.3rem}}

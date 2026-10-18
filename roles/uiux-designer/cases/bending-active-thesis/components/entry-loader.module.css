@@ -9,7 +9,7 @@
 .content{min-height:100%;display:grid;place-content:center;justify-items:center;gap:1.5rem;padding:clamp(1.25rem,5vw,3rem);transform:translateY(calc(var(--entry-reveal)*-12px))}
 .panel{width:min(22.5rem,100%);padding:2rem;border:1px solid var(--glass-border,#cadbd63b);border-radius:1.75rem;background:var(--glass-background,#182322);box-shadow:var(--glass-shadow,0 18px 48px #0004);-webkit-backdrop-filter:var(--glass-backdrop,none);backdrop-filter:var(--glass-backdrop,none);text-align:center}
 .eyebrow{margin:0 0 .8rem;color:var(--glass-muted,#c6d0ca);font:400 .6875rem/1.5 var(--mono);letter-spacing:.08em;text-transform:uppercase}
-.title{margin:0;font:500 1.75rem/1.2 var(--sans);letter-spacing:-.035em;text-wrap:balance}
+.title{margin:0;font:500 1.75rem/var(--type-leading-heading) var(--display);letter-spacing:var(--type-tracking-display);text-wrap:balance}
 .subtitle{margin:.625rem 0 0;color:var(--glass-muted,#c6d0ca);font:400 .875rem/1.5 var(--sans)}
 .preparation{display:flex;align-items:center;justify-content:center;gap:.625rem;margin-top:1.875rem;min-height:1.5rem}
 .preparation p{margin:0;font:400 .9375rem/1.5 var(--sans);color:var(--glass-foreground,#f2f4f0)}
@@ -23,3 +23,8 @@
 @media(prefers-reduced-transparency:reduce){.backdrop img{opacity:0}.panel{background:var(--glass-fallback,#182322);-webkit-backdrop-filter:none;backdrop-filter:none}}
 @media(forced-colors:active){.loader,.backdrop{background:Canvas}.backdrop picture,.backdrop::after{display:none}.panel{background:Canvas;color:CanvasText;border-color:CanvasText;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}.eyebrow,.subtitle,.identity,.preparation p{color:CanvasText}.activity{border-color:GrayText;border-top-color:CanvasText;border-right-color:CanvasText}.activity svg{stroke:CanvasText}.activity[data-ready=true]{border-color:CanvasText;background:Canvas}}
 @media print{.loader{display:none}}
+
+/* Site and case loading share the same readable typographic roles. */
+.eyebrow{font-size:var(--type-size-label);line-height:var(--type-leading-label);letter-spacing:var(--type-tracking-label)}
+.subtitle,.preparation p{line-height:var(--type-leading-body);letter-spacing:var(--type-tracking-body)}
+.identity{line-height:var(--type-leading-caption);letter-spacing:var(--type-tracking-caption)}

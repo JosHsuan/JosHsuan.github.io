@@ -100,7 +100,7 @@ export default function XRProject() {
           <dl className={styles.credits}>{study.credits.map(item=><div key={item.role}><dt>{item.role}</dt><dd>{item.names}</dd></div>)}</dl><p className={styles.sourceNote}>{study.sourceNote}</p>
           <p className={styles.caption}>{study.limitations[1]} {study.limitations[3]}</p>
           <div className={styles.recordingSource}><a className={styles.recordingLink} href={study.media.motion.src} target="_blank" rel="noreferrer">Original presentation excerpt <span aria-hidden="true">↗</span></a><p>{study.media.motion.caption}</p><p className={styles.credit}>{study.media.motion.credit}</p></div>
-          <a className={styles.nextProject} href="/projects/bending-active/"><span>RELATED STUDY</span><strong>Bending-Active Metal Panel Deformation</strong><span aria-hidden="true">↗</span></a>
+          <a className={styles.nextProject} href="/projects/bending-active/"><span>RELATED STUDY</span><strong data-display-type>Bending-Active Metal Panel Deformation</strong><span aria-hidden="true">↗</span></a>
         </Panel></footer>
       </article>
     </main>

@@ -7,7 +7,7 @@
 .overlay:global([data-model-ui-visible=false]) .sideLabel{pointer-events:none}
 .sideLabel{position:absolute;left:var(--model-info-left);top:var(--model-info-top);width:var(--model-info-width);padding:12px 16px;border:1px solid var(--glass-border);border-radius:18px;color:var(--glass-foreground);pointer-events:auto;background:var(--glass-background);font-family:var(--mono)}
 .eyebrow{display:block;font-size:11px;line-height:1.5;letter-spacing:.04em;color:var(--glass-muted)}
-.information h3{font-family:var(--sans);font-size:clamp(14px,1.25vw,20px);line-height:1.2;font-weight:400;letter-spacing:-.02em;margin:14px 0 8px;min-height:2.4em;overflow-wrap:anywhere;color:var(--accent)}
+.information h3{font-family:var(--display);font-size:clamp(14px,1.25vw,20px);line-height:var(--type-leading-subheading);font-weight:500;letter-spacing:var(--type-tracking-subheading);margin:14px 0 8px;min-height:2.4em;overflow-wrap:anywhere;color:var(--accent)}
 .position{font-size:11px;line-height:1.5;color:var(--glass-muted);margin:0;font-variant-numeric:tabular-nums}
 .description{margin:14px 0 0;font-size:12px;line-height:1.6;color:var(--glass-foreground);overflow-wrap:anywhere}
 .description:global([data-model-caption-sized]){display:grid;grid-template-columns:minmax(0,1fr)}
@@ -38,3 +38,19 @@
 @media(max-width:780px){.sideLabel{padding:6px 5px;border-radius:12px;max-width:calc(100vw - var(--model-info-left) - 1.1rem)}.information h3{font-size:14px;margin-top:10px;min-height:3.6em}.description{font-size:11px;line-height:1.55;margin-top:10px}.callout{margin-top:14px;margin-bottom:14px}.eyebrow{font-size:10px}.keyboardHint{margin-top:8px}}
 @media(hover:none),(pointer:coarse){.gesture .mouseHint{display:none}.gesture .touchHint{display:block}.keyboardHint{display:none}}
 @media print{.overlay{display:none}}
+
+.eyebrow{font-size:var(--type-size-label);line-height:var(--type-leading-label);letter-spacing:var(--type-tracking-label)}
+.position,.description,.callout,.gesture,.fallback p{font-size:max(var(--type-size-label),11px);line-height:var(--type-leading-caption);letter-spacing:var(--type-tracking-caption)}
+.sideLabel button{font-size:var(--type-size-control);line-height:var(--type-leading-control);letter-spacing:var(--type-tracking-control)}
+/* The 320x700 CI viewport exposed a 698px panel bottom. Keep every source
+   sentence and the OCR reading size; recover space from display reservations
+   and paragraph gaps in this narrow annotation column. No clipping/scroll box. */
+@media(max-width:360px) and (max-height:740px){
+  .sideLabel{padding:3px;max-width:calc(100vw - var(--model-info-left) - .5rem)}
+  .eyebrow,.position,.description,.callout,.gesture{letter-spacing:var(--type-tracking-body)}
+  .information h3{min-height:2.6em;margin-top:4px;margin-bottom:4px}
+  .description{margin-top:4px}
+  .callout{margin-top:6px;margin-bottom:6px;overflow-wrap:anywhere}
+  .calloutIndex{flex:none;white-space:nowrap}
+  .keyboardHint{margin-top:4px}
+}

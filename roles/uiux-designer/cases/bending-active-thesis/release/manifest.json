@@ -372,6 +372,18 @@
       "bytes": 1248596,
       "sha256": "937e8d388a3b4156bc19671ad7d614bee12fbbe3c54d79e9669d9fbe67ef135e",
       "source": "Owner-authorized high-resolution native Rhino Rendered transparent front capture of the original architectural XR research room and working setup; original geometry/materials/TV UVs preserved, with documented front-only visibility opening and temporary native capture lighting."
+    },
+    {
+      "path": "assets/fonts/space-grotesk-variable.woff2",
+      "bytes": 49256,
+      "sha256": "8e085aa438094f11487a836652edd5c054fa6a96f63fc7c282105ee3a4b08c07",
+      "source": "Unmodified Space Grotesk 2.000 variable WOFF2 (wght 300-700), Florian Karsten project, GitHub commit 03507d024a01282884232081fc6011c09ff4e849; SIL OFL 1.1, retrieved 2026-10-18. See OCR_TYPOGRAPHY_INTEGRATION.md."
+    },
+    {
+      "path": "licenses/space-grotesk-OFL.txt",
+      "bytes": 4402,
+      "sha256": "c6dec685825f73b18c20926fddc65e8315642e12986f15db0699170940a09efc",
+      "source": "Original Space Grotesk Project Authors copyright and SIL Open Font License 1.1 from GitHub commit 03507d024a01282884232081fc6011c09ff4e849; identical text normalized from CRLF to LF for portable public bytes, retrieved 2026-10-18."
     }
   ],
   "limits": [

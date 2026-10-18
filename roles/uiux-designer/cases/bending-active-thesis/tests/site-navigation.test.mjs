@@ -16,9 +16,10 @@ class Element extends EventTarget{
  getAttribute(name){return this.attributes.get(name)??null;}
  hasAttribute(name){return this.attributes.has(name);}
 }
-function environment({url='https://example.test/',storage=new Map(),images=[],previews=[],readyState='complete',fonts=Promise.resolve()}={}){
+function environment({url='https://example.test/',storage=new Map(),images=[],previews=[],fontFamilies=[],readyState='complete',fonts=Promise.resolve()}={}){
  const loader=new Element(),content=new Element(),navigation=new Element(),doc=new EventTarget(),win=new EventTarget(),media=new EventTarget();
- Object.assign(doc,{documentElement:new Element(),readyState,hidden:false,fonts:{ready:fonts},querySelectorAll:selector=>selector.includes('img')?images:selector==='[data-site-preview-required]'?previews:[content,navigation]});
+ const fontLinks=fontFamilies.map(family=>{const link=new Element();link.setAttribute('data-site-font-family',family);return link;});
+ Object.assign(doc,{documentElement:new Element(),readyState,hidden:false,fonts:{ready:fonts},querySelectorAll:selector=>selector.includes('img')?images:selector==='[data-site-preview-required]'?previews:selector==='link[rel="preload"][as="font"][data-site-font-family]'?fontLinks:[content,navigation]});
  let clock=0,serial=0;const timers=new Map();
  Object.assign(media,{matches:false});
  Object.assign(win,{location:new URL(url),sessionStorage:{getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,value),removeItem:key=>storage.delete(key)},matchMedia:()=>media,
@@ -497,6 +498,29 @@ test('fulfilled FontFaceSet readiness reports requested error faces and accepts 
   }else{assert.equal(manager.inspect().phase,'revealing');f.loader.dispatchEvent(new Event('animationend'));assert.equal(manager.inspect().phase,'entered');}
   assert.equal(loads,0);assert.equal(f.timers.size,0);
  }
+});
+
+test('an initially fulfilled font set cannot reveal before declared body and heading faces actually load after DOM readiness',async t=>{
+ const body=deferred(),heading=deferred(),calls=[],f=environment({readyState:'loading',fontFamilies:['Portfolio OCR B','Space Grotesk','Space Grotesk']});
+ f.doc.fonts={ready:Promise.resolve(),load(font,text){calls.push({font,text});return font.includes('OCR')?body.promise:heading.promise;}};
+ const manager=connect(t,f);await flush();assert.deepEqual(calls,[]);assert.deepEqual(phases(manager),['requested']);
+ f.doc.readyState='interactive';f.doc.dispatchEvent(new Event('DOMContentLoaded'));await flush();
+ assert.deepEqual(calls,[{font:'16px "Portfolio OCR B"',text:'Aa0'},{font:'16px "Space Grotesk"',text:'Aa0'}]);
+ body.resolve([{status:'loaded'}]);await flush();assert.deepEqual(phases(manager),['requested']);
+ heading.reject(new Error('Native webfont unavailable'));await flush();
+ assert.deepEqual(phases(manager),['requested','failed']);assert.equal(manager.inspect().reason,'fonts-unavailable');assert.equal(f.content.hasAttribute('inert'),false);
+});
+
+test('an absent declared face cannot turn a successful empty native font match into readable-font readiness',async t=>{
+ const f=environment({fontFamilies:['Missing project font']});f.doc.fonts={ready:Promise.resolve(),load:async()=>[]};
+ const manager=connect(t,f);await flush();assert.deepEqual(phases(manager),['requested','failed']);assert.equal(manager.inspect().reason,'fonts-unavailable');
+});
+
+test('declared font preparation shares the original deadline and cannot publish late success after its terminal',async t=>{
+ const loading=deferred(),f=environment({fontFamilies:['Portfolio OCR B']});f.doc.fonts={ready:Promise.resolve(),load:()=>loading.promise};
+ const manager=connect(t,f);await flush();f.advance(14999);assert.deepEqual(phases(manager),['requested']);
+ f.advance(1);await flush();assert.deepEqual(phases(manager),['requested','failed']);assert.equal(manager.inspect().reason,'readiness-timeout');assert.equal(f.timers.size,0);
+ loading.resolve([{status:'loaded'}]);await flush();assert.deepEqual(phases(manager),['requested','failed']);assert.equal(f.timers.size,0);
 });
 
 test('blocked session storage preserves native navigation and explicitly cancels its untracked document handoff',async t=>{

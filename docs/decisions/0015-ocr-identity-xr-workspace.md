@@ -3,13 +3,21 @@
 Date: 2026-10-18 (Europe/Berlin).
 
 The owner explicitly requests implementation through GitHub Pages publication
-of the supplied computational-designer-and-developer introduction, one actual
-OCR font family throughout the published application, and an XR presentation
+of the supplied computational-designer-and-developer introduction, actual OCR
+body text throughout the published application, and an XR presentation
 that uses Bending's header, chapter navigation and label conventions. The XR
 renderer must occupy the complete viewport after its events activate it. Its
 opening photograph is removed from the project page; Context instead presents
 a transparent capture of the complete working scene and setup from the actual
 source CAD file, with cross-role composition review.
+
+The owner's later typography amendment keeps OCR for body text and requests a
+compatible title face sourced on GitHub, plus site-wide letter spacing and
+leading informed by Apple's UI guidance. Use Space Grotesk for headings after
+checking the author's source and OFL license. Keep body text, navigation,
+controls and captions in OCR B. Record both faces, exact source identities,
+licenses and the Apple references. Typography and layout changes in the earlier
+single-face checkpoint are not final acceptance of this amended scope.
 
 The owner's subsequent image review rejects the elevated three-quarter view.
 The capture instead uses a level frontal view with a central axis and a clear
@@ -41,7 +49,10 @@ and glyph coverage. Preserve source provenance and license text, and document
 any project-named encoding or punctuation derivative. Do not replace it with a
 merely similar monospace font. Documentary photographs, diagrams and native
 recording pixels retain their source typography; website-owned HTML, SVG and
-font-based canvas text use the selected family.
+font-based canvas text follow the body/heading roles. Adopt Apple's principles
+of legibility, consistent hierarchy, sufficient multiline leading and adaptable
+layout; custom numeric tracking/leading values must suit these fonts rather than
+copy San Francisco's point-specific values.
 
 The source CAD file remains read-only. Only verified public raster derivatives,
 sanitized metadata and the existing approved interactive geometry enter the
