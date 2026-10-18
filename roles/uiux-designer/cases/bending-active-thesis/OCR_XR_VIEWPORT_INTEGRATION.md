@@ -1,7 +1,9 @@
 # OCR identity and XR viewport integration
 
 Date: 18 October 2026 (Europe/Berlin).
-Status: implementation; browser, CI, publication and live acceptance pending.
+Status: implemented and published as `ddafd44`. Full CI and live acceptance,
+including browser/device limits, are recorded in
+[the verification record](OCR_XR_VIEWPORT_VERIFICATION.md).
 
 This is the current contract for [decision 0015](../../../../docs/decisions/0015-ocr-identity-xr-workspace.md).
 Earlier decisions and verification records retain their historical evidence.

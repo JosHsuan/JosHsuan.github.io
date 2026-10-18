@@ -180,7 +180,8 @@ remain the acceptance gate, with no clipped text or relaxed bounds.
 - The empty reusable `src` framework and local-only research/catalogue tools
   remain outside this published typography change.
 
-This is source-level integration evidence. Browser font load, actual glyph
-rendering, mobile wrapping, interactions, built-output checks and publication
-must be accepted against the resulting artifact; this record does not claim
-those later gates have passed.
+This record documents source-level integration. The final `ddafd44` artifact
+also passes all 267 hosted public-browser executions and the live native
+desktop/mobile protocol. Actual font/glyph, wrapping, interaction, output and
+publication receipts, with their device limits and historical failures, are
+maintained in [the verification record](OCR_XR_VIEWPORT_VERIFICATION.md).

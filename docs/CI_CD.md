@@ -2,6 +2,8 @@
 
 The repository has two independent exports: the empty reusable framework (`out/`) and the public Bending-Active case (`.pages-workspace/out/`). [Decision 0009](decisions/0009-impact-selected-ci.md) defines the owner-authorized impact-selection policy. Node 24.19.0, pnpm 11.19.0 and the frozen committed lockfile remain mandatory.
 
+The [DORA-informed CI and delivery plan](CI_DELIVERY_PLAN.md) records the owner's 18 October research request, the fast-feedback objective, current capacity evidence, proposed staged improvements and production delivery metrics. This file describes implemented operation; planned stages do not replace the current release gate.
+
 ```mermaid
 flowchart TD
   Diff[Diff from validated ancestor / PR merge base] --> Plan[Impact plan + selector regression tests]
@@ -41,7 +43,7 @@ Push selection uses the last successful **ancestor push run**, not `event.before
 
 ## Build reuse and caches
 
-`quality` runs fast checks once. `pages-build` creates/audits a new export once and uploads `static-export-pages` plus `pages-build-record`. Case browser jobs download that exact export; each verifies its digest before and after tests. Only the required browser engine is installed. Full-case Chromium uses four file-level shards; full-case WebKit and mobile Chromium each use two. Scoped checks use one shard per browser. Every runner retains `workers: 1` to limit software-GPU contention. The browser job's 30-minute limit remains unchanged.
+`quality` runs fast checks once. `pages-build` creates/audits a new export once and uploads `static-export-pages` plus `pages-build-record`. Case browser jobs download that exact export; each verifies its digest before and after tests. Only the required browser engine is installed. Full-case Chromium uses four file-level shards; full-case WebKit and mobile Chromium each use two. Scoped checks use one shard per browser. Every runner retains `workers: 1` to limit software-GPU contention. The browser-job ceiling is 45 minutes from `ddafd44`: the preceding 30-minute ceiling cancelled the final case while it remained inside its original scenario deadline. All assertions and individual deadlines remain unchanged. This is a bounded capacity repair; the DORA-informed fast-feedback target is documented separately.
 
 The pnpm store cache uses the lockfile. Next cache keys separate framework root/subpath and Pages, with a lockfile-scoped restore prefix and a commit-specific save key. [prepare-pages-workspace.mjs](../scripts/prepare-pages-workspace.mjs) preserves only `.next/cache`; app sources, public files, server output and old exports are removed before assembling the allowlisted build. Cache hits are an optimization, never validation evidence or a reusable deployed output.
 
@@ -75,7 +77,7 @@ To inspect a targeted plan locally, set `CI_BASE_SHA` to a verified ancestor and
 
 ### Materials/event integration capacity — 15 October 2026
 
-The preceding successful `1d0bd9f` release ran 45 identical scenarios per public browser, 135 total. Hosted mobile Chromium took 26.1 minutes and WebKit 19.9 minutes. Full-case WebKit/mobile now use two file shards each to accommodate the new integration checks within the same 30-minute job limit. Chromium retains four shards; scoped checks remain unsharded. Scenario union and artifact identity remain required. This is workload partitioning, not a claim of faster rendering or weaker acceptance.
+At that checkpoint, the preceding successful `1d0bd9f` release ran 45 identical scenarios per public browser, 135 total. Hosted mobile Chromium took 26.1 minutes and WebKit 19.9 minutes. Full-case WebKit/mobile were changed to two file shards each to accommodate the new integration checks within the then-current 30-minute job limit. Chromium retained four shards; scoped checks remained unsharded. Scenario union and artifact identity remained required. This was workload partitioning, not a claim of faster rendering or weaker acceptance.
 
 ### Local migration checkpoint — 13 October 2026
 
@@ -87,11 +89,11 @@ The preceding successful `1d0bd9f` release ran 45 identical scenarios per public
 
 ### Full-mode partition checkpoint — 14–15 October 2026
 
-The Full-mode suite now contains 45 scenarios per browser. At commit `37d3728`, hosted Chromium shard `1/2` completed 20 of its 24 scenarios and began scenario 21 before the unchanged 30-minute job limit cancelled it. The log records cumulative execution time rather than an assertion failure. All other selected jobs passed; this incomplete run cannot satisfy the publication gate.
+The Full-mode suite contained 45 scenarios per browser at that checkpoint. At commit `37d3728`, hosted Chromium shard `1/2` completed 20 of its 24 scenarios and began scenario 21 before the then-current 30-minute job limit cancelled it. The log records cumulative execution time rather than an assertion failure. All other selected jobs passed; this incomplete run cannot satisfy the publication gate.
 
 Playwright listing showed that three file-level shards would still group the first 21 scenarios together (21/10/14), including both model inspection and the costly canvas/library scenarios. Four shards separate those files and contain 12/12/12/9 scenarios. An exact test-ID union check confirms all 45 Chromium scenarios occur once, with no file split across shards. The 14 selector/gate regression tests also pass.
 
-Full-case Chromium is therefore split across four separate runners, preserving complete files and their local sequences. Scoped Chromium remains unsharded. All 45 scenarios still run on each of Chromium, WebKit and mobile Chromium, with one worker per runner and the same audited output verified before and after every browser job. A successful exact-commit hosted gate remains required before publication. The 13 October counts above remain historical; the listed partition does not claim a hosted runtime improvement before measurement.
+At that checkpoint, full-case Chromium was therefore split across four separate runners, preserving complete files and their local sequences. Scoped Chromium remained unsharded. All 45 scenarios still ran on each of Chromium, WebKit and mobile Chromium, with one worker per runner and the same audited output verified before and after every browser job. A successful exact-commit hosted gate remained required before publication. The 13 October counts above remain historical; that partition did not claim a hosted runtime improvement before measurement.
 
 Selector/gate tests include cumulative Git histories, rename paths, scope unions, failed/skipped jobs, cached stale-output removal and changed artifact bytes/provenance. Functional browser assertions are unchanged by CI selection. Local Windows browser checks and hosted Linux checks are distinct evidence. Physical iPhone/Safari and Android verification remains unperformed; no device crash resolution or frame-rate improvement is implied. Time savings will be reported only from comparable measured runs.
 

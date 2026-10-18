@@ -116,4 +116,6 @@ pnpm build
 
 CI now selects checks from the union of changed feature/integration scopes, with full validation for shared tooling, dependencies and unknown inputs. It compares pushes against the last successful ancestor so failed/cancelled changes remain covered. The public case builds once; Chromium/WebKit/mobile jobs test the same audited output, and a required gate rejects unexpected skips. See [CI/CD operations](docs/CI_CD.md) and [decision 0009](docs/decisions/0009-impact-selected-ci.md).
 
+The [DORA-informed CI and delivery plan](docs/CI_DELIVERY_PLAN.md) records official Google DORA research, the fast-feedback and complete-acceptance stages, measured software-GPU capacity, the next optimization steps and the five production delivery metrics. It distinguishes implemented safeguards from proposed improvements.
+
 The publishing workflow accepts a successful CI `push` run from the default branch at the same commit, verifies its validated plan/results and complete artifact digest, and deploys that tested `static-export-pages` output without rebuilding. Documentation/framework-only runs do not produce a new public case release. The public case has canonical/index metadata; the framework remains a noindex scaffold. GitHub Actions records and public `/release.json` identify the deployed result.

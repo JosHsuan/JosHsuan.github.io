@@ -1,14 +1,92 @@
 # OCR identity and XR viewport verification
 
 Date: 18 October 2026 (Europe/Berlin).
-Status: native room and Rhino shutdown verified. The later OCR-body /
-Space-Grotesk-heading and Apple-informed spacing amendment is implemented;
-its final built-browser, CI artifact and live acceptance remain pending.
+Status: published as `ddafd44`. Full CI and same-artifact publication pass;
+live byte/range checks and native desktop/mobile interaction acceptance pass.
+Native room source identity and Rhino shutdown remain verified. Detailed
+historical failures and comparison limits below remain preserved.
 
 This record covers [decision 0015](../../../../docs/decisions/0015-ocr-identity-xr-workspace.md)
 and the [current integration contract](OCR_XR_VIEWPORT_INTEGRATION.md). It does not
 replace earlier raw receipts or imply that the preceding published artifact
 contains this work.
+
+## Published result
+
+- Deployed source: `ddafd44c343d0e5e02be472beee53eb6396acec0`.
+- [Full CI 39149807622](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39149807622)
+  completes successfully, including quality, both framework variants, all eight
+  public browser runners and `Required validation gate`. All **267 unique public
+  executions pass**, with no failed/flaky/skipped summaries. The formerly
+  interrupted Chromium 2/4 suite completes all twenty cases in 30.7 minutes
+  under the repaired job ceiling; individual assertions/deadlines are unchanged.
+- The verified **145-file / 63-pin** artifact digest is
+  `22da03dff3392a2ce79d0dbb4ff0b9d1d75be4caa1b14351b16761531e04c1f4`.
+  The final validated release is downloaded and independently checked before
+  dispatch. Its exact-source gate receipt is
+  `animation-review/.local/ocr-space-xr-ci-ddafd44/release-verification-gate.json`.
+- [Pages publication 39152480089](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39152480089)
+  succeeds using that tested artifact without rebuilding. The dispatch returns
+  HTTP 204 before a local Node cleanup assertion; an independent GET confirms
+  one unique successful deployment. It is not dispatched twice.
+- The public `/release.json` reports the exact deployed SHA and both pinned
+  typography identities. **114 exact HTTP comparisons** cover all seven HTML
+  documents, the index alias, release/sitemap, approved assets/licenses and
+  JavaScript/CSS. All match CI bytes. Eight prefix/suffix MP4 requests return
+  correct HTTP 206, MIME, content ranges and bytes. The live receipt is
+  `animation-review/.local/ocr-space-xr-ci-ddafd44/release-verification-live.json`.
+- The live native protocol passes **40/40 checks and 36 actual views**, with
+  **zero failed requests**, zero pending transports at every departure/close,
+  and no page/console/HTTP errors. It covers actual OCR/Space glyphs, prepared
+  Home/offscreen resources, all public routes/404, whole 4K Context, full-viewport
+  XR model hits and native drag, all three original phone recordings, pause and
+  scene closure/re-entry, original Bending Full/material/camera facts and a
+  separate Reduced Motion profile. Its strict result is **true**.
+  Raw receipt:
+  `animation-review/.local/ocr-space-xr-live-ddafd44/2026-10-18T18-06-31.529Z/results.json`,
+  SHA256 `233dce9ea40e2b681890bd28cbad030acc6dedc8c77ace8e6c9db46ff6729669`.
+
+The independent CI summary verifies eight log identities, consecutive case
+indices, unique project/test union, original pass summaries, pre/post artifact
+checks and gate provenance. Raw suite times are 9.3/30.7/27.8/8.2 minutes for
+Chromium, 14.8/10.4 for WebKit and 17.5/11.5 for mobile Chromium. The observed
+parallel browser-job log span is 31m22.191s and the summed suite duration is
+130m10.912s; neither is a queue-inclusive workflow or production-lead-time
+measurement. Receipt:
+`animation-review/.local/ocr-space-xr-ci-ddafd44/ci-final-summary/2026-10-18T18-08-30.946Z/summary.json`,
+SHA256 `4d0bf7bb66312a2d6e332ddecf84952d61dc7cd4179b56429a770205606dfd66`.
+The owner-requested [DORA CI/delivery plan](../../../../docs/CI_DELIVERY_PLAN.md)
+separates the proposed fast-feedback target from the complete acceptance gate
+and current 45-minute safety ceiling. It records official sources and the five
+production delivery metrics without treating CI cancellation as a production
+incident.
+
+The published artifact also completes fourteen native static Bending chapter
+captures under the unchanged Reduced Motion/Enable 3D protocol. All fourteen
+physical camera, material (including progress), lights, optics, source and
+compositor settings agree with the original `6288286` baseline; before/after
+self-variance is zero. The raw **full-tuple result remains false, 7/14 exact**:
+six caption-derived `annotation.end.y` differences and the mobile Credits
+derived signed-zero comparison remain recorded. Every published protected-tuple
+JSON string equals its corresponding `813a553` local capture on the same client.
+JSON equality cannot recover runtime zero signs lost during serialization.
+The unchanged presenter derives the caption endpoint from its DOMRect centre;
+the authorized font/wrapping changes explain that geometry without changing the
+physical scene. No tolerance, comparator omission or whole-page pixel equality
+is claimed. There are no failed/pending requests or page/console/HTTP errors;
+all eight raw warnings remain preserved. Raw receipt:
+`animation-review/.local/ocr-bending-static7-ddafd44/2026-10-18T18-10-39.038Z/results.json`,
+SHA256 `b812513451377452d1aacad2b1eb5ca676816eff9e6a123c488f9cc006714909`.
+Independent assessment:
+`animation-review/.local/ocr-bending-static7-assessment/2026-10-18T18-14-10.667Z-independent-postdeploy-ddafd44/assessment.json`,
+SHA256 `d1dc339cebeb99872bba8bd94228d88882d1e768528e5b686c14e08a1afc7903`.
+The original, intermediate and published PNG hashes are verified separately;
+raw images, comparison helpers and historical results remain unchanged.
+
+The checkpoint sections below retain what was known or pending at each earlier
+stage. Their raw false/incomplete results do not become passing reports through
+this final acceptance. Browser touch profiles are emulation; physical-device
+performance and iPhone/Safari certification are not claimed.
 
 ## Typography amendment and superseded checkpoint
 
@@ -152,7 +230,7 @@ The native room remains proportionally contained, uses the correct 4K source
 for each viewport, and leaves the structure/TV pixels unchanged. These are
 browser-emulated viewports, not physical-device tests.
 
-## Final two-face CI candidate and native observation
+## Two-face candidate checkpoints and native observation
 
 The amended source candidate is `813a55397f2a928ed70d31f15aa15039ff1a11f3`,
 pushed to `main` for [CI run 39147112657](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39147112657).
@@ -185,6 +263,55 @@ artifact checks unchanged. The resulting commit requires its own full CI
 gate and matching tested artifact; this interrupted run cannot authorize
 publication. A separate local run of those same twenty unchanged cases is
 recorded independently, without treating it as the missing CI result.
+
+Those same twenty unchanged Chromium cases pass **20/20 in 12.1 minutes** on
+the separately served `813a553` CI artifact under local Windows hardware
+(`animation-review/.local/ocr-space-chromium-shard2-local.log`). This includes
+the last native fragment/focus/history case. The CI-capacity patch also passes
+all **15 CI selector/artifact/gate tests**
+(`ocr-space-ci-wallclock-unit.log`). These are independent evidence, not a
+replacement for the interrupted hosted result or a controlled speed benchmark.
+
+### Final artifact identity after the capacity repair
+
+The replacement source is `ddafd44c343d0e5e02be472beee53eb6396acec0`,
+with [CI run 39149807622](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39149807622).
+Its full plan retains all 20 specs, 267 executions and eight runners. The new
+145-file export has digest
+`22da03dff3392a2ce79d0dbb4ff0b9d1d75be4caa1b14351b16761531e04c1f4`.
+The commit changes only the workflow wall-clock ceiling and this verification
+record; all other 1,164 tracked Git tree entries match `813a553` exactly.
+
+Independent CPU review verifies every one of its 63 pins, all active font and
+notice revisions, 42 original Bending assets, 24 protected code modules and
+every native 4K RGBA byte. The complete **three CSS and 38 JavaScript contents
+are byte-identical** to the preceding CI export. The exports themselves are
+different: 37 HTML/RSC files change their explicitly identified Next build ID,
+`release.json` changes commit, and two content-identical manifests move under
+the new build-ID directory. All original raw hashes and differences remain in
+`animation-review/.local/ocr-bending-protected-cpu/2026-10-18T17-35-23.708Z-independent-ci-ddafd44/results.json`,
+SHA256 `a19fec7e2693781bb91f1b2dd75a4f11608eb856da21e98a31bffbca5dbf4870`.
+This is source/artifact identity evidence; the new export still requires its
+own complete CI gate and live acceptance.
+
+Native observation of this exact replacement export also completes **40/40
+semantic checks and 36 views**, with all 63 pins and seven document/release
+preflights verified. Its strict raw result remains **false**, with one unused
+desktop poster candidate cancelled before HTTP and 446 finished requests.
+All 18 departure/close drains and context closes have zero pending requests;
+page, console, HTTP and report error lists are empty. The raw receipt is
+`animation-review/.local/ocr-space-xr-local-ddafd44/2026-10-18T17-41-21.944Z/results.json`,
+SHA256 `031501a783fc1bf0528d9194220799e4a506d30d5fe1b4a8347fe9c220b2cb00`.
+Its separate assessment verifies the actual matching mobile candidate succeeds
+HTTP 200, cancellation precedes page-chunk completion by 8ms and source-GLB
+acquisition by 426ms, and no source-ready React removal can explain that timing.
+Native responsive/shared-image scheduling remains a bounded inference, with
+the missing browser-internal initiator/per-element pre-3D observations recorded.
+The raw result is not rewritten. Assessment SHA256:
+`84302c526e7b2614870c64d0ddf157615f8e680140d7e92de94bbe6634843d92`,
+saved beside the raw receipt as `native-transport-assessment.json`.
+
+### Preceding 813a553 native and visual checkpoint
 
 An independent CPU review verifies all 63 pins between the committed source,
 working files and exact CI export. Original Bending assets are **42/42 identical**
@@ -283,13 +410,14 @@ untouched; independent CPU alpha measurements live in `capture-verified.json`.
 
 The synchronized public workspace JSON SHA256 is
 `d912d9a204f66df5380d9d2f00cc954a6484ee9da18a8bdf362095405a4ed8ec`.
-The manifest retains 61 assets. At native handoff, its other 59 pins were
+At native handoff, the manifest retained 61 assets and its other 59 pins were
 unchanged; the later canonical-LF correction also repins the OCR notice's line
 endings, preserving its complete text. The other 58 pins and both native image
 pins stay unchanged through that correction. Workspace JSON has 11,544 bytes,
 notice has 1,845 bytes, both contain zero CRLF and each has equal Git filtered
 and no-filter blob identity. The source hashes therefore survive Git's
-`text/eol=lf` normalization. Exact image
+`text/eol=lf` normalization. The later heading font and notice bring the published
+manifest to 63 assets. Exact image
 hashes, native framing, source identity and private receipt locations are in
 [the source review](XR_WORKSPACE_SOURCE_REVIEW.md). These are source/native
 image checks, not built-page or deployment acceptance.
@@ -303,22 +431,36 @@ neither file was saved. The actual close action, post-close checks and the
 initial no-action UI-stream failure remain in
 `animation-review/.local/xr-workspace-oct18/rhino-close-verified.json`.
 
-## Image review and remaining acceptance
+## Final image review and acceptance limits
 
 The original CAD remains read-only. The first elevated three-quarter workspace
 capture was explicitly rejected by the owner. Its temporary pins and local
 captures do not constitute visual acceptance. The replacement native room pair
 above satisfies the reviewed source/camera, authorized visibility, actual
 materials/lighting, true alpha and high-resolution image requirements. Its
-engine and source identity are recorded. Responsive framing and text/model
-relationships still require the final built-page browser checks.
+engine and source identity are recorded. Subsequent responsive framing and
+text/model relationships are checked against the built artifact and actual
+published page, as recorded above.
 
-The exported public application still requires all-route OCR and 404 checks,
+The completed full CI and live protocol cover all-route typography and 404,
 shared Bending/XR chrome geometry, full-viewport XR canvas geometry, workspace
 decode/error terminal behavior, model hits, all three native phone recordings,
-interrupted lifecycle checks, and Bending regression with the intentional OCR
+interrupted lifecycle checks, and Bending regression with the intentional
 typography change distinguished from protected scene behavior.
 
-Publication remains authorized through completion. Record the exact final
-commit, successful CI run, tested artifact digest, deployment run, exact live
-bytes and live browser captures here only after those events have occurred.
+Actual published-page high-resolution captures are saved under
+`animation-review/.local/room4k-live-2026-10-18T18-12-18.641Z/`: desktop Context
+is **3840 × 2160**, mobile Context and reading are **1170 × 2532**. PNG IHDR
+dimensions are independently read and agree with these pixel counts. The image
+elements decode the original **4096 × 2880 / 2160 × 4674** sources with `contain`,
+without horizontal document overflow or page errors. The root visually inspects
+the actual desktop and whole-room mobile captures; source structure and TV
+proportions remain intact. These captures use native page scrolling and no
+product, CSS, geometry, clock or media overrides. They are browser viewport
+emulation, with the actual source and complete native room retained.
+
+Publication is complete at the exact commit/run/digest above. Subsequent
+Markdown-only evidence and the DORA plan do not create another public build or
+replace the deployed artifact. Preserve original CAD files, all raw source and
+historical failure receipts, and the distinction between source proof, visual
+inspection and physical-device testing.

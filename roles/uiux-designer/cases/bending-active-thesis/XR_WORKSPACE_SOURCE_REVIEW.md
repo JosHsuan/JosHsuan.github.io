@@ -368,5 +368,7 @@ All paths below are relative to the ignored
   file hashes. Native capture receipts remain unmodified.
 
 These receipts establish their stated source, native workflow, raster and pin
-facts. Whole-page desktop/mobile composition, browser checks and same-artifact
-deployment remain separate acceptance requirements.
+facts. Subsequent desktop/mobile composition, full CI, same-artifact publication
+of `ddafd44` and live native acceptance are recorded separately in
+[the final verification record](OCR_XR_VIEWPORT_VERIFICATION.md). The high-resolution
+public image pins and original source remain unchanged through publication.
