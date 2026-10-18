@@ -98,6 +98,7 @@ const sources = [
   'components/ProjectCaseStudy.jsx', 'components/ProjectCaseStudy.module.css',
   'components/ProjectCaseStudyControls.jsx', 'release/project-studies.json',
   'components/ProjectCaseStudyStage.jsx', 'components/project-study-scene.mjs',
+  'components/project-study-appearance.mjs',
   'runtime/site/ProjectStudyStageRegistry.mjs', 'runtime/site/ProjectStudyScenePresenter.mjs',
   ...PROJECT_SLUGS.map(slug=>`app/projects/${slug}/page.jsx`),
   'components/ProjectModelPreview.jsx', 'components/project-model-scene.mjs', 'components/project-model-recipe.mjs', 'components/project-grid-layout.mjs',

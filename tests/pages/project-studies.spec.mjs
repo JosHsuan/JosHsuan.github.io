@@ -25,6 +25,25 @@ function sourceDraw(state,model,viewport){
  expect(resource.firstDraw).toMatchObject({completed:true,sourceRevision:model.sha256,meshes:model.meshes,...viewport});
  expect(resource.firstDraw.sourceCalls).toBeGreaterThanOrEqual(model.meshes);expect(resource.draws).toBeGreaterThan(0);expect(resource.canvasCount).toBe(1);
  expect(resource.size).toEqual(viewport);expect(resource.budget.budget.width*resource.budget.budget.height).toBeLessThanOrEqual(resource.pixelBudget);
+ const id=model.src.split('/')[3],look=resource.appearance;
+ expect(look.profileID).toBe(id);expect(look.phase).toBe('installed');expect(look.disposed).toBe(false);expect(look.renderables).toBe(model.meshes);
+ expect(look.materialClones).toBe(1);expect(look.materials).toHaveLength(1);expect(look.materials[0].sourceTextureReferencesPreserved).toBe(true);
+ if(model.primitive==='points'){
+  expect(look.environment).toMatchObject({kind:'none',generations:0,owned:false});expect(look.lights).toHaveLength(0);
+  expect(look.materials[0]).toMatchObject({type:'PointsMaterial',size:2,sizeAttenuation:false,toneMapped:false});
+ }else{
+  expect(look.environment).toMatchObject({kind:'room-pmrem',generations:1,size:128,atlas:[384,512],owned:true});expect(look.lights).toHaveLength(4);
+  const center=model.bounds.min.map((value,index)=>(value+model.bounds.max[index])*.5);
+  for(const light of look.lights.filter(light=>light.type==='DirectionalLight')){expect(light.targetInScene).toBe(true);expect(light.target).toEqual(center);expect(light.castShadow).toBe(false);}
+ }
+ if(id==='hc3dp-caustics')expect(look.materials[0]).toMatchObject({type:'MeshPhysicalMaterial',ior:1.5700000524520874,metalness:.31024929881095886,roughness:.14681440591812134,transmission:1,opacity:.1052631139755249,transparent:false,side:2,thickness:0});
+ const view=model.views?.[resource.view.chapter];
+ if(view){
+  const direction=resource.pose.position.map((value,index)=>value-resource.pose.target[index]);
+  expect(Math.atan2(direction[0],direction[2])).toBeCloseTo(view.yaw+resource.view.azimuth,10);
+  expect(Math.atan2(direction[1],Math.hypot(direction[0],direction[2]))).toBeCloseTo(Math.max(-.1,Math.min(1.15,view.pitch+resource.view.elevation)),10);
+  expect(resource.pose.fov).toBe(view.fov);
+ }
 }
 async function settled(page,chapter,model){
  await page.waitForFunction(({chapter,wanted})=>{
@@ -34,9 +53,10 @@ async function settled(page,chapter,model){
 }
 async function fullCanvas(page){
  await expect(page.locator('canvas')).toHaveCount(2);await expect(page.locator('[data-project-study-canvas]')).toHaveCount(1);await expect(stage(page).locator('canvas')).toBeVisible();
- const sample=await stage(page).evaluate(node=>({host:node.getBoundingClientRect().toJSON(),canvas:node.querySelector('canvas').getBoundingClientRect().toJSON(),position:getComputedStyle(node).position})),viewport=page.viewportSize();
+ const sample=await stage(page).evaluate(node=>({host:node.getBoundingClientRect().toJSON(),canvas:node.querySelector('canvas').getBoundingClientRect().toJSON(),position:getComputedStyle(node).position,project:node.closest('[data-project-study]').dataset.projectStudy,surround:getComputedStyle(node.querySelector('[data-project-model-surface]')).backgroundImage})),viewport=page.viewportSize();
  expect(sample.position).toBe('fixed');
  for(const box of [sample.host,sample.canvas]){expect(box.x).toBeCloseTo(0,0);expect(box.y).toBeCloseTo(0,0);expect(box.width).toBeCloseTo(viewport.width,0);expect(box.height).toBeCloseTo(viewport.height,0);}
+ if(['dot-based-3d-printing','special-assemblies'].includes(sample.project))expect(sample.surround).toContain('radial-gradient');else expect(sample.surround).toBe('none');
 }
 async function decodeSource(chapter,image){
  // The semantic source image keeps its descriptive alt even when a duplicate

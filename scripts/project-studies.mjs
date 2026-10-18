@@ -44,6 +44,14 @@ export function assertProjectStudies(record,manifest){
       assert((model.primitive==='points')?model.triangles===0:model.triangles>0);
       assert(model.chapters.length>0&&new Set(model.chapters).size===model.chapters.length);
       model.chapters.forEach(id=>assert(['overview',...ids,'credits'].includes(id),'Known model chapter'));
+      if(model.views){
+        assert.deepEqual(Object.keys(model.views).sort(),[...model.chapters].sort(),'Every model chapter has one reviewed camera view');
+        for(const view of Object.values(model.views)){
+          assert([view.yaw,view.pitch,view.fov,view.zoom].every(Number.isFinite),'Finite reviewed camera view');
+          assert(Math.abs(view.yaw)<=Math.PI&&view.pitch>=-.1&&view.pitch<=1.15&&view.fov>1&&view.fov<175);
+          assert(view.zoom>=1,'Reviewed camera fitting cannot crop the complete original source');
+        }
+      }
       for(let i=0;i<3;i++)assert(Number.isFinite(model.bounds.min[i])&&Number.isFinite(model.bounds.max[i])&&model.bounds.max[i]>model.bounds.min[i]);
       assert([project.hero,...project.sections.flatMap(section=>section.media)].some(image=>image.src===model.poster.src),'Model fallback uses this project\'s selected source image');
     }

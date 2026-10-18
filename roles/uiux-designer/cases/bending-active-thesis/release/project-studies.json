@@ -34,11 +34,11 @@
           ],
           "media": [
             {
-              "src": "/assets/projects/mode-s-of-making/assembly-visualization.webp",
-              "width": 2267,
-              "height": 3200,
-              "alt": "Digital visualization of custom bricks, assembly variations and the cutting machine.",
-              "caption": "A fabrication and assembly visualization, identified as an imagined process in the portfolio.",
+              "src": "/assets/projects/mode-s-of-making/fabrication-assembly-spread.webp",
+              "width": 3200,
+              "height": 2263,
+              "alt": "The complete landscape visualization joins curved-unit assemblies, a rotary cutting setup and its exploded machine components.",
+              "caption": "Imagined fabrication and assembly, with the cutting machine’s exploded components.",
               "credit": "Design study: Chia-Hsuan Chao / National Cheng Kung University."
             }
           ]
@@ -82,11 +82,11 @@
           ],
           "media": [
             {
-              "src": "/assets/projects/mode-s-of-making/machine-exploded.webp",
-              "width": 2267,
-              "height": 3200,
-              "alt": "Exploded digital model of the stepper motors, rods, belts, bearings and rotary holder.",
-              "caption": "The machine components and the relationship between planar and rotating movement.",
+              "src": "/assets/projects/mode-s-of-making/fabrication-assembly-spread.webp",
+              "width": 3200,
+              "height": 2263,
+              "alt": "The complete landscape visualization joins curved-unit assemblies, a rotary cutting setup and its exploded machine components.",
+              "caption": "Imagined fabrication and assembly, with the cutting machine’s exploded components.",
               "credit": "Design study: Chia-Hsuan Chao / National Cheng Kung University."
             },
             {
@@ -182,7 +182,21 @@
         "chapters": [
           "context",
           "results"
-        ]
+        ],
+        "views": {
+          "context": {
+            "yaw": 0.56,
+            "pitch": 0.18,
+            "fov": 36,
+            "zoom": 1.04
+          },
+          "results": {
+            "yaw": 0.76,
+            "pitch": 0.28,
+            "fov": 36,
+            "zoom": 1.04
+          }
+        }
       }
     },
     {
@@ -374,7 +388,21 @@
         "chapters": [
           "context",
           "system"
-        ]
+        ],
+        "views": {
+          "context": {
+            "yaw": 0.58,
+            "pitch": 0.16,
+            "fov": 36,
+            "zoom": 1.04
+          },
+          "system": {
+            "yaw": 0.9,
+            "pitch": 0.34,
+            "fov": 36,
+            "zoom": 1.04
+          }
+        }
       }
     },
     {
@@ -561,7 +589,15 @@
         "alt": "Recorded low-speed dot-path sample positions from Group 1. This point study describes the path rather than a finished solid.",
         "chapters": [
           "system"
-        ]
+        ],
+        "views": {
+          "system": {
+            "yaw": 0.5,
+            "pitch": 0.16,
+            "fov": 36,
+            "zoom": 1.04
+          }
+        }
       }
     },
     {
@@ -741,7 +777,21 @@
         "chapters": [
           "context",
           "system"
-        ]
+        ],
+        "views": {
+          "context": {
+            "yaw": 0.72,
+            "pitch": 0.14,
+            "fov": 36,
+            "zoom": 1.04
+          },
+          "system": {
+            "yaw": 0.92,
+            "pitch": 0.38,
+            "fov": 36,
+            "zoom": 1.04
+          }
+        }
       }
     },
     {
@@ -929,7 +979,21 @@
         "chapters": [
           "context",
           "system"
-        ]
+        ],
+        "views": {
+          "context": {
+            "yaw": 0.6,
+            "pitch": 0.16,
+            "fov": 36,
+            "zoom": 1.04
+          },
+          "system": {
+            "yaw": 0.92,
+            "pitch": 0.32,
+            "fov": 36,
+            "zoom": 1.04
+          }
+        }
       }
     },
     {

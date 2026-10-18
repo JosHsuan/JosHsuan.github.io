@@ -138,7 +138,7 @@ test('real GLTF parsing retains triangle and point POSITION buffers and validate
  for(const points of [false,true]){
   const {bytes,positions}=sourceGLB(points),f=rendererFixture(),controller=new AbortController();
   globalThis.fetch=async()=>({ok:true,arrayBuffer:async()=>bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength)});
-  const model={src:'/assets/projects/test/source.glb',sha256:createHash('sha256').update(bytes).digest('hex'),bytes:bytes.length,sourceUnits:'millimeters',webUnits:'meters',upAxis:'Y',primitive:points?'points':'triangles',vertices:3,triangles:points?0:1,meshes:1,bounds:{min:[-1,0,0],max:[1,1,0]},chapters:models};
+  const model={src:points?'/assets/projects/dot-based-3d-printing/model.glb':'/assets/projects/test/source.glb',sha256:createHash('sha256').update(bytes).digest('hex'),bytes:bytes.length,sourceUnits:'millimeters',webUnits:'meters',upAxis:'Y',primitive:points?'points':'triangles',vertices:3,triangles:points?0:1,meshes:1,bounds:{min:[-1,0,0],max:[1,1,0]},chapters:models};
   const scene=await acquireProjectStudyScene({host:f.host,model,signal:controller.signal,createRenderer:()=>f.renderer});
   assert.equal(scene.inspect().firstDraw,null);scene.resize(4096,2160);assert.equal(scene.inspect().firstDraw.completed,true);assert.equal(scene.inspect().drawnMeshes,1);assert.equal(scene.inspect().sourcePoints,points?3:0);assert.deepEqual(f.report.positions,positions,'No geometry is generated, rescaled or rewritten');
   assert.equal(f.report.primitive,model.primitive);if(points){assert.equal(f.report.pointSize,2);assert.equal(f.report.attenuation,false);}

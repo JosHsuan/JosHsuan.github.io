@@ -209,52 +209,87 @@
       "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
     },
     {
-      "id": "mode-s-of-making-assembly-visualization",
+      "id": "mode-s-of-making-fabrication-assembly-spread",
       "projectId": "mode-s-of-making",
-      "path": "assets/projects/mode-s-of-making/assembly-visualization.webp",
-      "src": "/assets/projects/mode-s-of-making/assembly-visualization.webp",
-      "width": 2267,
-      "height": 3200,
-      "bytes": 510550,
-      "sha256": "43028d489879647685e4c0102d97a88f148247f64c838b0013bf0d3e52a8cb31",
+      "path": "assets/projects/mode-s-of-making/fabrication-assembly-spread.webp",
+      "src": "/assets/projects/mode-s-of-making/fabrication-assembly-spread.webp",
+      "width": 3200,
+      "height": 2263,
+      "alt": "The complete landscape visualization joins curved-unit assemblies, a rotary cutting setup and its exploded machine components.",
+      "caption": "Imagined fabrication and assembly, with the cutting machine’s exploded components.",
+      "credit": "Design study: Chia-Hsuan Chao / National Cheng Kung University.",
+      "bytes": 602486,
+      "sha256": "543ce2861130c670bafa729e188de2c819abe805a0e81a1f1fd4d0c125bc169c",
       "source": {
         "file": "JosHsuan_CV&Portfolio_2025_Print.pdf",
         "bytes": 361589115,
         "sha256": "fdaf47a2df174e73d698a72c362b0644240bfd39448042ffcb3f1024fd27bd71",
         "locator": {
-          "physicalPage": 34,
-          "printedPage": 29,
-          "figure": "4-04"
-        },
-        "imageObject": {
-          "index": 0,
-          "name": "Im0.jpg",
-          "width": 2485,
-          "height": 3508,
-          "bytes": 800596,
-          "sha256": "5d8d924ba92e425dd408baa61ba4b36970e42e4752d4326ab318e0b856d111b6"
+          "physicalPages": [
+            34,
+            35
+          ],
+          "printedPages": [
+            29,
+            30
+          ],
+          "figure": "Complete fabrication and assembly spread"
         },
         "narrativeReference": {
           "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
           "bytes": 22624290,
           "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
           "locator": {
-            "physicalPage": 58,
-            "printedPage": 53,
-            "figure": "5-04"
+            "physicalPages": [
+              58,
+              59
+            ],
+            "printedPages": [
+              53,
+              54
+            ],
+            "figure": "Complete fabrication and assembly spread"
           }
         },
-        "identityReview": "Same composition, geometry, diagram connections or photograph group as the primary reference. Selected only for higher native image resolution; no old copy adopted."
+        "identityReview": "The two facing-page raster objects form one continuous landscape composition. Placement matrices imply 8.998478 pixels of overlap; independent native-pixel search uniquely selects 9 columns and zero vertical offset. The left object and all remaining right-object pixels are copied exactly before the single proportional output reduction. Independent JPEG objects differ in the overlap; no claim of identical overlapping bytes is made.",
+        "imageObjects": [
+          {
+            "index": 0,
+            "name": "Im0.jpg",
+            "width": 2485,
+            "height": 3508,
+            "bytes": 800596,
+            "sha256": "5d8d924ba92e425dd408baa61ba4b36970e42e4752d4326ab318e0b856d111b6",
+            "physicalPage": 34,
+            "xref": 2572
+          },
+          {
+            "index": 0,
+            "name": "Im0.jpg",
+            "width": 2485,
+            "height": 3508,
+            "bytes": 862412,
+            "sha256": "1c2b47e51f9cee44ca4836d4712cdecfb57781ee4ecd3dec056374cad2d1f24f",
+            "physicalPage": 35,
+            "xref": 2576
+          }
+        ]
       },
       "processing": {
-        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "method": "Restore the continuous book spread from its two native raster halves, left then right at their original scale; omit the right object’s duplicate first 9 columns. No blending, filling, geometric warping, AI, retouching or colour grading. Proportional reduction and WebP encoding follow.",
         "inputPixels": [
+          4961,
+          3508
+        ],
+        "nativeHalfPixels": [
           2485,
           3508
         ],
+        "overlapPixels": 9,
+        "verticalOffsetPixels": 0,
         "cropPixels": null,
         "preResizePixels": [
-          2485,
+          4961,
           3508
         ],
         "maxLongEdge": 3200,
@@ -268,70 +303,6 @@
         },
         "metadata": "EXIF, XMP and private filesystem metadata omitted."
       },
-      "credit": "Design study: Chia-Hsuan Chao / National Cheng Kung University.",
-      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
-    },
-    {
-      "id": "mode-s-of-making-machine-exploded",
-      "projectId": "mode-s-of-making",
-      "path": "assets/projects/mode-s-of-making/machine-exploded.webp",
-      "src": "/assets/projects/mode-s-of-making/machine-exploded.webp",
-      "width": 2267,
-      "height": 3200,
-      "bytes": 512116,
-      "sha256": "a44c52183bd37123dcd5caf1f792602baa17d8c4a0393c8f1121962ae47d314f",
-      "source": {
-        "file": "JosHsuan_CV&Portfolio_2025_Print.pdf",
-        "bytes": 361589115,
-        "sha256": "fdaf47a2df174e73d698a72c362b0644240bfd39448042ffcb3f1024fd27bd71",
-        "locator": {
-          "physicalPage": 35,
-          "printedPage": 30,
-          "figure": "4-05"
-        },
-        "imageObject": {
-          "index": 0,
-          "name": "Im0.jpg",
-          "width": 2485,
-          "height": 3508,
-          "bytes": 862412,
-          "sha256": "1c2b47e51f9cee44ca4836d4712cdecfb57781ee4ecd3dec056374cad2d1f24f"
-        },
-        "narrativeReference": {
-          "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
-          "bytes": 22624290,
-          "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
-          "locator": {
-            "physicalPage": 59,
-            "printedPage": 54,
-            "figure": "5-05"
-          }
-        },
-        "identityReview": "Same composition, geometry, diagram connections or photograph group as the primary reference. Selected only for higher native image resolution; no old copy adopted."
-      },
-      "processing": {
-        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
-        "inputPixels": [
-          2485,
-          3508
-        ],
-        "cropPixels": null,
-        "preResizePixels": [
-          2485,
-          3508
-        ],
-        "maxLongEdge": 3200,
-        "upscaled": false,
-        "selectedFrame": null,
-        "encoding": {
-          "format": "WebP",
-          "quality": 95,
-          "lossless": false,
-          "method": 6
-        },
-        "metadata": "EXIF, XMP and private filesystem metadata omitted."
-      },
-      "credit": "Design study: Chia-Hsuan Chao / National Cheng Kung University.",
       "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
     },
     {
@@ -2299,6 +2270,76 @@
           "reorder": false
         },
         "method": "Original stored mesh positions and faces converted once to the verified web coordinate convention; no procedural replacement."
+      },
+      "displayAdaptation": {
+        "adapter": "Project-local static material and lighting presentation; no geometry/source-asset rewrite.",
+        "reviewSHA256": "eb3110f62515c117b7b589d9737a4c768809b74d5f392ccae041341102dca21b",
+        "materialPolicy": "The native source lacks an authored finish. Apply a source-photo-informed neutral display material; values are presentation choices rather than measured physical properties.",
+        "material": {
+          "class": "MeshStandardMaterial",
+          "baseColorLinearRGB": [
+            0.76,
+            0.77,
+            0.74
+          ],
+          "metalness": 0,
+          "roughness": 0.88,
+          "emissiveLinearRGB": [
+            0,
+            0,
+            0
+          ],
+          "opacity": 1,
+          "transparent": false,
+          "side": "retain source DoubleSide",
+          "flatShading": false,
+          "normalMap": null,
+          "bumpMap": null
+        },
+        "lighting": {
+          "environmentIntensity": 0.32,
+          "hemisphereIntensity": 0.4,
+          "keyIntensity": 2.2,
+          "fillIntensity": 0.35,
+          "rimIntensity": 0.55
+        },
+        "environment": {
+          "kind": "Three RoomEnvironment to PMREM",
+          "cubeFaceSize": 128,
+          "sigma": 0.04,
+          "environmentRotationYRadians": 0.35,
+          "background": null,
+          "ownership": "One baked target per project resource; retained while off chapter or suspended, released on true disposal. No new render loop or HDR download."
+        },
+        "sourcePreservation": "Original transforms, positions, normals, UVs, indices, source-file revision, topology and complete first-draw coverage remain unchanged.",
+        "limits": [
+          "The albedo/roughness are source-informed display choices, not measured EPS data.",
+          "No coating/clearcoat/transmission; shiny beige plastic would contradict the visible physical material.",
+          "No UV exists. A fake repeated foam/wood map or shader displacement would add unsupported surface detail."
+        ],
+        "cameraPresentation": {
+          "views": {
+            "context": {
+              "yaw": 0.56,
+              "pitch": 0.18,
+              "fov": 36,
+              "zoom": 1.04
+            },
+            "results": {
+              "yaw": 0.76,
+              "pitch": 0.28,
+              "fov": 36,
+              "zoom": 1.04
+            }
+          },
+          "composition": "Whole-source bounds-centred perspective, with a small chapter-specific viewing change and a four-percent distance increase. No independent part rotation, source deformation, crop or autonomous camera clock.",
+          "reviewRoles": [
+            "Animation cinematographer",
+            "Scene designer",
+            "Experience director"
+          ],
+          "backdrop": "Existing shared background; no additional project surround."
+        }
       }
     },
     {
@@ -2346,6 +2387,76 @@
           "reorder": false
         },
         "method": "Original stored mesh positions and faces converted once to the verified web coordinate convention; no procedural replacement."
+      },
+      "displayAdaptation": {
+        "adapter": "Project-local static material and lighting presentation; no geometry/source-asset rewrite.",
+        "reviewSHA256": "eb3110f62515c117b7b589d9737a4c768809b74d5f392ccae041341102dca21b",
+        "materialPolicy": "The native source lacks an authored finish. Apply a source-photo-informed neutral display material; values are presentation choices rather than measured physical properties.",
+        "material": {
+          "class": "MeshStandardMaterial",
+          "baseColorLinearRGB": [
+            0.58,
+            0.6,
+            0.62
+          ],
+          "metalness": 0.9,
+          "roughness": 0.36,
+          "emissiveLinearRGB": [
+            0,
+            0,
+            0
+          ],
+          "opacity": 1,
+          "transparent": false,
+          "side": "retain source DoubleSide",
+          "flatShading": false,
+          "normalMap": null,
+          "bumpMap": null
+        },
+        "lighting": {
+          "environmentIntensity": 0.85,
+          "hemisphereIntensity": 0.25,
+          "keyIntensity": 2.2,
+          "fillIntensity": 0.3,
+          "rimIntensity": 1
+        },
+        "environment": {
+          "kind": "Three RoomEnvironment to PMREM",
+          "cubeFaceSize": 128,
+          "sigma": 0.04,
+          "environmentRotationYRadians": 0.35,
+          "background": null,
+          "ownership": "One baked target per project resource; retained while off chapter or suspended, released on true disposal. No new render loop or HDR download."
+        },
+        "sourcePreservation": "Original transforms, positions, normals, UVs, indices, source-file revision, topology and complete first-draw coverage remain unchanged.",
+        "limits": [
+          "Metalness 0.90 is an editorial mixed-surface starting value, not an alloy identifier, coating measurement or final-built certification. Do not call it stainless steel, aluminium, anodized or powder coated.",
+          "Do not sharpen or add brushing anisotropy: verified UVs do not establish a brushing direction.",
+          "The published derivative is a single merged primitive. This plan is a neutral whole-scheme finish, not a verified per-component material schedule. Do not infer panel/core/base materials by triangle position. A future multi-material split needs recorded source-object ranges and separate review without changing original geometry buffers."
+        ],
+        "cameraPresentation": {
+          "views": {
+            "context": {
+              "yaw": 0.58,
+              "pitch": 0.16,
+              "fov": 36,
+              "zoom": 1.04
+            },
+            "system": {
+              "yaw": 0.9,
+              "pitch": 0.34,
+              "fov": 36,
+              "zoom": 1.04
+            }
+          },
+          "composition": "Whole-source bounds-centred perspective, with a small chapter-specific viewing change and a four-percent distance increase. No independent part rotation, source deformation, crop or autonomous camera clock.",
+          "reviewRoles": [
+            "Animation cinematographer",
+            "Scene designer",
+            "Experience director"
+          ],
+          "backdrop": "Existing shared background; no additional project surround."
+        }
       }
     },
     {
@@ -2394,6 +2505,62 @@
           "reorder": false
         },
         "method": "Original velocity=2 sample positions converted once to web coordinates; native point primitive, no reconstructed surface."
+      },
+      "displayAdaptation": {
+        "adapter": "Project-local static material and lighting presentation; no geometry/source-asset rewrite.",
+        "reviewSHA256": "eb3110f62515c117b7b589d9737a4c768809b74d5f392ccae041341102dca21b",
+        "materialPolicy": "Preserve all original Points and positions; use a two-pixel unlit explanatory graphic. No fabricated surface, tube or physical TPU material.",
+        "material": {
+          "class": "retain native PointsMaterial/unlit primitive",
+          "baseColorLinearRGB": [
+            0.48,
+            0.68,
+            0.8
+          ],
+          "sizeCSSPixels": 2,
+          "sizeAttenuation": false,
+          "opacity": 1,
+          "transparent": false,
+          "depthTest": true,
+          "depthWrite": true,
+          "toneMapped": false,
+          "blending": "NormalBlending",
+          "pointCount": 14810
+        },
+        "lighting": {
+          "environmentIntensity": 0,
+          "hemisphereIntensity": 0,
+          "keyIntensity": 0,
+          "fillIntensity": 0,
+          "rimIntensity": 0,
+          "createPMREM": false
+        },
+        "environment": {
+          "created": false
+        },
+        "sourcePreservation": "Original transforms, positions, normals, UVs, indices, source-file revision, topology and complete first-draw coverage remain unchanged.",
+        "limits": [
+          "Unlit points do not possess a PBR material response. Do not convert them into spheres, tubes, surfaces or a skin to imitate TPU.",
+          "The colour is an explicitly explanatory graphic choice, not a sampled material reflectance or physical process measurement.",
+          "Do not reduce/drop points or lower their opacity until they falsely look like a continuous solid. The original positions/counts/primitive remain exact."
+        ],
+        "cameraPresentation": {
+          "views": {
+            "system": {
+              "yaw": 0.5,
+              "pitch": 0.16,
+              "fov": 36,
+              "zoom": 1.04
+            }
+          },
+          "composition": "Whole-source bounds-centred perspective, with a small chapter-specific viewing change and a four-percent distance increase. No independent part rotation, source deformation, crop or autonomous camera clock.",
+          "reviewRoles": [
+            "Animation cinematographer",
+            "Scene designer",
+            "Experience director"
+          ],
+          "backdrop": "A project-local CSS radial darkening behind sparse points or sticks follows the existing model surface visibility. Shared background rendering and time ownership remain unchanged."
+        }
       }
     },
     {
@@ -2441,6 +2608,92 @@
           "reorder": false
         },
         "method": "Original complete shade exported by Blender 4.0.2 glTF exporter; original node transform, normal/UV seams and exported material retained. Exact raw buffer compression. The original procedural shader and IOR graph are not equivalent to the glTF material; this is not a new optical simulation."
+      },
+      "displayAdaptation": {
+        "adapter": "Project-local static material and lighting presentation; no geometry/source-asset rewrite.",
+        "reviewSHA256": "eb3110f62515c117b7b589d9737a4c768809b74d5f392ccae041341102dca21b",
+        "materialPolicy": "Clone and preserve every native exported physical-material field; only correct the recorded source IOR scalar to 1.5700000524520874. This is not the complete linked Blender shader.",
+        "material": {
+          "class": "Preserve native MeshPhysicalMaterial (clone only if resource ownership requires)",
+          "preserveAllNativeFields": true,
+          "baseColorLinearRGB": [
+            1,
+            1,
+            1
+          ],
+          "metalness": 0.31024929881095886,
+          "roughness": 0.14681440591812134,
+          "transmission": 1,
+          "opacity": 0.1052631139755249,
+          "transparent": false,
+          "side": "retain native DoubleSide",
+          "thickness": "retain native 0",
+          "attenuationDistance": "retain native Infinity",
+          "normalMap": "retain native null",
+          "bumpMap": "retain native null",
+          "onlyOverride": {
+            "ior": 1.5700000524520874
+          }
+        },
+        "lighting": {
+          "environmentIntensity": 0.7,
+          "hemisphereIntensity": 0.18,
+          "keyIntensity": 1.9,
+          "fillIntensity": 0.25,
+          "rimIntensity": 1.2,
+          "transmissionResolutionScale": 1
+        },
+        "environment": {
+          "kind": "Three RoomEnvironment to PMREM",
+          "cubeFaceSize": 128,
+          "sigma": 0.04,
+          "environmentRotationYRadians": 0.35,
+          "background": null,
+          "ownership": "One baked target per project resource; retained while off chapter or suspended, released on true disposal. No new render loop or HDR download."
+        },
+        "sourcePreservation": "Original transforms, positions, normals, UVs, indices, source-file revision, topology and complete first-draw coverage remain unchanged.",
+        "limits": [
+          "Three transmission samples the WebGL opaque framebuffer. The separate CSS/Canvas2D site field is not part of that texture and cannot be optically refracted by setting transmission/IOR alone. Environment reflection improves recognisability without claiming CSS-field refraction.",
+          "No caustic projection, multiple scattering, full Blender shader/lighting match, ray-dependent IOR, optical correctness or photographed-pixel equivalence is claimed. Do not draw an invented caustic light pool.",
+          "No procedural Noise/Bump port in the first adapter. The existing complete geometry already contains fine authored surface relief; keep POSITION/NORMAL/UV/index buffers unchanged.",
+          "Current source-native receipt omits Value-node output, ColorRamp elements, some socket data types/identifiers and relevant node modes. Input dictionaries keyed only by duplicated socket names do not establish the complete evaluated procedural graph."
+        ],
+        "visualRefinement": {
+          "reason": "The initial native visual comparison showed broad near-white highlights obscuring the relief. Reduce only the environment and key amplitudes, retaining all native PBR fields and the evidenced IOR correction.",
+          "before": {
+            "environmentIntensity": 1.1,
+            "keyIntensity": 2.6
+          },
+          "after": {
+            "environmentIntensity": 0.7,
+            "keyIntensity": 1.9
+          },
+          "unchanged": "Hemisphere/fill/rim, exposure, original full geometry, transmission resolution, alpha semantics and all other material fields.",
+          "acceptance": "Native same-camera comparison is required; no optical simulation equivalence is implied."
+        },
+        "cameraPresentation": {
+          "views": {
+            "context": {
+              "yaw": 0.72,
+              "pitch": 0.14,
+              "fov": 36,
+              "zoom": 1.04
+            },
+            "system": {
+              "yaw": 0.92,
+              "pitch": 0.38,
+              "fov": 36,
+              "zoom": 1.04
+            }
+          },
+          "composition": "Whole-source bounds-centred perspective, with a small chapter-specific viewing change and a four-percent distance increase. No independent part rotation, source deformation, crop or autonomous camera clock.",
+          "reviewRoles": [
+            "Animation cinematographer",
+            "Scene designer",
+            "Experience director"
+          ],
+          "backdrop": "Existing shared background; no additional project surround."
+        }
       }
     },
     {
@@ -2488,6 +2741,76 @@
           "reorder": false
         },
         "method": "Original stored mesh positions and faces converted once to the verified web coordinate convention; no procedural replacement."
+      },
+      "displayAdaptation": {
+        "adapter": "Project-local static material and lighting presentation; no geometry/source-asset rewrite.",
+        "reviewSHA256": "eb3110f62515c117b7b589d9737a4c768809b74d5f392ccae041341102dca21b",
+        "materialPolicy": "The native source lacks an authored finish. Apply a source-photo-informed neutral display material; values are presentation choices rather than measured physical properties.",
+        "material": {
+          "class": "MeshStandardMaterial",
+          "baseColorLinearRGB": [
+            0.49,
+            0.34,
+            0.2
+          ],
+          "metalness": 0,
+          "roughness": 0.76,
+          "emissiveLinearRGB": [
+            0,
+            0,
+            0
+          ],
+          "opacity": 1,
+          "transparent": false,
+          "side": "retain source DoubleSide",
+          "flatShading": false,
+          "normalMap": null,
+          "bumpMap": null
+        },
+        "lighting": {
+          "environmentIntensity": 0.45,
+          "hemisphereIntensity": 0.35,
+          "keyIntensity": 2,
+          "fillIntensity": 0.3,
+          "rimIntensity": 0.65
+        },
+        "environment": {
+          "kind": "Three RoomEnvironment to PMREM",
+          "cubeFaceSize": 128,
+          "sigma": 0.04,
+          "environmentRotationYRadians": 0.35,
+          "background": null,
+          "ownership": "One baked target per project resource; retained while off chapter or suspended, released on true disposal. No new render loop or HDR download."
+        },
+        "sourcePreservation": "Original transforms, positions, normals, UVs, indices, source-file revision, topology and complete first-draw coverage remain unchanged.",
+        "limits": [
+          "Wood species, measured finish and exact final prototype identity are not established.",
+          "No UV exists; source world-coordinate meshes do not make object-local X a reliable grain axis. Do not attach the role bamboo-wall reference texture or fake cross-member grain.",
+          "Keep shadows disabled for the first adapter. If contact needs improvement after real inspection, Special alone is a cheap candidate for one bounded static key shadow, not an invented base/ground or an all-model shadow pass."
+        ],
+        "cameraPresentation": {
+          "views": {
+            "context": {
+              "yaw": 0.6,
+              "pitch": 0.16,
+              "fov": 36,
+              "zoom": 1.04
+            },
+            "system": {
+              "yaw": 0.92,
+              "pitch": 0.32,
+              "fov": 36,
+              "zoom": 1.04
+            }
+          },
+          "composition": "Whole-source bounds-centred perspective, with a small chapter-specific viewing change and a four-percent distance increase. No independent part rotation, source deformation, crop or autonomous camera clock.",
+          "reviewRoles": [
+            "Animation cinematographer",
+            "Scene designer",
+            "Experience director"
+          ],
+          "backdrop": "A project-local CSS radial darkening behind sparse points or sticks follows the existing model surface visibility. Shared background rendering and time ownership remain unchanged."
+        }
       }
     }
   ],

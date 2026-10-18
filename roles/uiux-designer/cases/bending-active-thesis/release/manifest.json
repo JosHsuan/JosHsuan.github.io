@@ -401,14 +401,9 @@
       "sha256": "8695d585ea84fe7a317eb4709373d8c187adcb9389087da6034e0b82f20c14ff"
     },
     {
-      "path": "assets/projects/mode-s-of-making/assembly-visualization.webp",
-      "bytes": 510550,
-      "sha256": "43028d489879647685e4c0102d97a88f148247f64c838b0013bf0d3e52a8cb31"
-    },
-    {
-      "path": "assets/projects/mode-s-of-making/machine-exploded.webp",
-      "bytes": 512116,
-      "sha256": "a44c52183bd37123dcd5caf1f792602baa17d8c4a0393c8f1121962ae47d314f"
+      "path": "assets/projects/mode-s-of-making/fabrication-assembly-spread.webp",
+      "bytes": 602486,
+      "sha256": "543ce2861130c670bafa729e188de2c819abe805a0e81a1f1fd4d0c125bc169c"
     },
     {
       "path": "assets/projects/mode-s-of-making/machine-prototype.webp",
@@ -629,6 +624,6 @@
   "xrStudySHA256": "a5edc97bb895c9427ed2457e918b143a05f1a7a91d4cfda9327a3e1e848648b0",
   "contactSHA256": "c68b4bc45a3ecc13eeee55bae43f3cab75f2085a095a5084e1494f90c5695882",
   "xrWorkspaceSHA256": "d912d9a204f66df5380d9d2f00cc954a6484ee9da18a8bdf362095405a4ed8ec",
-  "projectStudiesSHA256": "e02c3205063d500ee1ba4968097112fa09eee2c32a39819d7248a5aa35f08706",
-  "projectAssetsSHA256": "ba192fa51e8b460886fc6f9fb398c8b55aec6e3929823fcafc2dcb685a199e4c"
+  "projectStudiesSHA256": "23452fa336eff35aab83cd4d49e7d98c0839383f09345eedd910a8d8fe8c8a0d",
+  "projectAssetsSHA256": "f765439792ab8055d54d08e2e4753b399f9655653380b027355f1b3cfe2dbbe9"
 }

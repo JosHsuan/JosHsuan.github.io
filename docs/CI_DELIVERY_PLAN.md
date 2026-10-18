@@ -41,6 +41,19 @@ The completed run provides this first full-run timing sample. Durations below ar
 
 The eight parallel browser-job logs span approximately 31 minutes 22 seconds; summing suite execution times gives approximately 130 minutes 11 seconds. These are different measurements, and neither establishes a p95 or a controlled speedup. The independent [verification record](../roles/uiux-designer/cases/bending-active-thesis/OCR_XR_VIEWPORT_VERIFICATION.md) records the exact log hashes, timestamps, gate and artifact digest. The uneven distribution makes duration-based partitioning the first performance experiment after the bounded capacity repair.
 
+The later six-study work expands the collected public inventory to **114 unique
+cases per profile / 342 executions**, with a further **12 framework executions
+for each of root and subpath**. These are inventory counts, not a completed
+release result. Its [integration record](../roles/uiux-designer/cases/bending-active-thesis/SIX_PROJECT_STUDIES_INTEGRATION.md)
+separates the cancelled `6dcb159` candidate from the owner's subsequent restored
+spread and material/light revision. New source, clone/disposal and light-placement
+contracts run in the cheap CPU layer; native PMREM/transmission, source first
+draw, interaction and visual acceptance remain browser/release checks. Future
+duration balancing must account for those GPU costs and retain all source
+geometry, original time bounds and the exact scenario union. It must not treat
+an owner-superseded candidate as a production change failure or a timing sample
+for a completed full run.
+
 ## Planned feedback and release stages
 
 The table describes the target structure. Existing jobs implement parts of it; the dedicated fast browser stage and duration reporting are proposed improvements.

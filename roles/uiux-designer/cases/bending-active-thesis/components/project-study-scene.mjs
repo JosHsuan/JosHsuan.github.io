@@ -3,6 +3,7 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';
 import {createRendererBudget} from './renderer-budget.mjs';
 import {fitResearchCamera,RESEARCH_MODEL_PIXELS} from './research-scene-geometry.mjs';
+import {installProjectStudyAppearance} from './project-study-appearance.mjs';
 
 const aborted=()=>new DOMException('Project study released','AbortError');
 function releaseObject(root){
@@ -10,19 +11,20 @@ function releaseObject(root){
  root?.traverse(node=>{if(node.geometry)geometries.add(node.geometry);for(const material of(Array.isArray(node.material)?node.material:node.material?[node.material]:[])){materials.add(material);for(const value of Object.values(material))if(value?.isTexture)textures.add(value);}});
  geometries.forEach(value=>value.dispose());materials.forEach(value=>value.dispose());textures.forEach(value=>{value.image?.close?.();value.dispose();});
 }
-/** A single full-viewport renderer. Source transforms, vertices, materials and
- * UVs are never rewritten. The site driver supplies every presentation fact. */
+/** A single full-viewport renderer. Original source transforms, geometry and UVs
+ * stay exact. Scoped material clones and a static light rig own presentation;
+ * the existing site driver supplies every time-dependent fact. */
 export async function acquireProjectStudyScene({host,model,signal,onFailure=()=>{},createRenderer=options=>new T.WebGLRenderer(options)}){
  if(signal.aborted)throw aborted();
  const win=host.ownerDocument.defaultView,manager=new T.LoadingManager();
- let renderer=null,budget=null,scene=null,camera=null,gltf=null,support=null,disposed=false,shaderError=false;
+ let renderer=null,budget=null,scene=null,camera=null,gltf=null,support=null,appearance=null,disposed=false,shaderError=false;
  let size={width:0,height:0},state={chapter:model.chapters[0],azimuth:0,elevation:0},lastKey='',draws=0,firstDraw=null,successfulPaint=false,pose=null;
  let revision=null,vertices=0,triangles=0,meshes=0,drawnMeshes=0,sourceCalls=0,sourcePoints=0;
  const ray=new T.Raycaster(),point=new T.Vector2(),painted=new Set();
  const lost=event=>{event.preventDefault();successfulPaint=false;onFailure('context-lost');};
  const dispose=()=>{
   if(disposed)return;disposed=true;signal.removeEventListener('abort',dispose);manager.abort();
-  releaseObject(gltf?.scene);gltf=null;support=null;scene?.clear();scene=null;
+  appearance?.dispose();appearance=null;releaseObject(gltf?.scene);gltf=null;support=null;scene?.clear();scene=null;
   if(renderer){renderer.domElement.removeEventListener('webglcontextlost',lost);renderer.domElement.remove();budget?.dispose();renderer.dispose();renderer.forceContextLoss();renderer=null;}
  };
  signal.addEventListener('abort',dispose,{once:true});
@@ -67,7 +69,7 @@ export async function acquireProjectStudyScene({host,model,signal,onFailure=()=>
    if(!node.isMesh&&!node.isPoints)return;
    if(primitive==='points'?!node.isPoints:!node.isMesh)throw Error('Project source primitive differs');
    meshes++;vertices+=node.geometry.getAttribute('position').count;
-   if(node.isPoints){sourcePoints+=node.geometry.getAttribute('position').count;for(const material of Array.isArray(node.material)?node.material:[node.material]){material.size=2;material.sizeAttenuation=false;material.needsUpdate=true;}}
+   if(node.isPoints)sourcePoints+=node.geometry.getAttribute('position').count;
    else triangles+=(node.geometry.index?.count??node.geometry.getAttribute('position').count)/3;
    const previous=node.onBeforeRender;node.onBeforeRender=function(...args){painted.add(node);sourceCalls++;previous.apply(this,args);};
   });
@@ -87,14 +89,14 @@ export async function acquireProjectStudyScene({host,model,signal,onFailure=()=>
   renderer.debug.onShaderError=()=>{shaderError=true;};renderer.domElement.dataset.projectStudyCanvas='';renderer.domElement.setAttribute('aria-hidden','true');
   Object.assign(renderer.domElement.style,{position:'absolute',inset:'0',width:'100%',height:'100%',display:'block',pointerEvents:'none'});renderer.domElement.addEventListener('webglcontextlost',lost);
   budget=createRendererBudget(renderer,()=>({deviceDpr:win.devicePixelRatio||1,pixelBudget:RESEARCH_MODEL_PIXELS}));
-  scene=new T.Scene();camera=new T.PerspectiveCamera();scene.add(gltf.scene,new T.HemisphereLight('#d8e9f4','#484b40',2));
-  const key=new T.DirectionalLight('#fff0df',2.2);key.position.set(2,4,3);scene.add(key);const fill=new T.DirectionalLight('#90b9d8',.8);fill.position.set(-3,1,-2);scene.add(fill);
+  scene=new T.Scene();camera=new T.PerspectiveCamera();scene.add(gltf.scene);
+  appearance=installProjectStudyAppearance({scene,source:gltf.scene,renderer,bounds:model.bounds,projectId:url.pathname.split('/')[3]});
   (host.querySelector('[data-project-model-surface]')??host).appendChild(renderer.domElement);
   return{
    resize(width,height){if(disposed||!(width>0&&height>0))return;size={width,height};draw();},
    present(next){if(disposed)return;state={...state,...next};draw();},
    hitTest(x,y){if(disposed||!successfulPaint||!renderer)return false;const rect=renderer.domElement.getBoundingClientRect();if(x<rect.left||x>rect.right||y<rect.top||y>rect.bottom)return false;point.set((x-rect.left)/rect.width*2-1,-(y-rect.top)/rect.height*2+1);ray.setFromCamera(point,camera);return ray.intersectObject(gltf.scene,true).length>0;},
-   inspect:()=>({sourceRevision:revision,primitive:model.primitive??'triangles',vertices,triangles,renderables:meshes,sourcePoints,meshes,drawnMeshes,sourceCalls,successfulPaint,firstDraw:firstDraw?{...firstDraw}:null,draws,pose,view:{...state},size:{...size},pixelBudget:RESEARCH_MODEL_PIXELS,budget:budget?.inspect()??null,canvasCount:disposed?0:1,disposed}),
+   inspect:()=>({sourceRevision:revision,primitive:model.primitive??'triangles',vertices,triangles,renderables:meshes,sourcePoints,meshes,drawnMeshes,sourceCalls,successfulPaint,firstDraw:firstDraw?{...firstDraw}:null,draws,pose,view:{...state},size:{...size},appearance:appearance?.inspect()??null,pixelBudget:RESEARCH_MODEL_PIXELS,budget:budget?.inspect()??null,canvasCount:disposed?0:1,disposed}),
    dispose,
   };
  }catch(error){dispose();throw error;}

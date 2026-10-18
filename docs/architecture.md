@@ -8,7 +8,7 @@
 |---|---|
 | Owner | JosHsuan Chao |
 | Audience | The owner, collaborating developers, and coding agents |
-| Revision | **2.20 — 18 October 2026; six source-backed studies and five verified models on the existing shared clock** |
+| Revision | **2.21 — 18 October 2026; six source-backed studies, restored spreads and scoped material/light/camera ownership on the existing clock** |
 | Language | English for project documentation and future website content; Traditional Chinese for discussion with the owner |
 | Scope | Portfolio, Research & Development, About/CV, Contact, and selected interactive project stories |
 | Delivery baseline | Next.js static export to GitHub Pages; no paid domain, paid storage, or continuously running backend required for the initial release |
