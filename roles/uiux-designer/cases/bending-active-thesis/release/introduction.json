@@ -1,11 +1,11 @@
 {
   "name": "JosHsuan",
   "greeting": "Hi, I’m",
-  "discipline": "COMPUTATIONAL DESIGN / DIGITAL FABRICATION",
-  "statement": "I work between geometry, code and making.",
-  "description": "My work brings together computational design, digital fabrication and interactive systems. I’m interested in how digital methods connect with physical materials.",
-  "transition": "A good place to start is Bending-Active.",
-  "action": "Explore Bending-Active",
-  "metadataTitle": "JosHsuan Chao — Geometry, code and making",
-  "metadataDescription": "Hi, I’m JosHsuan. I work between geometry, code and making. Explore Bending-Active, a study connecting computational design and physical materials."
+  "discipline": "COMPUTATIONAL DESIGNER + DEVELOPER",
+  "statement": "I am a computational designer and developer working at the intersection of design technology, digital fabrication, and spatial interaction.",
+  "description": "My work bridges the physical and digital through computational tools, interactive interfaces, and workflows that translate design and engineering information into fabrication-ready, machine-readable data.",
+  "transition": "Explore the work across physical and digital systems.",
+  "action": "Explore selected work",
+  "metadataTitle": "JosHsuan Chao — Computational designer and developer",
+  "metadataDescription": "Computational designer and developer working at the intersection of design technology, digital fabrication, and spatial interaction."
 }

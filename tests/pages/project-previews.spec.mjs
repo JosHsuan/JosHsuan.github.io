@@ -1,12 +1,15 @@
 import {test,expect} from '@playwright/test';
 import {createServer} from 'node:http';
 import {fileURLToPath} from 'node:url';
+import {readFile} from 'node:fs/promises';
 import {createPagesPreviewHandler} from '../../scripts/serve-pages.mjs';
 import {WAIT,frames,scenarioTimeout} from './case-helpers.mjs';
 
 const model=page=>page.locator('[data-project-model-preview]');
 const xrStage=page=>page.locator('[data-xr-stage]');
 const xrVideo=page=>xrStage(page).locator('[data-xr-stage-video="adapt"]');
+const xrRelease=new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/',import.meta.url);
+const [xrStudy,xrWorkspace]=await Promise.all(['xr-study.json','xr-workspace.json'].map(async name=>JSON.parse(await readFile(new URL(name,xrRelease),'utf8'))));
 const entryFacts=page=>page.evaluate(()=>{
  const element=document.querySelector('[data-site-loader]'),style=element&&getComputedStyle(element);
  return{
@@ -42,7 +45,9 @@ async function xrChapter(page,chapter){
  await page.locator(`[data-xr-chapter="${chapter}"]`).evaluate(node=>node.scrollIntoView({block:'start',behavior:'instant'}));
  await page.waitForFunction(chapter=>{
   const state=document.querySelector('[data-xr-stage]')?.__xrStage?.inspect(),resource=state?.resource;
-  return state?.phase==='ready'&&state.chapter===chapter&&state.scene.chapter===chapter&&state.scene.mode===(chapter==='overview'?'absent':'hold')&&state.scene.settled&&!state.scene.paintPending&&state.camera.settled&&state.informationWindows.settled&&resource?.chapter===chapter&&resource.successfulPaint&&
+  const settled=state?.phase==='ready'&&state.chapter===chapter&&state.scene.chapter===chapter&&state.scene.mode===(chapter==='overview'?'absent':'hold')&&state.scene.settled&&!state.scene.paintPending&&state.camera.settled&&state.informationWindows.settled;
+  if(chapter==='context')return settled&&state.workspace.phase==='ready';
+  return settled&&resource?.chapter===chapter&&resource.successfulPaint&&
    (chapter==='adapt'?resource.mode==='webgl-phone'&&resource.media.stage==='adapt'&&!resource.media.pending&&resource.media.frames>2:resource.mode==='webgl-model');
  },chapter,{timeout:WAIT});
 }
@@ -159,6 +164,15 @@ test('the real model paints behind loading before its offscreen card appears, st
 
 test('the selected native recording plays only while eligible and a pause click does not navigate',async({page})=>{
  await page.goto('/projects/xr-bending-active/');await entered(page);
+ await xrChapter(page,'context');
+ const workspace=xrStage(page).locator('[data-xr-workspace-visual]');await expect(workspace).toBeVisible();
+ const source=await workspace.evaluate(node=>({ready:node.complete&&node.naturalWidth>0&&node.naturalHeight>0,src:new URL(node.currentSrc).pathname,width:node.naturalWidth,height:node.naturalHeight,fit:getComputedStyle(node).objectFit}));
+ const expected=page.viewportSize().width<800?xrWorkspace.image.mobile??xrWorkspace.image:xrWorkspace.image;
+ expect(source).toEqual({ready:true,src:expected.src,width:expected.width,height:expected.height,fit:'contain'});
+ expect((await xrFacts(page)).workspace).toMatchObject({phase:'ready',width:expected.width,height:expected.height});
+ await expect(xrStage(page).locator('canvas')).toHaveCount(1);await expect(xrStage(page).locator('canvas')).toBeHidden();
+ await expect(xrStage(page).locator('[data-xr-model-poster]')).toBeHidden();await expect(page.locator('[data-xr-scene-controls]')).toBeHidden();
+ closedRequests(await xrFacts(page));
  await xrChapter(page,'adapt');
  const video=xrVideo(page);
  expect(await video.evaluate(node=>node.muted&&node.loop&&node.playsInline&&!node.paused&&node.readyState>=2)).toBe(true);
@@ -172,8 +186,11 @@ test('the selected native recording plays only while eligible and a pause click 
  await button.click();await expect(button).toHaveAccessibleName('Pause recording');await expect.poll(()=>video.evaluate(node=>node.currentTime)).not.toBe(paused);expect(page.url()).toBe(before);
  await xrChapter(page,'overview');await expect(xrStage(page).locator('video[src]')).toHaveCount(0);expect((await xrFacts(page)).resource.media.stage).toBeNull();closedRequests(await xrFacts(page));
  await expect(xrStage(page)).toHaveAttribute('data-xr-opening','true');
- await expect(xrStage(page).locator('[data-xr-opening-visual]')).toBeVisible();
- await expect(xrStage(page).locator('[data-xr-opening-visual]')).toHaveAttribute('src','/assets/xr/portfolio-main-visual.webp');
+ await expect(xrStage(page).locator('[data-xr-opening-visual]')).toHaveCount(0);await expect(page.locator('[data-xr-hero]')).toHaveCount(0);
+ await expect(page.locator('#xr-overview h1')).toHaveText(xrStudy.title);await expect(page.locator('#xr-overview h1')).toBeVisible();
+ await expect(page.locator('#xr-overview p')).toHaveText(xrStudy.introduction);await expect(page.locator('#xr-overview p')).toBeVisible();
+ expect((await xrFacts(page)).scene).toMatchObject({chapter:'overview',mode:'absent',settled:true,visible:false});
+ await expect(workspace).toBeHidden();await expect(xrStage(page).locator('[data-xr-model-poster]')).toBeHidden();
  await expect(xrStage(page).locator('canvas')).toHaveCount(1);await expect(xrStage(page).locator('canvas')).toBeHidden();await expect(page.locator('[data-xr-scene-controls]')).toBeHidden();
  await page.evaluate(()=>addEventListener('pagehide',()=>sessionStorage.setItem('test-xr-preview-departure',JSON.stringify(document.querySelector('[data-xr-stage]').__xrStage.inspect())),{once:true}));
  await page.locator('[data-portfolio-navigation] a[href="/contact/"]').click();await entered(page);

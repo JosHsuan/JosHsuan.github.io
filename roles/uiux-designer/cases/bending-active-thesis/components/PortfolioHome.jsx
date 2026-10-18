@@ -23,9 +23,9 @@ const projects=[
 ];
 
 const approaches=[
-  {name:'FORM',title:'Geometry and spatial relationships',description:'An idea starts with a shape, a relationship or a question about how things fit together.'},
-  {name:'SYSTEM',title:'Code, tools and interactive systems',description:'Digital methods connect representations and make a process easier to explore.'},
-  {name:'MAKE',title:'Digital methods and physical materials',description:'Making brings the digital description into conversation with a physical result.'},
+  {name:'FORM',title:'Design and engineering information',description:'Geometry and spatial relationships give physical and digital systems a shared description.'},
+  {name:'SYSTEM',title:'Computational tools and interfaces',description:'Computational tools and interactive interfaces connect design intent, engineering information and spatial interaction.'},
+  {name:'MAKE',title:'Fabrication-ready workflows',description:'Workflows translate design and engineering information into fabrication-ready, machine-readable data.'},
 ];
 
 function Arrow({diagonal=false}){return <span aria-hidden="true">{diagonal?'↗':'↘'}</span>;}
@@ -37,16 +37,16 @@ function Introduction(){
         <div className={styles.scrollCopy} data-information-window="home-introduction" data-home-scroll-window="introduction"><InformationSkin/>
           <p className={styles.eyebrow}>{introduction.discipline}</p>
           <h1 id="home-title" className={styles.homeTitle}><span>{introduction.greeting}{' '}</span><span>{introduction.name}<span className={styles.period}>.</span></span></h1>
-          <p className={styles.statement}>{introduction.statement}</p>
-          <p className={styles.description}>{introduction.description}</p>
+          <p className={styles.statement} data-introduction-statement>{introduction.statement}</p>
+          <p className={styles.description} data-introduction-description>{introduction.description}</p>
         </div>
         <a href="#projects" className={`${styles.projectInvitation} ${styles.scrollCopy}`} data-home-project-link data-information-window="home-invitation" data-home-scroll-window="invitation"><InformationSkin/>
-          <span className={styles.invitationCopy}><span className={styles.invitationLabel}>SELECTED WORK / {String(projects.length).padStart(2,'0')}</span><span className={styles.invitationTitle}>Ideas, systems and things made.</span><span className={styles.invitationAction}>Explore the projects</span></span>
+          <span className={styles.invitationCopy}><span className={styles.invitationLabel}>SELECTED WORK / {String(projects.length).padStart(2,'0')}</span><span className={styles.invitationTitle}>Between physical and digital.</span><span className={styles.invitationAction}>Explore the projects</span></span>
           <span className={styles.invitationArrow}><Arrow/></span>
         </a>
       </div>
       <div className={styles.notation} aria-hidden="true"><span>FORM</span><span>SYSTEM</span><span>MAKE</span></div>
-      <span className={styles.signature} aria-hidden="true">IDEAS INTO MATERIAL</span>
+      <span className={styles.signature} aria-hidden="true">DESIGN INFORMATION INTO FABRICATION</span>
     </div>
   </section>;
 }
@@ -57,16 +57,16 @@ function About({standalone=false}){
   return <section id="about" className={[styles.section,standalone?styles.standalone:''].join(' ')} aria-labelledby="about-title" data-portfolio-about data-home-introduction={standalone?'':undefined}>
     <div className={styles.sectionLead}>
       <p className={styles.eyebrow}>01 / ABOUT</p>
-      <div><Heading id="about-title" className={styles.sectionTitle}>{standalone?'About the way I work.':'Between ideas and material.'}</Heading>
-        <p className={styles.sectionIntro}>{introduction.statement}</p>
-        <p className={styles.prose}>{introduction.description}</p>
+      <div><Heading id="about-title" className={styles.sectionTitle}>Between physical and digital.</Heading>
+        <p className={styles.sectionIntro} data-introduction-statement>{introduction.statement}</p>
+        <p className={styles.prose} data-introduction-description>{introduction.description}</p>
         {!standalone&&<a href="/about/" className={styles.textLink}>More about my approach <Arrow diagonal/></a>}
       </div>
     </div>
     <div className={styles.approaches}>{approaches.map(approach=><article key={approach.name}>
       <p className={styles.eyebrow}>{approach.name}</p><ApproachHeading>{approach.title}</ApproachHeading><p>{approach.description}</p>
     </article>)}</div>
-    {standalone&&<a href="/projects/" className={styles.textLink}>See the ideas in the work <Arrow diagonal/></a>}
+    {standalone&&<a href="/projects/" className={styles.textLink}>Explore the tools and workflows <Arrow diagonal/></a>}
   </section>;
 }
 
@@ -76,8 +76,8 @@ function Projects({standalone=false,scrolling=false}){
   return <section id="projects" className={[styles.section,styles.projects,standalone?styles.standalone:''].join(' ')} aria-labelledby="projects-title" data-portfolio-projects>
     <div className={scrolling?`${styles.projectHeading} ${styles.scrollCopy}`:styles.projectHeading} data-information-window={scrolling?'home-project-heading':undefined} data-home-scroll-window={scrolling?'project-heading':undefined}>
       {scrolling&&<InformationSkin/>}
-      <div><p className={styles.eyebrow}>02 / SELECTED PROJECTS</p><Heading id="projects-title" className={styles.sectionTitle}>A closer look at the work.</Heading></div>
-      <p className={styles.projectCount}>{String(projects.length).padStart(2,'0')} projects<br/>Geometry / interaction / making</p>
+      <div><p className={styles.eyebrow}>02 / SELECTED PROJECTS</p><Heading id="projects-title" className={styles.sectionTitle}>Design systems, made tangible.</Heading></div>
+      <p className={styles.projectCount}>{String(projects.length).padStart(2,'0')} projects<br/>Computation / fabrication / interaction</p>
     </div>
     <ul className={styles.projectGrid} style={{'--project-grid-rows':projectGridRows(projects.length)}} data-project-grid data-project-grid-cells={projectGridRows(projects.length)*3}>
       {projects.map(project=><li key={project.id} className={project.id==='xr-bending-active'?`${styles.projectCard} ${styles.xrProjectCard}`:styles.projectCard} data-project-tile={project.id} data-information-window={scrolling?'home-project-card':undefined} data-home-scroll-window={scrolling?project.id:undefined}>
@@ -119,7 +119,7 @@ export default function PortfolioHome({section='home'}){
       {section==='about'&&<><About standalone/><Contact/></>}
       {section==='projects'&&<><Projects standalone/><Contact/></>}
       {section==='contact'&&<Contact standalone/>}
-      <footer className={styles.footer}><span>JosHsuan Chao</span><span>GEOMETRY / CODE / MAKING</span><a href="#portfolio-main">Back to top <span aria-hidden="true">↑</span></a></footer>
+      <footer className={styles.footer}><span>JosHsuan Chao</span><span>DESIGN TECHNOLOGY / FABRICATION / SPATIAL INTERACTION</span><a href="#portfolio-main">Back to top <span aria-hidden="true">↑</span></a></footer>
     </main>
   </div>;
 }

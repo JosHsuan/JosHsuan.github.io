@@ -4,7 +4,7 @@ import {spawnSync, execFileSync} from 'node:child_process';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import assert from 'node:assert/strict';
-import {auditPages} from './audit-pages.mjs';
+import {auditPages,assertXRWorkspaceRecord,assertXRWorkspaceImage} from './audit-pages.mjs';
 import {preparePagesWorkspace} from './prepare-pages-workspace.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -20,6 +20,20 @@ assert.equal(digest(await readFile(path.join(release, 'introduction.json'))), ma
 const xrStudyBytes = await readFile(path.join(release, 'xr-study.json'));
 assert.equal(digest(xrStudyBytes), manifest.xrStudySHA256);
 const xrStudy = JSON.parse(xrStudyBytes);
+const xrWorkspaceBytes=await readFile(path.join(release,'xr-workspace.json'));
+assert.equal(digest(xrWorkspaceBytes),manifest.xrWorkspaceSHA256,'Approved full-workspace source record');
+const xrWorkspace=JSON.parse(xrWorkspaceBytes);
+assertXRWorkspaceRecord(xrWorkspace,manifest);
+assert.equal(xrWorkspace.schemaVersion,1,'Supported full-workspace source schema');
+for(const image of [xrWorkspace.image,xrWorkspace.image?.mobile]){
+  assert(image&&/^\/assets\/xr\/[a-zA-Z0-9._-]+\.webp$/.test(image.src),'Approved local workspace image');
+  assert(Number.isInteger(image.width)&&image.width>0&&Number.isInteger(image.height)&&image.height>0,'Positive workspace image dimensions');
+  const pin=manifest.assets.find(asset=>'/'+asset.path===image.src);
+  assert(pin&&pin.sha256===image.sha256&&pin.bytes===image.bytes,'Workspace image matches its approved asset pin');
+}
+const typographyAsset=manifest.assets.find(asset=>asset.path==='assets/fonts/portfolio-ocr-b.woff2');
+const typographyNotice=manifest.assets.find(asset=>asset.path==='licenses/ocr-b-NOTICE.txt');
+assert(typographyAsset&&typographyNotice,'OCR B source-derived font and original notices are pinned together');
 assert.equal(digest(await readFile(path.join(release, 'contact.json'))), manifest.contactSHA256);
 // Verify the complete public handoff before replacing generated workspace files.
 for (const asset of manifest.assets) {
@@ -29,6 +43,8 @@ for (const asset of manifest.assets) {
   assert((await realpath(filename)).startsWith(path.join(release, 'public') + path.sep));
   const bytes = await readFile(filename);
   assert.equal(bytes.length, asset.bytes); assert.equal(digest(bytes), asset.sha256, asset.path);
+  const workspaceImage=[xrWorkspace.image,xrWorkspace.image.mobile].find(image=>image.src==='/'+asset.path);
+  if(workspaceImage)assertXRWorkspaceImage(bytes,workspaceImage);
 }
 assert.equal(path.dirname(path.resolve(work)), path.resolve(root));
 assert.equal(path.basename(work), '.pages-workspace');
@@ -58,10 +74,11 @@ const sources = [
   'runtime/motion/window-recipes.mjs', 'runtime/motion/window-motion-api.mjs',
   'runtime/presentation/ModelAnnotationPresenter.mjs',
   'runtime/RuntimeRoot.mjs', 'runtime/core/FeatureRegistry.ts', 'runtime/core/Registrar.ts',
-  'app/page.jsx', 'app/layout.jsx', 'app/globals.css', 'app/glass-materials.css', 'app/page.module.css',
+  'app/page.jsx', 'app/layout.jsx', 'app/not-found.jsx', 'app/globals.css', 'app/glass-materials.css', 'app/page.module.css',
   'app/portfolio.module.css', 'app/about/page.jsx', 'app/projects/page.jsx', 'app/contact/page.jsx',
   'app/projects/bending-active/page.jsx', 'app/projects/xr-bending-active/page.jsx',
   'components/BendingProject.jsx', 'components/PortfolioHome.jsx', 'components/PortfolioNavigation.jsx',
+  'components/ProjectStudyChrome.jsx', 'release/xr-workspace.json',
   'components/ProjectModelPreview.jsx', 'components/project-model-scene.mjs', 'components/project-model-recipe.mjs', 'components/project-grid-layout.mjs',
   'components/GlobalBackground.jsx', 'runtime/background/BackgroundRuntime.mjs', 'runtime/background/SiteBackgroundDriver.mjs',
   'components/XRModelStudy.jsx', 'components/XRPhoneStudy.jsx', 'components/research-media.module.css',
@@ -109,7 +126,7 @@ await writeFile(path.join(work, 'public/robots.txt'), `User-agent: *\nAllow: /\n
 const routes=['/','/about/','/projects/','/contact/','/projects/bending-active/','/projects/xr-bending-active/'];
 await writeFile(path.join(work, 'public/sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${routes.map(route=>`<url><loc>${manifest.origin}${route}</loc></url>`).join('')}</urlset>\n`);
 const commit = process.env.GITHUB_SHA || execFileSync('git', ['rev-parse', 'HEAD'], {cwd: root, encoding: 'utf8'}).trim();
-await writeFile(path.join(work, 'public/release.json'), JSON.stringify({release: manifest.id, commit, modelRevision: 'ff112b90be104cca7e3705b5eee481ba3973d25e2f3d4a7350faa2f732cae47e', diagramRevision: manifest.assets.find(asset => asset.path === 'assets/thesis/source-diagrams.glb').sha256, xrModelRevision: xrStudy.model.sha256, xrStudyRevision: manifest.xrStudySHA256, typography: 'IBM Plex'}) + '\n');
+await writeFile(path.join(work, 'public/release.json'), JSON.stringify({release: manifest.id, commit, storyRevision:manifest.storySHA256, introductionRevision:manifest.introductionSHA256, modelRevision: 'ff112b90be104cca7e3705b5eee481ba3973d25e2f3d4a7350faa2f732cae47e', diagramRevision: manifest.assets.find(asset => asset.path === 'assets/thesis/source-diagrams.glb').sha256, xrModelRevision: xrStudy.model.sha256, xrStudyRevision: manifest.xrStudySHA256, xrWorkspaceRevision:manifest.xrWorkspaceSHA256, typography: 'Portfolio OCR B',typographyRevision:typographyAsset.sha256,typographyNoticeRevision:typographyNotice.sha256}) + '\n');
 const result = spawnSync(process.execPath, [path.join(root, 'node_modules/next/dist/bin/next'), 'build', work, '--webpack'], {cwd: root, stdio: 'inherit', env: {...process.env, THESIS_PUBLIC_RELEASE: '1', NEXT_PUBLIC_BASE_PATH: '', NEXT_TELEMETRY_DISABLED: '1'}});
 if (result.error) throw result.error;
 assert.equal(result.status, 0, 'Public static build failed');

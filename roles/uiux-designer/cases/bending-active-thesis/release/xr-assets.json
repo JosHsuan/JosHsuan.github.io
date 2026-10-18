@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "xr-bending-active-selected-media-v3",
-  "selectionAuthorization": "The 16 October owner request authorizes the selected latest-portfolio XR narrative, exact opening-page visual, genuine project media, independently verified archived geometry and iPhone display of the original app GIF recordings; unrelated sources remain private.",
-  "reviewScope": "Existing six XR derivatives retained unchanged. New selections use the exact opening portfolio visual, genuine photos, original method/system diagrams, three complete phone GIF recordings without changing resolution/action/timing, and the owner-designated native Rhino scene’s complete assembled bamboo geometry. The earlier numeric adaptive snapshot is not used as the primary model. Raw source documents, source JSON/configuration, native CAD files and whole original videos do not enter the browser.",
+  "id": "xr-bending-active-selected-media-v4",
+  "selectionAuthorization": "The 16 October owner request authorizes the selected XR narrative, genuine project media, verified source geometry and original app recordings. The latest 18 October owner revision removes the article opening photograph and selects native Rhino 8/MCPStart high-resolution transparent front captures of the complete architectural research room. Retain original room context, geometry, materials and TV imagery; open only the obstructing front facade and approved foreground speaker/cabinet row. Temporary native capture lighting is allowed; close Rhino after capture. Unrelated sources remain private and existing research/media/model pins stay unchanged.",
+  "reviewScope": "Existing research media, original phone recordings and assembled bamboo geometry retain their pinned bytes. Two genuine 4K-class responsive native Rhino Rendered front captures show the original room and complete working setup. Restore side/rear walls, ceiling, floor/carpet, doors and acoustic fixtures; hide only front glazing/frame and foreground speaker/cabinet occluders, original hidden objects and annotations. Source geometry, TV vertices/topology/UVs/materials and authored colours remain unchanged. Temporary neutral/cool/warm native lights improve depth, then are removed. Raw CAD, working copies, object-ID receipts and standalone private textures never enter the browser.",
   "assets": [
     {
       "path": "assets/xr/research-environment.webp",
@@ -129,6 +129,18 @@
       "bytes": 101448,
       "sha256": "c5297673fdbe7316157e1b21b76127c05eb9129fc3f3298d30bbb3ba329f4c59",
       "source": "Owner-designated only_interior.3dm; complete assembled bamboo geometry selected by native source groups; shared Chao / Nomura research"
+    },
+    {
+      "path": "assets/xr/research-workspace.webp",
+      "bytes": 3715044,
+      "sha256": "d691463248ac34d7dd71c7f8211363f9dd51a46e55cfa22a90006d7e400b27da",
+      "source": "Owner-authorized high-resolution native Rhino Rendered transparent front capture of the original architectural XR research room and working setup; original geometry/materials/TV UVs preserved, with documented front-only visibility opening and temporary native capture lighting."
+    },
+    {
+      "path": "assets/xr/research-workspace-mobile.webp",
+      "bytes": 1248596,
+      "sha256": "937e8d388a3b4156bc19671ad7d614bee12fbbe3c54d79e9669d9fbe67ef135e",
+      "source": "Owner-authorized high-resolution native Rhino Rendered transparent front capture of the original architectural XR research room and working setup; original geometry/materials/TV UVs preserved, with documented front-only visibility opening and temporary native capture lighting."
     }
   ],
   "provenance": [
@@ -351,7 +363,7 @@
         666,
         1440
       ],
-      "durationSeconds": 13.0,
+      "durationSeconds": 13,
       "processing": "Entire original GIF once; original resolution, frame count and presentation durations retained; at most one black pixel padded right/bottom for even coded dimensions, H264High3.2/yuv420p CRF32 silent faststart. No scale, crop, grade, retime, reorder, reverse, generated frame or composite.",
       "sourceOriginalUnchanged": true,
       "creditBoundary": "Chia-Hsuan Chao / Wataru Nomura research, 2024; individual image or recording creator not separately recorded."
@@ -365,7 +377,7 @@
         666,
         1440
       ],
-      "durationSeconds": 13.0,
+      "durationSeconds": 13,
       "processing": "LosslessWebP of first decoded selected MP4 frame; exactdecodedRGBA comparison passed.",
       "sourceOriginalUnchanged": true,
       "creditBoundary": "Chia-Hsuan Chao / Wataru Nomura research, 2024; individual image or recording creator not separately recorded."
@@ -447,6 +459,42 @@
       "webUnits": "Metres",
       "sourceOriginalUnchanged": true,
       "creditBoundary": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024; exact individual model author not separately recorded."
+    },
+    {
+      "publicPath": "assets/xr/research-workspace.webp",
+      "sourceLocator": "Owner-designated original native XR research CAD room and complete workspace; raw source remains private.",
+      "sourceSHA256": "52a2c77039977c612afd05d1179410927cbe0a48b83439aa55ac98a9eaef666b",
+      "derivativeSHA256": "d691463248ac34d7dd71c7f8211363f9dd51a46e55cfa22a90006d7e400b27da",
+      "dimensions": [
+        4096,
+        2880
+      ],
+      "processing": "Actual native Rhino 8 Rendered interactive-viewport capture through owner-selected Rhino MCP, at original 4096×2880 desktop or 2160×4674 portrait pixels. Source +Y level central-axis perspective; original side/rear walls, ceiling, floor/carpet and room fixtures restored. Obstructing front glazing/frame and approved foremost speaker row/two cabinets hidden only in private memory. Neutral key/cool fill/warm rim use temporary native lights, removed after capture; source materials, TV vertices/topology/UVs and all4204 original geometry CRCs unchanged. Exact lossless WebP decoded RGBA byte-equal to native PNG. No upscale, crop, warp, generated replacement, colour grade or erased background; source CAD bytes unchanged.",
+      "sourceOriginalUnchanged": true,
+      "creditBoundary": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024. Original research CAD scene; individual model author is not separately recorded.",
+      "nativeEngine": "Rhino 8.35.26251.13001 / native Rendered viewport",
+      "nativePNGSHA256": "81cd189bf25b66aa422ee84051fa648ebeda21348f60620588d858f6de4ff9c1",
+      "decodedRGBAExact": true,
+      "sourceGeometryCRCUnchanged": true,
+      "originalTVVerticesTopologyUVsExact": true
+    },
+    {
+      "publicPath": "assets/xr/research-workspace-mobile.webp",
+      "sourceLocator": "Owner-designated original native XR research CAD room and complete workspace; raw source remains private.",
+      "sourceSHA256": "52a2c77039977c612afd05d1179410927cbe0a48b83439aa55ac98a9eaef666b",
+      "derivativeSHA256": "937e8d388a3b4156bc19671ad7d614bee12fbbe3c54d79e9669d9fbe67ef135e",
+      "dimensions": [
+        2160,
+        4674
+      ],
+      "processing": "Actual native Rhino 8 Rendered interactive-viewport capture through owner-selected Rhino MCP, at original 4096×2880 desktop or 2160×4674 portrait pixels. Source +Y level central-axis perspective; original side/rear walls, ceiling, floor/carpet and room fixtures restored. Obstructing front glazing/frame and approved foremost speaker row/two cabinets hidden only in private memory. Neutral key/cool fill/warm rim use temporary native lights, removed after capture; source materials, TV vertices/topology/UVs and all4204 original geometry CRCs unchanged. Exact lossless WebP decoded RGBA byte-equal to native PNG. No upscale, crop, warp, generated replacement, colour grade or erased background; source CAD bytes unchanged.",
+      "sourceOriginalUnchanged": true,
+      "creditBoundary": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024. Original research CAD scene; individual model author is not separately recorded.",
+      "nativeEngine": "Rhino 8.35.26251.13001 / native Rendered viewport",
+      "nativePNGSHA256": "c4c98bcee3aaea95fe9dd32dee8e9e3d8a62aadfd7fd0c480afc27d750737705",
+      "decodedRGBAExact": true,
+      "sourceGeometryCRCUnchanged": true,
+      "originalTVVerticesTopologyUVsExact": true
     }
   ]
 }

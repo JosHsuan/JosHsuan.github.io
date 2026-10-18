@@ -19,7 +19,7 @@
 .glyph svg{display:block;width:100%;height:100%;stroke:currentColor;stroke-width:1.2;stroke-linejoin:round;stroke-linecap:round}
 .chapterHeading{font-weight:400;font-size:clamp(2.7rem,4.6vw,5.4rem);line-height:.99;letter-spacing:-.065em;margin:0 0 2.4rem;color:var(--paper);max-width:42rem}
 .chapterHeading>span{display:block}
-.headingLast{font-family:var(--serif);font-style:italic;letter-spacing:-.06em}
+.headingLast{font-family:var(--sans);font-style:normal;letter-spacing:-.02em}
 .overview{min-height:135svh}
 .openingCopy{grid-column:1/8;align-self:center;max-width:53rem;position:relative;z-index:3;padding-bottom:5svh}
 .openingLabel{display:flex;align-items:center;gap:.85rem;color:var(--accent);margin-bottom:2.4rem}
@@ -418,3 +418,24 @@
 }
 @media(max-height:650px){.homeInner{position:relative;padding-top:7rem;padding-bottom:3rem}.homeProject{margin-top:2rem}.home{min-height:100svh}}
 @media print{.home{min-height:0;break-after:page}.homeInner{position:relative;min-height:0;padding:2rem}.home::before,.homeNotation,.homeSignature{display:none}.homeDescription,.homeEyebrow,.homeProjectIndex{color:inherit}.homeProjectAction{color:inherit}.homeCopy h1{font-size:4rem}}
+
+/* The owner-selected OCR family replaces proportional/serif contrasts. Its
+   wider .723em cells need smaller headings; stage, camera and reading geometry
+   remain owned by the original Bending implementation. */
+.owner{font-weight:400;letter-spacing:0}
+.discipline,.openingLabel,.chapterLabel,.projectType{letter-spacing:.055em}
+/* The 336px OCR identity overlaps centred navigation at tablet widths.
+   Use the existing compact identity above the mobile breakpoint as well;
+   retain the name, native links, their hit areas and the optical skin. */
+@media(max-width:1100px){.masthead .owner>span:not(:global([data-liquid-skin])){display:none}}
+.openingCopy h1{font-size:clamp(3rem,7.1vw,8rem);font-weight:400;font-stretch:normal;letter-spacing:-.025em;line-height:1.03}
+.chapterHeading,.pattern .chapterHeading,.validation .chapterHeading{font-size:clamp(2.1rem,3.6vw,4.2rem);font-weight:400;letter-spacing:-.025em;line-height:1.12}
+.headingLast{font-style:normal;letter-spacing:-.025em}
+.closingCopy .chapterHeading{font-size:clamp(2.5rem,4.8vw,5.5rem);letter-spacing:-.025em;line-height:1.12}
+.subtitle,.measurements dd{letter-spacing:-.02em}
+@media(max-width:780px){
+  .openingCopy h1{font-size:clamp(2.35rem,12.2vw,5.8rem);letter-spacing:-.025em;line-height:1.05}
+  .chapterHeading,.pattern .chapterHeading,.validation .chapterHeading{font-size:clamp(1.9rem,8.2vw,3rem)}
+  .closingCopy .chapterHeading{font-size:clamp(2.25rem,9vw,3.4rem)}
+}
+@media print{.openingCopy h1{font-size:4rem}.chapterHeading,.closingCopy .chapterHeading{font-size:2.5rem}}

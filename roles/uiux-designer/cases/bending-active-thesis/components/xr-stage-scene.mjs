@@ -19,7 +19,8 @@ export function xrStagePaintReady({phone=false,shaderError=false,calls,source,ph
 }
 
 /** Camera presentation only: source positions, normals, units and materials are
- * untouched. Fit source support into the reading layout's clear viewport slot. */
+ * untouched. The subject has a reading-safe composition inside a full viewport;
+ * that composition never limits the canvas or its project-owned surroundings. */
 export function stageCameraPose(points,width,height,{chapter='overview',azimuth=0,elevation=0}={}){
  const narrow=width<800,phone=phoneChapter(chapter);
  const slot= narrow
@@ -34,12 +35,11 @@ export function stageCameraPose(points,width,height,{chapter='overview',azimuth=
   offset:{x:width*(.5-slot.x),y:height*(.5-slot.y)}};
 }
 
-/** The transparent canvas covers only the subject's safe viewport rectangle.
- * Its cropped subfrustum is mathematically the same full-stage projection;
- * empty backdrop pixels consume no project render budget. */
+/** One genuine full-viewport drawing surface, like Bending's rear scene.
+ * A view offset composes the subject around native reading; it never crops the
+ * drawing surface into a card. The existing physical-pixel cap remains bounded. */
 export function stageRenderView(pose,width,height){
- const rect={left:(pose.slot.x-pose.slot.width/2)*width,top:(pose.slot.y-pose.slot.height/2)*height,width:pose.slot.width*width,height:pose.slot.height*height};
- return {...rect,fullWidth:width,fullHeight:height,offsetX:pose.offset.x+rect.left,offsetY:pose.offset.y+rect.top};
+ return {left:0,top:0,width,height,fullWidth:width,fullHeight:height,offsetX:pose.offset.x,offsetY:pose.offset.y};
 }
 
 function releaseObject(root){
@@ -187,7 +187,7 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
     const rect=renderer.domElement.getBoundingClientRect();if(clientX<rect.left||clientX>rect.right||clientY<rect.top||clientY>rect.bottom)return false;ndc.set((clientX-rect.left)/rect.width*2-1,-(clientY-rect.top)/rect.height*2+1);raycaster.setFromCamera(ndc,camera);
     return raycaster.intersectObject(gltf.scene,true).length?{source:true,kind:'model'}:false;
    },
-   inspect:()=>({mode,chapter:state.chapter,successfulPaint,sourceRevision:revision,sourceUnits:model.sourceUnits,webUnits:model.webUnits,vertices,triangles,pose,view:{azimuth:state.azimuth,elevation:state.elevation},sourceTransforms:gltf?.scene.children.map(node=>({position:node.position.toArray(),scale:node.scale.toArray(),quaternion:node.quaternion.toArray()})),surface:renderer?{draws,calls:renderer.info.render.calls,sourceCalls:drawCounts.source,phoneCalls:drawCounts.phoneBody+drawCounts.phoneScreen,phoneBodyCalls:drawCounts.phoneBody,phoneScreenCalls:drawCounts.phoneScreen,stageCalls:drawCounts.stage,environment:environment?.inspect()??null,clearAlpha:renderer.getClearAlpha(),budget:budget.inspect(),pixelBudget:phoneChapter(state.chapter)?RESEARCH_PHONE_PIXELS:RESEARCH_MODEL_PIXELS}:null,media:{stage:activeStage?.id??null,pending:mediaPending,frames:mediaFrames,time:mediaTime,native:mediaHandle?.inspect()??null,reason:mediaReason,position:activeStage?videos[activeStage.id].currentTime:null},fallbackReason:gpuReason,paused:state.paused,disposed}),
+   inspect:()=>({mode,chapter:state.chapter,successfulPaint,sourceRevision:revision,sourceUnits:model.sourceUnits,webUnits:model.webUnits,vertices,triangles,pose,view:{azimuth:state.azimuth,elevation:state.elevation},sourceTransforms:gltf?.scene.children.map(node=>({position:node.position.toArray(),scale:node.scale.toArray(),quaternion:node.quaternion.toArray()})),surface:renderer?{draws,calls:renderer.info.render.calls,sourceCalls:drawCounts.source,phoneCalls:drawCounts.phoneBody+drawCounts.phoneScreen,phoneBodyCalls:drawCounts.phoneBody,phoneScreenCalls:drawCounts.phoneScreen,stageCalls:drawCounts.stage,environment:environment?.inspect()??null,viewport:renderView?{...renderView}:null,clearAlpha:renderer.getClearAlpha(),budget:budget.inspect(),pixelBudget:phoneChapter(state.chapter)?RESEARCH_PHONE_PIXELS:RESEARCH_MODEL_PIXELS}:null,media:{stage:activeStage?.id??null,pending:mediaPending,frames:mediaFrames,time:mediaTime,native:mediaHandle?.inspect()??null,reason:mediaReason,position:activeStage?videos[activeStage.id].currentTime:null},fallbackReason:gpuReason,paused:state.paused,disposed}),
    dispose,
   };
  }catch(error){dispose();throw error;}

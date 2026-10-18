@@ -1,0 +1,330 @@
+{
+  "schemaVersion": 1,
+  "id": "xr-source-architectural-room-front-rendered-2026-10-18",
+  "title": "The research workspace and architectural setting.",
+  "image": {
+    "src": "/assets/xr/research-workspace.webp",
+    "width": 4096,
+    "height": 2880,
+    "alt": "Native front view of the XR research room: original side and rear walls, ceiling, floor, capture rig, worktables, people, TV screens and bamboo studies.",
+    "bytes": 3715044,
+    "sha256": "d691463248ac34d7dd71c7f8211363f9dd51a46e55cfa22a90006d7e400b27da",
+    "mobile": {
+      "src": "/assets/xr/research-workspace-mobile.webp",
+      "width": 2160,
+      "height": 4674,
+      "alt": "Native front view of the XR research room: original side and rear walls, ceiling, floor, capture rig, worktables, people, TV screens and bamboo studies.",
+      "bytes": 1248596,
+      "sha256": "937e8d388a3b4156bc19671ad7d614bee12fbbe3c54d79e9669d9fbe67ef135e"
+    }
+  },
+  "caption": "The original research workspace within its architectural setting, seen straight on.",
+  "credit": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024. Original research CAD scene; individual model author is not separately recorded.",
+  "source": "Verified owner-designated original XR research CAD room and complete working setup, captured directly in native Rhino Rendered mode through the owner-selected Rhino MCP session. Only the selected high-resolution responsive raster derivatives are published.",
+  "sourceSHA256": "52a2c77039977c612afd05d1179410927cbe0a48b83439aa55ac98a9eaef666b",
+  "sourceOriginalUnchanged": true,
+  "render": {
+    "kind": "High-resolution transparent native Rendered front view of the original architectural research room",
+    "nativeEngine": {
+      "name": "Rhino 8 native Rendered interactive viewport via owner-selected Rhino MCP",
+      "version": "8.35.26251.13001",
+      "displayMode": "Rendered",
+      "captureOverload": "new ViewCapture { TransparentBackground=true }.CaptureToBitmap(RhinoView)"
+    },
+    "sourceObjectTotal": 4204,
+    "selectedObjects": 4022,
+    "excludedObjects": 182,
+    "meshParts": 18007,
+    "vertices": 31361185,
+    "triangles": 59354803,
+    "sourceVertexColourMeshes": 9,
+    "sourceVertexColourVertices": 1997801,
+    "sourceVertexColour8BitRoundtripExact": true,
+    "cachedMeshCoverage": "Independent source inspection inventories original authored/cached render meshes; every selected surface retains original geometry. Native Rhino renders the unchanged original scene directly.",
+    "geometrySimplified": false,
+    "sourceObjectPositionsChanged": false,
+    "units": "Original source millimetres/Z-up retained for native capture.",
+    "materialPolicy": "Original native source-assigned CAD materials, object/layer appearance, authored vertex colours and TV texture/UV assignments. Temporary native directional lighting improves depth and surface reading while preserving original geometry and materials.",
+    "bitmapPolicy": "The original TV/screen material appearance is rendered in place; no generated replacement, redrawn picture, screen warp or standalone private bitmap is published.",
+    "tvGeometryPolicy": "Exact source world-space screen vertices, quad topology, UVs and material assignment match independently read original values before and after capture. Natural perspective from the original TV orientation is retained.",
+    "cutaway": "Restore the original architectural room, floor/carpet, ceiling, rear/side walls and fixtures. Remove only the obstructing front-facade glass/frame assembly and approved foremost speaker row/two cabinets from capture visibility. Original hidden objects and non-surface annotations remain excluded.",
+    "visibility": {
+      "architectureRestoredObjects": 127,
+      "architecturePolicy": "Retain the original side/rear walls, ceiling, floor/carpet, doors, acoustic/diffusion wall elements, fixtures and non-obstructing front threshold.",
+      "foregroundHiddenObjects": 118,
+      "foremostSpeakerRowObjects": 116,
+      "foremostCabinetObjects": 2,
+      "frontFacadeHiddenObjects": 29,
+      "foregroundHiddenPolicy": "Open the front-facing glass/window-frame assembly and hide the foremost speaker row/two cabinets that obstruct the central working view. Retain side, rear, overhead and internal equipment.",
+      "originalHiddenObjects": 10,
+      "nonSurfaceOrClippingObjects": 25,
+      "sourceObjectsMoved": false,
+      "sourceObjectsMirrored": false
+    },
+    "clearAlpha": 0,
+    "alphaPolicy": "Each lossless exact WebP decodes to every original native PNG RGBA byte, including fully transparent RGB and antialiased edges. No background erasure, image warp, crop, resampling, recolouring or compositing.",
+    "nativePixelOutput": {
+      "desktop": [
+        4096,
+        2880
+      ],
+      "mobile": [
+        2160,
+        4674
+      ],
+      "upscaled": false
+    },
+    "camera": {
+      "basis": "Original source millimetres and Z-up; no coordinate conversion, reflection or object relocation.",
+      "projection": "perspective",
+      "frontAxis": "source +Y",
+      "position": [
+        25,
+        -24000,
+        3000
+      ],
+      "target": [
+        25,
+        0,
+        3000
+      ],
+      "direction": [
+        0,
+        1,
+        0
+      ],
+      "up": [
+        0,
+        0,
+        1
+      ],
+      "level": true,
+      "singlePoint": true,
+      "compositionPolicy": "Straight, level front view of the original architectural room and complete working setup. Preserve its central axis and real source asymmetry. Record requested framing separately from actual native alpha support; display with uniform proportional containment.",
+      "desktop": {
+        "projection": "perspective",
+        "singlePoint": true,
+        "frontAxis": "source +Y",
+        "position": [
+          25.0,
+          -24000.0,
+          3000.0
+        ],
+        "target": [
+          25.0,
+          0.0,
+          3000.0
+        ],
+        "direction": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "cameraDistance": 24000.0,
+        "level": true,
+        "up": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "requestedFrustumScale": 0.9,
+        "requestedSubjectCentreY": 0.5,
+        "requestedFrustum": {
+          "left": -33.28,
+          "right": 33.28,
+          "near": 100,
+          "bottom": -23.400000000000002,
+          "top": 23.400000000000002,
+          "far": 100000
+        },
+        "width": 4096,
+        "height": 2880,
+        "actualAlphaSupport": [
+          445,
+          469,
+          3655,
+          2468
+        ]
+      },
+      "mobile": {
+        "projection": "perspective",
+        "singlePoint": true,
+        "frontAxis": "source +Y",
+        "position": [
+          25.0,
+          -24000.0,
+          3000.0
+        ],
+        "target": [
+          25.0,
+          0.0,
+          3000.0
+        ],
+        "direction": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "cameraDistance": 24000.0,
+        "level": true,
+        "up": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "requestedFrustumScale": 0.86,
+        "requestedSubjectCentreY": 0.5,
+        "requestedFrustum": {
+          "left": -29.813333333333325,
+          "right": 29.813333333333325,
+          "near": 100,
+          "bottom": -64.51274074074072,
+          "top": 64.51274074074072,
+          "far": 100000
+        },
+        "width": 2160,
+        "height": 4674,
+        "actualAlphaSupport": [
+          136,
+          1765,
+          2026,
+          2942
+        ]
+      }
+    },
+    "environment": {
+      "syntheticGroundPlaneEnabled": false,
+      "sourceFloorGeometryRetained": true,
+      "reason": "The original room floor receives native illumination; the renderer-generated infinite ground plane remains disabled."
+    },
+    "lighting": {
+      "scheme": "SceneLighting",
+      "recipe": "Neutral source-compatible key, subtle cool fill and warm rim in original native coordinates.",
+      "lights": [
+        {
+          "intensity": 0.7,
+          "name": "neutral-key",
+          "rgb": [
+            245,
+            245,
+            245
+          ],
+          "style": "WorldDirectional",
+          "direction": [
+            0.4920678313051228,
+            0.5904813975661474,
+            -0.6396881806966597
+          ]
+        },
+        {
+          "intensity": 0.12,
+          "name": "cool-fill",
+          "rgb": [
+            205,
+            220,
+            232
+          ],
+          "style": "WorldDirectional",
+          "direction": [
+            -0.7035264706814485,
+            0.502518907629606,
+            -0.502518907629606
+          ]
+        },
+        {
+          "intensity": 0.06,
+          "name": "warm-rim",
+          "rgb": [
+            224,
+            190,
+            154
+          ],
+          "style": "WorldDirectional",
+          "direction": [
+            -0.502518907629606,
+            -0.7035264706814485,
+            -0.502518907629606
+          ]
+        }
+      ],
+      "sourceOriginalLightsChanged": false,
+      "temporaryCaptureLightsRemoved": true,
+      "userOpenGLAAUnchanged": true,
+      "openGLAALevel": "Good",
+      "displayProfileUpdated": false,
+      "colourGradeApplied": false
+    },
+    "verification": {
+      "desktop": {
+        "nativePNGSHA256": "81cd189bf25b66aa422ee84051fa648ebeda21348f60620588d858f6de4ff9c1",
+        "decodedRGBAExact": true,
+        "decodedAlphaExact": true,
+        "alpha": {
+          "zero": 5775399,
+          "opaque": 6016369,
+          "intermediate": 4712,
+          "total": 11796480,
+          "nonblackVisible": 5895687,
+          "support": [
+            445,
+            469,
+            3655,
+            2468
+          ],
+          "edgeVisiblePixels": {
+            "left": 0,
+            "right": 0,
+            "top": 0,
+            "bottom": 0
+          },
+          "allEdgesClear": true,
+          "decodedPixelFormat": "RGBA8 from actual native PNG"
+        },
+        "sourceShape": {
+          "originalTVVerticesExact": true,
+          "originalTVMaterialAssignmentExact": true,
+          "sourceObjectCount": 4204,
+          "sceneGeometryDataCRCListSHA256": "c7276283bd2b7f9d24ed378c630360ecac2b1c4a968add2c8f62a001913e8294",
+          "originalTVTopologyExact": true,
+          "originalTVUVsExact": true
+        },
+        "allSourceGeometryDataCRCUnchanged": true
+      },
+      "mobile": {
+        "nativePNGSHA256": "c4c98bcee3aaea95fe9dd32dee8e9e3d8a62aadfd7fd0c480afc27d750737705",
+        "decodedRGBAExact": true,
+        "decodedAlphaExact": true,
+        "alpha": {
+          "zero": 8006925,
+          "opaque": 2084684,
+          "intermediate": 4231,
+          "total": 10095840,
+          "nonblackVisible": 2031325,
+          "support": [
+            136,
+            1765,
+            2026,
+            2942
+          ],
+          "edgeVisiblePixels": {
+            "left": 0,
+            "right": 0,
+            "top": 0,
+            "bottom": 0
+          },
+          "allEdgesClear": true,
+          "decodedPixelFormat": "RGBA8 from actual native PNG"
+        },
+        "sourceShape": {
+          "originalTVVerticesExact": true,
+          "originalTVMaterialAssignmentExact": true,
+          "sourceObjectCount": 4204,
+          "sceneGeometryDataCRCListSHA256": "c7276283bd2b7f9d24ed378c630360ecac2b1c4a968add2c8f62a001913e8294",
+          "originalTVTopologyExact": true,
+          "originalTVUVsExact": true
+        },
+        "allSourceGeometryDataCRCUnchanged": true
+      }
+    }
+  }
+}

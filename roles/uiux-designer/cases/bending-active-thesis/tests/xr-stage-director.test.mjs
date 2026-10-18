@@ -28,10 +28,10 @@ class Element extends Target{
 const flush=async()=>{for(let i=0;i<14;i++)await Promise.resolve();};
 const deferred=()=>{let resolve,reject;const promise=new Promise((yes,no)=>{resolve=yes;reject=no;});return{promise,resolve,reject};};
 
-function fixture({pending=false,firstPaintFailure=false,firstPaint}={}){
+function fixture({pending=false,firstPaintFailure=false,firstPaint,workspacePending=false,workspaceDecode}={}){
  const win=new Target(),doc=new Target(),queries=new Map(),raf=new Map(),timers=new Map(),observers=[];let serial=0,now=100;
  const connection=Object.assign(new Target(),{saveData:false});doc.hidden=false;
- Object.assign(win,{innerWidth:1440,innerHeight:1000,scrollY:0,navigator:{connection},requestAnimationFrame:fn=>{const id=++serial;raf.set(id,fn);return id;},cancelAnimationFrame:id=>raf.delete(id),setTimeout:(fn,delay)=>{const id=++serial;timers.set(id,{fn,delay});return id;},clearTimeout:id=>timers.delete(id),matchMedia(query){if(!queries.has(query))queries.set(query,Object.assign(new Target(),{matches:false}));return queries.get(query);}});
+ Object.assign(win,{innerWidth:1440,innerHeight:1000,scrollY:0,navigator:{connection,userAgent:'Mozilla/5.0 Version/26.0 Safari/605.1.15'},CSS:{supports:()=>true},requestAnimationFrame:fn=>{const id=++serial;raf.set(id,fn);return id;},cancelAnimationFrame:id=>raf.delete(id),setTimeout:(fn,delay)=>{const id=++serial;timers.set(id,{fn,delay});return id;},clearTimeout:id=>timers.delete(id),matchMedia(query){if(!queries.has(query))queries.set(query,Object.assign(new Target(),{matches:false}));return queries.get(query);}});
  doc.defaultView=win;doc.fonts={ready:Promise.resolve()};doc.documentElement=new Element(doc);doc.documentElement.setAttribute('data-site-entry-state','requested');
  const observer=kind=>class{constructor(fn){this.fn=fn;this.kind=kind;this.nodes=new Set();this.disconnected=false;observers.push(this);}observe(node){this.nodes.add(node);}unobserve(node){this.nodes.delete(node);}disconnect(){this.nodes.clear();this.disconnected=true;}};
  Object.assign(win,{ResizeObserver:observer('resize'),IntersectionObserver:observer('intersection'),MutationObserver:observer('mutation')});
@@ -39,6 +39,14 @@ function fixture({pending=false,firstPaintFailure=false,firstPaint}={}){
  const root=new Element(doc,{height:11000}),host=new Element(doc,{width:1440,height:1000}),keys=['overview','context','method','adapt','assemble','join','making','credits'];
  const chapters=keys.map((key,index)=>{const node=new Element(doc,{id:`xr-${key}`,top:index*1100,height:1100});node.dataset.xrChapter=key;node.parentElement=root;return node;});
  const links=chapters.map(node=>{const link=new Element(doc,{marker:'a'});link.setAttribute('href',`#${node.id}`);return link;});
+ const workspaceImage=Object.assign(new Element(doc),{complete:!workspacePending,naturalWidth:workspacePending?0:1920,naturalHeight:workspacePending?0:1080,currentSrc:'https://site.test/assets/xr/workspace-desktop.png',decode:()=>workspaceDecode??Promise.resolve()});
+ host.querySelector=selector=>selector==='[data-xr-workspace-visual]'?workspaceImage:null;
+ const glass=['identity','chapter-navigation','reading-controls'].map(kind=>{
+  const node=new Element(doc,{width:220,height:60,marker:'[data-liquid-glass]'}),skin=new Element(doc),image=new Element(doc),displacement=new Element(doc);node.dataset.liquidGlass=kind;
+  node.querySelector=selector=>selector===':scope > [data-liquid-skin]'?skin:null;skin.querySelector=selector=>selector==='[data-liquid-map]'?image:selector==='[data-liquid-displacement]'?displacement:null;
+  node.getBoundingClientRect=()=>({left:0,top:0,width:220,height:60,right:220,bottom:60});return node;
+ });
+ doc.querySelectorAll=selector=>selector==='[data-liquid-glass]'?glass:selector==='[data-xr-chapter-link]'?links:[];
  const info=new Element(doc,{top:1200,width:500,height:160,marker:'[data-information-window]'}),skin=new Element(doc);info.parentElement=root;info.setAttribute('data-information-window','editorial');info.querySelector=selector=>selector===':scope > [data-information-skin]'?skin:null;
  root.querySelectorAll=selector=>selector==='[data-xr-chapter]'?chapters:selector==='a[href^="#"]'?links:selector==='[data-information-window]'?[info]:[];
  doc.getElementById=id=>chapters.find(node=>node.id===id)??null;
@@ -57,7 +65,7 @@ function fixture({pending=false,firstPaintFailure=false,firstPaint}={}){
  const scroll=key=>{win.scrollY=chapters.find(node=>node.dataset.xrChapter===key).offsetTop;win.fire('scroll');};
  const pointer=(type,overrides={})=>{const event={type,pointerId:1,pointerType:'mouse',isPrimary:true,button:0,clientX:600,clientY:400,target:control,prevented:0,preventDefault(){this.prevented++;},...overrides};doc.fire(type,event);return event;};
  const key=name=>{const event={key:name,target:control,prevented:0,preventDefault(){this.prevented++;}};doc.fire('keydown',event);return event;};
- return{win,doc,root,host,info,skin,links,chapters,control,protectedNode,queries,observers,raf,timers,connection,starts,handles,states,acquired,director,cleanup,frame,settle,site,scroll,pointer,key,makeHandle,setHit:value=>{hit=value;}};
+ return{win,doc,root,host,info,skin,links,chapters,control,protectedNode,workspaceImage,glass,queries,observers,raf,timers,connection,starts,handles,states,acquired,director,cleanup,frame,settle,site,scroll,pointer,key,makeHandle,setHit:value=>{hit=value;}};
 }
 function closed(facts){for(const id of new Set(facts.map(f=>f.id))){const own=facts.filter(f=>f.id===id);assert.equal(own.filter(f=>f.phase==='requested').length,1);assert.equal(own.filter(f=>['ready','failed','cancelled'].includes(f.phase)).length,1);}}
 
@@ -75,7 +83,7 @@ test('native XR chapters, real information presenter and first paint compose one
  const pausedDraws=f.handles[0].presents.length;f.director.setPaused(true);await f.settle();assert.equal(f.handles[0].presents.length,pausedDraws);
 });
 
-test('the opening visual keeps a prepared model inert; later chapters reuse it and returning closes inspection',async t=>{
+test('the model-free opening and full-workspace Context keep a prepared assembly inert; later chapters reuse it and returning closes inspection',async t=>{
  const f=fixture();t.after(f.cleanup);f.site('entered');await f.settle();
  assert.equal(f.director.inspect().chapter,'overview');assert.equal(f.starts.length,1);
  const resource=f.handles[0],frames=f.director.inspect().frames;
@@ -83,6 +91,9 @@ test('the opening visual keeps a prepared model inert; later chapters reuse it a
  assert.equal(f.key('ArrowRight').prevented,0);assert.equal(f.director.hitTest(600,400),false);
  await f.settle();assert.equal(f.director.inspect().frames,frames,'An invisible source never acquires a motion frame');
  f.scroll('context');await f.settle();
+ assert.equal(f.director.inspect().workspace.phase,'ready');assert.equal(f.director.hitTest(600,400),false);
+ f.pointer('pointerdown');assert.equal(f.director.inspect().gesture,null);assert.equal(f.key('ArrowRight').prevented,0);
+ f.scroll('method');await f.settle();
  assert.deepEqual(f.director.hitTest(600,400),{source:true,kind:'model'});
  f.pointer('pointerdown');f.pointer('pointermove',{clientX:680});await f.settle();
  assert.ok(f.director.inspect().camera.value.azimuth<0);
@@ -214,4 +225,57 @@ test('native pause commands acknowledge before UI state without waiting for a ca
  f.director.setPaused(true);
  const failed=f.director.inspect();assert.equal(failed.phase,'failed');assert.equal(failed.reason,'native-pause-unavailable');assert.equal(failed.resource,null);assert.equal(handle.disposed,1);assert.equal(f.raf.size,0);assert.equal(handle.presents.length,initial.presents);closed(failed.history);
  assert.deepEqual(failed.resourceFailures,[{id:failed.id,phase:'resource-failed',reason:'native-pause-unavailable'}]);
+});
+
+test('a decoded full-workspace image owns Context entry even when the hidden assembly already painted, without another clock',async t=>{
+ const decode=deferred(),f=fixture({workspacePending:true,workspaceDecode:decode.promise});t.after(f.cleanup);
+ f.site('entered');f.scroll('context');await f.settle();let state=f.director.inspect();
+ assert.equal(state.phase,'ready');assert.equal(state.scene.paintedChapter,'context','The assembly can prepare behind Context');
+ assert.equal(state.workspace.phase,'loading');assert.equal(state.scene.mode,'waiting');assert.equal(state.scene.opacity,0);assert.equal(state.scene.settled,false);
+ assert.equal(f.raf.size,0,'A pending image cannot spin a second clock or the Director scheduler');assert.equal(f.timers.size,0,'Readiness comes from the native image, not a new simulated image timer');
+ Object.assign(f.workspaceImage,{complete:true,naturalWidth:1920,naturalHeight:1080});f.workspaceImage.fire('load');await flush();
+ assert.equal(f.director.inspect().workspace.phase,'loading','Native load alone is insufficient while decode still awaits');assert.equal(f.raf.size,0);
+ decode.resolve();await f.settle();state=f.director.inspect();
+ assert.equal(state.workspace.phase,'ready');assert.equal(state.workspace.source,f.workspaceImage.currentSrc);assert.equal(state.scene.mode,'hold');assert.equal(state.scene.opacity,1);assert.equal(state.scene.settled,true);
+ assert.equal(f.director.hitTest(600,400),false,'The complete readonly workspace cannot expose the hidden assembly hit area');assert.equal(f.starts.length,1);
+ for(const id of new Set(state.scene.history.map(item=>item.id))){const own=state.scene.history.filter(item=>item.id===id);assert.equal(own.filter(item=>item.status==='requested').length,1);assert.equal(own.filter(item=>['completed','cancelled'].includes(item.status)).length,1);}
+});
+
+test('workspace image errors close a readable static Context and a stale decode cannot manufacture readiness after error or disposal',async t=>{
+ for(const terminal of ['error','dispose']){
+  const decode=deferred(),f=fixture({workspaceDecode:decode.promise});t.after(f.cleanup);f.site('entered');f.scroll('context');await f.settle();
+  assert.equal(f.director.inspect().scene.mode,'waiting');
+  if(terminal==='error'){
+   f.workspaceImage.fire('error');await f.settle();const failed=f.director.inspect();
+   assert.equal(failed.workspace.phase,'failed');assert.equal(failed.workspace.reason,'workspace-image-unavailable');assert.equal(failed.scene.mode,'hold');assert.equal(failed.scene.settled,true);
+   assert.equal(failed.scene.history.at(-1).status,'completed');assert.equal(failed.scene.history.at(-1).reason,'static');assert.equal(f.director.hitTest(600,400),false);assert.equal(f.key('ArrowDown').prevented,0);
+  }else{f.cleanup();assert.equal(f.director.inspect().scene.history.at(-1).status,'cancelled');assert.equal(f.director.inspect().scene.history.at(-1).reason,'disposed');}
+  const before={workspace:f.director.inspect().workspace,frames:f.director.inspect().frames};decode.resolve();await flush();
+  assert.deepEqual(f.director.inspect().workspace,before.workspace);assert.equal(f.director.inspect().frames,before.frames);assert.equal(f.raf.size,0);
+  if(terminal==='dispose'){assert.equal(f.director.inspect().events.nativeListeners,0);assert.equal(f.host.getAttribute('data-xr-workspace-phase'),null);}
+ }
+});
+
+test('responsive workspace sources require their own decoded epoch and an older source cannot acknowledge a later request',async t=>{
+ const f=fixture();t.after(f.cleanup);f.site('entered');f.scroll('context');await f.settle();assert.equal(f.director.inspect().workspace.phase,'ready');
+ const oldDecode=deferred(),newDecode=deferred();
+ Object.assign(f.workspaceImage,{complete:false,currentSrc:'https://site.test/assets/xr/workspace-mobile.png',decode:()=>oldDecode.promise});
+ f.host.clientWidth=390;f.host.clientHeight=844;f.win.innerWidth=390;f.win.innerHeight=844;f.win.fire('resize');await f.settle();
+ assert.equal(f.director.inspect().workspace.phase,'loading');assert.equal(f.director.inspect().scene.mode,'waiting');assert.equal(f.raf.size,0);
+ Object.assign(f.workspaceImage,{complete:true,naturalWidth:1000,naturalHeight:2164});f.workspaceImage.fire('load');await flush();
+ Object.assign(f.workspaceImage,{currentSrc:'https://site.test/assets/xr/workspace-desktop-v2.png',naturalWidth:1920,naturalHeight:1080,decode:()=>newDecode.promise});f.workspaceImage.fire('load');await flush();
+ oldDecode.resolve();await flush();assert.equal(f.director.inspect().workspace.phase,'loading','The older native decode cannot acknowledge the new picture source');assert.equal(f.raf.size,0);
+ newDecode.resolve();await f.settle();const state=f.director.inspect();
+ assert.equal(state.workspace.phase,'ready');assert.equal(state.workspace.source,f.workspaceImage.currentSrc);assert.equal(state.workspace.width,1920);assert.equal(state.workspace.height,1080);assert.equal(state.scene.mode,'hold');assert.equal(f.starts.length,1,'A picture source switch never creates another WebGL context');
+});
+
+test('the three shared glass groups use the XR Director scheduler, engine fallback and native keyboard reset without waking an idle model',async()=>{
+ const f=fixture();f.site('entered');await f.settle();let state=f.director.inspect();
+ assert.equal(state.liquidGlass.count,3);assert.equal(state.liquidGlass.mode,'reflective');assert.equal(state.liquidGlass.settled,true);assert.equal(f.raf.size,0);
+ f.pointer('pointermove',{target:f.glass[0],clientX:180,clientY:40});assert.equal(f.raf.size,1);await f.settle();
+ state=f.director.inspect();assert.equal(state.liquidGlass.settled,true);assert.equal(state.liquidGlass.items[0].hover,1);assert.equal(f.raf.size,0);
+ const before=state.frames;assert.equal(f.key('Tab').prevented,0);assert.equal(f.director.inspect().liquidGlass.items[0].hover,0);assert.equal(f.director.inspect().frames,before);assert.equal(f.raf.size,0,'Keyboard reset must not steal native keys or wake a camera frame');
+ const contrast=f.queries.get('(prefers-contrast: more)');contrast.matches=true;contrast.fire('change');await f.settle();assert.equal(f.director.inspect().liquidGlass.mode,'opaque');
+ assert.ok(f.glass.every(node=>node.getAttribute('data-liquid-mode')==='opaque'));assert.equal(f.director.inspect().liquidGlass.mapPixels,0);
+ f.cleanup();assert.equal(f.director.inspect().events.nativeListeners,0);assert.equal(f.director.inspect().liquidGlass.count,0);assert.ok(f.glass.every(node=>node.getAttribute('data-liquid-ready')===null&&node.getAttribute('data-liquid-mode')===null));assert.equal(f.raf.size,0);
 });

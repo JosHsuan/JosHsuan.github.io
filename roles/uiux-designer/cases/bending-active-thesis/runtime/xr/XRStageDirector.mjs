@@ -1,6 +1,7 @@
 import {EventManager} from '../core/EventManager.ts';
 import {DOMPresenter} from '../presentation/DOMPresenter.ts';
 import {createInformationWindowPresenter} from '../presentation/InformationWindowPresenter.mjs';
+import {createLiquidGlassPresenter} from '../presentation/LiquidGlassPresenter.mjs';
 import {createFrameScheduler} from '../../components/runtime-scheduler.mjs';
 import {createPreviewLifecycle} from '../site/PreviewLifecycle.mjs';
 import {createXRStageMotion,advanceXRStageMotion,cancelXRStageMotion} from './XRStageMotion.mjs';
@@ -23,17 +24,22 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
    const events=new EventManager(),scope=events.createScope('xr-stage');
    const dom=new DOMPresenter(),publisher=dom.forOwner('xr-director');
    const windows=createInformationWindowPresenter({root,publisher:dom.forOwner('xr-information')});
+   const liquid=createLiquidGlassPresenter({root:doc,publisher:dom.forOwner('xr-liquid-glass')});
    const sceneMotion=createXRStageMotion(),sceneSurface=host.querySelector('[data-xr-scene-surface]')??host;
+   const workspaceImage=host.querySelector('[data-xr-workspace-visual]');
+   const workspace={phase:workspaceImage?'loading':'failed',reason:workspaceImage?null:'workspace-absent',width:0,height:0,source:null};
    const reduced=win.matchMedia('(prefers-reduced-motion: reduce)'),connection=win.navigator?.connection;
+   const glassPreferences=['(forced-colors: active)','(prefers-contrast: more)','(prefers-reduced-transparency: reduce)'].map(query=>win.matchMedia(query));
+   const opaqueGlass=()=>glassPreferences.some(query=>query.matches);
    const observerList=[],observed=new Set(),gestureHistory=[];
    let disposed=false,away=false,visible=true,dirty=true,resumed=true,previous=0,frames=0,frameDelta=0;
    let chapters=[],links=[],chapter='overview',progress=0,size={width:0,height:0},resource=null,windowSize={width:win.innerWidth,height:win.innerHeight};
    let target=zero(),value=zero(),velocity=zero(),settled=true,press=null,gestureId=0,lastState='',lastPaint='';
-   let paintedChapter=null,paintPending=false,paintGeneration=0;
+   let paintedChapter=null,paintPending=false,paintGeneration=0,workspaceGeneration=0,liquidKeyboardFocus=true;
    const scheduler=createFrameScheduler({request:fn=>win.requestAnimationFrame(fn),cancel:id=>win.cancelAnimationFrame(id),onFrame:tick});
    const listen=(node,type,fn,options)=>events.listen(scope,node,type,fn,options);
    const policy=()=>({reduced:!!reduced.matches,saveData:!!connection?.saveData,hidden:!!doc.hidden,siteReady:doc.documentElement.getAttribute('data-site-entry-state')==='entered'});
-   const canInspect=()=>{const p=policy(),painted=resource?.inspect();return chapter!=='overview'&&sceneMotion.chapter===chapter&&sceneMotion.mode==='hold'&&sceneMotion.settled&&!!resource&&painted?.mode==='webgl-model'&&painted.successfulPaint&&!disposed&&!scheduler.suspended&&!away&&visible&&!p.hidden&&!p.reduced&&!p.saveData&&p.siteReady;};
+   const canInspect=()=>{const p=policy(),painted=resource?.inspect();return !['overview','context'].includes(chapter)&&sceneMotion.chapter===chapter&&sceneMotion.mode==='hold'&&sceneMotion.settled&&!!resource&&painted?.mode==='webgl-model'&&painted.successfulPaint&&!disposed&&!scheduler.suspended&&!away&&visible&&!p.hidden&&!p.reduced&&!p.saveData&&p.siteReady;};
    const state=()=>{const p=policy(),s=lifecycle.inspect();return{phase:s.phase,reason:s.reason,chapter,sceneChapter:sceneMotion.chapter,sceneMode:sceneMotion.mode,reduced:p.reduced,saveData:p.saveData,paused};};
    const notify=()=>{if(disposed)return;const next=state(),key=JSON.stringify(next);if(key!==lastState){lastState=key;onState(next);}};
    const presentation=()=>({chapter:sceneMotion.chapter,progress,azimuth:value.azimuth,elevation:value.elevation,paused,reduced:policy().reduced});
@@ -89,12 +95,14 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
    function measure(){
     dirty=false;
     chapters=[...root.querySelectorAll('[data-xr-chapter]')].map(element=>({element,key:element.dataset.xrChapter,top:naturalY(element),height:element.offsetHeight})).sort((a,b)=>a.top-b.top);
-    links=[...root.querySelectorAll('a[href^="#"]')];
+    links=[...new Set([...root.querySelectorAll('a[href^="#"]'),...doc.querySelectorAll('[data-xr-chapter-link]')])];
     const rect=host.getBoundingClientRect(),next={width:Math.max(0,rect.width),height:Math.max(0,rect.height)};
     if(next.width!==size.width||next.height!==size.height){size=next;lifecycle.resize(size.width,size.height);lastPaint='';}
+    if(workspaceImage&&workspace.phase==='ready'&&(!workspaceImage.complete||workspaceImage.currentSrc!==workspace.source)){workspace.phase='loading';workspace.reason='responsive-source-loading';void decodeWorkspace();}
     windows.measure({naturalY,viewportHeight:win.innerHeight,docY:win.scrollY});
+    liquid.measure({opaque:opaqueGlass()});
     if(resize){
-     const wanted=new Set([root,...chapters.map(item=>item.element),...root.querySelectorAll('[data-information-window]')]);
+     const wanted=new Set([root,...chapters.map(item=>item.element),...root.querySelectorAll('[data-information-window]'),...doc.querySelectorAll('[data-liquid-glass]')]);
      for(const node of observed)if(!wanted.has(node)){resize.unobserve(node);observed.delete(node);}
      for(const node of wanted)if(!observed.has(node)){resize.observe(node);observed.add(node);}
     }
@@ -126,6 +134,7 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
     publisher.style(sceneSurface,'opacity',sceneMotion.pose.opacity);
     publisher.attribute(host,'data-xr-scene-mode',sceneMotion.mode);
     publisher.attribute(host,'data-xr-presented-chapter',sceneMotion.chapter);
+    publisher.attribute(host,'data-xr-workspace-phase',workspace.phase);
    }
    function tick(now){
     if(disposed||scheduler.suspended)return;
@@ -133,11 +142,13 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
     const dt=previous?Math.max(0,(now-previous)/1000):1/60;previous=now;frames++;frameDelta=dt;
     advance(dt);
     const p=policy();
-    advanceXRStageMotion(sceneMotion,dt,{chapter,readyChapter:paintedChapter,reduced:p.reduced||p.saveData||lifecycle.inspect().phase==='failed',resumed});
+    const readyChapter=sceneMotion.chapter==='context'?(workspace.phase==='ready'?'context':null):paintedChapter;
+    advanceXRStageMotion(sceneMotion,dt,{chapter,readyChapter,reduced:p.reduced||p.saveData||lifecycle.inspect().phase==='failed'||chapter==='context'&&workspace.phase==='failed',resumed});
     publishScene();
     const moving=windows.publish({docY:win.scrollY,dt,reduced:policy().reduced,seek:resumed,resumed});
+    const glassMoving=liquid.publish({dt,reduced:p.reduced,resumed,hidden:p.hidden,opaque:opaqueGlass(),keyboardFocus:liquidKeyboardFocus});
     resumed=false;paint();notify();
-    if(!settled||moving||sceneMotion.transition)scheduler.schedule();else previous=0;
+    if(!settled||moving||glassMoving||sceneMotion.transition)scheduler.schedule();else previous=0;
    }
    function invalidate(){if(disposed)return;dirty=true;scheduler.schedule();}
    function down(event){
@@ -166,30 +177,49 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
    }
    function suspend(reason,flag){
     scheduler.suspend(reason,flag);previous=0;resumed=true;
-    if(flag){closeGesture(reason,true);cancelXRStageMotion(sceneMotion,reason);advanceXRStageMotion(sceneMotion,0,{chapter,reduced:true});publishScene();windows.publish({docY:win.scrollY,dt:0,reduced:true,resumed:true});}
+    if(flag){closeGesture(reason,true);liquid.reset();cancelXRStageMotion(sceneMotion,reason);advanceXRStageMotion(sceneMotion,0,{chapter,reduced:true});publishScene();windows.publish({docY:win.scrollY,dt:0,reduced:true,resumed:true});}
     updateEligibility(reason);if(!scheduler.suspended){dirty=true;scheduler.schedule();}
    }
    const resize=win.ResizeObserver?new win.ResizeObserver(invalidate):null;if(resize)observerList.push(resize);
    if(win.IntersectionObserver){const observer=new win.IntersectionObserver(entries=>{for(const entry of entries)if(entry.target===root){const next=entry.isIntersecting&&entry.intersectionRatio>0;if(next!==visible){visible=next;suspend('offscreen',!visible);}}},{threshold:[0,.01]});observer.observe(root);observerList.push(observer);}
    if(win.MutationObserver){const observer=new win.MutationObserver(()=>{updateEligibility('entry-ready');if(!scheduler.suspended)scheduler.schedule();});observer.observe(doc.documentElement,{attributes:true,attributeFilter:['data-site-entry-state']});observerList.push(observer);}
    listen(win,'scroll',()=>scheduler.schedule(),{passive:true});listen(win,'resize',()=>{if(windowSize.width===win.innerWidth&&windowSize.height===win.innerHeight)return;windowSize={width:win.innerWidth,height:win.innerHeight};invalidate();},{passive:true});listen(root,'toggle',invalidate,true);
-   listen(doc,'pointerdown',down);listen(doc,'pointermove',move,{passive:false});listen(doc,'pointerup',event=>end(event));listen(doc,'pointercancel',event=>end(event,true));
+   const pointerGlass=event=>{if(!scheduler.suspended&&liquid.pointer(event))scheduler.schedule();};
+   listen(doc,'pointerdown',event=>{liquidKeyboardFocus=false;pointerGlass(event);down(event);});listen(doc,'pointermove',event=>{pointerGlass(event);move(event);},{passive:false});listen(doc,'pointerup',event=>{pointerGlass(event);end(event);});listen(doc,'pointercancel',event=>{pointerGlass(event);end(event,true);});
    listen(doc,'lostpointercapture',event=>{if(press?.pointerId===event.pointerId){closeGesture('lost-capture',true);scheduler.schedule();}});
    listen(doc.documentElement,'pointerleave',()=>{if(press){closeGesture('pointer-left',true);if(!scheduler.suspended)scheduler.schedule();}});
-   listen(doc,'keydown',key);listen(win,'blur',()=>{if(press||!settled||Object.values(target).some(Boolean)){closeGesture('blur',true);if(!scheduler.suspended)scheduler.schedule();}});
+   listen(doc,'keydown',event=>{liquidKeyboardFocus=true;liquid.reset();key(event);});listen(win,'blur',()=>{liquid.reset();if(press||!settled||Object.values(target).some(Boolean)){closeGesture('blur',true);if(!scheduler.suspended)scheduler.schedule();}});
    listen(root,'focusout',event=>{if(event.target.closest?.('[data-xr-model-control]')){closeGesture('focus-left',true);if(!scheduler.suspended)scheduler.schedule();}});
    listen(doc,'visibilitychange',()=>suspend('visibility',doc.hidden));listen(doc,'freeze',()=>{away=true;suspend('freeze',true);});listen(doc,'resume',()=>{away=false;suspend('freeze',false);});
    listen(win,'pagehide',event=>{away=true;if(event.persisted)suspend('page',true);else dispose();});
    listen(win,'pageshow',()=>{away=false;scheduler.suspend('visibility',doc.hidden);suspend('page',false);});
    listen(reduced,'change',()=>{closeGesture('preference-change',true);previous=0;resumed=true;updateEligibility('preference-change');scheduler.schedule();});
    if(connection?.addEventListener)listen(connection,'change',()=>{closeGesture('preference-change',true);updateEligibility('preference-change');scheduler.schedule();});
+   for(const query of glassPreferences)listen(query,'change',()=>{liquid.reset();invalidate();});
+   // Native image decoding is Context's own readiness fact. A prepared hidden
+   // assembly cannot acknowledge the complete workspace still on its behalf.
+   async function decodeWorkspace(){
+    if(!workspaceImage||!workspaceImage.complete)return;
+    const source=workspaceImage.currentSrc;
+    if(workspace.phase==='ready'&&workspace.source===source)return;
+    const generation=++workspaceGeneration;workspace.phase='loading';workspace.reason=null;
+    try{
+     if(!workspaceImage.naturalWidth)throw Error('Workspace image is unavailable');
+     await workspaceImage.decode();if(disposed||generation!==workspaceGeneration)return;
+     if(workspaceImage.currentSrc!==source){void decodeWorkspace();return;}
+     if(!(workspaceImage.naturalWidth>0&&workspaceImage.naturalHeight>0))throw Error('Workspace image is empty');
+     workspace.phase='ready';workspace.reason=null;workspace.width=workspaceImage.naturalWidth;workspace.height=workspaceImage.naturalHeight;workspace.source=source;
+    }catch{if(disposed||generation!==workspaceGeneration)return;workspace.phase='failed';workspace.reason='workspace-decode-failed';}
+    if(!scheduler.suspended)scheduler.schedule();
+   }
+   if(workspaceImage){listen(workspaceImage,'load',decodeWorkspace);listen(workspaceImage,'error',()=>{workspaceGeneration++;workspace.phase='failed';workspace.reason='workspace-image-unavailable';if(!scheduler.suspended)scheduler.schedule();});void decodeWorkspace();}
    function dispose(){
-    if(disposed)return;closeGesture('disposed',true);cancelXRStageMotion(sceneMotion,'disposed');disposed=true;lifecycle.dispose();scheduler.dispose();windows.dispose();
+    if(disposed)return;closeGesture('disposed',true);cancelXRStageMotion(sceneMotion,'disposed');disposed=true;lifecycle.dispose();scheduler.dispose();windows.dispose();liquid.dispose();
     observerList.forEach(observer=>observer.disconnect());observed.clear();scope.dispose();events.dispose();
     publisher.attribute(root,'data-xr-director-ready',null);publisher.attribute(root,'data-xr-active-chapter',null);links.forEach(link=>publisher.attribute(link,'aria-current',null));
-    publisher.style(sceneSurface,'transform','');publisher.style(sceneSurface,'opacity','');publisher.attribute(host,'data-xr-scene-mode',null);publisher.attribute(host,'data-xr-presented-chapter',null);
+    publisher.style(sceneSurface,'transform','');publisher.style(sceneSurface,'opacity','');publisher.attribute(host,'data-xr-scene-mode',null);publisher.attribute(host,'data-xr-presented-chapter',null);publisher.attribute(host,'data-xr-workspace-phase',null);
    }
-   const inspect=()=>({...lifecycle.inspect(),chapter,progress,paused,...policy(),size:{...size},scene:{chapter:sceneMotion.chapter,requestedChapter:sceneMotion.requestedChapter,mode:sceneMotion.mode,settled:sceneMotion.settled,visible:sceneMotion.visible,...sceneMotion.pose,paintPending,paintedChapter,history:sceneMotion.history.map(item=>({...item}))},camera:{target:{...target},value:{...value},settled},gesture:press?{id:press.id,pointerId:press.pointerId,locked:press.locked}:null,gestures:[...gestureHistory],frames,frameDelta,lifecycle:scheduler.inspect(),events:events.inspect(),informationWindows:windows.inspect(),domPublication:dom.inspect(),disposed});
+   const inspect=()=>({...lifecycle.inspect(),chapter,progress,paused,...policy(),size:{...size},workspace:{...workspace},scene:{chapter:sceneMotion.chapter,requestedChapter:sceneMotion.requestedChapter,mode:sceneMotion.mode,settled:sceneMotion.settled,visible:sceneMotion.visible,...sceneMotion.pose,paintPending,paintedChapter,history:sceneMotion.history.map(item=>({...item}))},camera:{target:{...target},value:{...value},settled},gesture:press?{id:press.id,pointerId:press.pointerId,locked:press.locked}:null,gestures:[...gestureHistory],frames,frameDelta,lifecycle:scheduler.inspect(),events:events.inspect(),informationWindows:windows.inspect(),liquidGlass:liquid.inspect(),domPublication:dom.inspect(),disposed});
    binding={dispose,inspect,hitTest:(x,y)=>canInspect()&&[x,y].every(Number.isFinite)?resource.hitTest?.(x,y)??false:false,pause(value){
     if(disposed||paused===value)return;paused=value;
     // Native media commands acknowledge before the UI, independently of the

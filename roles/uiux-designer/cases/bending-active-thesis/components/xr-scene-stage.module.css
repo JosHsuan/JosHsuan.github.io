@@ -1,11 +1,13 @@
-.stage{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden;contain:layout paint}
+.stage{position:fixed;left:0;top:0;width:100vw;height:100vh;height:100dvh;z-index:1;pointer-events:none;overflow:hidden;contain:layout paint}
 .sceneSurface{position:absolute;inset:0;pointer-events:none}
 .stage canvas{opacity:0}
 .stage[data-xr-scene-painted] canvas{opacity:1}
-.openingVisual{position:absolute;left:48%;top:14%;width:50%;height:78%;object-fit:contain;visibility:hidden}
-.stage[data-xr-opening=true]>.openingVisual{visibility:visible}
-/* Preserve the stage's measured dimensions and prepared resources. Only the
-   opening's presentation changes; later chapters keep their original 3D pose. */
+.workspaceVisual{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;visibility:hidden}
+.stage[data-xr-presented-chapter=context] .workspaceVisual{visibility:visible}
+.stage[data-xr-workspace-phase=failed] .workspaceVisual{visibility:hidden}
+.stage[data-xr-presented-chapter=context] :is(canvas,.modelPoster,.nativePhone){visibility:hidden}
+/* The introduction stays model-free. The prepared stage keeps its measured
+   viewport and retained resource; Context selects the complete source still. */
 .stage[data-xr-opening=true]>.sceneSurface{visibility:hidden}
 .modelPoster{position:absolute;left:48%;top:14%;width:50%;height:78%;object-fit:contain}
 .stage[data-xr-scene-painted=model] .modelPoster,.stage:has([data-xr-native-phone]:not([hidden])) .modelPoster{visibility:hidden}
@@ -16,11 +18,11 @@
 .screen img{position:absolute;inset:0}
 .nativePhone[data-video-ready=true] img{visibility:hidden}
 .stage[data-xr-scene-painted=phone] .nativePhone{opacity:0}
-.controls{position:fixed;right:24px;bottom:20px;z-index:8;display:flex;gap:16px;align-items:center;padding:8px 10px 8px 16px;border:1px solid var(--material-control-border);border-radius:24px;background:var(--material-control-fill);backdrop-filter:var(--material-control-backdrop);box-shadow:var(--material-control-shadow);color:var(--material-control-ink)}
-.controls>span{font:.5rem/1.5 var(--mono);letter-spacing:.06em}
-.controls button{min-width:88px;min-height:44px;padding:.5rem .8rem;background:var(--material-inner-fill);border-color:var(--material-inner-border);font-size:.72rem}
+.controls{display:flex;gap:10px;align-items:center;font:inherit}
+.inspectionHint{font:.5rem/1.5 var(--mono);letter-spacing:.04em}
+:global([data-xr-reading-tools]) .controls button{min-width:88px;min-height:44px;font-family:var(--mono)}
 .controls[hidden]{display:none}
-@media(max-width:799px){.openingVisual,.modelPoster{left:3%;top:9.5%;width:94%;height:45%}.nativePhone{left:3%;top:13%;width:94%;height:76%}.screen{height:95%;border-width:8px;border-radius:24px}.controls{right:12px;bottom:max(12px,env(safe-area-inset-bottom));gap:8px;padding:5px 6px 5px 12px}.controls>span{font-size:.42rem;max-width:140px}.controls button{min-width:80px;font-size:.66rem}}
+@media(max-width:799px){.modelPoster{left:3%;top:16%;width:94%;height:45%}.nativePhone{left:3%;top:15%;width:94%;height:76%}.screen{height:95%;border-width:8px;border-radius:24px}.controls{gap:8px}.controls button{min-width:80px;min-height:44px;font-size:.66rem}}
 @media(prefers-contrast:more){.controls{background:#152127;border-color:#bdc9c9;color:#fff}}
 @media(forced-colors:active){.stage{display:none}.controls{background:Canvas;border-color:CanvasText;color:CanvasText}}
 @media print{.stage,.controls{display:none}}

@@ -45,6 +45,8 @@ test('Home keeps its introduction model-free and enters with its live project ca
  page.on('pageerror',error=>errors.push(error.message));
  await page.goto('/');await entered(page);
  await expect(page.locator('[data-home-introduction] h1')).toHaveText('Hi, I’m JosHsuan.');
+ await expect(page.locator('[data-introduction-statement]')).toHaveText('I am a computational designer and developer working at the intersection of design technology, digital fabrication, and spatial interaction.');
+ await expect(page.locator('[data-introduction-description]')).toHaveText('My work bridges the physical and digital through computational tools, interactive interfaces, and workflows that translate design and engineering information into fabrication-ready, machine-readable data.');
  expect(await page.locator('main>section').evaluateAll(sections=>sections.map(section=>section.id))).toEqual(['about','projects','contact']);
  await expect(page.locator('[data-cinematic-stage],[data-story-chapter]')).toHaveCount(0);
  await expect(page.locator('canvas[data-project-model-canvas]')).toHaveCount(1);
@@ -211,7 +213,7 @@ test('native internal routes display loading and close the correlated request ac
  const departure=observation.state;
   const destination=await entered(page);expect(destination.id).toBe(departure.id);
   expect(destination.history.filter(fact=>fact.id===destination.id).map(fact=>fact.phase)).toEqual(['requested','ready','revealing','entered']);
-  await expect(page.locator('h1')).toHaveText('About the way I work.');
+  await expect(page.locator('h1')).toHaveText('Between physical and digital.');
   await page.locator('[data-portfolio-navigation] a[href="/projects/"]').click();await entered(page);
   await expect(page.locator('[data-project-card]')).toHaveCount(2);
   await page.locator('[data-portfolio-navigation] a[href="/contact/"]').click();await entered(page);

@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "id": "joshsuan-selected-portfolio-v1",
-  "authorizedAt": "2026-10-16",
-  "authorization": "Owner authorizes the shared original Bending background, protected unchanged Bending presentation, latest-portfolio XR narrative, original opening-page card visual, true project media and geometry, and iPhone 3D playback of source app recordings, including tests, commit, push and same-artifact CI-gated deployment. The reusable empty framework and unrelated private materials remain outside scope.",
+  "authorizedAt": "2026-10-18",
+  "authorization": "Owner authorizes the exact supplied computational-designer/developer introduction and theme, OCR typography on all published pages including Bending, Bending-aligned XR chrome, a full-viewport XR renderer, removal of the XR opening photograph, and a verified transparent capture of the complete source CAD workspace for Context; including tests, commit, push and same-artifact CI-gated deployment. Bending geometry, materials, lighting, camera, motion and native source assets remain protected. The empty framework and unrelated private materials remain outside scope. The latest owner direction requires retaining the architectural room and complete workspace in a level source-front, central-axis material-based native Rendered capture through Rhino 8/MCPStart. Restore the side/rear walls, ceiling, original floor/carpet, doors and acoustic fixtures; open only the obstructing front glass/window-frame assembly and hide the approved foreground speaker row/two cabinets. Produce genuine 4K-class native pixels with unchanged source geometry, TV screen vertices/UVs, materials and authored colours; temporary neutral/cool/warm native capture lights are removed afterward. Close Rhino when capture work is complete. The original CAD remains unchanged and private.",
   "origin": "https://joshsuan.github.io",
   "storySHA256": "4df944efbfca4421457eb2205cdaad9d8c2990adc921c5e95415f9012f77ad32",
-  "introductionSHA256": "2763f86f5f0a813da583df0f1d84ae2b3a39f68bdb788e26d32538b48e3d384e",
+  "introductionSHA256": "ab0fa9933275c22bad9f24fb79c27f7307d469ba570d9cd4a78f6f9fd3a6751b",
   "assets": [
     {
       "path": "assets/cinematic/built-prototype.webp",
@@ -348,6 +348,30 @@
       "bytes": 101448,
       "sha256": "c5297673fdbe7316157e1b21b76127c05eb9129fc3f3298d30bbb3ba329f4c59",
       "source": "Owner-designated only_interior.3dm; complete assembled bamboo geometry selected by native source groups; shared Chao / Nomura research"
+    },
+    {
+      "path": "assets/fonts/portfolio-ocr-b.woff2",
+      "bytes": 12840,
+      "sha256": "8806e9a6ed3260df742c43ef996dc1d82ab090f899de08cc486fe3882b0f7d79",
+      "source": "Portfolio OCR B derivative of Matthew Skala OCR B 0.3.1; original Norbert Schwarz unrestricted notices and source provenance retained in OCR_TYPOGRAPHY_INTEGRATION.md; retrieved 2026-10-18"
+    },
+    {
+      "path": "licenses/ocr-b-NOTICE.txt",
+      "bytes": 1845,
+      "sha256": "8676f6ac15567452d394a4576c41bb8a28eb37e8b14dabdcc973cbf91e60076b",
+      "source": "Original Norbert Schwarz / Matthew Skala OCR B notices plus explicitly identified public-domain project symbol additions; source package 0.3.1, retrieved 2026-10-18"
+    },
+    {
+      "path": "assets/xr/research-workspace.webp",
+      "bytes": 3715044,
+      "sha256": "d691463248ac34d7dd71c7f8211363f9dd51a46e55cfa22a90006d7e400b27da",
+      "source": "Owner-authorized high-resolution native Rhino Rendered transparent front capture of the original architectural XR research room and working setup; original geometry/materials/TV UVs preserved, with documented front-only visibility opening and temporary native capture lighting."
+    },
+    {
+      "path": "assets/xr/research-workspace-mobile.webp",
+      "bytes": 1248596,
+      "sha256": "937e8d388a3b4156bc19671ad7d614bee12fbbe3c54d79e9669d9fbe67ef135e",
+      "source": "Owner-authorized high-resolution native Rhino Rendered transparent front capture of the original architectural XR research room and working setup; original geometry/materials/TV UVs preserved, with documented front-only visibility opening and temporary native capture lighting."
     }
   ],
   "limits": [
@@ -356,5 +380,6 @@
     "Geometry and mobile transfer budgets remain above the earlier targets; no physical-phone performance certification."
   ],
   "xrStudySHA256": "a5edc97bb895c9427ed2457e918b143a05f1a7a91d4cfda9327a3e1e848648b0",
-  "contactSHA256": "c68b4bc45a3ecc13eeee55bae43f3cab75f2085a095a5084e1494f90c5695882"
+  "contactSHA256": "c68b4bc45a3ecc13eeee55bae43f3cab75f2085a095a5084e1494f90c5695882",
+  "xrWorkspaceSHA256": "d912d9a204f66df5380d9d2f00cc954a6484ee9da18a8bdf362095405a4ed8ec"
 }

@@ -1,6 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {createServer} from 'node:http';
 import {fileURLToPath} from 'node:url';
+import {readFile} from 'node:fs/promises';
 import {createPagesPreviewHandler} from '../../scripts/serve-pages.mjs';
 import {WAIT,frames} from './case-helpers.mjs';
 
@@ -8,13 +9,27 @@ const stage=page=>page.locator('[data-xr-stage]');
 const control=page=>page.locator('[data-xr-model-control]');
 const video=(page,id)=>stage(page).locator(`[data-xr-stage-video="${id}"]`);
 const facts=page=>stage(page).evaluate(node=>node.__xrStage.inspect());
+const workspace=JSON.parse(await readFile(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/xr-workspace.json',import.meta.url),'utf8'));
 async function openingVisible(page){
  await expect(stage(page)).toHaveAttribute('data-xr-opening','true');
- const visual=stage(page).locator('[data-xr-opening-visual]');await expect(visual).toBeVisible();
- await expect.poll(()=>visual.evaluate(node=>node.complete&&node.naturalWidth===2000&&node.naturalHeight===1125)).toBe(true);
- await expect(visual).toHaveAttribute('src','/assets/xr/portfolio-main-visual.webp');
+ await expect(stage(page).locator('[data-xr-opening-visual]')).toHaveCount(0);
+ await expect(page.locator('[data-xr-hero]')).toHaveCount(0);
+ await expect(stage(page).locator('[data-xr-workspace-visual]')).toBeHidden();
  await expect(stage(page).locator('canvas')).toBeHidden();await expect(stage(page).locator('[data-xr-model-poster]')).toBeHidden();
  await expect(page.locator('[data-xr-scene-controls]')).toBeHidden();
+}
+async function contextVisible(page){
+ const visual=stage(page).locator('[data-xr-workspace-visual]');await expect(visual).toBeVisible();
+ const source=await visual.evaluate(node=>({ready:node.complete&&node.naturalWidth>0&&node.naturalHeight>0,source:new URL(node.currentSrc).pathname,width:node.naturalWidth,height:node.naturalHeight,fit:getComputedStyle(node).objectFit,box:node.getBoundingClientRect().toJSON()})),viewport=page.viewportSize(),expected=viewport.width<800?workspace.image.mobile??workspace.image:workspace.image;
+ expect(source.ready).toBe(true);expect(source.source).toBe(expected.src);expect(source.width).toBe(expected.width);expect(source.height).toBe(expected.height);expect(source.source).not.toBe('/assets/xr/portfolio-main-visual.webp');expect(source.source).not.toBe('/assets/xr/research-assembly-poster.webp');expect(source.fit).toBe('contain');
+ expect(source.box.x).toBeCloseTo(0,0);expect(source.box.y).toBeCloseTo(0,0);expect(source.box.width).toBeCloseTo(viewport.width,0);expect(source.box.height).toBeCloseTo(viewport.height,0);
+ await expect(stage(page).locator('canvas')).toBeHidden();await expect(stage(page).locator('[data-xr-model-poster]')).toBeHidden();await expect(page.locator('[data-xr-scene-controls]')).toBeHidden();
+ expect((await facts(page)).workspace.phase).toBe('ready');
+}
+async function fullCanvas(page){
+ const sample=await page.evaluate(()=>{const host=document.querySelector('[data-xr-stage]'),canvas=host.querySelector('canvas');return{box:canvas.getBoundingClientRect().toJSON(),view:host.__xrStage.inspect().resource.surface.viewport};}),viewport=page.viewportSize(),{box,view}=sample;
+ expect(box.x).toBeCloseTo(0,0);expect(box.y).toBeCloseTo(0,0);expect(box.width).toBeCloseTo(viewport.width,0);expect(box.height).toBeCloseTo(viewport.height,0);
+ expect({left:view.left,top:view.top,width:view.width,height:view.height}).toEqual({left:0,top:0,...viewport});
 }
 async function viewportFits(page){
  const viewport=page.viewportSize(),actual=await page.evaluate(()=>({clientWidth:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth,innerWidth,innerHeight,visualWidth:visualViewport?.width,visualHeight:visualViewport?.height}));
@@ -64,6 +79,53 @@ async function nativeArrowScroll(page){
  await control(page).press('ArrowDown');await expect.poll(()=>page.evaluate(()=>scrollY)).toBeGreaterThan(before);
 }
 
+test('XR reuses Bending study-header, section-label and control-rail positions with native project navigation',async({page,isMobile})=>{
+ await page.emulateMedia({reducedMotion:'reduce'});
+ const chrome=()=>page.evaluate(()=>{
+  const box=selector=>{const node=document.querySelector(selector),rect=node.getBoundingClientRect(),css=getComputedStyle(node);return{x:rect.x,y:rect.y,width:rect.width,height:rect.height,rightEdge:rect.right,bottomEdge:rect.bottom,font:css.fontFamily,size:css.fontSize,direction:css.flexDirection,position:css.position,top:css.top,right:css.right,bottom:css.bottom,padding:css.padding,background:css.background,borderRadius:css.borderRadius,backdrop:css.backdropFilter};};
+  return{masthead:box('[data-page-masthead]'),identity:box('[data-liquid-glass="identity"]'),navigation:box('[data-page-masthead] nav'),rail:box('[data-liquid-glass="chapter-navigation"]'),reading:box('[data-liquid-glass="reading-controls"]')};
+ });
+ await page.goto('/projects/bending-active/');await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});
+ await page.locator('[data-liquid-glass="chapter-navigation"][data-liquid-ready]').waitFor();const bending=await chrome();
+ await enter(page);await page.locator('[data-liquid-glass="chapter-navigation"][data-liquid-ready]').waitFor();const xr=await chrome();
+ for(const key of ['masthead','identity','navigation'])expect(xr[key]).toEqual(bending[key]);
+ for(const key of ['x','width','font','size','direction','position','right','padding','background','borderRadius','backdrop'])expect(xr.rail[key]).toEqual(bending.rail[key]);
+ // Seven and eight links have different desktop heights. Compare the fixed
+ // top anchor there; its auto bottom is derived from the content height.
+ // The mobile rail uses the same fixed bottom anchor instead.
+ expect(xr.rail[isMobile?'bottom':'top']).toEqual(bending.rail[isMobile?'bottom':'top']);
+ expect(isMobile?xr.rail.bottomEdge:xr.rail.y).toEqual(isMobile?bending.rail.bottomEdge:bending.rail.y);
+ if(!isMobile)for(const key of ['y','rightEdge','font','size','position','top','right','padding','background','borderRadius','backdrop'])expect(xr.reading[key]).toEqual(bending.reading[key]);
+ await expect(page.locator('[data-liquid-glass]')).toHaveCount(3);await expect(page.locator('[data-xr-chapter-link]')).toHaveCount(8);
+ for(const [label,href]of[['About','/about/'],['Project','/projects/'],['Contact','/contact/']])await expect(page.locator('[data-portfolio-navigation]').getByRole('link',{name:label,exact:true})).toHaveAttribute('href',href);
+ await scrollChapter(page,'context');await contextVisible(page);await expect(page.locator('[data-xr-chapter-link="context"]')).toHaveAttribute('aria-current','location');
+ const label=page.locator('#xr-context [data-project-section-label]');await expect(label).toContainText('01 / CONTEXT');await expect(label.locator('svg')).toHaveCount(1);
+});
+
+test('the complete workspace image owns Context readiness and a real image failure closes to readable static content',async({page})=>{
+ let releaseImage,requestSeen,handler,deny=false;const requested=new Promise(resolve=>{requestSeen=resolve;});let waiting=false;
+ const server=createServer((request,response)=>{
+  if([workspace.image.src,workspace.image.mobile?.src].includes(request.url.split('?')[0])){
+   if(deny){response.writeHead(404,{'Content-Type':'text/plain','Cache-Control':'no-store'}).end('Unavailable workspace');return;}
+   waiting=true;requestSeen();releaseImage=()=>handler(request,response);return;
+  }
+  handler(request,response);
+ });
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const port=server.address().port;handler=createPagesPreviewHandler({root:fileURLToPath(new URL('../../.pages-workspace/out/',import.meta.url)),port});
+ try{
+  await page.goto(`http://127.0.0.1:${port}/projects/xr-bending-active/`,{waitUntil:'domcontentloaded'});await requested;
+  await page.waitForFunction(()=>!!document.querySelector('[data-xr-stage]')?.__xrStage,null,{timeout:WAIT});
+  await page.locator('[data-xr-chapter="context"]').evaluate(node=>node.scrollIntoView({block:'start',behavior:'instant'}));await frames(page,2);
+  const pending=await facts(page);expect(pending.workspace.phase).toBe('loading');expect(pending.scene.mode).toBe('waiting');expect(pending.scene.settled).toBe(false);expect(await page.evaluate(()=>window.__site.inspect().phase)).toBe('requested');
+  releaseImage();waiting=false;await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});await settled(page,'context');await contextVisible(page);closed(await facts(page));
+  deny=true;await page.goto(`http://127.0.0.1:${port}/projects/xr-bending-active/`);await page.waitForFunction(()=>window.__site?.inspect().phase==='failed',null,{timeout:WAIT});
+  await page.waitForFunction(()=>document.querySelector('[data-xr-stage]')?.__xrStage?.inspect().workspace.phase==='failed',null,{timeout:WAIT});
+  await scrollChapter(page,'context');const failed=await facts(page);expect(failed.workspace.reason).toMatch(/^workspace-/);expect(failed.scene.mode).toBe('hold');expect(failed.scene.settled).toBe(true);closed(failed);
+  await expect(stage(page).locator('canvas')).toHaveCount(0);await expect(stage(page).locator('[data-xr-model-poster]')).toBeHidden();await expect(page.locator('#xr-context-heading')).toBeVisible();
+  await expect(page.getByRole('link',{name:'← All projects',exact:true})).toHaveAttribute('href','/projects/');
+ }finally{if(waiting)releaseImage?.();await page.goto('about:blank');server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
+});
+
 test('one project background stage preserves source geometry, stays idle, and follows finite entries and real hit-based inspection',async({page,isMobile,browserName})=>{
  const requests=[],errors=[];page.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)/.test(request.url()))requests.push(request.url());});page.on('pageerror',error=>errors.push(error.message));
  await enter(page);await modelReady(page);await openingVisible(page);
@@ -82,11 +144,16 @@ test('one project background stage preserves source geometry, stays idle, and fo
   const samples=[];const observer=new MutationObserver(()=>{const scene=node.__xrStage.inspect().scene;if(['entry','exit'].includes(scene.mode)&&scene.opacity>0&&scene.opacity<1&&samples.length<256)samples.push({...scene});});
   observer.observe(node,{attributes:true,subtree:true,attributeFilter:['style','data-xr-scene-mode']});return{samples,dispose(){observer.disconnect();}};
  });
- await scrollChapter(page,'context');await modelReady(page,'context');await expect(stage(page).locator('canvas')).toBeVisible();
+ await scrollChapter(page,'context');await modelReady(page,'context');await contextVisible(page);
  const chapterNav=await page.getByRole('navigation',{name:'XR project sections',exact:true}).boundingBox(),masthead=await page.locator('[data-portfolio-navigation]').boundingBox();
- expect(chapterNav.y).toBeGreaterThanOrEqual(masthead.y+masthead.height+8);
- if(isMobile){expect(chapterNav.height).toBeLessThan(56);await expect(page.getByRole('navigation',{name:'XR project sections',exact:true})).toHaveCSS('flex-wrap','nowrap');}
+ await expect(page.getByRole('navigation',{name:'XR project sections',exact:true})).toHaveCSS('position','fixed');
+ expect(chapterNav.y).toBeGreaterThan(masthead.y+masthead.height);expect(chapterNav.x).toBeGreaterThanOrEqual(0);expect(chapterNav.x+chapterNav.width).toBeLessThanOrEqual(page.viewportSize().width);
+ if(isMobile){expect(chapterNav.height).toBeLessThan(60);expect(chapterNav.y).toBeGreaterThan(page.viewportSize().height*.8);await expect(page.getByRole('navigation',{name:'XR project sections',exact:true})).toHaveCSS('flex-direction','row');const targets=await page.locator('[data-xr-chapter-link]').evaluateAll(nodes=>nodes.map(node=>({width:node.getBoundingClientRect().width,height:node.getBoundingClientRect().height})));expect(targets.every(rect=>rect.width>=44&&rect.height>=44)).toBe(true);}
+ else await expect(page.getByRole('navigation',{name:'XR project sections',exact:true})).toHaveCSS('flex-direction','column');
  await scrollChapter(page,'method');await modelReady(page,'method');await control(page).evaluate(node=>node.focus({preventScroll:true}));await control(page).press('ArrowRight');
+ await settled(page,'method');await fullCanvas(page);
+ const originalViewport=page.viewportSize();await page.setViewportSize({width:originalViewport.width-10,height:originalViewport.height-20});await settled(page,'method');await fullCanvas(page);
+ await page.setViewportSize(originalViewport);await settled(page,'method');await fullCanvas(page);
  const transitions=await passage.evaluate(value=>value.samples);await passage.evaluate(value=>value.dispose());await passage.dispose();
  expect(transitions.some(sample=>sample.mode==='entry'&&sample.chapter==='context')).toBe(true);expect(transitions.some(sample=>sample.mode==='exit'&&sample.chapter==='context')).toBe(true);
  expect((await facts(page)).scene.mode).toBe('hold');
@@ -136,10 +203,13 @@ test('native scrolling selects all three complete recordings in the same scene a
    const hosts=document.querySelectorAll('[data-xr-stage]');if(hosts.length!==1)throw Error('Expected exactly one XR stage');
    const host=hosts[0],videos=host.querySelectorAll(`[data-xr-stage-video="${id}"]`);if(videos.length!==1)throw Error('Expected exactly one selected recording');
    const recording=videos[0];return{state:host.__xrStage.inspect(),canvasCount:host.querySelectorAll('canvas').length,videoSources:host.querySelectorAll('video[src]').length,
-    originalCanvas:canvas.isConnected&&canvas===host.querySelector('canvas'),nativePlaying:recording.muted&&recording.loop&&recording.playsInline&&!recording.paused,duration:recording.duration};
+    originalCanvas:canvas.isConnected&&canvas===host.querySelector('canvas'),nativePlaying:recording.muted&&recording.loop&&recording.playsInline&&!recording.paused,duration:recording.duration,
+    canvasBox:canvas.getBoundingClientRect().toJSON(),viewport:{width:innerWidth,height:innerHeight}};
   },id);
   const {state}=sample;closed(state);expect(state.acquisitions).toBe(1);expect(state.resource.media.reason).toBeNull();expect(state.resource.fallbackReason).toBeNull();
   expect(sample.canvasCount).toBe(1);expect(sample.videoSources).toBe(1);expect(sample.originalCanvas).toBe(true);
+  expect(sample.canvasBox.x).toBeCloseTo(0,0);expect(sample.canvasBox.y).toBeCloseTo(0,0);expect(sample.canvasBox.width).toBeCloseTo(sample.viewport.width,0);expect(sample.canvasBox.height).toBeCloseTo(sample.viewport.height,0);
+  expect({left:state.resource.surface.viewport.left,top:state.resource.surface.viewport.top,width:state.resource.surface.viewport.width,height:state.resource.surface.viewport.height}).toEqual({left:0,top:0,...sample.viewport});
   expect(state.resource.surface.budget.budget.pixels).toBeLessThanOrEqual(393216);expect(sample.nativePlaying).toBe(true);expect(sample.duration).toBeCloseTo(duration,2);
   const draw=state.resource.surface;expect(draw.sourceCalls).toBe(0);expect(draw.phoneBodyCalls).toBe(1);expect(draw.phoneScreenCalls).toBe(1);expect(draw.phoneCalls).toBe(2);expect(draw.stageCalls).toBeGreaterThan(0);expect(draw.calls).toBe(draw.sourceCalls+draw.phoneCalls+draw.stageCalls);
   const first=await originalCanvas.screenshot(),count=await decodedFrames();

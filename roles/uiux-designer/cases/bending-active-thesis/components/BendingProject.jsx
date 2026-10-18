@@ -51,7 +51,7 @@ export default function Page() {
     <EvidenceInspector items={evidence} />
     <a href="#main" className={styles.skip}>Skip to content</a>
     <header className={styles.masthead} data-protect data-page-masthead>
-      <a href="/#about" className={styles.owner} data-home-link data-choreography="nav" data-liquid-glass="identity" aria-label={`${review.owner} — Home`}>{review.owner}<span aria-hidden="true"> / </span><span className={styles.discipline}>DESIGN + MAKING</span><LiquidGlassSkin id="identity" /></a>
+      <a href="/#about" className={styles.owner} data-home-link data-choreography="nav" data-liquid-glass="identity" aria-label={`${review.owner} — Home`}>{review.owner}<span aria-hidden="true"> / </span><span className={styles.discipline}>DESIGN + TECHNOLOGY</span><LiquidGlassSkin id="identity" /></a>
       <nav className={styles.siteLinks} aria-label="Portfolio"><a href="/about/">About</a><a href="/projects/">Project</a><a href="/contact/">Contact</a></nav>
     </header>
     <nav className={styles.chapterRail} aria-label="Study chapters" data-protect data-story-navigation data-liquid-glass="chapter-navigation">{['overview','form','system','pattern','make','validation','credits'].map((id,index)=><a key={id} href={`#${id}`} data-chapter-link={id}><span data-choreography="nav">{String(index+1).padStart(2,'0')}</span><span className={styles.railLabel}>{id}</span></a>)}<LiquidGlassSkin id="chapter-navigation" /></nav>

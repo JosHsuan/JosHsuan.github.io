@@ -2,9 +2,12 @@
 /* eslint-disable @next/next/no-img-element -- Pinned source posters are the SSR/no-WebGL fallback. */
 import {useEffect,useRef,useState} from 'react';
 import {createXRStageDirector} from '../runtime/xr/XRStageDirector.mjs';
+import LiquidGlassSkin from './LiquidGlassSkin';
+import cinematic from './cinematic.module.css';
 import styles from './xr-scene-stage.module.css';
 
-export default function XRSceneStage({model,stages,openingVisual}){
+const chapterOrder=['overview','context','method','adapt','assemble','join','making','credits'];
+export default function XRSceneStage({model,stages,workspaceVisual}){
  const host=useRef(null),director=useRef(null),positions=useRef(new Map());
  const [state,setState]=useState({phase:'poster',reason:'initial',chapter:'overview',sceneChapter:'overview',sceneMode:'absent',paused:false,reduced:false,saveData:false});
  const [rendering,setRendering]=useState('poster');
@@ -20,8 +23,11 @@ export default function XRSceneStage({model,stages,openingVisual}){
  },[model,stages]);
  return <>
   <div ref={host} className={styles.stage} data-xr-stage data-xr-opening={state.sceneChapter==='overview'?'true':'false'} data-research-phase={state.phase} data-research-reason={state.reason} aria-hidden="true">
-   <img className={styles.openingVisual} data-xr-opening-visual data-site-critical src={openingVisual.src} width={openingVisual.width} height={openingVisual.height} alt="" loading="eager" decoding="async" fetchPriority="high"/>
    <div className={styles.sceneSurface} data-xr-scene-surface>
+    <picture>
+     {workspaceVisual.mobile&&<source media="(max-width:799px)" srcSet={workspaceVisual.mobile.src} width={workspaceVisual.mobile.width} height={workspaceVisual.mobile.height}/>}
+     <img className={styles.workspaceVisual} data-xr-workspace-visual data-site-critical src={workspaceVisual.src} width={workspaceVisual.width} height={workspaceVisual.height} alt="" loading="eager" decoding="async" fetchPriority="high"/>
+    </picture>
     <img className={styles.modelPoster} data-xr-model-poster src={model.poster.src} width={model.poster.width} height={model.poster.height} alt=""/>
     {stages.map(stage=><div className={styles.nativePhone} data-xr-native-phone={stage.id} key={stage.id} hidden={state.sceneChapter!==stage.id}>
      <div className={styles.screen} style={{aspectRatio:`${stage.width}/${stage.height}`}}>
@@ -31,9 +37,12 @@ export default function XRSceneStage({model,stages,openingVisual}){
     </div>)}
    </div>
   </div>
-  <div className={styles.controls} data-xr-scene-controls data-protect hidden={state.sceneMode!=='hold'||state.sceneChapter!==state.chapter||state.chapter==='overview'||state.phase!=='ready'||!['webgl-model','webgl-phone','native-video'].includes(rendering)}>
-   <span aria-live="polite">{['adapt','assemble','join'].includes(state.chapter)?'RECORDED APP INTERFACE':'SOURCE GEOMETRY / DRAG TO EXPLORE'}</span>
-   {['adapt','assemble','join'].includes(state.chapter)&&<button type="button" data-xr-motion-toggle disabled={state.reduced||state.saveData||state.phase!=='ready'} aria-pressed={state.paused} onClick={()=>director.current?.setPaused(!state.paused)}>{state.paused?'Play recording':'Pause recording'}</button>}
+  <div className={cinematic.readingTools} data-xr-reading-tools data-protect data-liquid-glass="reading-controls">
+   <span aria-live="polite">{String(chapterOrder.indexOf(state.chapter)+1).padStart(2,'0')} / 08</span>
+   <div className={styles.controls} data-xr-scene-controls hidden={state.sceneMode!=='hold'||state.sceneChapter!==state.chapter||['overview','context'].includes(state.chapter)||state.phase!=='ready'||!['webgl-model','webgl-phone','native-video'].includes(rendering)}>
+    {['adapt','assemble','join'].includes(state.chapter)?<button type="button" data-xr-motion-toggle disabled={state.reduced||state.saveData||state.phase!=='ready'} aria-pressed={state.paused} onClick={()=>director.current?.setPaused(!state.paused)}>{state.paused?'Play recording':'Pause recording'}</button>:<span className={styles.inspectionHint}>SOURCE GEOMETRY / DRAG TO EXPLORE</span>}
+   </div>
+   <LiquidGlassSkin id="reading-controls"/>
   </div>
   <noscript><style>{'[data-xr-scene-controls]{display:none!important}'}</style></noscript>
  </>;

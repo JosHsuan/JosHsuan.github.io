@@ -1,9 +1,10 @@
 @import './glass-materials.css';
 html[data-presentation-context=home] [data-story-progress]{visibility:hidden}
-@font-face{font-family:'IBM Plex Sans';src:url('/assets/fonts/ibm-plex-sans-variable.woff2') format('woff2');font-weight:100 700;font-stretch:75% 100%;font-style:normal;font-display:swap}
-@font-face{font-family:'IBM Plex Mono';src:url('/assets/fonts/ibm-plex-mono-regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
-@font-face{font-family:'IBM Plex Serif';src:url('/assets/fonts/ibm-plex-serif-italic.woff2') format('woff2');font-weight:400;font-style:italic;font-display:swap}
-:root{color-scheme:dark;--bg:#090d0d;--surface:#121a18;--paper:#efeee7;--muted:#c1c9c4;--line:#495650;--accent:#ff9469;--ink:#131b17;--sans:'IBM Plex Sans',Arial,sans-serif;--mono:'IBM Plex Mono',monospace;--serif:'IBM Plex Serif',Georgia,serif;--radius:24px;font-family:var(--sans);color:var(--paper);background:var(--bg)}
+@font-face{font-family:'Portfolio OCR B';src:url('/assets/fonts/portfolio-ocr-b.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+/* One actual OCR family for every published route, including native controls
+   and generated SVG labels. Old semantic tokens remain API-compatible aliases;
+   size, spacing and colour supply hierarchy rather than synthetic font faces. */
+:root{color-scheme:dark;--bg:#090d0d;--surface:#121a18;--paper:#efeee7;--muted:#c1c9c4;--line:#495650;--accent:#ff9469;--ink:#131b17;--ocr:'Portfolio OCR B',monospace;--sans:var(--ocr);--mono:var(--ocr);--serif:var(--ocr);--radius:24px;font-family:var(--ocr);font-synthesis:none;color:var(--paper);background:var(--bg)}
 /* One web material family, informed by Apple's material hierarchy. Reading
    surfaces use a regular material; floating navigation uses a lighter variant.
    These CSS backdrops do not alter source pixels or the WebGL/ASCII renderers. */
@@ -56,6 +57,7 @@ html{scroll-behavior:auto}
 html[data-presentation-context="project"][data-entry-state="preparing"],html[data-presentation-context="project"][data-entry-state="revealing"]{overflow:hidden}
 body{margin:0;min-width:320px;background:var(--bg)}
 button,input,select,textarea{font:inherit}
+code,kbd,samp,pre{font-family:var(--ocr)}
 button,a{-webkit-tap-highlight-color:transparent}
 a{color:inherit;text-underline-offset:.22em}
 button{cursor:pointer}

@@ -3,9 +3,9 @@ import {WAIT,scenarioTimeout,loadScene,settle,frames,centerStudy} from './case-h
 import {renderedTextContrast} from './reading-contrast.mjs';
 import {SOURCE_COMPARISON_SECONDS} from '../../roles/uiux-designer/cases/bending-active-thesis/components/source-scene-score.mjs';
 
-test('IBM Plex, rounded shadowboxes and orange photos retain an accessible original',async({page,isMobile})=>{
+test('OCR typography, rounded shadowboxes and orange photos retain an accessible original',async({page,isMobile})=>{
  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/projects/bending-active/#overview');await page.waitForFunction(()=>window.__story?.inspect().entry?.phase==='entered',null,{timeout:WAIT});await page.evaluate(()=>document.fonts.ready);
- const fonts=await page.evaluate(async()=>{await document.fonts.load('400 16px "IBM Plex Mono"');await document.fonts.load('italic 400 16px "IBM Plex Serif"');return{sans:document.fonts.check('400 16px "IBM Plex Sans"'),mono:document.fonts.check('400 16px "IBM Plex Mono"'),serif:document.fonts.check('italic 400 16px "IBM Plex Serif"'),body:getComputedStyle(document.body).fontFamily};});expect(fonts).toMatchObject({sans:true,mono:true,serif:true});expect(fonts.body).toContain('IBM Plex Sans');
+ const fonts=await page.evaluate(async()=>{const faces=await document.fonts.load('400 16px "Portfolio OCR B"','Original source artwork 60° × 160 mm ↗');return{loaded:document.fonts.check('400 16px "Portfolio OCR B"','Original source artwork 60° × 160 mm ↗'),faces:faces.map(face=>({family:face.family.replaceAll(/['"]/g,''),status:face.status})),body:getComputedStyle(document.body).fontFamily};});expect(fonts).toMatchObject({loaded:true,faces:[{family:'Portfolio OCR B',status:'loaded'}]});expect(fonts.body).toContain('Portfolio OCR B');
  const photo=page.locator('#make [data-media-kind="photo"] img'),link=page.locator('#make [data-inspect-figure]');await link.scrollIntoViewIfNeeded();
  expect(await photo.evaluate(el=>getComputedStyle(el).filter)).toContain('invert(1)');expect(await link.evaluate(el=>parseFloat(getComputedStyle(el).borderTopLeftRadius))).toBeGreaterThanOrEqual(16);
  if(!isMobile){await link.hover();expect(await photo.evaluate(el=>getComputedStyle(el).filter)).toBe('none');}else{await link.focus();expect(await photo.evaluate(el=>getComputedStyle(el).filter)).toBe('none');}

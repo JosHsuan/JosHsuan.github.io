@@ -116,14 +116,14 @@ test('all three full recorded screens and device bodies fit the phone clear regi
  }
 });
 
-test('the bounded subject canvas preserves the full-stage projection and hit ray while spending its pixel budget on the subject',()=>{
+test('the real full-viewport canvas preserves every source point, reading-safe camera and hit ray within its bounded physical-pixel budget',()=>{
  const first=new T.Vector3(),second=new T.Vector3(),ndc=new T.Vector2(),fullRay=new T.Raycaster(),croppedRay=new T.Raycaster();
  for(const[width,height]of viewports)for(const chapter of[...modelChapters,...study.phoneStages.map(stage=>stage.id)]){
   const stage=study.phoneStages.find(item=>item.id===chapter),phone=stage?createResearchPhoneGeometry(stage.width/stage.height):null;
   try{
    const support=phone?.support??sourceSupport,pose=stageCameraPose(support,width,height,{chapter}),view=stageRenderView(pose,width,height);
-   assert(view.width>0&&view.height>0&&view.left>=0&&view.top>=0&&view.left+view.width<=width&&view.top+view.height<=height,
-    'The sole canvas must remain inside its full document viewport');
+   assert.deepEqual({left:view.left,top:view.top,width:view.width,height:view.height},{left:0,top:0,width,height},
+    'The sole canvas must cover the complete viewport, rather than a cropped subject rectangle');
    const fullCamera=cameraFor(pose,width,height),croppedCamera=new T.PerspectiveCamera(pose.fov,width/height,pose.near,pose.far);
    croppedCamera.position.fromArray(pose.position);croppedCamera.up.fromArray(pose.up);
    croppedCamera.setViewOffset(view.fullWidth,view.fullHeight,view.offsetX,view.offsetY,view.width,view.height);
@@ -133,10 +133,10 @@ test('the bounded subject canvas preserves the full-stage projection and hit ray
     const fullX=(first.x+1)*width/2,fullY=(1-first.y)*height/2;
     const croppedX=view.left+(second.x+1)*view.width/2,croppedY=view.top+(1-second.y)*view.height/2;
     assert(Math.abs(fullX-croppedX)<1e-6&&Math.abs(fullY-croppedY)<1e-6,
-     'Cropping empty backdrop must preserve every source point at the same global CSS coordinate');
+     'The full-viewport canvas must preserve every source point at the same reading-safe CSS coordinate');
     assert(Math.abs(first.z-second.z)<1e-12,'Changing the canvas rectangle cannot alter source depth or clipping');
     assert(Math.abs(second.x)<1&&Math.abs(second.y)<1&&second.z>-1&&second.z<1,
-     'All model or complete phone support must remain inside the cropped subfrustum');
+     'All model or complete phone support must remain inside the full viewport frustum');
    }
    // A native pointer uses the actual canvas rectangle. It must reconstruct
    // the same world ray, rather than orbiting or selecting an offset subject.
@@ -147,10 +147,8 @@ test('the bounded subject canvas preserves the full-stage projection and hit ray
    const pixelBudget=phone?RESEARCH_PHONE_PIXELS:RESEARCH_MODEL_PIXELS;
    const fullBudget=resolveRenderBudget({width,height,deviceDpr:1,maxTextureSize:4096,pixelBudget});
    const croppedBudget=resolveRenderBudget({width:view.width,height:view.height,deviceDpr:1,maxTextureSize:4096,pixelBudget});
-   assert(croppedBudget.pixels<=pixelBudget&&croppedBudget.dpr>=fullBudget.dpr,
-    'The same bounded budget must provide at least the previous subject resolution');
-   if(phone&&width>=1440)assert(croppedBudget.dpr/fullBudget.dpr>1.5,
-    'Desktop recorded UI needs the expected resolution gain without a larger budget or second context');
+   assert(croppedBudget.pixels<=pixelBudget,'A full viewport cannot create an unbounded GPU attachment');
+   assert.deepEqual(croppedBudget,fullBudget,'The renderer budget now applies to the real full viewport');
   }finally{phone?.dispose();}
  }
 });

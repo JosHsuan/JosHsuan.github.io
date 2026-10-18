@@ -12,5 +12,5 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  return <html lang="en"><head><link rel="preload" href="/assets/fonts/ibm-plex-sans-variable.woff2" as="font" type="font/woff2" crossOrigin="anonymous" /></head><body><GlobalBackground><SiteExperience/>{children}</GlobalBackground></body></html>;
+  return <html lang="en"><head><link rel="preload" href="/assets/fonts/portfolio-ocr-b.woff2" as="font" type="font/woff2" crossOrigin="anonymous" /></head><body><GlobalBackground><SiteExperience/>{children}</GlobalBackground></body></html>;
 }

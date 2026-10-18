@@ -1,0 +1,37 @@
+OCR B original font notices
+
+Source: Tsukurimashou Project OCR A and OCR B package, version 0.3.1
+https://tsukurimashou.org/ocr.php.en
+https://tsukurimashou.org/files/ocr-0.3.1.zip
+Retrieved: 2026-10-18
+
+The original OCRB.otf contains the following copyright notice:
+Matthew Skala (2011, 2021); based on code by Norbert Schwarz (1986, 2011)
+
+The original package's msk-ocrbdef.mp contains this notice:
+% ocrbdef.mf
+% Copyright 1995, 2010 Norbert Schwarz
+% You may freely use, modify and/or distribute this file, without limitation.
+
+The original package's msk-ocrbmac.mp contains this notice:
+% Copyright 1995, 2010 Norbert Schwarz
+% You may freely use, modify, and/or distribute this file, without limitation.
+
+Matthew Skala's accompanying ocr.tex, section 3, explains that Schwarz
+released his previous non-commercial restriction for unrestricted use and
+distribution. Skala states: "I make no copyright claim on these fonts myself."
+The author's original documentation remains available at:
+https://tsukurimashou.org/ocr.pdf
+
+Project derivative: Portfolio OCR B Regular, 2026-10-18.
+All original OCR B glyph programs, mappings, metrics and original attribution
+are retained. Twelve editorial/navigation characters are added using the
+original dot, lowercase o, hyphen, plus and upward-arrow outlines: degree,
+middle dot, multiplication sign, en/em dash, minus, ellipsis, and
+left/right/bidirectional/diagonal arrows.
+No source character is retraced or replaced. The derivative is WOFF2 encoded
+and renamed to identify this project adaptation; it is not represented as an
+official Tsukurimashou release or certified machine-recognition font.
+Project additions are dedicated to the public domain under CC0 1.0 Universal:
+https://creativecommons.org/publicdomain/zero/1.0/
+The original font notices above continue to apply to the original work.
