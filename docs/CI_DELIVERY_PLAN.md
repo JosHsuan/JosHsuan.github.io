@@ -113,6 +113,46 @@ duration balancing must account for those GPU costs and retain all source
 geometry, original time bounds and the exact scenario union. A superseded-run
 cancellation is not a production change failure or a completed-run timing sample.
 
+## Latest motion-workload observation
+
+The native source-motion candidate `4fa0af93600cfa71c02dfd30898a7e9d7b85a33c`
+completes [CI 39324474356](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39324474356)
+with all 14 jobs successful. Its fresh raw-log union contains **124 scenarios
+per profile / 372 public executions**, plus **24 framework root/subpath
+executions**, all passing without retries, skips or incomplete cases. The
+[motion verification record](../roles/uiux-designer/cases/bending-active-thesis/PROJECT_BACKGROUND_MOTION_VERIFICATION.md#exact-successor-ci-and-gate)
+binds the exact source inventory, logs, run and artifact gate.
+
+| Browser batch | Passed | Native suite summary |
+| --- | ---: | ---: |
+| Chromium 1/4 | 32 | 15.3 min |
+| Chromium 2/4 | 47 | 16.7 min |
+| Chromium 3/4 | 17 | 24.9 min |
+| Chromium 4/4 | 28 | 6.9 min |
+| WebKit 1/2 | 79 | 15.5 min |
+| WebKit 2/2 | 45 | 9.9 min |
+| Mobile Chromium 1/2 | 79 | 22.2 min |
+| Mobile Chromium 2/2 | 45 | 14.2 min |
+
+The workflow spans **21:03:46–21:31:14 UTC on 19 October 2026: 27m28s**.
+Quality takes **49 seconds**, completing **75 seconds after workflow creation**;
+the public build takes **56 seconds**, completing **82 seconds after creation**.
+These distinguish active job time from queue/dependency-inclusive feedback.
+They do not establish the proposed complete fast layer, native smoke or p95.
+The slowest batch is now Chromium 3/4 despite its 17 cases. This reinforces
+measuring actual duration and workload before changing partitions; comparing
+these 372 public executions with the earlier 267/342 public executions is not a
+controlled speedup experiment.
+
+This repair also illustrates an appropriate earlier regression layer: controlled
+native-event/Promise tests fail before the resumed-media state repair and pass
+afterwards, while the actual second-visit time advance remains required in
+Linux WebKit and the other browsers. Waiting and seeking are not accepted as
+playback evidence. The preceding failed CI attempts remain pipeline failures,
+not production incidents; they were not deployed. No workflow optimization,
+new smoke stage, metric collector or recurring automation is implemented by
+this documentation update.
+
 ## Planned feedback and release stages
 
 The table describes the target structure. Existing jobs implement parts of it; the dedicated fast browser stage and duration reporting are proposed improvements.

@@ -2,7 +2,8 @@
 
 Date: 19 October 2026 (Europe/Berlin).
 
-Status: implemented; local validation and CI/live acceptance are recorded separately below.
+Status: deployed as `4fa0af9`; exact CI, public-byte/native acceptance and visual
+scope are recorded in the [verification record](PROJECT_BACKGROUND_MOTION_VERIFICATION.md).
 The owner authorizes the complete implementation and CI-gated publication.
 The preceding public product is `7ccff6d6bdc89cd8574023e23ea2f1848ff1716b`;
 its source and accepted visual limits remain in the
@@ -300,3 +301,28 @@ end/replay, preferences and truthful HTTP/rejection/deadline fallback. No
 Windows codec result or local output is used to accept Linux WebKit or the
 future exact-commit CI artifact. Root's browser contexts and preview are closed
 after the local run.
+
+## Published checkpoint — 20 October 2026 (19 October UTC)
+
+Exact `4fa0af93600cfa71c02dfd30898a7e9d7b85a33c` passes
+[CI 39324474356](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39324474356):
+all 14 jobs and the exact **396 browser executions** succeed. The downloaded
+239-file artifact, 117 pins and required gate bind digest
+`e03651d586460aab9348bad6bedc4395601796236a30fdf55bc10da6b56cb68a`.
+[Deployment 39339773684](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39339773684)
+promotes that same output without rebuilding. All 109 original pins remain exact.
+
+Public verification matches 185 HTTP paths and all 18 prefix/suffix range
+responses across nine MP4s. The new studies pass 18 selected native live
+executions; a separate public-origin XR fixture preserves all original
+assertions and passes six more. The live 72-view desktop/mobile capture and
+five source-first mobile views complete without page errors. Protected Bending
+capture completes 14 states; every saved before/after tuple matches the approved
+DD baseline exactly. The original 628 raw comparison remains 7/14 and is not
+rewritten into a full pass or a whole-page pixel claim.
+
+The [verification record](PROJECT_BACKGROUND_MOTION_VERIFICATION.md) owns the
+raw CI/deployment/live receipts, scoped visual review, retained infrastructure
+and fixture failures, physical-device limits and final cleanup. Earlier pending
+paragraphs are historical checkpoints. The DORA plan remains documentation of
+current gates and proposed improvements, without new workflow optimization.
