@@ -614,6 +614,46 @@
       "path": "assets/projects/special-assemblies/model.glb",
       "bytes": 117672,
       "sha256": "43de5ca2dd8095a125d7f29e58851b5a80dc9588625912918d75dbadae8e28df"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/rotary-cutting-motion.mp4",
+      "bytes": 16358510,
+      "sha256": "8a4d94866d3daffc4b75ef6d2d5782a5e5fa6d647de4da3e2965f1452afac15b"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/rotary-cutting-motion-poster.webp",
+      "bytes": 103120,
+      "sha256": "d3a2b8c079cb3ebd63075069974a515fecb8ecf17b7d14a15d1ba47577dd2a53"
+    },
+    {
+      "path": "assets/projects/entrance-installation-art/installation-lighting-motion.mp4",
+      "bytes": 4987684,
+      "sha256": "d90cade4251751ade9297067e2825f32180c560e118839d71345097836881369"
+    },
+    {
+      "path": "assets/projects/entrance-installation-art/installation-lighting-motion-poster.webp",
+      "bytes": 120554,
+      "sha256": "ab2815c0967be14c8675566dc1e43d698417a83833bbf8f03ab2372710917a77"
+    },
+    {
+      "path": "assets/projects/dot-based-3d-printing/printing-process-motion.mp4",
+      "bytes": 24383755,
+      "sha256": "1d9014c6bc56e57e6dd80c8d47fb76c7e696ba6c1d7b4d1b1e04444c6b8d6821"
+    },
+    {
+      "path": "assets/projects/hc3dp-caustics/fabrication-path-motion.mp4",
+      "bytes": 983144,
+      "sha256": "f4f24c57fe236709c3580008ea39d429edcdb1e0d51e02bef4d61f4c90fab1ee"
+    },
+    {
+      "path": "assets/projects/special-assemblies/robot-assembly-motion.mp4",
+      "bytes": 2313223,
+      "sha256": "fd47359165c6270aa250030b89d290b004f6ebe745f00e456d6ed33a378f62a9"
+    },
+    {
+      "path": "assets/projects/special-assemblies/robot-assembly-motion-poster.webp",
+      "bytes": 60084,
+      "sha256": "1c1f330356c6fd00f4e3666ee6a997068e36653b73ccd24c970eece3ba03371b"
     }
   ],
   "limits": [
@@ -624,6 +664,6 @@
   "xrStudySHA256": "a5edc97bb895c9427ed2457e918b143a05f1a7a91d4cfda9327a3e1e848648b0",
   "contactSHA256": "c68b4bc45a3ecc13eeee55bae43f3cab75f2085a095a5084e1494f90c5695882",
   "xrWorkspaceSHA256": "d912d9a204f66df5380d9d2f00cc954a6484ee9da18a8bdf362095405a4ed8ec",
-  "projectStudiesSHA256": "23452fa336eff35aab83cd4d49e7d98c0839383f09345eedd910a8d8fe8c8a0d",
-  "projectAssetsSHA256": "f765439792ab8055d54d08e2e4753b399f9655653380b027355f1b3cfe2dbbe9"
+  "projectStudiesSHA256": "e91d06b5555898fee52d4b5a5ef689ebc47ba0c6b5096ecde6c172f881961167",
+  "projectAssetsSHA256": "058dbf61182033cfaa5f0cdc26b5941969537191249fa4f7bb7d0771063d22f4"
 }

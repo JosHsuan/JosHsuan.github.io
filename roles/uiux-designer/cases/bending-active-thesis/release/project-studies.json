@@ -197,7 +197,30 @@
             "zoom": 1.04
           }
         }
-      }
+      },
+      "motionMedia": [
+        {
+          "id": "rotary-cutting-motion",
+          "chapter": "making",
+          "src": "/assets/projects/mode-s-of-making/rotary-cutting-motion.mp4",
+          "poster": {
+            "src": "/assets/projects/mode-s-of-making/rotary-cutting-motion-poster.webp",
+            "width": 1280,
+            "height": 720,
+            "alt": "The studio rotary-cutting prototype shapes a foam blank with its moving cutter.",
+            "caption": "Original studio recording of the rotary-cutting prototype in operation.",
+            "credit": "NCKU studio fabrication record. Photographer and operator are not individually identified."
+          },
+          "width": 1280,
+          "height": 720,
+          "durationSeconds": 9.0289,
+          "frameCount": 269,
+          "loop": true,
+          "alt": "The studio rotary-cutting prototype shapes a foam blank with its moving cutter.",
+          "caption": "Original studio recording of the rotary-cutting prototype in operation.",
+          "credit": "NCKU studio fabrication record. Photographer and operator are not individually identified."
+        }
+      ]
     },
     {
       "id": "entrance-installation-art",
@@ -403,7 +426,30 @@
             "zoom": 1.04
           }
         }
-      }
+      },
+      "motionMedia": [
+        {
+          "id": "installation-lighting-motion",
+          "chapter": "results",
+          "src": "/assets/projects/entrance-installation-art/installation-lighting-motion.mp4",
+          "poster": {
+            "src": "/assets/projects/entrance-installation-art/installation-lighting-motion-poster.webp",
+            "width": 540,
+            "height": 960,
+            "alt": "The completed entrance installation changes illumination in a night view.",
+            "caption": "The built installation during a night lighting sequence.",
+            "credit": "PKD Engineering Consultants project record. Individual media author is not identified; project collaborators and commissioning credits remain in the case."
+          },
+          "width": 540,
+          "height": 960,
+          "durationSeconds": 22.066666666666666,
+          "frameCount": 662,
+          "loop": true,
+          "alt": "The completed entrance installation changes illumination in a night view.",
+          "caption": "The built installation during a night lighting sequence.",
+          "credit": "PKD Engineering Consultants project record. Individual media author is not identified; project collaborators and commissioning credits remain in the case."
+        }
+      ]
     },
     {
       "id": "dot-based-3d-printing",
@@ -598,7 +644,30 @@
             "zoom": 1.04
           }
         }
-      }
+      },
+      "motionMedia": [
+        {
+          "id": "printing-process-motion",
+          "chapter": "making",
+          "src": "/assets/projects/dot-based-3d-printing/printing-process-motion.mp4",
+          "poster": {
+            "src": "/assets/projects/dot-based-3d-printing/printing-process.webp",
+            "width": 2500,
+            "height": 1304,
+            "alt": "A printing nozzle deposits material along the upper edge of a dotted specimen.",
+            "caption": "Original Group1 recording of nozzle deposition during the printing study.",
+            "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie. Photographer not individually identified."
+          },
+          "width": 2500,
+          "height": 1304,
+          "durationSeconds": 4.4,
+          "frameCount": 27,
+          "loop": true,
+          "alt": "A printing nozzle deposits material along the upper edge of a dotted specimen.",
+          "caption": "Original Group1 recording of nozzle deposition during the printing study.",
+          "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie. Photographer not individually identified."
+        }
+      ]
     },
     {
       "id": "hc3dp-caustics",
@@ -792,7 +861,30 @@
             "zoom": 1.04
           }
         }
-      }
+      },
+      "motionMedia": [
+        {
+          "id": "fabrication-path-motion",
+          "chapter": "making",
+          "src": "/assets/projects/hc3dp-caustics/fabrication-path-motion.mp4",
+          "poster": {
+            "src": "/assets/projects/hc3dp-caustics/fabrication-path.webp",
+            "width": 2307,
+            "height": 2500,
+            "alt": "A source-authored simulation presents the robotic printing tool, shell geometry and path frames.",
+            "caption": "Source-authored robotic printing-path study from the Group-Red presentation; this is a simulation.",
+            "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao. Individual media authors are not separately identified."
+          },
+          "width": 2308,
+          "height": 2500,
+          "durationSeconds": 2.17,
+          "frameCount": 31,
+          "loop": true,
+          "alt": "A source-authored simulation presents the robotic printing tool, shell geometry and path frames.",
+          "caption": "Source-authored robotic printing-path study from the Group-Red presentation; this is a simulation.",
+          "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao. Individual media authors are not separately identified."
+        }
+      ]
     },
     {
       "id": "special-assemblies",
@@ -994,7 +1086,30 @@
             "zoom": 1.04
           }
         }
-      }
+      },
+      "motionMedia": [
+        {
+          "id": "robot-assembly-motion",
+          "chapter": "making",
+          "src": "/assets/projects/special-assemblies/robot-assembly-motion.mp4",
+          "poster": {
+            "src": "/assets/projects/special-assemblies/robot-assembly-motion-poster.webp",
+            "width": 2508,
+            "height": 1267,
+            "alt": "The original robot-assembly simulation presents an arm and reciprocal stick modules with its authored framing.",
+            "caption": "Original robot-assembly simulation from the Group6 course records; the source framing is preserved.",
+            "credit": "MAS DFab Group6: JosHsuan Chao / Kevin Seav / Megi Sinani. Individual media authors are not separately identified."
+          },
+          "width": 2508,
+          "height": 1268,
+          "durationSeconds": 7.56,
+          "frameCount": 108,
+          "loop": false,
+          "alt": "The original robot-assembly simulation presents an arm and reciprocal stick modules with its authored framing.",
+          "caption": "Original robot-assembly simulation from the Group6 course records; the source framing is preserved.",
+          "credit": "MAS DFab Group6: JosHsuan Chao / Kevin Seav / Megi Sinani. Individual media authors are not separately identified."
+        }
+      ]
     },
     {
       "id": "project-caschlatsch",

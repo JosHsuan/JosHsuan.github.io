@@ -48,18 +48,28 @@ export function advanceProjectStudyStageMotion(state,dt,{chapter,chapters,modelC
 /** One optional scene adapter on the ordinary-page driver's existing clock.
  * React supplies a host; this owner supplies intent/lifecycle; Three alone owns
  * source rendering and its camera. No RAF or autonomous animation is created. */
-export function createProjectStudyScenePresenter({root,host,model,window:win,document:doc,publisher,schedule,policy,acquire=async options=>{
+export function createProjectStudyScenePresenter({root,host,model,window:win,document:doc,publisher,schedule,policy,externalStage=false,acquire=async options=>{
  const sceneModule=await import('../../components/project-study-scene.mjs');return sceneModule.acquireProjectStudyScene(options);
 }}){
  const events=new EventManager(),scope=events.createScope('project-study-scene'),surface=host.querySelector('[data-project-model-surface]')??host,poster=host.querySelector('[data-project-model-poster]');
  const chapters=[...root.querySelectorAll('[data-project-chapter]')].map(element=>element.dataset.projectChapter),motion=createProjectStudyStageMotion(),gestures=[];
- let disposed=false,suspended=false,arrivalStatic=false,staticReason='',resource=null,lifecycle=null,readiness=null;
+ let disposed=false,suspended=false,arrivalStatic=false,staticReason='',resource=null,lifecycle=null,readiness=null,sharedStage=null,preparedChapter=null,posterFailed=false;
  let size={width:win.innerWidth,height:win.innerHeight},chapter=root.dataset.projectActiveChapter??'overview',paintedChapter=null,lastPaint='';
  let target=rest(),value=rest(),velocity=rest(),settled=true,press=null,gestureSequence=0;
+ let posterRequested=false,posterTimer=null,posterEpoch=0,posterStarted=0,posterRemaining=15000,posterFailureReason='';
+ const posterClock=()=>win.performance?.now?.()??Date.now();
+ const stopPosterDeadline=()=>{posterEpoch++;if(posterTimer!==null){win.clearTimeout(posterTimer);posterRemaining=Math.max(0,posterRemaining-(posterClock()-posterStarted));posterTimer=null;}};
+ const failPoster=reason=>{if(disposed||posterFailureReason)return;stopPosterDeadline();posterFailed=true;posterFailureReason=reason;publisher.attribute(host,'data-project-model-poster-ready',null);announce();schedule();};
+ const armPosterDeadline=()=>{
+  if(disposed||!posterRequested||!arrivalStatic||!poster||posterFailed||poster.complete&&poster.naturalWidth||suspended||policy().hidden||posterTimer!==null)return;
+  if(posterRemaining<=0){failPoster('model-poster-timeout');return;}
+  const epoch=++posterEpoch;posterStarted=posterClock();posterTimer=win.setTimeout(()=>{if(disposed||epoch!==posterEpoch)return;posterTimer=null;posterRemaining=0;failPoster('model-poster-timeout');},posterRemaining);
+ };
+ const syncPosterDeadline=()=>{const native=root.dataset.projectActiveChapter??'overview',active=preparedChapter===native&&(!externalStage||!sharedStage||sharedStage.kind==='model'&&sharedStage.chapter===preparedChapter);if(!active||suspended||policy().hidden)stopPosterDeadline();else armPosterDeadline();};
  const listen=(node,type,fn,options)=>events.listen(scope,node,type,fn,options);
- const posterReady=()=>publisher.attribute(host,'data-project-model-poster-ready',poster?.complete&&poster.naturalWidth?'':null);
+ const posterReady=()=>{if(disposed||posterFailureReason)return;if(poster?.complete&&!poster.naturalWidth){failPoster('model-poster-unavailable');return;}if(poster?.complete&&poster.naturalWidth)stopPosterDeadline();publisher.attribute(host,'data-project-model-poster-ready',poster?.complete&&poster.naturalWidth?'':null);schedule();};
  if(poster){listen(poster,'load',posterReady);listen(poster,'error',posterReady);posterReady();}
- const announce=()=>{if(disposed)return;const state=lifecycle?.inspect();publisher.attribute(host,'data-project-model-phase',state?.phase??'poster');publisher.attribute(host,'data-project-model-reason',staticReason||state?.reason||'');publisher.attribute(host,'data-project-model-rendering',!arrivalStatic&&state?.phase==='ready'?'webgl-model':'poster');};
+ function announce(){if(disposed)return;const state=lifecycle?.inspect();publisher.attribute(host,'data-project-model-phase',state?.phase??'poster');publisher.attribute(host,'data-project-model-reason',posterFailureReason||staticReason||state?.reason||'');publisher.attribute(host,'data-project-model-rendering',!arrivalStatic&&state?.phase==='ready'?'webgl-model':'poster');}
  const staticReady=()=>readiness?.report({mode:'static',reason:staticReason});
  const settleStatic=reason=>{if(disposed||arrivalStatic)return;arrivalStatic=true;staticReason=reason;lifecycle?.stop(reason);staticReady();announce();schedule();};
  readiness=registerPagePreviewReadiness(doc,host,{onFallback:settleStatic});if(arrivalStatic)staticReady();
@@ -90,8 +100,10 @@ export function createProjectStudyScenePresenter({root,host,model,window:win,doc
   if(!arrivalStatic&&(p.reduced||p.saveData))settleStatic(p.reduced?'reduced-motion':'save-data');
   if(!arrivalStatic&&(p.hidden||suspended)&&lifecycle.inspect().phase!=='ready')settleStatic(p.hidden?'hidden':'suspended');
   if(!arrivalStatic)lifecycle.setActive(!p.hidden&&!suspended,'hidden');
+  syncPosterDeadline();
  }
- const canInspect=()=>{const p=policy();return!disposed&&!arrivalStatic&&!suspended&&!p.hidden&&!p.reduced&&!p.saveData&&!p.paused&&p.siteReady&&motion.mode==='hold'&&motion.settled&&model.chapters.includes(chapter)&&motion.chapter===chapter&&lifecycle.inspect().phase==='ready'&&resource?.inspect().successfulPaint;};
+ const activeMotion=()=>externalStage?sharedStage:motion;
+ const canInspect=()=>{const p=policy(),stage=activeMotion();return!disposed&&!arrivalStatic&&!suspended&&!p.hidden&&!p.reduced&&!p.saveData&&!p.paused&&p.siteReady&&stage?.mode==='hold'&&stage.settled&&model.chapters.includes(chapter)&&stage.chapter===chapter&&(!externalStage||stage.kind==='model')&&lifecycle.inspect().phase==='ready'&&resource?.inspect().successfulPaint;};
  const surfaceFor=event=>event.target.closest?.('[data-project-model-control]')??host;
  listen(doc,'pointerdown',event=>{
   if(!canInspect()||event.button!==0||event.isPrimary===false||press||event.target.closest?.(BLOCKED)||!resource.hitTest(event.clientX,event.clientY))return;
@@ -114,26 +126,46 @@ export function createProjectStudyScenePresenter({root,host,model,window:win,doc
  listen(doc.documentElement,'pointerleave',()=>{if(press){closeGesture('pointer-left',true);schedule();}});
  listen(root,'focusout',event=>{if(event.target.closest?.('[data-project-model-control]')){closeGesture('focus-left',true);schedule();}});
  lifecycle.resize(size.width,size.height);updatePolicy();announce();
+ const sharedFacts=()=>sharedStage?{...sharedStage,history:[...(sharedStage.history??[])]}:null;
+ const motionFacts=()=>{
+  if(!externalStage)return{...motion,history:[...motion.history]};
+  const shared=sharedFacts();if(!shared)return null;
+  // The historical scene inspector describes model participation. Documentary
+  // source motion lives in sharedStage/backdrop and does not make a model held.
+  return{...shared,...(shared.kind!=='model'?{chapter,mode:'absent',transition:null,settled:true,pose:outside(1)}:{}),history:shared.history.filter(fact=>fact.key?.startsWith('model:'))};
+ };
  return{
   measure(width,height){if(disposed)return;size={width,height};lifecycle.resize(width,height);},
-  publish({dt=0,resumed=false}={}){
+  prepare(next){
+   if(disposed||!model.chapters.includes(next))return false;
+   if(preparedChapter===next&&paintedChapter===next&&resource?.inspect().successfulPaint)return true;
+   if(preparedChapter!==next){preparedChapter=next;closeGesture('source-change',true);}
+   if(arrivalStatic){if(posterFailed)return false;if(!poster||poster.complete&&poster.naturalWidth){stopPosterDeadline();return true;}posterRequested=true;armPosterDeadline();return false;}
+   if(!resource||lifecycle.inspect().phase!=='ready')return false;
+   const presentation={chapter:next,azimuth:0,elevation:0},key=JSON.stringify(presentation);
+   if(key!==lastPaint)try{resource.present(presentation);if(!resource.inspect().successfulPaint)throw Error('Project model draw unavailable');lastPaint=key;paintedChapter=next;}catch(error){lifecycle.fail(error?.message||'render-unavailable');return false;}
+   return paintedChapter===next&&!!resource?.inspect().successfulPaint;
+  },
+  publish({dt=0,resumed=false,stage=null}={}){
    if(disposed)return false;updatePolicy();
+   if(externalStage)sharedStage=stage;syncPosterDeadline();
    const next=root.dataset.projectActiveChapter??'overview';if(next!==chapter){chapter=next;closeGesture('chapter-change',true);}
    const p=policy(),snap=arrivalStatic||p.paused||p.reduced||p.saveData||resumed;
    if(snap||dt>1){value={...target};velocity=rest();settled=true;}
    else{const decay=Math.exp(-16*dt);settled=true;for(const key of Object.keys(value)){const distance=value[key]-target[key],coefficient=velocity[key]+16*distance;value[key]=target[key]+(distance+coefficient*dt)*decay;velocity[key]=(velocity[key]-16*coefficient*dt)*decay;if(Math.abs(value[key]-target[key])<.00001&&Math.abs(velocity[key])<.0001){value[key]=target[key];velocity[key]=0;}else settled=false;}}
-   const advance=seconds=>advanceProjectStudyStageMotion(motion,seconds,{chapter,chapters,modelChapters:model.chapters,readyChapter:paintedChapter,snap,resumed});advance(dt);
-   if(resource&&model.chapters.includes(motion.chapter)){
-    const presentation={chapter:motion.chapter,azimuth:value.azimuth,elevation:value.elevation},key=JSON.stringify(presentation);
-    if(key!==lastPaint)try{resource.present(presentation);if(!resource.inspect().successfulPaint)throw Error('Project model draw unavailable');lastPaint=key;paintedChapter=motion.chapter;advance(0);}catch(error){lifecycle.fail(error?.message||'render-unavailable');}
+   const advance=seconds=>{if(!externalStage)advanceProjectStudyStageMotion(motion,seconds,{chapter,chapters,modelChapters:model.chapters,readyChapter:paintedChapter,snap,resumed});};advance(dt);
+   const displayed=activeMotion();
+   if(resource&&displayed&&(!externalStage||displayed.kind==='model')&&model.chapters.includes(displayed.chapter)){
+    const presentation={chapter:displayed.chapter,azimuth:value.azimuth,elevation:value.elevation},key=JSON.stringify(presentation);
+    if(key!==lastPaint)try{resource.present(presentation);if(!resource.inspect().successfulPaint)throw Error('Project model draw unavailable');lastPaint=key;paintedChapter=displayed.chapter;advance(0);}catch(error){lifecycle.fail(error?.message||'render-unavailable');}
    }
-   publisher.attribute(host,'data-project-model-active',model.chapters.includes(motion.chapter)&&motion.pose.opacity>0?'':null);publisher.attribute(host,'data-project-model-mode',motion.mode);publisher.attribute(host,'data-project-model-chapter',motion.chapter);
-   publisher.style(surface,'transform',`translate3d(${motion.pose.x*size.width}px,${motion.pose.y*size.height}px,0)`);publisher.style(surface,'opacity',motion.pose.opacity);
-   return!settled||!!motion.transition;
+   if(!externalStage){publisher.attribute(host,'data-project-model-active',model.chapters.includes(motion.chapter)&&motion.pose.opacity>0?'':null);publisher.attribute(host,'data-project-model-mode',motion.mode);publisher.attribute(host,'data-project-model-chapter',motion.chapter);
+    publisher.style(surface,'transform',`translate3d(${motion.pose.x*size.width}px,${motion.pose.y*size.height}px,0)`);publisher.style(surface,'opacity',motion.pose.opacity);}
+   return!settled||!externalStage&&!!motion.transition;
   },
   suspend(reason){if(disposed)return;suspended=true;closeGesture(reason,true);cancelProjectStudyStageMotion(motion,reason);updatePolicy();},
   resume(){if(disposed)return;suspended=false;updatePolicy();},
-  inspect:()=>({...lifecycle.inspect(),arrivalStatic,staticReason,chapter,paintedChapter,motion:{...motion,history:[...motion.history]},camera:{target:{...target},value:{...value},settled},gestures:[...gestures],gesture:press?{id:press.id,locked:press.locked}:null,events:events.inspect(),disposed}),
-  dispose(){if(disposed)return;closeGesture('disposed',true);cancelProjectStudyStageMotion(motion,'disposed');disposed=true;lifecycle.dispose();readiness.release();scope.dispose();events.dispose();for(const name of ['phase','reason','rendering','active','mode','chapter','poster-ready'])publisher.attribute(host,'data-project-model-'+name,null);publisher.style(surface,'transform','');publisher.style(surface,'opacity','');},
+  inspect:()=>({...lifecycle.inspect(),externalStage,arrivalStatic,staticReason,posterFailed,posterFailureReason,posterPreparation:{requested:posterRequested,pending:posterTimer!==null,remainingMs:posterTimer===null?posterRemaining:Math.max(0,posterRemaining-(posterClock()-posterStarted)),reason:posterFailureReason},chapter,paintedChapter,preparedChapter,motion:motionFacts(),sharedStage:externalStage?sharedFacts():null,camera:{target:{...target},value:{...value},settled},gestures:[...gestures],gesture:press?{id:press.id,locked:press.locked}:null,events:events.inspect(),disposed}),
+  dispose(){if(disposed)return;closeGesture('disposed',true);cancelProjectStudyStageMotion(motion,'disposed');stopPosterDeadline();disposed=true;lifecycle.dispose();readiness.release();scope.dispose();events.dispose();for(const name of ['phase','reason','rendering','poster-ready',...(!externalStage?['active','mode','chapter']:[])])publisher.attribute(host,'data-project-model-'+name,null);if(!externalStage){publisher.style(surface,'transform','');publisher.style(surface,'opacity','');}},
  };
 }

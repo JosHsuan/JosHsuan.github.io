@@ -128,6 +128,9 @@ test('documentary studies share one clock, pause decorative time and release the
  env.doc.querySelector=selector=>selector==='[data-project-study]'?env.homeRoot:null;
  env.doc.querySelectorAll=()=>[];
  env.homeRoot.hasAttribute=key=>env.homeRoot.attributes.has(key);
+ env.homeRoot.dataset={projectActiveChapter:'overview'};
+ const informationWindows=env.homeRoot.querySelectorAll;
+ env.homeRoot.querySelectorAll=selector=>selector.startsWith('[data-project-')?[]:informationWindows(selector);
  const runtime=createBackgroundRuntime({createRenderer:fieldFactory});
  const driver=createSiteBackgroundDriver({window:env.win,document:env.doc,runtime,canvas:canvas(),backdrop:{style:{getPropertyValue(){return'';},setProperty(){}}}});
  await Promise.resolve();env.siteReady();env.frame(100);env.frame(1100);

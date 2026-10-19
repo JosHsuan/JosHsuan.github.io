@@ -2,11 +2,30 @@ import assert from 'node:assert/strict';
 
 export const PROJECT_SLUGS=['mode-s-of-making','entrance-installation-art','dot-based-3d-printing','hc3dp-caustics','special-assemblies','project-caschlatsch'];
 const text=(value,name)=>assert(typeof value==='string'&&value.trim().length>0,`Missing project ${name}`);
+export const PROJECT_MOTION_SPECS=Object.freeze({
+  'mode-s-of-making':{id:'rotary-cutting-motion',chapter:'making',loop:true,width:1280,height:720,sourceWidth:1280,sourceHeight:720,frameCount:269,durationSeconds:9.0289,file:'VID_20171226_170743.mp4',bytes:16868782,sha256:'1b9fc374bb02883f45a55875623cbf37bae2dd78ca048b9777e63cb58457c7b3',finalTicks:2611,timeBase:'1/90000',posterFrame:134,remux:true},
+  'entrance-installation-art':{id:'installation-lighting-motion',chapter:'results',loop:true,width:540,height:960,sourceWidth:540,sourceHeight:960,frameCount:662,durationSeconds:22.066666666666666,file:'657032932.686244.mp4',bytes:5232787,sha256:'a14c83ff6d9d40d9f4c175121d483e2c21cc9c56c5f3de5a86738331a090fe7e',finalTicks:20,timeBase:'1/600',posterFrame:330,remux:true},
+  'dot-based-3d-printing':{id:'printing-process-motion',chapter:'making',loop:true,width:2500,height:1304,sourceWidth:2500,sourceHeight:1304,frameCount:27,durationSeconds:4.4,file:'image61.gif',bytes:40264322,sha256:'61a575b1c3863cb6b1becbef6cf9c7fa279778deccc94f3dfea30c26739fac68',finalTicks:13,timeBase:'1/100',posterFrame:0,remux:false,gifLoop:0,container:{file:'JosHsuan_Group01_PrintingArchitecture.pptx',bytes:131691431,sha256:'30f048ec92f7e539d5ffbc9fc51c54fa573674ee0424ed3d6b614aac3f68e117',slide:10,zipMember:'ppt/media/image61.gif',byteExactExtractedMember:true}},
+  'hc3dp-caustics':{id:'fabrication-path-motion',chapter:'making',loop:true,width:2308,height:2500,sourceWidth:2307,sourceHeight:2500,frameCount:31,durationSeconds:2.17,file:'image68.gif',bytes:3033958,sha256:'f69592248ba9e63c044d87dc5ed5978f2c3acb57960d402361c4908509cdafc5',finalTicks:7,timeBase:'1/100',posterFrame:30,remux:false,gifLoop:0,container:{file:'Final Presentation Group-Red.pptx',bytes:112035652,sha256:'9016edfcd197cf268531f4074c6c26bd420fd581fb8783944e33b440c622ff55',slide:14,zipMember:'ppt/media/image68.gif',byteExactExtractedMember:true}},
+  'special-assemblies':{id:'robot-assembly-motion',chapter:'making',loop:false,width:2508,height:1268,sourceWidth:2508,sourceHeight:1267,frameCount:108,durationSeconds:7.56,file:'animationfinal.gif',bytes:5945917,sha256:'34552b023b813144da97eb3b50acb5e066302110d6c4bba773f04ee23f6f02de',finalTicks:7,timeBase:'1/100',posterFrame:36,remux:false,gifLoop:null},
+});
+
+function assertMotionSelection(media,projectId){
+  const spec=PROJECT_MOTION_SPECS[projectId];assert(spec,'Only five source-reviewed project motions');
+  for(const key of ['id','chapter','loop','width','height','frameCount'])assert.equal(media[key],spec[key],`Reviewed motion ${key}: ${projectId}`);
+  assert.equal(media.src,`/assets/projects/${projectId}/${spec.id}.mp4`);
+  assert(Number.isFinite(media.durationSeconds)&&Math.abs(media.durationSeconds-spec.durationSeconds)<1e-6,'Reviewed complete motion duration');
+  for(const key of ['alt','caption','credit'])text(media[key],`motion ${key}`);
+  if(['hc3dp-caustics','special-assemblies'].includes(projectId))assert.match(media.caption,/simulation/i,'Source-authored simulation remains explicitly labelled');
+  assert(media.poster&&media.poster.width===spec.sourceWidth&&media.poster.height===spec.sourceHeight,'Motion poster preserves native source dimensions');
+  return spec;
+}
 
 /** Selected public records only. The build never traverses preparation sources. */
 export function assertProjectStudies(record,manifest){
   assert.equal(record.schemaVersion,1);
   assert.deepEqual(record.projects.map(project=>project.slug),PROJECT_SLUGS,'Exactly the six owner-selected studies, in their requested order');
+  assert.equal(new Set(manifest.assets.map(asset=>asset.path)).size,manifest.assets.length,'Unique release pins');
   const pins=new Map(manifest.assets.map(asset=>['/'+asset.path,asset]));
   const images=[];
   for(const project of record.projects){
@@ -22,7 +41,15 @@ export function assertProjectStudies(record,manifest){
       assert(section.paragraphs.length>0);section.paragraphs.forEach(paragraph=>text(paragraph,'paragraph'));
       assert(section.media.length>0,'Every chapter has actual source evidence');
     }
-    for(const image of [project.hero,...project.sections.flatMap(section=>section.media)]){
+    const motions=project.motionMedia??[];
+    assert(Array.isArray(motions));
+    assert.equal(motions.length,PROJECT_MOTION_SPECS[project.id]?1:0,'One selected motion per approved project; Caschlatsch stays still');
+    for(const media of motions){
+      assertMotionSelection(media,project.id);
+      assert(ids.includes(media.chapter),'Motion belongs to an actual source chapter');
+      const pin=pins.get(media.src);assert(pin&&Number.isInteger(pin.bytes)&&pin.bytes>0&&/^[a-f0-9]{64}$/.test(pin.sha256),'Selected motion has a release pin');
+    }
+    for(const image of [project.hero,...project.sections.flatMap(section=>section.media),...motions.map(media=>media.poster)]){
       assert(image.src.startsWith(`/assets/projects/${project.slug}/`));
       assert.match(image.src,/^\/assets\/projects\/[a-z0-9-]+\/[a-z0-9-]+\.webp$/);
       assert(Number.isInteger(image.width)&&image.width>0&&Number.isInteger(image.height)&&image.height>0);
@@ -57,7 +84,7 @@ export function assertProjectStudies(record,manifest){
     }
   }
   const publicText=JSON.stringify(record);
-  assert(!/portfolio-preparation|[A-Z]:[\\/]|sourceObjectId|NDA|\.3dm\b|\.psd\b/.test(publicText),'No private preparation or native source payload');
+  assert(!/portfolio-preparation|(?:^|[^A-Za-z0-9])[A-Za-z]:[\\/]|sourceObjectId|NDA|\.3dm\b|\.psd\b/.test(publicText),'No private preparation or native source payload');
   return images;
 }
 
@@ -87,6 +114,7 @@ export function assertProjectAssetRecord(record,images,manifest,studies){
   for(const asset of record.assets){
     assert(PROJECT_SLUGS.includes(asset.projectId));assert.equal(asset.src,'/'+asset.path);
     const pin=pins.get(asset.path);assert(pin&&pin.bytes===asset.bytes&&pin.sha256===asset.sha256,'Image provenance matches release pin');
+    for(const image of images.filter(image=>image.src===asset.src))assert.deepEqual([asset.width,asset.height],[image.width,image.height],'Selected image dimensions match provenance');
     assert.match(asset.source.sha256,/^[a-f0-9]{64}$/);text(asset.credit,'image attribution');
     assert.equal(asset.processing.upscaled,false,'Do not manufacture resolution by enlargement');
     const [width,height]=asset.processing.preResizePixels;
@@ -105,7 +133,48 @@ export function assertProjectAssetRecord(record,images,manifest,studies){
     assert.equal(model.processing.compression.decodedByteExact,true);assert.equal(model.processing.compression.quantization,false);
     assert(Number.isFinite(model.processing.maxFloat32PositionErrorMeters)&&model.processing.maxFloat32PositionErrorMeters>=0);
   }
-  assert(!/portfolio-preparation|[A-Z]:[\\/]/.test(JSON.stringify(record)),'No private source paths in public provenance');
+  const motions=record.motionAssets??[],selectedMotion=studies?.projects.flatMap(project=>(project.motionMedia??[]).map(media=>({...media,projectId:project.id})));
+  assert.equal(motions.length,5,'Exactly five reviewed source-motion provenance rows');
+  assert.equal(new Set(motions.map(media=>media.src)).size,5,'Unique motion provenance');
+  assert.deepEqual(motions.map(media=>media.projectId).sort(),Object.keys(PROJECT_MOTION_SPECS).sort(),'Exactly the five selected motion sources');
+  if(selectedMotion)assert.deepEqual(motions.map(media=>media.src).sort(),selectedMotion.map(media=>media.src).sort(),'Selected motion and provenance correspond one to one');
+  for(const media of motions){
+    const selected=selectedMotion?.find(item=>item.src===media.src),expected=PROJECT_MOTION_SPECS[media.projectId];
+    const spec=assertMotionSelection(selected??{...media,poster:{width:expected?.sourceWidth,height:expected?.sourceHeight}},media.projectId);
+    assert.equal(media.src,'/'+media.path);
+    const pin=pins.get(media.path);assert(pin&&pin.bytes===media.bytes&&pin.sha256===media.sha256,'Motion provenance matches release pin');
+    for(const key of ['id','chapter','width','height','frameCount','durationSeconds','loop'])assert.equal(media[key],(selected??spec)[key],`Motion provenance ${key} matches selection`);
+    const source=media.source,processing=media.processing;
+    for(const key of ['file','bytes','sha256'])assert.equal(source[key],spec[key],`Reviewed original motion source ${key}`);
+    text(source.sourceMeaning,'motion source meaning');assert.equal(source.sourceUnchangedSHA256BeforeAfter,true);
+    assert.deepEqual(source.container,spec.container,'Exact reviewed PPTX container and member');
+    assert.equal(source.intrinsicGIFLoopExtension,spec.gifLoop??null);
+    text(source.loopPolicy,'source loop policy');text(media.credit,'motion attribution');text(media.rightsBasis,'scoped motion authorization');
+    assert.equal(processing.fullNativeSequence,true);
+    for(const key of ['crop','trim','retime','resize'])assert.equal(processing[key],null,`No motion ${key}`);
+    assert.equal(processing.upscaled,false);assert.equal(processing.geometryDeformation,false);
+    const right=spec.width-spec.sourceWidth,bottom=spec.height-spec.sourceHeight;
+    assert([right,bottom].every(value=>value===0||value===1),'Only a bounded one-pixel codec pad');
+    assert.deepEqual(processing.pad,{rightPixels:right,bottomPixels:bottom,color:right||bottom?'white':null,sourcePixelBounds:{x:0,y:0,width:spec.sourceWidth,height:spec.sourceHeight}},'Complete native pixel bounds preserved');
+    for(const key of ['frameCountExact','allFramePTSExact','allFrameDurationsExact','finalFrameDurationExact','absolutePTSOriginUnchanged','faststartVerified','noChapterAdvanceOnEnded'])assert.equal(processing[key],true,`Verified native motion ${key}`);
+    assert.equal(processing.finalFrameDurationTicks,spec.finalTicks);assert.equal(processing.finalFrameDurationTimeBase,spec.timeBase);
+    assert.equal(processing.loop,spec.loop);text(processing.loopPolicy,'motion presentation loop policy');
+    if(!spec.loop)assert.match(processing.loopPolicy,/hold last frame; manual replay/,'Finite source motion holds its final frame and permits replay');
+    assert.match(processing.audio,/omitted/i);assert.match(processing.metadata,/omitted/i);
+    assert.equal(processing.videoCodec,'h264');assert.equal(processing.codecTag,'avc1');assert.equal(processing.transcoded,!spec.remux);
+    assert.equal(processing.encodedVideoPacketsByteExact,spec.remux);assert.equal(processing.avcCExtradataByteExact,spec.remux);
+    if(spec.remux){
+      for(const key of ['allPacketPTSExact','allPacketDTSExact','allPacketDurationsExact','identityTrackMatrixExact','sourceColorRangePreserved'])assert.equal(processing[key],true,`Native remux preserves ${key}`);
+      assert.deepEqual(processing.trackMatrix,[65536,0,0,0,65536,0,0,0,1073741824]);
+      assert.equal(processing.pixelFormat,'yuvj420p');assert.equal(processing.colorRange,'pc/full');
+    }else assert.equal(processing.pixelFormat,'yuv420p');
+    const poster=selected?.poster;
+    if(poster){
+      const provenance=record.assets.find(asset=>asset.src===poster.src);assert(provenance,'Reviewed motion poster provenance');
+      assert.equal(provenance.processing.selectedFrame,spec.posterFrame,'Exact reviewed native poster frame');
+    }
+  }
+  assert(!/portfolio-preparation|(?:^|[^A-Za-z0-9])[A-Za-z]:[\\/]/.test(JSON.stringify(record)),'No private source paths in public provenance');
 }
 
 export function assertProjectModel(bytes,model){

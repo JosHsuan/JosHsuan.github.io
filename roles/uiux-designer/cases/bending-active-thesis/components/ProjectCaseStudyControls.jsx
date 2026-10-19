@@ -12,7 +12,7 @@ export default function ProjectCaseStudyControls({projectId,chapterCount}){
   const root=document.querySelector(`[data-project-study="${projectId}"]`);
   if(!root)return;
   const chapters=[...root.querySelectorAll('[data-project-chapter]')],links=[...document.querySelectorAll('[data-project-chapter-link]')];
-  const images=[...root.querySelectorAll('[data-project-media] img')],releases=[];
+  const releases=[];
   let disposed=false,current=null;
   const listen=(node,type,handler,options)=>{node.addEventListener(type,handler,options);releases.push(()=>node.removeEventListener(type,handler,options));};
   const update=()=>{
@@ -27,26 +27,9 @@ export default function ProjectCaseStudyControls({projectId,chapterCount}){
     for(const link of links)if(link.dataset.projectChapterLink===id)link.setAttribute('aria-current','location');else link.removeAttribute('aria-current');
     if(counter.current)counter.current.textContent=`${String(index+1).padStart(2,'0')} / ${String(chapterCount).padStart(2,'0')}`;
    }
-   // A chapter without a new source (for example Credits) retains the last
-   // actual documentary image. No synthetic model or replacement is created.
-   const visual=chapters.slice(0,index+1).reverse().map(chapter=>chapter.querySelector('[data-project-media]')).find(Boolean);
-   for(const figure of root.querySelectorAll('[data-project-media]')){
-    const active=figure===visual;
-    if(figure.hasAttribute('data-project-media-active')!==active)figure.toggleAttribute('data-project-media-active',active);
-   }
+   // Semantic reading is immediate. The existing site driver's unified source
+   // transaction owns every documentary/model surface and its decode/paint gate.
   };
-  for(const image of images){
-   let generation=0;
-   const figure=image.closest('[data-project-media]');
-   const loaded=()=>{
-    const own=++generation;
-    Promise.resolve().then(()=>image.decode?.()).then(()=>{
-     if(!disposed&&own===generation){figure.dataset.projectImageState=image.naturalWidth?'ready':'failed';update();}
-    },()=>{if(!disposed&&own===generation)figure.dataset.projectImageState='failed';});
-   };
-   listen(image,'load',loaded);listen(image,'error',()=>{generation++;if(!disposed)figure.dataset.projectImageState='failed';});
-   if(image.complete){if(image.naturalWidth)loaded();else figure.dataset.projectImageState='failed';}
-  }
   const observer=typeof IntersectionObserver==='function'?new IntersectionObserver(update,{rootMargin:'-20% 0px -40% 0px',threshold:[0,.01,1]}):null;
   for(const chapter of chapters)observer?.observe(chapter);
   for(const event of ['scroll','resize','hashchange','pageshow'])listen(window,event,update,{passive:true});

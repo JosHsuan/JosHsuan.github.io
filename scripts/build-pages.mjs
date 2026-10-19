@@ -7,6 +7,7 @@ import assert from 'node:assert/strict';
 import {auditPages,assertXRWorkspaceRecord,assertXRWorkspaceImage} from './audit-pages.mjs';
 import {preparePagesWorkspace} from './prepare-pages-workspace.mjs';
 import {assertProjectStudies,assertProjectImage,assertProjectModel,assertProjectAssetRecord,PROJECT_SLUGS} from './project-studies.mjs';
+import {projectMotionMedia,assertProjectVideo} from './project-motion-media.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const source = path.join(root, 'roles/uiux-designer/cases/bending-active-thesis');
@@ -27,6 +28,7 @@ const projectAssetBytes=await readFile(path.join(release,'project-assets.json'))
 assert.equal(digest(projectAssetBytes),manifest.projectAssetsSHA256,'Selected public image provenance');
 const projectStudies=JSON.parse(projectStudyBytes);
 const projectImages=assertProjectStudies(projectStudies,manifest);
+const projectVideos=projectMotionMedia(projectStudies);
 assertProjectAssetRecord(JSON.parse(projectAssetBytes),projectImages,manifest,projectStudies);
 const xrWorkspaceBytes=await readFile(path.join(release,'xr-workspace.json'));
 assert.equal(digest(xrWorkspaceBytes),manifest.xrWorkspaceSHA256,'Approved full-workspace source record');
@@ -61,6 +63,8 @@ for (const asset of manifest.assets) {
   if(projectImage)assertProjectImage(bytes,projectImage);
   const projectModel=projectStudies.projects.find(project=>project.model?.src==='/'+asset.path)?.model;
   if(projectModel)assertProjectModel(bytes,projectModel);
+  const projectVideo=projectVideos.find(media=>media.src==='/'+asset.path);
+  if(projectVideo)assertProjectVideo(bytes,projectVideo);
 }
 assert.equal(path.dirname(path.resolve(work)), path.resolve(root));
 assert.equal(path.basename(work), '.pages-workspace');
@@ -100,6 +104,7 @@ const sources = [
   'components/ProjectCaseStudyStage.jsx', 'components/project-study-scene.mjs',
   'components/project-study-appearance.mjs',
   'runtime/site/ProjectStudyStageRegistry.mjs', 'runtime/site/ProjectStudyScenePresenter.mjs',
+  'runtime/site/ProjectStudyBackdropPresenter.mjs', 'runtime/site/ProjectStudyBackdropMotion.mjs',
   ...PROJECT_SLUGS.map(slug=>`app/projects/${slug}/page.jsx`),
   'components/ProjectModelPreview.jsx', 'components/project-model-scene.mjs', 'components/project-model-recipe.mjs', 'components/project-grid-layout.mjs',
   'components/GlobalBackground.jsx', 'runtime/background/BackgroundRuntime.mjs', 'runtime/background/SiteBackgroundDriver.mjs',

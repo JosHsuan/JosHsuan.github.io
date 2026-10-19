@@ -7,6 +7,7 @@ import {createHomeScrollPresenter} from '../site/HomeScrollPresenter.mjs';
 import {createLiquidGlassPresenter} from '../presentation/LiquidGlassPresenter.mjs';
 import {observeProjectStudyStage} from '../site/ProjectStudyStageRegistry.mjs';
 import {createProjectStudyScenePresenter} from '../site/ProjectStudyScenePresenter.mjs';
+import {createProjectStudyBackdropPresenter} from '../site/ProjectStudyBackdropPresenter.mjs';
 
 /** Actual Bending Layer 1 score and renderer. Optional verified project scenes
  * borrow this demand clock through their own adapter; Layer 1 never owns their
@@ -29,7 +30,7 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
   const studyPaused=()=>!!studyRoot?.hasAttribute('data-study-paused');
   const forced=home?win.matchMedia('(forced-colors: active)'):null,connection=home?win.navigator?.connection:null;
   const naturalY=element=>{let top=0;for(let node=element;node;node=node.offsetParent)top+=node.offsetTop;return top;};
-  let homeDirty=!!home,glassDirty=!!liquid,keyboardFocus=true,projectScene=null,releaseStage=()=>{};
+  let homeDirty=!!home,glassDirty=!!liquid,keyboardFocus=true,projectScene=null,projectBackdrop=null,releaseStage=()=>{};
   let previous=0,resumed=true,pendingImpulse=0,touchY=null,disposed=false,frames=0;
   let pointer={x:0,y:0,active:false},size={width:win.innerWidth,height:win.innerHeight};
   let stableWidth=0,latest=null;
@@ -39,6 +40,8 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
   const ready=()=>['entered','failed'].includes(doc.documentElement.getAttribute('data-site-entry-state'));
   const motionAllowed=()=>!scheduler.suspended&&ready()&&!reduced.matches&&!studyPaused();
   const homePolicy=()=>({ready:ready(),reduced:reduced.matches||studyPaused(),suspended:scheduler.suspended,saveData:!!connection?.saveData,forcedColors:!!forced?.matches});
+  const projectPolicy=()=>({hidden:doc.hidden||scheduler.suspended,reduced:reduced.matches,saveData:!!connection?.saveData,paused:studyPaused(),siteReady:doc.documentElement.getAttribute('data-site-entry-state')==='entered'});
+  if(studyRoot)projectBackdrop=createProjectStudyBackdropPresenter({root:studyRoot,window:win,document:doc,publisher:dom.forOwner('project-study-backdrop'),schedule:()=>scheduler.schedule(),policy:projectPolicy});
   const homeInvalidate=()=>{if(disposed||!home)return;homeDirty=true;glassDirty=!!liquid;scheduler.schedule();};
   const measure=()=>{
     // Same coarse-pointer browser-chrome stability rule as the case Director.
@@ -51,7 +54,7 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
     if(disposed||scheduler.suspended)return;
     const dt=previous?(now-previous)/1000:1/60;previous=now;frames++;
     const wasResumed=resumed;
-    if(homeDirty){home.measure({naturalY,viewportHeight:win.innerHeight,docY:win.scrollY});projectScene?.measure(win.innerWidth,win.innerHeight);homeDirty=false;}
+    if(homeDirty){home.measure({naturalY,viewportHeight:win.innerHeight,docY:win.scrollY});projectScene?.measure(win.innerWidth,win.innerHeight);projectBackdrop?.measure(win.innerWidth,win.innerHeight);homeDirty=false;}
     if(glassDirty){liquid.measure({opaque:opaqueGlass()});glassDirty=false;}
     const impulse=pendingImpulse;pendingImpulse=0;
     advanceChapterPlayback(playback,dt,{chapter:'overview',impulse,reducedMotion:reduced.matches,resumed,paused:!ready()||studyPaused()});
@@ -62,7 +65,7 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
     binding.present(latest,{frameTimeMs:now,paused:!ready()||studyPaused(),hidden:doc.hidden,systemReduced:reduced.matches},size.width,size.height);
     const moving=home?.publish({...homePolicy(),dt,docY:win.scrollY,resumed:wasResumed,seek:wasResumed})??false;
     const glassMoving=liquid?.publish({dt,reduced:reduced.matches||studyPaused()||!ready(),resumed:wasResumed,hidden:doc.hidden,opaque:opaqueGlass(),keyboardFocus})??false;
-    const sceneMoving=projectScene?.publish({dt,resumed:wasResumed})??false;
+    const sceneMoving=projectBackdrop?.publish({dt,resumed:wasResumed})??false;
     if(moving||glassMoving||sceneMoving||score.needsFrame&&binding.inspect().ready&&!binding.inspect().failed)scheduler.schedule();
     else previous=0;
   }
@@ -71,8 +74,8 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
     const before=scheduler.suspended;scheduler.suspend(reason,value);
     if(before===scheduler.suspended)return;
     previous=0;resumed=true;pendingImpulse=0;touchY=null;pointer={x:0,y:0,active:false};
-    if(scheduler.suspended){advanceChapterPlayback(playback,0,{hidden:true});home?.publish({...homePolicy(),dt:0,docY:win.scrollY,seek:true});liquid?.reset();liquid?.publish({hidden:true,opaque:opaqueGlass()});projectScene?.suspend(reason);}
-    else{projectScene?.resume();measure();scheduler.schedule();}
+    if(scheduler.suspended){advanceChapterPlayback(playback,0,{hidden:true});home?.publish({...homePolicy(),dt:0,docY:win.scrollY,seek:true});liquid?.reset();liquid?.publish({hidden:true,opaque:opaqueGlass()});projectBackdrop?.suspend(reason);}
+    else{projectBackdrop?.resume();measure();scheduler.schedule();}
   };
   const visibility=()=>suspend('visibility',doc.hidden);
   const siteState=()=>{previous=0;resumed=true;homeDirty=!!home;glassDirty=!!liquid;liquid?.reset();scheduler.schedule();};
@@ -129,14 +132,14 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
   listen(doc,'resume',()=>{visibility();suspend('freeze',false);});
   if(win.MutationObserver){const observer=new win.MutationObserver(siteState);observer.observe(doc.documentElement,{attributes:true,attributeFilter:['data-site-entry-state']});scope.add(()=>observer.disconnect());}
   if(studyRoot)releaseStage=observeProjectStudyStage(doc,descriptor=>{
-    if(disposed)return;projectScene?.dispose();projectScene=null;
-    if(descriptor&&descriptor.root===studyRoot)projectScene=createProjectStudyScenePresenter({...descriptor,window:win,document:doc,publisher:dom.forOwner('project-study-scene'),schedule:()=>scheduler.schedule(),policy:()=>({hidden:doc.hidden||scheduler.suspended,reduced:reduced.matches,saveData:!!connection?.saveData,paused:studyPaused(),siteReady:doc.documentElement.getAttribute('data-site-entry-state')==='entered'})});
+    if(disposed)return;projectBackdrop?.setScene(null);projectScene?.dispose();projectScene=null;
+    if(descriptor&&descriptor.root===studyRoot){projectScene=createProjectStudyScenePresenter({...descriptor,externalStage:true,window:win,document:doc,publisher:dom.forOwner('project-study-scene'),schedule:()=>scheduler.schedule(),policy:projectPolicy});projectBackdrop?.setScene({actor:projectScene,host:descriptor.host,model:descriptor.model});}
     homeDirty=!!home;scheduler.schedule();
   });
   measure();scheduler.schedule();
-  function dispose(){if(disposed)return;disposed=true;releaseStage();projectScene?.dispose();projectScene=null;scheduler.dispose();home?.dispose();liquid?.dispose();scope.dispose();events.dispose();binding.dispose();}
+  function dispose(){if(disposed)return;disposed=true;releaseStage();projectBackdrop?.dispose();projectScene?.dispose();projectScene=null;scheduler.dispose();home?.dispose();liquid?.dispose();scope.dispose();events.dispose();binding.dispose();}
   return {
-    inspect:()=>({owner:'site',frames,playback:sampleChapterPlayback(playback),chapterScene:latest,size:{...size},lifecycle:scheduler.inspect(),events:events.inspect(),pageField:binding.inspect(),homeScrolling:home?.inspect()??null,projectStudy:studyRoot?{paused:studyPaused(),liquidGlass:liquid?.inspect(),scene:projectScene?.inspect()??null}:null,domPublication:publisher.inspect(),disposed}),
+    inspect:()=>({owner:'site',frames,playback:sampleChapterPlayback(playback),chapterScene:latest,size:{...size},lifecycle:scheduler.inspect(),events:events.inspect(),pageField:binding.inspect(),homeScrolling:home?.inspect()??null,projectStudy:studyRoot?{paused:studyPaused(),liquidGlass:liquid?.inspect(),scene:projectScene?.inspect()??null,backdrop:projectBackdrop?.inspect()??null,media:projectBackdrop?.inspect().media??[]}:null,domPublication:publisher.inspect(),disposed}),
     dispose,
   };
 }

@@ -8,7 +8,7 @@
 |---|---|
 | Owner | JosHsuan Chao |
 | Audience | The owner, collaborating developers, and coding agents |
-| Revision | **2.21 — 18 October 2026; six source-backed studies, restored spreads and scoped material/light/camera ownership on the existing clock** |
+| Revision | **2.22 — 19 October 2026; unified documentary/model passages and authentic native motion on the existing clock** |
 | Language | English for project documentation and future website content; Traditional Chinese for discussion with the owner |
 | Scope | Portfolio, Research & Development, About/CV, Contact, and selected interactive project stories |
 | Delivery baseline | Next.js static export to GitHub Pages; no paid domain, paid storage, or continuously running backend required for the initial release |
@@ -19,6 +19,8 @@
 | Materials preparation root | `D:\JosHsuan_Website\_private\portfolio-preparation` — designated source for all project, CV, and content preparation |
 
 ## Executive decision
+
+**Six-study background motion — 19 October 2026:** [Decision 0017](decisions/0017-project-background-motion.md) authorizes Bending/XR-derived finite background passages, authentic selected source sequences and removal of the generic loader's lower duplicate name through same-artifact CI-gated publication. All twelve existing team responsibilities participate in the [integration contract](../roles/uiux-designer/cases/bending-active-thesis/PROJECT_BACKGROUND_MOTION_INTEGRATION.md). One backdrop transaction selects and moves images, videos and the existing model actor on `SiteBackgroundDriver`'s demand clock. Native document reading remains immediate; decoded source frames or successful source paint gate entry. Native video owns media time, retained pause/BFCache state and finite end/replay. Reduced/data policies and bounded failures retain explicit stills. Five authentic motion derivatives and three native-frame posters add eight approved pins without changing the previous 109 or the five source GLBs. Bending/XR presentation, the shared background lease and empty framework remain protected. Implementation authorization is separate from built-browser, CI and live acceptance.
 
 **Six selected project studies — 18 October 2026:** [Decision 0016](decisions/0016-three-fabrication-studies.md) now covers Mode/s of Making, Entrance Installation Art, Dot-Based 3D Printing, HC3DP Caustics, Special Assemblies and Project Caschlatsch. Five inspected source-model derivatives augment their credited native documents; Caschlatsch uses public ETH photographs and an original high-level workflow, excluding restricted CAD/engineering records. One generic imperative Three adapter borrows `SiteBackgroundDriver`'s existing demand clock and background lease. Pinned bytes, actual GLTF primitives/counts/bounds and participation of every source renderable must precede real first paint and readiness; a bounded static terminal rejects late upgrades. Ready resources persist off chapter, hidden and in BFCache; true page exit disposes them. Pause never stops native reading. The [current six-project contract](../roles/uiux-designer/cases/bending-active-thesis/SIX_PROJECT_STUDIES_INTEGRATION.md) records source/UV/material limits and separate browser/CI/live evidence; the former documentary-only three-case contract is historical. Bending/XR source presentations and the empty framework remain protected. Commit/push and same-artifact CI-gated deployment are owner-authorized through completion.
 

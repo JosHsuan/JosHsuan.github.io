@@ -5,6 +5,7 @@ import {registerProjectStudyStage,observeProjectStudyStage} from '../runtime/sit
 import {acquirePagePreviewReadiness} from '../runtime/site/PagePreviewReadiness.mjs';
 import {createProjectStudyScenePresenter,createProjectStudyStageMotion,advanceProjectStudyStageMotion,cancelProjectStudyStageMotion} from '../runtime/site/ProjectStudyScenePresenter.mjs';
 import {createSiteBackgroundDriver} from '../runtime/background/SiteBackgroundDriver.mjs';
+import {createProjectStudyBackdropPresenter} from '../runtime/site/ProjectStudyBackdropPresenter.mjs';
 import {createBackgroundRuntime} from '../runtime/background/BackgroundRuntime.mjs';
 import {acquireProjectStudyScene} from '../components/project-study-scene.mjs';
 import {createHash} from 'node:crypto';
@@ -22,19 +23,39 @@ class Target{
  querySelector(){return null;}querySelectorAll(){return[];}closest(selector){return this.marker&&selector.includes(this.marker)?this:null;}
  setPointerCapture(id){this.captured.add(id);}hasPointerCapture(id){return this.captured.has(id);}releasePointerCapture(id){this.captured.delete(id);}
 }
-function fixture({pending=false,firstDraw=true,reduced=false}={}){
+function fixture({pending=false,firstDraw=true,reduced=false,externalStage=false,posterPending=false}={}){
  const doc=new Target(),win=new Target(),root=new Target(),host=new Target(),surface=new Target(),control=new Target(),timers=new Map(),policy={hidden:false,reduced,saveData:false,paused:false,siteReady:false},waiting=deferred();
- let timerId=0,schedules=0,disposed=0,starts=0,fixtureSignal,failResource;const presentations=[],sizes=[];
- doc.documentElement=new Target();doc.querySelectorAll=()=>[host];root.dataset.projectActiveChapter='overview';root.querySelectorAll=()=>keys.map(key=>({dataset:{projectChapter:key}}));host.querySelector=selector=>selector==='[data-project-model-surface]'?surface:null;control.marker='[data-project-model-control]';
- Object.assign(win,{innerWidth:1440,innerHeight:1000,setTimeout:(fn,delay)=>{timers.set(++timerId,{fn,delay});return timerId;},clearTimeout:id=>timers.delete(id)});
+ let timerId=0,schedules=0,disposed=0,starts=0,fixtureSignal,failResource,now=0;const presentations=[],sizes=[],poster=posterPending?Object.assign(new Target(),{complete:false,naturalWidth:0}):null;
+ doc.documentElement=new Target();doc.querySelectorAll=()=>[host];root.dataset.projectActiveChapter='overview';root.querySelectorAll=()=>keys.map(key=>({dataset:{projectChapter:key}}));host.querySelector=selector=>selector==='[data-project-model-surface]'?surface:selector==='[data-project-model-poster]'?poster:null;control.marker='[data-project-model-control]';
+ Object.assign(win,{innerWidth:1440,innerHeight:1000,performance:{now:()=>now},setTimeout:(fn,delay)=>{timers.set(++timerId,{fn,delay});return timerId;},clearTimeout:id=>timers.delete(id)});
  const model={chapters:models,alt:'Verified source geometry'},handle={resize(w,h){sizes.push([w,h]);},present(value){presentations.push({...value});},inspect:()=>({firstDraw:firstDraw?{completed:true}:null,successfulPaint:firstDraw,view:presentations.at(-1)}),hitTest:()=>true,dispose(){disposed++;}};
- const scene=createProjectStudyScenePresenter({root,host,model,window:win,document:doc,publisher:new DOMPresenter().forOwner('test-scene'),schedule:()=>schedules++,policy:()=>policy,acquire:options=>{starts++;fixtureSignal=options.signal;failResource=options.onFailure;return pending?waiting.promise:Promise.resolve(handle);}});
+ const scene=createProjectStudyScenePresenter({root,host,model,externalStage,window:win,document:doc,publisher:new DOMPresenter().forOwner('test-scene'),schedule:()=>schedules++,policy:()=>policy,acquire:options=>{starts++;fixtureSignal=options.signal;failResource=options.onFailure;return pending?waiting.promise:Promise.resolve(handle);}});
  const step=(dt=.016,resumed=false)=>scene.publish({dt,resumed});
  const settle=()=>{let remaining=240;while(step()&&remaining-->0);assert(remaining>0,'Finite work settles on supplied active seconds');};
  const select=key=>{root.dataset.projectActiveChapter=key;step();settle();};
  const pointer=(type,overrides={})=>{const event={type,target:control,pointerId:1,pointerType:'mouse',isPrimary:true,button:0,clientX:600,clientY:400,prevented:0,preventDefault(){this.prevented++;},...overrides};doc.fire(type,event);return event;};
- return{doc,win,root,host,surface,control,policy,timers,waiting,handle,scene,step,settle,select,pointer,presentations,sizes,fail:reason=>failResource(reason),get starts(){return starts;},get disposed(){return disposed;},get schedules(){return schedules;},get signal(){return fixtureSignal;}};
+ return{doc,win,root,host,surface,control,policy,timers,waiting,handle,scene,step,settle,select,pointer,presentations,sizes,poster,advanceClock:ms=>{now+=ms;},fail:reason=>failResource(reason),get starts(){return starts;},get disposed(){return disposed;},get schedules(){return schedules;},get signal(){return fixtureSignal;}};
 }
+
+test('a pending static model poster has no timer until selected and preserves its active preparation bound across suspension and source departure',async()=>{
+ const f=fixture({reduced:true,externalStage:true,posterPending:true});await flush();assert.equal(f.timers.size,0);f.root.dataset.projectActiveChapter='context';assert.equal(f.scene.prepare('context'),false);assert.equal(f.timers.size,1);assert.equal([...f.timers.values()][0].delay,15000);
+ const stale=[...f.timers.values()][0].fn;f.advanceClock(5000);f.policy.hidden=true;f.scene.suspend('page');assert.equal(f.timers.size,0);assert.equal(f.scene.inspect().posterPreparation.remainingMs,10000);f.advanceClock(100000);stale();assert.equal(f.scene.inspect().posterFailed,false);
+ f.policy.hidden=false;f.scene.resume();assert.equal([...f.timers.values()][0].delay,10000);f.advanceClock(1000);f.root.dataset.projectActiveChapter='making';f.scene.publish({dt:0,stage:{kind:'image',chapter:'making',mode:'hold',settled:true,history:[]}});assert.equal(f.timers.size,0);assert.equal(f.scene.inspect().posterPreparation.remainingMs,9000);
+ f.root.dataset.projectActiveChapter='context';assert.equal(f.scene.prepare('context'),false);assert.equal([...f.timers.values()][0].delay,9000);f.poster.complete=true;f.poster.naturalWidth=1600;f.poster.fire('load');assert.equal(f.timers.size,0);assert.equal(f.scene.prepare('context'),true);f.scene.dispose();assert.equal(f.timers.size,0);
+ const exit=fixture({reduced:true,externalStage:true,posterPending:true});await flush();exit.root.dataset.projectActiveChapter='context';exit.scene.prepare('context');const late=[...exit.timers.values()][0].fn;exit.scene.dispose();assert.equal(exit.timers.size,0);late();assert.equal(exit.scene.inspect().posterFailed,false);assert([...exit.poster.listeners.values()].every(rows=>rows.length===0));
+});
+
+test('a permanently pending static model poster fails once, closes the shared model source and cannot upgrade after a late load',async()=>{
+ for(const startupFallback of [false,true]){
+ const f=fixture({reduced:!startupFallback,pending:startupFallback,externalStage:true,posterPending:true}),entry=acquirePagePreviewReadiness(f.doc);await flush();if(startupFallback)entry.fallback('startup-timeout');await flush();assert.equal((await entry.promise).previews[0].mode,'static');f.policy.reduced=false;f.policy.siteReady=true;f.root.dataset.projectActiveChapter='context';
+ const figure=new Target(),image=Object.assign(new Target(),{complete:true,naturalWidth:1600,decode:async()=>{}});figure.dataset.projectMedia='context';image.setAttribute('src','/documentary.webp');figure.querySelector=selector=>selector==='img'||selector==='[data-project-media-poster]'?image:null;
+ f.root.querySelectorAll=selector=>selector==='[data-project-chapter]'?keys.map(key=>({dataset:{projectChapter:key}})):selector==='[data-project-media]'?[figure]:[];
+ const backdrop=createProjectStudyBackdropPresenter({root:f.root,window:f.win,document:f.doc,publisher:new DOMPresenter().forOwner('poster-fallback'),schedule:()=>{},policy:()=>f.policy});backdrop.setScene({actor:f.scene,host:f.host,model:{chapters:models}});await flush();backdrop.publish({dt:0});assert.equal(backdrop.inspect().stage.mode,'waiting');
+ const [id,timer]=[...f.timers][0];f.timers.delete(id);f.advanceClock(15000);timer.fn();assert.equal(f.scene.inspect().posterFailed,true);assert.equal(f.scene.inspect().posterPreparation.reason,'model-poster-timeout');backdrop.publish({dt:0});assert.equal(backdrop.inspect().stage.key,'image:/documentary.webp');assert.equal(backdrop.inspect().stage.mode,'hold');closed(backdrop.inspect().stage.history);assert.equal(backdrop.inspect().stage.history.filter(item=>item.key==='model:context'&&item.status==='failed').length,1);
+ assert.equal(backdrop.inspect().stage.history.find(item=>item.key==='model:context'&&item.status==='failed').reason,'model-poster-timeout');
+ f.poster.complete=true;f.poster.naturalWidth=1600;f.poster.fire('load');assert.equal(f.scene.inspect().posterFailed,true);assert.equal(f.host.getAttribute('data-project-model-poster-ready'),null);assert.equal(f.scene.prepare('context'),false);assert.equal(f.timers.size,0);if(startupFallback){f.waiting.resolve(f.handle);await flush();assert.equal(f.disposed,1);}backdrop.dispose();f.scene.dispose();
+ }
+});
 
 test('document registration handles both effect orders and releases only its own stage',()=>{
  const doc={},seen=[],release=registerProjectStudyStage(doc,{model:'real-source'}),stop=observeProjectStudyStage(doc,value=>seen.push(value?.model??null));
@@ -65,6 +86,20 @@ test('preparation requires an actual first draw before entry and retains the sam
  f.scene.measure(390,844);assert.deepEqual(f.sizes.at(-1),[390,844]);f.scene.dispose();f.scene.dispose();assert.equal(f.disposed,1);assert.equal(f.timers.size,0);closed(f.scene.inspect().motion.history);
  assert([...f.doc.listeners.values(),...f.win.listeners.values()].every(rows=>rows.length===0));
  assert.equal(f.scene.inspect().events.nativeListeners,0);
+});
+
+test('external scene actor paints and inspects while the unified stage alone owns surface motion',async()=>{
+ const f=fixture({externalStage:true});await flush();f.policy.siteReady=true;f.root.dataset.projectActiveChapter='context';assert.equal(f.scene.prepare('context'),true);
+ const stage={key:'model:context',kind:'model',chapter:'context',mode:'hold',settled:true,pose:{x:0,y:0,opacity:1},history:[]};
+ const step=()=>f.scene.publish({dt:.016,stage});step();f.pointer('pointerdown');f.pointer('pointermove',{clientX:680});
+ let left=150;while(step()&&left-->0);assert(left>0);assert(f.scene.inspect().camera.value.azimuth<0);
+ const inspected=f.scene.inspect().camera.value.azimuth,draws=f.presentations.length;
+ assert.equal(f.scene.inspect().paintedChapter,'context','The external stage owns the actual painted source chapter');
+ assert.equal(f.scene.prepare('context'),true);assert.equal(f.presentations.length,draws,'A prepared source never redraws a zero-offset camera before restoring the inspected pose');
+ step();assert.equal(f.scene.inspect().camera.value.azimuth,inspected,'Readiness inspection never reapplies a zero-offset camera');
+ assert.equal(f.host.getAttribute('data-project-model-active'),null);assert.equal(f.surface.style.getPropertyValue('transform'),'');assert.equal(f.surface.style.getPropertyValue('opacity'),'');assert.equal(f.scene.inspect().motion.key,'model:context');
+ f.root.dataset.projectActiveChapter='system';f.scene.publish({dt:.016,stage:{...stage,mode:'exit',settled:false}});assert.equal(f.control.captured.size,0);assert.equal(f.presentations.at(-1).chapter,'context','An exiting source retains its own painted chapter');
+ assert.equal(f.scene.prepare('system'),true);assert.equal(f.presentations.at(-1).chapter,'system');f.scene.dispose();assert.equal(f.disposed,1);
 });
 
 test('missing first paint closes preparation as an explicit static fallback',async()=>{

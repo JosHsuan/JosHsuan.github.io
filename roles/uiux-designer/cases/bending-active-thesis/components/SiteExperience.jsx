@@ -27,7 +27,7 @@ export default function SiteExperience(){
      <p role="status" aria-live="polite" aria-atomic="true">{ready?'Ready to read':'Preparing this page'}</p>
     </div>
    </section>
-   <p className={entry.identity}>JosHsuan Chao <a href="/">Return to home</a></p>
+   <p className={entry.identity}><a href="/">Return to home</a></p>
   </div>
  </div><p className={styles.status} role="status" aria-live="polite">{status.phase==='failed'?'This page is available. Some preparation steps could not finish.':''}</p><noscript><style>{'[data-site-loader]{display:none!important}'}</style></noscript></>;
 }

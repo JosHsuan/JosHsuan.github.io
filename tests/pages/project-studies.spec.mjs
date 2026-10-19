@@ -13,7 +13,7 @@ const facts=page=>page.evaluate(()=>window.__globalBackground.inspect().driver.p
 const dot=studies.find(project=>project.id==='dot-based-3d-printing');
 function closed(state){
  for(const id of new Set(state.history.map(fact=>fact.id))){const own=state.history.filter(fact=>fact.id===id);expect(own.filter(fact=>fact.phase==='requested')).toHaveLength(1);expect(own.filter(fact=>['ready','failed','cancelled'].includes(fact.phase))).toHaveLength(1);}
- for(const id of new Set(state.motion.history.map(fact=>fact.id))){const own=state.motion.history.filter(fact=>fact.id===id);expect(own.filter(fact=>fact.status==='requested')).toHaveLength(1);expect(own.filter(fact=>['completed','cancelled'].includes(fact.status))).toHaveLength(1);}
+ for(const id of new Set(state.motion.history.map(fact=>fact.id))){const own=state.motion.history.filter(fact=>fact.id===id);expect(own.filter(fact=>fact.status==='requested')).toHaveLength(1);expect(own.filter(fact=>['completed','cancelled','failed'].includes(fact.status))).toHaveLength(1);}
 }
 function sourceDraw(state,model,viewport){
  expect(state.phase).toBe('ready');expect(state.arrivalStatic).toBe(false);expect(state.acquisitions).toBe(1);expect(state.disposals).toBe(0);
@@ -61,7 +61,8 @@ async function fullCanvas(page){
 async function decodeSource(chapter,image){
  // The semantic source image keeps its descriptive alt even when a duplicate
  // reference thumbnail is intentionally decorative beside the model caption.
- const element=chapter.locator(`img[src="${image.src}"]:not([alt=""])`).first();
+ const element=chapter.getByAltText(image.alt,{exact:true}).first();
+ await expect(element).toHaveAttribute('src',image.src);
  await element.scrollIntoViewIfNeeded();
  expect(await element.evaluate(async node=>{await node.decode();return{width:node.naturalWidth,height:node.naturalHeight,fit:getComputedStyle(node).objectFit,alt:node.alt};})).toEqual({width:image.width,height:image.height,fit:'contain',alt:image.alt});
  await expect(chapter.locator(`a[href="${image.src}"]`).first()).toHaveAttribute('target','_blank');

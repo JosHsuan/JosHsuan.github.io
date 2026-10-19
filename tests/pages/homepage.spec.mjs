@@ -144,6 +144,9 @@ test('site loading waits for actual critical images and same-page movement does 
  try{
   await page.goto('/',{waitUntil:'domcontentloaded'});
   await expect(loader(page)).toBeVisible();
+  await expect(loader(page).getByRole('heading',{name:'JosHsuan Chao',exact:true})).toHaveCount(1);
+  expect((await loader(page).textContent()).match(/JosHsuan Chao/g)).toHaveLength(1);
+  await expect(loader(page).getByRole('link',{name:'Return to home',exact:true})).toHaveAttribute('href','/');
   await expect(page.locator('[data-portfolio-root]')).toHaveAttribute('inert','');
   await page.waitForFunction(()=>window.__site?.inspect().phase==='requested');
   // Reinsert the real compiled case fallback last. Its ownership must remain

@@ -11,13 +11,31 @@ function Panel({children,opening=false}){
 function SourceLink({image}){
  return <a className={styles.sourceLink} href={image.src} target="_blank" rel="noreferrer">View full image <span aria-hidden="true">↗</span></a>;
 }
-function PrimaryVisual({image,chapter,prefix,opening=false,model}){
- const inspect=model?.chapters.includes(chapter);
+function PrimaryVisual({image,chapter,prefix,opening=false,model,motion}){
+ const inspect=model?.chapters.includes(chapter),poster=motion?.poster??image,source=motion??image;
  return <div className={styles.visualSlot} data-project-model-control={inspect?'':undefined} tabIndex={inspect?0:undefined} role={inspect?'group':undefined} aria-label={inspect?`${model.alt} When 3D is available, drag horizontally or use arrow keys to inspect. Home or Escape returns to the chapter view.`:undefined}>
   <figure className={styles.primaryFigure} data-project-media={chapter} aria-describedby={`${prefix}-${chapter}-caption ${prefix}-${chapter}-credit`}>
-   <picture><img src={image.src} width={image.width} height={image.height} alt={image.alt} loading={opening?'eager':'lazy'} decoding="async" fetchPriority={opening?'high':undefined} data-site-critical={opening?'':undefined}/></picture>
-   <span className={styles.imageFailure} role="status">Image unavailable. The source caption and project text remain available.</span>
+   <div className={styles.mediaFrame} data-project-media-frame>
+    <picture><img data-project-media-poster src={poster.src} width={poster.width} height={poster.height} alt={source.alt} loading={opening?'eager':'lazy'} decoding="async" fetchPriority={opening?'high':undefined} data-site-critical={opening?'':undefined}/></picture>
+    {motion&&<video className={styles.motionMedia} data-project-motion-media data-project-motion-id={motion.id} data-project-video-src={motion.src} width={motion.width} height={motion.height} muted playsInline preload="none" loop={motion.loop} aria-label={motion.alt} aria-describedby={`${prefix}-${chapter}-caption ${prefix}-${chapter}-credit`}/>}
+    <span className={styles.imageFailure} role="status">Image unavailable. The source caption and project text remain available.</span>
+   </div>
   </figure>
+  <div className={styles.sourcePanel} data-project-source-caption={chapter} data-information-window="evidence-caption" data-home-scroll-window="project-caption">
+   <InformationSkin/>
+   {inspect&&<p className={styles.modelDescription} data-project-model-description>{model.alt}</p>}
+   {inspect&&<a className={styles.modelReference} href={image.src} target="_blank" rel="noreferrer" aria-label={`View reference image: ${image.alt}`}><img src={image.src} width={image.width} height={image.height} alt="" loading="lazy" decoding="async"/></a>}
+   <p id={`${prefix}-${chapter}-caption`} className={styles.sourceCaption}>{source.caption}</p>
+   <p id={`${prefix}-${chapter}-credit`} className={styles.credit}>{source.credit}</p>
+   {motion?<>
+    <a className={styles.sourceLink} data-project-motion-source href={motion.src} target="_blank" rel="noreferrer">View animation <span aria-hidden="true">↗</span></a>
+    <div className={styles.motionControls}>
+     <button type="button" data-project-motion-toggle={motion.id} aria-pressed="false" hidden>Play recording</button>
+     <button type="button" data-project-motion-replay={motion.id} hidden>Replay recording</button>
+    </div>
+    <p className={styles.motionStatus} data-project-motion-status={motion.id} role="status"/>
+   </>:<SourceLink image={image}/>}
+  </div>
  </div>;
 }
 function EvidenceFigure({image}){
@@ -50,26 +68,23 @@ export default function ProjectCaseStudy({project}){
         <div><dt>Context</dt><dd>{project.context}</dd></div>
         <div><dt>Role</dt><dd>{project.role}</dd></div>
        </dl>
-       <p id={`${prefix}-overview-caption`} className={styles.sourceCaption}>{project.hero.caption}</p><p id={`${prefix}-overview-credit`} className={styles.credit}>{project.hero.credit}</p>
-       <SourceLink image={project.hero}/>
        <a className={styles.readingLink} href={`#${prefix}-${project.sections[0].id}`}>Follow the study <span aria-hidden="true">↓</span></a>
       </Panel>
      </div>
     </header>
-    {project.sections.map((section,index)=><section key={section.id} className={styles.chapter} data-project-chapter={section.id} aria-labelledby={`${prefix}-${section.id}`}>
+    {project.sections.map((section,index)=>{
+     const motion=project.motionMedia?.find(media=>media.chapter===section.id),evidence=motion?section.media:section.media.slice(1);
+     return <section key={section.id} className={styles.chapter} data-project-chapter={section.id} aria-labelledby={`${prefix}-${section.id}`}>
      <div className={styles.chapterInner}>
-      {section.media[0]&&<PrimaryVisual image={section.media[0]} chapter={section.id} prefix={prefix} model={project.model}/>}
+      {section.media[0]&&<PrimaryVisual image={section.media[0]} chapter={section.id} prefix={prefix} model={project.model} motion={motion}/>}
       <Panel>
        <StudyLabel kind={section.kind}>{String(index+1).padStart(2,'0')} / {section.label}</StudyLabel>
        <h2 id={`${prefix}-${section.id}`} tabIndex={-1}>{section.title}</h2>
        {section.paragraphs.map(paragraph=><p key={paragraph}>{paragraph}</p>)}
-       {project.model?.chapters.includes(section.id)&&<p className={styles.sourceCaption} data-project-model-description>{project.model.alt}</p>}
-       {project.model?.chapters.includes(section.id)&&section.media[0]&&<a className={styles.modelReference} href={section.media[0].src} target="_blank" rel="noreferrer" aria-label={`View reference image: ${section.media[0].alt}`}><img src={section.media[0].src} width={section.media[0].width} height={section.media[0].height} alt="" loading="lazy" decoding="async"/></a>}
-       {section.media[0]&&<><p id={`${prefix}-${section.id}-caption`} className={styles.sourceCaption}>{section.media[0].caption}</p><p id={`${prefix}-${section.id}-credit`} className={styles.credit}>{section.media[0].credit}</p><SourceLink image={section.media[0]}/></>}
       </Panel>
      </div>
-     {section.media.length>1&&<div className={styles.evidenceBand}>{section.media.slice(1).map(image=><EvidenceFigure key={image.src} image={image}/>)}</div>}
-    </section>)}
+     {evidence.length>0&&<div className={styles.evidenceBand}>{evidence.map(image=><EvidenceFigure key={image.src} image={image}/>)}</div>}
+    </section>;})}
     <footer className={`${styles.chapter} ${styles.creditsChapter}`} data-project-chapter="credits" aria-labelledby={`${prefix}-credits`}>
      <div className={styles.chapterInner}><Panel>
       <StudyLabel kind="make">{String(chapters.length-1).padStart(2,'0')} / CREDITS & SOURCES</StudyLabel>

@@ -4,6 +4,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import assert from 'node:assert/strict';
 import {assertProjectStudies,assertProjectImage,assertProjectModel,assertProjectAssetRecord,PROJECT_SLUGS} from './project-studies.mjs';
+import {projectMotionMedia,assertProjectVideo} from './project-motion-media.mjs';
 
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 const OCR_FONT='/assets/fonts/portfolio-ocr-b.woff2',OCR_NOTICE='licenses/ocr-b-NOTICE.txt';
@@ -11,7 +12,7 @@ const DISPLAY_FONT='/assets/fonts/space-grotesk-variable.woff2',DISPLAY_NOTICE='
 const INTRO_STATEMENT='I am a computational designer and developer working at the intersection of design technology, digital fabrication, and spatial interaction.';
 const INTRO_DESCRIPTION='My work bridges the physical and digital through computational tools, interactive interfaces, and workflows that translate design and engineering information into fabrication-ready, machine-readable data.';
 const markerCount=(html,name)=>(html.match(new RegExp(`\\b${name}(?:=|(?=[\\s>]))`,'g'))??[]).length;
-const tagAttribute=(tag,name)=>(tag??'').match(new RegExp(`\\b${name}="([^"]*)"`,'i'))?.[1]??null;
+const tagAttribute=(tag,name)=>(tag??'').match(new RegExp(`(?:^|\\s)${name}="([^"]*)"`,'i'))?.[1]??null;
 const tagWith=(html,name,marker)=>[...html.matchAll(new RegExp(`<${name}\\b[^>]*>`,'g'))].map(match=>match[0]).find(tag=>new RegExp(`\\b${marker}(?:=|(?=[\\s>]))`).test(tag));
 
 export function assertXRWorkspaceImage(bytes,image){
@@ -117,6 +118,7 @@ export async function auditPages() {
   }
   const expected = new Map(manifest.assets.map(asset => [asset.path, asset]));
   const projectImages=assertProjectStudies(records['project-studies'],manifest);
+  const projectVideos=projectMotionMedia(records['project-studies']);
   assertProjectAssetRecord(records['project-assets'],projectImages,manifest,records['project-studies']);
   const files = [];
   async function walk(folder) {
@@ -139,6 +141,8 @@ export async function auditPages() {
       if(projectImage)assertProjectImage(bytes,projectImage);
       const projectModel=records['project-studies'].projects.find(project=>project.model?.src==='/'+relative)?.model;
       if(projectModel)assertProjectModel(bytes,projectModel);
+      const projectVideo=projectVideos.find(media=>media.src==='/'+relative);
+      if(projectVideo)assertProjectVideo(bytes,projectVideo);
       expected.delete(relative);
     }
     if (/\.(html|js|json|txt|css)$/.test(relative)) {
@@ -239,6 +243,17 @@ export async function auditPages() {
     assert(page.includes(project.title)&&page.includes(project.role),'Actual title and individual/team role');
     for(const credit of project.credits)assert(page.includes(credit.names.replaceAll('&','&amp;')),'Preserved source credit: '+credit.names);
     for(const image of [project.hero,...project.sections.flatMap(section=>section.media)])assert(page.includes(image.src),'Source image stays readable in the native document');
+    const nativeMotionTags=[...page.matchAll(/<video\b[^>]*\bdata-project-motion-media(?:=|[\s>])[^>]*>/g)].map(match=>match[0]);
+    assert.equal(nativeMotionTags.length,project.motionMedia?.length??0,'Only selected authentic sequences enter the native document');
+    for(const media of project.motionMedia??[]){
+      const tag=nativeMotionTags.find(tag=>tagAttribute(tag,'data-project-motion-id')===media.id);
+      assert(tag,'Each selected sequence has its own native player');
+      assert.equal(tagAttribute(tag,'data-project-video-src'),media.src);
+      assert.equal(tagAttribute(tag,'src'),null,'Runtime policy owns movie acquisition; no initial automatic source');
+      assert.equal(Number(tagAttribute(tag,'width')),media.width);assert.equal(Number(tagAttribute(tag,'height')),media.height);
+      assert.equal(/\bloop(?:=|[\s>])/.test(tag),media.loop,'Finite source semantics are preserved');
+      assert(page.includes(media.poster.src)&&page.includes(`href="${media.src}"`),'Pinned poster and direct no-JavaScript animation link remain available');
+    }
     assert(!page.includes('data-xr-stage')&&!page.includes('data-cinematic-stage'),'Documentary evidence does not acquire an unrelated 3D scene');
   }
   const xr=await readFile(path.join(out,'projects/xr-bending-active/index.html'),'utf8');
