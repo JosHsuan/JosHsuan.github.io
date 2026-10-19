@@ -17,9 +17,9 @@ class Target{
  getAttribute(key){return this.attributes.get(key)??null;}setAttribute(key,value){this.attributes.set(key,String(value));}removeAttribute(key){this.attributes.delete(key);}
  querySelector(){return null;}querySelectorAll(){return[];}
 }
-function fixture({video=false,reduced=false,saveData=false,rejectPlay=false,pendingImage=null,pendingDecode=null,sharedImage=false}={}){
+function fixture({video=false,reduced=false,saveData=false,rejectPlay=false,pendingImage=null,pendingDecode=null,sharedImage=false,deferPause=false}={}){
  const root=new Target(),doc=new Target(),win=new Target(),timers=new Map(),callbacks=new Map(),controls=[];
- const pendingDecodes=new Map();
+ const pendingDecodes=new Map(),nativeEvents=[];
  let sequence=0,schedules=0,now=0,plays=0,pauses=0,loads=0,cancels=0;
  const policy={hidden:false,reduced,saveData,paused:false,siteReady:true},figures=[];
  const sources=['overview','context','system','making','results'];
@@ -29,7 +29,7 @@ function fixture({video=false,reduced=false,saveData=false,rejectPlay=false,pend
   if(video&&chapter==='making'){
    const media=new Target();media.setAttribute('data-project-motion-id','authentic-making');media.setAttribute('data-project-video-src','/authentic-making.mp4');Object.assign(media,{paused:true,currentTime:0,videoWidth:640,videoHeight:480,readyState:2,preload:'none'});
    media.play=()=>{plays++;if(rejectPlay)return Promise.reject(Error('blocked'));media.paused=false;media.fire('playing');return Promise.resolve();};
-   media.pause=()=>{pauses++;const changed=!media.paused;media.paused=true;if(changed)media.fire('pause');};media.load=()=>loads++;
+   media.pause=()=>{pauses++;const changed=!media.paused;media.paused=true;if(changed){if(deferPause)nativeEvents.push(()=>media.fire('pause'));else media.fire('pause');}};media.load=()=>loads++;
    media.requestVideoFrameCallback=fn=>{callbacks.set(++sequence,fn);return sequence;};media.cancelVideoFrameCallback=id=>{cancels++;callbacks.delete(id);};figure.video=media;
    for(const attribute of ['data-project-motion-toggle','data-project-motion-replay','data-project-motion-status']){const control=new Target();control.setAttribute(attribute,'authentic-making');controls.push(control);}
   }
@@ -43,7 +43,7 @@ function fixture({video=false,reduced=false,saveData=false,rejectPlay=false,pend
  const settle=()=>{let left=300;while(step()&&left-->0);assert(left>0);};
  const select=chapter=>{root.dataset.projectActiveChapter=chapter;return step();};
  const frame=()=>{const pending=[...callbacks.values()];callbacks.clear();for(const fn of pending)fn(now,{mediaTime:.04,presentedFrames:1});};
- return{root,win,doc,policy,figures,presenter,step,settle,select,frame,timers,callbacks,controls,pendingDecodes,advanceClock:seconds=>{now+=seconds*1000;},video:figures.find(figure=>figure.video)?.video,get schedules(){return schedules;},get plays(){return plays;},get pauses(){return pauses;},get loads(){return loads;},get cancels(){return cancels;}};
+ return{root,win,doc,policy,figures,presenter,step,settle,select,frame,timers,callbacks,controls,pendingDecodes,flushNative:()=>{for(const deliver of nativeEvents.splice(0))deliver();},advanceClock:seconds=>{now+=seconds*1000;},video:figures.find(figure=>figure.video)?.video,get schedules(){return schedules;},get plays(){return plays;},get pauses(){return pauses;},get loads(){return loads;},get cancels(){return cancels;}};
 }
 
 test('actual Bending passages are finite at 30/60/120 Hz and preserve retargeted poses',()=>{
@@ -92,6 +92,21 @@ test('native source waits for real first frame; pause/BFCache retain time and fi
  f.policy.hidden=true;f.presenter.suspend('page');assert.equal(f.callbacks.size,0);assert.equal(f.video.paused,true);assert.equal(f.video.getAttribute('src'),'/authentic-making.mp4');f.policy.hidden=false;f.presenter.resume();f.step(100,true);await flush();assert.equal(f.video.currentTime,1.25);assert.equal(f.presenter.inspect().stage.mode,'hold');
  f.video.currentTime=3;f.video.paused=true;f.video.fire('ended');const plays=f.plays;f.step();assert.equal(f.plays,plays);assert.equal(f.presenter.inspect().media.find(item=>item.id).ended,true);const replay=f.controls.find(control=>control.getAttribute('data-project-motion-replay'));assert.equal(replay.getAttribute('hidden'),null);replay.fire('click');await flush();assert.equal(f.video.currentTime,0);assert.equal(f.video.paused,false);
  f.presenter.dispose();assert.equal(f.video.getAttribute('src'),null);assert.equal(f.callbacks.size,0);assert.equal(f.timers.size,0);assert([...f.video.listeners.values()].every(rows=>rows.length===0));terminal(f.presenter.inspect().stage.history);
+});
+
+test('a queued native pause from departure cannot overwrite resumed playback on the retained source',async()=>{
+ const f=fixture({video:true,deferPause:true});await flush();f.step();f.select('making');f.step(1);f.frame();await flush();f.flushNative();f.step();f.settle();await flush();
+ assert.equal(f.video.paused,false);assert.equal(f.presenter.inspect().media.find(item=>item.id).playing,true);
+ f.video.currentTime=1.25;const loads=f.loads;
+ f.select('results');f.settle();assert.equal(f.video.paused,true);
+ f.select('making');f.settle();await flush();assert.equal(f.video.paused,false);
+ // HTML media events are queued tasks. Deliver the departure's pause after
+ // the same native element has genuinely resumed, as observed in WebKit CI.
+ f.flushNative();const resumed=f.presenter.inspect().media.find(item=>item.id);
+ assert.equal(resumed.playing,true);assert.equal(resumed.phase,'playing');assert.equal(resumed.failed,false);assert.equal(resumed.currentTime,1.25);assert.equal(f.loads,loads);
+ assert.equal(f.controls.find(control=>control.getAttribute('data-project-motion-toggle')).textContent,'Pause recording');
+ f.policy.paused=true;f.step();f.flushNative();assert.equal(f.video.paused,true);assert.equal(f.presenter.inspect().media.find(item=>item.id).playing,false);
+ f.presenter.dispose();terminal(f.presenter.inspect().stage.history);
 });
 
 test('reduced/Save Data never acquire animation, supersession cancels native firstframe work, and rejected play latches a poster',async()=>{

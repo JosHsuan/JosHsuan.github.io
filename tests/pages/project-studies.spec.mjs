@@ -13,6 +13,14 @@ const facts=page=>page.evaluate(()=>window.__globalBackground.inspect().driver.p
 const dot=studies.find(project=>project.id==='dot-based-3d-printing');
 function closed(state){
  for(const id of new Set(state.history.map(fact=>fact.id))){const own=state.history.filter(fact=>fact.id===id);expect(own.filter(fact=>fact.phase==='requested')).toHaveLength(1);expect(own.filter(fact=>['ready','failed','cancelled'].includes(fact.phase))).toHaveLength(1);}
+ if(state.motion===null){
+  // Initial Reduced Motion can settle arrival before the ordinary driver's
+  // first source publication. No model acquisition or motion request exists.
+  expect(state).toMatchObject({externalStage:true,phase:'poster',reason:'reduced-motion',arrivalStatic:true,staticReason:'reduced-motion',active:false,pending:false,id:null,acquisitions:0,disposals:0,renders:0,resource:null,paintedChapter:null,preparedChapter:null,sharedStage:null});
+  expect(state.history).toEqual([]);expect(state.resourceFailures).toEqual([]);
+  expect(state.posterPreparation).toMatchObject({requested:false,pending:false});
+  return;
+ }
  for(const id of new Set(state.motion.history.map(fact=>fact.id))){const own=state.motion.history.filter(fact=>fact.id===id);expect(own.filter(fact=>fact.status==='requested')).toHaveLength(1);expect(own.filter(fact=>['completed','cancelled','failed'].includes(fact.status))).toHaveLength(1);}
 }
 function sourceDraw(state,model,viewport){

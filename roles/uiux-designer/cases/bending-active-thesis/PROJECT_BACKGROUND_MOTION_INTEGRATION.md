@@ -202,6 +202,47 @@ across local Chromium, Windows WebKit and mobile Chromium. The typography run
 checks actual spacing/faces/glyphs and retains the original assertions. This
 Windows WebKit reading result does not establish native H264 playback support.
 
+The complete `417e0b5` replacement CI attempt finishes seven browser jobs
+successfully. Linux WebKit 1/2 reports 77 passes and two failures; its required
+gate therefore prevents publication. All five individual native movie-decode
+cases pass on that engine. The failing Dot revisit trace records resumed native
+properties (`paused: false`, advancing native time) while the presenter remains
+paused. The trace does not instrument the original native-event timeline. Source
+inspection identifies a queued departure `pause` as a way to overwrite resumed
+state, and a portable queued-event regression reproduces that exact mismatch
+before the repair. The pause
+listener now accepts the event only while the native element is still paused;
+genuine pauses, failures, retained time and disposal remain checked. No polling
+loop, media seek, retry or new clock is introduced.
+
+The second WebKit failure is a fixture assumption: initial Reduced Motion can
+finish static arrival before the model's first publication, leaving `motion`
+null. The closure check now permits only the explicit zero-acquisition,
+zero-render, empty-history, unrequested-poster static state. Every actual
+resource or motion request still requires exactly one terminal. Neither browser
+scenario, deadline, engine nor source assertion is removed. The failed run,
+original traces and pre-repair failing unit output remain retained; the final
+replacement still requires its own full CI and same-artifact acceptance.
+
+The repaired portable run contains 498 cases: 496 pass, zero fail and the same
+two opt-in browser probes remain skipped. The native `playing` acceptance helper
+retains its original deadline and predicate, adding only a bounded read-only
+native-event receipt and a real media/state attachment on failure. This makes
+future engine failures diagnosable without manufacturing a playback event,
+changing media time or relaxing acceptance.
+
+The rebuilt repair passes the native Dot photograph/model/video return journey
+on Chromium and mobile Chromium, and the strict initial Reduced Motion journey
+on Chromium, Windows WebKit and mobile Chromium (five executions). The public
+build/audit retains all 117 asset pins. The independently reviewed `417e0b5`
+visual receipt passes its scoped 42-image review, including whole desktop title
+words, five unobstructed mobile model-first views and actual source passages.
+The initially mislabelled Mode/s System image passage remains archived as an
+image passage; a separately verified Context passage supplies genuine 3D entry
+evidence. This repair changes no CSS, source assets, model recipes or finite
+motion coordinates. Final candidate provenance, full CI and live verification
+remain required before publication.
+
 The [DORA CI plan](../../../../docs/CI_DELIVERY_PLAN.md) remains a separate
 planning record. This feature retains the existing complete acceptance union,
 one-worker GPU isolation and exact-SHA, same-artifact publication gate. No new

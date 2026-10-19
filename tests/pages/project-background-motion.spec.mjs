@@ -43,12 +43,26 @@ async function hold(page,key){
  return backdrop(page);
 }
 async function playing(page,media){
- await hold(page,`video:${media.id}`);
- await page.waitForFunction(id=>{
-  const state=window.__globalBackground.inspect().driver.projectStudy.backdrop.media.find(item=>item.id===id);
-  const video=[...document.querySelectorAll('[data-project-motion-media]')].find(node=>node.dataset.projectMotionId===id);
-  return state?.firstFrame&&!state.failed&&state.playing&&video&&video.readyState>=2&&!video.paused;
- },media.id,{timeout:WAIT});
+ await page.evaluate(()=>{
+  if(window.__testProjectMediaReceipts)return;
+  const receipts=window.__testProjectMediaReceipts=[];
+  for(const type of ['pause','playing','waiting','ended','loadeddata','error'])document.addEventListener(type,event=>{
+   const video=event.target;if(!(video instanceof HTMLVideoElement)||!video.matches('[data-project-motion-media]'))return;
+   receipts.push({at:performance.now(),type:event.type,trusted:event.isTrusted,id:video.dataset.projectMotionId,paused:video.paused,readyState:video.readyState,currentTime:video.currentTime,phase:video.closest('[data-project-media]')?.dataset.projectMediaPhase,error:video.error?.code??null});
+   if(receipts.length>128)receipts.splice(0,receipts.length-128);
+  },{capture:true,passive:true});
+ });
+ try{
+  await hold(page,`video:${media.id}`);
+  await page.waitForFunction(id=>{
+   const state=window.__globalBackground.inspect().driver.projectStudy.backdrop.media.find(item=>item.id===id);
+   const video=[...document.querySelectorAll('[data-project-motion-media]')].find(node=>node.dataset.projectMotionId===id);
+   return state?.firstFrame&&!state.failed&&state.playing&&video&&video.readyState>=2&&!video.paused;
+  },media.id,{timeout:WAIT});
+ }catch(error){
+  const facts=await page.evaluate(id=>({at:performance.now(),backdrop:window.__globalBackground.inspect().driver.projectStudy.backdrop,receipts:window.__testProjectMediaReceipts,native:[...document.querySelectorAll('[data-project-motion-media]')].filter(video=>video.dataset.projectMotionId===id).map(video=>({paused:video.paused,readyState:video.readyState,currentTime:video.currentTime,currentSrc:video.currentSrc,networkState:video.networkState,error:video.error?{code:video.error.code,message:video.error.message}:null}))}),media.id);
+  await test.info().attach('native-media-failure',{body:JSON.stringify(facts,null,2),contentType:'application/json'});throw error;
+ }
 }
 async function nativeVideo(page,media){
  await playing(page,media);

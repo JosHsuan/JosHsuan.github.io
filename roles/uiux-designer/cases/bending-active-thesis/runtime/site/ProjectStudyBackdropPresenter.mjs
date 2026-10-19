@@ -145,7 +145,12 @@ export function createProjectStudyBackdropPresenter({root,window:win,document:do
     else{awaitFrame(record);if(!record.firstFrame)play(record);}
    });
    listen(video,'playing',()=>{if(disposed)return;if(!eligible(settings())||!record.active&&!record.preparing||record.userPaused){pause(record);return;}record.playing=true;record.phase='playing';publishMedia(record);});
-   listen(video,'pause',()=>{if(disposed)return;record.playing=false;if(record.firstFrame&&!record.failed&&!record.ended)record.phase='paused';publishMedia(record);});
+   listen(video,'pause',()=>{
+    // Native media events are queued. A departure's pause can arrive after
+    // this retained element has resumed; it cannot replace its current fact.
+    if(disposed||!video.paused)return;
+    record.playing=false;if(record.firstFrame&&!record.failed&&!record.ended)record.phase='paused';publishMedia(record);
+   });
    listen(video,'ended',()=>{if(disposed)return;if(!record.firstFrame){if(video.readyState>=2&&video.videoWidth>0&&video.videoHeight>0)firstFrame(record,null,'loadeddata');else{fail(record,'first-frame-unavailable');return;}}record.ended=true;record.playing=false;record.phase='ended';cancelFrame(record);publishMedia(record);changed();});
    listen(video,'error',()=>{if(record.started)fail(record,'media-error');});
    if(record.toggle)listen(record.toggle,'click',()=>{if(!record.active||!record.firstFrame||record.failed)return;record.userPaused=record.playing||record.playPending;if(record.userPaused)pause(record);else if(eligible(settings()))play(record);publishMedia(record);changed();});
