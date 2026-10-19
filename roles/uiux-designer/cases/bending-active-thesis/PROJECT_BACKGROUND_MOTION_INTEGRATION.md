@@ -174,6 +174,34 @@ study journeys on Chromium and mobile Chromium, including the unchanged masthead
 clearance assertion. Final high-resolution native capture, full Linux CI and
 publication remain pending at this candidate checkpoint.
 
+The first 72-view capture completes at 3840 × 2160 on desktop and 1170 × 2532
+on mobile, with no browser errors and an unchanged local artifact digest. Its
+build metadata remains `c54570a`; it is a local working-tree visual checkpoint,
+not the CI artifact identity. Visual comparison against `7ccff6d` finds a real
+opening-title regression: the newly narrower reading panel breaks words in
+Entrance, Special and Caschlatsch. The `6755c50` candidate is therefore
+superseded before publication. Opening-only title fitting and a native-word
+layout assertion must pass on the replacement candidate; source framing,
+materials, model cameras and original fonts remain protected.
+
+The initial title repair passes eleven of twelve full native source journeys;
+Caschlatsch still exceeds its heading by about six pixels at 1440 px. A separate
+native-font measurement checks all six headings at 1920, 1440, 1024, 390 and
+320 px and confirms this one remaining fit failure. The opening-only maximum
+therefore decreases to 4.5 rem, with normal whole-word wrapping; tablet/mobile
+type overrides remain in place. The original trace and first measurement remain
+retained. The first CI Chromium 4/4 shard also reports five typography failures:
+new playback controls inherit caption leading (1.55) instead of control leading
+(1.4). Those controls now use the existing control size/leading/tracking tokens.
+No typography assertion or engine is excluded. Replacement built-browser and
+exact-commit CI results must establish acceptance.
+
+The rebuilt replacement passes all 30 native heading measurements without
+overflow or split words, and all 39 published-document typography executions
+across local Chromium, Windows WebKit and mobile Chromium. The typography run
+checks actual spacing/faces/glyphs and retains the original assertions. This
+Windows WebKit reading result does not establish native H264 playback support.
+
 The [DORA CI plan](../../../../docs/CI_DELIVERY_PLAN.md) remains a separate
 planning record. This feature retains the existing complete acceptance union,
 one-worker GPU isolation and exact-SHA, same-artifact publication gate. No new

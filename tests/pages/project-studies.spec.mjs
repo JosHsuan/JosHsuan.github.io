@@ -106,6 +106,24 @@ for(const project of studies)test(`${project.shortTitle} has native evidence cha
  page.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)/.test(request.url()))models.push(request.url());});
  expect((await page.goto(route(project))).status()).toBe(200);await entered(page);
  await expect(page.locator('h1')).toHaveText(project.title);
+ const openingType=await page.locator('h1').evaluate(async heading=>{
+  await document.fonts.ready;
+  const text=heading.textContent,bounds=heading.getBoundingClientRect(),words=[];
+  const plain=[...heading.childNodes].every(node=>node.nodeType===Node.TEXT_NODE);
+  if(plain)for(const match of text.matchAll(/\S+/gu)){
+   const range=document.createRange();range.setStart(heading.firstChild,match.index);range.setEnd(heading.firstChild,match.index+match[0].length);
+   const rects=[...range.getClientRects()].filter(rect=>rect.width>0&&rect.height>0),lines=[];
+   for(const rect of rects)if(!lines.some(top=>Math.abs(top-rect.top)<=1))lines.push(rect.top);
+   words.push({word:match[0],lines:lines.length,fits:rects.length>0&&rects.every(rect=>rect.left>=Math.max(0,bounds.left)-1&&rect.right<=Math.min(innerWidth,bounds.right)+1)});
+  }
+  return{plain,words,scrollWidth:heading.scrollWidth,clientWidth:heading.clientWidth,left:bounds.left,right:bounds.right,viewport:innerWidth};
+ });
+ expect(openingType.plain,'Opening headings remain native plain text').toBe(true);
+ expect(openingType.words.length).toBeGreaterThan(0);
+ expect(openingType.words.filter(word=>word.lines!==1),'A complete heading word must occupy one line').toEqual([]);
+ expect(openingType.words.filter(word=>!word.fits),'Every heading word fits its heading and the viewport').toEqual([]);
+ expect(openingType.scrollWidth).toBeLessThanOrEqual(openingType.clientWidth+1);
+ expect(openingType.left).toBeGreaterThanOrEqual(-1);expect(openingType.right).toBeLessThanOrEqual(openingType.viewport+1);
  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href','https://joshsuan.github.io'+route(project));
  await expect(page.locator('[data-project-chapter]')).toHaveCount(6);
  await expect(page.locator('[data-project-chapter-link]')).toHaveCount(6);

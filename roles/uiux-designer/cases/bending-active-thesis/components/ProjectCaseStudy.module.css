@@ -30,7 +30,7 @@
 .sourcePanel>p{margin:0 0 .6rem}.sourcePanel>.credit{font-size:var(--type-size-label)}
 .sourcePanel>.sourceLink{margin-right:0}.sourcePanel>.modelDescription{margin-bottom:.9rem}
 .motionControls{display:flex;flex-wrap:wrap;gap:.6rem}.motionControls:has(button:not([hidden])){margin-top:.6rem}
-.motionControls button{min-height:44px;padding:.55rem .8rem;border:1px solid var(--material-reading-border);border-radius:10px;background:var(--material-reading-fill);color:var(--glass-control-accent);font:inherit;cursor:pointer}
+.motionControls button{min-height:44px;padding:.55rem .8rem;border:1px solid var(--material-reading-border);border-radius:10px;background:var(--material-reading-fill);color:var(--glass-control-accent);font:inherit;font-size:var(--type-size-control);line-height:var(--type-leading-control);letter-spacing:var(--type-tracking-control);cursor:pointer}
 .motionControls button[hidden]{display:none}.sourcePanel>.motionStatus:empty{display:none}.sourcePanel>.motionStatus{margin-top:.75rem;margin-bottom:0}
 .panel{grid-column:1/6;grid-row:1;position:relative;z-index:2;min-width:0;width:100%;max-width:35rem;padding:clamp(1.5rem,2.6vw,2.8rem);border:1px solid var(--material-reading-border);border-radius:24px;overflow:visible}
 .panel h1,.panel h2{margin:0 0 1.6rem;font-family:var(--display);font-weight:500;font-style:normal;text-wrap:balance;overflow-wrap:break-word}
@@ -39,6 +39,7 @@
 .panel>p{margin:1.25rem 0;color:var(--glass-muted);font-size:clamp(1rem,1.12vw,1.1rem);line-height:var(--type-leading-body);letter-spacing:var(--type-tracking-body)}
 .panel>p:last-child{margin-bottom:0}
 .openingPanel{grid-column:1/6;max-width:35rem}
+.openingPanel h1{font-size:clamp(2.4rem,5.4vw,4.5rem);overflow-wrap:normal;word-break:normal;hyphens:none}
 .opening .chapterInner{min-height:118svh}
 .panel>.subtitle{color:var(--paper)}
 .backLink,.readingLink,.sourceLink{display:inline-flex;align-items:center;justify-content:space-between;gap:1rem;min-height:44px;color:var(--glass-control-accent);font-size:var(--type-size-control);line-height:var(--type-leading-control);letter-spacing:var(--type-tracking-control);text-decoration:none}
