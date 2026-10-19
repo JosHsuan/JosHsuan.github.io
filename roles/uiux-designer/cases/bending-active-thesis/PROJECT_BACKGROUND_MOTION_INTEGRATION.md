@@ -247,3 +247,56 @@ The [DORA CI plan](../../../../docs/CI_DELIVERY_PLAN.md) remains a separate
 planning record. This feature retains the existing complete acceptance union,
 one-worker GPU isolation and exact-SHA, same-artifact publication gate. No new
 smoke stage, duration partition or CI workflow optimization is claimed here.
+
+The `afb8a3b` candidate's eight browser jobs finish with seven successful jobs;
+Linux WebKit 1/2 reports 78 passes and one failure, again on Dot's second Making
+visit. The initial Reduced Motion fixture now passes. The added native-event
+attachment records a completed/held source with no media error, native
+`paused=false` and controller `playing=false/phase=paused`. Between a `waiting`
+receipt and the final snapshot, media time increases from 1.202663955 to
+2.881604636 seconds, while no new `playing` event appears among the six observed
+event types. This proves some native progress between those samples, not
+continuous playback or a settled play Promise. The queued-pause repair alone
+does not resolve this case. The original log, trace, attachment and source bytes
+remain retained; this candidate is not eligible for publication.
+
+A replacement must reconcile transport from native facts and actual progress,
+keep buffering distinct from playing, reject stale native notifications and
+preserve pending-operation ownership. Native `timeupdate` can also accompany
+seeking or stalls, so the event alone cannot establish playback. Its relevant
+state and real time change must be checked. No polling, synthetic media event,
+time seek, reload or retry is an acceptable substitute. The Dot return journey
+now also requires a second real native time advance after return, with its
+existing playback predicate and deadline retained. Full replacement CI and
+same-artifact/live acceptance remain required. See the
+[HTML media specification](https://html.spec.whatwg.org/multipage/media.html#event-media-timeupdate).
+
+The replacement reconciles native `playing`, `waiting`, `timeupdate`, pause and
+seek notifications with the current source owner and play generation. Waiting
+only records buffering and rebases time; a native progress acknowledgement needs
+an actual positive time change in the held, eligible source. A seek latch spans
+the native `seeking=false` / `timeupdate` / `seeked` completion sequence, so seek
+completion cannot manufacture playback. Late Promise fulfillment only completes
+the operation and preserves newer transport facts; a current rejection still
+latches a source failure. The control's pause intent follows native transport
+and a pending operation, allowing real pause while buffering. Unauthorized native
+progress actually pauses the element. No source bytes, appearance recipe,
+camera, finite-motion coordinates, media time or rendering clock change.
+
+Two new portable scenarios fail before the fix and pass afterwards. The focused
+backdrop/scene/global-background run passes 37 cases; the complete portable run
+has **500 cases / 498 passes / zero failures / two existing opt-in probe skips**.
+Source-only peer review finds no must-fix issue. These facts do not establish
+Linux WebKit's actual event path; the replacement browser, CI and live evidence
+remain required.
+
+The replacement local `pnpm check` passes content, lint, types, unit/CI tests,
+the empty-framework build and its audit. The public build/audit separately
+passes with 241 local output files and 117 pins; its metadata still identifies
+the pre-commit working-tree checkpoint. All **20 native background-motion
+executions on Chromium and mobile Chromium pass in 3.0 minutes**, including
+five movie decodes, the second Dot time advance, pause/history/reload, finite
+end/replay, preferences and truthful HTTP/rejection/deadline fallback. No
+Windows codec result or local output is used to accept Linux WebKit or the
+future exact-commit CI artifact. Root's browser contexts and preview are closed
+after the local run.

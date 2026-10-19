@@ -47,6 +47,7 @@ export function createProjectStudyBackdropPresenter({root,window:win,document:do
  const pause=record=>{
   if(!record.video)return;cancelFrame(record);
   record.playGeneration++;record.playPending=false;record.preparing=false;record.video.pause();record.playing=false;
+  record.progressGeneration=0;record.progressBaseline=safeTime(record.video);record.progressReceipt=null;record.transportWaiting=false;record.transportSeeking=!!record.video.seeking;
   if(record.started&&!record.failed&&!record.ended)record.phase='paused';
  };
  const publishMedia=record=>{
@@ -56,8 +57,9 @@ export function createProjectStudyBackdropPresenter({root,window:win,document:do
   const p=settings(),available=record.active&&record.visualVideo&&record.firstFrame&&!record.failed&&!p.reduced&&!p.saveData;
   publisher.attribute(record.toggle,'hidden',available&&!record.ended?null:'');
   publisher.attribute(record.replay,'hidden',available&&record.ended?null:'');
-  publisher.attribute(record.toggle,'aria-pressed',record.playing?'true':'false');
-  publisher.text(record.toggle,record.playing?'Pause recording':'Play recording');
+  const pauseIntent=record.video&&(!record.video.paused||record.playPending)&&!record.failed&&!record.ended;
+  publisher.attribute(record.toggle,'aria-pressed',pauseIntent?'true':'false');
+  publisher.text(record.toggle,pauseIntent?'Pause recording':'Play recording');
   publisher.text(record.status,record.failed?'Recording unavailable. The original source poster remains available.':record.ended?'Recording complete. The final source frame is held.':record.userPaused?'Recording paused.':'');
  };
  const releaseVideo=record=>{
@@ -67,14 +69,59 @@ export function createProjectStudyBackdropPresenter({root,window:win,document:do
   if(disposed||record.failed)return;record.failed=true;record.reason=reason;record.phase='failed';
   failProjectStudyBackdropMotion(motion,record.key,reason);record.failures.push({reason,currentTime:safeTime(record.video)});releaseVideo(record);publishMedia(record);changed();
  };
+ const heldTransport=record=>record.active&&record.visualVideo&&motion.key===record.key&&motion.mode==='hold'&&eligible(settings())&&!record.userPaused;
+ const observeTransport=(record,type)=>{
+  if(disposed||record.failed)return;
+  const video=record.video,time=safeTime(video),fromTime=record.progressBaseline;
+  const sequence=++record.transportSequence;
+  record.transportFact={type,sequence,at:clock(),currentTime:time,paused:video.paused,seeking:!!video.seeking,readyState:video.readyState};
+  if(!video.paused&&(!eligible(settings())||!record.active&&!record.preparing||record.userPaused)){
+   // A late native start can outlive its play Promise generation. Reassert
+   // source/policy ownership rather than merely ignoring its progress receipt.
+   pause(record);publishMedia(record);return;
+  }
+  if(type==='seeking'||type==='seeked'){
+   // WHATWG queues seek completion timeupdate after seeking becomes false and
+   // before seeked. Retain the event latch until seeked rebases this position.
+   record.transportSeeking=type==='seeking';record.progressBaseline=time;record.playing=false;
+   if(record.firstFrame&&heldTransport(record)&&!video.paused&&!record.ended)record.phase='buffering';
+   publishMedia(record);return;
+  }
+  if(type==='waiting'){
+   record.transportWaiting=true;record.progressBaseline=time;record.playing=false;
+   if(record.firstFrame&&heldTransport(record)&&!video.paused&&!record.ended)record.phase='buffering';
+   publishMedia(record);return;
+  }
+  if(type==='pause'){
+   if(!video.paused)return;
+   record.progressGeneration=0;record.progressBaseline=time;record.progressReceipt=null;record.transportWaiting=false;record.playing=false;
+   if(record.firstFrame&&!record.ended)record.phase='paused';publishMedia(record);return;
+  }
+  if(type==='play-fulfilled'){
+   // Promise settlement belongs to the operation, not a newer native transport
+   // receipt. In particular it cannot turn a later waiting/pause into playing.
+   if(!eligible(settings())||!record.active&&!record.preparing||record.userPaused){pause(record);publishMedia(record);return;}
+   if(record.ended||video.ended){record.playing=false;publishMedia(record);return;}
+   if(video.paused){record.playing=false;if(record.firstFrame)record.phase='paused';}
+   else if(record.transportWaiting||record.transportSeeking){record.playing=false;if(record.firstFrame)record.phase='buffering';}
+   else if(!record.playing)record.phase=record.firstFrame?'starting':'preparing';
+   publishMedia(record);return;
+  }
+  if(type==='timeupdate')record.progressBaseline=time;
+  const usable=record.firstFrame&&heldTransport(record)&&!video.paused&&!video.ended&&!record.ended&&!video.error&&!video.seeking&&!record.transportSeeking&&record.progressGeneration===record.playGeneration;
+  if(!usable||type==='playing'&&video.readyState<3||type==='timeupdate'&&(!Number.isFinite(fromTime)||time<=fromTime))return;
+  const changed=!record.playing||record.phase!=='playing';
+  record.progressBaseline=time;record.progressReceipt={type,sequence,at:clock(),fromTime,currentTime:time,playGeneration:record.playGeneration};record.transportWaiting=false;record.playing=true;record.phase='playing';
+  if(changed)publishMedia(record);
+ };
  const play=record=>{
-  if(disposed||record.failed||record.ended||record.playPending||record.playing)return;
+  if(disposed||record.failed||record.ended||record.playPending||!record.video.paused)return;
   record.playPending=true;const generation=++record.playGeneration;
+  record.progressGeneration=generation;record.progressBaseline=safeTime(record.video);record.progressReceipt=null;record.transportWaiting=false;record.transportSeeking=!!record.video.seeking;record.playing=false;record.phase=record.firstFrame?'starting':'preparing';
   let result;try{result=record.video.play();}catch{record.playPending=false;fail(record,'play-rejected');return;}
   Promise.resolve(result).then(()=>{
    if(disposed||generation!==record.playGeneration)return;record.playPending=false;
-   if(!eligible(settings())||!record.active&&!record.preparing||record.userPaused){pause(record);return;}
-   record.playing=!record.video.paused;record.phase=record.playing?'playing':record.firstFrame?'paused':'preparing';publishMedia(record);
+   observeTransport(record,'play-fulfilled');
   },()=>{if(!disposed&&generation===record.playGeneration){record.playPending=false;fail(record,'play-rejected');}});
  };
  const firstFrame=(record,metadata,method)=>{
@@ -119,7 +166,7 @@ export function createProjectStudyBackdropPresenter({root,window:win,document:do
   const image=figure.querySelector('[data-project-media-poster]')??figure.querySelector('img'),video=figure.querySelector('[data-project-motion-media]');
   const id=video?.getAttribute('data-project-motion-id')??null,src=video?.getAttribute('data-project-video-src')??null;
   const chapter=figure.dataset.projectMedia,key=video?`video:${id}`:`image:${image?.getAttribute('src')??chapter}`;
-  const record={key,kind:video?'video':'image',chapter,figure,image,video,id,src,posterReady:false,posterFailed:false,posterReason:'',posterTimer:null,posterTimerStarted:0,posterRemaining:ARRIVAL_MS,decodeGeneration:0,active:false,visualVideo:false,phase:'poster',reason:'',firstFrame:false,decoded:false,frame:null,compositorFrame:null,started:false,preparing:false,playing:false,playPending:false,playGeneration:0,userPaused:false,ended:false,failed:false,failures:[],generation:0,callback:null,timer:null,timerStarted:0,remaining:ARRIVAL_MS,toggle:id?findControl('data-project-motion-toggle',id):null,replay:id?findControl('data-project-motion-replay',id):null,status:id?findControl('data-project-motion-status',id):null};
+  const record={key,kind:video?'video':'image',chapter,figure,image,video,id,src,posterReady:false,posterFailed:false,posterReason:'',posterTimer:null,posterTimerStarted:0,posterRemaining:ARRIVAL_MS,decodeGeneration:0,active:false,visualVideo:false,phase:'poster',reason:'',firstFrame:false,decoded:false,frame:null,compositorFrame:null,started:false,preparing:false,playing:false,playPending:false,playGeneration:0,progressGeneration:0,progressBaseline:0,progressReceipt:null,transportWaiting:false,transportSeeking:false,transportSequence:0,transportFact:null,userPaused:false,ended:false,failed:false,failures:[],generation:0,callback:null,timer:null,timerStarted:0,remaining:ARRIVAL_MS,toggle:id?findControl('data-project-motion-toggle',id):null,replay:id?findControl('data-project-motion-replay',id):null,status:id?findControl('data-project-motion-status',id):null};
   records.push(record);if(!descriptors.has(key))descriptors.set(key,record);
   const decode=()=>{
    if(disposed||record.posterFailed)return;
@@ -144,16 +191,17 @@ export function createProjectStudyBackdropPresenter({root,window:win,document:do
     if(video.readyState>=2&&video.videoWidth>0&&video.videoHeight>0)firstFrame(record,null,'loadeddata');
     else{awaitFrame(record);if(!record.firstFrame)play(record);}
    });
-   listen(video,'playing',()=>{if(disposed)return;if(!eligible(settings())||!record.active&&!record.preparing||record.userPaused){pause(record);return;}record.playing=true;record.phase='playing';publishMedia(record);});
+   listen(video,'playing',()=>{if(disposed||record.failed)return;if(!eligible(settings())||!record.active&&!record.preparing||record.userPaused){pause(record);return;}observeTransport(record,'playing');});
    listen(video,'pause',()=>{
     // Native media events are queued. A departure's pause can arrive after
     // this retained element has resumed; it cannot replace its current fact.
     if(disposed||!video.paused)return;
-    record.playing=false;if(record.firstFrame&&!record.failed&&!record.ended)record.phase='paused';publishMedia(record);
+    observeTransport(record,'pause');
    });
+   for(const type of ['waiting','timeupdate','seeking','seeked'])listen(video,type,()=>observeTransport(record,type));
    listen(video,'ended',()=>{if(disposed)return;if(!record.firstFrame){if(video.readyState>=2&&video.videoWidth>0&&video.videoHeight>0)firstFrame(record,null,'loadeddata');else{fail(record,'first-frame-unavailable');return;}}record.ended=true;record.playing=false;record.phase='ended';cancelFrame(record);publishMedia(record);changed();});
    listen(video,'error',()=>{if(record.started)fail(record,'media-error');});
-   if(record.toggle)listen(record.toggle,'click',()=>{if(!record.active||!record.firstFrame||record.failed)return;record.userPaused=record.playing||record.playPending;if(record.userPaused)pause(record);else if(eligible(settings()))play(record);publishMedia(record);changed();});
+   if(record.toggle)listen(record.toggle,'click',()=>{if(!record.active||!record.firstFrame||record.failed)return;record.userPaused=!video.paused||record.playPending;if(record.userPaused)pause(record);else if(eligible(settings()))play(record);publishMedia(record);changed();});
    if(record.replay)listen(record.replay,'click',()=>{if(!record.active||!record.firstFrame||record.failed||!eligible(settings()))return;record.video.currentTime=0;record.ended=false;record.userPaused=false;play(record);publishMedia(record);changed();});
   }
   publishMedia(record);
@@ -233,7 +281,7 @@ export function createProjectStudyBackdropPresenter({root,window:win,document:do
   },
   suspend(reason){if(disposed)return;suspended=true;seekPending=true;for(const record of records){closePosterTimer(record);pause(record);}cancelProjectStudyBackdropMotion(motion,reason);scene?.actor.suspend(reason);},
   resume(){if(disposed)return;suspended=false;seekPending=true;scene?.actor.resume();changed();},
-  inspect:()=>({ticks,stage:snapshot(),media:records.map(record=>({id:record.id,key:record.key,chapter:record.chapter,kind:record.kind,active:record.active,posterReady:record.posterReady,posterFailed:record.posterFailed,posterReason:record.posterReason,posterDeadlinePending:record.posterTimer!==null,posterRemaining:Math.max(0,record.posterRemaining-(record.posterTimer===null?0:clock()-record.posterTimerStarted)),phase:record.phase,reason:record.reason,started:record.started,firstFrame:record.firstFrame,frame:record.frame?{...record.frame}:null,compositorFrame:record.compositorFrame?{...record.compositorFrame}:null,playing:record.playing,paused:record.video?record.video.paused:true,currentTime:safeTime(record.video),ended:record.ended,userPaused:record.userPaused,failed:record.failed,source:record.src,sourceAttached:!!record.video?.getAttribute('src'),callbackPending:record.callback!==null,deadlinePending:record.timer!==null,failures:[...record.failures]})),events:events.inspect(),suspended,disposed}),
+  inspect:()=>({ticks,stage:snapshot(),media:records.map(record=>({id:record.id,key:record.key,chapter:record.chapter,kind:record.kind,active:record.active,posterReady:record.posterReady,posterFailed:record.posterFailed,posterReason:record.posterReason,posterDeadlinePending:record.posterTimer!==null,posterRemaining:Math.max(0,record.posterRemaining-(record.posterTimer===null?0:clock()-record.posterTimerStarted)),phase:record.phase,reason:record.reason,started:record.started,firstFrame:record.firstFrame,frame:record.frame?{...record.frame}:null,compositorFrame:record.compositorFrame?{...record.compositorFrame}:null,playing:record.playing,playPending:record.playPending,progressReceipt:record.progressReceipt?{...record.progressReceipt}:null,transport:{playGeneration:record.playGeneration,progressGeneration:record.progressGeneration,baseline:record.progressBaseline,waiting:record.transportWaiting,seeking:record.transportSeeking,lastFact:record.transportFact?{...record.transportFact}:null},paused:record.video?record.video.paused:true,currentTime:safeTime(record.video),ended:record.ended,userPaused:record.userPaused,failed:record.failed,source:record.src,sourceAttached:!!record.video?.getAttribute('src'),callbackPending:record.callback!==null,deadlinePending:record.timer!==null,failures:[...record.failures]})),events:events.inspect(),suspended,disposed}),
   dispose(){
    if(disposed)return;cancelProjectStudyBackdropMotion(motion,'disposed');disposed=true;
    for(const record of records){record.decodeGeneration++;closePosterTimer(record);releaseVideo(record);for(const name of ['active','mode','phase','reason'])publisher.attribute(record.figure,'data-project-media-'+name,null);publisher.style(record.figure,'transform','');publisher.style(record.figure,'opacity','');}

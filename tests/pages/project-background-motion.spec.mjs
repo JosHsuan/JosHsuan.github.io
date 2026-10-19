@@ -46,10 +46,10 @@ async function playing(page,media){
  await page.evaluate(()=>{
   if(window.__testProjectMediaReceipts)return;
   const receipts=window.__testProjectMediaReceipts=[];
-  for(const type of ['pause','playing','waiting','ended','loadeddata','error'])document.addEventListener(type,event=>{
+  for(const type of ['play','pause','playing','waiting','timeupdate','seeking','seeked','ended','loadeddata','canplay','stalled','error'])document.addEventListener(type,event=>{
    const video=event.target;if(!(video instanceof HTMLVideoElement)||!video.matches('[data-project-motion-media]'))return;
    receipts.push({at:performance.now(),type:event.type,trusted:event.isTrusted,id:video.dataset.projectMotionId,paused:video.paused,readyState:video.readyState,currentTime:video.currentTime,phase:video.closest('[data-project-media]')?.dataset.projectMediaPhase,error:video.error?.code??null});
-   if(receipts.length>128)receipts.splice(0,receipts.length-128);
+   if(receipts.length>256)receipts.splice(0,receipts.length-256);
   },{capture:true,passive:true});
  });
  try{
@@ -174,7 +174,7 @@ test('Dot exchanges photographs, the original model and video through one transa
  await expect(page.locator('[data-project-model-stage]')).toHaveAttribute('data-project-model-active','');await expect(page.locator('[data-project-media-active]')).toHaveCount(0);
  await select(page,media.chapter);const video=await nativeVideo(page,media);await expect(page.locator('[data-project-model-stage]')).not.toHaveAttribute('data-project-model-active','');
  await select(page,'results');await hold(page,imageKey(dot,'results'));expect((await mediaFacts(page,media.id)).paused).toBe(true);
- await select(page,media.chapter);await playing(page,media);
+ await select(page,media.chapter);await nativeVideo(page,media);
  const toggle=page.locator('[data-study-motion-toggle]');await toggle.click();await expect(toggle).toHaveAttribute('aria-pressed','true');
  await expect.poll(()=>video.evaluate(node=>node.paused),{timeout:WAIT}).toBe(true);const paused=await video.evaluate(node=>node.currentTime);await frames(page,5);expect(await video.evaluate(node=>node.currentTime)).toBe(paused);
  const before=await page.evaluate(()=>scrollY);await select(page,'results');await hold(page,imageKey(dot,'results'));expect(await page.evaluate(()=>scrollY)).not.toBe(before);expect(await video.evaluate(node=>node.currentTime)).toBe(paused);

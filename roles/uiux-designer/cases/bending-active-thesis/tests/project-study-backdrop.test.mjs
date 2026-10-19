@@ -19,16 +19,16 @@ class Target{
 }
 function fixture({video=false,reduced=false,saveData=false,rejectPlay=false,pendingImage=null,pendingDecode=null,sharedImage=false,deferPause=false}={}){
  const root=new Target(),doc=new Target(),win=new Target(),timers=new Map(),callbacks=new Map(),controls=[];
- const pendingDecodes=new Map(),nativeEvents=[];
- let sequence=0,schedules=0,now=0,plays=0,pauses=0,loads=0,cancels=0;
+ const pendingDecodes=new Map(),nativeEvents=[],pendingPlays=[];
+ let sequence=0,schedules=0,now=0,plays=0,pauses=0,loads=0,cancels=0,deferNextPlay=false;
  const policy={hidden:false,reduced,saveData,paused:false,siteReady:true},figures=[];
  const sources=['overview','context','system','making','results'];
  for(const chapter of sources){
   const figure=new Target(),image=new Target();figure.dataset.projectMedia=chapter;image.setAttribute('src',sharedImage&&chapter==='making'?'/context.webp':`/${chapter}.webp`);image.complete=chapter!==pendingImage;image.naturalWidth=image.complete?1600:0;image.decode=()=>chapter===pendingDecode?new Promise(resolve=>pendingDecodes.set(chapter,resolve)):Promise.resolve();figure.image=image;
   figure.querySelector=selector=>selector==='[data-project-media-poster]'||selector==='img'?image:selector==='[data-project-motion-media]'?figure.video??null:null;
   if(video&&chapter==='making'){
-   const media=new Target();media.setAttribute('data-project-motion-id','authentic-making');media.setAttribute('data-project-video-src','/authentic-making.mp4');Object.assign(media,{paused:true,currentTime:0,videoWidth:640,videoHeight:480,readyState:2,preload:'none'});
-   media.play=()=>{plays++;if(rejectPlay)return Promise.reject(Error('blocked'));media.paused=false;media.fire('playing');return Promise.resolve();};
+   const media=new Target();media.setAttribute('data-project-motion-id','authentic-making');media.setAttribute('data-project-video-src','/authentic-making.mp4');Object.assign(media,{paused:true,seeking:false,ended:false,currentTime:0,videoWidth:640,videoHeight:480,readyState:2,preload:'none'});
+   media.play=()=>{plays++;if(rejectPlay)return Promise.reject(Error('blocked'));media.paused=false;if(deferNextPlay){deferNextPlay=false;return new Promise((resolve,reject)=>pendingPlays.push({resolve,reject}));}media.readyState=4;media.fire('playing');return Promise.resolve();};
    media.pause=()=>{pauses++;const changed=!media.paused;media.paused=true;if(changed){if(deferPause)nativeEvents.push(()=>media.fire('pause'));else media.fire('pause');}};media.load=()=>loads++;
    media.requestVideoFrameCallback=fn=>{callbacks.set(++sequence,fn);return sequence;};media.cancelVideoFrameCallback=id=>{cancels++;callbacks.delete(id);};figure.video=media;
    for(const attribute of ['data-project-motion-toggle','data-project-motion-replay','data-project-motion-status']){const control=new Target();control.setAttribute(attribute,'authentic-making');controls.push(control);}
@@ -43,7 +43,7 @@ function fixture({video=false,reduced=false,saveData=false,rejectPlay=false,pend
  const settle=()=>{let left=300;while(step()&&left-->0);assert(left>0);};
  const select=chapter=>{root.dataset.projectActiveChapter=chapter;return step();};
  const frame=()=>{const pending=[...callbacks.values()];callbacks.clear();for(const fn of pending)fn(now,{mediaTime:.04,presentedFrames:1});};
- return{root,win,doc,policy,figures,presenter,step,settle,select,frame,timers,callbacks,controls,pendingDecodes,flushNative:()=>{for(const deliver of nativeEvents.splice(0))deliver();},advanceClock:seconds=>{now+=seconds*1000;},video:figures.find(figure=>figure.video)?.video,get schedules(){return schedules;},get plays(){return plays;},get pauses(){return pauses;},get loads(){return loads;},get cancels(){return cancels;}};
+ return{root,win,doc,policy,figures,presenter,step,settle,select,frame,timers,callbacks,controls,pendingDecodes,pendingPlays,deferPlay:()=>{deferNextPlay=true;},flushNative:()=>{for(const deliver of nativeEvents.splice(0))deliver();},advanceClock:seconds=>{now+=seconds*1000;},video:figures.find(figure=>figure.video)?.video,get schedules(){return schedules;},get plays(){return plays;},get pauses(){return pauses;},get loads(){return loads;},get cancels(){return cancels;}};
 }
 
 test('actual Bending passages are finite at 30/60/120 Hz and preserve retargeted poses',()=>{
@@ -107,6 +107,24 @@ test('a queued native pause from departure cannot overwrite resumed playback on 
  assert.equal(f.controls.find(control=>control.getAttribute('data-project-motion-toggle')).textContent,'Pause recording');
  f.policy.paused=true;f.step();f.flushNative();assert.equal(f.video.paused,true);assert.equal(f.presenter.inspect().media.find(item=>item.id).playing,false);
  f.presenter.dispose();terminal(f.presenter.inspect().stage.history);
+});
+
+async function pendingRevisit(){
+ const f=fixture({video:true});await flush();f.step();f.select('making');f.step(1);f.frame();await flush();f.step();f.settle();await flush();f.video.currentTime=1.000437469;f.select('results');f.settle();f.deferPlay();f.select('making');f.settle();await flush();assert.equal(f.pendingPlays.length,1);assert.equal(f.video.paused,false);return f;
+}
+test('a pending resumed play is acknowledged only by real native progress, and late fulfillment cannot override newer waiting or pause',async()=>{
+ const f=await pendingRevisit();f.video.currentTime=1.202663955;f.video.fire('waiting');assert.equal(f.presenter.inspect().media.find(item=>item.id).playing,false);
+ f.video.fire('timeupdate');assert.equal(f.presenter.inspect().media.find(item=>item.id).playing,false,'An unchanged waiting sample is not progress');
+ f.video.currentTime=2.881604636;f.video.fire('timeupdate');const progressing=f.presenter.inspect().media.find(item=>item.id);assert.equal(progressing.playing,true);assert.equal(progressing.phase,'playing');assert.equal(progressing.playPending,true);assert.equal(progressing.progressReceipt.type,'timeupdate');assert.equal(progressing.progressReceipt.fromTime,1.202663955);assert.equal(progressing.progressReceipt.currentTime,2.881604636);
+ f.video.currentTime=2.9;f.video.fire('waiting');const waiting=f.presenter.inspect().media.find(item=>item.id);assert.equal(waiting.playing,false);assert.equal(waiting.phase,'buffering');f.pendingPlays[0].resolve();await flush();assert.equal(f.presenter.inspect().media.find(item=>item.id).phase,'buffering');assert.equal(f.presenter.inspect().media.find(item=>item.id).playing,false);
+ const toggle=f.controls.find(control=>control.getAttribute('data-project-motion-toggle'));assert.equal(toggle.textContent,'Pause recording');const plays=f.plays;toggle.fire('click');assert.equal(f.video.paused,true);assert.equal(f.plays,plays);assert.equal(f.presenter.inspect().media.find(item=>item.id).userPaused,true);f.video.fire('playing');assert.equal(f.presenter.inspect().media.find(item=>item.id).playing,false,'A queued playing event cannot override native paused');f.presenter.dispose();terminal(f.presenter.inspect().stage.history);
+});
+test('native timeupdate from seeking, inactive or disallowed transport cannot acknowledge playback, while a real pending rejection still fails',async()=>{
+ const f=await pendingRevisit();f.video.currentTime=1.2;f.video.fire('waiting');f.video.seeking=true;f.video.fire('seeking');f.video.currentTime=3;f.video.seeking=false;f.video.fire('timeupdate');assert.equal(f.presenter.inspect().media.find(item=>item.id).playing,false,'Seek completion timeupdate occurs after native seeking becomes false');f.video.fire('seeked');f.video.fire('timeupdate');assert.equal(f.presenter.inspect().media.find(item=>item.id).playing,false,'The seeked position rebases without acknowledging normal progress');
+ f.video.currentTime=3.1;f.video.fire('timeupdate');assert.equal(f.presenter.inspect().media.find(item=>item.id).playing,true);f.pendingPlays[0].reject(Error('Genuine native rejection'));await flush();assert.equal(f.presenter.inspect().media.find(item=>item.id).failed,true);assert.equal(f.presenter.inspect().media.find(item=>item.id).reason,'play-rejected');assert.equal(f.video.getAttribute('src'),null);f.step();f.settle();f.presenter.dispose();terminal(f.presenter.inspect().stage.history);
+ const inactive=await pendingRevisit();inactive.select('results');inactive.settle();inactive.video.paused=false;inactive.video.currentTime=2;inactive.video.fire('timeupdate');assert.equal(inactive.presenter.inspect().media.find(item=>item.id).playing,false);assert.equal(inactive.video.paused,true,'Inactive native transport is actually stopped');inactive.presenter.dispose();
+ const hidden=await pendingRevisit();hidden.policy.hidden=true;hidden.video.currentTime=2;hidden.video.fire('timeupdate');assert.equal(hidden.presenter.inspect().media.find(item=>item.id).playing,false);assert.equal(hidden.video.paused,true,'Hidden native transport is actually stopped');hidden.pendingPlays[0].resolve();await flush();assert.equal(hidden.video.paused,true);hidden.presenter.dispose();
+ const paused=await pendingRevisit();paused.video.pause();assert.equal(paused.presenter.inspect().media.find(item=>item.id).phase,'paused');paused.pendingPlays[0].resolve();await flush();assert.equal(paused.presenter.inspect().media.find(item=>item.id).playing,false);assert.equal(paused.presenter.inspect().media.find(item=>item.id).phase,'paused');paused.video.fire('playing');assert.equal(paused.presenter.inspect().media.find(item=>item.id).playing,false);paused.presenter.dispose();
 });
 
 test('reduced/Save Data never acquire animation, supersession cancels native firstframe work, and rejected play latches a poster',async()=>{
