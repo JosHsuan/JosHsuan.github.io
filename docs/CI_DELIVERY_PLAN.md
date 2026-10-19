@@ -1,6 +1,6 @@
 # DORA-informed CI and delivery plan
 
-Reviewed: 18 October 2026. Scope: this repository's reusable framework and selected public application. The owner requested research and Markdown planning. Current operations remain defined by [CI/CD operations](CI_CD.md), [decision 0009](decisions/0009-impact-selected-ci.md), and the exact-commit, same-artifact publication gate. Future work below is a plan, not a claim that it has been implemented.
+Reviewed: 19 October 2026 against the linked official Google Cloud DORA guidance and the checked-in workflows. Scope: this repository's reusable framework and selected public application. The owner requested research and Markdown planning. Current operations remain defined by [CI/CD operations](CI_CD.md), [decision 0009](decisions/0009-impact-selected-ci.md), and the exact-commit, same-artifact publication gate. Future work below is a plan, not a claim that it has been implemented.
 
 ## Research basis
 
@@ -139,6 +139,22 @@ Fast checks can overlap artifact preparation. Browser smoke and comprehensive ac
 
 These improvements should be separate small changes with their own validation. This document does not change the active run's tests, schedule recurring jobs or bypass owner publication scope.
 
+## Implementation sequence and completion evidence
+
+The next implementation should use the following small, independently reviewable changes. These are proposed work items; this planning amendment changes no workflow, selector, browser partition, timeout or publication condition.
+
+| Order / status | Proposed change and repository location | Responsible work | Evidence required before completion |
+| --- | --- | --- | --- |
+| 1 — planned | Add per-test and stage timing receipts to the existing CI reporting path, starting with `.github/workflows/ci.yml` and `scripts/ci-run-pages.mjs`. | CI/release, with browser/performance review | UTC timestamps and run/attempt/SHA/profile identities; separate queue, setup, execution and teardown; failed/cancelled observations retained. Establish a baseline before comparing improvements. |
+| 2 — planned | Experiment with measured-duration partitions in `scripts/ci-impact.mjs` and the browser runner. | CI/release and browser/performance | The same required test-ID union across all profiles, no duplication or omission, one GL worker per runner, unchanged retry/assertion budgets, artifact digest intact. Compare longest-shard duration and total runner-minutes on comparable workloads. |
+| 3 — planned | Introduce a clearly named native smoke stage consuming `pages-build` output. | Runtime/development and browser/QA | Real entry/navigation, source first draw and bounded failure journeys; build digest checked before and after; the same candidate still reaches its selected acceptance jobs and required gate. A smoke-only record cannot be published. |
+| 4 — planned, incremental | Move suitable regressions into portable tests alongside changes; retain engine-specific acceptance. | Developers and relevant interaction/source reviewers | A demonstrated defect caught by the earlier layer, with native layout, media, GPU and lifecycle behavior still verified in the browser where needed. No test-count target or fixed test-pyramid percentage. |
+| 5 — planned | Exercise recovery against the existing deployment provenance checks and document the operation in `docs/CI_CD.md`. | CI/release and owner within the established publication scope | A verified eligible artifact, recorded failure/recovery times and successful live release/route checks. Do not weaken SHA/digest eligibility to promote an old artifact. Record any current gate limitation before claiming rollback is operational. |
+
+The developer responsible for a breaking change owns the initial diagnosis and repair, with CI/release work checking infrastructure and provenance failures. Repair a broken build before starting the next optimization. If a repair cannot be made promptly, evaluate reverting the offending change, with the same source protection and validation rules. Keep optimization failures separate from production incidents. This follows DORA's emphasis on frequent integration and immediate build repair; it does not authorize unrelated product changes. [DORA: Continuous integration](https://dora.dev/capabilities/continuous-integration/).
+
+For each experiment, retain the candidate and baseline SHAs, scope, raw observations, coverage union, artifact identity and outcome. Report sample count and workload differences before quoting a percentile or speedup. The first objective is a trustworthy feedback loop; adding a measurement dashboard is optional and should follow a demonstrated need. [DORA: Software delivery performance metrics](https://dora.dev/guides/dora-metrics/).
+
 ## Measurement contract
 
 Use UTC event timestamps, commit/run/attempt/job identities, scope, engine/profile and artifact digest. Publish raw sample counts alongside p50/p95, separate queue from active execution, and flag censored timeout/cancellation data. Fast-feedback latency runs from workflow creation until all required fast-layer results are terminal; the ten-minute p95 target includes queue time. Active execution is a separate diagnostic, not a subtraction used to claim the end-to-end target was met. Set the first measured baseline before claiming an improvement. Also target zero job-wallclock cancellations while a test remains inside its valid scenario budget. The 45-minute safety ceiling is not the target runtime.
@@ -156,6 +172,8 @@ Current DORA guidance defines **five production delivery metrics**, grouped into
 | Deployment rework rate | Share of deployments that are unplanned responses to production incidents. | Incident-linked unplanned deployments divided by deployments in the same window. |
 
 CI cancellation before publication is a pipeline event, not automatically a production change failure or deployment rework. Recovery time is not the duration of a failed CI run. Mark missing production evidence as unavailable; do not invent zero rates, an “elite” rating or a service-level guarantee from these runs. The five-metric evolution is explained in [DORA's metric history](https://dora.dev/insights/dora-metrics-history/).
+
+**Collection status:** the five production metrics above are defined for future reporting; the current workflows do not automatically aggregate them. Existing run, deployment and live-verification receipts support manual investigation. Incident-linked recovery/rework evidence and a statistical baseline are incomplete. As an initial local review policy, CI/release work should summarize a rolling 30-day window at a monthly delivery review, with the owner reviewing incidents and recovery decisions. Show the window, observed counts and missing data; short or empty windows remain explicitly insufficient for rate or percentile claims. This is a review plan, not a newly scheduled automation.
 
 ## Review responsibilities and acceptance
 

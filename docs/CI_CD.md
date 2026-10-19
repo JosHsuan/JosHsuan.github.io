@@ -2,7 +2,7 @@
 
 The repository has two independent exports: the empty reusable framework (`out/`) and the public Bending-Active case (`.pages-workspace/out/`). [Decision 0009](decisions/0009-impact-selected-ci.md) defines the owner-authorized impact-selection policy. Node 24.19.0, pnpm 11.19.0 and the frozen committed lockfile remain mandatory.
 
-The [DORA-informed CI and delivery plan](CI_DELIVERY_PLAN.md) records the owner's 18 October research request, the fast-feedback objective, current capacity evidence, proposed staged improvements and production delivery metrics. This file describes implemented operation; planned stages do not replace the current release gate.
+The [DORA-informed CI and delivery plan](CI_DELIVERY_PLAN.md) records the owner's research request, the 19 October official-source review, the fast-feedback objective, current capacity evidence, an ordered implementation backlog with completion criteria, and production delivery metrics. This file describes implemented operation; planned stages do not replace the current release gate.
 
 ```mermaid
 flowchart TD
