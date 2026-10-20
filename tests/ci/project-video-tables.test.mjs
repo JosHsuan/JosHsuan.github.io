@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {PROJECT_MOTION_SPECS} from '../../scripts/project-studies.mjs';
 import {projectMotionMedia,assertProjectVideo,readProjectVideo} from '../../scripts/project-motion-media.mjs';
 
 const release=new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/',import.meta.url);
@@ -18,10 +20,11 @@ test('all seven selected source sequences retain their real dimensions, frame co
   }
 });
 
-test('both physical recordings retain every reviewed native 1080p frame and exact final-frame duration',async()=>{
+test('all three compact Mode/s outputs retain reviewed 1080p frames and exact final-frame duration',async()=>{
   for(const [id,frames,timescale,frameTicks,durationTicks] of [
-    ['film-physical-cutting',300,30000,1001,300300],
-    ['prototype-cutting-operation',522,25000,1000,522000],
+    ['film-physical-cutting',240,30000,1001,240240],
+    ['prototype-cutting-operation',200,25000,1000,200000],
+    ['film-machine-simulation',120,50000,2000,240000],
   ]){
     const source=media.find(value=>value.projectId==='mode-s-of-making'&&value.id===id);
     assert(source,'The exact reviewed physical clip is selected');
@@ -64,4 +67,63 @@ test('truncation, external sample URLs and out-of-payload chunk pointers fail be
   assert(chunk>0&&chunk<bytes.indexOf(Buffer.from('mdat')));
   redirected.writeUInt32BE(0,chunk+12);
   assert.throws(()=>readProjectVideo(redirected),/inside encoded media/);
+});
+
+
+// Inspect actual composition/edit tables as well as decode durations. B-frame
+// reordering changes sample DTS and ctts; it must not retime displayed frames.
+function boundedBoxes(bytes,start=0,end=bytes.length){
+  const result=[];let at=start;
+  while(at<end){
+    assert(at+8<=end);const size=bytes.readUInt32BE(at);assert(size>=8&&at+size<=end);
+    result.push({type:bytes.toString('ascii',at+4,at+8),payload:at+8,end:at+size});at+=size;
+  }
+  assert.equal(at,end);return result;
+}
+function oneBox(bytes,parent,type){
+  const boxes=boundedBoxes(bytes,parent.payload,parent.end).filter(box=>box.type===type);
+  assert.equal(boxes.length,1,'One reviewed '+type+' box');return boxes[0];
+}
+function actualWebPresentation(bytes){
+  const actual=readProjectVideo(bytes),moov=boundedBoxes(bytes).find(box=>box.type==='moov');
+  const track=oneBox(bytes,moov,'trak'),mdia=oneBox(bytes,track,'mdia'),table=oneBox(bytes,oneBox(bytes,mdia,'minf'),'stbl');
+  const timing=oneBox(bytes,table,'stts'),composition=oneBox(bytes,table,'ctts'),edit=oneBox(bytes,oneBox(bytes,track,'edts'),'elst');
+  assert.equal(bytes[composition.payload],0,'Reviewed nonnegative composition-offset table');
+  assert.equal(bytes[edit.payload],0);assert.equal(bytes.readUInt32BE(edit.payload+4),1,'One native edit origin');
+  assert.equal(edit.payload+20,edit.end);assert.equal(bytes.readInt16BE(edit.payload+16),1);assert.equal(bytes.readInt16BE(edit.payload+18),0,'Unit native edit rate');
+  const mediaOrigin=bytes.readInt32BE(edit.payload+12),durations=[],offsets=[];
+  for(let i=0,count=bytes.readUInt32BE(timing.payload+4);i<count;i++){
+    const at=timing.payload+8+i*8,frames=bytes.readUInt32BE(at),delta=bytes.readUInt32BE(at+4);
+    for(let frame=0;frame<frames;frame++)durations.push(delta);
+  }
+  const entries=bytes.readUInt32BE(composition.payload+4);assert.equal(composition.payload+8+entries*8,composition.end);
+  for(let i=0;i<entries;i++){
+    const at=composition.payload+8+i*8,frames=bytes.readUInt32BE(at),offset=bytes.readUInt32BE(at+4);
+    for(let frame=0;frame<frames;frame++)offsets.push(offset);
+  }
+  assert.equal(durations.length,actual.frameCount);assert.equal(offsets.length,actual.frameCount);
+  let dts=0;const frames=durations.map((duration,i)=>{const frame={pts:dts+offsets[i]-mediaOrigin,duration};dts+=duration;return frame;}).sort((a,b)=>a.pts-b.pts);
+  assert.equal(frames[0].pts,0,'Native presentation begins at the reviewed normalized origin');
+  for(let i=1;i<frames.length;i++)assert.equal(frames[i].pts,frames[i-1].pts+frames[i-1].duration,'Every native presentation-frame interval is continuous');
+  assert.equal(frames.at(-1).pts+frames.at(-1).duration,actual.durationTicks,'The final displayed frame retains its entire duration');
+  return{...actual,frames,mediaOrigin,composition,edit,reordered:new Set(offsets).size>1};
+}
+
+test('actual compact H264 tables retain every normalized source presentation timestamp through B-frame reordering',async()=>{
+  let total=0;
+  for(const spec of PROJECT_MOTION_SPECS['mode-s-of-making']){
+    const source=media.find(value=>value.projectId==='mode-s-of-making'&&value.id===spec.id),bytes=await load(source.src),actual=actualWebPresentation(bytes);
+    assert.equal(bytes.length,spec.outputBytes);assert.equal(createHash('sha256').update(bytes).digest('hex'),spec.outputSHA256);
+    assert(bytes.length<=4000000);assert(actual.durationSeconds<=10);total+=bytes.length;
+    assert.equal(actual.reordered,true,'The selected H264 actually uses composition reordering');
+    assert.equal(actual.mediaOrigin,spec.finalTicks*2,'The reviewed encoder delay is normalized by the native edit origin');
+    for(let i=0;i<actual.frames.length;i++)assert.deepEqual(actual.frames[i],{pts:i*spec.finalTicks,duration:spec.finalTicks});
+    assert.deepEqual([actual.width,actual.height],[1920,1080]);assert.equal(actual.width/actual.height,spec.sourceWidth/spec.sourceHeight,'Source display shape is retained');
+    const entry=bytes.indexOf(Buffer.from('avcC'));assert(entry>0);assert.equal(bytes[entry+5],100,'Reviewed High profile');assert.equal(bytes[entry+7],41,'Reviewed level 4.1');
+    const wrongComposition=Buffer.from(bytes);wrongComposition.writeUInt32BE(wrongComposition.readUInt32BE(actual.composition.payload+12)+1,actual.composition.payload+12);
+    assert.throws(()=>actualWebPresentation(wrongComposition),/presentation|interval|displayed/);
+    const wrongOrigin=Buffer.from(bytes);wrongOrigin.writeInt32BE(actual.mediaOrigin+spec.finalTicks,actual.edit.payload+12);
+    assert.throws(()=>actualWebPresentation(wrongOrigin),/presentation/);
+  }
+  assert.equal(total,6841683);assert(total<=8000000);
 });

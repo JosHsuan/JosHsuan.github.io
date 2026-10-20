@@ -20,21 +20,23 @@ class Target{
  removeEventListener(type,fn){this.listeners.set(type,(this.listeners.get(type)??[]).filter(value=>value!==fn));}
  fire(type,event={}){for(const fn of [...this.listeners.get(type)??[]])fn(event);}
  getAttribute(name){return this.attributes.get(name)??null;}setAttribute(name,value){this.attributes.set(name,String(value));}removeAttribute(name){this.attributes.delete(name);}
- querySelector(){return null;}querySelectorAll(){return[];}closest(selector){return this.marker&&selector.includes(this.marker)?this:null;}
+ querySelector(){return null;}querySelectorAll(){return[];}closest(selector){return selector.split(',').some(part=>part===this.marker||this.markers?.includes(part))?this:this.parentElement?.closest(selector)??null;}
  setPointerCapture(id){this.captured.add(id);}hasPointerCapture(id){return this.captured.has(id);}releasePointerCapture(id){this.captured.delete(id);}
 }
 function fixture({pending=false,firstDraw=true,reduced=false,externalStage=false,posterPending=false}={}){
- const doc=new Target(),win=new Target(),root=new Target(),host=new Target(),surface=new Target(),control=new Target(),timers=new Map(),policy={hidden:false,reduced,saveData:false,paused:false,siteReady:false},waiting=deferred();
+ const doc=new Target(),win=new Target(),root=new Target(),host=new Target(),surface=new Target(),timers=new Map(),policy={hidden:false,reduced,saveData:false,paused:false,siteReady:false},waiting=deferred();
+ const modelUI=Object.fromEntries(models.map(key=>{const row=Object.fromEntries(['target','state','help','reset'].map(field=>{const node=new Target();node.dataset['projectModel'+field[0].toUpperCase()+field.slice(1)]=key;node.markers=[`[data-project-model-${field}]`];if(field==='target')node.markers.push('[data-project-model-control]');if(['help','reset'].includes(field))node.setAttribute('hidden','');return[field,node];}));return[key,row];})),control=modelUI.context.target;
  let timerId=0,schedules=0,disposed=0,starts=0,fixtureSignal,failResource,now=0;const presentations=[],sizes=[],poster=posterPending?Object.assign(new Target(),{complete:false,naturalWidth:0}):null;
- doc.documentElement=new Target();doc.querySelectorAll=()=>[host];root.dataset.projectActiveChapter='overview';root.querySelectorAll=()=>keys.map(key=>({dataset:{projectChapter:key}}));host.querySelector=selector=>selector==='[data-project-model-surface]'?surface:selector==='[data-project-model-poster]'?poster:null;control.marker='[data-project-model-control]';
+ doc.documentElement=new Target();doc.querySelectorAll=()=>[host];root.dataset.projectActiveChapter='overview';root.querySelectorAll=selector=>selector==='[data-project-chapter]'?keys.map(key=>({dataset:{projectChapter:key}})):Object.values(modelUI).flatMap(row=>Object.values(row).filter(node=>node.markers.includes(selector)));host.querySelector=selector=>selector==='[data-project-model-surface]'?surface:selector==='[data-project-model-poster]'?poster:null;
  Object.assign(win,{innerWidth:1440,innerHeight:1000,performance:{now:()=>now},setTimeout:(fn,delay)=>{timers.set(++timerId,{fn,delay});return timerId;},clearTimeout:id=>timers.delete(id)});
  const model={chapters:models,alt:'Verified source geometry'},handle={resize(w,h){sizes.push([w,h]);},present(value){presentations.push({...value});},inspect:()=>({firstDraw:firstDraw?{completed:true}:null,successfulPaint:firstDraw,view:presentations.at(-1)}),hitTest:()=>true,dispose(){disposed++;}};
- const scene=createProjectStudyScenePresenter({root,host,model,externalStage,window:win,document:doc,publisher:new DOMPresenter().forOwner('test-scene'),schedule:()=>schedules++,policy:()=>policy,acquire:options=>{starts++;fixtureSignal=options.signal;failResource=options.onFailure;return pending?waiting.promise:Promise.resolve(handle);}});
+ const publisher=new DOMPresenter().forOwner('test-scene'),scene=createProjectStudyScenePresenter({root,host,model,externalStage,window:win,document:doc,publisher,schedule:()=>schedules++,policy:()=>policy,acquire:options=>{starts++;fixtureSignal=options.signal;failResource=options.onFailure;return pending?waiting.promise:Promise.resolve(handle);}});
  const step=(dt=.016,resumed=false)=>scene.publish({dt,resumed});
  const settle=()=>{let remaining=240;while(step()&&remaining-->0);assert(remaining>0,'Finite work settles on supplied active seconds');};
  const select=key=>{root.dataset.projectActiveChapter=key;step();settle();};
  const pointer=(type,overrides={})=>{const event={type,target:control,pointerId:1,pointerType:'mouse',isPrimary:true,button:0,clientX:600,clientY:400,prevented:0,preventDefault(){this.prevented++;},...overrides};doc.fire(type,event);return event;};
- return{doc,win,root,host,surface,control,policy,timers,waiting,handle,scene,step,settle,select,pointer,presentations,sizes,poster,advanceClock:ms=>{now+=ms;},fail:reason=>failResource(reason),get starts(){return starts;},get disposed(){return disposed;},get schedules(){return schedules;},get signal(){return fixtureSignal;}};
+ const key=(name,target=control,overrides={})=>{const event={target,key:name,prevented:0,preventDefault(){this.prevented++;},...overrides};doc.fire('keydown',event);return event;};
+ return{doc,win,root,host,surface,control,modelUI,publisher,policy,timers,waiting,handle,scene,step,settle,select,pointer,key,presentations,sizes,poster,advanceClock:ms=>{now+=ms;},fail:reason=>failResource(reason),get starts(){return starts;},get disposed(){return disposed;},get schedules(){return schedules;},get signal(){return fixtureSignal;}};
 }
 
 test('a pending static model poster has no timer until selected and preserves its active preparation bound across suspension and source departure',async()=>{
@@ -88,6 +90,58 @@ test('preparation requires an actual first draw before entry and retains the sam
  assert.equal(f.scene.inspect().events.nativeListeners,0);
 });
 
+test('visible inspection guidance follows current painted hold and policy without publishing frame values',async()=>{
+ const f=fixture({pending:true,externalStage:true});f.root.dataset.projectActiveChapter='context';f.scene.publish({dt:0,stage:{kind:'model',chapter:'context',mode:'waiting',settled:false}});
+ assert.equal(f.modelUI.context.state.textContent,'Preparing 3D view.');assert.equal(f.modelUI.context.help.getAttribute('hidden'),'');assert.equal(f.modelUI.context.target.getAttribute('aria-disabled'),'true');
+ await flush();f.waiting.resolve(f.handle);await flush();f.policy.siteReady=true;
+ const hold={kind:'model',chapter:'context',mode:'hold',settled:true,history:[]};f.scene.publish({dt:0,stage:{...hold,mode:'entry',settled:false}});assert.equal(f.scene.inspect().inspection.available,false);
+ f.scene.publish({dt:0,stage:hold});assert.equal(f.scene.inspect().inspection.available,true);assert.equal(f.modelUI.context.state.textContent,'3D view · drag to inspect.');assert.equal(f.modelUI.context.help.getAttribute('hidden'),null);assert.equal(f.modelUI.context.reset.getAttribute('hidden'),'');
+ const before=f.publisher.inspect().writes;for(let i=0;i<20;i++)assert.equal(f.scene.publish({dt:.016,stage:hold}),false);assert.equal(f.publisher.inspect().writes,before,'An unchanged hold never writes state/help every frame');
+ f.root.dataset.projectActiveChapter='system';f.scene.publish({dt:0,stage:hold});assert.equal(f.modelUI.context.state.textContent,'Original source view.');assert.equal(f.modelUI.context.help.getAttribute('hidden'),'');assert.equal(f.modelUI.system.state.textContent,'Preparing 3D view.');assert.equal(f.scene.inspect().inspection.available,false,'A ready resource cannot advertise the wrong displayed source');
+ f.scene.publish({dt:0,stage:{...hold,chapter:'system'}});assert.equal(f.scene.inspect().inspection.available,true);assert.equal(f.scene.inspect().paintedChapter,'system');
+ f.policy.paused=true;f.scene.publish({dt:0,stage:{...hold,chapter:'system'}});assert.equal(f.modelUI.system.state.textContent,'Motion paused · original view.');assert.equal(f.modelUI.system.help.getAttribute('hidden'),'');assert.equal(f.modelUI.system.reset.getAttribute('hidden'),'');
+ f.policy.paused=false;f.scene.suspend('bfcache');assert.equal(f.modelUI.system.state.textContent,'Motion paused · original view.');f.scene.resume();f.scene.publish({dt:0,stage:{...hold,chapter:'system'}});assert.equal(f.modelUI.system.help.getAttribute('hidden'),null);
+ f.fail('context-lost');assert.equal(f.modelUI.system.state.textContent,'Original source view.');assert.equal(f.modelUI.system.help.getAttribute('hidden'),'');f.scene.dispose();assert.equal(f.modelUI.system.target.getAttribute('data-project-model-availability'),null);
+});
+
+test('inspection keys require the current dedicated target and preserve native link, form and editable keys even under legacy nesting',async()=>{
+ const f=fixture();await flush();f.policy.siteReady=true;f.select('context');assert.equal(f.key('ArrowLeft').prevented,1);f.settle();const inspected={...f.scene.inspect().camera.value};assert.equal(inspected.azimuth,.12);
+ for(const marker of ['a','button','input','select','textarea','summary','[contenteditable]:not([contenteditable="false"])','[role="textbox"]','[data-protect]','[data-information-window]']){
+  const native=new Target();native.marker=marker;native.parentElement=f.control;
+  for(const name of ['ArrowLeft','Home','Escape']){assert.equal(f.key(name,native).prevented,0,`${marker} keeps ${name}`);assert.deepEqual(f.scene.inspect().camera.target,inspected);}
+ }
+ for(const target of [f.modelUI.system.target,new Target()])assert.equal(f.key('ArrowLeft',target).prevented,0,'Another or absent model aperture never owns this source');
+ for(const overrides of [{defaultPrevented:true},{isComposing:true},{altKey:true},{ctrlKey:true},{metaKey:true}])assert.equal(f.key('ArrowLeft',f.control,overrides).prevented,0);
+ const child=new Target();child.parentElement=f.control;assert.equal(f.key('ArrowRight',child).prevented,1);f.settle();assert.deepEqual(f.scene.inspect().camera.value,{azimuth:0,elevation:0});f.scene.dispose();
+});
+
+test('visible reset and Home or Escape return through one owner while focus can reach the reset without losing the inspected pose',async()=>{
+ const f=fixture();await flush();f.policy.siteReady=true;f.select('context');const row=f.modelUI.context;
+ const click=target=>{const event={target,prevented:0,preventDefault(){this.prevented++;}};f.doc.fire('click',event);return event;};
+ for(const action of ['reset','Home','Escape']){
+  f.key('ArrowLeft');f.settle();assert.equal(row.state.textContent,'Inspecting 3D view.');assert.equal(row.reset.getAttribute('hidden'),null);
+  if(action==='reset'){
+   f.root.fire('focusout',{target:f.control,relatedTarget:row.reset});assert.equal(f.scene.inspect().camera.value.azimuth,.12,'Focusing its own Return control does not erase or hide the action before click');
+   assert.equal(row.reset.getAttribute('hidden'),null);assert.equal(click(row.reset).prevented,1);
+  }else assert.equal(f.key(action).prevented,1);
+  f.step();assert.deepEqual(f.scene.inspect().camera.value,{azimuth:0,elevation:0});assert.deepEqual(f.presentations.at(-1),{chapter:'context',azimuth:0,elevation:0});assert.equal(row.state.textContent,'3D view · drag to inspect.');assert.equal(row.reset.getAttribute('hidden'),'');
+ }
+ f.key('ArrowLeft');f.settle();const foreign=new Target();foreign.marker='[data-project-model-reset]';foreign.dataset.projectModelReset='context';assert.equal(click(foreign).prevented,0);assert.equal(click(f.modelUI.system.reset).prevented,0);assert.equal(f.scene.inspect().camera.value.azimuth,.12);
+ f.root.fire('focusout',{target:row.reset,relatedTarget:new Target()});f.step();assert.deepEqual(f.scene.inspect().camera.value,{azimuth:0,elevation:0},'Leaving the inspection controls closes inspection');
+ f.key('ArrowLeft');f.settle();f.policy.paused=true;f.step();assert.equal(click(row.reset).prevented,0,'A stale hidden reset never bypasses inspection eligibility');
+ f.scene.dispose();const writes=f.publisher.inspect().writes;click(row.reset);f.key('ArrowLeft');assert.equal(f.publisher.inspect().writes,writes);assert([...f.doc.listeners.values(),...f.root.listeners.values()].every(rows=>rows.length===0));
+});
+
+test('actual-hit drag exposes a finite returning state, yields vertical touch reading and closes on source departure',async()=>{
+ const f=fixture();await flush();f.policy.siteReady=true;f.select('context');const row=f.modelUI.context;
+ f.handle.hitTest=()=>false;f.pointer('pointerdown');assert.equal(f.scene.inspect().gesture,null);f.handle.hitTest=()=>true;
+ f.pointer('pointerdown',{pointerType:'touch'});assert.equal(f.pointer('pointermove',{pointerType:'touch',clientX:602,clientY:407}).prevented,0);assert.equal(f.control.captured.size,0,'Touch movement below eight pixels does not commit');
+ assert.equal(f.pointer('pointermove',{pointerType:'touch',clientX:604,clientY:460}).prevented,0);assert.equal(f.scene.inspect().gesture,null);assert.equal(f.scene.inspect().gestures.at(-1).reason,'native-scroll');
+ f.pointer('pointerdown',{pointerType:'touch'});assert.equal(f.pointer('pointermove',{pointerType:'touch',clientX:660,clientY:404}).prevented,1);f.settle();assert.equal(row.state.textContent,'Inspecting 3D view.');assert.equal(f.control.captured.size,1);
+ f.pointer('pointerup');f.step();assert.equal(row.state.textContent,'Returning to chapter view.');assert.equal(row.reset.getAttribute('hidden'),null);assert.equal(f.control.captured.size,0);f.settle();assert.equal(row.state.textContent,'3D view · drag to inspect.');assert.equal(row.reset.getAttribute('hidden'),'');
+ f.pointer('pointerdown');f.pointer('pointermove',{clientX:660});f.step();f.select('results');assert.equal(f.scene.inspect().gesture,null);assert.deepEqual(f.scene.inspect().camera.value,{azimuth:0,elevation:0});assert.equal(row.help.getAttribute('hidden'),'');assert.equal(row.reset.getAttribute('hidden'),'');f.scene.dispose();
+});
+
 test('external scene actor paints and inspects while the unified stage alone owns surface motion',async()=>{
  const f=fixture({externalStage:true});await flush();f.policy.siteReady=true;f.root.dataset.projectActiveChapter='context';assert.equal(f.scene.prepare('context'),true);
  const stage={key:'model:context',kind:'model',chapter:'context',mode:'hold',settled:true,pose:{x:0,y:0,opacity:1},history:[]};
@@ -125,11 +179,14 @@ test('a hidden pending arrival and true departure close partial work without lat
 });
 
 test('the actual site driver composes source drawing, information and glass with one outstanding frame and retained BFCache resource',async()=>{
- const doc=new Target(),win=new Target(),root=new Target(),host=new Target(),surface=new Target(),observers=[],raf=new Map(),timers=new Map(),queries=new Map();let id=0,now=100,maxPending=0,disposed=0,acquisitions=0;
- root.dataset.projectActiveChapter='context';root.hasAttribute=key=>root.attributes.has(key);root.querySelectorAll=selector=>selector==='[data-project-chapter]'?keys.map(key=>({dataset:{projectChapter:key}})):[];
- host.querySelector=selector=>selector==='[data-project-model-surface]'?surface:null;doc.querySelector=selector=>selector==='[data-project-study]'?root:null;doc.querySelectorAll=selector=>selector==='[data-site-preview-required]'?[host]:[];
+ const doc=new Target(),win=new Target(),root=new Target(),host=new Target(),surface=new Target(),tools=new Target(),counter=new Target(),toggle=new Target(),navigation=new Target(),observers=[],raf=new Map(),timers=new Map(),queries=new Map();let id=0,now=100,maxPending=0,disposed=0,acquisitions=0,chapterReads=0;
+ const chapters=keys.map((key,index)=>({dataset:{projectChapter:key},getBoundingClientRect(){chapterReads++;return{top:index*1000-win.scrollY};}})),links=keys.map(key=>{const link=new Target();link.dataset.projectChapterLink=key;return link;});
+ root.hasAttribute=key=>root.attributes.has(key);root.querySelectorAll=selector=>selector==='[data-project-chapter]'?chapters:[];
+ const set=root.setAttribute.bind(root),remove=root.removeAttribute.bind(root);root.setAttribute=(key,value)=>{set(key,value);if(key==='data-project-active-chapter')root.dataset.projectActiveChapter=String(value);};root.removeAttribute=key=>{remove(key);if(key==='data-project-active-chapter')delete root.dataset.projectActiveChapter;};
+ tools.querySelector=selector=>selector==='[data-project-chapter-count]'?counter:selector==='[data-study-motion-toggle]'?toggle:null;navigation.querySelectorAll=()=>links;
+ host.querySelector=selector=>selector==='[data-project-model-surface]'?surface:null;doc.querySelector=selector=>({'[data-project-study]':root,'[data-project-reading-tools]':tools,'[data-project-chapter-navigation]':navigation}[selector]??null);doc.querySelectorAll=selector=>selector==='[data-site-preview-required]'?[host]:[];
  doc.documentElement=new Target();doc.documentElement.setAttribute('data-site-entry-state','entered');doc.hidden=false;doc.defaultView=win;doc.fonts={ready:Promise.resolve()};
- Object.assign(win,{innerWidth:1440,innerHeight:1000,scrollY:0,navigator:{userAgent:'test',connection:Object.assign(new Target(),{saveData:false})},CSS:{supports:()=>false},
+ Object.assign(win,{innerWidth:1440,innerHeight:1000,scrollY:600,navigator:{userAgent:'test',connection:Object.assign(new Target(),{saveData:false})},CSS:{supports:()=>false},
   matchMedia(query){if(!queries.has(query))queries.set(query,Object.assign(new Target(),{matches:false}));return queries.get(query);},
   requestAnimationFrame(fn){raf.set(++id,fn);maxPending=Math.max(maxPending,raf.size);return id;},cancelAnimationFrame:key=>raf.delete(key),
   setTimeout(fn){timers.set(++id,fn);return id;},clearTimeout:key=>timers.delete(key),
@@ -141,6 +198,7 @@ test('the actual site driver composes source drawing, information and glass with
  const driver=createSiteBackgroundDriver({window:win,document:doc,runtime,canvas:{},backdrop});
  const frame=(seconds=.016)=>{now+=seconds*1000;const callbacks=[...raf.values()];raf.clear();for(const fn of callbacks)fn(now);};
  await flush();for(let i=0;i<150&&raf.size;i++)frame();assert.equal(raf.size,0);assert.equal(acquisitions,1);assert.equal(driver.inspect().projectStudy.scene.motion.mode,'hold');
+ assert.equal(driver.inspect().projectStudy.chapters.chapter,'context');assert.equal(root.dataset.projectActiveChapter,'context');assert.equal(counter.textContent,'02 / 06');assert(chapterReads>=keys.length);
  assert.equal(driver.inspect().projectStudy.liquidGlass.ticks,driver.inspect().frames);assert.equal(maxPending,1);assert.equal(timers.size,0);
  root.setAttribute('data-study-paused','');for(const observer of observers)if(observer.target===root)observer.fn([{attributeName:'data-study-paused'}]);frame();const activeSeconds=driver.inspect().playback.activeSeconds;
  win.fire('wheel',{deltaY:100,deltaMode:0});win.fire('scroll');frame(10);assert.equal(driver.inspect().playback.activeSeconds,activeSeconds);assert.equal(maxPending,1);

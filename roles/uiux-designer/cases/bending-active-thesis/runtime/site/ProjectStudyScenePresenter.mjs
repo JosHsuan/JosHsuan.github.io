@@ -8,7 +8,7 @@ const smooth=value=>{const t=clamp(value,0,1);return t*t*t*(10+t*(-15+6*t));};
 const rest=()=>({azimuth:0,elevation:0});
 const outside=direction=>direction>0?{x:-1.08,y:-.05,opacity:0}:{x:.22,y:.035,opacity:0};
 const held=()=>({x:0,y:0,opacity:1});
-const BLOCKED='a,button,input,select,textarea,summary,[data-protect],[data-information-window]';
+const BLOCKED='a,button,input,select,textarea,summary,[contenteditable]:not([contenteditable="false"]),[role="textbox"],[data-protect],[data-information-window]';
 const fact=(state,status,reason)=>{
  if(!state.request)return;
  state.history.push({id:state.request.id,chapter:state.request.chapter,status,...(reason?{reason}:{})});if(state.history.length>64)state.history.shift();
@@ -53,6 +53,8 @@ export function createProjectStudyScenePresenter({root,host,model,window:win,doc
 }}){
  const events=new EventManager(),scope=events.createScope('project-study-scene'),surface=host.querySelector('[data-project-model-surface]')??host,poster=host.querySelector('[data-project-model-poster]');
  const chapters=[...root.querySelectorAll('[data-project-chapter]')].map(element=>element.dataset.projectChapter),motion=createProjectStudyStageMotion(),gestures=[];
+ const inspectionNodes=new Map(model.chapters.map(key=>[key,{target:null,state:null,help:null,reset:null,published:''}]));
+ for(const [selector,field,data]of [['[data-project-model-target]','target','projectModelTarget'],['[data-project-model-state]','state','projectModelState'],['[data-project-model-help]','help','projectModelHelp'],['[data-project-model-reset]','reset','projectModelReset']])for(const node of root.querySelectorAll(selector)){const row=inspectionNodes.get(node.dataset[data]);if(row)row[field]=node;}
  let disposed=false,suspended=false,arrivalStatic=false,staticReason='',resource=null,lifecycle=null,readiness=null,sharedStage=null,preparedChapter=null,posterFailed=false;
  let size={width:win.innerWidth,height:win.innerHeight},chapter=root.dataset.projectActiveChapter??'overview',paintedChapter=null,lastPaint='';
  let target=rest(),value=rest(),velocity=rest(),settled=true,press=null,gestureSequence=0;
@@ -69,7 +71,7 @@ export function createProjectStudyScenePresenter({root,host,model,window:win,doc
  const listen=(node,type,fn,options)=>events.listen(scope,node,type,fn,options);
  const posterReady=()=>{if(disposed||posterFailureReason)return;if(poster?.complete&&!poster.naturalWidth){failPoster('model-poster-unavailable');return;}if(poster?.complete&&poster.naturalWidth)stopPosterDeadline();publisher.attribute(host,'data-project-model-poster-ready',poster?.complete&&poster.naturalWidth?'':null);schedule();};
  if(poster){listen(poster,'load',posterReady);listen(poster,'error',posterReady);posterReady();}
- function announce(){if(disposed)return;const state=lifecycle?.inspect();publisher.attribute(host,'data-project-model-phase',state?.phase??'poster');publisher.attribute(host,'data-project-model-reason',posterFailureReason||staticReason||state?.reason||'');publisher.attribute(host,'data-project-model-rendering',!arrivalStatic&&state?.phase==='ready'?'webgl-model':'poster');}
+ function announce(){if(disposed)return;const state=lifecycle?.inspect();publisher.attribute(host,'data-project-model-phase',state?.phase??'poster');publisher.attribute(host,'data-project-model-reason',posterFailureReason||staticReason||state?.reason||'');publisher.attribute(host,'data-project-model-rendering',!arrivalStatic&&state?.phase==='ready'?'webgl-model':'poster');publishInspection();}
  const staticReady=()=>readiness?.report({mode:'static',reason:staticReason});
  const settleStatic=reason=>{if(disposed||arrivalStatic)return;arrivalStatic=true;staticReason=reason;lifecycle?.stop(reason);staticReady();announce();schedule();};
  readiness=registerPagePreviewReadiness(doc,host,{onFallback:settleStatic});if(arrivalStatic)staticReady();
@@ -103,7 +105,20 @@ export function createProjectStudyScenePresenter({root,host,model,window:win,doc
   syncPosterDeadline();
  }
  const activeMotion=()=>externalStage?sharedStage:motion;
- const canInspect=()=>{const p=policy(),stage=activeMotion();return!disposed&&!arrivalStatic&&!suspended&&!p.hidden&&!p.reduced&&!p.saveData&&!p.paused&&p.siteReady&&stage?.mode==='hold'&&stage.settled&&model.chapters.includes(chapter)&&stage.chapter===chapter&&(!externalStage||stage.kind==='model')&&lifecycle.inspect().phase==='ready'&&resource?.inspect().successfulPaint;};
+ function canInspect(){const p=policy(),stage=externalStage?sharedStage:motion;return!!(!disposed&&!arrivalStatic&&!suspended&&!p.hidden&&!p.reduced&&!p.saveData&&!p.paused&&p.siteReady&&stage?.mode==='hold'&&stage.settled&&model.chapters.includes(chapter)&&stage.chapter===chapter&&(!externalStage||stage.kind==='model')&&lifecycle?.inspect().phase==='ready'&&paintedChapter===chapter&&resource?.inspect().successfulPaint);}
+ function publishInspection(){
+  if(disposed)return;const p=policy(),phase=lifecycle?.inspect().phase,available=canInspect(),offset=Object.keys(value).some(key=>value[key]!==0||target[key]!==0||velocity[key]!==0),returning=offset&&!press&&Object.values(target).every(number=>number===0);
+  for(const [key,row]of inspectionNodes){
+   const current=key===chapter,usable=current&&available;
+   const state=!current||arrivalStatic||p.reduced||p.saveData?'static':p.paused||p.hidden||suspended?'paused':!p.siteReady||phase==='requested'||!usable?'loading':returning?'returning':offset||press?.locked?'inspecting':'ready';
+   const reset=usable&&offset,signature=`${state}:${usable}:${reset}`;if(signature===row.published)continue;row.published=signature;
+   const text={loading:'Preparing 3D view.',ready:'3D view · drag to inspect.',inspecting:'Inspecting 3D view.',returning:'Returning to chapter view.',paused:'Motion paused · original view.',static:'Original source view.'}[state];
+   publisher.text(row.state,text);publisher.attribute(row.state,'data-project-model-availability',state);publisher.attribute(row.target,'data-project-model-availability',state);publisher.attribute(row.target,'aria-disabled',usable?null:'true');publisher.attribute(row.help,'hidden',usable?null:'');publisher.attribute(row.reset,'hidden',reset?null:'');
+  }
+ }
+ const returnToChapter=reason=>{closeGesture(reason,true);publishInspection();schedule();};
+ const ownReset=node=>{const button=node?.closest?.('[data-project-model-reset]');return button&&inspectionNodes.get(chapter)?.reset===button?button:null;};
+ const ownTarget=node=>{const target=node?.closest?.('[data-project-model-target]');return target&&inspectionNodes.get(chapter)?.target===target?target:null;};
  const surfaceFor=event=>event.target.closest?.('[data-project-model-control]')??host;
  listen(doc,'pointerdown',event=>{
   if(!canInspect()||event.button!==0||event.isPrimary===false||press||event.target.closest?.(BLOCKED)||!resource.hitTest(event.clientX,event.clientY))return;
@@ -117,14 +132,15 @@ export function createProjectStudyScenePresenter({root,host,model,window:win,doc
  },{passive:false});
  for(const type of ['pointerup','pointercancel','lostpointercapture'])listen(doc,type,event=>{if(press?.pointerId===event.pointerId){closeGesture(type==='pointerup'?'released':type,type!=='pointerup');schedule();}});
  listen(doc,'keydown',event=>{
-  if(!canInspect()||!event.target.closest?.('[data-project-model-control]'))return;
+  if(!canInspect()||event.defaultPrevented||event.isComposing||event.altKey||event.ctrlKey||event.metaKey||event.target.closest?.(BLOCKED)||!ownTarget(event.target))return;
   const change={ArrowLeft:{azimuth:.12},ArrowRight:{azimuth:-.12},ArrowUp:{elevation:-.09},ArrowDown:{elevation:.09}}[event.key];
   if(change){event.preventDefault();for(const [key,delta]of Object.entries(change))target[key]=clamp(target[key]+delta,...(key==='azimuth'?[-.9,.9]:[-.4,.5]));settled=false;schedule();}
-  else if(['Escape','Home'].includes(event.key)){event.preventDefault();closeGesture('keyboard-return',true);schedule();}
+  else if(['Escape','Home'].includes(event.key)){event.preventDefault();returnToChapter('keyboard-return');}
  });
+ listen(doc,'click',event=>{if(canInspect()&&ownReset(event.target)){event.preventDefault();returnToChapter('control-return');}});
  listen(win,'blur',()=>{closeGesture('blur',true);schedule();});
  listen(doc.documentElement,'pointerleave',()=>{if(press){closeGesture('pointer-left',true);schedule();}});
- listen(root,'focusout',event=>{if(event.target.closest?.('[data-project-model-control]')){closeGesture('focus-left',true);schedule();}});
+ listen(root,'focusout',event=>{if((ownTarget(event.target)||ownReset(event.target))&&!ownTarget(event.relatedTarget)&&!ownReset(event.relatedTarget))returnToChapter('focus-left');});
  lifecycle.resize(size.width,size.height);updatePolicy();announce();
  const sharedFacts=()=>sharedStage?{...sharedStage,history:[...(sharedStage.history??[])]}:null;
  const motionFacts=()=>{
@@ -161,11 +177,11 @@ export function createProjectStudyScenePresenter({root,host,model,window:win,doc
    }
    if(!externalStage){publisher.attribute(host,'data-project-model-active',model.chapters.includes(motion.chapter)&&motion.pose.opacity>0?'':null);publisher.attribute(host,'data-project-model-mode',motion.mode);publisher.attribute(host,'data-project-model-chapter',motion.chapter);
     publisher.style(surface,'transform',`translate3d(${motion.pose.x*size.width}px,${motion.pose.y*size.height}px,0)`);publisher.style(surface,'opacity',motion.pose.opacity);}
-   return!settled||!externalStage&&!!motion.transition;
+   publishInspection();return!settled||!externalStage&&!!motion.transition;
   },
   suspend(reason){if(disposed)return;suspended=true;closeGesture(reason,true);cancelProjectStudyStageMotion(motion,reason);updatePolicy();},
   resume(){if(disposed)return;suspended=false;updatePolicy();},
-  inspect:()=>({...lifecycle.inspect(),externalStage,arrivalStatic,staticReason,posterFailed,posterFailureReason,posterPreparation:{requested:posterRequested,pending:posterTimer!==null,remainingMs:posterTimer===null?posterRemaining:Math.max(0,posterRemaining-(posterClock()-posterStarted)),reason:posterFailureReason},chapter,paintedChapter,preparedChapter,motion:motionFacts(),sharedStage:externalStage?sharedFacts():null,camera:{target:{...target},value:{...value},settled},gestures:[...gestures],gesture:press?{id:press.id,locked:press.locked}:null,events:events.inspect(),disposed}),
-  dispose(){if(disposed)return;closeGesture('disposed',true);cancelProjectStudyStageMotion(motion,'disposed');stopPosterDeadline();disposed=true;lifecycle.dispose();readiness.release();scope.dispose();events.dispose();for(const name of ['phase','reason','rendering','poster-ready',...(!externalStage?['active','mode','chapter']:[])])publisher.attribute(host,'data-project-model-'+name,null);if(!externalStage){publisher.style(surface,'transform','');publisher.style(surface,'opacity','');}},
+  inspect:()=>({...lifecycle.inspect(),externalStage,arrivalStatic,staticReason,posterFailed,posterFailureReason,posterPreparation:{requested:posterRequested,pending:posterTimer!==null,remainingMs:posterTimer===null?posterRemaining:Math.max(0,posterRemaining-(posterClock()-posterStarted)),reason:posterFailureReason},chapter,paintedChapter,preparedChapter,inspection:{available:canInspect(),states:Object.fromEntries([...inspectionNodes].map(([key,row])=>[key,row.published.split(':')[0]]))},motion:motionFacts(),sharedStage:externalStage?sharedFacts():null,camera:{target:{...target},value:{...value},settled},gestures:[...gestures],gesture:press?{id:press.id,locked:press.locked}:null,events:events.inspect(),disposed}),
+  dispose(){if(disposed)return;closeGesture('disposed',true);cancelProjectStudyStageMotion(motion,'disposed');stopPosterDeadline();disposed=true;lifecycle.dispose();readiness.release();scope.dispose();events.dispose();for(const row of inspectionNodes.values()){publisher.text(row.state,'Original source view.');publisher.attribute(row.state,'data-project-model-availability',null);publisher.attribute(row.target,'data-project-model-availability',null);publisher.attribute(row.target,'aria-disabled',null);publisher.attribute(row.help,'hidden','');publisher.attribute(row.reset,'hidden','');}for(const name of ['phase','reason','rendering','poster-ready',...(!externalStage?['active','mode','chapter']:[])])publisher.attribute(host,'data-project-model-'+name,null);if(!externalStage){publisher.style(surface,'transform','');publisher.style(surface,'opacity','');}},
  };
 }

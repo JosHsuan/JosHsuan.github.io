@@ -275,9 +275,38 @@ test('the original Dot source supports native drag and keyboard inspection, retu
  test.setTimeout(scenarioTimeout(120000));expect(dot.model.primitive).toBe('points');
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
  await page.goto(route(dot));await entered(page);const control=await modelChapter(page,dot);
+ const chapter=dot.model.chapters[0],state=page.locator(`[data-project-model-state="${chapter}"]`),help=page.locator(`[data-project-model-help="${chapter}"]`),reset=page.locator(`[data-project-model-reset="${chapter}"]`),chapterOrder=['overview',...dot.sections.map(section=>section.id),'credits'];
+ const semanticChapter=async(wanted,paused)=>{
+  await expect.poll(()=>page.evaluate(()=>{
+   const owner=window.__globalBackground.inspect().driver.projectStudy.chapters;
+   return{chapter:owner.chapter,paused:owner.paused,total:owner.chapters,disposed:owner.disposed,root:document.querySelector('[data-project-study]').dataset.projectActiveChapter,current:[...document.querySelectorAll('[data-project-chapter-link][aria-current="location"]')].map(node=>node.dataset.projectChapterLink),counter:document.querySelector('[data-project-chapter-count]').textContent};
+  }),{timeout:WAIT}).toEqual({chapter:wanted,paused,total:chapterOrder.length,disposed:false,root:wanted,current:[wanted],counter:`${String(chapterOrder.indexOf(wanted)+1).padStart(2,'0')} / ${String(chapterOrder.length).padStart(2,'0')}`});
+ };
+ await semanticChapter(chapter,false);await expect(state).toHaveAttribute('data-project-model-availability','ready');await expect(help).toBeVisible();await expect(reset).toBeHidden();
  await control.evaluate(node=>node.focus({preventScroll:true}));await control.press('ArrowLeft');
  await expect.poll(async()=>(await facts(page)).camera.value.azimuth,{timeout:WAIT}).toBeGreaterThan(.01);
  await control.press('Home');await expect.poll(async()=>(await facts(page)).camera).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});
+ await control.press('ArrowLeft');await expect.poll(async()=>(await facts(page)).camera.value.azimuth,{timeout:WAIT}).toBeGreaterThan(.01);
+ await expect(state).toHaveAttribute('data-project-model-availability','inspecting');await expect(reset).toBeVisible();
+ await page.keyboard.press('Tab');await expect(reset).toBeFocused();
+ expect((await facts(page)).camera.target.azimuth).toBeCloseTo(.12,8);expect((await facts(page)).camera.value.azimuth).toBeGreaterThan(.01);
+ await reset.press('Enter');await expect.poll(async()=>(await facts(page)).camera,{timeout:WAIT}).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});
+ await expect.poll(async()=>(await facts(page)).resource.view).toEqual({chapter,azimuth:0,elevation:0});await expect(state).toHaveAttribute('data-project-model-availability','ready');await expect(reset).toBeHidden();
+ await modelChapter(page,dot);await control.evaluate(node=>node.focus({preventScroll:true}));await control.press('ArrowLeft');
+ await expect.poll(async()=>(await facts(page)).camera.value.azimuth,{timeout:WAIT}).toBeGreaterThan(.01);await control.press('Escape');
+ await expect.poll(async()=>(await facts(page)).camera).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});
+ const source=page.locator(`[data-project-source-caption="${chapter}"] a`).first(),sourceKeys=await page.evaluateHandle(()=>{
+  const events=[],read=event=>{if(event.target.closest('[data-project-source-caption]'))events.push({key:event.key,trusted:event.isTrusted,prevented:event.defaultPrevented});};
+  addEventListener('keydown',read);return{events,dispose:()=>removeEventListener('keydown',read)};
+ });
+ try{
+  for(const key of ['ArrowLeft','Home']){
+   await modelChapter(page,dot);await source.evaluate(node=>node.focus({preventScroll:true}));await source.press(key);
+   expect(await sourceKeys.evaluate(probe=>probe.events.at(-1))).toEqual({key,trusted:true,prevented:false});
+   expect((await facts(page)).camera.target).toEqual({azimuth:0,elevation:0});
+  }
+ }finally{try{await sourceKeys.evaluate(probe=>probe.dispose());}finally{await sourceKeys.dispose();}}
+ await modelChapter(page,dot);await semanticChapter(chapter,false);
  const point=await pressSource(page,control),dx=point.x<page.viewportSize().width*.6?60:-60;
  await page.mouse.move(point.x+dx,point.y+12,{steps:6});
  await expect.poll(async()=>Math.abs((await facts(page)).camera.value.azimuth),{timeout:WAIT}).toBeGreaterThan(.01);
@@ -309,13 +338,19 @@ test('the original Dot source supports native drag and keyboard inspection, retu
  await expect.poll(async()=>(await facts(page)).camera.value.elevation,{timeout:WAIT}).toBeGreaterThan(.01);
  const toggle=page.locator('[data-study-motion-toggle]');await toggle.click();await expect(toggle).toHaveAttribute('aria-pressed','true');
  await expect.poll(async()=>(await facts(page)).camera).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});
+ await semanticChapter(chapter,true);await expect(state).toHaveAttribute('data-project-model-availability','paused');await expect(help).toBeHidden();await expect(reset).toBeHidden();
+ // Native reading/selection remains live while source motion is paused. The
+ // one semantic owner must update rail and counter on forward and reverse.
+ await page.locator('[data-project-chapter-link="results"]').click();await semanticChapter('results',true);
+ await page.locator(`[data-project-chapter-link="${chapter}"]`).click();await settled(page,chapter,dot.model);await semanticChapter(chapter,true);await expect(state).toHaveAttribute('data-project-model-availability','paused');
  await frames(page,2);const frozen=await page.evaluate(()=>{const driver=window.__globalBackground.inspect().driver;return{time:driver.playback.activeSeconds,draws:driver.projectStudy.scene.resource.draws};});
  await control.evaluate(node=>node.focus({preventScroll:true}));await control.press('ArrowLeft');await frames(page,8);
  expect(await page.evaluate(()=>{const driver=window.__globalBackground.inspect().driver;return{time:driver.playback.activeSeconds,draws:driver.projectStudy.scene.resource.draws};})).toEqual(frozen);
- await toggle.click();await expect(toggle).toHaveAttribute('aria-pressed','false');await settled(page,dot.model.chapters[0],dot.model);
+ await toggle.click();await expect(toggle).toHaveAttribute('aria-pressed','false');await settled(page,dot.model.chapters[0],dot.model);await semanticChapter(chapter,false);await expect(state).toHaveAttribute('data-project-model-availability','ready');await expect(help).toBeVisible();
  const y=await page.evaluate(()=>scrollY);await page.mouse.wheel(0,80);await expect.poll(()=>page.evaluate(()=>scrollY)).toBeGreaterThan(y);
  await modelChapter(page,dot);await pressSource(page,control);await page.emulateMedia({reducedMotion:'reduce'});await page.mouse.up();
  await expect(stage(page).locator('canvas')).toHaveCount(0);const reduced=await facts(page);closed(reduced);closedGestures(reduced);expect(reduced.resource).toBeNull();expect(reduced.disposals).toBe(reduced.acquisitions);expect(reduced.staticReason).toBe('reduced-motion');
+ await expect(state).toHaveAttribute('data-project-model-availability','static');await expect(help).toBeHidden();await expect(reset).toBeHidden();
  await page.emulateMedia({reducedMotion:'no-preference'});await frames(page,8);await expect(stage(page).locator('canvas')).toHaveCount(0);expect((await facts(page)).acquisitions).toBe(reduced.acquisitions);expect(errors).toEqual([]);
 });
 

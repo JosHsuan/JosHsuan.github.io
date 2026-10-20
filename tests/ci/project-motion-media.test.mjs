@@ -16,7 +16,6 @@ const motion=(fixture,projectId='mode-s-of-making',id='film-machine-simulation')
 const provenance=(fixture,projectId='mode-s-of-making',id='film-machine-simulation')=>fixture.assets.motionAssets.find(item=>item.projectId===projectId&&item.id===id);
 const reject=change=>{const current=fixture();change(current);assert.throws(()=>validate(current));};
 const originalPairs=[
-  ['mode-s-of-making','film-machine-simulation'],
   ['entrance-installation-art','installation-lighting-motion'],
   ['dot-based-3d-printing','printing-process-motion'],
   ['hc3dp-caustics','fabrication-path-motion'],
@@ -25,10 +24,10 @@ const originalPairs=[
 
 test('seven source motions and their posters have complete release provenance',()=>{
   const current=fixture(),images=validate(current);
-  assert.equal(images.length,50);
-  assert.equal(new Set(images.map(image=>image.src)).size,45);
+  assert.equal(images.length,52);
+  assert.equal(new Set(images.map(image=>image.src)).size,48);
   assert.equal(current.assets.motionAssets.length,7);
-  assert.equal(current.manifest.assets.length,128);
+  assert.equal(current.manifest.assets.length,138);
   assert.equal(project(current,'project-caschlatsch').motionMedia,undefined);
   assert.doesNotThrow(()=>assertProjectAssetRecord(current.assets,images,current.manifest));
 });
@@ -110,7 +109,7 @@ test('provenance rejects orphaned, duplicated, mismatched and unpinned motion as
   reject(current=>current.manifest.assets.push(structuredClone(current.manifest.assets[0])));
 });
 
-test('the five original sources and exact PPTX members cannot be silently substituted',()=>{
+test('all original sources and exact PPTX members cannot be silently substituted',()=>{
   reject(current=>provenance(current).source.sha256='0'.repeat(64));
   reject(current=>provenance(current,'dot-based-3d-printing','printing-process-motion').source.container.zipMember='ppt/media/image49.gif');
   reject(current=>provenance(current,'hc3dp-caustics','fabrication-path-motion').source.container.slide=18);
@@ -140,14 +139,14 @@ test('native frame, end and final-delay proofs cannot be removed or weakened',()
 
 test('native remux proofs preserve encoded packets, range, identity matrix and silent private-data boundary',()=>{
   for(const key of ['encodedVideoPacketsByteExact','avcCExtradataByteExact','allPacketPTSExact','allPacketDTSExact','allPacketDurationsExact','identityTrackMatrixExact','sourceColorRangePreserved']){
-    reject(current=>provenance(current).processing[key]=false);
+    reject(current=>provenance(current,'entrance-installation-art','installation-lighting-motion').processing[key]=false);
   }
-  reject(current=>provenance(current).processing.trackMatrix[0]=0);
-  reject(current=>provenance(current).processing.colorRange='pc/full');
-  reject(current=>provenance(current).processing.pixelFormat='yuvj420p');
+  reject(current=>provenance(current,'entrance-installation-art','installation-lighting-motion').processing.trackMatrix[0]=0);
   reject(current=>provenance(current,'entrance-installation-art','installation-lighting-motion').processing.colorRange='tv/limited');
   reject(current=>provenance(current,'entrance-installation-art','installation-lighting-motion').processing.pixelFormat='yuv420p');
-  reject(current=>provenance(current).processing.audio='Source audio retained.');
+  reject(current=>provenance(current,'entrance-installation-art','installation-lighting-motion').processing.colorRange='tv/limited');
+  reject(current=>provenance(current,'entrance-installation-art','installation-lighting-motion').processing.pixelFormat='yuv420p');
+  reject(current=>provenance(current,'entrance-installation-art','installation-lighting-motion').processing.audio='Source audio retained.');
   reject(current=>provenance(current).source.privatePath='D:\\private\\source.mp4');
   reject(current=>provenance(current).source.privatePath='d:\\private\\source.mp4');
 });
@@ -175,7 +174,7 @@ test('a reviewed interval keeps every selected source frame and only a constant 
   assert.equal(spec.sourceInterval.endFrameExclusive-spec.sourceInterval.startFrame,spec.frameCount);
 });
 
-test('interval permission cannot weaken any of the five complete-native sequence contracts',()=>{
+test('web excerpt permission cannot weaken the four unaffected complete-native sequence contracts',()=>{
   for(const [projectId,id] of originalPairs){
     const spec=PROJECT_MOTION_SPECS[projectId].find(item=>item.id===id);
     const current=fixture(),media=provenance(current,projectId,spec.id);
@@ -184,9 +183,9 @@ test('interval permission cannot weaken any of the five complete-native sequence
     media.processing.trim=structuredClone(intervalFixture().spec.sourceInterval);
     assert.throws(()=>validate(current));
   }
-  reject(current=>provenance(current).processing.timestampRebase={offsetTicks:0,timeBase:'1/50000'});
-  reject(current=>provenance(current).processing.allFramePTSExact=false);
-  reject(current=>provenance(current).processing.allPacketPTSExact=false);
+  reject(current=>provenance(current,'entrance-installation-art','installation-lighting-motion').processing.timestampRebase={offsetTicks:0,timeBase:'1/50000'});
+  reject(current=>provenance(current,'entrance-installation-art','installation-lighting-motion').processing.allFramePTSExact=false);
+  reject(current=>provenance(current,'entrance-installation-art','installation-lighting-motion').processing.allPacketPTSExact=false);
 });
 
 test('interval provenance rejects missing, changed, enlarged or out-of-bounds source selection',()=>{
@@ -296,16 +295,17 @@ test('the physical RELAX excerpt cannot substitute animation, a different interv
   reject(current=>provenance(current,'mode-s-of-making',id).processing.absolutePTSOriginUnchanged=true);
 });
 
-test('the complete physical prototype transcode cannot drop source frames, retime, replace range or claim source-pixel identity',()=>{
+test('the reviewed physical prototype excerpt cannot change frames, origin, range, compression or identity claims',()=>{
   const id='prototype-cutting-operation';
-  reject(current=>motion(current,'mode-s-of-making',id).frameCount=300);
+  reject(current=>motion(current,'mode-s-of-making',id).frameCount=522);
   reject(current=>provenance(current,'mode-s-of-making',id).processing.trim={startFrame:0,endFrameExclusive:300});
-  reject(current=>provenance(current,'mode-s-of-making',id).processing.allFramePTSExact=false);
-  reject(current=>provenance(current,'mode-s-of-making',id).processing.allPacketDurationsExact=false);
+  reject(current=>provenance(current,'mode-s-of-making',id).processing.allFramePTSExact=true);
+  reject(current=>provenance(current,'mode-s-of-making',id).processing.allRelativeFramePTSExact=false);
+  reject(current=>provenance(current,'mode-s-of-making',id).processing.allPacketDurationsExact=true);
   reject(current=>provenance(current,'mode-s-of-making',id).processing.colorRange='tv/limited');
   reject(current=>provenance(current,'mode-s-of-making',id).processing.decodedFramesByteExact=true);
-  reject(current=>provenance(current,'mode-s-of-making',id).processing.quality.comparedFrames=521);
-  reject(current=>provenance(current,'mode-s-of-making',id).processing.transcodeRecipe.crf=23);
+  reject(current=>provenance(current,'mode-s-of-making',id).processing.quality.comparedFrames=522);
+  reject(current=>provenance(current,'mode-s-of-making',id).processing.transcodeRecipe.crf=16);
 });
 
 test('both physical selections and provenance retain the reviewed recording classification',()=>{
@@ -315,4 +315,75 @@ test('both physical selections and provenance retain the reviewed recording clas
     reject(current=>provenance(current,'mode-s-of-making',id).kind='simulation');
     reject(current=>delete provenance(current,'mode-s-of-making',id).kind);
   }
+});
+
+
+test('Mode/s has exactly three reviewed compact web outputs while all original poster pins remain exact',()=>{
+  const current=fixture();validate(current);
+  const specs=PROJECT_MOTION_SPECS['mode-s-of-making'];let bytes=0;
+  for(const spec of specs){
+    assert.equal(spec.webDelivery,true);assert(Object.isFrozen(spec.transcodeRecipe));assert(Object.isFrozen(spec.qualityReceipt));
+    const source=provenance(current,'mode-s-of-making',spec.id);bytes+=source.bytes;
+    assert(source.bytes<=4000000);assert(source.durationSeconds<=10);
+    assert.equal(source.bytes,spec.outputBytes);assert.equal(source.sha256,spec.outputSHA256);
+    assert.equal(source.processing.transcodeRecipe.bFrames,3);
+    assert.equal(source.processing.encodedVideoPacketsByteExact,false);assert.equal(source.processing.avcCExtradataByteExact,false);assert.equal(source.processing.decodedFramesByteExact,false);
+    const poster=current.manifest.assets.find(pin=>'/'+pin.path===spec.posterSrc);
+    assert.equal(poster.bytes,spec.posterBytes);assert.equal(poster.sha256,spec.posterSHA256);
+  }
+  assert.equal(bytes,6841683);assert(bytes<=8000000);
+});
+
+test('reviewed compact web delivery rejects wrong budget, source interval, timestamp or encoding facts',()=>{
+  for(const id of ['film-machine-simulation','film-physical-cutting','prototype-cutting-operation']){
+    for(const key of ['file','bytes','sha256'])reject(current=>{const source=provenance(current,'mode-s-of-making',id).source;source[key]=key==='bytes'?source[key]+1:'unreviewed';});
+    reject(current=>motion(current,'mode-s-of-making',id).durationSeconds=10.01);
+    reject(current=>{const media=provenance(current,'mode-s-of-making',id);media.bytes=4000001;current.manifest.assets.find(pin=>pin.path===media.path).bytes=4000001;});
+    reject(current=>{const media=provenance(current,'mode-s-of-making',id);media.sha256='0'.repeat(64);current.manifest.assets.find(pin=>pin.path===media.path).sha256=media.sha256;});
+    for(const [key,value] of [['crop',[0,0,1280,720]],['retime',2],['upscaled',true],['geometryDeformation',true]])reject(current=>provenance(current,'mode-s-of-making',id).processing[key]=value);
+    for(const key of ['allFramePTSExact','absolutePTSOriginUnchanged','allPacketPTSExact','allPacketDTSExact','allPacketDurationsExact','allRelativePacketPTSExact','allRelativePacketDTSExact','encodedVideoPacketsByteExact','avcCExtradataByteExact','decodedFramesByteExact'])reject(current=>provenance(current,'mode-s-of-making',id).processing[key]=true);
+    for(const key of ['allRelativeFramePTSExact','allFrameDurationsExact','finalFrameDurationExact','identityTrackMatrixExact','sourceColorRangePreserved'])reject(current=>provenance(current,'mode-s-of-making',id).processing[key]=false);
+    reject(current=>provenance(current,'mode-s-of-making',id).processing.timestampRebase.offsetTicks++);
+    reject(current=>provenance(current,'mode-s-of-making',id).processing.transcodeRecipe.bFrames=0);
+    reject(current=>provenance(current,'mode-s-of-making',id).processing.transcodeRecipe.crf++);
+    reject(current=>provenance(current,'mode-s-of-making',id).processing.transcodeRecipe.keyframeInterval=120);
+    reject(current=>provenance(current,'mode-s-of-making',id).processing.quality.mean=1);
+    reject(current=>provenance(current,'mode-s-of-making',id).processing.quality.comparedFrames--);
+    reject(current=>provenance(current,'mode-s-of-making',id).processing.quality.allFramesCompared=false);
+    reject(current=>provenance(current,'mode-s-of-making',id).processing.quality.statsSHA256='0'.repeat(64));
+    reject(current=>provenance(current,'mode-s-of-making',id).processing.quality.reference='Claimed original pixel identity.');
+    reject(current=>provenance(current,'mode-s-of-making',id).processing.trackMatrix[0]=0);
+    reject(current=>provenance(current,'mode-s-of-making',id).processing.sourceColorSpace='bt2020nc');
+    reject(current=>{const spec=PROJECT_MOTION_SPECS['mode-s-of-making'].find(s=>s.id===id);current.manifest.assets.find(pin=>'/'+pin.path===spec.posterSrc).sha256='0'.repeat(64);});
+  }
+  for(const id of ['film-physical-cutting','prototype-cutting-operation']){
+    reject(current=>provenance(current,'mode-s-of-making',id).processing.trim.startFrame--);
+    reject(current=>provenance(current,'mode-s-of-making',id).processing.trim.endFrameExclusive++);
+    reject(current=>provenance(current,'mode-s-of-making',id).processing.trim.sourceFrameCount--);
+    reject(current=>provenance(current,'mode-s-of-making',id).processing.resize={from:[1920,1080],to:[1280,720],method:'Lanczos',uniformScale:2/3});
+    reject(current=>provenance(current,'mode-s-of-making',id).processing.fullNativeSequence=true);
+  }
+});
+
+test('only the reviewed simulation may downsample uniformly and its complete source/poster remains documented',()=>{
+  const current=fixture(),source=provenance(current);validate(current);
+  assert.deepEqual(source.processing.resize,{from:[4096,2304],to:[1920,1080],method:'Lanczos',uniformScale:.46875});
+  assert.equal(source.processing.trim,null);assert.equal(source.processing.fullNativeSequence,true);
+  assert.equal(source.source.file,'cube.mp4');assert.deepEqual([motion(current).poster.width,motion(current).poster.height],[4096,2304]);
+  for(const change of [
+    x=>x.processing.resize=null,x=>x.processing.resize.to[0]=1922,x=>x.processing.resize.from[0]=3840,
+    x=>x.processing.resize.method='Bilinear',x=>x.processing.resize.uniformScale=.5,
+    x=>x.processing.transcodeRecipe.resize=[1280,720],x=>x.processing.fullNativeSequence=false,
+    x=>x.processing.sourceDecodePolicy='Default native input decoding.',
+  ])reject(value=>change(provenance(value)));
+});
+
+test('Caschlatsch active evidence is exactly the ten original portfolio extracts with complete XR and voxel plates',()=>{
+  const current=fixture();validate(current);const p=project(current,'project-caschlatsch');
+  const images=[p.hero,...p.sections.flatMap(section=>section.media)];
+  assert.equal(images.length,10);assert.equal(new Set(images.map(image=>image.src)).size,10);
+  assert(images.every(image=>image.src.includes('/portfolio-')));
+  assert(images.every(image=>!image.src.endsWith('/workflow.webp')&&!image.caption.includes('Design, fabrication and assembly')));
+  assert.deepEqual(p.sections.map(section=>[section.id,section.media.length]),[['context',1],['system',2],['xr-guidance',3],['making',2],['results',1]]);
+  for(const name of ['portfolio-voxel-framework','portfolio-module-infill','portfolio-xr-assembly-sequence','portfolio-xr-data-exchange','portfolio-xr-interface'])assert(images.some(image=>image.src.endsWith('/'+name+'.webp')));
 });

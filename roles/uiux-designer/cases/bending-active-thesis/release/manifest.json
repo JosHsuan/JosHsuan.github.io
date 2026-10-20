@@ -693,9 +693,9 @@
     },
     {
       "path": "assets/projects/mode-s-of-making/film-machine-simulation.mp4",
-      "bytes": 3295317,
-      "sha256": "7a0fc1e886eb5ba63ad766a9864980dc19c5c29b0b6e131077fffd0d6acf4c46",
-      "source": "Owner-selected native studio film material; complete-frame lossless still or unchanged H264 stream derivative."
+      "bytes": 498303,
+      "sha256": "522911028b4c3956b2376b1dad470534813f2d12c4ae20c7b73a4cc3ad3877eb",
+      "source": "Owner-selected studio simulation; reviewed proportional H264 web transcode; original source preserved."
     },
     {
       "path": "assets/projects/mode-s-of-making/film-physical-cutting-poster.webp",
@@ -704,8 +704,8 @@
     },
     {
       "path": "assets/projects/mode-s-of-making/film-physical-cutting.mp4",
-      "bytes": 75965366,
-      "sha256": "cead2cc6381b29c094f061f9290a1b33854c544f68346fce94a15c5e193c94dc"
+      "bytes": 3167168,
+      "sha256": "6e520ca2063a839d7ec4fcd27011301971af0f587f737cb28b5814ee964b4ac1"
     },
     {
       "path": "assets/projects/mode-s-of-making/prototype-cutting-operation-poster.webp",
@@ -714,8 +714,68 @@
     },
     {
       "path": "assets/projects/mode-s-of-making/prototype-cutting-operation.mp4",
-      "bytes": 43864914,
-      "sha256": "771aadc5fd14107b861c78e632cbaf4a5ac43253b3a343a6de8ed0feba3a716a"
+      "bytes": 3176212,
+      "sha256": "dd5ad72944afc12d00fa6ab3456cf7369e003455ee242d0d7f4c0f9813e0209d"
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/portfolio-timber-model.webp",
+      "bytes": 500284,
+      "sha256": "f5d80276bccf8b0c823f835ac2ada293866855d2caa8ae62dcbf421b8c026698",
+      "source": "Owner-authorized original portfolio Caschlatsch derivative; original source preserved."
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/portfolio-tower-on-site.webp",
+      "bytes": 1824666,
+      "sha256": "23984c6d3b2efb0c6c221608a6d4ff81e7291f348418a63799592e1725affa98",
+      "source": "Owner-authorized original portfolio Caschlatsch derivative; original source preserved."
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/portfolio-voxel-framework.webp",
+      "bytes": 809408,
+      "sha256": "5b8d6b5b0e2267d12c2fa0081064b51b0eedbc951bc4df01b4b49ac074e38195",
+      "source": "Owner-authorized original portfolio Caschlatsch derivative; original source preserved."
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/portfolio-module-infill.webp",
+      "bytes": 478560,
+      "sha256": "ca38db6694ef4c59cfecd5051a9888d2318062ab8f28a8e210b6c0265a937303",
+      "source": "Owner-authorized original portfolio Caschlatsch derivative; original source preserved."
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/portfolio-xr-assembly-sequence.webp",
+      "bytes": 1404140,
+      "sha256": "ea94c71833464b0abf3a78ac1106ac5e46b0b9cffb2bef70b534d76e22f59493",
+      "source": "Owner-authorized original portfolio Caschlatsch derivative; original source preserved."
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/portfolio-xr-data-exchange.webp",
+      "bytes": 140750,
+      "sha256": "5694aa51d8854868d9d562fa8052ab53b1247fe4fb157cae2d9e8973e0e5b9bb",
+      "source": "Owner-authorized original portfolio Caschlatsch derivative; original source preserved."
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/portfolio-xr-interface.webp",
+      "bytes": 596350,
+      "sha256": "3e2dd587a011960317ce1c67e12406236951d33f7e94bc3819cf4611082cf3c5",
+      "source": "Owner-authorized original portfolio Caschlatsch derivative; original source preserved."
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/portfolio-xr-workshop.webp",
+      "bytes": 209742,
+      "sha256": "8af6a5b6d80a6f0205fe3a203c1cd6550307e2d3a6999f307162aafb74b3e4a0",
+      "source": "Owner-authorized original portfolio Caschlatsch derivative; original source preserved."
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/portfolio-robotic-assembly.webp",
+      "bytes": 603292,
+      "sha256": "a8a5fc30e52a2d5b2196ed28a256faea852bfdd93ae909f25ce62c39d1a3ae72",
+      "source": "Owner-authorized original portfolio Caschlatsch derivative; original source preserved."
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/portfolio-timber-interior.webp",
+      "bytes": 418822,
+      "sha256": "26ec566d90605d45930d2175d68925aa584f0b8fbfd586eaa58bbac4062e31f0",
+      "source": "Owner-authorized original portfolio Caschlatsch derivative; original source preserved."
     }
   ],
   "limits": [
@@ -726,6 +786,6 @@
   "xrStudySHA256": "3605cb7ed9abefc0721091d7883fdc765d0f0471af1b7d4db49f326228a68001",
   "contactSHA256": "c68b4bc45a3ecc13eeee55bae43f3cab75f2085a095a5084e1494f90c5695882",
   "xrWorkspaceSHA256": "41c48db687e71332240a002e0892141a7eac887c94740ef4c175cc4ccc4e1211",
-  "projectStudiesSHA256": "565286449653b66dd33c2ea8fddb337e6c062a8bfb52fc6d08705f7f2b25c261",
-  "projectAssetsSHA256": "0446962dbbc1936b992420f1bccbc6678623750e941c268a958465823bc6e45d"
+  "projectStudiesSHA256": "5e55b823007d5969f04539338c8193a24f448bb7823042f18d320699d2ba08f6",
+  "projectAssetsSHA256": "7215f72717af17154d896c7e1789ee552139f1406c96305fc6300b50f38b1a2e"
 }

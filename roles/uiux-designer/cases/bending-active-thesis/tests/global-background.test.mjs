@@ -58,7 +58,7 @@ function environment({home=false}={}){
   requestAnimationFrame:fn=>{pending.set(++next,fn);frameStats.requested++;frameStats.maxPending=Math.max(frameStats.maxPending,pending.size);return next;},
   cancelAnimationFrame:id=>{if(pending.delete(id))frameStats.cancelled++;},
   matchMedia(query){if(!queries.has(query))queries.set(query,Object.assign(new Target(),{matches:false}));return queries.get(query);},
-  MutationObserver:class{constructor(fn){this.fn=fn;this.target=null;this.disconnected=false;observers.push(this);}observe(target){this.target=target;}disconnect(){this.disconnected=true;}}});
+  MutationObserver:class{constructor(fn){this.fn=fn;this.target=null;this.disconnected=false;observers.push(this);}observe(target,options){this.target=target;this.options=options;}disconnect(){this.disconnected=true;}}});
  let homeRoot=null,homeWindow=null;
  if(home){
   const element=()=>Object.assign(new Target(),{attributes:new Map(),properties:new Map(),
@@ -80,6 +80,57 @@ function environment({home=false}={}){
  return{win,doc,html,queries,pending,observers,frameStats,homeRoot,homeWindow,frame,
   siteReady(){html.phase='entered';for(const observer of observers)if(!observer.disconnected&&observer.target===html)observer.fn();}};
 }
+
+function studyEnvironment(){
+ const env=environment({home:true}),root=env.homeRoot;
+ const element=()=>{
+  const node=new Target();node.attributes=new Map();node.dataset={};node.textContent='';
+  node.getAttribute=key=>node.attributes.get(key)??null;node.hasAttribute=key=>node.attributes.has(key);
+  node.setAttribute=(key,value)=>node.attributes.set(key,String(value));node.removeAttribute=key=>node.attributes.delete(key);
+  return node;
+ };
+ const tools=element(),counter=element(),toggle=element(),navigation=element();let reads=0,resolveFonts;
+ const chapters=['overview','context','system','credits'].map((id,index)=>{const node=element();node.dataset.projectChapter=id;node.top=index*1200+.25;node.getBoundingClientRect=()=>{reads++;return{top:node.top-env.win.scrollY};};return node;});
+ const links=chapters.map(chapter=>{const link=element();link.dataset.projectChapterLink=chapter.dataset.projectChapter;return link;});
+ tools.setAttribute('hidden','');tools.querySelector=selector=>selector==='[data-project-chapter-count]'?counter:selector==='[data-study-motion-toggle]'?toggle:null;navigation.querySelectorAll=()=>links;
+ root.dataset={};root.hasAttribute=key=>root.attributes.has(key);
+ const set=root.setAttribute.bind(root),remove=root.removeAttribute.bind(root);
+ root.setAttribute=(key,value)=>{set(key,value);if(key==='data-project-active-chapter')root.dataset.projectActiveChapter=String(value);};
+ root.removeAttribute=key=>{remove(key);if(key==='data-project-active-chapter')delete root.dataset.projectActiveChapter;};
+ const windows=root.querySelectorAll;root.querySelectorAll=selector=>selector==='[data-project-chapter]'?chapters:selector.startsWith('[data-project-')?[]:windows(selector);
+ env.doc.querySelector=selector=>({'[data-project-study]':root,'[data-project-reading-tools]':tools,'[data-project-chapter-navigation]':navigation}[selector]??null);env.doc.querySelectorAll=()=>[];
+ env.doc.fonts={ready:new Promise(resolve=>{resolveFonts=resolve;})};
+ return{...env,tools,counter,toggle,navigation,chapters,links,resolveFonts,get chapterReads(){return reads;},
+  pauseReceipt(){for(const observer of env.observers)if(observer.target===root&&observer.options?.attributeFilter?.includes('data-study-paused'))observer.fn([{attributeName:'data-study-paused'}]);},
+  layoutReceipt(){for(const observer of env.observers)if(observer.target===root&&observer.options?.childList)observer.fn([{type:'childList'}]);}};
+}
+
+test('the native study chapter owner shares one frame through rapid reading, reduced motion and pause without repeated geometry scans',()=>{
+ const env=studyEnvironment(),surface=canvas();surface.getContext=()=>null;
+ const runtime=createBackgroundRuntime({createRenderer:fieldFactory}),driver=createSiteBackgroundDriver({window:env.win,document:env.doc,runtime,canvas:surface,backdrop:{style:{getPropertyValue(){return'';},setProperty(){}}}});
+ const reduced=env.win.matchMedia('(prefers-reduced-motion: reduce)');reduced.matches=true;env.siteReady();env.frame(100);
+ const root=env.homeRoot;assert.equal(root.dataset.projectActiveChapter,'overview');assert.equal(env.counter.textContent,'01 / 04');assert.equal(env.chapterReads,4);
+ let now=100;
+ for(const y of [701,2000,3101,2000,701,0]){env.win.scrollY=y;for(let i=0;i<8;i++)env.win.fire('scroll');assert.equal(env.pending.size,1);env.frame(now+=16);}
+ assert.equal(env.chapterReads,4,'Only actual layout invalidation may rescan chapters');assert.equal(root.dataset.projectActiveChapter,'overview');assert.equal(env.frameStats.maxPending,1);
+ env.toggle.fire('click');assert.equal(env.toggle.getAttribute('aria-pressed'),'true');assert.equal(env.toggle.textContent,'Resume motion');env.frame(now+=16);const afterPause=driver.inspect().frames;env.pauseReceipt();assert.equal(env.pending.size,0,'Same pause mutation must not reschedule its synchronous control');
+ env.win.scrollY=2000;env.win.fire('hashchange');env.win.fire('scroll');env.frame(now+=16);assert.equal(root.dataset.projectActiveChapter,'system');assert.equal(env.counter.textContent,'03 / 04');assert.equal(driver.inspect().playback.activeSeconds,0);
+ assert.equal(driver.inspect().frames,afterPause+1);assert.equal(env.pending.size,0);assert.deepEqual(env.links.map(link=>link.getAttribute('aria-current')),[null,null,'location',null]);
+ root.removeAttribute('data-study-paused');env.pauseReceipt();assert.equal(env.toggle.getAttribute('aria-pressed'),'false');assert.equal(env.toggle.textContent,'Pause motion');env.frame(now+=16);
+ driver.dispose();assert.equal(env.toggle.listeners.get('click').length,0);assert.equal(driver.inspect().events.nativeListeners,0);assert.equal(env.tools.hasAttribute('hidden'),true);
+});
+
+test('retained study chapters remeasure native layout on BFCache restore and late sources, then reject delayed work after departure',async()=>{
+ const env=studyEnvironment(),surface=canvas();surface.getContext=()=>null;
+ const runtime=createBackgroundRuntime({createRenderer:fieldFactory}),driver=createSiteBackgroundDriver({window:env.win,document:env.doc,runtime,canvas:surface,backdrop:{style:{getPropertyValue(){return'';},setProperty(){}}}});
+ env.win.matchMedia('(prefers-reduced-motion: reduce)').matches=true;env.siteReady();env.win.scrollY=701;env.frame(100);assert.equal(env.homeRoot.dataset.projectActiveChapter,'context');
+ env.doc.hidden=true;env.doc.fire('visibilitychange');env.win.fire('pagehide',{persisted:true});env.chapters[1].top=1800.5;env.win.scrollY=801;env.win.fire('scroll');assert.equal(env.pending.size,0);
+ env.doc.hidden=false;env.doc.fire('visibilitychange');assert.equal(env.pending.size,0,'Visibility cannot clear retained-page suspension');env.win.fire('pageshow',{persisted:true});assert.equal(env.pending.size,1);env.frame(10000);
+ assert.equal(env.homeRoot.dataset.projectActiveChapter,'overview');assert.equal(env.chapterReads,8);assert.equal(runtime.inspect().acquisitions,1);assert.equal(driver.inspect().playback.activeSeconds,0);
+ env.chapters[1].top=1200.25;env.layoutReceipt();env.frame(10016);assert.equal(env.homeRoot.dataset.projectActiveChapter,'context');assert.equal(env.chapterReads,12);
+ env.win.fire('pagehide',{persisted:false});const before=driver.inspect().frames,reads=env.chapterReads;env.resolveFonts();await Promise.resolve();await Promise.resolve();env.win.fire('scroll');env.win.fire('pageshow',{persisted:true});env.toggle.fire('click');env.frame(20000);
+ assert.equal(driver.inspect().frames,before);assert.equal(env.chapterReads,reads);assert.equal(env.pending.size,0);assert.equal(driver.inspect().projectStudy.chapters.disposed,true);assert.equal(driver.inspect().events.nativeListeners,0);assert.equal(runtime.inspect().releases,1);assert(env.observers.every(observer=>observer.disconnected));
+});
 
 test('Home native scroll uses the single site scheduler, resets on policy and suspension, and closes every source on exit',async()=>{
  const env=environment({home:true}),surface=canvas();surface.getContext=()=>null;

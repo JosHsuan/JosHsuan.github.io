@@ -7,7 +7,7 @@
     "pages": 86,
     "locatorPolicy": "Physical pages are one-based; printed page = physical page - 5 in these chapters."
   },
-  "scope": "Six owner-selected project studies. Source image, geometry and motion provenance only; build consumes verified repository derivatives without accessing source drives.",
+  "scope": "Six owner-selected project studies; Caschlatsch uses exact original portfolio derivatives and Mode/s uses reviewed compact web transcodes. Build consumes only verified repository derivatives, never private source drives.",
   "assets": [
     {
       "id": "film-assembly-hero",
@@ -1776,336 +1776,6 @@
       "authorStatus": "Group6 attribution retained. Individual media authors are not separately established by the selected sources."
     },
     {
-      "id": "project-caschlatsch-hero",
-      "projectId": "project-caschlatsch",
-      "path": "assets/projects/project-caschlatsch/hero.webp",
-      "src": "/assets/projects/project-caschlatsch/hero.webp",
-      "width": 2000,
-      "height": 1333,
-      "bytes": 1277128,
-      "sha256": "b25f15cdec11b036cbab780d8d80002c15610116f24a62ed4b1e8bc463efcdd6",
-      "source": {
-        "file": "hero.jpg",
-        "url": "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch/_jcr_content/par/image/image.imageformat.1286.dpr3.290151008.jpg",
-        "sourcePage": "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch.html",
-        "bytes": 1498668,
-        "sha256": "c1046900306a3c63991eb4ecf7a967e70498a70ca7c31a95fccb6b7515f7b472",
-        "retrievedAt": "2026-10-18T19:56:59.368494+00:00",
-        "rendition": "Official highest HTML srcset option (3x); this is a published rendition, not a claimed original master.",
-        "credit": "Wataru Nomura",
-        "locator": {
-          "officialImageAlt": "caschlatsch pavillion as installed in Disentis/Muster"
-        }
-      },
-      "processing": {
-        "method": "Decode the complete official public photograph, apply orientation, encode WebP. No crop, enlargement, AI, recolouring or retouching.",
-        "inputPixels": [
-          2000,
-          1333
-        ],
-        "cropPixels": null,
-        "preResizePixels": [
-          2000,
-          1333
-        ],
-        "maxLongEdge": 3200,
-        "upscaled": false,
-        "encoding": {
-          "format": "WebP",
-          "quality": 95,
-          "lossless": false,
-          "method": 6
-        },
-        "metadata": "EXIF, XMP and private filesystem metadata omitted."
-      },
-      "credit": "Photo: Wataru Nomura / ETH Zurich.",
-      "authorStatus": "Official ETH project page attributes this photograph to Wataru Nomura. Public availability is not asserted to be an open reuse license."
-    },
-    {
-      "id": "project-caschlatsch-cnc-fabrication",
-      "projectId": "project-caschlatsch",
-      "path": "assets/projects/project-caschlatsch/cnc-fabrication.webp",
-      "src": "/assets/projects/project-caschlatsch/cnc-fabrication.webp",
-      "width": 2000,
-      "height": 1333,
-      "bytes": 253756,
-      "sha256": "34504a98da70ddff2b2af2ddd4ef48bc3b8bae038aa2d7202233f517151705f1",
-      "source": {
-        "file": "cnc-fabrication.jpg",
-        "url": "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch/_jcr_content/par/twocolumn/par_left/image/image.imageformat.1286.dpr3.1422750991.jpg",
-        "sourcePage": "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch.html",
-        "bytes": 482800,
-        "sha256": "c2476dd41b6e4ef0a99d70fd1566f3b867df78bfcfa83d2c8986c92d654b476f",
-        "retrievedAt": "2026-10-18T19:56:55.087148+00:00",
-        "rendition": "Official highest HTML srcset option (3x); this is a published rendition, not a claimed original master.",
-        "credit": "Wataru Nomura",
-        "locator": {
-          "officialImageAlt": "CNC machine cutting a timber beam"
-        }
-      },
-      "processing": {
-        "method": "Decode the complete official public photograph, apply orientation, encode WebP. No crop, enlargement, AI, recolouring or retouching.",
-        "inputPixels": [
-          2000,
-          1333
-        ],
-        "cropPixels": null,
-        "preResizePixels": [
-          2000,
-          1333
-        ],
-        "maxLongEdge": 3200,
-        "upscaled": false,
-        "encoding": {
-          "format": "WebP",
-          "quality": 95,
-          "lossless": false,
-          "method": 6
-        },
-        "metadata": "EXIF, XMP and private filesystem metadata omitted."
-      },
-      "credit": "Photo: Wataru Nomura / ETH Zurich.",
-      "authorStatus": "Official ETH project page attributes this photograph to Wataru Nomura. Public availability is not asserted to be an open reuse license."
-    },
-    {
-      "id": "project-caschlatsch-mountain-setting",
-      "projectId": "project-caschlatsch",
-      "path": "assets/projects/project-caschlatsch/mountain-setting.webp",
-      "src": "/assets/projects/project-caschlatsch/mountain-setting.webp",
-      "width": 1365,
-      "height": 2048,
-      "bytes": 930516,
-      "sha256": "66ddc65f11127f75b59f772cc36c39c3de729ad8066dcb5ef353394ac70555f2",
-      "source": {
-        "file": "mountain-setting.jpg",
-        "url": "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch/_jcr_content/par/twocolumn/par_left/image_1638742688/image.imageformat.1286.dpr3.1342049301.jpg",
-        "sourcePage": "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch.html",
-        "bytes": 1170602,
-        "sha256": "e06d802ddbe9541766426d37fda2d1d3438b06dd906e05bfa8d4e58192f09b82",
-        "retrievedAt": "2026-10-18T19:56:57.626613+00:00",
-        "rendition": "Official highest HTML srcset option (3x); this is a published rendition, not a claimed original master.",
-        "credit": "Wataru Nomura",
-        "locator": {
-          "officialImageAlt": "caschlatsch structure with backdrop of mountains"
-        }
-      },
-      "processing": {
-        "method": "Decode the complete official public photograph, apply orientation, encode WebP. No crop, enlargement, AI, recolouring or retouching.",
-        "inputPixels": [
-          1365,
-          2048
-        ],
-        "cropPixels": null,
-        "preResizePixels": [
-          1365,
-          2048
-        ],
-        "maxLongEdge": 3200,
-        "upscaled": false,
-        "encoding": {
-          "format": "WebP",
-          "quality": 95,
-          "lossless": false,
-          "method": 6
-        },
-        "metadata": "EXIF, XMP and private filesystem metadata omitted."
-      },
-      "credit": "Photo: Wataru Nomura / ETH Zurich.",
-      "authorStatus": "Official ETH project page attributes this photograph to Wataru Nomura. Public availability is not asserted to be an open reuse license."
-    },
-    {
-      "id": "project-caschlatsch-module-assembly",
-      "projectId": "project-caschlatsch",
-      "path": "assets/projects/project-caschlatsch/module-assembly.webp",
-      "src": "/assets/projects/project-caschlatsch/module-assembly.webp",
-      "width": 2000,
-      "height": 1333,
-      "bytes": 579684,
-      "sha256": "c4593f2996c2afef769e859d7577c3e70503bde5ba6832e09c60fd104f093734",
-      "source": {
-        "file": "module-assembly.jpg",
-        "url": "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch/_jcr_content/par/twocolumn/par_right/image/image.imageformat.1286.dpr3.1961350012.jpg",
-        "sourcePage": "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch.html",
-        "bytes": 820346,
-        "sha256": "8fa706d455538e103f6a19287562c4af055c36faac4f4691a43829301c45058a",
-        "retrievedAt": "2026-10-18T19:56:57.626613+00:00",
-        "rendition": "Official highest HTML srcset option (3x); this is a published rendition, not a claimed original master.",
-        "credit": "Wataru Nomura",
-        "locator": {
-          "officialImageAlt": "MAS DFAB students installing the modules of the caschlatsch pavillion"
-        }
-      },
-      "processing": {
-        "method": "Decode the complete official public photograph, apply orientation, encode WebP. No crop, enlargement, AI, recolouring or retouching.",
-        "inputPixels": [
-          2000,
-          1333
-        ],
-        "cropPixels": null,
-        "preResizePixels": [
-          2000,
-          1333
-        ],
-        "maxLongEdge": 3200,
-        "upscaled": false,
-        "encoding": {
-          "format": "WebP",
-          "quality": 95,
-          "lossless": false,
-          "method": 6
-        },
-        "metadata": "EXIF, XMP and private filesystem metadata omitted."
-      },
-      "credit": "Photo: Wataru Nomura / ETH Zurich.",
-      "authorStatus": "Official ETH project page attributes this photograph to Wataru Nomura. Public availability is not asserted to be an open reuse license."
-    },
-    {
-      "id": "project-caschlatsch-timber-steps",
-      "projectId": "project-caschlatsch",
-      "path": "assets/projects/project-caschlatsch/timber-steps.webp",
-      "src": "/assets/projects/project-caschlatsch/timber-steps.webp",
-      "width": 1365,
-      "height": 2048,
-      "bytes": 876108,
-      "sha256": "087549f8dfbe26639e4f9e3ff091b670a6c55f2dcc39ee918a03492632105e54",
-      "source": {
-        "file": "timber-steps.jpg",
-        "url": "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch/_jcr_content/par/twocolumn/par_right/image_1362255624/image.imageformat.1286.dpr3.787207185.jpg",
-        "sourcePage": "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch.html",
-        "bytes": 1120713,
-        "sha256": "5007c436d0b52a9e0817a9c4fde5dea63327b33f35cd41b391e794cde16c7821",
-        "retrievedAt": "2026-10-18T19:56:58.662239+00:00",
-        "rendition": "Official highest HTML srcset option (3x); this is a published rendition, not a claimed original master.",
-        "credit": "Wataru Nomura",
-        "locator": {
-          "officialImageAlt": "timber steps of the caschlatsch structure"
-        }
-      },
-      "processing": {
-        "method": "Decode the complete official public photograph, apply orientation, encode WebP. No crop, enlargement, AI, recolouring or retouching.",
-        "inputPixels": [
-          1365,
-          2048
-        ],
-        "cropPixels": null,
-        "preResizePixels": [
-          1365,
-          2048
-        ],
-        "maxLongEdge": 3200,
-        "upscaled": false,
-        "encoding": {
-          "format": "WebP",
-          "quality": 95,
-          "lossless": false,
-          "method": 6
-        },
-        "metadata": "EXIF, XMP and private filesystem metadata omitted."
-      },
-      "credit": "Photo: Wataru Nomura / ETH Zurich.",
-      "authorStatus": "Official ETH project page attributes this photograph to Wataru Nomura. Public availability is not asserted to be an open reuse license."
-    },
-    {
-      "id": "project-caschlatsch-timber-interior",
-      "projectId": "project-caschlatsch",
-      "path": "assets/projects/project-caschlatsch/timber-interior.webp",
-      "src": "/assets/projects/project-caschlatsch/timber-interior.webp",
-      "width": 2000,
-      "height": 1333,
-      "bytes": 314530,
-      "sha256": "253f17805bf21c443ab63db679db12cbe0cba9660d0068bc07d2ea838be53257",
-      "source": {
-        "file": "timber-interior.jpg",
-        "url": "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch/_jcr_content/par/twocolumn/par_right/image_278832838/image.imageformat.1286.dpr3.1880643882.jpg",
-        "sourcePage": "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch.html",
-        "bytes": 526416,
-        "sha256": "bd9778137d901ab2cceaad8524202d5ff0ad02161743bf92f025c02b1da09a2b",
-        "retrievedAt": "2026-10-18T19:56:59.208882+00:00",
-        "rendition": "Official highest HTML srcset option (3x); this is a published rendition, not a claimed original master.",
-        "credit": "Wataru Nomura",
-        "locator": {
-          "officialImageAlt": "complex beams assembling the interiors of caschlatsch"
-        }
-      },
-      "processing": {
-        "method": "Decode the complete official public photograph, apply orientation, encode WebP. No crop, enlargement, AI, recolouring or retouching.",
-        "inputPixels": [
-          2000,
-          1333
-        ],
-        "cropPixels": null,
-        "preResizePixels": [
-          2000,
-          1333
-        ],
-        "maxLongEdge": 3200,
-        "upscaled": false,
-        "encoding": {
-          "format": "WebP",
-          "quality": 95,
-          "lossless": false,
-          "method": 6
-        },
-        "metadata": "EXIF, XMP and private filesystem metadata omitted."
-      },
-      "credit": "Photo: Wataru Nomura / ETH Zurich.",
-      "authorStatus": "Official ETH project page attributes this photograph to Wataru Nomura. Public availability is not asserted to be an open reuse license."
-    },
-    {
-      "id": "project-caschlatsch-workflow",
-      "projectId": "project-caschlatsch",
-      "path": "assets/projects/project-caschlatsch/workflow.webp",
-      "src": "/assets/projects/project-caschlatsch/workflow.webp",
-      "width": 3200,
-      "height": 1000,
-      "bytes": 34108,
-      "sha256": "25a1b8b7dcedb07b9b4a8ad853917753389ef22877b974005a8a8f4b38318d0a",
-      "source": {
-        "file": "caschlatsch-workflow.svg",
-        "bytes": 126609,
-        "sha256": "d199df49f6f1b001c3c9fbf224803586146745a19f25b98919fc9896cc4a89eb",
-        "sourcePages": [
-          "https://masdfab.arch.ethz.ch/projects/2023-24/caschlatsch.html",
-          "https://arch.ethz.ch/en/news-und-veranstaltungen/news-kanal/2024/09/how-humans-and-robots-built-a-wooden-tower-in-disentismustr.html"
-        ],
-        "locator": {
-          "kind": "Original conceptual workflow authored from public descriptions"
-        },
-        "fontSources": [
-          {
-            "file": "portfolio-ocr-b.woff2",
-            "sha256": "b46ba3f38b89bcbf7fd688eafe40c435a93dcf6cbadf7fdb43ad3cbc9973e703"
-          },
-          {
-            "file": "space-grotesk-variable.woff2",
-            "sha256": "8e085aa438094f11487a836652edd5c054fa6a96f63fc7c282105ee3a4b08c07"
-          }
-        ]
-      },
-      "processing": {
-        "method": "Original SVG paths and outlined OCR/Space Grotesk glyphs rasterized with CPU sharp/libvips to lossless WebP. No private model, dimensions, joint or engineering details reconstructed.",
-        "inputPixels": [
-          3200,
-          1000
-        ],
-        "cropPixels": null,
-        "preResizePixels": [
-          3200,
-          1000
-        ],
-        "maxLongEdge": 3200,
-        "upscaled": false,
-        "encoding": {
-          "format": "WebP",
-          "lossless": true,
-          "effort": 6
-        },
-        "metadata": "EXIF, XMP and private filesystem metadata omitted."
-      },
-      "credit": "Original website diagram based on public ETH Zurich descriptions.",
-      "authorStatus": "Original website process diagram; source facts from ETH Zurich. This is not a source engineering drawing."
-    },
-    {
       "id": "installation-lighting-motion-poster",
       "projectId": "entrance-installation-art",
       "path": "assets/projects/entrance-installation-art/installation-lighting-motion-poster.webp",
@@ -2290,6 +1960,493 @@
         "metadata": "EXIF/XMP omitted"
       },
       "authorStatus": "Owner-confirmed studio design and fabrication; existing project-photography credit remains separate."
+    },
+    {
+      "id": "project-caschlatsch-portfolio-timber-model",
+      "projectId": "project-caschlatsch",
+      "path": "assets/projects/project-caschlatsch/portfolio-timber-model.webp",
+      "src": "/assets/projects/project-caschlatsch/portfolio-timber-model.webp",
+      "width": 1141,
+      "height": 761,
+      "bytes": 500284,
+      "sha256": "f5d80276bccf8b0c823f835ac2ada293866855d2caa8ae62dcbf421b8c026698",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+        "bytes": 22624290,
+        "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+        "physicalPage": 30,
+        "printedPage": 25,
+        "figure": "Fig.2-01",
+        "embeddedImageIndex": 0,
+        "embeddedImageKey": "/Im0",
+        "embeddedImageEncodedSha256": "5d5b96c7f39181a65d5a19da8513ee45fc6857b43b69fdbe96e47224b04afd13",
+        "nativeEmbeddedWidth": 1141,
+        "nativeEmbeddedHeight": 761,
+        "nativeRgbSha256": "b5ebcd2835e891b168e32e0f48ca46c7e60e2937f20ffba89a3a62a352536a22",
+        "orientation": "native embedded orientation"
+      },
+      "processing": {
+        "format": "WebP",
+        "lossless": true,
+        "resize": null,
+        "upscale": false,
+        "sourceGeometryChanged": false,
+        "colorGrade": false,
+        "aiProcessing": false,
+        "metadata": "EXIF/XMP omitted",
+        "decodedRgbSha256": "b5ebcd2835e891b168e32e0f48ca46c7e60e2937f20ffba89a3a62a352536a22",
+        "decodedPixelsMatchPreparedSource": true,
+        "preResizePixels": [
+          1141,
+          761
+        ],
+        "upscaled": false
+      },
+      "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
+      "authorStatus": "Source portfolio pages identify the project, owner, institution and cohort but do not establish separate photographers or sole authorship of all project work. Retain existing named team/research/project credits separately; do not inherit Wataru Nomura attribution from replaced ETH web photographs."
+    },
+    {
+      "id": "project-caschlatsch-portfolio-tower-on-site",
+      "projectId": "project-caschlatsch",
+      "path": "assets/projects/project-caschlatsch/portfolio-tower-on-site.webp",
+      "src": "/assets/projects/project-caschlatsch/portfolio-tower-on-site.webp",
+      "width": 1191,
+      "height": 1786,
+      "bytes": 1824666,
+      "sha256": "23984c6d3b2efb0c6c221608a6d4ff81e7291f348418a63799592e1725affa98",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+        "bytes": 22624290,
+        "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+        "physicalPage": 31,
+        "printedPage": 26,
+        "figure": "Fig.2-02",
+        "embeddedImageIndex": 0,
+        "embeddedImageKey": "/Im0",
+        "embeddedImageEncodedSha256": "1e873ade2ce7fe70f71ba2ff534f5d1313af74de4d5b889a9bdf00cc29c23b73",
+        "nativeEmbeddedWidth": 1786,
+        "nativeEmbeddedHeight": 1191,
+        "nativeRgbSha256": "b8f4064ea32e82afc44fc0eee9492a454d56240d72feb0457d7516e77c213b9b",
+        "orientation": "PDF display orientation; transpose 90 degrees counterclockwise",
+        "pdfImageTransform": [
+          0,
+          892.680638,
+          -595.120421,
+          0,
+          595.344664,
+          -50.7908936
+        ]
+      },
+      "processing": {
+        "format": "WebP",
+        "lossless": true,
+        "resize": null,
+        "upscale": false,
+        "sourceGeometryChanged": false,
+        "colorGrade": false,
+        "aiProcessing": false,
+        "metadata": "EXIF/XMP omitted",
+        "decodedRgbSha256": "65e6fc92ddd1392f6652e5a5408c9f5d4ec66ef17c02abeabfc9a347d27e9c09",
+        "decodedPixelsMatchPreparedSource": true,
+        "preResizePixels": [
+          1191,
+          1786
+        ],
+        "upscaled": false
+      },
+      "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
+      "authorStatus": "Source portfolio pages identify the project, owner, institution and cohort but do not establish separate photographers or sole authorship of all project work. Retain existing named team/research/project credits separately; do not inherit Wataru Nomura attribution from replaced ETH web photographs."
+    },
+    {
+      "id": "project-caschlatsch-portfolio-voxel-framework",
+      "projectId": "project-caschlatsch",
+      "path": "assets/projects/project-caschlatsch/portfolio-voxel-framework.webp",
+      "src": "/assets/projects/project-caschlatsch/portfolio-voxel-framework.webp",
+      "width": 2270,
+      "height": 1782,
+      "bytes": 809408,
+      "sha256": "5b8d6b5b0e2267d12c2fa0081064b51b0eedbc951bc4df01b4b49ac074e38195",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+        "bytes": 22624290,
+        "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+        "physicalPage": 32,
+        "printedPage": 27,
+        "figure": "Fig.2-03",
+        "renderEngine": "Poppler pdftoppm",
+        "renderDpi": 300,
+        "pageRasterWidth": 2481,
+        "pageRasterHeight": 3508,
+        "pageRasterSha256": "71508b6d9fcab49e774ffc2dd72e610cc422fae642a0f5f4eb25bbab65f211cc",
+        "pixelCropBoundsLeftTopRightBottom": [
+          90,
+          95,
+          2360,
+          1877
+        ],
+        "cropPurpose": "Select complete authored figure and original labels from the source page; no internal rearrangement, relabeling or redrawing."
+      },
+      "processing": {
+        "format": "WebP",
+        "lossless": true,
+        "resize": null,
+        "sourceGeometryChanged": false,
+        "colorGrade": false,
+        "aiProcessing": false,
+        "metadata": "EXIF/XMP omitted",
+        "decodedRgbSha256": "ca981ae7e4ad628dabc5cab02913557e932fdd047db26ae600d804648ba49b12",
+        "decodedPixelsMatchPreparedSource": true,
+        "postRasterResize": false,
+        "rasterization": "Original PDF page rendered at 300 dpi, then integer rectangle extracted without further resizing. Embedded raster artwork follows original PDF interpolation; no new source detail is claimed.",
+        "preResizePixels": [
+          2270,
+          1782
+        ],
+        "upscaled": false
+      },
+      "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
+      "authorStatus": "Source portfolio pages identify the project, owner, institution and cohort but do not establish separate photographers or sole authorship of all project work. Retain existing named team/research/project credits separately; do not inherit Wataru Nomura attribution from replaced ETH web photographs."
+    },
+    {
+      "id": "project-caschlatsch-portfolio-module-infill",
+      "projectId": "project-caschlatsch",
+      "path": "assets/projects/project-caschlatsch/portfolio-module-infill.webp",
+      "src": "/assets/projects/project-caschlatsch/portfolio-module-infill.webp",
+      "width": 2245,
+      "height": 830,
+      "bytes": 478560,
+      "sha256": "ca38db6694ef4c59cfecd5051a9888d2318062ab8f28a8e210b6c0265a937303",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+        "bytes": 22624290,
+        "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+        "physicalPage": 33,
+        "printedPage": 28,
+        "figure": "Fig.2-05 (upper diagram)",
+        "renderEngine": "Poppler pdftoppm",
+        "renderDpi": 300,
+        "pageRasterWidth": 2481,
+        "pageRasterHeight": 3508,
+        "pageRasterSha256": "487230817885d708b503e77800c52c5c945abc0f09c4e7444cccdecef8bc1e7a",
+        "pixelCropBoundsLeftTopRightBottom": [
+          95,
+          70,
+          2340,
+          900
+        ],
+        "cropPurpose": "Select the upper schematic detail of Fig.2-05 and all labels within that detail. The lower module group and original figure caption are outside this extract; no internal rearrangement, relabeling or redrawing."
+      },
+      "processing": {
+        "format": "WebP",
+        "lossless": true,
+        "resize": null,
+        "sourceGeometryChanged": false,
+        "colorGrade": false,
+        "aiProcessing": false,
+        "metadata": "EXIF/XMP omitted",
+        "decodedRgbSha256": "1bbf95f7631f7c0adda418cae0865aff71571cc1bb8b60b4bb5ad64c0c02f97e",
+        "decodedPixelsMatchPreparedSource": true,
+        "postRasterResize": false,
+        "rasterization": "Original PDF page rendered at 300 dpi, then integer rectangle extracted without further resizing. Embedded raster artwork follows original PDF interpolation; no new source detail is claimed.",
+        "preResizePixels": [
+          2245,
+          830
+        ],
+        "upscaled": false
+      },
+      "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
+      "authorStatus": "Source portfolio pages identify the project, owner, institution and cohort but do not establish separate photographers or sole authorship of all project work. Retain existing named team/research/project credits separately; do not inherit Wataru Nomura attribution from replaced ETH web photographs."
+    },
+    {
+      "id": "project-caschlatsch-portfolio-xr-assembly-sequence",
+      "projectId": "project-caschlatsch",
+      "path": "assets/projects/project-caschlatsch/portfolio-xr-assembly-sequence.webp",
+      "src": "/assets/projects/project-caschlatsch/portfolio-xr-assembly-sequence.webp",
+      "width": 2325,
+      "height": 1690,
+      "bytes": 1404140,
+      "sha256": "ea94c71833464b0abf3a78ac1106ac5e46b0b9cffb2bef70b534d76e22f59493",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+        "bytes": 22624290,
+        "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+        "physicalPage": 34,
+        "printedPage": 29,
+        "figure": "Fig.2-08",
+        "renderEngine": "Poppler pdftoppm",
+        "renderDpi": 300,
+        "pageRasterWidth": 2481,
+        "pageRasterHeight": 3508,
+        "pageRasterSha256": "8cb07553fc802d2fd5df19c74c7fe04ac98998b66c661ec07ea9acf3b7b1aef1",
+        "pixelCropBoundsLeftTopRightBottom": [
+          90,
+          1380,
+          2415,
+          3070
+        ],
+        "cropPurpose": "Select complete authored figure and original labels from the source page; no internal rearrangement, relabeling or redrawing."
+      },
+      "processing": {
+        "format": "WebP",
+        "lossless": true,
+        "resize": null,
+        "sourceGeometryChanged": false,
+        "colorGrade": false,
+        "aiProcessing": false,
+        "metadata": "EXIF/XMP omitted",
+        "decodedRgbSha256": "6f4c1296e23bee03dc9de255d03ab4998d98f28c227acad61c685fb75fae1721",
+        "decodedPixelsMatchPreparedSource": true,
+        "postRasterResize": false,
+        "rasterization": "Original PDF page rendered at 300 dpi, then integer rectangle extracted without further resizing. Embedded raster artwork follows original PDF interpolation; no new source detail is claimed.",
+        "preResizePixels": [
+          2325,
+          1690
+        ],
+        "upscaled": false
+      },
+      "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
+      "authorStatus": "Source portfolio pages identify the project, owner, institution and cohort but do not establish separate photographers or sole authorship of all project work. Retain existing named team/research/project credits separately; do not inherit Wataru Nomura attribution from replaced ETH web photographs."
+    },
+    {
+      "id": "project-caschlatsch-portfolio-xr-data-exchange",
+      "projectId": "project-caschlatsch",
+      "path": "assets/projects/project-caschlatsch/portfolio-xr-data-exchange.webp",
+      "src": "/assets/projects/project-caschlatsch/portfolio-xr-data-exchange.webp",
+      "width": 2310,
+      "height": 1240,
+      "bytes": 140750,
+      "sha256": "5694aa51d8854868d9d562fa8052ab53b1247fe4fb157cae2d9e8973e0e5b9bb",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+        "bytes": 22624290,
+        "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+        "physicalPage": 35,
+        "printedPage": 30,
+        "figure": "Fig.2-09",
+        "renderEngine": "Poppler pdftoppm",
+        "renderDpi": 300,
+        "pageRasterWidth": 2481,
+        "pageRasterHeight": 3508,
+        "pageRasterSha256": "93cea47d5446a211fadff66e271345ed266446c55a69b7c406b4aea70e2c70e4",
+        "pixelCropBoundsLeftTopRightBottom": [
+          95,
+          105,
+          2405,
+          1345
+        ],
+        "cropPurpose": "Select complete authored figure and original labels from the source page; no internal rearrangement, relabeling or redrawing."
+      },
+      "processing": {
+        "format": "WebP",
+        "lossless": true,
+        "resize": null,
+        "sourceGeometryChanged": false,
+        "colorGrade": false,
+        "aiProcessing": false,
+        "metadata": "EXIF/XMP omitted",
+        "decodedRgbSha256": "7b0ee03c7be3a3fa4d1fb419d2165b85b5b69232cead05a765c0a5ad6d8a0881",
+        "decodedPixelsMatchPreparedSource": true,
+        "postRasterResize": false,
+        "rasterization": "Original PDF page rendered at 300 dpi, then integer rectangle extracted without further resizing. Embedded raster artwork follows original PDF interpolation; no new source detail is claimed.",
+        "preResizePixels": [
+          2310,
+          1240
+        ],
+        "upscaled": false
+      },
+      "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
+      "authorStatus": "Source portfolio pages identify the project, owner, institution and cohort but do not establish separate photographers or sole authorship of all project work. Retain existing named team/research/project credits separately; do not inherit Wataru Nomura attribution from replaced ETH web photographs."
+    },
+    {
+      "id": "project-caschlatsch-portfolio-xr-interface",
+      "projectId": "project-caschlatsch",
+      "path": "assets/projects/project-caschlatsch/portfolio-xr-interface.webp",
+      "src": "/assets/projects/project-caschlatsch/portfolio-xr-interface.webp",
+      "width": 2481,
+      "height": 1035,
+      "bytes": 596350,
+      "sha256": "3e2dd587a011960317ce1c67e12406236951d33f7e94bc3819cf4611082cf3c5",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+        "bytes": 22624290,
+        "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+        "physicalPage": 35,
+        "printedPage": 30,
+        "figure": "Fig.2-10",
+        "renderEngine": "Poppler pdftoppm",
+        "renderDpi": 300,
+        "pageRasterWidth": 2481,
+        "pageRasterHeight": 3508,
+        "pageRasterSha256": "93cea47d5446a211fadff66e271345ed266446c55a69b7c406b4aea70e2c70e4",
+        "pixelCropBoundsLeftTopRightBottom": [
+          0,
+          2040,
+          2481,
+          3075
+        ],
+        "cropPurpose": "Select complete authored figure and original labels from the source page; no internal rearrangement, relabeling or redrawing."
+      },
+      "processing": {
+        "format": "WebP",
+        "lossless": true,
+        "resize": null,
+        "sourceGeometryChanged": false,
+        "colorGrade": false,
+        "aiProcessing": false,
+        "metadata": "EXIF/XMP omitted",
+        "decodedRgbSha256": "a63c39bfd795d14c91604b0984d6a6e935f8940a41a8a9cf3c244f8fa061dc5b",
+        "decodedPixelsMatchPreparedSource": true,
+        "postRasterResize": false,
+        "rasterization": "Original PDF page rendered at 300 dpi, then integer rectangle extracted without further resizing. Embedded raster artwork follows original PDF interpolation; no new source detail is claimed.",
+        "preResizePixels": [
+          2481,
+          1035
+        ],
+        "upscaled": false
+      },
+      "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
+      "authorStatus": "Source portfolio pages identify the project, owner, institution and cohort but do not establish separate photographers or sole authorship of all project work. Retain existing named team/research/project credits separately; do not inherit Wataru Nomura attribution from replaced ETH web photographs."
+    },
+    {
+      "id": "project-caschlatsch-portfolio-xr-workshop",
+      "projectId": "project-caschlatsch",
+      "path": "assets/projects/project-caschlatsch/portfolio-xr-workshop.webp",
+      "src": "/assets/projects/project-caschlatsch/portfolio-xr-workshop.webp",
+      "width": 662,
+      "height": 373,
+      "bytes": 209742,
+      "sha256": "8af6a5b6d80a6f0205fe3a203c1cd6550307e2d3a6999f307162aafb74b3e4a0",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+        "bytes": 22624290,
+        "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+        "physicalPage": 36,
+        "printedPage": 31,
+        "figure": "Fig.2-14",
+        "embeddedImageIndex": 5,
+        "embeddedImageKey": [
+          "/Fm5",
+          "/Im0"
+        ],
+        "embeddedImageEncodedSha256": "d4decadd06b61b56012155f82cb6c7c7ede123fa094dcbb936fed973b22d9a22",
+        "nativeEmbeddedWidth": 662,
+        "nativeEmbeddedHeight": 373,
+        "nativeRgbSha256": "6575ae5d9b8b51f584ad4bc511f463502096f1ded687abbb86617b61f72f640e",
+        "orientation": "native embedded orientation"
+      },
+      "processing": {
+        "format": "WebP",
+        "lossless": true,
+        "resize": null,
+        "upscale": false,
+        "sourceGeometryChanged": false,
+        "colorGrade": false,
+        "aiProcessing": false,
+        "metadata": "EXIF/XMP omitted",
+        "decodedRgbSha256": "6575ae5d9b8b51f584ad4bc511f463502096f1ded687abbb86617b61f72f640e",
+        "decodedPixelsMatchPreparedSource": true,
+        "preResizePixels": [
+          662,
+          373
+        ],
+        "upscaled": false
+      },
+      "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
+      "authorStatus": "Source portfolio pages identify the project, owner, institution and cohort but do not establish separate photographers or sole authorship of all project work. Retain existing named team/research/project credits separately; do not inherit Wataru Nomura attribution from replaced ETH web photographs."
+    },
+    {
+      "id": "project-caschlatsch-portfolio-robotic-assembly",
+      "projectId": "project-caschlatsch",
+      "path": "assets/projects/project-caschlatsch/portfolio-robotic-assembly.webp",
+      "src": "/assets/projects/project-caschlatsch/portfolio-robotic-assembly.webp",
+      "width": 1024,
+      "height": 575,
+      "bytes": 603292,
+      "sha256": "a8a5fc30e52a2d5b2196ed28a256faea852bfdd93ae909f25ce62c39d1a3ae72",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+        "bytes": 22624290,
+        "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+        "physicalPage": 36,
+        "printedPage": 31,
+        "figure": "Fig.2-16",
+        "embeddedImageIndex": 7,
+        "embeddedImageKey": [
+          "/Fm7",
+          "/Im0"
+        ],
+        "embeddedImageEncodedSha256": "147c274d5b3c35a95772c458f47cbab1a028c7c099b6e4423308307cfd41f1cf",
+        "nativeEmbeddedWidth": 1024,
+        "nativeEmbeddedHeight": 575,
+        "nativeRgbSha256": "4d18141a6ef9ae8d2038b1dbd67a99bad256bfc18e00250db1094ccea90f7fbe",
+        "orientation": "native embedded orientation"
+      },
+      "processing": {
+        "format": "WebP",
+        "lossless": true,
+        "resize": null,
+        "upscale": false,
+        "sourceGeometryChanged": false,
+        "colorGrade": false,
+        "aiProcessing": false,
+        "metadata": "EXIF/XMP omitted",
+        "decodedRgbSha256": "4d18141a6ef9ae8d2038b1dbd67a99bad256bfc18e00250db1094ccea90f7fbe",
+        "decodedPixelsMatchPreparedSource": true,
+        "preResizePixels": [
+          1024,
+          575
+        ],
+        "upscaled": false
+      },
+      "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
+      "authorStatus": "Source portfolio pages identify the project, owner, institution and cohort but do not establish separate photographers or sole authorship of all project work. Retain existing named team/research/project credits separately; do not inherit Wataru Nomura attribution from replaced ETH web photographs."
+    },
+    {
+      "id": "project-caschlatsch-portfolio-timber-interior",
+      "projectId": "project-caschlatsch",
+      "path": "assets/projects/project-caschlatsch/portfolio-timber-interior.webp",
+      "src": "/assets/projects/project-caschlatsch/portfolio-timber-interior.webp",
+      "width": 775,
+      "height": 517,
+      "bytes": 418822,
+      "sha256": "26ec566d90605d45930d2175d68925aa584f0b8fbfd586eaa58bbac4062e31f0",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+        "bytes": 22624290,
+        "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+        "physicalPage": 37,
+        "printedPage": 32,
+        "figure": "Fig.2-19",
+        "embeddedImageIndex": 8,
+        "embeddedImageKey": [
+          "/Fm8",
+          "/Im0"
+        ],
+        "embeddedImageEncodedSha256": "38baeaa8c8cfa90e6e1034d2398373039a8b300fe5b1c298fed598bf18118dfe",
+        "nativeEmbeddedWidth": 775,
+        "nativeEmbeddedHeight": 517,
+        "nativeRgbSha256": "a7f12a8721b89a5b9f2cd2e65dd760e7b88174114f246037c50f2c7854287e4e",
+        "orientation": "native embedded orientation"
+      },
+      "processing": {
+        "format": "WebP",
+        "lossless": true,
+        "resize": null,
+        "upscale": false,
+        "sourceGeometryChanged": false,
+        "colorGrade": false,
+        "aiProcessing": false,
+        "metadata": "EXIF/XMP omitted",
+        "decodedRgbSha256": "a7f12a8721b89a5b9f2cd2e65dd760e7b88174114f246037c50f2c7854287e4e",
+        "decodedPixelsMatchPreparedSource": true,
+        "preResizePixels": [
+          775,
+          517
+        ],
+        "upscaled": false
+      },
+      "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
+      "authorStatus": "Source portfolio pages identify the project, owner, institution and cohort but do not establish separate photographers or sole authorship of all project work. Retain existing named team/research/project credits separately; do not inherit Wataru Nomura attribution from replaced ETH web photographs."
     }
   ],
   "highResolutionReferences": [
@@ -2941,10 +3098,10 @@
       "projectId": "mode-s-of-making",
       "path": "assets/projects/mode-s-of-making/film-machine-simulation.mp4",
       "src": "/assets/projects/mode-s-of-making/film-machine-simulation.mp4",
-      "width": 4096,
-      "height": 2304,
-      "bytes": 3295317,
-      "sha256": "7a0fc1e886eb5ba63ad766a9864980dc19c5c29b0b6e131077fffd0d6acf4c46",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 498303,
+      "sha256": "522911028b4c3956b2376b1dad470534813f2d12c4ae20c7b73a4cc3ad3877eb",
       "durationSeconds": 4.8,
       "frameCount": 120,
       "loop": true,
@@ -2964,7 +3121,18 @@
         "crop": null,
         "trim": null,
         "retime": null,
-        "resize": null,
+        "resize": {
+          "from": [
+            4096,
+            2304
+          ],
+          "to": [
+            1920,
+            1080
+          ],
+          "method": "Lanczos",
+          "uniformScale": 0.46875
+        },
         "upscaled": false,
         "geometryDeformation": false,
         "pad": {
@@ -2979,24 +3147,29 @@
           }
         },
         "frameCountExact": true,
-        "allFramePTSExact": true,
+        "allFramePTSExact": false,
+        "allRelativeFramePTSExact": true,
         "allFrameDurationsExact": true,
         "finalFrameDurationExact": true,
         "finalFrameDurationTicks": 2000,
         "finalFrameDurationTimeBase": "1/50000",
-        "absolutePTSOriginUnchanged": true,
+        "absolutePTSOriginUnchanged": false,
+        "timestampRebase": {
+          "offsetTicks": -2000,
+          "timeBase": "1/50000"
+        },
         "audio": "All source audio omitted.",
         "metadata": "Source metadata and chapters omitted; no private paths in MP4 metadata.",
         "faststartVerified": true,
         "loop": true,
         "loopPolicy": "Native MP4 has no intrinsic repeat instruction. Repetition is an explicit presentation choice; replay uses native time with no retiming or scroll seek.",
         "noChapterAdvanceOnEnded": true,
-        "method": "Native H264/avc1 video bitstream remux. Encoded packets, avcC extradata, PTS/DTS, packet durations, timebase, dimensions, range and identity track matrix are unchanged.",
-        "encodedVideoPacketsByteExact": true,
-        "allPacketPTSExact": true,
-        "allPacketDTSExact": true,
-        "allPacketDurationsExact": true,
-        "avcCExtradataByteExact": true,
+        "method": "Locally optimized silent H264/AVC web transcode. Original display aspect ratio and native presentation-frame intervals are preserved. The complete 120-frame simulation is decoded with ignore_editlist=1, matching the preceding full-frame public remux, then uniformly downsampled from 4096 × 2304 to 1920 × 1080 with Lanczos. Native source audio/private metadata are omitted. Encoded packets, avcC, decoded pixels and reordered DTS are not claimed identical.",
+        "encodedVideoPacketsByteExact": false,
+        "allPacketPTSExact": false,
+        "allPacketDTSExact": false,
+        "allPacketDurationsExact": false,
+        "avcCExtradataByteExact": false,
         "identityTrackMatrixExact": true,
         "trackMatrix": [
           65536,
@@ -3014,18 +3187,46 @@
         "pixelFormat": "yuv420p",
         "videoCodec": "h264",
         "codecTag": "avc1",
-        "transcoded": false,
-        "nativeBrowserAcceptance": "Native playback acceptance is recorded separately in PROJECT_BACKGROUND_MOTION_INTEGRATION.md; the source container record alone does not establish browser decoding.",
+        "transcoded": true,
+        "nativeBrowserAcceptance": "Source and local CPU quality verification only; actual built-browser acceptance and publication remain separate.",
         "nativeFrameRate": "25/1",
         "sourceColorSpace": "bt709",
         "sourceColorTransfer": "bt709",
-        "sourceColorPrimaries": "bt709"
+        "sourceColorPrimaries": "bt709",
+        "decodedFramesByteExact": false,
+        "transcodeRecipe": {
+          "encoder": "libx264",
+          "crf": 21,
+          "preset": "slow",
+          "profile": "High",
+          "level": 41,
+          "bFrames": 3,
+          "refs": 4,
+          "keyframeInterval": 60,
+          "minimumKeyframeInterval": 30,
+          "resize": [
+            1920,
+            1080
+          ]
+        },
+        "quality": {
+          "metric": "SSIM",
+          "comparedFrames": 120,
+          "mean": 0.9996269583333334,
+          "minimumFrame": 0.999477,
+          "maximumFrame": 0.999786,
+          "statsSHA256": "99286cf4a5df88f75c8ed29aea75ecd57512d0433e0483113bf9a11c63a04a2a",
+          "allFramesCompared": true,
+          "reference": "Original source uniformly downsampled with the same Lanczos transform to the reviewed output size before SSIM. This is compression quality at 1080p, not a claim of native-4K pixel equality."
+        },
+        "sourceDecodePolicy": "ignore_editlist=1 to recover complete 120 original coded frames; original has an edit-list-discarded first frame. Constant PTS origin is normalized. Existing public remux already presents all 120 frames."
       },
       "alt": "Original line animation of the rotary-cutting machine and rotating blank.",
       "caption": "Original studio simulation of the complete rotary-cutting machine and rotating blank.",
       "credit": "Studio design and digital animation: Chia-Hsuan Chao / National Cheng Kung University.",
       "authorStatus": "Owner-confirmed studio design and digital animation attribution.",
-      "rightsBasis": "Owner selected this exact source and scoped public derivative for the named project; no open licence is asserted."
+      "rightsBasis": "Owner selected this exact source and scoped public derivative for the named project; no open licence is asserted.",
+      "kind": "simulation"
     },
     {
       "id": "installation-lighting-motion",
@@ -3111,7 +3312,8 @@
       "caption": "The built installation during a night lighting sequence.",
       "credit": "PKD Engineering Consultants project record. Individual media author is not identified; project collaborators and commissioning credits remain in the case.",
       "authorStatus": "Project/team/employer attribution is preserved; individual media authors not recorded in the source remain unidentified.",
-      "rightsBasis": "Owner selected this exact source and scoped public derivative for the named project; no open licence is asserted."
+      "rightsBasis": "Owner selected this exact source and scoped public derivative for the named project; no open licence is asserted.",
+      "kind": "recording"
     },
     {
       "id": "printing-process-motion",
@@ -3189,7 +3391,8 @@
       "caption": "Original Group1 recording of nozzle deposition during the printing study.",
       "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie. Photographer not individually identified.",
       "authorStatus": "Project/team/employer attribution is preserved; individual media authors not recorded in the source remain unidentified.",
-      "rightsBasis": "Owner selected this exact source and scoped public derivative for the named project; no open licence is asserted."
+      "rightsBasis": "Owner selected this exact source and scoped public derivative for the named project; no open licence is asserted.",
+      "kind": "recording"
     },
     {
       "id": "fabrication-path-motion",
@@ -3267,7 +3470,8 @@
       "caption": "Source-authored robotic printing-path study from the Group-Red presentation; this is a simulation.",
       "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao. Individual media authors are not separately identified.",
       "authorStatus": "Project/team/employer attribution is preserved; individual media authors not recorded in the source remain unidentified.",
-      "rightsBasis": "Owner selected this exact source and scoped public derivative for the named project; no open licence is asserted."
+      "rightsBasis": "Owner selected this exact source and scoped public derivative for the named project; no open licence is asserted.",
+      "kind": "simulation"
     },
     {
       "id": "robot-assembly-motion",
@@ -3337,7 +3541,8 @@
       "caption": "Original robot-assembly simulation from the Group6 course records; the source framing is preserved.",
       "credit": "MAS DFab Group6: JosHsuan Chao / Kevin Seav / Megi Sinani. Individual media authors are not separately identified.",
       "authorStatus": "Project/team/employer attribution is preserved; individual media authors not recorded in the source remain unidentified.",
-      "rightsBasis": "Owner selected this exact source and scoped public derivative for the named project; no open licence is asserted."
+      "rightsBasis": "Owner selected this exact source and scoped public derivative for the named project; no open licence is asserted.",
+      "kind": "simulation"
     },
     {
       "id": "film-physical-cutting",
@@ -3347,10 +3552,10 @@
       "src": "/assets/projects/mode-s-of-making/film-physical-cutting.mp4",
       "width": 1920,
       "height": 1080,
-      "bytes": 75965366,
-      "sha256": "cead2cc6381b29c094f061f9290a1b33854c544f68346fce94a15c5e193c94dc",
-      "durationSeconds": 10.01,
-      "frameCount": 300,
+      "bytes": 3167168,
+      "sha256": "6e520ca2063a839d7ec4fcd27011301971af0f587f737cb28b5814ee964b4ac1",
+      "durationSeconds": 8.008,
+      "frameCount": 240,
       "loop": true,
       "chapter": "fabrication",
       "source": {
@@ -3368,10 +3573,10 @@
         "crop": null,
         "trim": {
           "startFrame": 90,
-          "endFrameExclusive": 390,
+          "endFrameExclusive": 330,
           "sourceFrameCount": 3603,
           "startPTSTicks": 90090,
-          "endPTSTicks": 390390,
+          "endPTSTicks": 330330,
           "timeBase": "1/30000"
         },
         "retime": null,
@@ -3391,23 +3596,28 @@
         },
         "frameCountExact": true,
         "allFramePTSExact": false,
+        "allRelativeFramePTSExact": true,
         "allFrameDurationsExact": true,
         "finalFrameDurationExact": true,
         "finalFrameDurationTicks": 1001,
         "finalFrameDurationTimeBase": "1/30000",
         "absolutePTSOriginUnchanged": false,
+        "timestampRebase": {
+          "offsetTicks": -90090,
+          "timeBase": "1/30000"
+        },
         "audio": "All source audio omitted.",
         "metadata": "Source metadata and chapters omitted; no private paths in MP4 metadata.",
         "faststartVerified": true,
         "loop": true,
         "loopPolicy": "No intrinsic movie loop instruction; repeat is an explicit website presentation policy. Native media time is unchanged; no chapter advance on ended.",
         "noChapterAdvanceOnEnded": true,
-        "method": "Exact source-frame interval remux of the original H264 bitstream. All selected encoded packets, avcC and decoded frames are identical; only a constant timestamp-origin rebase is applied. Source-authored title over actual footage remains; no animated diagram is selected.",
-        "encodedVideoPacketsByteExact": true,
+        "method": "Locally optimized silent H264/AVC web transcode. Original display aspect ratio and native presentation-frame intervals are preserved. Only the exact owner-authorized contiguous physical-operation interval is selected; full native 1920 × 1080 pixels are encoded without crop or resize. Native source audio/private metadata are omitted. Encoded packets, avcC, decoded pixels and reordered DTS are not claimed identical.",
+        "encodedVideoPacketsByteExact": false,
         "allPacketPTSExact": false,
         "allPacketDTSExact": false,
-        "allPacketDurationsExact": true,
-        "avcCExtradataByteExact": true,
+        "allPacketDurationsExact": false,
+        "avcCExtradataByteExact": false,
         "identityTrackMatrixExact": true,
         "trackMatrix": [
           65536,
@@ -3425,20 +3635,36 @@
         "pixelFormat": "yuv420p",
         "videoCodec": "h264",
         "codecTag": "avc1",
-        "transcoded": false,
-        "nativeBrowserAcceptance": "Source verification only; native browser and release acceptance are recorded separately.",
+        "transcoded": true,
+        "nativeBrowserAcceptance": "Source and local CPU quality verification only; actual built-browser acceptance and publication remain separate.",
         "nativeFrameRate": "30000/1001",
         "sourceColorSpace": "bt709",
         "sourceColorTransfer": "bt709",
         "sourceColorPrimaries": "bt709",
-        "decodedFramesByteExact": true,
-        "timestampRebase": {
-          "offsetTicks": -90090,
-          "timeBase": "1/30000"
+        "decodedFramesByteExact": false,
+        "transcodeRecipe": {
+          "encoder": "libx264",
+          "crf": 25,
+          "preset": "slow",
+          "profile": "High",
+          "level": 41,
+          "bFrames": 3,
+          "refs": 4,
+          "keyframeInterval": 60,
+          "minimumKeyframeInterval": 30,
+          "resize": null
         },
-        "allRelativeFramePTSExact": true,
-        "allRelativePacketPTSExact": true,
-        "allRelativePacketDTSExact": true
+        "quality": {
+          "metric": "SSIM",
+          "comparedFrames": 240,
+          "mean": 0.990176625,
+          "minimumFrame": 0.985469,
+          "maximumFrame": 0.996902,
+          "statsSHA256": "330cadc4bbcc5ec5d18045f3ddabbf24af8befbab24001dff305b30117f767e6",
+          "allFramesCompared": true,
+          "reference": "Original native-size selected source frames."
+        },
+        "sourceDecodePolicy": "Default native input decoding."
       },
       "alt": "Physical heat-cutting operation from the original studio film.",
       "caption": "Physical heat-cutting operation from the original studio film.",
@@ -3454,26 +3680,33 @@
       "src": "/assets/projects/mode-s-of-making/prototype-cutting-operation.mp4",
       "width": 1920,
       "height": 1080,
-      "bytes": 43864914,
-      "sha256": "771aadc5fd14107b861c78e632cbaf4a5ac43253b3a343a6de8ed0feba3a716a",
-      "durationSeconds": 20.88,
-      "frameCount": 522,
+      "bytes": 3176212,
+      "sha256": "dd5ad72944afc12d00fa6ab3456cf7369e003455ee242d0d7f4c0f9813e0209d",
+      "durationSeconds": 8,
+      "frameCount": 200,
       "loop": true,
       "chapter": "cutting",
       "source": {
         "file": "MVI_9109.MOV",
         "bytes": 119726396,
         "sha256": "0dfff18451db42602266d07fbdce50ef24f3e7aa87f62ca0c54a344ff18c841b",
-        "sourceMeaning": "Complete original black-background physical prototype cutting recording.",
+        "sourceMeaning": "Exact eight-second contiguous excerpt of the original black-background physical prototype cutting recording.",
         "sourceUnchangedSHA256BeforeAfter": true,
         "intrinsicGIFLoopExtension": null,
         "loopPolicy": "No intrinsic movie loop instruction; repeat is an explicit website presentation policy. Native media time is unchanged; no chapter advance on ended.",
         "nativeFrameRate": "25/1"
       },
       "processing": {
-        "fullNativeSequence": true,
+        "fullNativeSequence": false,
         "crop": null,
-        "trim": null,
+        "trim": {
+          "startFrame": 150,
+          "endFrameExclusive": 350,
+          "sourceFrameCount": 522,
+          "startPTSTicks": 150000,
+          "endPTSTicks": 350000,
+          "timeBase": "1/25000"
+        },
         "retime": null,
         "resize": null,
         "upscaled": false,
@@ -3490,23 +3723,28 @@
           }
         },
         "frameCountExact": true,
-        "allFramePTSExact": true,
+        "allFramePTSExact": false,
+        "allRelativeFramePTSExact": true,
         "allFrameDurationsExact": true,
         "finalFrameDurationExact": true,
         "finalFrameDurationTicks": 1000,
         "finalFrameDurationTimeBase": "1/25000",
-        "absolutePTSOriginUnchanged": true,
+        "absolutePTSOriginUnchanged": false,
+        "timestampRebase": {
+          "offsetTicks": -150000,
+          "timeBase": "1/25000"
+        },
         "audio": "All source audio omitted.",
         "metadata": "Source metadata and chapters omitted; no private paths in MP4 metadata.",
         "faststartVerified": true,
         "loop": true,
         "loopPolicy": "No intrinsic movie loop instruction; repeat is an explicit website presentation policy. Native media time is unchanged; no chapter advance on ended.",
         "noChapterAdvanceOnEnded": true,
-        "method": "High-quality native-resolution H264 transcode of the complete original physical recording. All frame times, durations, dimensions and full range are preserved. Encoded packets, avcC and decoded pixels are not claimed byte-identical; the all-frame SSIM receipt quantifies compression.",
+        "method": "Locally optimized silent H264/AVC web transcode. Original display aspect ratio and native presentation-frame intervals are preserved. Only the exact owner-authorized contiguous physical-operation interval is selected; full native 1920 × 1080 pixels are encoded without crop or resize. Native source audio/private metadata are omitted. Encoded packets, avcC, decoded pixels and reordered DTS are not claimed identical.",
         "encodedVideoPacketsByteExact": false,
-        "allPacketPTSExact": true,
-        "allPacketDTSExact": true,
-        "allPacketDurationsExact": true,
+        "allPacketPTSExact": false,
+        "allPacketDTSExact": false,
+        "allPacketDurationsExact": false,
         "avcCExtradataByteExact": false,
         "identityTrackMatrixExact": true,
         "trackMatrix": [
@@ -3526,7 +3764,7 @@
         "videoCodec": "h264",
         "codecTag": "avc1",
         "transcoded": true,
-        "nativeBrowserAcceptance": "Source verification only; native browser and release acceptance are recorded separately.",
+        "nativeBrowserAcceptance": "Source and local CPU quality verification only; actual built-browser acceptance and publication remain separate.",
         "nativeFrameRate": "25/1",
         "sourceColorSpace": "smpte170m",
         "sourceColorTransfer": "bt709",
@@ -3534,22 +3772,27 @@
         "decodedFramesByteExact": false,
         "transcodeRecipe": {
           "encoder": "libx264",
-          "crf": 16,
+          "crf": 23,
           "preset": "slow",
           "profile": "High",
           "level": 41,
-          "bFrames": 0,
-          "refs": 4
+          "bFrames": 3,
+          "refs": 4,
+          "keyframeInterval": 60,
+          "minimumKeyframeInterval": 30,
+          "resize": null
         },
         "quality": {
           "metric": "SSIM",
-          "comparedFrames": 522,
+          "comparedFrames": 200,
+          "mean": 0.988161265,
+          "minimumFrame": 0.985489,
+          "maximumFrame": 0.992829,
+          "statsSHA256": "50b71294a2642a23d7aa28ef89617f8203e9c3f78953b1350db7683d00ce8a3f",
           "allFramesCompared": true,
-          "mean": 0.9943950919540229,
-          "minimumFrame": 0.99262,
-          "maximumFrame": 0.997528,
-          "statsSHA256": "0a461b6a2af10b49885b45347d8ba9fcf4c5367571c75818378d0c9d265a5950"
-        }
+          "reference": "Original native-size selected source frames."
+        },
+        "sourceDecodePolicy": "Default native input decoding."
       },
       "alt": "Original recording of the physical rotary-cutting prototype machining a polystyrene workpiece.",
       "caption": "Original recording of the physical rotary-cutting prototype machining a polystyrene workpiece.",

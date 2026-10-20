@@ -4,6 +4,7 @@ import ProjectCaseStudyControls from './ProjectCaseStudyControls';
 import ProjectCaseStudyStage from './ProjectCaseStudyStage';
 import InformationSkin from './InformationSkin';
 import {projectStudyEvidence} from './project-study-media.mjs';
+import {projectStudyLayout,projectStudyEvidenceLayout} from './project-study-layout.mjs';
 import styles from './ProjectCaseStudy.module.css';
 
 function Panel({children,opening=false}){
@@ -12,9 +13,13 @@ function Panel({children,opening=false}){
 function SourceLink({image}){
  return <a className={styles.sourceLink} href={image.src} target="_blank" rel="noreferrer">View full image <span aria-hidden="true">↗</span></a>;
 }
+function layoutAttributes(layout){
+ return{'data-study-composition':layout.composition,'data-study-layout':layout.layout,'data-study-source-shape':layout.sourceShape,'data-study-source-role':layout.sourceRole,'data-study-reading-density':layout.readingDensity};
+}
 function PrimaryVisual({image,chapter,prefix,opening=false,model,motion}){
  const inspect=model?.chapters.includes(chapter),poster=motion?.poster??image,source=motion??image;
- return <div className={styles.visualSlot} data-project-model-control={inspect?'':undefined} tabIndex={inspect?0:undefined} role={inspect?'group':undefined} aria-label={inspect?`${model.alt} When 3D is available, drag horizontally or use arrow keys to inspect. Home or Escape returns to the chapter view.`:undefined}>
+ return <div className={styles.visualSlot}>
+  <div className={styles.sourceAperture} data-project-source-aperture>
   <figure className={styles.primaryFigure} data-project-media={chapter} aria-describedby={`${prefix}-${chapter}-caption ${prefix}-${chapter}-credit`}>
    <div className={styles.mediaFrame} data-project-media-frame>
     <picture><img data-project-media-poster src={poster.src} width={poster.width} height={poster.height} alt={source.alt} loading={opening?'eager':'lazy'} decoding="async" fetchPriority={opening?'high':undefined} data-site-critical={opening?'':undefined}/></picture>
@@ -22,25 +27,34 @@ function PrimaryVisual({image,chapter,prefix,opening=false,model,motion}){
     <span className={styles.imageFailure} role="status">Image unavailable. The source caption and project text remain available.</span>
    </div>
   </figure>
+  {inspect&&<div className={styles.modelTarget} data-project-model-control data-project-model-target={chapter} tabIndex={0} role="group" aria-label={`${model.alt} When 3D is available, drag horizontally or use arrow keys to inspect. Home or Escape returns to the chapter view.`} aria-describedby={`${prefix}-${chapter}-model-state ${prefix}-${chapter}-model-help`}/>}
+  </div>
   <div className={styles.sourcePanel} data-project-source-caption={chapter} data-information-window="evidence-caption" data-home-scroll-window="project-caption">
    <InformationSkin/>
-   {inspect&&<p className={styles.modelDescription} data-project-model-description>{model.alt}</p>}
+   {inspect&&<>
+    <p className={styles.modelState} id={`${prefix}-${chapter}-model-state`} data-project-model-state={chapter} role="status">Original source view.</p>
+    <p className={styles.modelDescription} data-project-model-description>{model.alt}</p>
+    <p className={styles.modelHelp} id={`${prefix}-${chapter}-model-help`} data-project-model-help={chapter} hidden>Drag the model to inspect. With focus, use arrow keys; Home or Esc returns.</p>
+    <button className={styles.sourceAction} type="button" data-project-model-reset={chapter} hidden>Return to chapter view</button>
+   </>}
    <p id={`${prefix}-${chapter}-caption`} className={styles.sourceCaption}>{source.caption}</p>
    <p id={`${prefix}-${chapter}-credit`} className={styles.credit}>{source.credit}</p>
-   {motion?<>
+   <div className={styles.sourceLinks}>{motion?<>
     <a className={styles.sourceLink} data-project-motion-source href={motion.src} target="_blank" rel="noreferrer">{motion.kind==='recording'?'View recording':'View animation'} <span aria-hidden="true">↗</span></a>
     <SourceLink image={poster}/>
+   </>:<SourceLink image={image}/>}</div>
+   {motion&&<>
     <div className={styles.motionControls}>
      <button type="button" data-project-motion-toggle={motion.id} aria-pressed="false" hidden>Play recording</button>
      <button type="button" data-project-motion-replay={motion.id} hidden>Replay recording</button>
     </div>
     <p className={styles.motionStatus} data-project-motion-status={motion.id} role="status"/>
-   </>:<SourceLink image={image}/>}
+   </>}
   </div>
  </div>;
 }
 function EvidenceFigure({image}){
- return <figure className={styles.evidence}>
+ return <figure className={styles.evidence} data-study-evidence-layout={projectStudyEvidenceLayout(image)} data-study-evidence-role={image.purpose==='diagram'?'technical-plate':'photograph'}>
   <a className={styles.evidenceImage} href={image.src} target="_blank" rel="noreferrer" aria-label={`View full image: ${image.alt}`}><img data-project-evidence-image src={image.src} width={image.width} height={image.height} alt={image.alt} loading="lazy" decoding="async"/></a>
   <figcaption data-information-window="evidence-caption" data-home-scroll-window="project-caption"><InformationSkin/><p>{image.caption}</p><span>{image.credit}</span></figcaption>
  </figure>;
@@ -55,14 +69,13 @@ export default function ProjectCaseStudy({project}){
   <ProjectCaseStudyControls projectId={project.id} chapterCount={chapters.length}/>
   <main id="portfolio-main" tabIndex={-1} className={styles.page} data-project-study={project.id} data-portfolio-root data-portfolio-section="project-study">
    {project.model&&<ProjectCaseStudyStage projectId={project.id} model={project.model}/>}
-   <article aria-labelledby={`${prefix}-overview`}>
-    <header className={`${styles.chapter} ${styles.opening}`} data-project-chapter="overview">
+   <article aria-labelledby={`${prefix}-overview-heading`}>
+    <header id={`${prefix}-overview`} tabIndex={-1} className={`${styles.chapter} ${styles.opening}`} data-project-chapter="overview" {...layoutAttributes(projectStudyLayout(project,'overview'))}>
      <div className={styles.chapterInner}>
-      <PrimaryVisual image={project.hero} chapter="overview" prefix={prefix} opening model={project.model} motion={project.motionMedia?.find(media=>media.chapter==='overview')}/>
       <Panel opening>
        <a href="/projects/" className={styles.backLink}>← All projects</a>
        <StudyLabel opening>{project.yearLabel} / {project.category}</StudyLabel>
-       <h1 id={`${prefix}-overview`} tabIndex={-1}>{project.title}</h1>
+       <h1 id={`${prefix}-overview-heading`} tabIndex={-1}>{project.title}</h1>
        {project.subtitle&&<p className={styles.subtitle}>{project.subtitle}</p>}
        <p>{project.summary}</p>
        <dl className={styles.metadata}>
@@ -71,25 +84,26 @@ export default function ProjectCaseStudy({project}){
        </dl>
        <a className={styles.readingLink} href={`#${prefix}-${project.sections[0].id}`}>Follow the study <span aria-hidden="true">↓</span></a>
       </Panel>
+      <PrimaryVisual image={project.hero} chapter="overview" prefix={prefix} opening model={project.model} motion={project.motionMedia?.find(media=>media.chapter==='overview')}/>
      </div>
     </header>
     {project.sections.map((section,index)=>{
      const motion=project.motionMedia?.find(media=>media.chapter===section.id),evidence=evidenceByChapter.get(section.id);
-     return <section key={section.id} className={styles.chapter} data-project-chapter={section.id} aria-labelledby={`${prefix}-${section.id}`}>
+     return <section key={section.id} id={`${prefix}-${section.id}`} tabIndex={-1} className={styles.chapter} data-project-chapter={section.id} aria-labelledby={`${prefix}-${section.id}-heading`} {...layoutAttributes(projectStudyLayout(project,section.id))}>
      <div className={styles.chapterInner}>
       {section.media[0]&&<PrimaryVisual image={section.media[0]} chapter={section.id} prefix={prefix} model={project.model} motion={motion}/>}
       <Panel>
        <StudyLabel kind={section.kind}>{String(index+1).padStart(2,'0')} / {section.label}</StudyLabel>
-       <h2 id={`${prefix}-${section.id}`} tabIndex={-1}>{section.title}</h2>
+       <h2 id={`${prefix}-${section.id}-heading`} tabIndex={-1}>{section.title}</h2>
        {section.paragraphs.map(paragraph=><p key={paragraph}>{paragraph}</p>)}
       </Panel>
      </div>
      {evidence.length>0&&<div className={styles.evidenceBand}>{evidence.map(image=><EvidenceFigure key={image.src} image={image}/>)}</div>}
     </section>;})}
-    <footer className={`${styles.chapter} ${styles.creditsChapter}`} data-project-chapter="credits" aria-labelledby={`${prefix}-credits`}>
+    <footer id={`${prefix}-credits`} tabIndex={-1} className={`${styles.chapter} ${styles.creditsChapter}`} data-project-chapter="credits" aria-labelledby={`${prefix}-credits-heading`} {...layoutAttributes(projectStudyLayout(project,'credits'))}>
      <div className={styles.chapterInner}><Panel>
       <StudyLabel kind="make">{String(chapters.length-1).padStart(2,'0')} / CREDITS</StudyLabel>
-      <h2 id={`${prefix}-credits`} tabIndex={-1}>Project credits.</h2>
+      <h2 id={`${prefix}-credits-heading`} tabIndex={-1}>Project credits.</h2>
       <dl className={styles.credits}>{project.credits.map(credit=><div key={credit.role}><dt>{credit.role}</dt><dd>{credit.names}</dd></div>)}</dl>
       <p className={styles.sourceNote}>{project.sourceNote}</p>
       <a className={styles.related} href={project.related.href}><span>RELATED STUDY</span><strong data-display-type>{project.related.title}</strong><span aria-hidden="true">↗</span></a>

@@ -8,6 +8,7 @@ import {createLiquidGlassPresenter} from '../presentation/LiquidGlassPresenter.m
 import {observeProjectStudyStage} from '../site/ProjectStudyStageRegistry.mjs';
 import {createProjectStudyScenePresenter} from '../site/ProjectStudyScenePresenter.mjs';
 import {createProjectStudyBackdropPresenter} from '../site/ProjectStudyBackdropPresenter.mjs';
+import {createProjectStudyChapterPresenter} from '../site/ProjectStudyChapterPresenter.mjs';
 
 /** Actual Bending Layer 1 score and renderer. Optional verified project scenes
  * borrow this demand clock through their own adapter; Layer 1 never owns their
@@ -30,7 +31,7 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
   const studyPaused=()=>!!studyRoot?.hasAttribute('data-study-paused');
   const forced=home?win.matchMedia('(forced-colors: active)'):null,connection=home?win.navigator?.connection:null;
   const naturalY=element=>{let top=0;for(let node=element;node;node=node.offsetParent)top+=node.offsetTop;return top;};
-  let homeDirty=!!home,glassDirty=!!liquid,keyboardFocus=true,projectScene=null,projectBackdrop=null,releaseStage=()=>{};
+  let homeDirty=!!home,glassDirty=!!liquid,keyboardFocus=true,projectScene=null,projectBackdrop=null,projectChapters=null,releaseStage=()=>{};
   let previous=0,resumed=true,pendingImpulse=0,touchY=null,disposed=false,frames=0;
   let pointer={x:0,y:0,active:false},size={width:win.innerWidth,height:win.innerHeight};
   let stableWidth=0,latest=null;
@@ -54,7 +55,8 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
     if(disposed||scheduler.suspended)return;
     const dt=previous?(now-previous)/1000:1/60;previous=now;frames++;
     const wasResumed=resumed;
-    if(homeDirty){home.measure({naturalY,viewportHeight:win.innerHeight,docY:win.scrollY});projectScene?.measure(win.innerWidth,win.innerHeight);projectBackdrop?.measure(win.innerWidth,win.innerHeight);homeDirty=false;}
+    if(homeDirty){projectChapters?.measure({docY:win.scrollY});home.measure({naturalY,viewportHeight:win.innerHeight,docY:win.scrollY});projectScene?.measure(win.innerWidth,win.innerHeight);projectBackdrop?.measure(win.innerWidth,win.innerHeight);homeDirty=false;}
+    projectChapters?.publish({docY:win.scrollY,viewportHeight:win.innerHeight});
     if(glassDirty){liquid.measure({opaque:opaqueGlass()});glassDirty=false;}
     const impulse=pendingImpulse;pendingImpulse=0;
     advanceChapterPlayback(playback,dt,{chapter:'overview',impulse,reducedMotion:reduced.matches,resumed,paused:!ready()||studyPaused()});
@@ -75,10 +77,12 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
     if(before===scheduler.suspended)return;
     previous=0;resumed=true;pendingImpulse=0;touchY=null;pointer={x:0,y:0,active:false};
     if(scheduler.suspended){advanceChapterPlayback(playback,0,{hidden:true});home?.publish({...homePolicy(),dt:0,docY:win.scrollY,seek:true});liquid?.reset();liquid?.publish({hidden:true,opaque:opaqueGlass()});projectBackdrop?.suspend(reason);}
-    else{projectBackdrop?.resume();measure();scheduler.schedule();}
+    else{projectBackdrop?.resume();if(projectChapters){homeDirty=!!home;glassDirty=!!liquid;}measure();scheduler.schedule();}
   };
   const visibility=()=>suspend('visibility',doc.hidden);
   const siteState=()=>{previous=0;resumed=true;homeDirty=!!home;glassDirty=!!liquid;liquid?.reset();scheduler.schedule();};
+  const chapterTools=studyRoot?doc.querySelector?.('[data-project-reading-tools]'):null;
+  if(chapterTools)projectChapters=createProjectStudyChapterPresenter({root:studyRoot,tools:chapterTools,navigation:doc.querySelector?.('[data-project-chapter-navigation]'),publisher:dom.forOwner('project-study-chapters'),listen,onPause:siteState});
   const wheel=event=>{
     if(event.ctrlKey||!motionAllowed())return;
     const delta=event.deltaY*(event.deltaMode===1?16:event.deltaMode===2?win.innerHeight:1);
@@ -104,7 +108,8 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
   if(home){
     // Native scrolling, including keyboard and anchor movement, invalidates the
     // same demand scheduler. Home never starts a second frame clock.
-    listen(win,'scroll',()=>{if(ready()&&!scheduler.suspended&&!reduced.matches&&!connection?.saveData&&!forced?.matches)scheduler.schedule();},{passive:true});
+    listen(win,'scroll',()=>{if(projectChapters||ready()&&!scheduler.suspended&&!reduced.matches&&!connection?.saveData&&!forced?.matches)scheduler.schedule();},{passive:true});
+    if(projectChapters)listen(win,'hashchange',()=>scheduler.schedule(),{passive:true});
     listen(homeRoot,'load',homeInvalidate,{capture:true});
     listen(homeRoot,'focusin',()=>{if(!scheduler.suspended)scheduler.schedule();});
     listen(homeRoot,'focusout',()=>{if(!scheduler.suspended)scheduler.schedule();});
@@ -121,13 +126,13 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
     for(const type of ['pointermove','pointerdown','pointerup','pointercancel'])listen(doc,type,event=>{if(type==='pointerdown')keyboardFocus=false;pointerGlass(event);},{passive:true});
     listen(doc,'keydown',()=>{keyboardFocus=true;liquid.reset();if(!scheduler.suspended)scheduler.schedule();});
     for(const query of glassPreferences)listen(query,'change',siteState);
-    if(win.MutationObserver){const observer=new win.MutationObserver(records=>{if(!records?.length||records.some(record=>record.attributeName==='data-study-paused'))siteState();else scheduler.schedule();});observer.observe(studyRoot,{attributes:true,attributeFilter:['data-study-paused','data-project-active-chapter']});scope.add(()=>observer.disconnect());}
+    if(win.MutationObserver){const observer=new win.MutationObserver(()=>{if(!projectChapters||projectChapters.syncPause())siteState();});observer.observe(studyRoot,{attributes:true,attributeFilter:['data-study-paused']});scope.add(()=>observer.disconnect());}
   }
   listen(doc,'visibilitychange',visibility);
   // A retained BFCache document may resume the same resource. A real document
   // exit releases backing storage, observation and listeners immediately.
   listen(win,'pagehide',event=>{if(event.persisted)suspend('page',true);else dispose();});
-  listen(win,'pageshow',()=>{visibility();suspend('page',false);});
+  listen(win,'pageshow',()=>{visibility();suspend('page',false);if(projectChapters)homeInvalidate();});
   listen(doc,'freeze',()=>suspend('freeze',true));
   listen(doc,'resume',()=>{visibility();suspend('freeze',false);});
   if(win.MutationObserver){const observer=new win.MutationObserver(siteState);observer.observe(doc.documentElement,{attributes:true,attributeFilter:['data-site-entry-state']});scope.add(()=>observer.disconnect());}
@@ -137,9 +142,9 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
     homeDirty=!!home;scheduler.schedule();
   });
   measure();scheduler.schedule();
-  function dispose(){if(disposed)return;disposed=true;releaseStage();projectBackdrop?.dispose();projectScene?.dispose();projectScene=null;scheduler.dispose();home?.dispose();liquid?.dispose();scope.dispose();events.dispose();binding.dispose();}
+  function dispose(){if(disposed)return;disposed=true;releaseStage();projectBackdrop?.dispose();projectScene?.dispose();projectScene=null;projectChapters?.dispose();scheduler.dispose();home?.dispose();liquid?.dispose();scope.dispose();events.dispose();binding.dispose();}
   return {
-    inspect:()=>({owner:'site',frames,playback:sampleChapterPlayback(playback),chapterScene:latest,size:{...size},lifecycle:scheduler.inspect(),events:events.inspect(),pageField:binding.inspect(),homeScrolling:home?.inspect()??null,projectStudy:studyRoot?{paused:studyPaused(),liquidGlass:liquid?.inspect(),scene:projectScene?.inspect()??null,backdrop:projectBackdrop?.inspect()??null,media:projectBackdrop?.inspect().media??[]}:null,domPublication:publisher.inspect(),disposed}),
+    inspect:()=>({owner:'site',frames,playback:sampleChapterPlayback(playback),chapterScene:latest,size:{...size},lifecycle:scheduler.inspect(),events:events.inspect(),pageField:binding.inspect(),homeScrolling:home?.inspect()??null,projectStudy:studyRoot?{paused:studyPaused(),chapters:projectChapters?.inspect()??null,liquidGlass:liquid?.inspect(),scene:projectScene?.inspect()??null,backdrop:projectBackdrop?.inspect()??null,media:projectBackdrop?.inspect().media??[]}:null,domPublication:publisher.inspect(),disposed}),
     dispose,
   };
 }

@@ -226,8 +226,8 @@
         {
           "id": "film-machine-simulation",
           "chapter": "making",
-          "width": 4096,
-          "height": 2304,
+          "width": 1920,
+          "height": 1080,
           "durationSeconds": 4.8,
           "frameCount": 120,
           "loop": true,
@@ -242,7 +242,8 @@
             "caption": "Full-machine rotary-cutting simulation from the original studio animation.",
             "credit": "Studio design and digital animation: Chia-Hsuan Chao / National Cheng Kung University.",
             "src": "/assets/projects/mode-s-of-making/film-machine-motion-poster.webp"
-          }
+          },
+          "kind": "simulation"
         },
         {
           "id": "film-physical-cutting",
@@ -251,8 +252,8 @@
           "src": "/assets/projects/mode-s-of-making/film-physical-cutting.mp4",
           "width": 1920,
           "height": 1080,
-          "durationSeconds": 10.01,
-          "frameCount": 300,
+          "durationSeconds": 8.008,
+          "frameCount": 240,
           "loop": true,
           "alt": "Physical heat-cutting operation from the original studio film.",
           "caption": "Physical heat-cutting operation from the original studio film.",
@@ -273,8 +274,8 @@
           "src": "/assets/projects/mode-s-of-making/prototype-cutting-operation.mp4",
           "width": 1920,
           "height": 1080,
-          "durationSeconds": 20.88,
-          "frameCount": 522,
+          "durationSeconds": 8,
+          "frameCount": 200,
           "loop": true,
           "alt": "Original recording of the physical rotary-cutting prototype machining a polystyrene workpiece.",
           "caption": "Original recording of the physical rotary-cutting prototype machining a polystyrene workpiece.",
@@ -511,7 +512,8 @@
           "loop": true,
           "alt": "The completed entrance installation changes illumination in a night view.",
           "caption": "The built installation during a night lighting sequence.",
-          "credit": "Project: PKD Engineering Consultants."
+          "credit": "Project: PKD Engineering Consultants.",
+          "kind": "recording"
         }
       ]
     },
@@ -725,7 +727,8 @@
           "loop": true,
           "alt": "A printing nozzle deposits material along the upper edge of a dotted specimen.",
           "caption": "Original Group1 recording of nozzle deposition during the printing study.",
-          "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie."
+          "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie.",
+          "kind": "recording"
         }
       ]
     },
@@ -934,7 +937,8 @@
           "loop": true,
           "alt": "A robotic printing-path simulation showing the tool, shell geometry and path frames.",
           "caption": "Robotic printing-path simulation developed for the Group-Red study.",
-          "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao."
+          "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao.",
+          "kind": "simulation"
         }
       ]
     },
@@ -1155,7 +1159,8 @@
           "loop": false,
           "alt": "The original robot-assembly simulation presents an arm and reciprocal stick modules with its authored framing.",
           "caption": "Robot-assembly simulation of the Group6 reciprocal stick study.",
-          "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani."
+          "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani.",
+          "kind": "simulation"
         }
       ]
     },
@@ -1173,12 +1178,13 @@
       "yearLabel": "2024",
       "role": "Computational design and COMPAS XR development - ETH MAS DFab 2023-24 cohort project",
       "hero": {
-        "src": "/assets/projects/project-caschlatsch/hero.webp",
-        "width": 2000,
-        "height": 1333,
-        "alt": "The timber tower on its rocky site.",
-        "caption": "Caschlatsch in Disentis/Mustér.",
-        "credit": "Photo: Wataru Nomura / ETH Zurich."
+        "src": "/assets/projects/project-caschlatsch/portfolio-timber-model.webp",
+        "width": 1141,
+        "height": 761,
+        "alt": "Timber tower model on a stepped white site model in front of a window.",
+        "caption": "The architectural timber-tower model.",
+        "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
+        "purpose": "photograph"
       },
       "sections": [
         {
@@ -1192,12 +1198,13 @@
           ],
           "media": [
             {
-              "src": "/assets/projects/project-caschlatsch/mountain-setting.webp",
-              "width": 1365,
-              "height": 2048,
-              "alt": "The tower framed by a mountain landscape.",
-              "caption": "The installation and its setting.",
-              "credit": "Photo: Wataru Nomura / ETH Zurich."
+              "src": "/assets/projects/project-caschlatsch/portfolio-tower-on-site.webp",
+              "width": 1191,
+              "height": 1786,
+              "alt": "Timber tower seen through trees with visitors gathered at its base.",
+              "caption": "The constructed timber tower on site.",
+              "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
+              "purpose": "photograph"
             }
           ]
         },
@@ -1215,12 +1222,22 @@
           ],
           "media": [
             {
-              "src": "/assets/projects/project-caschlatsch/workflow.webp",
-              "width": 3200,
-              "height": 1000,
-              "alt": "Parametric model, module plan, CNC fabrication and AR assembly.",
-              "caption": "A conceptual public workflow.",
-              "credit": "Original website diagram based on public ETH Zurich descriptions."
+              "src": "/assets/projects/project-caschlatsch/portfolio-voxel-framework.webp",
+              "width": 2270,
+              "height": 1782,
+              "alt": "Original diagram of ID and Discrete Vector Generator processing classes and Voxel, Beam and Layer geometry classes.",
+              "caption": "The original five-class framework for voxel-based structural generation.",
+              "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
+              "purpose": "diagram"
+            },
+            {
+              "src": "/assets/projects/project-caschlatsch/portfolio-module-infill.webp",
+              "width": 2245,
+              "height": 830,
+              "alt": "Original voxel module studies showing initial frames, orthogonal and diagonal support, and five- and thirty-beam infill.",
+              "caption": "Module-frame, orthogonal/diagonal support and 5-/30-beam infill strategies (upper schematic detail).",
+              "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
+              "purpose": "diagram"
             }
           ]
         },
@@ -1230,12 +1247,31 @@
           "kind": "system",
           "media": [
             {
-              "src": "/assets/projects/project-caschlatsch/workflow.webp",
-              "width": 3200,
-              "height": 1000,
-              "alt": "Parametric model, module plan, CNC fabrication and AR assembly.",
-              "caption": "A conceptual public workflow.",
-              "credit": "Original website diagram based on public ETH Zurich descriptions."
+              "src": "/assets/projects/project-caschlatsch/portfolio-xr-assembly-sequence.webp",
+              "width": 2325,
+              "height": 1690,
+              "alt": "Original app screenshots and arrows showing module selection, floating and orientation, stacking/assembly mode, model positioning and beam selection.",
+              "caption": "The original AR-based beam and module assembly sequence.",
+              "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
+              "purpose": "diagram"
+            },
+            {
+              "src": "/assets/projects/project-caschlatsch/portfolio-xr-data-exchange.webp",
+              "width": 2310,
+              "height": 1240,
+              "alt": "Original CAD-to-Firebase-to-AR diagram with JSON building plans/checklists and OBJ mesh data.",
+              "caption": "The original cloud data-exchange framework for XR and CAD.",
+              "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
+              "purpose": "diagram"
+            },
+            {
+              "src": "/assets/projects/project-caschlatsch/portfolio-xr-interface.webp",
+              "width": 2481,
+              "height": 1035,
+              "alt": "Original annotated assembly app interfaces identifying orientation, float, scale, module rotation and selection, beam ID, sequence order and stacking/assembly modes.",
+              "caption": "The original XR interfaces for modular assembly and beam positioning.",
+              "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
+              "purpose": "diagram"
             }
           ],
           "title": "Developing XR for multi-module assembly.",
@@ -1257,20 +1293,22 @@
           ],
           "media": [
             {
-              "src": "/assets/projects/project-caschlatsch/cnc-fabrication.webp",
-              "width": 2000,
-              "height": 1333,
-              "alt": "A CNC tool cuts a timber beam.",
-              "caption": "Beam fabrication at ETH Zurich.",
-              "credit": "Photo: Wataru Nomura / ETH Zurich."
+              "src": "/assets/projects/project-caschlatsch/portfolio-xr-workshop.webp",
+              "width": 662,
+              "height": 373,
+              "alt": "Participant checks a handheld device while positioning a timber member within a module.",
+              "caption": "XR-guided timber assembly in the collaborative workshop.",
+              "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
+              "purpose": "photograph"
             },
             {
-              "src": "/assets/projects/project-caschlatsch/module-assembly.webp",
-              "width": 2000,
-              "height": 1333,
-              "alt": "Students work within a timber module.",
-              "caption": "Collaborative module assembly.",
-              "credit": "Photo: Wataru Nomura / ETH Zurich."
+              "src": "/assets/projects/project-caschlatsch/portfolio-robotic-assembly.webp",
+              "width": 1024,
+              "height": 575,
+              "alt": "Industrial robot and people working around a timber assembly in the fabrication workshop.",
+              "caption": "Robot-assisted timber module assembly.",
+              "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
+              "purpose": "photograph"
             }
           ]
         },
@@ -1285,20 +1323,13 @@
           ],
           "media": [
             {
-              "src": "/assets/projects/project-caschlatsch/timber-steps.webp",
-              "width": 1365,
-              "height": 2048,
-              "alt": "Timber steps rise through the structure.",
-              "caption": "A route through the tower.",
-              "credit": "Photo: Wataru Nomura / ETH Zurich."
-            },
-            {
-              "src": "/assets/projects/project-caschlatsch/timber-interior.webp",
-              "width": 2000,
-              "height": 1333,
-              "alt": "Intersecting beams frame the timber interior.",
-              "caption": "Inside the assembled structure.",
-              "credit": "Photo: Wataru Nomura / ETH Zurich."
+              "src": "/assets/projects/project-caschlatsch/portfolio-timber-interior.webp",
+              "width": 775,
+              "height": 517,
+              "alt": "Upward view through intersecting timber members toward the blue sky.",
+              "caption": "Inside the constructed timber tower.",
+              "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
+              "purpose": "photograph"
             }
           ]
         }
@@ -1341,12 +1372,8 @@
           "names": "Schilliger Holz AG / Bearth Lenn AG / Strabag AG Disentis/Mustér / SFS Group Schweiz AG / Bau & Holz"
         },
         {
-          "role": "Photography",
-          "names": "Wataru Nomura"
-        },
-        {
-          "role": "Workflow diagram",
-          "names": "Original website graphic based on public ETH Zurich descriptions"
+          "role": "Visual material source",
+          "names": "Chia-Hsuan Chao / ETH MAS DFab 2023–24 project publication"
         }
       ],
       "sourceNote": "I worked on computational aggregation and the digital-to-physical assembly workflow within the MAS DFab cohort. During production, I improved COMPAS XR so users could select and switch modules from the cloud, track beam IDs and follow the assembly sequence in real time.",

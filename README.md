@@ -1,127 +1,221 @@
-# Portfolio framework and Bending-Active presentation
+# JosHsuan Chao — portfolio architecture
 
-**Portfolio story and source continuity — 20 October 2026:** The owner requests final-film material for Mode/s of Making, a fuller Caschlatsch story, direct contribution/credit wording on all eight cases, one continuous appearance interval per background model, and no repeated background photograph in the 2D information layer. [Decision 0018](docs/decisions/0018-portfolio-story-source-continuity.md) and [the integration contract](roles/uiux-designer/cases/bending-active-thesis/PORTFOLIO_STORY_CONTINUITY_INTEGRATION.md) govern the correction and its verification status. Necessary Bending/XR outer-motion changes are intentional; original source bytes, geometry, material/light/camera recipes, one runtime clock and the empty framework remain protected. Commit, push and same-artifact CI-gated publication are owner-authorized through completion.
+A static portfolio with native editorial pages, source-backed project studies,
+and optional 3D/media presentation. The public site is
+[**joshsuan.github.io**](https://joshsuan.github.io/).
 
-**Project background motion published — 20 October 2026 (19 October UTC):** Six new studies now use Bending/XR-derived source passages, five authentic recordings/GIF derivatives and a generic loader with one owner-name heading. [CI 39324474356](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39324474356) passes all 396 browser executions; [deployment 39339773684](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39339773684) publishes the same `4fa0af9` artifact. The [integration contract](roles/uiux-designer/cases/bending-active-thesis/PROJECT_BACKGROUND_MOTION_INTEGRATION.md) and [verification record](roles/uiux-designer/cases/bending-active-thesis/PROJECT_BACKGROUND_MOTION_VERIFICATION.md) cover all twelve role responsibilities, 117 pins including all 109 protected originals, native live checks and retained visual/baseline limits. The [DORA CI plan](docs/CI_DELIVERY_PLAN.md) separates implemented gates from proposed feedback improvements.
+This repository contains **two independent applications**. The selected public
+application lives in the Bending-Active case workspace; the reusable `src/`
+framework intentionally contains no personal projects or registered scenes.
+The latest refinement is governed by [decision 0019](docs/decisions/0019-portfolio-refinement-and-runtime.md)
+and its [integration and acceptance record](roles/uiux-designer/cases/bending-active-thesis/PORTFOLIO_REFINEMENT_INTEGRATION.md).
+Implemented source, local acceptance and a deployed release are separate facts;
+the public [`release.json`](https://joshsuan.github.io/release.json) identifies
+the deployed commit and source revisions.
 
-**Six selected project studies — 18 October 2026:** The owner authorizes **Mode/s of Making**, **Entrance Installation Art**, **Dot-Based 3D Printing**, **HC3DP Caustics**, **Special Assemblies** and **Project Caschlatsch**, with separate pages and selected-work cards. [Decision 0016](docs/decisions/0016-three-fabrication-studies.md) and [the current six-project contract](roles/uiux-designer/cases/bending-active-thesis/SIX_PROJECT_STUDIES_INTEGRATION.md) govern source-backed English copy, credited images, five verified source-model derivatives and a shared imperative Three adapter on the existing background driver's clock. Caschlatsch uses public ETH photographs and an original public-workflow diagram; its restricted CAD and engineering drawings are excluded. The original Bending/XR presentations and empty reusable framework remain protected. Implementation through same-artifact CI-gated deployment is authorized. The 230-file/109-pin CI artifact passed 342 website and 24 framework browser executions and was published without rebuilding. The integration record retains source/visual evidence, completed native live verification and historical failures. The earlier three-case documentary record remains historical.
+## System boundaries
 
-**Current OCR identity / XR viewport revision — 18 October 2026:** The owner requests the supplied computational-designer-and-developer introduction and matching theme, OCR body text with a compatible GitHub-sourced heading face and Apple-informed tracking/leading across every published page, Bending-aligned XR project navigation/labels, a full-viewport XR renderer, removal of the XR opening photograph and a transparent Context view of the complete actual CAD workspace. [Decision 0015](docs/decisions/0015-ocr-identity-xr-workspace.md) and [the integration contract](roles/uiux-designer/cases/bending-active-thesis/OCR_XR_VIEWPORT_INTEGRATION.md) supersede the earlier single-face OCR checkpoint and opening-photo/cropped-stage choices. Bending's explicitly authorized typography changes preserve its geometry, material, camera, motion and evidence; originals and the empty reusable framework remain protected. Implementation through same-artifact CI-gated deployment is authorized. This paragraph records scope, not completed browser acceptance or publication.
+| Application | Source and purpose | Build output |
+| --- | --- | --- |
+| Selected public portfolio | `roles/uiux-designer/cases/bending-active-thesis/{app,components,runtime,release}`. Home, About, Project, Contact, Bending-Active, XR and six further project studies. | `pnpm build:pages` → `.pages-workspace/out/` |
+| Reusable framework | `src/` and empty `content/` inputs. Typed content/motion contracts, generated entry templates, scene loading/fallbacks and an empty scene registry. | `pnpm build` → `out/` |
+| Specialist workspaces | Twelve existing roles under `roles/`: source preparation, design research, local tools and verification. Only explicitly allowlisted case files enter the public build. | Separate opt-in tools; see the [role index](roles/README.md). |
 
-**Current prepared-page / Home / XR revision — 16 October 2026:** The owner authorizes implementation through deployment of destination-ready loading, page-open preparation of the live model card, an expandable 9/12/15-cell conceptual grid without drawn cell dividers, and Bending's scrolling response on Home. XR opens with its approved main visual while its hidden 3D may prepare; later chapters retain 3D and gain project-local background/entry/exit. The separate Contribution/Limits sections are removed while source facts and credits remain. [Decision 0014](docs/decisions/0014-prepared-page-home.md), [the current contract](roles/uiux-designer/cases/bending-active-thesis/PREPARED_PAGE_HOME_INTEGRATION.md) and [verification checkpoint](roles/uiux-designer/cases/bending-active-thesis/PREPARED_PAGE_HOME_VERIFICATION.md) supersede the earlier visibility-only card, fixed-nine-grid and ten-chapter/opening-model descriptions below. The introduction/shared atmosphere remain model-free; the whole Home document can already contain the prepared offscreen card canvas. Bending's protected case, approved bytes, empty framework and exact-artifact CI/CD gate remain. Source-level checks do not claim completed browser acceptance or publication of this revision.
+Both applications use Next.js static export with trailing-slash routes. The
+public site needs no request-time Node server, database, CMS or account service.
+Native document links preserve direct loading, browser history and resource
+lifetimes. Text, captions, credits, source links and poster alternatives remain
+HTML; understanding a project does not require WebGL or completing an animation.
 
-**XR immersive presentation — 16 October 2026:** The owner requests the Bending-style background scene / floating information approach for XR while preserving its accepted content. [Decision 0013](docs/decisions/0013-xr-immersive-stage.md) authorizes a single project-local model/phone stage, native continuous recording chapters, standard glass information and a centered/inset XR card image. The [team research](roles/uiux-designer/cases/bending-active-thesis/XR_IMMERSIVE_TEAM_REVIEW.md) records all twelve role responsibilities before implementation. The protected Bending case, original source pins, empty framework and exact-artifact publication gate remain. Implementation and deployment are authorized; this dated note does not claim final verification or publication.
+The primary stack is Next.js/React and Three.js; Bending uses a demand-rendered
+React Three Fiber scene, while the generic studies and XR have their existing
+imperative rendering adapters. Exact dependencies are in
+[package.json](package.json) and [pnpm-lock.yaml](pnpm-lock.yaml).
+The framework contains a Theatre adapter under `src/motion/theatre`; this does
+not mean the selected public application runs an authored Theatre timeline.
+Its current choreography uses the checked-in project samplers/presenters.
+Studio remains local-only and is rejected from production bundles.
 
-**Shared background and XR research revision — 16 October 2026:** The owner now authorizes promoting Bending-Active's actual CSS atmosphere, vignette and independent Canvas 2D ASCII field into the selected public application's shared background, and extending the XR case from the latest verified portfolio evidence. [Decision 0012](docs/decisions/0012-global-background-xr-research.md) separates that background from native page content and each project's own 3D/interaction. Bending's published `6288286` presentation is the protected comparison target: its content, model, materials, lighting, camera, motion and interaction must remain unchanged. The [background integration](roles/uiux-designer/cases/bending-active-thesis/GLOBAL_BACKGROUND_INTEGRATION.md) records the exclusive background lease, delegated case clock and native-document lifecycle; the [XR source record](roles/uiux-designer/cases/bending-active-thesis/XR_PROJECT_INTEGRATION.md) governs the selected media and owner-specified `only_interior.3dm` source. This request supersedes the static common-background proposal and earlier XR presentation/card selection only within this explicit scope. Implementation, matched pre/post and live Bending verification, commit/push and same-artifact CI-gated deployment are authorized; this paragraph does not claim those acceptance or publication steps have completed.
+## Content and public asset pipeline
 
-**Selected portfolio revision — 16 October 2026:** The owner authorized About / Project / Contact, a model-free introduction that scrolls to a nine-cell project index, site-entry and cross-page loading, and a second selected XR research case. The subsequent card revision adds square full-bleed rounded-glass cards, a visibility-gated live preview of the actual Bending model, an excerpt of the specifically supplied XR `Background.mp4`, and hover/focus titles. [Decision 0011](docs/decisions/0011-selected-portfolio-navigation.md) supersedes the earlier home-to-thesis link and static-card proposal while preserving the empty reusable framework and exact-artifact publication gate. [Visual role review](roles/uiux-designer/cases/bending-active-thesis/PORTFOLIO_UI_REVIEW.md), [runtime integration](roles/uiux-designer/cases/bending-active-thesis/PORTFOLIO_RUNTIME_INTEGRATION.md) and [XR evidence](roles/uiux-designer/cases/bending-active-thesis/XR_PROJECT_INTEGRATION.md) describe the implementation. Earlier dated checkpoints below remain historical.
+Software architecture and executable contracts are maintained here. Original
+portfolio documents, CAD, footage and content preparation remain in the
+owner-designated preparation workspace described in
+[architecture Sections 00 and 12](docs/architecture.md#00-current-project-baseline-and-source-authority).
+Normal builds never scan that workspace or require a private drive.
 
-**Completed pre-introduction publication — 15 October 2026:** Bending-Active's neutral glass / 2D and scene-background revision was deployed at `d34e38aac02c66cfcc4296d5405392eb77501852`. [CI 38783455602](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/38783455602) passed all fourteen jobs and 156 public browser scenarios across fifteen spec files; [deployment 38787493080](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/38787493080) published its tested artifact. Live verification matched all ten checked HTML/release/script/style responses byte-for-byte. Earlier pending paragraphs below are historical; [the completed checkpoint](roles/uiux-designer/cases/bending-active-thesis/SCENE_BACKGROUND_LIGHTING.md#completed-publication-checkpoint--15-october-2026) records output identity and receipts. The subsequent [personal homepage introduction](roles/uiux-designer/cases/bending-active-thesis/HOME_INTRODUCTION.md) has its own implementation and verification record.
+```mermaid
+flowchart LR
+    Private[Private originals and preparation] -. reviewed public handoff .-> Release[Release JSON and pinned public derivatives]
+    Release --> Validate[Schema, provenance and byte validation]
+    Code[Allowlisted app, components and runtime] --> Validate
+    Validate --> Export[Next static export and public artifact audit]
+    Export --> Pages[.pages-workspace/out]
+    Empty[Empty content inputs] --> Snapshot[content:export]
+    Snapshot --> Framework[src/generated and generated entry routes]
+    Framework --> Scaffold[out]
+```
 
-The owner-authorized local [scene background and light-field revision](roles/uiux-designer/cases/bending-active-thesis/SCENE_BACKGROUND_LIGHTING.md) adds steel-blue / warm-copper surroundings behind the existing glass and model. Source key/materials, camera, exposure and approved asset bytes remain unchanged. All 30 V2 browser checks pass; 22 viewport captures and two portal-only supplements record scoped contrast and explicit limits. After visual review and a native-input audit confirming the orange model outline is keyboard focus, the owner agreed to continue. The owner explicitly renewed commit/push authorization for the reviewed neutral glass, 2D/catalog, background and existing keyboard-focus behavior, with deployment subject to the same-SHA CI gate. Execution remains pending; no completed commit or deployment is claimed here.
+[`release/manifest.json`](roles/uiux-designer/cases/bending-active-thesis/release/manifest.json)
+pins public bytes and source-record hashes. Story/introduction/contact JSON,
+XR records and `project-studies.json` supply the selected application;
+`project-assets.json` records the reviewed derivatives and provenance.
+[`build-pages.mjs`](scripts/build-pages.mjs) verifies that handoff, copies only
+explicitly allowed source/assets into a generated workspace, builds once and
+runs [`audit-pages.mjs`](scripts/audit-pages.mjs). Image/model/media validators
+check the declared dimensions, source geometry and native timing where relevant.
+Original documents, drafts, SQL, private paths and raw review records are not
+browser inputs. Publicly delivered assets are downloadable; a viewer is not a
+confidentiality boundary.
 
-The [Liquid Glass integration](roles/uiux-designer/cases/bending-active-thesis/LIQUID_GLASS_INTEGRATION.md) records the deployed `39636b7` baseline and a local neutral-dark revision across three floating controls, all seven standard 2D reading-window kinds and the catalog. Its 48 local browser passes and nineteen captures identify the preceding background baseline. The rejected white proposal and withdrawn publication approval remain historical facts; the renewed publication authorization and pending execution are recorded above.
+The framework's separate `content:export` validates repository-local `content/`
+and writes `src/generated/public-content.json` and `src/app/(entries)`.
+**Never edit generated entry routes manually.** Empty inputs generate no
+fictional projects or detail slugs. Do not modify either generated output
+folder as an implementation source.
 
-The owner-authorized [Apple-inspired materials, entry and event lifecycle integration](roles/uiux-designer/cases/bending-active-thesis/APPLE_GLASS_EVENT_INTEGRATION.md) records the 15 October request: a restrained readiness presentation, consistent frosted information panels, and reconciled 2D / 3D / ASCII trigger, interruption and terminal ownership. It follows the existing architecture, exact toolchain and same-artifact publication gate.
+English is the maintained documentation and public UI language. Owner
+conversations use Traditional Chinese; original evidence retains its source
+language, labels and credits.
 
-This repository contains the reusable empty Next.js portfolio framework and the completed Bending-Active presentation. On 8 October 2026 the owner authorized publishing that presentation to GitHub Pages. The explicit [public release](roles/uiux-designer/cases/bending-active-thesis/release/README.md) builds independently from its approved story/assets; the original framework and public-content arrays remain empty. [Decision 0006](docs/decisions/0006-public-thesis-pages.md) supersedes the earlier local-only boundary for this selected presentation.
+## Runtime building blocks and event flow
 
-Build the published home page with `pnpm build:pages` and verify it with `pnpm test:pages`. Output is `.pages-workspace/out/`, previewed at `http://127.0.0.1:4186/`. The canonical public URL is `https://joshsuan.github.io/`. Earlier local-review sections below preserve research history; they do not revoke the explicit publication request.
+Presentation has three ownership domains: the shared CSS/vignette/Canvas 2D
+atmosphere, native content/information surfaces, and each project's own 3D or
+recorded evidence. [The background contract](roles/uiux-designer/cases/bending-active-thesis/GLOBAL_BACKGROUND_INTEGRATION.md)
+and [architecture review](roles/uiux-designer/cases/bending-active-thesis/PORTFOLIO_ARCHITECTURE_REFACTOR_REVIEW.md)
+describe their boundaries.
 
-The current [Full-mode interaction and entry contract](roles/uiux-designer/cases/bending-active-thesis/FULL_MODE_INTERACTION_ENTRY.md) records the owner's 14 October request and cross-role review: one Full renderer, aligned mouse/touch rotation, original library line reveal, and an event-driven loading threshold. All changes remain subject to this project's architecture, development rules and same-artifact CI/CD gate.
+| Building block | Responsibility |
+| --- | --- |
+| `GlobalBackground` / `BackgroundRuntime` | One exclusive Layer 1 lease per document. The service owns no camera or clock. Bending delegates it to its existing Director; ordinary pages use `SiteBackgroundDriver`. |
+| `SiteNavigation`, `SiteReadiness`, preview readiness | Native document handoff and bounded font/image/required-preview readiness. A verified first draw or explicit static terminal precedes optional enhancement; timeout/failure never fabricates readiness. |
+| `SiteBackgroundDriver` | Existing ordinary-page demand scheduler for atmosphere, Home/six-case reading response, glass and generic project source presentation. No separate generic chapter or media animation loop. |
+| `ProjectStudyChapterPresenter` | One six-case semantic chapter owner. Layout invalidation caches fractional native section anchors; the current viewport midpoint selects chapter intent, rail and counter before source presentation. Native pause owns one intent and truthful controls. |
+| `ProjectStudyBackdropPresenter` | One generic image/video/model source transaction: exit → prepare → enter → hold, with explicit supersession/failure closure and actual decode/paint gates. |
+| Stage registry / scene presenter / Three adapter | React registers a native host; the project owner manages preparation and inspection; the renderer alone writes the source model and final camera. Off-chapter ready resources are retained, then disposed on actual departure. |
+| Bending runtime / `ExperienceDirector` | Closed feature registration, validated commands/discrete state, native reading and its existing chapter/frame orchestration. Continuous values stay outside React state. |
+| `XRStageDirector` | XR's existing project-local stage, inspection and reading presentation. It does not write the ordinary driver's Layer 1 background or native video time. |
+| `EventManager`, `DisposableScope`, `DOMPresenter` | Scoped registration/cleanup and owner-specific DOM publication that suppresses unchanged writes. These services do not choose narrative or create another clock. |
 
-Current [Round 10](roles/uiux-designer/cases/bending-active-thesis/ROUND_10_VERIFICATION.md) restores the Round 08 viewport composition with borderless chapter holds and an independent full-page ASCII layer. Scene and information triggers are separate; one controller supplies their shared clock. Mobile attachment budgets and interrupted-session recovery address sustained-rendering risk without shrinking the scene into a card. [Decision 0008](docs/decisions/0008-viewport-thesis-holds.md) supersedes Round 09 placement. Physical iPhone crash resolution remains unverified.
+On the six generic pages, native scroll/anchors invalidate the existing demand
+frame. A layout change refreshes cached anchors; the single chapter result then
+feeds the source transaction. Reading is immediate even while a new source is
+preparing. Wheel/touch observation stays passive until a real model hit commits
+an inspection gesture; vertical touch movement remains native document reading.
+Keyboard inspection and return controls provide equivalent access.
 
-The owner subsequently authorized a staged local [Bending-Active runtime refactor](roles/software-architect/research/BENDING_ACTIVE_RUNTIME_DESIGN.md): scoped events, explicit feature registration, validated discrete commands/state, and separate frame/presentation services. The [verification record](roles/software-architect/research/RUNTIME_REFACTOR_VERIFICATION.md) records artifact-specific tests, pixel comparisons and performance evidence. The existing story, assets and presentation remain the comparison target. The local implementation checkpoint excluded publication; on 12 October 2026 the owner explicitly authorized commit, push and GitHub Pages deployment through the existing same-commit validation gate.
+One writer owns each camera/property. Each established presentation owner keeps
+its existing demand scheduler; Bending substitutes its Director for the ordinary
+background driver, and XR retains its separate project-stage ownership. No new
+clock is introduced by the six-case chapter refactor. **Native video owns media
+time**: scrolling chooses a source, not its playback position. Pause, finite
+end/replay and retained per-recording time remain native transport facts.
 
-## Source authority and language
+Hidden/frozen and persisted pagehide states compose suspension reasons, cancel
+outstanding frame work and stop media without replaying elapsed hidden time.
+BFCache restoration reuses retained resources and refreshes native layout.
+Nonpersisted departure disposes listeners/observers, pending acquisition,
+callbacks/deadlines, native media sources, render resources and the background
+lease. Reduced motion, Save Data, failed WebGL/media and no-JavaScript reading
+retain meaningful static material.
 
-| Responsibility | Primary source |
-|---|---|
-| Software architecture, dependencies, routes, public schemas and tooling | This GitHub working folder: `C:\Users\JosHsuan\Documents\GitHub\JosHsuan.github.io` |
-| All project, CV and content preparation | `D:\JosHsuan_Website\_private\portfolio-preparation` |
-| Integration rules and current scope | [Architecture Sections 00 and 12](docs/architecture.md#00-current-project-baseline-and-source-authority) |
+## Development and verification
 
-English is the primary project language and the selected public application's UI language. Discussions with the owner use Traditional Chinese. Original evidence retains its source language. The unchanged reusable framework's Chinese UI is a historical scaffold state; adapting that framework or adding bilingual support remains a separate choice.
-
-The preparation path is not an environment variable, import source, watched directory or build dependency. The original designation was Markdown-only and did not select material for publication. Subsequent explicit owner requests authorize the selected public case derivatives and summaries recorded above; they do not expose the preparation drive or raw source corpus. Normal builds work without that drive.
-
-## Design guidelines and current scope
-
-The supplied [Website Design Guidelines v1.0](docs/WEBSITE_DESIGN_GUIDELINES.md) are preserved verbatim as the presentation reference. They describe cinematic engineering editorial, an original **FORM / SYSTEM / MAKE** identity, accessible reading/navigation, truthful case studies and future procedural experiments. The [architecture](docs/architecture.md) continues to govern the stack, software boundaries, exact versions and static deployment; preparation records continue to govern factual content and publication limits.
-
-On 7 October 2026 the owner requested withdrawal of the portfolio implementation and integration of this guide **without starting implementation**. That historical checkpoint restored the reusable empty framework. The guide's phases, commands, execution brief and embedded implementation prompt remain reference, not independent authorization. Later explicit selected-application requests are recorded above; unrelated Work/Lab changes, projects and authored experiments remain deferred. Prior approval of the three proposed identity strings did not populate the site. See [decision 0002](docs/decisions/0002-design-guidelines-integration.md) for the dated withdrawal, precedence and verification.
-
-## Role-specific local proposals
-
-The owner subsequently authorized an isolated [UI/UX designer material workspace](roles/uiux-designer/README.md). Its opt-in skills/MCP configuration, pinned licensed assets and 26 working specimens live under `roles/uiux-designer/`, with a separate local inspection desk at `http://127.0.0.1:4175/`. Round 02 adds seven [spatial motion and object-feedback proposals](roles/uiux-designer/research/spatial-feedback.md). Round 03 extends the Saved direction into [six connected feature proposals](roles/uiux-designer/research/spatial-editorial-system.md), reviewed at `http://127.0.0.1:4175/features/` in the same browser. This is proposal work; the portfolio remains the empty framework. Normal application builds do not include those assets, tools or experiments. [Decision 0003](docs/decisions/0003-uiux-material-workspace.md) records the role and delivery boundaries.
-
-Round 04 applies the spatial vocabulary directly to [19 existing materials](roles/uiux-designer/research/applied-feedback.md): Icons, Interface, Motion, Spatial, Typography and Identity. Each keeps its original controls and Saved ID, with a Baseline/Spatial comparison inside its working specimen. [Review the applied collection](http://127.0.0.1:4175/?collection=applied-feedback#materials).
-
-The owner has recorded these rounds as the [UIUX design plan](roles/uiux-designer/UIUX_DESIGN_PLAN.md), with Saved as the authoritative preference source. The plan preserves the distinction between the original browser choices, an uncaptured snapshot and curator proposals. The separately authorized [3D Artist workspace](roles/3d-artist/README.md) now includes twelve material, lighting, physics, texture and shader studies. Its [initial session brief](roles/3d-artist/SESSION_BRIEF.md) remains historical; the role's research and verification records describe the implemented work. See the [role index](roles/README.md) for workspace boundaries and local preview entry points.
-
-## Development
-
-The owner also authorized a [local Bending-Active Thesis case review](roles/uiux-designer/cases/bending-active-thesis/README.md), now available at `http://127.0.0.1:4184/`. It combines the metal-panel thesis evidence, an inspected derivative of the supplied Rhino assembly, and the UIUX/3D Artist/cinematography research. [Geometry Engineer](roles/geometry-engineer/README.md) provides an isolated conversion skill and read-only MCP. [Decision 0004](docs/decisions/0004-local-thesis-review.md) defines this local-only content boundary; the production framework and public snapshot remain empty.
-
-The subsequent [cinematic integration](docs/decisions/0005-cinematic-thesis-integration.md) replaces the initial boxed viewer with one persistent background scene and seven naturally scrolling chapters. The new [Interactive Experience Director](roles/experience-director/README.md) coordinates layers, source evidence and cross-role acceptance. Working crops, narrative preparation and rendered captures remain under the designated D-drive work area; prepared local handoffs are explicit. Public deployment remains separate.
-
-Use Node **24.19.0** and pnpm **11.19.0**.
+Use **Node 24.19.0**, **pnpm 11.19.0** and the committed lockfile. See
+[toolchain](docs/toolchain.md) and [compatibility](docs/compatibility.md).
+Install once from the repository root:
 
 ```sh
 pnpm install --frozen-lockfile
-pnpm dev
 ```
 
-Open `http://127.0.0.1:3000`. After a later change to repository content inputs, restart the development server or run `pnpm content:export` separately. This reads only repository-local publication inputs, not the private preparation folder.
+For the selected public application:
 
 ```sh
-pnpm check
-pnpm exec playwright install chromium firefox webkit
-pnpm test:e2e
-pnpm preview
+pnpm build:pages
+node scripts/serve-pages.mjs
 ```
 
-`check` runs content validation, ESLint, TypeScript, unit/controller tests, static export and artifact auditing. Browser tests serve the production `out/` artifact. Preview runs at `http://127.0.0.1:4173`.
+Open `http://127.0.0.1:4186/`. The preview serves the exact built files, including
+native MP4 byte ranges. In another terminal, or with the test-managed server:
 
-## Implemented structure
-
-| Path | Responsibility |
-|---|---|
-| `src/app` | Home, Projects, Research & Development, About, Contact and 404 shells |
-| `src/components` | Shared layout, navigation, empty states and entry templates |
-| `content` → `src/generated` | Empty publication inputs, strict validation and reproducible public snapshot |
-| `src/features/scene-viewer` | User-activated loading, poster boundary, contained failures and presentation modes |
-| `src/scenes` | Empty explicit registry and shared camera/inspection helpers |
-| `src/motion` | Playback contract, lifecycle, Theatre adapter and native-scroll integration |
-| `scripts` | Public-input export, asset/motion validation, artifact audit and static preview |
-| `tests` | Content/path tests, cancellation/ownership tests and browser checks |
-| `.github/workflows` | Root/subpath validation and a separate manual publishing workflow |
-
-Project/research detail pages are generated from published entries. Empty content produces no fictional slug. Do not edit the generated `src/app/(entries)` directory manually.
-
-## Materials and subsequent discussion
-
-[Architecture Section 12](docs/architecture.md#12-content-architecture-and-materials-preparation) maps the private project packs, CV draft, attribution, evidence, asset manifests, candidates and review records into the current website contract. The candidate schema is provisional and does not directly match the public schema. No importer or synchronization has been implemented.
-
-The owner will choose the next step: project/research selection, public narrative and contributions, CV/contact scope, English copy, selected media and any actual scene. No selection or translation is implied by the folder designation. Preserve existing evidence and permissions while resolving only the questions relevant to that step.
-
-Earlier design documents remain historical references. The [framework decision](docs/decisions/0001-empty-framework.md) records the software baseline. Real-scene, Studio authoring and clean exported-state replay have not been demonstrated; see the [compatibility record](docs/compatibility.md) for verified scaffold checks and remaining gaps.
-
-## Static export and publishing
-
-`pnpm build` creates `out/`. Leave `NEXT_PUBLIC_BASE_PATH` empty for a user site; use one `/repository-name` for a project site. See `.env.example`. Subpath verification in PowerShell:
-
-```powershell
-$env:NEXT_PUBLIC_BASE_PATH = '/portfolio-test'
-pnpm build
-pnpm test:e2e
-Remove-Item Env:NEXT_PUBLIC_BASE_PATH
-pnpm build
+```sh
+pnpm exec playwright install chromium webkit
+pnpm test:pages
 ```
 
-CI now selects checks from the union of changed feature/integration scopes, with full validation for shared tooling, dependencies and unknown inputs. It compares pushes against the last successful ancestor so failed/cancelled changes remain covered. The public case builds once; Chromium/WebKit/mobile jobs test the same audited output, and a required gate rejects unexpected skips. See [CI/CD operations](docs/CI_CD.md) and [decision 0009](docs/decisions/0009-impact-selected-ci.md).
+Set `THESIS_REUSE_SERVER=1` when deliberately testing an already running preview;
+otherwise Playwright starts its own server. Tests target the built export,
+not a development server.
 
-The [DORA-informed CI and delivery plan](docs/CI_DELIVERY_PLAN.md) records official Google DORA research, the fast-feedback and complete-acceptance stages, measured software-GPU capacity, the next optimization steps and the five production delivery metrics. It distinguishes implemented safeguards from proposed improvements.
+| Command | Actual scope |
+| --- | --- |
+| `pnpm check` | Framework content/lint/types/unit tests, CI selector/gate tests, framework export and artifact audit. Does not replace the public-case suites below. |
+| `node --test roles/uiux-designer/cases/bending-active-thesis/tests/*.test.mjs roles/uiux-designer/tools/*.test.mjs` | Portable case/runtime/source/tool contracts. Report intentional skips separately. |
+| `pnpm build:pages` / `pnpm audit:pages` | Complete selected public export and its source/output boundaries; the latter audits existing output. |
+| `pnpm test:pages` | Built public Chromium, WebKit and mobile Chromium journeys; one worker, no retries. |
+| `pnpm dev` | Empty framework development at `http://127.0.0.1:3000/`. |
+| `pnpm build` / `pnpm preview` | Empty framework static export and preview at `http://127.0.0.1:4173/`. |
+| `pnpm exec playwright install chromium firefox webkit` / `pnpm test:e2e` | Built framework browser checks; CI tests root and simulated subpath exports. |
 
-The publishing workflow accepts a successful CI `push` run from the default branch at the same commit, verifies its validated plan/results and complete artifact digest, and deploys that tested `static-export-pages` output without rebuilding. Documentation/framework-only runs do not produce a new public case release. The public case has canonical/index metadata; the framework remains a noindex scaffold. GitHub Actions records and public `/release.json` identify the deployed result.
+Root ESLint intentionally excludes isolated role workspaces; changed case runtime
+files also need explicit scoped lint, as recorded in the architecture review.
+For a framework project-site export, `NEXT_PUBLIC_BASE_PATH` accepts one
+`/repository-name`; leave it empty for the canonical user site. The selected
+public build uses its own verified root-route configuration.
+
+## CI, publication and evidence
+
+[`ci.yml`](.github/workflows/ci.yml) selects the union of affected checks from a
+validated ancestor. Shared/unknown inputs widen coverage. Documentation-only
+changes still validate selection/gate logic but create no new publishable app
+artifact when that computed scope is genuinely documentation-only.
+
+A public candidate is built once as `static-export-pages`; browser jobs download
+and verify that same complete output before and after testing. The required
+gate validates selected aggregate job results and records the commit, plan and
+output digest. Structured per-test receipt enforcement is not yet part of that
+gate; the separate release audit checks actual execution coverage.
+
+The owner-authorized [`deploy-pages.yml`](.github/workflows/deploy-pages.yml)
+accepts a successful default-branch **push** validation run for the **same commit**.
+It verifies the validated record/output digest and publishes those tested bytes
+without rebuilding. A successful documentation/framework-only run cannot supply
+a new public application release. After publication, check `release.json`, route
+and asset bytes, native media delivery and desktop/mobile user journeys.
+[CI/CD operations](docs/CI_CD.md) documents the procedure;
+[the DORA-informed plan](docs/CI_DELIVERY_PLAN.md) separates implemented safeguards
+from proposed faster feedback, coverage receipts and recovery improvements.
+
+Green source tests, browser simulations, a human image review, CI, deployment
+provenance and live acceptance establish different things. Current candidate
+results and remaining work belong in the
+[refinement contract](roles/uiux-designer/cases/bending-active-thesis/PORTFOLIO_REFINEMENT_INTEGRATION.md),
+[team review](roles/uiux-designer/cases/bending-active-thesis/PORTFOLIO_REFINEMENT_TEAM_REVIEW.md)
+and [performance review](roles/uiux-designer/cases/bending-active-thesis/PORTFOLIO_PERFORMANCE_REFINEMENT_REVIEW.md).
+Do not infer a new release from this README or reuse an older candidate's counts.
+Physical iPhone/Safari stability remains unverified; mobile emulation and
+synthetic context loss do not prove it. Recorded software-rendered lab stalls
+are not field INP, hardware performance or a resolved crash.
+
+## Architecture references and further reading
+
+This README uses a compact [arc42](https://github.com/arc42/arc42-template)-inspired
+context/building-block/runtime/deployment structure, adapted to the actual code.
+It does not introduce an architecture framework dependency.
+
+| Primary reference | Application here |
+| --- | --- |
+| [Next.js static export source](https://github.com/vercel/next.js/blob/canary/docs/01-app/02-guides/static-exports.mdx) | Build-time HTML/routes and explicit browser-only setup; no request-time server assumptions. |
+| [React effect guidance](https://github.com/reactjs/react.dev/blob/main/src/content/reference/react/useEffect.md) | External-system setup has mirrored cleanup; derived chapter state has one owner. |
+| [MDN listener source](https://github.com/mdn/content/blob/main/files/en-us/web/api/eventtarget/addeventlistener/index.md) | Explicit listener identity/lifetime and passive native observation, implemented through tested local scopes. |
+| [Chrome Page Lifecycle implementation](https://github.com/GoogleChromeLabs/page-lifecycle/blob/master/src/Lifecycle.mjs) | Retained hidden/frozen/BFCache lifetimes differ from permanent disposal. |
+| [Chrome Web Vitals guidance](https://github.com/GoogleChrome/web-vitals/blob/main/README.md) | Bounded measurement lifetimes and honest separation of lab observations from field metrics. |
+
+[Architecture](docs/architecture.md) retains detailed implemented mappings and
+clearly labelled proposals. [Website design guidance](docs/WEBSITE_DESIGN_GUIDELINES.md)
+sets presentation/content priorities. [Decision 0001](docs/decisions/0001-empty-framework.md)
+protects the empty reusable framework; [the decision log](docs/decisions/)
+retains earlier scope and rationale. Specialist research, private preparation
+and installed-but-unused adapters are not evidence of active public features.
