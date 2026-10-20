@@ -2,16 +2,14 @@
 
 Date: 20 October 2026 (Europe/Berlin).
 
-Status: all twelve existing roles have completed distinct independent review
-and handoffs; integrated native design, senior refactor and release acceptance
-remain pending.
+Status: all twelve existing roles completed distinct independent reviews and handoffs. Integrated design/runtime, exact-source CI, same-artifact deployment and scoped live acceptance are complete; the [final verification](PORTFOLIO_REFINEMENT_VERIFICATION.md) records scope and unavailable checks.
 The owner's current six-part request authorizes corrected Caschlatsch portfolio
 imagery, short web-ready Mode/s recordings, six-project visual and interaction
 refactoring, senior runtime review, an architecture-led root README, and
 same-artifact CI-gated publication. The integration contract and decision for
 this request govern implementation. The initial Director findings below remain
 the historical starting checkpoint; the updated participation matrix records
-actual subsequent work without claiming browser/performance or release acceptance.
+actual subsequent work. Its original acceptance assignments are historical; the closure ledger records resulting evidence separately.
 
 ## Review basis and boundaries
 
@@ -101,7 +99,7 @@ captures. Their completeness and visual quality have not yet been accepted.
 | lighting-designer | Independent code/source/prior-capture review and reasoned no-light-change handoff complete | [Lighting review](PORTFOLIO_LIGHTING_REFINEMENT_REVIEW.md): preserve accepted rigs/exposure/material tokens, original white plates and bright/dark footage; fix layout rather than relighting. Analytic contrast examples explicitly do not claim native contrast acceptance. | Actual composited source/reading contrast, aperture, source opacity and capability/fallback paths on the built candidate. |
 | 3d-animation-designer | Independent source/code/prior-capture review and motion handoff complete | [3D Animation review](PORTFOLIO_3D_ANIMATION_REFINEMENT_REVIEW.md): retain 1.10s entry/0.95s exit, same-model interval, actual-hit commitment, finite return and independent native media time; 31 existing controller/source tests passed at its earlier checkpoint. No invented deformation or assembly order. | Native intermediate/reverse/rapid-jump continuity, real source participation, independent clip times and finite-end/replay behavior. |
 | geometry-engineer | Independent actual-GLB decoding, source comparison and framing/ownership handoff complete | [Geometry review](PORTFOLIO_GEOMETRY_REFINEMENT_REVIEW.md): five protected GLBs/records and source recipes unchanged, 567 actual-bound camera-fit cases, prepared figure/media consistency checks and 28 related CPU tests at its checkpoint; retain source transforms and no new CAD conversion. | Actual render/hit/inspection coverage and complete-source reading; mathematical containment is not native visual or physical-engineering acceptance. |
-| performance-engineer | Independent source/primary-reference audit and bounded measurement protocol/helper complete | [Performance review](PORTFOLIO_PERFORMANCE_REFINEMENT_REVIEW.md): identify duplicate layout/event work and secondary hypotheses; define paired native layout/task/media/idle/lifecycle measurement, overhead reporting and lab-versus-field limits. | Root-exclusive equivalent before/after measurements, attributed regressions, hidden/actual-BFCache/departure facts and final resource/idle acceptance. No native performance result is accepted yet. |
+| performance-engineer | Independent source/primary-reference audit and bounded measurement protocol/helper complete | [Performance review](PORTFOLIO_PERFORMANCE_REFINEMENT_REVIEW.md): identify duplicate layout/event work and secondary hypotheses; define paired native layout/task/media/idle/lifecycle measurement, overhead reporting and lab-versus-field limits. | Root-exclusive equivalent before/after measurements, attributed regressions, hidden/actual-BFCache/departure facts and final resource/idle acceptance. Paired lab measurements and explicit-false closure are complete; see the final ledger for scope and limits. |
 | software-architect | Separate senior independent source/primary-GitHub-reference audit and implementation plan complete | [Architecture/event review](PORTFOLIO_ARCHITECTURE_REFACTOR_REVIEW.md): map actual source/event/render owners, consolidate chapter selection on the existing demand driver, preserve lifecycle/media/source transactions, and use architecture-led README structure. | Implement after the native design checkpoint, validate measured benefit and unchanged visuals, then complete README, exact-artifact CI/deployment and live closure. |
 
 Information Designer and Animation Cinematographer evidence paths above are
@@ -187,18 +185,29 @@ neither release acceptance nor a physical-device claim.
 
 ## Closure ledger
 
-All twelve independent role reviews and their scoped handoffs are complete.
-Corrected media and first six-page composition/inspection implementation are
-integrated and built. Root's initial captures now cover all eight routes at
-desktop/mobile; the bounded Director peer review above supports the six-page
-visual direction and records two chrome/source-reading collisions for closure.
-It is not complete visual, continuous-motion or interaction acceptance.
-The bounded senior architecture implementation and architecture-led README are
-complete at source level. Root's framework check, public build and portable
-runtime/source suites pass; the initial native Dot interaction and 799/800px
-boundary smoke also pass on the resulting local export. Matched runtime
-performance, complete current native visual and interaction acceptance,
-protected-reference regression, exact-artifact CI, deployment and live
-verification remain pending.
-Later acceptance must identify the actual resulting candidate and scope rather
-than converting these source/CPU handoffs or historical images into final proof.
+All twelve independent role reviews and allocated handoffs are complete. The
+initial Director observations above remain historical: source/rail overlap and
+credit safe-top collisions were corrected in generic pages and checked on the
+resulting native candidate. Original media/model/scene recipes and protected
+Bending/XR presentation remain within their accepted boundaries.
+
+The [final refinement verification](PORTFOLIO_REFINEMENT_VERIFICATION.md) is the
+authoritative integrated acceptance record for `567d1c0`: original-portfolio
+Caschlatsch images, short A/B real-operation recordings and simulation,
+six-study source-first design and native inspection/return, one generic semantic
+chapter owner, explicit nonpersisted disposal, paired lab measurements and the
+architecture-led README. Earlier role CPU counts are not summed as a final suite.
+
+Fresh CI 39459999497 passed all 411 required browser executions and the exact
+artifact audit. Deployment 39465817087 published those bytes without rebuilding.
+Both the CI-export and live captures cover all eight projects at desktop/mobile,
+108 original PNGs per capture. Assistant image inspection covers every project
+contact sheet plus explicitly listed selected originals; it is not owner approval
+or inspection of every glyph in all images. Live response and video-range bytes
+also match the tested output. Receipt identities and review limits are retained
+in the final verification.
+
+Paired chapter measurement work decreased overall; operation latency was mixed.
+The software-rendering/native-stall limits, physical-device/real-Safari checks,
+field INP, total GPU-memory accounting and genuine persisted BFCache restoration
+remain unverified. These limits are not converted into acceptance by green CI.

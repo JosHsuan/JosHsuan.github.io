@@ -1,9 +1,7 @@
 # Portfolio performance refinement review
 
 Date: 20 October 2026. Role: the existing Performance Engineer, independently
-reviewing decision 0019. Status: source audit, measurement plan and initial native
-desktop baseline; post-refactor performance acceptance remains unproven. No field
-Core Web Vitals claim.
+reviewing decision 0019. Status: paired desktop/mobile measurements and explicit nonpersisted-departure follow-up complete within the lab scope below. Native latency is mixed; no field Core Web Vitals or physical-device claim. The [final refinement verification](PORTFOLIO_REFINEMENT_VERIFICATION.md) records exact-source CI, deployment and separate live acceptance.
 
 The role read the current repository and role instructions, empty-framework
 decision, architecture boundaries, website design guidance, decision 0019,
@@ -416,7 +414,5 @@ total GPU-memory release or CI/live acceptance.
 The chapter ownership implementation has native paired measurement evidence;
 the original field renderer is deliberately retained after the bounded experiment.
 The explicit native-departure owner findings are closed by the bounded follow-up
-and eight-route native recheck above. Matched visual acceptance, the exact
-committed candidate, full required CI/deployment gate and live acceptance remain
-separate root-owned records. A green source test cannot close those rows, and
+and eight-route native recheck above. Matched visual inspection, the exact committed candidate `567d1c0`, all 411 required CI browser executions, same-artifact deployment and live checks are closed separately in the [final refinement verification](PORTFOLIO_REFINEMENT_VERIFICATION.md). A green source test cannot close those rows, and
 these controlled lab samples do not establish field INP or CrUX.

@@ -179,7 +179,7 @@ not production incidents; they were not deployed. No workflow optimization,
 new smoke stage, metric collector or recurring automation is implemented by
 this documentation update.
 
-### Latest full-candidate observation — 20 October 2026
+### Story/source candidate observation — 20 October 2026
 
 The story/source correction at `9608cdb6b018384e96d6130564b69a6e5f5d6665`
 completes [CI run 39363796520](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39363796520)
@@ -212,6 +212,28 @@ neither a controlled speedup nor a p95. The uneven durations support the planned
 measurement-first partition experiment; they do not authorize skipping cases
 or changing budgets. The [verification record](../roles/uiux-designer/cases/bending-active-thesis/PORTFOLIO_STORY_CONTINUITY_VERIFICATION.md)
 retains failed predecessors, raw evidence and exact-artifact provenance.
+
+### Latest refinement candidate observation — 20 October 2026
+
+The subsequent refinement source `567d1c051f95049ce417ee7e426d067e708ed411`
+passes [CI 39459999497](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39459999497),
+with fourteen successful jobs and **411 exact required browser executions**:
+129 public cases on each of Chromium, WebKit and mobile Chromium, plus twelve
+framework cases at root and twelve at the simulated subpath. The independent
+fresh inventory/raw-log union records no missing, duplicated, skipped, retried
+or failed required execution. The existing gate still checks aggregate results;
+structured per-test gate enforcement remains proposed below.
+
+Workflow creation to terminal update spans **16:43:50–17:17:43 UTC: 33m53s**.
+Quality takes 56 seconds of active job time and completes 93 seconds after
+creation; the public build takes 59 seconds and completes 96 seconds after
+creation. These are distinct pipeline observations, not website interaction
+latency, a controlled speedup, a percentile or a DORA production-metric rating.
+The changed workload precludes a direct speed comparison with the preceding
+402-case sample. [Deployment 39465817087](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39465817087)
+then promotes the tested artifact without rebuilding. The
+[refinement verification](../roles/uiux-designer/cases/bending-active-thesis/PORTFOLIO_REFINEMENT_VERIFICATION.md)
+records failures, exact artifact identity and separate live acceptance.
 
 ## Planned feedback and release stages
 

@@ -1,12 +1,112 @@
 # Portfolio refinement verification
 
-Date: 20 October 2026. Status: local implementation and acceptance in progress;
-the first candidate's CI failed. No new deployment or live acceptance is claimed.
+Date: 20 October 2026. Status: implemented, validated and published. Exact
+application source `567d1c051f95049ce417ee7e426d067e708ed411` passed fresh CI,
+same-artifact deployment, live HTTP/media checks and scoped native capture/image
+inspection. Historical failed and uncommitted checkpoints remain below.
 
 [Decision 0019](../../../../docs/decisions/0019-portfolio-refinement-and-runtime.md)
 and the [integration contract](PORTFOLIO_REFINEMENT_INTEGRATION.md) define the
 six-part scope. The preceding published application is `7ff67ce`; its successful
-release is a comparison baseline, not acceptance of this revision.
+release is a comparison baseline, not acceptance of this revision. Later
+documentation-only commits do not replace the deployed application's tested bytes.
+
+## Released candidate and evidence identity
+
+All six requested outcomes are implemented: original-portfolio Caschlatsch
+evidence, compact Mode/s A/B operation footage and simulation, six-study
+UI/UX/motion/interaction refinement with all twelve existing roles, bounded
+senior event/lifecycle/performance refactoring, the architecture-led README,
+and owner-authorized publication with live verification. Performance and
+unavailable-device limits below remain explicit.
+
+| Release fact | Actual result |
+| --- | --- |
+| Application source | `567d1c051f95049ce417ee7e426d067e708ed411` |
+| Required push CI | [39459999497, attempt 1](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39459999497); all fourteen jobs successful |
+| Exact execution audit | **411/411 passed**: 129 public cases on each of Chromium, WebKit and mobile Chromium; 12 framework-root and 12 simulated-subpath cases. No required skips, retries, duplicates or failures. |
+| CI export | 259 files, 138 pinned public assets; distinct from the 261-file local Windows build |
+| Canonical output digest | `857dd9262f3be5a8055e3433a63b1c04488a5e87e4c2e2f296fca8505e889179` |
+| Tested static artifact | ID `12281314857`; ZIP SHA-256 `71094b9a6fc1a9345b5666bd174802fbc9751c99cbe964597565666e9a84479d` |
+| Validated release artifact | ID `12284695977`; ZIP SHA-256 `c08660721a04c3b86a96170a8b1c0cfc1d87ac961251c7b6c70853affafc3745` |
+| Publication | [39465817087, attempt 1](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39465817087); all thirteen deployment steps successful; tested output verified, packaged and deployed **without rebuilding** |
+| Live origin | [joshsuan.github.io](https://joshsuan.github.io/); release identity stable throughout checks |
+| Live HTTP equality | **205** requested response bodies exactly match the CI export, including twelve sitemap routes plus index/404/metadata/assets/licenses/static files. This request plan does not cover every internal/RSC artifact file. |
+| Live video delivery | Eleven active unique MP4s, **22** prefix/suffix 32-byte Range comparisons: status 206, content type, Content-Range and exact bytes passed |
+
+The fresh required inventory/raw-log union is separate from the checked-in
+gate's aggregate job-result checks; structured per-test enforcement in the
+gate remains a proposed improvement. The Pages transport archive is a distinct
+packaging artifact, not the original static ZIP; its payload identity and
+ordering are verified through deployment evidence, without claiming an
+independent transport-archive download. CI creation-to-terminal-update took
+33m53s; that is pipeline elapsed time, not website performance.
+
+All receipt paths below are relative to the ignored local
+`animation-review/.local/portfolio-refactor-20261020/` evidence directory.
+They are not public build inputs. Portable maintained facts remain in this
+document and the linked workflow runs.
+
+| Independent evidence | SHA-256 |
+| --- | --- |
+| `refactor-ci-union-2026-10-20T17-18-46.236Z.json` | `b94db75e9c57c1b13c4c49dab55765a725af0f65248dcdc7d5dd7c017a0b93f3` |
+| `ci-39459999497/ci-release-audit-2026-10-20T17-18-59.015Z.json` | `be988850520b3a6e3129f1a4baec443fb1ee40d31a37db23224fd5e5e65e52a3` |
+| `deployment-39465817087/deployment-provenance-2026-10-20T17-28-26.220Z.json` | `8ac1b05cd2525ed65e8d6fea97f145a248724012b5c8d5d469c9d5b6ac4028a6` |
+| `deployment-39465817087/deployment-provenance-peer.json` | `2aab3b02fd151f7cb81a19432bbb499c617c42d929515207b9a18233306719b8` |
+| `live-http-39459999497-2026-10-20T17-29-01.782Z-014-passed.json` | `74ff2312ffd752ec8a524b13c8ca16d0580ec54ebe61c986a05b8149e8f02b9f` |
+
+### Native and visual acceptance scope
+
+The downloaded exact CI export and the actual live site each completed all
+eight projects at desktop 1440×1000/DPR 2 and mobile 390×844/DPR 3, producing
+**108 original viewport PNGs per capture**, with no scenario/page-loading errors.
+Each capture closed its browser and retained stable release identity. Native
+continuous interaction, model/source participation, fallback and native-media
+time are covered separately by the required CI journeys and local diagnostics;
+a held PNG alone cannot establish them.
+
+The independent candidate assistant inspected all sixteen project/profile
+contact sheets and 24 selected originals. Its original receipt used the phrase
+“human review” incorrectly; the append-only terminology correction explicitly
+identifies assistant visual inspection, with no owner/human approval claimed.
+Root separately inspected eighteen candidate originals and four contact sheets.
+The matched comparison source is the frozen uncommitted design export at the
+same viewport/DPR, not a claim of raw pixel identity with an old release.
+The current generic rail/credit corrections and Caschlatsch distinct plates
+were accepted within the recorded scope; protected Bending/XR composition and
+source recipes remain unchanged.
+
+The live capture completed at 17:38:06.945 UTC. Root inspected twelve selected
+live originals and four contact sheets spanning both actual Mode/s operations,
+Caschlatsch System/XR plates/credits, all six generic projects and protected
+Bending/XR key states.
+The live contact mapping binds all 108 unmodified originals to sixteen uniformly
+scaled QA sheets; labels are outside viewport rectangles. Independent live
+image inspection is recorded alongside the capture, separately from HTTP equality:
+the independent assistant reviewed all sixteen live contact sheets and twelve
+named originals (six desktop, six mobile), checked their hash/dimension mapping
+and compared the accepted CI composition. Its verdict is accepted within the
+listed live visual scope, with zero definite must-fix items.
+
+| Native/image evidence | SHA-256 |
+| --- | --- |
+| `ci-39459999497/visual-candidate-review-567d1c0.json` | `a30c9ac35fb963580c5a75dc49e4bf19c0cff2dc52cfbc66b363e449ddc1b0e0` |
+| `ci-39459999497/visual-candidate-review-567d1c0-terminology-correction.json` | `bcefdd3b3ced073dba13bc5730840e42e2553a067b24f3f034f7c25375a2cd25` |
+| `deployment-39465817087/native-live/results.json` | `3f773df62329687b7c06c965056faaeb71025089360cec35b164b04fa19ee43e` |
+| `deployment-39465817087/native-live/qa-contacts/qa-contacts.json` | `7decb2dcc6878f039858020224b0404809ce4244d2ff1205085403f4bbe108a3` |
+| `deployment-39465817087/root-live-original-visual-review.json` | `6a0a2b8b9b6e8f8ed586c9af1d6e43e254814bcfb5f791ff4726d25bf53b7978` |
+| `deployment-39465817087/root-live-contact-visual-review.json` | `e854486377ab4d8e2e4fc9829a0db2e0d89c355c8270a7014837b2c7862430db` |
+| `deployment-39465817087/visual-live-review-567d1c0.json` | `5bc87b8a771dee8477be316aaea6623b7bc5e475f848047ef999785074fcc8fe` |
+
+This is scoped assistant inspection, not owner approval, every-glyph review or
+pixel equality across all 108 originals. Native video/field phases can differ.
+Long mobile captions/prose/control tails may cross the fixed rail in a held
+viewport; native wheel/source-link checks establish their reachability, not
+simultaneous fit. Protected Bending mobile Form/Pattern's existing opaque prose
+occlusion is retained. Original soft footage and small portfolio labels are
+preserved rather than reconstructed. Physical iPhone/real Safari, accelerated
+hardware, field INP, sustained frame rate, complete GPU-memory accounting and
+genuine persisted BFCache restoration remain unverified.
 
 ## Source and media
 
@@ -177,7 +277,7 @@ nonpersisted Mode/s cleanup and history re-entry. Neither lab Event Timing nor
 browser mobile emulation establishes field INP, physical-device stability or a
 real persisted BFCache restoration.
 
-## Remaining acceptance
+## Historical failed candidate
 
 Candidate `05cece4dbac044323e352b5e7ce5ff4c3fd71bbf` was pushed and checked by
 [CI 39451663831](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39451663831).
@@ -192,7 +292,8 @@ candidate's downloaded export remain local evidence. Its output digest is
 `51bd1e9c892cbc9b9c5f7524e6f92a42796cd6b0cd40f98643d232ac7d11aaf7`;
 there is no validated-release artifact and it must not be published.
 
-Complete current reading/interaction/visual acceptance, protected Bending/XR
-comparison, paired after measurements, updated maintained browser tests,
-exact-commit CI execution coverage, same-artifact deployment and live verification
-are still required. No preceding release counts substitute for those results.
+The subsequent `567d1c0` candidate corrected the maintained tests and explicit
+document closure, then passed its own complete fresh CI inventory, publication
+and live acceptance recorded above. The failed candidate was never deployed;
+its errors and local diagnostic iterations are retained rather than counted as
+accepted retries. No preceding release counts substitute for the current proof.

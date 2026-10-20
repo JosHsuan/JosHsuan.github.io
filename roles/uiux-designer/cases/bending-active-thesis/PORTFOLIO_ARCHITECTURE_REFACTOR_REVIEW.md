@@ -1,15 +1,21 @@
 # Portfolio architecture and event review
 
 Date: 20 October 2026. Reviewer: the existing Software Architect / Runtime
-Engineer role. Status: independent audit and bounded runtime implementation;
-31 focused CPU tests and explicit role-file lint pass. Post-refactor built
-native/performance, matched visual, CI and live acceptance remain pending.
+Engineer role. Status: bounded ownership and permanent-departure refactoring
+implemented and validated; exact-source CI, same-artifact deployment and live
+HTTP checks passed for `567d1c051f95049ce417ee7e426d067e708ed411`.
+Post-deployment native capture and assistant visual inspection also passed within the final verification's stated scope. The
+[final refinement verification](PORTFOLIO_REFINEMENT_VERIFICATION.md) owns the
+current acceptance status and receipt identities; the checkpoints below retain
+their original scope and limits.
 
 [Decision 0019](../../../../docs/decisions/0019-portfolio-refinement-and-runtime.md)
 and the [refinement contract](PORTFOLIO_REFINEMENT_INTEGRATION.md) govern this
-work. This is the architecture phase after source correction, compact media and
-six-case design integration. It does not accept their visual result or claim a
-new deployment. Bending-Active and XR are protected comparison references.
+work. This records the architecture phase after source correction, compact media
+and six-case design integration. Initial implementation and measurement
+checkpoints below remain historical evidence; the final acceptance section
+distinguishes their scope from the released artifact. Bending-Active and XR
+remain protected comparison references.
 
 ## Review coverage and actual ownership
 
@@ -32,14 +38,14 @@ demand scheduler establish the existing infrastructure boundary.
 | Concern | Current owner and invariant | Audit result |
 | --- | --- | --- |
 | Public document and navigation | Native HTML/anchors; SiteNavigation owns only bounded loader/readiness and document handoff. | Retain native navigation and the existing readiness/reveal completion facts. No SPA migration. |
-| Shared atmosphere | BackgroundRuntime grants one exclusive document lease; Bending supplies its existing Director frame and ordinary pages use SiteBackgroundDriver. | Retain lease and exact backdrop/ASCII algorithms. No additional frame loop. |
+| Shared atmosphere | BackgroundRuntime grants one exclusive document lease. Bending supplies its existing Director frame; Home and ordinary pages use SiteBackgroundDriver. XR's project StageDirector retains its separate property domain alongside the ordinary-page atmosphere driver. | Retain the lease, existing owner-specific clocks and exact field/ASCII algorithms. Native videos retain their own transport time. No single global RAF is claimed. |
 | Bending discrete interaction | Closed RuntimeRoot feature catalog, CommandRouter/state transaction and scoped native events. | Existing selected-case architecture remains; do not replace it with a second global bus. |
 | Six-case semantic chapter | ProjectStudyChapterPresenter measures section anchors during the existing driver's layout invalidation, then publishes midpoint intent, navigation and counter before the backdrop on that same demand frame. | Replaces the controls' independent scroll/IO geometry scans and the chapter-attribute observer. Fractional anchors preserve the original exact midpoint boundary. |
 | Six-case visual source | ProjectStudyBackdropPresenter owns source request, exit, preparation, entry, hold, supersession and failure. | Retain this transaction and its finite shared-clock motion. Native reading does not wait for source readiness. |
 | Five source models | StageRegistry registers a host; ScenePresenter/PreviewLifecycle own preparation and retained lifetime; Three adapter owns final source rendering and camera. | Retain complete-source first draw, cancellation generations, off-chapter retention and true-exit disposal. No geometry/material/light/camera changes. |
 | Native video time | Backdrop's native media elements own currentTime, play/pause/end/replay and real transport/first-frame facts. | Retain independent media times, one playing owner, no scroll seeking and no synthetic readiness. |
 | Reading/glass effects | InformationWindowPresenter and LiquidGlassPresenter borrow the driver's demand frame; DOMPresenter suppresses unchanged writes. | Retain current transforms/opacity and accepted visual values. Invalidation needs measurement, not an unmeasured wholesale rewrite. |
-| Hidden/BFCache/exit | Scheduler composes visibility/page/freeze suspension; retained page resumes without replaying hidden time; true pagehide disposes listeners, resources and lease. | Retain distinct suspension and permanent disposal. New chapter work must obey the same lifetime. |
+| Hidden/BFCache/exit | Scheduler composes visibility/page/freeze suspension. Explicit `pagehide.persisted === false` permanently disposes through existing scopes/Registrar/kernel; persisted pages retain the established resume path. | Native follow-up observed closed application registrations/resources and released leases on all eight nonpersisted departures. It did not observe genuine persisted BFCache restoration; see the [final verification](PORTFOLIO_REFINEMENT_VERIFICATION.md). |
 | Fallbacks | Server-rendered text/posters, reduced motion, Save Data, source failure terminals and no-JS flow. | Essential content remains native and readable. Semantic chapter selection must still work when decorative motion is disabled. |
 
 ## Primary references and their admission here
@@ -164,10 +170,11 @@ Commands were checked against `package.json`, build/preview scripts and actual
 workflow steps. All **22 distinct local link targets** exist; eight documented
 package scripts resolve. The README distinguishes per-owner clocks, the single
 background lease and native video time rather than claiming one global RAF for
-XR's already-separate project stage/background. It distinguishes current source
-from pending release acceptance, identifies the gate's current aggregate-result
-limit, and keeps real-device/software-rendering uncertainty visible. Source
-validation is recorded separately from native/CI/deployment acceptance.
+XR's already-separate project stage/background. It separates implemented architecture from evidence acceptance, identifies
+the aggregate gate's limit and keeps real-device/software-rendering uncertainty
+visible. The [final verification](PORTFOLIO_REFINEMENT_VERIFICATION.md)
+distinguishes source checks, exact-CI execution coverage, deployment provenance,
+HTTP identity and native acceptance.
 
 ## Native departure follow-up
 
@@ -205,8 +212,16 @@ tracked-ticket preservation with successful destination adoption, no late
 readiness revival, persisted/bare retention and idempotent unmount. Two older
 BFCache fixture departures now explicitly set `persisted: true` before testing
 restoration; a nonpersisted destroyed document cannot serve that scenario.
-These are portable/source-level results. Root's new build, native retained-port
-capture, matched Bending/XR regression and fresh candidate CI remain required.
+These focused tests are portable/source-level evidence. The later frozen
+lifetime-export's native follow-up observed all eight SiteNavigation owners
+disposed with zero listeners, every departing background lease released, and
+one lease after new-document history re-entry. Bending's Director was disposed
+with no scheduled work. That local export carried base metadata rather than
+the complete follow-up commit; it must not be relabelled exact-source or live
+evidence. The [final verification](PORTFOLIO_REFINEMENT_VERIFICATION.md)
+separately records the released `567d1c0` artifact and current native-live
+status. Every observed departure was nonpersisted; actual BFCache restoration
+remains unverified.
 
 ## Measured performance interpretation
 
@@ -228,22 +243,52 @@ JavaScript. Repeated inactive media pause calls are confirmed but their measured
 cost is comparatively small. These are scenario-specific laboratory facts;
 they neither prove physical-device performance nor justify attributing the
 stall to chapter listeners. The bounded refactor changes no field pixels,
-density, cadence, source geometry or camera recipe. Post-refactor profiles and
-any further justified optimization require their own comparable evidence.
+density, cadence, source geometry or camera recipe. The later paired results, their source/checkpoint binding and contaminated
+Mode/s companion distinction are retained in the
+[final verification](PORTFOLIO_REFINEMENT_VERIFICATION.md) and
+[performance review](PORTFOLIO_PERFORMANCE_REFINEMENT_REVIEW.md). Desktop/mobile
+generic journey rectangle reads changed from 1,134/1,054 to 729/723; Mode/s
+mobile increased from 254 to 288. Paused intervals remained idle, while native
+operation latency was mixed. These results support the ownership cleanup;
+they do not establish a general speedup, accelerated-hardware performance or
+resolution of the native stalls. The active rendering algorithm was unchanged
+by the subsequent permanent-departure fix.
 
-## Acceptance and remaining evidence
+## Current acceptance and evidence limits
 
-Root has preserved the resulting six-case native design baseline. The
-architecture phase still needs equivalent built native chapter
-selection through anchors, wheel and keyboard, actual source transition/media
-time and pause/replay checks, no-JS/reduced/data/failure reading, hidden/actual
-BFCache or explicitly recorded unavailable restoration, true-exit cleanup and
-idle controller facts. Use the same browser/profile/source revision for
-before/after performance comparison and identify unavoidable measurement noise.
+The [final refinement verification](PORTFOLIO_REFINEMENT_VERIFICATION.md)
+is the current acceptance record, including original failures, source/media
+review, native checkpoints, matched performance and protected Bending/XR
+comparisons. The initial plans and focused checks above do not replace those
+integrated results.
 
-Matched Bending/XR desktop/mobile images and native interaction checks must
-remain equivalent because the accepted visual effect is protected. Focused
-CPU tests and `pnpm check` precede native tests on the built export. CI, artifact
-identity, same-artifact deployment and live acceptance remain root-owned and
-pending. The rewritten README describes implemented boundaries and must not
-promote a proposal or an earlier candidate's acceptance to current evidence.
+The released source is `567d1c051f95049ce417ee7e426d067e708ed411`.
+[CI 39459999497](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39459999497)
+passed its complete required jobs and independent exact execution audit:
+411 browser executions, comprising 387 public-profile executions plus 12
+framework-root and 12 framework-subpath executions. The aggregate gate alone
+is not the execution-union proof.
+[Deployment 39465817087](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39465817087)
+promoted the tested export and validation artifact without rebuilding. The
+export's 259-file canonical output digest is
+`857dd9262f3be5a8055e3433a63b1c04488a5e87e4c2e2f296fca8505e889179`.
+
+Live HTTP verification matched 205 requested responses exactly against that
+artifact and 22 video byte ranges, with no retries. These counts describe the
+audited request plan, not HTTP coverage of all 259 output files or native
+visual/interaction acceptance. The completed live native capture and scoped assistant image review are recorded separately in the final verification; HTTP equality alone does not establish them.
+
+The accepted architectural change is one driver-owned semantic chapter result
+with truthful scoped pause, plus explicit permanent application disposal on
+nonpersisted departure. It retains source preparation/first draw, source exit
+closure, native navigation/media time, retained off-chapter resources and
+existing owner-specific clock domains. It changes no protected scene recipe,
+field algorithm, camera, geometry or active motion pacing.
+
+Actual persisted BFCache restoration was not observed. The native closure
+follow-up proved the nonpersisted/new-document branch; portable persisted
+tests do not establish a real retained browser document. Bending's untouched
+R3F frame allowance alone neither proves a pending browser callback nor total
+renderer/process memory release. Mixed latency and SwiftShader/software
+rendering remain lab limitations, with no claim of physical-device stability,
+hardware-accelerated performance, field INP or sustained frame-rate acceptance.

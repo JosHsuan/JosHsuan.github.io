@@ -1,6 +1,6 @@
 # Portfolio refinement integration
 
-Date: 20 October 2026. Status: implementation in progress; no release acceptance.
+Date: 20 October 2026. Status: implemented, CI-validated and published; scoped live verification complete. Source `567d1c051f95049ce417ee7e426d067e708ed411` is the deployed application; subsequent documentation commits do not replace its tested artifact.
 
 The [verification record](PORTFOLIO_REFINEMENT_VERIFICATION.md) distinguishes
 implemented changes, local evidence and remaining release acceptance.
@@ -63,8 +63,8 @@ The reusable framework stays empty; source documents, private drives, drafts,
 SQL and raw portfolio records never become browser/build dependencies. Public
 allowlisted derivatives and truthful provenance are the integration boundary.
 
-Keep source preparation, portable checks, built native-browser behavior, human
-visual review, CI, deployment provenance and live acceptance separate. Cover all
+Keep source preparation, portable checks, built native-browser behavior, assistant
+visual inspection, owner evaluation, CI, deployment provenance and live acceptance separate. Cover all
 six redesigned pages and both protected references at desktop and mobile sizes,
 including forward/reverse interruption, keyboard/touch inspection, media pause/
 resume, reduced/no-JS/data fallbacks, chrome-safe reading and disposal/BFCache.
@@ -72,3 +72,7 @@ Tests must inspect actual native source participation and advancing media time;
 do not weaken assertions, add retries or manufacture readiness to obtain green.
 Record physical-device checks that cannot run. Completion remains unproven until
 every requested outcome and this full acceptance scope has current evidence.
+
+## Final checkpoint
+
+All six requested outcomes are complete within the [final verification](PORTFOLIO_REFINEMENT_VERIFICATION.md)'s stated scope. CI 39459999497 passed 411 exact required browser executions; deployment 39465817087 published that same tested output without rebuilding. Live HTTP/media equality and eight-project desktop/mobile capture plus scoped assistant visual inspection passed. The [team ledger](PORTFOLIO_REFINEMENT_TEAM_REVIEW.md) records all twelve independent role handoffs. Physical iPhone/real Safari, accelerated-hardware performance, field INP and genuine persisted BFCache restoration remain unavailable checks rather than inferred successes.
