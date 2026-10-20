@@ -419,3 +419,83 @@ readiness timeout is relaxed. Linux WebKit CI, final exact-artifact checks and
 live publication are still required for this follow-up. The preceding release's
 402-case acceptance does not accept this candidate, and no physical-device
 acceptance is inferred.
+
+### Final follow-up acceptance and publication
+
+Application commit `7ff67ce9d8ad6df91657f615d892fa971d186327` completes
+[CI 39408408707](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39408408707),
+attempt one, as a default-branch push. All fourteen jobs succeed in 31 minutes
+10 seconds. A fresh candidate-bound inventory and the ten original browser
+logs prove **411 exact required executions passing**: 129 each in Chromium,
+Linux WebKit and mobile Chromium, plus twelve each at framework root and
+subpath. No browser execution is retried, skipped, duplicated or missing. The
+new physical recording cases and the three-video forward/reverse/manual-pause
+case pass in all three browser profiles. Windows WebKit's local rejection remains a
+separate observation, with its underlying decoder cause unconfirmed.
+
+The original fourteen complete job logs also prove CI tests 40/40, root tests
+9/9, and 508 portable checks passing with two existing opt-in skips. Those
+portable skips are not omitted browser executions. The full raw-evidence receipt
+is SHA-256 `53c0735590c02367f68dd840c60d37beaf504e08a9725704ee9cbffc096a6f59`;
+the strict browser union is
+`257b397e30123953b1a450b185706740b6c97629e2162df734049a2e77a625e9`.
+
+The final Linux export contains **250 files / 128 pins**, preserving all 124
+preceding asset bytes and adding only the two physical recordings and posters.
+The output digest is
+`5f30369d429c7e5a7ae6ed94cf49e01b3c538fc8f456c52a8422bbfb91355c14`.
+Static-export artifact `12258780159` has ZIP SHA-256
+`34c9325667051df74dcf467da5118fabee6abb82c048db0ccacbc9389934fc72`.
+The validated-release artifact is `12259517776`. Actual source hashes, A's
+contiguous packet/timing selection, B's complete source-resolution transcode,
+the exact Caschlatsch copy, public SSR and all source records are bound to this
+candidate by `candidate-gate.json`, SHA-256
+`d7c3091633c826db97a301415b14230ceab35db99ea39d3662bf83d15877e556`.
+
+The downloaded candidate completes thirty native chapter captures across the
+two updated projects in desktop and mobile emulation. Root views four contact
+sheets and four important original desktop PNGs. Separate original mobile
+captures show both physical videos unobscured and advancing native time.
+Additional native scroll captures show the complete final Caschlatsch System
+and XR paragraphs above the bottom navigation within their own active chapters.
+An independent reviewer views the four contacts and ten original screenshots,
+rechecks all 250 output hashes and 128 pins, and finds no scoped must-fix. Its
+exact-candidate visual/source receipt is
+`25315d6384d6d8ffa397485373d075a29780ce222b8c59cdaefa5b38a413a137`.
+
+[Deployment 39412575881](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39412575881)
+successfully promotes the same tested output without rebuilding. The original
+deployment log, all thirteen successful API steps and the two actual artifact
+downloads bind that run to the exact candidate and validation run. The
+independent deployment-provenance receipt is
+`900c2f51ec28f979db2bf24a8555ce86fbaf6f2c28de7ebdfb26c43503ed4ae7`.
+
+Fresh public-site checks compare **261 exact HTTP responses** covering 249
+served output files, including all 128 pins, with the downloaded artifact.
+The sole host-control exclusion is `.nojekyll`; the 250-file artifact count is
+not an HTTP-request count. Eleven selected MP4s also pass twenty-two actual
+first/last Range responses with exact 206 status, content ranges and bytes.
+The live byte/range receipt is
+`40a370323129a06ced965a2e6142eaff092d14a6c5bd35539c537800e9920571`.
+
+The public site separately completes thirty ready native chapter captures of
+Mode/s and Caschlatsch with stable release identity before and after. Root views
+the four live contact sheets, four important desktop originals and two separate
+clear mobile physical-video originals; actual native video time advances across
+both mobile captures. An independent reviewer views the same ten live images
+and finds no scoped must-fix. Root's live visual receipt is
+`334204a4cf44fade60d4a2033451ee1ef6c3a491960a43e0a77a32b590dae539`;
+the independent receipt is
+`ffa7bc29f2ab1f642e7d6cce9fc63ce212520fc78e53ebab3dfa243ca9ac80eb`.
+The exact served-byte comparison bridges the candidate's
+additional Caschlatsch lower-paragraph checks; no new live tail captures or
+eight-project live journey are claimed for this follow-up. All owned capture
+browsers/contexts and both owned local preview processes are closed.
+
+These scoped visual checks do not view every original PNG at native size or
+certify continuous playback, all chrome/control overlap states, frame rate or
+physical-phone behavior. Heading-aligned mobile cards can cover their background;
+the separate apertures establish unobscured video positions. Existing caption /
+chapter-hover / fixed-chrome overlaps remain recorded. Physical iPhone/Safari and
+Android acceptance is still not established. The documentation-only follow-up
+does not rebuild or change the published `7ff67ce` application.

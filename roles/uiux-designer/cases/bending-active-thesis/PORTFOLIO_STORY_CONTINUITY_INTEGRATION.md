@@ -118,9 +118,9 @@ cannot be applied to another source through public metadata alone.
 
 The existing model interval,
 exclusive playback ownership, native timing, background/evidence separation,
-source geometry and single Director clock remain required. With source selection
-confirmed, completion still requires built native-browser/visual checks, CI,
-same-artifact publication and live verification of the resulting candidate.
+source geometry and single Director clock remain required. Source selection,
+built native-browser/visual checks, exact-artifact CI, publication and scoped
+live acceptance are recorded in the [verification record](PORTFOLIO_STORY_CONTINUITY_VERIFICATION.md).
 
 A chapter is reading intent, not a new identity for an unchanged model. A model
 occupies one ordered continuous interval. Within it, actual source-view repaint
