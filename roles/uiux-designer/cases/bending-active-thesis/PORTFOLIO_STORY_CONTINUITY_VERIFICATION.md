@@ -2,9 +2,11 @@
 
 Date: 20 October 2026 (Europe/Berlin).
 
-Status: source selection, local build and targeted browser checks verified;
-final-candidate visual, hosted CI, same-artifact deployment and live acceptance
-remain in progress.
+Status: the exact published application `9608cdb` is accepted for the owner's
+story/source correction scope after source, native visual, complete hosted CI,
+same-artifact deployment and live verification. Physical-device and historical
+render-cause limits remain explicit below. Pending statements in the historical
+checkpoints are superseded by the final accepted-candidate section.
 This record does not accept the preceding release as evidence for this revision.
 The [integration contract](PORTFOLIO_STORY_CONTINUITY_INTEGRATION.md) and
 [decision 0018](../../../../docs/decisions/0018-portfolio-story-source-continuity.md)
@@ -290,3 +292,95 @@ visual and live results remain required.
 Physical iPhone/Safari and Android device acceptance is not established by
 desktop browser emulation or CI. No frame-rate, physical-device crash-resolution
 or unchanged Bending motion claim is made.
+
+## Final accepted candidate, publication and live verification
+
+Application commit `9608cdb6b018384e96d6130564b69a6e5f5d6665` completes
+[CI 39363796520](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39363796520),
+attempt one, as a successful default-branch push. All fourteen jobs succeed.
+An independently generated candidate inventory and all ten original browser
+logs prove **402 exact required executions passing**: 126 public cases in each
+of Chromium, WebKit and mobile Chromium, plus twelve framework cases at each
+of root and `/portfolio-test`. No required execution is missing, duplicated,
+skipped, retried or unfinished. All fourteen original job logs and final API
+responses are retained. The final raw-evidence receipt is SHA-256
+`181de0001d5202125e0d543aceef71728886d7502ebd3f1ce74dc309f8681990`;
+the strict inventory/log union is
+`56c1886530efa21ef983a5f16bbd7cd91bba19a514caa895e35aae91e12d8677`.
+
+The final output has **246 files and 124 pinned assets**, retaining the original
+117 pins exactly and adding seven selected Mode/s derivatives. Its digest is
+`6b378facb02643ba66de32e3a4b51fbb885e687ea3dd408432fa1f692c358602`.
+The downloaded static-export ZIP, artifact `12238576585`, hashes to
+`df743bb4ea2ef8e2dde444a84e6829a955c29d9cadc3c06a71fe3e079dffb9b8`.
+The validated-release ZIP, artifact `12240025696`, hashes to
+`fc10eb63c71b196403bd93b7654f6960b726e2f897f784d2706957d3b4733efd`;
+its actual validation JSON hashes to
+`73d6a01ac09d9b126fadab2f1f5062a8742901c79972c9bb87cfa6b0fbc2f405`.
+Fresh source/SSR verification binds all seven source records, native Mode/s
+source hashes, direct project voice, continuous source intervals, disjoint
+background/evidence selections and the actual plan/build/validation to this
+candidate. The exact gate receipt is
+`375711f30ba80ab21a6522923f534ad8d5f23345983ead201257b3562465b907`.
+
+The downloaded final artifact produces **104 ready native chapter captures**,
+52 desktop PNGs at 2880 by 2000 pixels and 52 mobile PNGs at 1170 by 2532.
+Root views all sixteen proportional uncropped contact sheets and four important
+desktop originals: Mode/s opening/making, XR Context and Caschlatsch XR guidance.
+An independent reviewer views the same contact set and XR Context original.
+Root and the independent reviewer also each view all nine separate mobile
+aperture originals. These establish scoped visibility of five generic models,
+Caschlatsch's opening photograph and the three Bending source chapters without
+changing application state, DOM, CSS, camera or video time. Root's final-artifact
+review is `4c9a7f29cc108fe0cf5ae17c6f264099ac05d5b7434168418af842a35f6aff7f`;
+the independent aperture review is
+`80c6ed8c50e56009c485e057165ea1f1cce7290a97c6a38f72bf2958a05f03ef`.
+The earlier decoded photo review is carried forward only after checking all
+79 mapped raster bytes against this final export and checking image-selection
+and provenance mappings. This byte/mapping bridge does not invent another
+round of human source-image observations.
+
+[Deployment 39366842511](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39366842511)
+successfully promotes this exact CI output, without rebuilding. The actual
+deployment log and final API bind the same main SHA, validation run and both
+downloaded artifact digests; all thirteen deployment steps succeed. The
+independent deployment-provenance receipt is
+`4e760a1ba468fe775d857c5c00cd4ae1c840c563ee7c02ef89aed58c87ce114e`.
+
+Fresh checks of [the public site](https://joshsuan.github.io/) compare **192
+unique page/asset HTTP responses** with exact artifact bytes, including all
+124 source pins. Nine selected MP4s each pass first/last 32-byte Range checks:
+**eighteen actual 206 responses** with exact content ranges and bytes. The
+246-file artifact count is not an HTTP-request count. The live byte/range
+receipt is `6b11b9760b8b2d2d38dcccf1a04fac21e779a8ad69efa131b6c6557ec06a73c7`.
+
+The public site separately completes eight native project journeys in each of
+desktop and mobile emulation: another **104 ready chapter captures**, with
+stable exact release identity before and after. Browser and both contexts close.
+Root and an independent reviewer each view all sixteen live contact sheets and
+the four important original desktop screenshots. No new definite visual
+must-fix is found. The live capture receipt is
+`b77b9adfb6a43c0e1a7d66797a279e4b053b1f23881b050a6901f06766299c35`;
+root's scoped live visual review is
+`f8171545a69e1ed74d36ea9cd98496de1b12b9d61d62ea5ef8cda22d049d95f2`.
+The independent scoped live visual review is
+`793e747e021cee96d3c0946f1d8328fa1c6f12cb62320cd6fc99351631ec7e8f`.
+
+These visual reviews cover 104 thumbnails per capture set and the stated
+originals, not every original PNG at native size or continuous frame-by-frame
+playback. Mobile chapter-heading captures can place the narrative over the
+background; the separate final-artifact apertures support model visibility.
+Existing Bending framing, source side information and fixed chrome/caption edge
+overlaps are recorded. A small grey shape at the Pattern aperture edge prevents
+a claim that every source subpart is uncropped. The preceding Linux WebKit
+geometry failure does not reproduce in this accepted run; its old root cause
+remains unconfirmed. This successful candidate does not erase that failure or
+claim a proven underlying repair. No physical-device acceptance is inferred.
+
+The owned local preview process is stopped, all capture browser/context resources
+are closed, and no public assets or software are changed by the subsequent
+documentation record. [The DORA CI plan](../../../../docs/CI_DELIVERY_PLAN.md)
+adds this run's actual timings and preserves the distinction between implemented
+operation and proposed timing receipts, coverage enforcement, partitioning,
+smoke and recovery work. A later documentation-only repository commit does not
+change the published application's `9608cdb` identity or require rebuilding it.

@@ -179,6 +179,40 @@ not production incidents; they were not deployed. No workflow optimization,
 new smoke stage, metric collector or recurring automation is implemented by
 this documentation update.
 
+### Latest full-candidate observation — 20 October 2026
+
+The story/source correction at `9608cdb6b018384e96d6130564b69a6e5f5d6665`
+completes [CI run 39363796520](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39363796520)
+with **402 exact required browser executions**: 126 public cases in each of
+Chromium, WebKit and mobile Chromium, plus twelve framework cases at each of
+root and the simulated subpath. The independent fresh inventory/raw-log union
+rejects missing, duplicated, skipped, retried or unfinished cases; all 402 pass.
+All fourteen jobs and the required validation gate succeed. This remains an
+independent release audit; structured per-test enforcement inside the checked-in
+CI gate is still the proposed work below.
+
+| Public browser batch | Passed | Playwright suite duration |
+| --- | ---: | ---: |
+| Chromium 1/4 | 33 | 21.4 min |
+| Chromium 2/4 | 47 | 28.9 min |
+| Chromium 3/4 | 17 | 23.2 min |
+| Chromium 4/4 | 29 | 9.1 min |
+| WebKit 1/2 | 80 | 23.0 min |
+| WebKit 2/2 | 46 | 8.1 min |
+| Mobile Chromium 1/2 | 80 | 22.4 min |
+| Mobile Chromium 2/2 | 46 | 8.2 min |
+
+The workflow spans **03:20:44–03:52:12 UTC: 31m28s**. Quality takes
+**40 seconds of active job time** and completes **60 seconds after workflow
+creation**; the public build takes **64 seconds**, completing **84 seconds after
+creation**. These early results are distinct from complete release acceptance.
+The eight suite durations are rounded native summaries, not job wall-clock
+times. The workload differs from earlier samples, so this run establishes
+neither a controlled speedup nor a p95. The uneven durations support the planned
+measurement-first partition experiment; they do not authorize skipping cases
+or changing budgets. The [verification record](../roles/uiux-designer/cases/bending-active-thesis/PORTFOLIO_STORY_CONTINUITY_VERIFICATION.md)
+retains failed predecessors, raw evidence and exact-artifact provenance.
+
 ## Planned feedback and release stages
 
 The table describes the target structure. Existing jobs implement parts of it; the dedicated fast browser stage and duration reporting are proposed improvements.
