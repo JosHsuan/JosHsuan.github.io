@@ -119,12 +119,79 @@ test('a queued native pause from departure cannot overwrite resumed playback on 
 async function pendingRevisit(){
  const f=fixture({video:true});await flush();f.step();f.select('making');f.step(1);f.frame();await flush();f.step();f.settle();await flush();f.video.currentTime=1.000437469;f.select('results');f.settle();f.deferPlay();f.select('making');f.settle();await flush();assert.equal(f.pendingPlays.length,1);assert.equal(f.video.paused,false);return f;
 }
+async function lateNativeRevisit(){
+ const f=await pendingRevisit();f.policy.paused=true;f.step();assert.equal(f.video.paused,true);
+ const paused=f.presenter.inspect().media.find(item=>item.id);assert.equal(paused.transport.progressGeneration,0);
+ // A browser can finish an older native start after the current policy pause.
+ // The real element is already unpaused when the held presenter runs again,
+ // so play() correctly does not issue another operation to bind an epoch.
+ f.policy.paused=false;f.video.paused=false;f.video.readyState=2;const plays=f.plays;f.step();assert.equal(f.plays,plays);
+ f.video.fire('waiting');const waiting=f.presenter.inspect().media.find(item=>item.id);
+ assert.equal(waiting.active,true);assert.equal(waiting.firstFrame,true);assert.equal(waiting.playing,false);assert.equal(waiting.phase,'buffering');assert.equal(waiting.transport.progressGeneration,0);assert(waiting.transport.playGeneration>0);assert.equal(waiting.progressReceipt,null);
+ return f;
+}
 test('a pending resumed play is acknowledged only by real native progress, and late fulfillment cannot override newer waiting or pause',async()=>{
  const f=await pendingRevisit();f.video.currentTime=1.202663955;f.video.fire('waiting');assert.equal(f.presenter.inspect().media.find(item=>item.id).playing,false);
  f.video.fire('timeupdate');assert.equal(f.presenter.inspect().media.find(item=>item.id).playing,false,'An unchanged waiting sample is not progress');
  f.video.currentTime=2.881604636;f.video.fire('timeupdate');const progressing=f.presenter.inspect().media.find(item=>item.id);assert.equal(progressing.playing,true);assert.equal(progressing.phase,'playing');assert.equal(progressing.playPending,true);assert.equal(progressing.progressReceipt.type,'timeupdate');assert.equal(progressing.progressReceipt.fromTime,1.202663955);assert.equal(progressing.progressReceipt.currentTime,2.881604636);
  f.video.currentTime=2.9;f.video.fire('waiting');const waiting=f.presenter.inspect().media.find(item=>item.id);assert.equal(waiting.playing,false);assert.equal(waiting.phase,'buffering');f.pendingPlays[0].resolve();await flush();assert.equal(f.presenter.inspect().media.find(item=>item.id).phase,'buffering');assert.equal(f.presenter.inspect().media.find(item=>item.id).playing,false);
  const toggle=f.controls.find(control=>control.getAttribute('data-project-motion-toggle'));assert.equal(toggle.textContent,'Pause recording');const plays=f.plays;toggle.fire('click');assert.equal(f.video.paused,true);assert.equal(f.plays,plays);assert.equal(f.presenter.inspect().media.find(item=>item.id).userPaused,true);f.video.fire('playing');assert.equal(f.presenter.inspect().media.find(item=>item.id).playing,false,'A queued playing event cannot override native paused');f.presenter.dispose();terminal(f.presenter.inspect().stage.history);
+});
+
+test('real forward native progress rebinds an invalidated play epoch without issuing another play or trusting its old Promise',async()=>{
+ const f=await lateNativeRevisit();
+ try{
+  const initial=f.presenter.inspect().media.find(item=>item.id),plays=f.plays,callbacks=f.callbacks.size;
+  f.video.fire('playing');f.video.fire('timeupdate');assert.equal(f.presenter.inspect().media.find(item=>item.id).playing,false,'Neither playing nor an unchanged sample repairs an invalidated epoch');
+  f.video.currentTime=1.202663955;f.video.fire('timeupdate');const progressing=f.presenter.inspect().media.find(item=>item.id);
+  assert.equal(progressing.playing,true);assert.equal(progressing.phase,'playing');assert.equal(progressing.transport.progressGeneration,initial.transport.playGeneration);
+  assert.deepEqual(progressing.progressReceipt,{type:'timeupdate',sequence:progressing.transport.lastFact.sequence,at:progressing.transport.lastFact.at,fromTime:initial.transport.baseline,currentTime:1.202663955,playGeneration:initial.transport.playGeneration});
+  assert.equal(f.plays,plays);assert.equal(f.callbacks.size,callbacks);assert.equal(f.timers.size,0,'Native transport recovery introduces no polling/deadline work');
+  f.video.fire('waiting');const waiting=f.presenter.inspect().media.find(item=>item.id);f.pendingPlays[0].resolve();await flush();
+  const settled=f.presenter.inspect().media.find(item=>item.id);assert.equal(settled.phase,'buffering');assert.equal(settled.playing,false);assert.equal(settled.transport.waiting,true);assert.deepEqual(settled.progressReceipt,waiting.progressReceipt,'An old operation cannot mint a newer progress receipt');
+  f.video.currentTime=.04;f.video.fire('timeupdate');assert.equal(f.presenter.inspect().media.find(item=>item.id).playing,false,'A loop wrap is a baseline change, not forward progress');
+  f.video.currentTime=.08;f.video.fire('timeupdate');const looped=f.presenter.inspect().media.find(item=>item.id);assert.equal(looped.playing,true);assert.equal(looped.progressReceipt.fromTime,.04);assert.equal(looped.progressReceipt.currentTime,.08);
+ }finally{f.presenter.dispose();terminal(f.presenter.inspect().stage.history);}
+});
+
+test('invalidated transport cannot rebind from an inactive, forbidden, undecoded or nonprogressing native sample',async()=>{
+ const cases=[
+  {name:'inactive',change:f=>{f.select('results');f.settle();f.video.paused=false;}},
+  {name:'hidden',change:f=>{f.policy.hidden=true;}},
+  {name:'global pause',change:f=>{f.policy.paused=true;}},
+  {name:'reduced',change:f=>{f.policy.reduced=true;}},
+  {name:'Save Data',change:f=>{f.policy.saveData=true;}},
+  {name:'entry not ready',change:f=>{f.policy.siteReady=false;}},
+  {name:'user pause',change:f=>{f.controls.find(control=>control.getAttribute('data-project-motion-toggle')).fire('click');f.video.paused=false;}},
+  {name:'native paused',change:f=>{f.video.pause();}},
+  {name:'native ended',change:f=>{f.video.ended=true;}},
+  {name:'native error',change:f=>{f.video.error={code:3};}},
+  {name:'native seeking',change:f=>{f.video.seeking=true;}},
+  {name:'no decoded current data',change:f=>{f.video.readyState=1;}},
+  {name:'unchanged time',change:()=>{},time:1.000437469},
+  {name:'backwards time',change:()=>{},time:.5},
+ ];
+ for(const item of cases){
+  const f=await lateNativeRevisit();
+  try{
+   item.change(f);f.video.currentTime=item.time??2;f.video.fire('timeupdate');const sample=f.presenter.inspect().media.find(row=>row.id);
+   assert.equal(sample.playing,false,item.name);assert.equal(sample.progressReceipt,null,item.name);assert.equal(sample.transport.progressGeneration,0,item.name);
+   if(['inactive','hidden','global pause','reduced','Save Data','entry not ready','user pause'].includes(item.name))assert.equal(f.video.paused,true,`${item.name} stops the actual disallowed native source`);
+  }finally{f.presenter.dispose();}
+ }
+});
+
+test('seeking latches and native pause survive an old play settlement before a later valid epoch recovery',async()=>{
+ const f=await lateNativeRevisit();
+ try{
+  f.video.seeking=true;f.video.fire('seeking');f.video.currentTime=3;f.video.seeking=false;f.video.fire('timeupdate');
+  assert.equal(f.presenter.inspect().media.find(item=>item.id).progressReceipt,null,'Seek completion timeupdate cannot pass the event latch');
+  f.video.fire('seeked');f.video.fire('timeupdate');assert.equal(f.presenter.inspect().media.find(item=>item.id).progressReceipt,null,'The seeked position is a baseline, not playback');
+  f.video.pause();f.pendingPlays[0].resolve();await flush();const paused=f.presenter.inspect().media.find(item=>item.id);
+  assert.equal(paused.phase,'paused');assert.equal(paused.playing,false);assert.equal(paused.progressReceipt,null);assert.equal(paused.transport.progressGeneration,0);
+  f.video.paused=false;f.video.currentTime=3.1;f.video.fire('timeupdate');const progressing=f.presenter.inspect().media.find(item=>item.id);
+  assert.equal(progressing.playing,true);assert.equal(progressing.transport.progressGeneration,progressing.transport.playGeneration);assert.equal(progressing.progressReceipt.fromTime,3);assert.equal(progressing.progressReceipt.currentTime,3.1);
+ }finally{f.presenter.dispose();terminal(f.presenter.inspect().stage.history);}
 });
 test('native timeupdate from seeking, inactive or disallowed transport cannot acknowledge playback, while a real pending rejection still fails',async()=>{
  const f=await pendingRevisit();f.video.currentTime=1.2;f.video.fire('waiting');f.video.seeking=true;f.video.fire('seeking');f.video.currentTime=3;f.video.seeking=false;f.video.fire('timeupdate');assert.equal(f.presenter.inspect().media.find(item=>item.id).playing,false,'Seek completion timeupdate occurs after native seeking becomes false');f.video.fire('seeked');f.video.fire('timeupdate');assert.equal(f.presenter.inspect().media.find(item=>item.id).playing,false,'The seeked position rebases without acknowledging normal progress');

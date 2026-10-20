@@ -13,6 +13,10 @@
 .stage[data-xr-scene-painted=model] .modelPoster,.stage:has([data-xr-native-phone]:not([hidden])) .modelPoster{visibility:hidden}
 .nativePhone{position:absolute;left:calc(73.5% - 17%);top:12%;width:34%;height:76%;display:grid;place-items:center;pointer-events:none}
 .nativePhone[hidden]{display:none}
+/* A painted phone still owns its native decoded source across chapter swaps.
+   Keep that backing node in layout; the painted-phone rule below hides the
+   DOM presentation while its VideoTexture remains the visible owner. */
+.nativePhone[hidden][data-video-texture-source=true]{display:grid}
 .screen{position:relative;height:95%;max-width:100%;border:10px solid #292e30;border-radius:26px;background:#16191b;box-shadow:0 14px 35px #0005;overflow:hidden}
 .screen img,.screen video{display:block;width:100%;height:100%;object-fit:contain}
 .screen img{position:absolute;inset:0}

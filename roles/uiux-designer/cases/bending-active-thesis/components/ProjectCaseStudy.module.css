@@ -29,6 +29,7 @@
 .sourcePanel{position:relative;z-index:2;min-width:0;width:100%;max-width:36rem;align-self:flex-end;padding:1.1rem 1.3rem;border:1px solid var(--material-reading-border);border-radius:18px;color:var(--glass-muted);font-size:var(--type-size-caption);line-height:var(--type-leading-caption);letter-spacing:var(--type-tracking-caption)}
 .sourcePanel>p{margin:0 0 .6rem}.sourcePanel>.credit{font-size:var(--type-size-label)}
 .sourcePanel>.sourceLink{margin-right:0}.sourcePanel>.modelDescription{margin-bottom:.9rem}
+.sourcePanel>.sourceLink+.sourceLink{margin-inline-start:1.5rem}
 .motionControls{display:flex;flex-wrap:wrap;gap:.6rem}.motionControls:has(button:not([hidden])){margin-top:.6rem}
 .motionControls button{min-height:44px;padding:.55rem .8rem;border:1px solid var(--material-reading-border);border-radius:10px;background:var(--material-reading-fill);color:var(--glass-control-accent);font:inherit;font-size:var(--type-size-control);line-height:var(--type-leading-control);letter-spacing:var(--type-tracking-control);cursor:pointer}
 .motionControls button[hidden]{display:none}.sourcePanel>.motionStatus:empty{display:none}.sourcePanel>.motionStatus{margin-top:.75rem;margin-bottom:0}

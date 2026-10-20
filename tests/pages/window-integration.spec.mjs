@@ -2,7 +2,9 @@ import {test,expect} from '@playwright/test';
 import {loadScene,centerStudy,settle,expectIdle,scenarioTimeout,WAIT} from './case-helpers.mjs';
 
 test('native scroll triggers a timed Canvas departure and completion follows the submitted frame',async({page})=>{
- test.setTimeout(scenarioTimeout(120000));await page.clock.install();await loadScene(page);await centerStudy(page,'system');
+ // Pattern ends the continuous Overview-to-Pattern source passage. Internal
+ // chapter boundaries retain the scene and must not trigger a departure.
+ test.setTimeout(scenarioTimeout(120000));await page.clock.install();await loadScene(page);await centerStudy(page,'pattern');
  const canvas=await page.locator('[data-cinematic-stage] canvas').elementHandle();
  const range=await page.evaluate(()=>{const s=window.__story.inspect();return{start:s.canvasPlacement.holdEnd-80,target:s.canvasPlacement.holdEnd+30,end:s.canvasPlacement.end};});
  await page.evaluate(y=>scrollTo({top:y,behavior:'instant'}),range.start);await settle(page);
@@ -26,7 +28,7 @@ test('native scroll triggers a timed Canvas departure and completion follows the
   await page.evaluate(y=>scrollTo({top:y,behavior:'instant'}),range.start);
   for(let i=0;i<18;i++)await page.clock.fastForward(100);
   const arrived=await page.evaluate(()=>{const s=window.__story.inspect(),r=window.__thesis.inspect();return{placement:s.canvasPlacement,events:s.canvasTransitions,frame:r.renderedControllerFrame,opacity:Number(document.querySelector('[data-cinematic-stage]').style.opacity)};});
-  expect(arrived.placement).toMatchObject({chapter:'system',mode:'hold',scale:1,opacity:1,settled:true});
+  expect(arrived.placement).toMatchObject({chapter:'pattern',mode:'hold',scale:1,opacity:1,settled:true});
   expect(arrived.opacity).toBe(1);expect(arrived.events.pending).toBe(null);expect(arrived.events.open).toBe(null);
   expect(arrived.events.history.at(-1).status).toBe('completed');
   expect(await page.evaluate(el=>document.querySelector('[data-cinematic-stage] canvas')===el,canvas)).toBe(true);

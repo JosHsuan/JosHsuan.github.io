@@ -86,9 +86,10 @@ test('permanent side information and source annotations stay beside the model an
 });
 
 test('side information and its leader follow the displayed Canvas throughout the timed exit',async({page})=>{
- test.setTimeout(scenarioTimeout(120000));await page.clock.install();await loadScene(page);await centerStudy(page,'form');
+ // The final source chapter owns departure; Form-to-System is continuous.
+ test.setTimeout(scenarioTimeout(120000));await page.clock.install();await loadScene(page);await centerStudy(page,'pattern');
  const canvas=await page.locator('[data-cinematic-stage] canvas').elementHandle();
- const panel=page.locator('[data-model-study][data-study-chapter="form"] [data-model-side-label]');
+ const panel=page.locator('[data-model-study][data-study-chapter="pattern"] [data-model-side-label]');
  const before=await panel.boundingBox();
  const exit=await page.evaluate(()=>{const p=window.__story.inspect().canvasPlacement;return p.holdEnd+(p.end-p.holdEnd)*.4;});
  await page.clock.pauseAt(new Date(Date.now()+3600000));
@@ -100,7 +101,7 @@ test('side information and its leader follow the displayed Canvas throughout the
    const sample=await page.evaluate(()=>{
     const p=window.__story.inspect().canvasPlacement,r=window.__thesis.inspect().representation;
     const canvas=document.querySelector('[data-cinematic-stage] canvas'),display=canvas.getBoundingClientRect();
-    const study=document.querySelector('[data-model-study][data-study-chapter="form"]'),outer=study.getBoundingClientRect();
+    const study=document.querySelector('[data-model-study][data-study-chapter="pattern"]'),outer=study.getBoundingClientRect();
     const dot=study.querySelector('[data-model-anchor]'),caption=study.querySelector('[data-model-annotation-label]').getBoundingClientRect();
     const points=study.querySelector('[data-model-leader]').getAttribute('points').trim().split(/\s+/).map(point=>point.split(',').map(Number));
     return{p,annotation:r.annotation,visible:study.querySelector('[data-model-connector]').dataset.annotationVisible,

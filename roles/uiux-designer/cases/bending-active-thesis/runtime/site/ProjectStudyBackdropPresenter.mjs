@@ -108,8 +108,16 @@ export function createProjectStudyBackdropPresenter({root,window:win,document:do
    publishMedia(record);return;
   }
   if(type==='timeupdate')record.progressBaseline=time;
-  const usable=record.firstFrame&&heldTransport(record)&&!video.paused&&!video.ended&&!record.ended&&!video.error&&!video.seeking&&!record.transportSeeking&&record.progressGeneration===record.playGeneration;
+  const usable=record.firstFrame&&heldTransport(record)&&!video.paused&&!video.ended&&!record.ended&&!video.error&&video.readyState>=2&&!video.seeking&&!record.transportSeeking;
   if(!usable||type==='playing'&&video.readyState<3||type==='timeupdate'&&(!Number.isFinite(fromTime)||time<=fromTime))return;
+  if(record.progressGeneration!==record.playGeneration){
+   // A late native start can resume this held source after pause invalidated
+   // its play operation. Only actual forward native time, under the current
+   // owner/policy and outside seeking, can bind a new progress receipt. A
+   // playing event or the superseded play Promise cannot acknowledge it.
+   if(type!=='timeupdate')return;
+   record.progressGeneration=record.playGeneration;
+  }
   const changed=!record.playing||record.phase!=='playing';
   record.progressBaseline=time;record.progressReceipt={type,sequence,at:clock(),fromTime,currentTime:time,playGeneration:record.playGeneration};record.transportWaiting=false;record.playing=true;record.phase='playing';
   if(changed)publishMedia(record);

@@ -261,8 +261,22 @@ test('a genuinely delayed recording preserves its paused native frame through a 
  let release;const held=new Promise(resolve=>{release=resolve;});let waiting=false;
  await page.route('**/assets/xr/assemble-interface.mp4',async route=>{waiting=true;await held;await route.continue();});
  let continuity;
+ const nativeFrame=()=>video(page,'adapt').evaluate(async node=>{
+  if(node.readyState<2||!node.videoWidth||!node.videoHeight)throw Error('Retained native frame is unavailable');
+  const sample=document.createElement('canvas');sample.width=node.videoWidth;sample.height=node.videoHeight;
+  const context=sample.getContext('2d');context.drawImage(node,0,0);const pixels=context.getImageData(0,0,sample.width,sample.height).data;
+  let min=255,max=0,alphaMin=255,alphaMax=0;
+  for(let index=0;index<pixels.length;index+=4){min=Math.min(min,pixels[index],pixels[index+1],pixels[index+2]);max=Math.max(max,pixels[index],pixels[index+1],pixels[index+2]);alphaMin=Math.min(alphaMin,pixels[index+3]);alphaMax=Math.max(alphaMax,pixels[index+3]);}
+  const sha256=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',pixels)),value=>value.toString(16).padStart(2,'0')).join('');
+  const wrapper=node.closest('[data-xr-native-phone]'),css=getComputedStyle(wrapper);
+  return{sha256,width:sample.width,height:sample.height,contrast:max-min,alphaMin,alphaMax,position:node.currentTime,decodedFrames:node.getVideoPlaybackQuality().totalVideoFrames,paused:node.paused,readyState:node.readyState,currentSrc:node.currentSrc,wrapper:{hidden:wrapper.hidden,display:css.display,opacity:css.opacity,textureSource:wrapper.dataset.videoTextureSource??null}};
+ });
+ const frameIdentity=({sha256,width,height,contrast,alphaMin,alphaMax,position,decodedFrames,paused})=>({sha256,width,height,contrast,alphaMin,alphaMax,position,decodedFrames,paused});
  try{
   await enter(page);await phoneReady(page,'adapt');const canvas=stage(page).locator('canvas'),original=await canvas.elementHandle();
+  const active=await nativeFrame();
+  await test.info().attach('active-native-frame-facts',{body:JSON.stringify(active),contentType:'application/json'});
+  await test.info().attach('active-phone-composition',{body:await canvas.screenshot(),contentType:'image/png'});
   continuity=await stage(page).evaluateHandle(host=>{
    let running=true,raf;const samples=[];
    const read=()=>{if(!running)return;const s=host.__xrStage.inspect();samples.push({chapter:s.chapter,mode:s.scene.mode,opacity:s.scene.opacity,cssOpacity:Number(getComputedStyle(host.querySelector('[data-xr-scene-surface]')).opacity),painted:s.resource?.successfulPaint,phoneCalls:s.resource?.surface?.phoneCalls});raf=requestAnimationFrame(read);};read();
@@ -275,17 +289,13 @@ test('a genuinely delayed recording preserves its paused native frame through a 
   // The transparent WebGL surface is composited with moving native reading
   // and Layer 1. Compare the retained decoded source pixels directly instead
   // of treating a screenshot of that whole composition as a paused frame.
-  const nativeFrame=()=>video(page,'adapt').evaluate(async node=>{
-   if(node.readyState<2||!node.videoWidth||!node.videoHeight)throw Error('Retained native frame is unavailable');
-   const sample=document.createElement('canvas');sample.width=node.videoWidth;sample.height=node.videoHeight;
-   const context=sample.getContext('2d');context.drawImage(node,0,0);const pixels=context.getImageData(0,0,sample.width,sample.height).data;
-   let min=255,max=0;for(let index=0;index<pixels.length;index+=4){min=Math.min(min,pixels[index],pixels[index+1],pixels[index+2]);max=Math.max(max,pixels[index],pixels[index+1],pixels[index+2]);}
-   const sha256=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',pixels)),value=>value.toString(16).padStart(2,'0')).join('');
-   return{sha256,width:sample.width,height:sample.height,contrast:max-min,position:node.currentTime,decodedFrames:node.getVideoPlaybackQuality().totalVideoFrames,paused:node.paused};
-  });
-  const frozen=await nativeFrame();await frames(page,8);const retained=await nativeFrame();expect(retained).toEqual(frozen);expect(retained.contrast).toBeGreaterThan(32);expect(retained.paused).toBe(true);
-  await test.info().attach('retained-native-frame-facts',{body:JSON.stringify({frozen,retained}),contentType:'application/json'});
+  const frozen=await nativeFrame();await frames(page,8);const retained=await nativeFrame();
+  await test.info().attach('retained-native-frame-facts',{body:JSON.stringify({active,frozen,retained}),contentType:'application/json'});
   await test.info().attach('pending-phone-composition',{body:await canvas.screenshot(),contentType:'image/png'});
+  // Buffer readiness and React's chapter attributes are diagnostic facts;
+  // pixel identity, media time and pause are the actual frozen-frame contract.
+  expect(active.contrast).toBeGreaterThan(32);expect(frozen.contrast).toBeGreaterThan(32);expect(frameIdentity(retained)).toEqual(frameIdentity(frozen));expect(retained.contrast).toBeGreaterThan(32);expect(retained.paused).toBe(true);
+  for(const sample of [active,frozen,retained]){expect(sample.wrapper.textureSource).toBe('true');expect(sample.wrapper.display).not.toBe('none');}
   const pending=await facts(page);expect(pending.scene.opacity).toBe(1);expect(pending.resource.successfulPaint).toBe(true);expect(pending.resource.mode).toBe('webgl-phone');expect(pending.resource.surface.phoneCalls).toBe(2);
   await expect(video(page,'adapt')).toHaveAttribute('src',/adapt-interface\.mp4$/);expect(await video(page,'adapt').evaluate(node=>node.paused)).toBe(true);
   // Reverse while the target HTTP response is still held. The retained video

@@ -71,9 +71,12 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
  const stopFrames=()=>{if(frameCallback!==null&&activeStage){videos[activeStage.id]?.cancelVideoFrameCallback?.(frameCallback);frameCallback=null;}};
  function disposePhone(){
   stopFrames();if(phone){scene?.remove(phone.group);releaseObject(phone.group);}phone=null;texture=null;
+  for(const node of nativeNodes.values())delete node.dataset.videoTextureSource;
  }
  function releaseRetainedMedia(){
-  const retained=retainedMedia;retainedMedia=null;retained?.controller?.abort();retained?.handle?.dispose();
+  const retained=retainedMedia;retainedMedia=null;
+  if(retained)delete nativeNodes.get(retained.stage.id).dataset.videoTextureSource;
+  retained?.controller?.abort();retained?.handle?.dispose();
  }
  function stopMedia(retainPhone=false){
   mediaGeneration++;if(mediaDeadline!==null){win.clearTimeout(mediaDeadline);mediaDeadline=null;}stopFrames();
@@ -174,7 +177,11 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
     const geometry=createResearchPhoneGeometry(stage.width/stage.height);texture=new T.VideoTexture(video);texture.colorSpace=T.SRGBColorSpace;texture.generateMipmaps=false;
     const group=new T.Group(),body=new T.Mesh(geometry.body,new T.MeshStandardMaterial({color:'#292e30',metalness:.65,roughness:.33})),screen=new T.Mesh(geometry.screen,new T.MeshBasicMaterial({map:texture,toneMapped:false}));
     group.add(body,screen);countDraws(body,'phoneBody');countDraws(screen,'phoneScreen');
-    phone={group,support:geometry.support,dimensions:geometry.dimensions,bounds:supportBounds(geometry.support)};scene.add(group);draw(true);nextFrame();
+    phone={group,support:geometry.support,dimensions:geometry.dimensions,bounds:supportBounds(geometry.support)};scene.add(group);
+    // React owns chapter visibility. Keep the VideoTexture's actual native
+    // source in layout until this phone is released, including a pending
+    // chapter or a reverse before React commits its new hidden attributes.
+    node.dataset.videoTextureSource='true';draw(true);nextFrame();
    }else announce('native-video',gpuReason??'webgl-unavailable');
   }catch(error){
    if(disposed||generation!==mediaGeneration)return;mediaPending=false;if(mediaDeadline!==null)win.clearTimeout(mediaDeadline);mediaDeadline=null;
