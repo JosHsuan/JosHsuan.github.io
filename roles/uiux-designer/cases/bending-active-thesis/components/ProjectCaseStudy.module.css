@@ -96,6 +96,4 @@
  .panel,.sourcePanel{max-width:none;padding:1rem!important;break-inside:avoid}.panel h1{font-size:2.6rem}.panel h2{font-size:2rem}.readingTools,.backLink,.readingLink{display:none!important}.evidenceBand{padding:1rem 0}
  .page:global([data-home-scrolling-ready]) :global([data-information-window][data-information-ready]){transform:none!important}
 }
-.modelReference{display:block;margin:1rem 0;position:relative;border-radius:.75rem;overflow:hidden}
-.modelReference img{display:block;width:100%;height:auto;max-height:10rem;object-fit:contain}
 .modelReference:focus-visible{outline:2px solid currentColor;outline-offset:4px}

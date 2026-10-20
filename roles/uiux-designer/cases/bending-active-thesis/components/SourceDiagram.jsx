@@ -6,7 +6,7 @@ import styles from './source-diagram.module.css';
 import InformationSkin from './InformationSkin';
 
 const TITLES = {library: 'Function library', miura: 'Miura fold anatomy', workflow: 'From geometry to fabrication'};
-const HINTS = {library: 'Length traces unfold from 60 mm to 160 mm.', miura: 'Read the net, folds and form.', workflow: 'Follow the source. Select a stage to compare its model.'};
+const HINTS = {library: 'Length traces unfold from 60 mm to 160 mm.', miura: 'Read the net, folds and form.', workflow: 'Follow the workflow. Select a stage to compare its model.'};
 const RATIOS = {library: '360 / 326', miura: '490 / 230', workflow: '560 / 524'};
 const ASSETS = '/assets/diagrams/';
 
@@ -56,7 +56,7 @@ export default function SourceDiagram({kind = 'library', title, className = ''})
     onBlur={validKind==='library'?undefined:manager.blur}>
     <InformationSkin/>
     <figcaption className={styles.heading} data-protect data-choreography="caption">
-      <span className={styles.eyebrow}>Source study</span>
+      <span className={styles.eyebrow}>Research study</span>
       <h3 id={`${id}-title`}>{heading}</h3>
       <p>{HINTS[validKind]}</p>
     </figcaption>

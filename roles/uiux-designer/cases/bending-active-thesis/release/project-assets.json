@@ -7,416 +7,307 @@
     "pages": 86,
     "locatorPolicy": "Physical pages are one-based; printed page = physical page - 5 in these chapters."
   },
-  "scope": "Six owner-selected project studies. Source image and geometry provenance only; build consumes verified repository derivatives without accessing source drives.",
+  "scope": "Six owner-selected project studies. Source image, geometry and motion provenance only; build consumes verified repository derivatives without accessing source drives.",
   "assets": [
     {
-      "id": "mode-s-of-making-hero",
+      "id": "film-assembly-hero",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 742318,
+      "sha256": "c78e51847b64c1bf5d6a465f901d98da13f8e701833371dc0ccc68d3862bd1bc",
+      "credit": "Studio design and digital animation: Chia-Hsuan Chao / National Cheng Kung University.",
       "projectId": "mode-s-of-making",
-      "path": "assets/projects/mode-s-of-making/hero.webp",
-      "src": "/assets/projects/mode-s-of-making/hero.webp",
-      "width": 2267,
-      "height": 3200,
-      "bytes": 422762,
-      "sha256": "9a0beb28153b96b9b2f8e074fb7091e3e2043033494d5ceb3245d7ac3cb1c7e4",
+      "path": "assets/projects/mode-s-of-making/film-assembly-hero.webp",
+      "src": "/assets/projects/mode-s-of-making/film-assembly-hero.webp",
       "source": {
-        "file": "JosHsuan_CV&Portfolio_2025_Print.pdf",
-        "bytes": 361589115,
-        "sha256": "fdaf47a2df174e73d698a72c362b0644240bfd39448042ffcb3f1024fd27bd71",
+        "file": "RELAX.mov",
+        "bytes": 766777591,
+        "sha256": "54d91bf859b86b46bc5f9a4d19a16244ebcd0ff8f4b46e4d51ce22d778a9e789",
         "locator": {
-          "physicalPage": 31,
-          "printedPage": 26,
-          "figure": "4-01"
+          "frameIndex": 2490,
+          "timestampSeconds": 83.083
         },
-        "imageObject": {
-          "index": 0,
-          "name": "Im0.jpg",
-          "width": 2485,
-          "height": 3508,
-          "bytes": 750265,
-          "sha256": "8b1d5778173dcab60e48afbc1a0ee36af08f3798d522019a6988bd2d6f3fd5d2"
-        },
-        "narrativeReference": {
-          "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
-          "bytes": 22624290,
-          "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
-          "locator": {
-            "physicalPage": 55,
-            "printedPage": 50,
-            "figure": "Simulation detail"
-          }
-        },
-        "identityReview": "Same composition, geometry, diagram connections or photograph group as the primary reference. Selected only for higher native image resolution; no old copy adopted."
+        "nativeDimensions": [
+          1920,
+          1080
+        ],
+        "decodedPNGSHA256": "9538211419d6cdf164223f19f40aeec89c2d1c2899fa83019ed1584620218bfc",
+        "identityReview": "Reviewed original complete edited studio film and its native digital animation materials. Native source composition matches the film study; no claim of a separately identified FINAL FILM version."
       },
       "processing": {
-        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "method": "Native full-frame source decode to RGB PNG, then lossless WebP. No resize/crop/grade/retouch/AI. Source-authored black bars, overlays and guide lines retained.",
         "inputPixels": [
-          2485,
-          3508
+          1920,
+          1080
         ],
         "cropPixels": null,
         "preResizePixels": [
-          2485,
-          3508
+          1920,
+          1080
         ],
-        "maxLongEdge": 3200,
+        "resize": null,
         "upscaled": false,
-        "selectedFrame": null,
+        "selectedFrame": 2490,
+        "timestampSeconds": 83.083,
+        "decodedRGBExact": true,
         "encoding": {
           "format": "WebP",
-          "quality": 95,
-          "lossless": false,
-          "method": 6
-        },
-        "metadata": "EXIF, XMP and private filesystem metadata omitted."
-      },
-      "credit": "Design study: Chia-Hsuan Chao / National Cheng Kung University.",
-      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
-    },
-    {
-      "id": "mode-s-of-making-design-workflow",
-      "projectId": "mode-s-of-making",
-      "path": "assets/projects/mode-s-of-making/design-workflow.webp",
-      "src": "/assets/projects/mode-s-of-making/design-workflow.webp",
-      "width": 2251,
-      "height": 2618,
-      "bytes": 1354306,
-      "sha256": "8330a0695b738831254982f3c3ec8246f70ec7619d6279bb84d8d1294fe2a82b",
-      "source": {
-        "file": "JosHsuan_CV&Portfolio_2025_Print.pdf",
-        "bytes": 361589115,
-        "sha256": "fdaf47a2df174e73d698a72c362b0644240bfd39448042ffcb3f1024fd27bd71",
-        "locator": {
-          "physicalPage": 32,
-          "printedPage": 27,
-          "figure": "4-02"
-        },
-        "imageObject": {
-          "index": 0,
-          "name": "Im0.png",
-          "width": 2485,
-          "height": 3508,
-          "bytes": 2456496,
-          "sha256": "aa5f15b53e421e97f434dda84c644b2a6d7dbbb6505325802dd173bbc847a625"
-        },
-        "narrativeReference": {
-          "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
-          "bytes": 22624290,
-          "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
-          "locator": {
-            "physicalPage": 56,
-            "printedPage": 51,
-            "figure": "5-02"
-          }
-        },
-        "identityReview": "Same composition, geometry, diagram connections or photograph group as the primary reference. Selected only for higher native image resolution; no old copy adopted."
-      },
-      "processing": {
-        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
-        "inputPixels": [
-          2485,
-          3508
-        ],
-        "cropPixels": [
-          123,
-          132,
-          2374,
-          2750
-        ],
-        "preResizePixels": [
-          2251,
-          2618
-        ],
-        "maxLongEdge": 3200,
-        "upscaled": false,
-        "selectedFrame": null,
-        "encoding": {
-          "format": "WebP",
-          "quality": 95,
           "lossless": true,
           "method": 6
         },
-        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+        "metadata": "EXIF/XMP omitted"
       },
-      "credit": "Design study: Chia-Hsuan Chao / National Cheng Kung University.",
-      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
+      "authorStatus": "Owner-confirmed studio design and digital animation attribution; project and collaborator credits remain in the study."
     },
     {
-      "id": "mode-s-of-making-machine-system",
+      "id": "film-unit-geometry",
+      "width": 4096,
+      "height": 2304,
+      "bytes": 474092,
+      "sha256": "932bb6258c9bb79636487354d54542b3f92f87c9675d4cbbd2888d024ba654f1",
+      "credit": "Studio design and digital animation: Chia-Hsuan Chao / National Cheng Kung University.",
       "projectId": "mode-s-of-making",
-      "path": "assets/projects/mode-s-of-making/machine-system.webp",
-      "src": "/assets/projects/mode-s-of-making/machine-system.webp",
-      "width": 1783,
-      "height": 2606,
-      "bytes": 312024,
-      "sha256": "8695d585ea84fe7a317eb4709373d8c187adcb9389087da6034e0b82f20c14ff",
+      "path": "assets/projects/mode-s-of-making/film-unit-geometry.webp",
+      "src": "/assets/projects/mode-s-of-making/film-unit-geometry.webp",
       "source": {
-        "file": "JosHsuan_CV&Portfolio_2025_Print.pdf",
-        "bytes": 361589115,
-        "sha256": "fdaf47a2df174e73d698a72c362b0644240bfd39448042ffcb3f1024fd27bd71",
+        "file": "動畫200.mp4",
+        "bytes": 45729892,
+        "sha256": "8b7a0d0682852cf4aff31cb90f60621d11f804640738badd17a3868e43d3bb60",
         "locator": {
-          "physicalPage": 33,
-          "printedPage": 28,
-          "figure": "4-03"
+          "frameIndex": 0,
+          "timestampSeconds": 0.0
         },
-        "imageObject": {
-          "index": 0,
-          "name": "Im0.png",
-          "width": 2485,
-          "height": 3508,
-          "bytes": 947506,
-          "sha256": "4b33e5282d505995cb7697fe82bace66dda187e943207777db803b2902bca951"
-        },
-        "narrativeReference": {
-          "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
-          "bytes": 22624290,
-          "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
-          "locator": {
-            "physicalPage": 57,
-            "printedPage": 52,
-            "figure": "5-03"
-          }
-        },
-        "identityReview": "Same composition, geometry, diagram connections or photograph group as the primary reference. Selected only for higher native image resolution; no old copy adopted."
+        "nativeDimensions": [
+          4096,
+          2304
+        ],
+        "decodedPNGSHA256": "db03a8b9e0c7f7e791be16d2896e7f182a39c9d7f56160317924d313179943bf",
+        "identityReview": "Reviewed original complete edited studio film and its native digital animation materials. Native source composition matches the film study; no claim of a separately identified FINAL FILM version."
       },
       "processing": {
-        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "method": "Native full-frame source decode to RGB PNG, then lossless WebP. No resize/crop/grade/retouch/AI. Source-authored black bars, overlays and guide lines retained.",
         "inputPixels": [
-          2485,
-          3508
+          4096,
+          2304
         ],
-        "cropPixels": [
-          351,
-          133,
-          2134,
-          2739
-        ],
+        "cropPixels": null,
         "preResizePixels": [
-          1783,
-          2606
+          4096,
+          2304
         ],
-        "maxLongEdge": 3200,
+        "resize": null,
         "upscaled": false,
-        "selectedFrame": null,
+        "selectedFrame": 0,
+        "timestampSeconds": 0.0,
+        "decodedRGBExact": true,
         "encoding": {
           "format": "WebP",
-          "quality": 95,
           "lossless": true,
           "method": 6
         },
-        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+        "metadata": "EXIF/XMP omitted"
       },
-      "credit": "Design study: Chia-Hsuan Chao / National Cheng Kung University.",
-      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
+      "authorStatus": "Owner-confirmed studio design and digital animation attribution; project and collaborator credits remain in the study."
     },
     {
-      "id": "mode-s-of-making-fabrication-assembly-spread",
+      "id": "film-corexy-system",
+      "width": 4096,
+      "height": 2304,
+      "bytes": 230462,
+      "sha256": "02cddda238fcb71e4452e417094d5817f526b4f3e474315e1c267a30862d766b",
+      "credit": "Studio design and digital animation: Chia-Hsuan Chao / National Cheng Kung University.",
       "projectId": "mode-s-of-making",
-      "path": "assets/projects/mode-s-of-making/fabrication-assembly-spread.webp",
-      "src": "/assets/projects/mode-s-of-making/fabrication-assembly-spread.webp",
-      "width": 3200,
-      "height": 2263,
-      "alt": "The complete landscape visualization joins curved-unit assemblies, a rotary cutting setup and its exploded machine components.",
-      "caption": "Imagined fabrication and assembly, with the cutting machine’s exploded components.",
-      "credit": "Design study: Chia-Hsuan Chao / National Cheng Kung University.",
-      "bytes": 602486,
-      "sha256": "543ce2861130c670bafa729e188de2c819abe805a0e81a1f1fd4d0c125bc169c",
+      "path": "assets/projects/mode-s-of-making/film-corexy-system.webp",
+      "src": "/assets/projects/mode-s-of-making/film-corexy-system.webp",
       "source": {
-        "file": "JosHsuan_CV&Portfolio_2025_Print.pdf",
-        "bytes": 361589115,
-        "sha256": "fdaf47a2df174e73d698a72c362b0644240bfd39448042ffcb3f1024fd27bd71",
+        "file": "HARDcore.mp4",
+        "bytes": 7331866,
+        "sha256": "455c2f23a8d5084e739552a0cdebe46f19851490beb5fd66967e90c1b109ef62",
         "locator": {
-          "physicalPages": [
-            34,
-            35
-          ],
-          "printedPages": [
-            29,
-            30
-          ],
-          "figure": "Complete fabrication and assembly spread"
+          "frameIndex": 75,
+          "timestampSeconds": 3.0
         },
-        "narrativeReference": {
-          "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
-          "bytes": 22624290,
-          "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
-          "locator": {
-            "physicalPages": [
-              58,
-              59
-            ],
-            "printedPages": [
-              53,
-              54
-            ],
-            "figure": "Complete fabrication and assembly spread"
-          }
-        },
-        "identityReview": "The two facing-page raster objects form one continuous landscape composition. Placement matrices imply 8.998478 pixels of overlap; independent native-pixel search uniquely selects 9 columns and zero vertical offset. The left object and all remaining right-object pixels are copied exactly before the single proportional output reduction. Independent JPEG objects differ in the overlap; no claim of identical overlapping bytes is made.",
-        "imageObjects": [
-          {
-            "index": 0,
-            "name": "Im0.jpg",
-            "width": 2485,
-            "height": 3508,
-            "bytes": 800596,
-            "sha256": "5d8d924ba92e425dd408baa61ba4b36970e42e4752d4326ab318e0b856d111b6",
-            "physicalPage": 34,
-            "xref": 2572
-          },
-          {
-            "index": 0,
-            "name": "Im0.jpg",
-            "width": 2485,
-            "height": 3508,
-            "bytes": 862412,
-            "sha256": "1c2b47e51f9cee44ca4836d4712cdecfb57781ee4ecd3dec056374cad2d1f24f",
-            "physicalPage": 35,
-            "xref": 2576
-          }
-        ]
+        "nativeDimensions": [
+          4096,
+          2304
+        ],
+        "decodedPNGSHA256": "71e6da13e682e8826b4f6db53b9758eeaa73cbb2ff1cfffc45d73bfd620edd36",
+        "identityReview": "Reviewed original complete edited studio film and its native digital animation materials. Native source composition matches the film study; no claim of a separately identified FINAL FILM version."
       },
       "processing": {
-        "method": "Restore the continuous book spread from its two native raster halves, left then right at their original scale; omit the right object’s duplicate first 9 columns. No blending, filling, geometric warping, AI, retouching or colour grading. Proportional reduction and WebP encoding follow.",
+        "method": "Native full-frame source decode to RGB PNG, then lossless WebP. No resize/crop/grade/retouch/AI. Source-authored black bars, overlays and guide lines retained.",
         "inputPixels": [
-          4961,
-          3508
-        ],
-        "nativeHalfPixels": [
-          2485,
-          3508
-        ],
-        "overlapPixels": 9,
-        "verticalOffsetPixels": 0,
-        "cropPixels": null,
-        "preResizePixels": [
-          4961,
-          3508
-        ],
-        "maxLongEdge": 3200,
-        "upscaled": false,
-        "selectedFrame": null,
-        "encoding": {
-          "format": "WebP",
-          "quality": 95,
-          "lossless": false,
-          "method": 6
-        },
-        "metadata": "EXIF, XMP and private filesystem metadata omitted."
-      },
-      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
-    },
-    {
-      "id": "mode-s-of-making-machine-prototype",
-      "projectId": "mode-s-of-making",
-      "path": "assets/projects/mode-s-of-making/machine-prototype.webp",
-      "src": "/assets/projects/mode-s-of-making/machine-prototype.webp",
-      "width": 3200,
-      "height": 2400,
-      "bytes": 949594,
-      "sha256": "e047c663c1fdc0698b73a39a0c71a62f4b4fd2e340207f131d4059cf257104a2",
-      "source": {
-        "file": "IMG_20171219_141348.jpg",
-        "bytes": 1443290,
-        "sha256": "27eea3b1af6c8fa3819626ee43d05d44072f15f45d600f4c0cb7ea55ad863d66",
-        "locator": {
-          "physicalPage": 60,
-          "printedPage": 55,
-          "figure": "Related machine-process record",
-          "supplementaryRecord": "rotate_cuttung / Design studio pic+vid / IMG_20171219_141348.jpg"
-        }
-      },
-      "processing": {
-        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
-        "inputPixels": [
-          4160,
-          3120
+          4096,
+          2304
         ],
         "cropPixels": null,
         "preResizePixels": [
-          4160,
-          3120
+          4096,
+          2304
         ],
-        "maxLongEdge": 3200,
+        "resize": null,
         "upscaled": false,
-        "selectedFrame": null,
+        "selectedFrame": 75,
+        "timestampSeconds": 3.0,
+        "decodedRGBExact": true,
         "encoding": {
           "format": "WebP",
-          "quality": 95,
-          "lossless": false,
+          "lossless": true,
           "method": 6
         },
-        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+        "metadata": "EXIF/XMP omitted"
       },
-      "credit": "Studio fabrication record. Photographer not individually identified.",
-      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
+      "authorStatus": "Owner-confirmed studio design and digital animation attribution; project and collaborator credits remain in the study."
     },
     {
-      "id": "mode-s-of-making-toolpath-textures",
+      "id": "film-rotary-system",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 702740,
+      "sha256": "796eac47f8bd2ae9a9b1af18291afb718edb455d464e39c7846fe02b3409810a",
+      "credit": "Studio design and digital animation: Chia-Hsuan Chao / National Cheng Kung University.",
       "projectId": "mode-s-of-making",
-      "path": "assets/projects/mode-s-of-making/toolpath-textures.webp",
-      "src": "/assets/projects/mode-s-of-making/toolpath-textures.webp",
-      "width": 2235,
-      "height": 2546,
-      "bytes": 1248488,
-      "sha256": "548932813915ed78445d1e7030313029da5da8d1c4e4b8e707cff3e48522fa35",
+      "path": "assets/projects/mode-s-of-making/film-rotary-system.webp",
+      "src": "/assets/projects/mode-s-of-making/film-rotary-system.webp",
       "source": {
-        "file": "JosHsuan_CV&Portfolio_2025_Print.pdf",
-        "bytes": 361589115,
-        "sha256": "fdaf47a2df174e73d698a72c362b0644240bfd39448042ffcb3f1024fd27bd71",
+        "file": "RELAX.mov",
+        "bytes": 766777591,
+        "sha256": "54d91bf859b86b46bc5f9a4d19a16244ebcd0ff8f4b46e4d51ce22d778a9e789",
         "locator": {
-          "physicalPage": 37,
-          "printedPage": 32,
-          "figure": "4-09–4-13"
+          "frameIndex": 2310,
+          "timestampSeconds": 77.077
         },
-        "imageObject": {
-          "index": 0,
-          "name": "Im0.jpg",
-          "width": 2485,
-          "height": 3508,
-          "bytes": 1160496,
-          "sha256": "70607ed0d401bd6e9d9178a4959ed1b09d1a667ff7db4b392ff91085fa72c95f"
-        },
-        "narrativeReference": {
-          "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
-          "bytes": 22624290,
-          "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
-          "locator": {
-            "physicalPage": 61,
-            "printedPage": 56,
-            "figure": "5-09–5-13"
-          }
-        },
-        "identityReview": "Same composition, geometry, diagram connections or photograph group as the primary reference. Selected only for higher native image resolution; no old copy adopted."
+        "nativeDimensions": [
+          1920,
+          1080
+        ],
+        "decodedPNGSHA256": "da3aa165d07f6cac20d15a54ed06303f437c1752ce0e6715e375596efb00f86b",
+        "identityReview": "Reviewed original complete edited studio film and its native digital animation materials. Native source composition matches the film study; no claim of a separately identified FINAL FILM version."
       },
       "processing": {
-        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "method": "Native full-frame source decode to RGB PNG, then lossless WebP. No resize/crop/grade/retouch/AI. Source-authored black bars, overlays and guide lines retained.",
         "inputPixels": [
-          2485,
-          3508
+          1920,
+          1080
         ],
-        "cropPixels": [
-          125,
-          146,
-          2360,
-          2692
-        ],
+        "cropPixels": null,
         "preResizePixels": [
-          2235,
-          2546
+          1920,
+          1080
         ],
-        "maxLongEdge": 3200,
+        "resize": null,
         "upscaled": false,
-        "selectedFrame": null,
+        "selectedFrame": 2310,
+        "timestampSeconds": 77.077,
+        "decodedRGBExact": true,
         "encoding": {
           "format": "WebP",
-          "quality": 95,
-          "lossless": false,
+          "lossless": true,
           "method": 6
         },
-        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+        "metadata": "EXIF/XMP omitted"
       },
-      "credit": "Jan Kyselý (Figs. 5-09 and 5-10); other photographs not individually credited.",
-      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
+      "authorStatus": "Owner-confirmed studio design and digital animation attribution; project and collaborator credits remain in the study."
+    },
+    {
+      "id": "film-design-workflow",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 225544,
+      "sha256": "aef3852c59c529fe6a18e01c41da01419ba6d943791ae02ae14e576e6aca0549",
+      "credit": "Studio design and digital animation: Chia-Hsuan Chao / National Cheng Kung University.",
+      "projectId": "mode-s-of-making",
+      "path": "assets/projects/mode-s-of-making/film-design-workflow.webp",
+      "src": "/assets/projects/mode-s-of-making/film-design-workflow.webp",
+      "source": {
+        "file": "RELAX.mov",
+        "bytes": 766777591,
+        "sha256": "54d91bf859b86b46bc5f9a4d19a16244ebcd0ff8f4b46e4d51ce22d778a9e789",
+        "locator": {
+          "frameIndex": 3300,
+          "timestampSeconds": 110.11
+        },
+        "nativeDimensions": [
+          1920,
+          1080
+        ],
+        "decodedPNGSHA256": "842913ea9fc1b4313ed964e99045e092e4e13707908b163587f986e2509f8715",
+        "identityReview": "Reviewed original complete edited studio film and its native digital animation materials. Native source composition matches the film study; no claim of a separately identified FINAL FILM version."
+      },
+      "processing": {
+        "method": "Native full-frame source decode to RGB PNG, then lossless WebP. No resize/crop/grade/retouch/AI. Source-authored black bars, overlays and guide lines retained.",
+        "inputPixels": [
+          1920,
+          1080
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          1920,
+          1080
+        ],
+        "resize": null,
+        "upscaled": false,
+        "selectedFrame": 3300,
+        "timestampSeconds": 110.11,
+        "decodedRGBExact": true,
+        "encoding": {
+          "format": "WebP",
+          "lossless": true,
+          "method": 6
+        },
+        "metadata": "EXIF/XMP omitted"
+      },
+      "authorStatus": "Owner-confirmed studio design and digital animation attribution; project and collaborator credits remain in the study."
+    },
+    {
+      "id": "film-machine-motion-poster",
+      "width": 4096,
+      "height": 2304,
+      "bytes": 571200,
+      "sha256": "d059423c2fa4ce63eaad53f8630a7eab7c6a8442fce3822700ea73dc53a7b8e0",
+      "credit": "Studio design and digital animation: Chia-Hsuan Chao / National Cheng Kung University.",
+      "projectId": "mode-s-of-making",
+      "path": "assets/projects/mode-s-of-making/film-machine-motion-poster.webp",
+      "src": "/assets/projects/mode-s-of-making/film-machine-motion-poster.webp",
+      "source": {
+        "file": "cube.mp4",
+        "bytes": 3454875,
+        "sha256": "341abcbfbb58e3a3861bd1acfe8ffb904a65a260926a808ac4379c6363e3ed3e",
+        "locator": {
+          "frameIndex": 60,
+          "timestampSeconds": 2.4
+        },
+        "nativeDimensions": [
+          4096,
+          2304
+        ],
+        "decodedPNGSHA256": "b79eb4218088bdf88f0c201861369984e4078ccca70046664c7e76c2db800e61",
+        "identityReview": "Reviewed original complete edited studio film and its native digital animation materials. Native source composition matches the film study; no claim of a separately identified FINAL FILM version."
+      },
+      "processing": {
+        "method": "Native full-frame source decode to RGB PNG, then lossless WebP. No resize/crop/grade/retouch/AI. Source-authored black bars, overlays and guide lines retained.",
+        "inputPixels": [
+          4096,
+          2304
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          4096,
+          2304
+        ],
+        "resize": null,
+        "upscaled": false,
+        "selectedFrame": 60,
+        "timestampSeconds": 2.4,
+        "decodedRGBExact": true,
+        "encoding": {
+          "format": "WebP",
+          "lossless": true,
+          "method": 6
+        },
+        "metadata": "EXIF/XMP omitted"
+      },
+      "authorStatus": "Owner-confirmed studio design and digital animation attribution; project and collaborator credits remain in the study."
     },
     {
       "id": "entrance-installation-art-hero",
@@ -2215,50 +2106,6 @@
       "authorStatus": "Original website process diagram; source facts from ETH Zurich. This is not a source engineering drawing."
     },
     {
-      "id": "rotary-cutting-motion-poster",
-      "projectId": "mode-s-of-making",
-      "path": "assets/projects/mode-s-of-making/rotary-cutting-motion-poster.webp",
-      "src": "/assets/projects/mode-s-of-making/rotary-cutting-motion-poster.webp",
-      "width": 1280,
-      "height": 720,
-      "bytes": 103120,
-      "sha256": "d3a2b8c079cb3ebd63075069974a515fecb8ecf17b7d14a15d1ba47577dd2a53",
-      "source": {
-        "file": "VID_20171226_170743.mp4",
-        "bytes": 16868782,
-        "sha256": "1b9fc374bb02883f45a55875623cbf37bae2dd78ca048b9777e63cb58457c7b3",
-        "sourceMeaning": "Actual recorded fabrication; not a recreation of source geometry.",
-        "selectedFrame": 134,
-        "sourceUnchangedSHA256BeforeAfter": true
-      },
-      "processing": {
-        "method": "Decode the explicit native source frame at original source dimensions and encode WebP. No AI, retouching or creative grading.",
-        "inputPixels": [
-          1280,
-          720
-        ],
-        "cropPixels": null,
-        "preResizePixels": [
-          1280,
-          720
-        ],
-        "upscaled": false,
-        "selectedFrame": 134,
-        "encoding": {
-          "format": "WebP",
-          "quality": 95,
-          "lossless": false,
-          "method": 6
-        },
-        "metadata": "EXIF, XMP and private filesystem metadata omitted."
-      },
-      "alt": "The studio rotary-cutting prototype shapes a foam blank with its moving cutter.",
-      "caption": "Original studio recording of the rotary-cutting prototype in operation.",
-      "credit": "NCKU studio fabrication record. Photographer and operator are not individually identified.",
-      "authorStatus": "Project/team/employer attribution preserved; unrecorded individual media authors remain unidentified.",
-      "rightsBasis": "Owner selected this exact source frame as the scoped project motion poster; no open licence is asserted."
-    },
-    {
       "id": "installation-lighting-motion-poster",
       "projectId": "entrance-installation-art",
       "path": "assets/projects/entrance-installation-art/installation-lighting-motion-poster.webp",
@@ -2394,7 +2241,7 @@
       "processing": {
         "decimation": false,
         "deformation": false,
-        "maxFloat32PositionErrorMeters": 2.95639037695139e-8,
+        "maxFloat32PositionErrorMeters": 2.95639037695139e-08,
         "compression": {
           "encoding": "EXT_meshopt_compression v0",
           "decodedByteExact": true,
@@ -2511,7 +2358,7 @@
       "processing": {
         "decimation": false,
         "deformation": false,
-        "maxFloat32PositionErrorMeters": 4.730224603122224e-7,
+        "maxFloat32PositionErrorMeters": 4.730224603122224e-07,
         "compression": {
           "encoding": "EXT_meshopt_compression v0",
           "decodedByteExact": true,
@@ -2629,7 +2476,7 @@
       "processing": {
         "decimation": false,
         "deformation": false,
-        "maxFloat32PositionErrorMeters": 2.9739873563805475e-8,
+        "maxFloat32PositionErrorMeters": 2.9739873563805475e-08,
         "compression": {
           "encoding": "EXT_meshopt_compression v0",
           "decodedByteExact": true,
@@ -2865,7 +2712,7 @@
       "processing": {
         "decimation": false,
         "deformation": false,
-        "maxFloat32PositionErrorMeters": 1.5255199002695008e-8,
+        "maxFloat32PositionErrorMeters": 1.5255199002695008e-08,
         "compression": {
           "encoding": "none",
           "decodedByteExact": true,
@@ -2992,26 +2839,27 @@
   ],
   "motionAssets": [
     {
-      "id": "rotary-cutting-motion",
+      "id": "film-machine-simulation",
       "projectId": "mode-s-of-making",
-      "path": "assets/projects/mode-s-of-making/rotary-cutting-motion.mp4",
-      "src": "/assets/projects/mode-s-of-making/rotary-cutting-motion.mp4",
-      "width": 1280,
-      "height": 720,
-      "bytes": 16358510,
-      "sha256": "8a4d94866d3daffc4b75ef6d2d5782a5e5fa6d647de4da3e2965f1452afac15b",
-      "durationSeconds": 9.0289,
-      "frameCount": 269,
+      "path": "assets/projects/mode-s-of-making/film-machine-simulation.mp4",
+      "src": "/assets/projects/mode-s-of-making/film-machine-simulation.mp4",
+      "width": 4096,
+      "height": 2304,
+      "bytes": 3295317,
+      "sha256": "7a0fc1e886eb5ba63ad766a9864980dc19c5c29b0b6e131077fffd0d6acf4c46",
+      "durationSeconds": 4.8,
+      "frameCount": 120,
       "loop": true,
       "chapter": "making",
       "source": {
-        "file": "VID_20171226_170743.mp4",
-        "bytes": 16868782,
-        "sha256": "1b9fc374bb02883f45a55875623cbf37bae2dd78ca048b9777e63cb58457c7b3",
-        "sourceMeaning": "Actual recorded fabrication; not a recreation of source geometry.",
+        "file": "cube.mp4",
+        "bytes": 3454875,
+        "sha256": "341abcbfbb58e3a3861bd1acfe8ffb904a65a260926a808ac4379c6363e3ed3e",
+        "sourceMeaning": "Complete source-authored digital simulation of the rotary-cutting machine and rotating blank, visually matched to the complete edited studio film.",
         "sourceUnchangedSHA256BeforeAfter": true,
         "intrinsicGIFLoopExtension": null,
-        "loopPolicy": "Native video has no intrinsic loop instruction; repeating is the explicitly selected background presentation policy."
+        "loopPolicy": "Native MP4 has no intrinsic repeat instruction. Repetition is an explicit presentation choice; replay uses native time with no retiming or scroll seek.",
+        "nativeFrameRate": "25/1"
       },
       "processing": {
         "fullNativeSequence": true,
@@ -3028,22 +2876,22 @@
           "sourcePixelBounds": {
             "x": 0,
             "y": 0,
-            "width": 1280,
-            "height": 720
+            "width": 4096,
+            "height": 2304
           }
         },
         "frameCountExact": true,
         "allFramePTSExact": true,
         "allFrameDurationsExact": true,
         "finalFrameDurationExact": true,
-        "finalFrameDurationTicks": 2611,
-        "finalFrameDurationTimeBase": "1/90000",
+        "finalFrameDurationTicks": 2000,
+        "finalFrameDurationTimeBase": "1/50000",
         "absolutePTSOriginUnchanged": true,
         "audio": "All source audio omitted.",
         "metadata": "Source metadata and chapters omitted; no private paths in MP4 metadata.",
         "faststartVerified": true,
         "loop": true,
-        "loopPolicy": "repeat chosen by the owner-selected background presentation",
+        "loopPolicy": "Native MP4 has no intrinsic repeat instruction. Repetition is an explicit presentation choice; replay uses native time with no retiming or scroll seek.",
         "noChapterAdvanceOnEnded": true,
         "method": "Native H264/avc1 video bitstream remux. Encoded packets, avcC extradata, PTS/DTS, packet durations, timebase, dimensions, range and identity track matrix are unchanged.",
         "encodedVideoPacketsByteExact": true,
@@ -3064,17 +2912,21 @@
           1073741824
         ],
         "sourceColorRangePreserved": true,
-        "colorRange": "pc/full",
-        "pixelFormat": "yuvj420p",
+        "colorRange": "tv/limited",
+        "pixelFormat": "yuv420p",
         "videoCodec": "h264",
         "codecTag": "avc1",
         "transcoded": false,
-        "nativeBrowserAcceptance": "Native playback acceptance is recorded separately in PROJECT_BACKGROUND_MOTION_INTEGRATION.md; the source container record alone does not establish browser decoding."
+        "nativeBrowserAcceptance": "Native playback acceptance is recorded separately in PROJECT_BACKGROUND_MOTION_INTEGRATION.md; the source container record alone does not establish browser decoding.",
+        "nativeFrameRate": "25/1",
+        "sourceColorSpace": "bt709",
+        "sourceColorTransfer": "bt709",
+        "sourceColorPrimaries": "bt709"
       },
-      "alt": "The studio rotary-cutting prototype shapes a foam blank with its moving cutter.",
-      "caption": "Original studio recording of the rotary-cutting prototype in operation.",
-      "credit": "NCKU studio fabrication record. Photographer and operator are not individually identified.",
-      "authorStatus": "Project/team/employer attribution is preserved; individual media authors not recorded in the source remain unidentified.",
+      "alt": "Original line animation of the rotary-cutting machine and rotating blank.",
+      "caption": "Original studio simulation of the complete rotary-cutting machine and rotating blank.",
+      "credit": "Studio design and digital animation: Chia-Hsuan Chao / National Cheng Kung University.",
+      "authorStatus": "Owner-confirmed studio design and digital animation attribution.",
       "rightsBasis": "Owner selected this exact source and scoped public derivative for the named project; no open licence is asserted."
     },
     {

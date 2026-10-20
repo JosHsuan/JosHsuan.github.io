@@ -55,11 +55,11 @@ function supportBounds(points){
 
 /** One project renderer/camera. Director supplies chapter and interaction facts;
  * native video supplies decoded frames. Neither owns another animation clock. */
-export async function acquireXRStage({host,signal,model,stages,videos,positions=new Map(),onMode=()=>{},createRenderer=options=>new T.WebGLRenderer(options)}){
+export async function acquireXRStage({host,signal,model,stages,videos,positions=new Map(),onMode=()=>{},createRenderer=options=>new T.WebGLRenderer(options),acquireMedia=acquireVideo}){
  if(signal.aborted)throw abortError();
  const win=host.ownerDocument.defaultView;
  let disposed=false,renderer=null,budget=null,scene=null,camera=null,gltf=null,support=null,phone=null,texture=null,environment=null;
- let mediaController=null,mediaHandle=null,frameCallback=null,mediaGeneration=0,mediaDeadline=null,activeStage=null;
+  let mediaController=null,mediaHandle=null,frameCallback=null,mediaGeneration=0,mediaDeadline=null,activeStage=null,retainedMedia=null;
  let state={chapter:'overview',azimuth:0,elevation:0,paused:false},size={width:0,height:0},pose=null;
  let gpuReason=null,mediaReason=null,draws=0,mediaFrames=0,lastPaintKey='',revision=null,vertices=0,triangles=0,shaderError=false,mode='poster';
  let contextListener=null,mediaTime=null,mediaPending=false,successfulPaint=false,selection=null,renderView=null;
@@ -72,12 +72,27 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
  function disposePhone(){
   stopFrames();if(phone){scene?.remove(phone.group);releaseObject(phone.group);}phone=null;texture=null;
  }
- function stopMedia(){
+ function releaseRetainedMedia(){
+  const retained=retainedMedia;retainedMedia=null;retained?.controller?.abort();retained?.handle?.dispose();
+ }
+ function stopMedia(retainPhone=false){
   mediaGeneration++;if(mediaDeadline!==null){win.clearTimeout(mediaDeadline);mediaDeadline=null;}stopFrames();
   // Release both application and VideoTexture frame callbacks before resetting
   // the native source. The texture must not retain a video being unloaded.
-  disposePhone();const controller=mediaController,handle=mediaHandle;mediaController=null;mediaHandle=null;mediaPending=false;
-  controller?.abort();handle?.dispose();for(const node of nativeNodes.values())delete node.dataset.videoReady;activeStage=null;mediaReason=null;
+   const controller=mediaController,handle=mediaHandle;mediaController=null;mediaHandle=null;mediaPending=false;
+   if(!retainPhone)disposePhone();
+   if(retainPhone&&phone&&handle){
+    releaseRetainedMedia();videos[activeStage.id].pause();retainedMedia={controller,handle,stage:activeStage};
+   }else{controller?.abort();handle?.dispose();}
+   if(!retainPhone)releaseRetainedMedia();
+   for(const node of nativeNodes.values())delete node.dataset.videoReady;activeStage=null;mediaReason=null;
+ }
+ function mediaFailed(controller,node){
+  const active=mediaController===controller,retained=retainedMedia?.controller===controller;
+  if(disposed||!active&&!retained)return;
+  if(active)mediaReason='recording-unavailable';
+  disposePhone();releaseRetainedMedia();delete node.dataset.videoReady;delete host.dataset.xrScenePainted;successfulPaint=false;
+  announce('poster','recording-unavailable');
  }
  function applyPaused(next){
   if(disposed)return;const paused=!!next;if(state.paused===paused)return;state={...state,paused};
@@ -88,7 +103,7 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
  }
  function disposeGPU(){
   stopFrames();if(renderer){renderer.domElement.removeEventListener('webglcontextlost',contextListener);renderer.domElement.remove();budget?.dispose();renderer.dispose();renderer.forceContextLoss();}renderer=null;budget=null;
-  disposePhone();environment?.dispose();environment=null;releaseObject(gltf?.scene);gltf=null;support=null;scene?.clear();scene=null;camera=null;successfulPaint=false;delete host.dataset.xrScenePainted;
+   disposePhone();releaseRetainedMedia();environment?.dispose();environment=null;releaseObject(gltf?.scene);gltf=null;support=null;scene?.clear();scene=null;camera=null;successfulPaint=false;delete host.dataset.xrScenePainted;
  }
  function fallbackGPU(reason){
   if(disposed)return;gpuReason=reason;disposeGPU();announce(activeStage&&mediaHandle?'native-video':'poster',reason);
@@ -129,15 +144,33 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
   });
  }
  async function selectMedia(stage){
-  stopMedia();activeStage=stage;mediaReason=null;const node=nativeNodes.get(stage.id),video=videos[stage.id];delete host.dataset.xrScenePainted;successfulPaint=false;
-  const generation=mediaGeneration,controller=new AbortController();mediaController=controller;mediaPending=true;announce('poster',gpuReason??'recording-loading');
-  mediaDeadline=win.setTimeout(()=>{if(!disposed&&generation===mediaGeneration){mediaReason='recording-timeout';controller.abort();mediaPending=false;announce('poster',mediaReason);}},15000);
+   // Consecutive recordings share one visible phone passage. Keep its paused
+   // last native frame until the next real decoded source can replace it.
+   stopMedia(true);activeStage=stage;mediaReason=null;const node=nativeNodes.get(stage.id),video=videos[stage.id];
+   // A quick reversal can select the exact native node still owned by the
+   // retained phone. Transfer that owner instead of acquiring the node twice:
+   // disposing the old handle would otherwise unload the new handle's source.
+   const retained=retainedMedia;
+   if(retained?.stage.id===stage.id&&!retained.controller.signal.aborted&&retained.handle.inspect().hasSource){
+    retainedMedia=null;mediaController=retained.controller;mediaHandle=retained.handle;node.dataset.videoReady='true';
+    const generation=mediaGeneration;
+    if(state.paused)video.pause();
+    else{
+     try{await video.play();if(!disposed&&generation===mediaGeneration&&!state.paused)nextFrame();}
+     catch{if(!disposed&&generation===mediaGeneration){mediaReason='playback-blocked';announce('native-video',mediaReason);}}
+    }
+    return;
+   }
+   if(!phone){delete host.dataset.xrScenePainted;successfulPaint=false;}
+   const generation=mediaGeneration,controller=new AbortController();mediaController=controller;mediaPending=true;if(!phone)announce('poster',gpuReason??'recording-loading');
+   mediaDeadline=win.setTimeout(()=>{if(!disposed&&generation===mediaGeneration){mediaReason='recording-timeout';controller.abort();mediaPending=false;disposePhone();releaseRetainedMedia();announce('poster',mediaReason);}},15000);
   try{
-   const handle=await acquireVideo({video,src:stage.src,signal:controller.signal,position:positions.get(stage.id)??0,onPosition:value=>positions.set(stage.id,value),origin:win.location.origin,onFailure:()=>{if(!disposed&&generation===mediaGeneration){mediaReason='recording-unavailable';stopFrames();disposePhone();delete node.dataset.videoReady;delete host.dataset.xrScenePainted;successfulPaint=false;announce('poster',mediaReason);}}});
+    const handle=await acquireMedia({video,src:stage.src,signal:controller.signal,position:positions.get(stage.id)??0,onPosition:value=>positions.set(stage.id,value),origin:win.location.origin,onFailure:()=>mediaFailed(controller,node)});
    if(disposed||controller.signal.aborted||generation!==mediaGeneration){handle.dispose();return;}
    win.clearTimeout(mediaDeadline);mediaDeadline=null;mediaPending=false;mediaHandle=handle;node.dataset.videoReady='true';
    if(state.paused)video.pause();
    if(renderer){
+     disposePhone();releaseRetainedMedia();
     const geometry=createResearchPhoneGeometry(stage.width/stage.height);texture=new T.VideoTexture(video);texture.colorSpace=T.SRGBColorSpace;texture.generateMipmaps=false;
     const group=new T.Group(),body=new T.Mesh(geometry.body,new T.MeshStandardMaterial({color:'#292e30',metalness:.65,roughness:.33})),screen=new T.Mesh(geometry.screen,new T.MeshBasicMaterial({map:texture,toneMapped:false}));
     group.add(body,screen);countDraws(body,'phoneBody');countDraws(screen,'phoneScreen');
@@ -145,7 +178,7 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
    }else announce('native-video',gpuReason??'webgl-unavailable');
   }catch(error){
    if(disposed||generation!==mediaGeneration)return;mediaPending=false;if(mediaDeadline!==null)win.clearTimeout(mediaDeadline);mediaDeadline=null;
-   if(!controller.signal.aborted)mediaReason=error?.message??'recording-unavailable';announce('poster',mediaReason??'recording-unavailable');
+    if(!controller.signal.aborted)mediaReason=error?.message??'recording-unavailable';disposePhone();releaseRetainedMedia();announce('poster',mediaReason??'recording-unavailable');
   }
  }
  try{

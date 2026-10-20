@@ -45,7 +45,7 @@ function PhoneChapter({stage,index}) {
 }
 export default function XRProject() {
   return <>
-    <ProjectStudyChrome chapters={[{id:'overview',label:'Overview'},{id:'context',label:'Context'},{id:'method',label:'Method'},{id:'adapt',label:'Adapt'},{id:'assemble',label:'Assemble'},{id:'join',label:'Join'},{id:'making',label:'Physical study'},{id:'credits',label:'Credits & sources'}]}/>
+    <ProjectStudyChrome chapters={[{id:'overview',label:'Overview'},{id:'context',label:'Context'},{id:'method',label:'Method'},{id:'adapt',label:'Adapt'},{id:'assemble',label:'Assemble'},{id:'join',label:'Join'},{id:'making',label:'Physical study'},{id:'credits',label:'Credits'}]}/>
     <XRSceneStage model={study.model} stages={study.phoneStages} workspaceVisual={workspace.image}/>
     <main id="portfolio-main" tabIndex={-1} className={styles.page} data-xr-study data-portfolio-root data-portfolio-section="xr-project">
       <article aria-labelledby="xr-title">
@@ -58,6 +58,7 @@ export default function XRProject() {
               <dl className={styles.metadata}>
                 <div><dt>Context</dt><dd>{study.context}</dd></div><div><dt>Research</dt><dd>{study.authors.join(' / ')}</dd></div>
                 <div><dt>Practice</dt><dd>Computational design / XR / Digital fabrication</dd></div>
+                {study.role&&<div><dt>My role</dt><dd>{study.role}</dd></div>}
               </dl>
               <a className={styles.readingLink} href="#xr-context">Scroll to follow the research <span aria-hidden="true">↓</span></a>
             </Panel>
@@ -88,15 +89,15 @@ export default function XRProject() {
           <div className={styles.sectionIntroduction}><Panel><Heading number="03" label="PROTOTYPE" title={study.sections.prototype.title} id="xr-prototype-heading"/>{study.sections.prototype.paragraphs.map(text=><p key={text}>{text}</p>)}</Panel></div>
           {study.phoneStages.map((stage,index)=><PhoneChapter key={stage.id} stage={stage} index={index}/>)}
         </section>
-        <section id="xr-making" className={styles.chapter} data-xr-chapter="making" aria-labelledby="xr-making-heading">
-          <div className={styles.chapterInner}><SceneSlot/><Panel className={styles.narrative}><Heading number="04" label="PHYSICAL STUDY" title={study.sections.making.title} id="xr-making-heading" kind="make"/>{study.sections.making.paragraphs.map(text=><p key={text}>{text}</p>)}</Panel></div>
+        <section id="xr-making" className={`${styles.chapter} ${styles.physicalChapter}`} data-xr-chapter="making" aria-labelledby="xr-making-heading">
+          <div className={styles.chapterInner}><Panel className={styles.narrative}><Heading number="04" label="PHYSICAL STUDY" title={study.sections.making.title} id="xr-making-heading" kind="make"/>{study.sections.making.paragraphs.map(text=><p key={text}>{text}</p>)}</Panel></div>
           <div className={styles.evidenceBand}>
             <div className={styles.mediaPair}><EvidenceFigure item={study.media.physicalAssembly} label="APP-ASSISTED ASSEMBLY / PHYSICAL RECORD"/><EvidenceFigure item={study.media.assembly} label="MODULE ASSEMBLY / PROJECT ILLUSTRATION"/></div>
             <EvidenceFigure item={study.media.physicalResult} label="BAMBOO DEMONSTRATOR / PHYSICAL RECORD"/>
           </div>
         </section>
         <footer id="xr-credits" className={styles.readingChapter} data-xr-chapter="credits" aria-labelledby="xr-credits-heading"><Panel>
-          <Heading number="05" label="CREDITS & SOURCES" title="A collaborative foundation." id="xr-credits-heading"/>
+          <Heading number="05" label="CREDITS" title="A collaborative foundation." id="xr-credits-heading"/>
           <dl className={styles.credits}>{study.credits.map(item=><div key={item.role}><dt>{item.role}</dt><dd>{item.names}</dd></div>)}</dl><p className={styles.sourceNote}>{study.sourceNote}</p>
           <p className={styles.caption}>{study.limitations[1]} {study.limitations[3]}</p>
           <div className={styles.recordingSource}><a className={styles.recordingLink} href={study.media.motion.src} target="_blank" rel="noreferrer">Original presentation excerpt <span aria-hidden="true">↗</span></a><p>{study.media.motion.caption}</p><p className={styles.credit}>{study.media.motion.credit}</p></div>

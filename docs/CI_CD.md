@@ -2,7 +2,7 @@
 
 The repository has two independent exports: the empty reusable framework (`out/`) and the public Bending-Active case (`.pages-workspace/out/`). [Decision 0009](decisions/0009-impact-selected-ci.md) defines the owner-authorized impact-selection policy. Node 24.19.0, pnpm 11.19.0 and the frozen committed lockfile remain mandatory.
 
-The [DORA-informed CI and delivery plan](CI_DELIVERY_PLAN.md) records the owner's research request, the 19 October official-source review, the fast-feedback objective, current capacity evidence, an ordered implementation backlog with completion criteria, and production delivery metrics. This file describes implemented operation; planned stages do not replace the current release gate.
+The [DORA-informed CI and delivery plan](CI_DELIVERY_PLAN.md) records the owner's research request, the 20 October official-source review, the fast-feedback objective, current capacity evidence, an ordered implementation backlog with completion criteria, and production delivery metrics. Its [current planning decision](CI_DELIVERY_PLAN.md#current-planning-decision--20-october-2026) distinguishes implemented jobs from proposed timing/coverage receipts, duration balancing, native smoke and recovery work. This file describes implemented operation; planned stages do not replace the current release gate.
 
 ```mermaid
 flowchart TD
@@ -52,6 +52,8 @@ Superseded CI runs in the same event/ref concurrency group are cancelled. Manual
 ## Gate and release procedure
 
 `Required validation gate` runs after all job outcomes, including failures/skips. A selected job must report success; an excluded job must report skipped. A failed plan or missing build record fails the gate. The `validated-release` artifact contains `ci-validation.json` with the plan, exact commit/run/event/branch, required results and complete static output digest, including hidden files.
+
+The checked-in gate validates aggregate job outcomes; it does not yet collect structured per-test receipts or enforce an expected test-ID union itself. The separate release audit records that union for full candidates. Moving this check into CI, with candidate-bound evidence and negative regression tests, is a planned improvement in the DORA plan. Existing conservative scoped acceptance remains valid under the selection rules above.
 
 1. Run `pnpm check`, `pnpm test:ci`, case portable tests and the appropriate browser checks against built output locally. For architecture changes, retain the required root check even when a later documentation-only CI push would skip it.
 2. Commit and push. Inspect the workflow's plan and required gate. This CI migration and the current shared runtime changes intentionally select **full** validation.

@@ -208,9 +208,11 @@ export function createProjectStudyBackdropPresenter({root,window:win,document:do
  }
  const wanted=(chapter,p)=>{
   const modelState=scene?.actor.inspect(),modelUnavailable=modelState?.arrivalStatic&&modelState.posterFailed;
-  if(modelUnavailable)failProjectStudyBackdropMotion(motion,`model:${chapter}`,modelState.posterFailureReason||modelState.staticReason||'model-poster-unavailable');
+   const modelKey=scene?`model:${scene.model.sha256}`:null;
+   if(modelUnavailable)failProjectStudyBackdropMotion(motion,modelKey,modelState.posterFailureReason||modelState.staticReason||'model-poster-unavailable');
   if(scene?.model.chapters.includes(chapter)&&!modelUnavailable){
-   const key=`model:${chapter}`;if(!descriptors.has(key))descriptors.set(key,{key,chapter,kind:'model'});return descriptors.get(key);
+    if(!descriptors.has(modelKey))descriptors.set(modelKey,{key:modelKey,chapter,kind:'model'});
+    const descriptor=descriptors.get(modelKey);descriptor.chapter=chapter;return descriptor;
   }
   const index=chapters.indexOf(chapter);
   const selected=records.filter(record=>chapters.indexOf(record.chapter)<=index).at(-1)??records[0]??null;

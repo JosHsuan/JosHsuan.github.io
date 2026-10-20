@@ -13,6 +13,11 @@ const INTRO_STATEMENT='I am a computational designer and developer working at th
 const INTRO_DESCRIPTION='My work bridges the physical and digital through computational tools, interactive interfaces, and workflows that translate design and engineering information into fabrication-ready, machine-readable data.';
 const markerCount=(html,name)=>(html.match(new RegExp(`\\b${name}(?:=|(?=[\\s>]))`,'g'))??[]).length;
 const tagAttribute=(tag,name)=>(tag??'').match(new RegExp(`(?:^|\\s)${name}="([^"]*)"`,'i'))?.[1]??null;
+const assertProjectVoice=(html,route)=>{
+  const main=html.match(/<main\b[^>]*>[\s\S]*?<\/main>/i)?.[0];assert(main,`${route}: native project main`);
+  const readable=main.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi,'').replace(/<[^>]*>/g,' ');
+  assert(!/\bportfolio\b|source-backed/i.test(readable),`${route}: public narrative describes the work rather than its preparation source`);
+};
 const tagWith=(html,name,marker)=>[...html.matchAll(new RegExp(`<${name}\\b[^>]*>`,'g'))].map(match=>match[0]).find(tag=>new RegExp(`\\b${marker}(?:=|(?=[\\s>]))`).test(tag));
 
 export function assertXRWorkspaceImage(bytes,image){
@@ -237,10 +242,15 @@ export async function auditPages() {
     assert(html.includes(`data-project-card="${project.id}"`)&&html.includes(`href="${route}"`),'Selected project has a real Home card');
     assert(sitemap.includes(manifest.origin+route),'Selected project is discoverable in the sitemap');
     assert.equal(tagAttribute(tagWith(page,'main','data-project-study'),'data-project-study'),project.id);
-    assert.equal(markerCount(page,'data-project-chapter'),6,'Opening, four actual chapters and credits');
-    assert.equal(markerCount(page,'data-project-chapter-link'),6,'Every chapter has a native direct link');
+    assert.equal(markerCount(page,'data-project-chapter'),project.sections.length+2,'Opening, actual story chapters and credits');
+    assert.equal(markerCount(page,'data-project-chapter-link'),project.sections.length+2,'Every chapter has a native direct link');
     for(const group of ['identity','chapter-navigation','reading-controls'])assert.equal((page.match(new RegExp(`data-liquid-glass="${group}"`,'g'))??[]).length,1,'One shared study control group: '+group);
     assert(page.includes(project.title)&&page.includes(project.role),'Actual title and individual/team role');
+    assertProjectVoice(page,route);
+    const backdropSources=new Set([...page.matchAll(/<img\b[^>]*\bdata-project-(?:media-poster|model-poster)(?:=|[\s>])[^>]*>/g)].map(match=>tagAttribute(match[0],'src')));
+    const evidenceSources=[...page.matchAll(/<img\b[^>]*\bdata-project-evidence-image(?:=|[\s>])[^>]*>/g)].map(match=>tagAttribute(match[0],'src'));
+    assert(evidenceSources.every(src=>!backdropSources.has(src)),'Background photographs are not repeated in the 2D information layer');
+    assert.equal(new Set(evidenceSources).size,evidenceSources.length,'Supporting photographs have one information-layer placement');
     for(const credit of project.credits)assert(page.includes(credit.names.replaceAll('&','&amp;')),'Preserved source credit: '+credit.names);
     for(const image of [project.hero,...project.sections.flatMap(section=>section.media)])assert(page.includes(image.src),'Source image stays readable in the native document');
     const nativeMotionTags=[...page.matchAll(/<video\b[^>]*\bdata-project-motion-media(?:=|[\s>])[^>]*>/g)].map(match=>match[0]);
@@ -257,6 +267,7 @@ export async function auditPages() {
     assert(!page.includes('data-xr-stage')&&!page.includes('data-cinematic-stage'),'Documentary evidence does not acquire an unrelated 3D scene');
   }
   const xr=await readFile(path.join(out,'projects/xr-bending-active/index.html'),'utf8');
+  assertProjectVoice(xr,'/projects/xr-bending-active/');
   for(const marker of ['data-xr-study','xr-context','xr-method','xr-prototype','xr-making','xr-credits','Wataru Nomura'])assert(xr.includes(marker),`XR: ${marker}`);
   for(const removed of ['xr-contribution','xr-limits'])assert(!xr.includes(`id="${removed}"`)&&!xr.includes(`href="#${removed}"`),`XR removed section: ${removed}`);
   const study=records['xr-study'],workspace=records['xr-workspace'];
@@ -283,6 +294,7 @@ export async function auditPages() {
   assert.equal(markerCount(xr,'data-xr-evidence'),8,'Only the opening photograph is removed from the original nine evidence figures');
   for(const group of ['identity','chapter-navigation','reading-controls'])assert.equal((xr.match(new RegExp(`data-liquid-glass="${group}"`,'g'))??[]).length,1,`One shared XR glass group: ${group}`);
   const bending=await readFile(path.join(out,'projects/bending-active/index.html'),'utf8');
+  assertProjectVoice(bending,'/projects/bending-active/');
   assert.equal(tagAttribute(tagWith(xr,'header','data-page-masthead'),'class'),tagAttribute(tagWith(bending,'header','data-page-masthead'),'class'),'XR and Bending use the same maintained masthead class');
   const bendingRail=tagAttribute(tagWith(bending,'nav','data-story-navigation'),'class');
   assert(tagAttribute(tagWith(xr,'nav','data-xr-chapter-navigation'),'class').split(/\s+/).includes(bendingRail),'XR keeps the original shared chapter-rail class');

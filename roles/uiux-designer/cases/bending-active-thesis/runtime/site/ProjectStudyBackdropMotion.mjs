@@ -39,6 +39,10 @@ export function advanceProjectStudyBackdropMotion(state,dt,{key,chapter,directio
   state.request={id:++state.sequence,key,chapter,direction:Math.sign(direction)||1,terminal:null,failure:''};fact(state,'requested');
  }
  const request=state.request;
+  // A source may span several reading chapters. Its identity owns the outer
+  // passage; a chapter/view update never sends the same source outside again.
+  request.chapter=chapter;
+  if(state.key===key)state.chapter=chapter;
  if(failure)request.failure=failure;
  const reconcile=()=>{
   if(state.key!==request.key){

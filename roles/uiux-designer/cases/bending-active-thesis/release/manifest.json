@@ -4,7 +4,7 @@
   "authorizedAt": "2026-10-18",
   "authorization": "Owner authorizes the exact supplied computational-designer/developer introduction and theme, OCR typography on all published pages including Bending, Bending-aligned XR chrome, a full-viewport XR renderer, removal of the XR opening photograph, and a verified transparent capture of the complete source CAD workspace for Context; including tests, commit, push and same-artifact CI-gated deployment. Bending geometry, materials, lighting, camera, motion and native source assets remain protected. The empty framework and unrelated private materials remain outside scope. The latest owner direction requires retaining the architectural room and complete workspace in a level source-front, central-axis material-based native Rendered capture through Rhino 8/MCPStart. Restore the side/rear walls, ceiling, original floor/carpet, doors and acoustic fixtures; open only the obstructing front glass/window-frame assembly and hide the approved foreground speaker row/two cabinets. Produce genuine 4K-class native pixels with unchanged source geometry, TV screen vertices/UVs, materials and authored colours; temporary neutral/cool/warm native capture lights are removed afterward. Close Rhino when capture work is complete. The original CAD remains unchanged and private.",
   "origin": "https://joshsuan.github.io",
-  "storySHA256": "4df944efbfca4421457eb2205cdaad9d8c2990adc921c5e95415f9012f77ad32",
+  "storySHA256": "250c0853d8d5f9d993bc89b8a563eef5717300c1772a8c5da04647d165c740da",
   "introductionSHA256": "ab0fa9933275c22bad9f24fb79c27f7307d469ba570d9cd4a78f6f9fd3a6751b",
   "assets": [
     {
@@ -654,6 +654,48 @@
       "path": "assets/projects/special-assemblies/robot-assembly-motion-poster.webp",
       "bytes": 60084,
       "sha256": "1c1f330356c6fd00f4e3666ee6a997068e36653b73ccd24c970eece3ba03371b"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/film-assembly-hero.webp",
+      "bytes": 742318,
+      "sha256": "c78e51847b64c1bf5d6a465f901d98da13f8e701833371dc0ccc68d3862bd1bc",
+      "source": "Owner-selected native studio film material; complete-frame lossless still or unchanged H264 stream derivative."
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/film-unit-geometry.webp",
+      "bytes": 474092,
+      "sha256": "932bb6258c9bb79636487354d54542b3f92f87c9675d4cbbd2888d024ba654f1",
+      "source": "Owner-selected native studio film material; complete-frame lossless still or unchanged H264 stream derivative."
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/film-corexy-system.webp",
+      "bytes": 230462,
+      "sha256": "02cddda238fcb71e4452e417094d5817f526b4f3e474315e1c267a30862d766b",
+      "source": "Owner-selected native studio film material; complete-frame lossless still or unchanged H264 stream derivative."
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/film-rotary-system.webp",
+      "bytes": 702740,
+      "sha256": "796eac47f8bd2ae9a9b1af18291afb718edb455d464e39c7846fe02b3409810a",
+      "source": "Owner-selected native studio film material; complete-frame lossless still or unchanged H264 stream derivative."
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/film-design-workflow.webp",
+      "bytes": 225544,
+      "sha256": "aef3852c59c529fe6a18e01c41da01419ba6d943791ae02ae14e576e6aca0549",
+      "source": "Owner-selected native studio film material; complete-frame lossless still or unchanged H264 stream derivative."
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/film-machine-motion-poster.webp",
+      "bytes": 571200,
+      "sha256": "d059423c2fa4ce63eaad53f8630a7eab7c6a8442fce3822700ea73dc53a7b8e0",
+      "source": "Owner-selected native studio film material; complete-frame lossless still or unchanged H264 stream derivative."
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/film-machine-simulation.mp4",
+      "bytes": 3295317,
+      "sha256": "7a0fc1e886eb5ba63ad766a9864980dc19c5c29b0b6e131077fffd0d6acf4c46",
+      "source": "Owner-selected native studio film material; complete-frame lossless still or unchanged H264 stream derivative."
     }
   ],
   "limits": [
@@ -661,9 +703,9 @@
     "Publication of this presentation does not approve unrelated source documents or private audit records.",
     "Geometry and mobile transfer budgets remain above the earlier targets; no physical-phone performance certification."
   ],
-  "xrStudySHA256": "a5edc97bb895c9427ed2457e918b143a05f1a7a91d4cfda9327a3e1e848648b0",
+  "xrStudySHA256": "3605cb7ed9abefc0721091d7883fdc765d0f0471af1b7d4db49f326228a68001",
   "contactSHA256": "c68b4bc45a3ecc13eeee55bae43f3cab75f2085a095a5084e1494f90c5695882",
   "xrWorkspaceSHA256": "d912d9a204f66df5380d9d2f00cc954a6484ee9da18a8bdf362095405a4ed8ec",
-  "projectStudiesSHA256": "e91d06b5555898fee52d4b5a5ef689ebc47ba0c6b5096ecde6c172f881961167",
-  "projectAssetsSHA256": "058dbf61182033cfaa5f0cdc26b5941969537191249fa4f7bb7d0771063d22f4"
+  "projectStudiesSHA256": "44b227acd792c691c1b5dc7e693b3073fb8f53d5a80f79fb70e4882f8a09940a",
+  "projectAssetsSHA256": "9410291dee8dcdf85f2366d315ac570ebec2ff9dc4fc32afe215c835b4d70c8d"
 }

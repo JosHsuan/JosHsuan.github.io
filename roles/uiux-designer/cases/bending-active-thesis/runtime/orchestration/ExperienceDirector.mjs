@@ -195,9 +195,12 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       if(canvasActive&&!canvasWasVisible)canvasActivation=controllerFrame;
       canvasWasVisible=canvasActive;
       const presented=input.getPresentation();
+       const canvasFirstPaint=canvasActive&&presented.controllerFrame<canvasActivation;
       canvasAwaitingPaint=canvasActive&&(presented.controllerFrame<canvasActivation||presented.chapterId!==canvasChapter);
       publisher.style(stage.current,'transform',`translate3d(${canvasPlacement.x}px,${canvasPlacement.y}px,0) scale(${canvasPlacement.scale})`);
-      publisher.style(stage.current,'opacity',canvasAwaitingPaint?0:canvasPlacement.opacity);
+       // Keep the already painted source visible across the continuous chapter
+       // block. Only a new surface activation needs an invisible first-draw gate.
+       publisher.style(stage.current,'opacity',canvasFirstPaint?0:canvasPlacement.opacity);
       if(modelOverlay){
         // The information column is permanent; only its model aperture follows
         // the existing scene entry/exit. Source leader points use the real Canvas rect.
@@ -255,7 +258,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
         editorial:{lightSweep:0,materialLift:0},pointer,modelHover,hidden:false,
         inspection:{...inspection.value,lightMix:0},inspectionSettled:inspection.settled,
         inspectionActive:inspectionWeight>0,inspectionWeight,inspectionViewport,modelViewports,
-        compositionMode:'viewport-stage',independentAscii:true,informationChapter:chapter.id,canvasLocal:false,canvasPresented:canvasActive&&!canvasAwaitingPaint&&canvasPlacement.opacity>0,canvasPlacement:{...canvasPlacement},canvasSurface,
+        compositionMode:'viewport-stage',independentAscii:true,informationChapter:chapter.id,canvasLocal:false,canvasPresented:canvasActive&&!canvasFirstPaint&&canvasPlacement.opacity>0,canvasPlacement:{...canvasPlacement},canvasSurface,
       });
       canvasEvents.consume(canvasMotion.events,controllerFrame);
       moving=canvasEvents.flush({presented:input.getPresentation(),requiresScene:state.sceneEnabled&&!state.sceneFailed})||moving;

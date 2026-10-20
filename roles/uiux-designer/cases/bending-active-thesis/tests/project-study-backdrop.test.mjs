@@ -80,9 +80,16 @@ test('all documentary chapters exit before decode/entry, while retained Credits 
 test('one shared transaction hands model paint/camera intent to the actor only after the prior source exits',async()=>{
  const f=fixture();await flush();const preparations=[],stages=[],host=new Target(),surface=new Target();let ready=false;
  host.querySelector=()=>surface;const actor={prepare(chapter){preparations.push(chapter);return ready;},publish({stage}){stages.push(stage);return false;},inspect:()=>({arrivalStatic:false}),suspend(){},resume(){}};
- f.presenter.setScene({actor,host,model:{chapters:['context','system']}});f.step();f.select('context');assert.deepEqual(preparations,[]);f.step(1);assert.deepEqual(preparations,['context']);assert.equal(f.presenter.inspect().stage.mode,'waiting');assert.equal(host.getAttribute('data-project-model-active'),null);
+ f.presenter.setScene({actor,host,model:{sha256:'verified-model-revision',chapters:['context','system']}});f.step();f.select('context');assert.deepEqual(preparations,[]);f.step(1);assert.deepEqual(preparations,['context']);assert.equal(f.presenter.inspect().stage.mode,'waiting');assert.equal(host.getAttribute('data-project-model-active'),null);
  ready=true;f.step();f.settle();assert.equal(host.getAttribute('data-project-model-active'),'');assert.equal(stages.at(-1).kind,'model');assert.equal(stages.at(-1).mode,'hold');assert.equal(f.figures.filter(figure=>figure.getAttribute('data-project-media-active')!==null).length,0);
- const before=preparations.length;f.select('system');assert.equal(preparations.length,before);f.step(1);assert.equal(preparations.at(-1),'system');f.settle();f.select('making');f.settle();assert.equal(host.getAttribute('data-project-model-active'),null);assert.equal(f.figures[3].getAttribute('data-project-media-active'),'');f.presenter.dispose();terminal(f.presenter.inspect().stage.history);
+ const sequence=f.presenter.inspect().stage.sequence;
+ for(const chapter of ['system','context','system']){
+  f.select(chapter);assert.equal(preparations.at(-1),chapter);const stage=f.presenter.inspect().stage;
+  assert.equal(stage.key,'model:verified-model-revision');assert.equal(stage.sequence,sequence);assert.equal(stage.chapter,chapter);
+  assert.equal(stage.mode,'hold');assert.equal(stage.transition,null);assert.deepEqual(stage.pose,{x:0,y:0,opacity:1});
+ }
+ ready=false;f.select('context');assert.equal(f.presenter.inspect().stage.mode,'waiting');assert.deepEqual(f.presenter.inspect().stage.pose,{x:0,y:0,opacity:1});
+ ready=true;f.step();f.settle();f.select('making');f.settle();assert.equal(host.getAttribute('data-project-model-active'),null);assert.equal(f.figures[3].getAttribute('data-project-media-active'),'');f.presenter.dispose();terminal(f.presenter.inspect().stage.history);
 });
 
 test('native source waits for real first frame; pause/BFCache retain time and finite end holds until explicit replay',async()=>{

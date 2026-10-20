@@ -4,7 +4,8 @@ export const XR_SCENE_CHAPTERS=Object.freeze(['overview','context','method','ada
 const outside=direction=>direction>0?{x:-1.08,y:-.05,opacity:0}:{x:.22,y:.035,opacity:0};
 const held=()=>({x:0,y:0,opacity:1});
 const smooth=value=>{const t=Math.max(0,Math.min(1,value));return t*t*t*(10+t*(-15+6*t));};
-const absent=chapter=>chapter==='overview';
+export const xrStageSubject=chapter=>chapter==='context'?'workspace':chapter==='method'?'model':['adapt','assemble','join'].includes(chapter)?'phone':'none';
+const absent=chapter=>xrStageSubject(chapter)==='none';
 function fact(state,status,reason){
  const request=state.request;if(!request)return;
  state.history.push({id:request.id,chapter:request.chapter,status,...(reason?{reason}:{})});
@@ -18,8 +19,10 @@ function transition(state,kind,direction){
 function reconcile(state,readyChapter){
  const request=state.request;
  if(state.chapter!==request.chapter){
-  if(state.pose.opacity>0){if(state.transition?.kind!=='exit')transition(state,'exit',request.direction);return;}
-  state.chapter=request.chapter;state.pose=outside(-request.direction);state.transition=null;
+  const sameSubject=xrStageSubject(state.chapter)===xrStageSubject(request.chapter);
+  if(state.pose.opacity>0&&!sameSubject){if(state.transition?.kind!=='exit')transition(state,'exit',request.direction);return;}
+  state.chapter=request.chapter;
+  if(!sameSubject){state.pose=outside(-request.direction);state.transition=null;}
  }
  if(absent(state.chapter)){state.pose=outside(request.direction);state.transition=null;state.mode='absent';state.settled=true;complete(state);}
  else if(readyChapter!==state.chapter){state.transition=null;state.mode='waiting';state.settled=false;}
@@ -29,7 +32,8 @@ function reconcile(state,readyChapter){
 
 /** Project-local adaptation of Bending's finite scene passage. Native reading
  * selects a chapter; only the existing XR Director's active seconds move it.
- * The old scene leaves before the renderer prepares the new source. This module
+ * A different subject leaves before preparation; consecutive phone recordings
+ * retain the same outer surface while their next native source prepares. This module
  * owns no DOM, resource, camera, timer, observer or animation frame.
  */
 export function createXRStageMotion(){

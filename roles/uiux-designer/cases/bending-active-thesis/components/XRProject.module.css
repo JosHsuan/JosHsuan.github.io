@@ -11,6 +11,7 @@
 .panel>p{margin:1.25rem 0;color:var(--glass-muted);font-size:clamp(.97rem,1.12vw,1.1rem);line-height:1.75}
 .panel>p:last-child{margin-bottom:0}
 .narrative{grid-column:1/6;grid-row:1;align-self:center;max-width:34rem}
+.physicalChapter .chapterInner{min-height:0;padding-bottom:2rem}.physicalChapter .narrative{grid-column:1/10;max-width:50rem}
 .hero .chapterInner{min-height:118svh}
 .heroCopy{grid-column:1/9;max-width:56rem}.heroCopy h1{margin:0 0 1.7rem;font-size:clamp(2.4rem,5.7vw,6rem);font-weight:400;line-height:1.1;letter-spacing:-.02em;overflow-wrap:break-word}
 .backLink,.readingLink,.recordingLink{display:inline-flex;align-items:center;justify-content:space-between;gap:1rem;min-height:44px;color:var(--glass-control-accent);font-size:.8rem;text-decoration:none}

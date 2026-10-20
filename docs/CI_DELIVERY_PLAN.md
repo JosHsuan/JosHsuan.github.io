@@ -1,6 +1,20 @@
 # DORA-informed CI and delivery plan
 
-Reviewed: 19 October 2026 against the linked official Google Cloud DORA guidance and the checked-in workflows. Scope: this repository's reusable framework and selected public application. The owner requested research and Markdown planning. Current operations remain defined by [CI/CD operations](CI_CD.md), [decision 0009](decisions/0009-impact-selected-ci.md), and the exact-commit, same-artifact publication gate. Future work below is a plan, not a claim that it has been implemented.
+Reviewed: 20 October 2026 against the linked official Google Cloud DORA guidance and the checked-in workflows. Scope: this repository's reusable framework and selected public application. The owner requested research and Markdown planning. Current operations remain defined by [CI/CD operations](CI_CD.md), [decision 0009](decisions/0009-impact-selected-ci.md), and the exact-commit, same-artifact publication gate. Future work below is a plan, not a claim that it has been implemented.
+
+## Current planning decision — 20 October 2026
+
+Preserve the existing release protections and improve how quickly developers receive trustworthy feedback. First add timing and machine-readable coverage evidence; then use those observations to balance browser work and introduce a small native smoke stage. Keep each improvement independently reviewable. This amendment updates documentation only: no workflow, test selection, timeout, retry, deployment permission or product runtime changes.
+
+| Checked-in capability | Current state | Next acceptance condition |
+| --- | --- | --- |
+| Cheap feedback | `quality` is independent of the long browser jobs. A dedicated native smoke stage is not implemented. | Report fast-layer completion separately from the release gate; smoke consumes the same built artifact and cannot authorize publication alone. |
+| Browser scheduling | `browserMatrix` in `scripts/ci-impact.mjs` uses file shards: Chromium 4, WebKit 2, mobile Chromium 2 for full candidates; one worker per runner and zero retries. | Measure per-file/per-test costs before changing partitions. Preserve the selected test-ID union, engine coverage, assertions and source/runtime budgets. |
+| Completion evidence | `scripts/ci-gate.mjs` checks selected aggregate job results and build identity. Exact per-test completion is currently checked in the separate release audit, not enforced by a structured-receipt CI gate. | Add candidate-bound receipts and reject missing, duplicate, skipped, retried or unfinished required executions before marking the candidate publishable. |
+| Artifact promotion | `pages-build` creates one complete export; browser jobs verify its digest before and after testing; deployment checks successful main-push/SHA provenance and promotes that output without rebuilding. | Retain this chain throughout every experiment; stale, tampered or differently built output must still fail. |
+| Operational learning | Timing samples and manual live-verification receipts exist. Automatic delivery-metric aggregation and an exercised recovery procedure are not established. | Establish comparable observations, incident links and a verified recovery operation before claiming an improvement, a failure rate or operational rollback. |
+
+The existing selector permits conservative `case-scoped` acceptance as well as `fullCase`. A scoped candidate still runs its release baseline on all three public profiles and promotes the complete audited output. Shared runtime, source assets, workflow/build changes and unknown inputs widen coverage according to the current rules. This plan does not require every unrelated change to run every public scenario, and it does not move required acceptance out of the candidate's release chain.
 
 ## Research basis
 
@@ -11,6 +25,18 @@ DORA recommends finding defects in the cheapest suitable test layer, maintaining
 Deployment automation should promote the same tested packages, keep scripts/configuration in version control, and verify the deployed service. Small independently testable changes should continue through feedback and delivery rather than accumulate into another large release batch. [DORA: Deployment automation](https://dora.dev/capabilities/deployment-automation/), [DORA: Working in small batches](https://dora.dev/capabilities/working-in-small-batches/).
 
 The stage names, p95 targets, shard counts and timeout values below are project engineering decisions. DORA does not specify 45 minutes, eight runners or 267 browser executions, and these values are not performance certification.
+
+### Research-to-project mapping
+
+| Official guidance | Application in this plan |
+| --- | --- |
+| [Continuous integration](https://dora.dev/capabilities/continuous-integration/) emphasizes frequent integration, quick automated feedback and immediate repair of broken builds. | Keep small changes and an independently visible fast layer; prioritize diagnosis or a validated revert when a required build breaks. The complete release suite may remain a later pipeline stage. |
+| [Test automation](https://dora.dev/capabilities/test-automation/) favors reliable developer-maintained tests and finding defects in the fastest suitable layer. | Add meaningful portable regressions for state/event/geometry defects; retain native browser coverage for layout, WebGL, media and lifecycle. Fix flaky causes rather than hiding failures with retries. |
+| [Deployment automation](https://dora.dev/capabilities/deployment-automation/) promotes tested packages through environments. | Preserve the existing build-once, digest-verified artifact chain and check the deployed site. |
+| [Working in small batches](https://dora.dev/capabilities/working-in-small-batches/) reduces integration and feedback delays. | Deliver measurement, coverage enforcement, partition experiments and smoke as separate changes rather than one CI rewrite. |
+| [Software delivery performance metrics](https://dora.dev/guides/dora-metrics/) measure application-level delivery outcomes in context. | Track the five production metrics below separately from CI duration, cancelled validation runs and test counts. |
+
+These are project-specific applications of the research, not a DORA-prescribed workflow. The existing documentation-only exception is also a local policy: selector/gate regressions still run, but a wholly documentation-only computed change set creates no application build or new publishable output when full validation is not forced and a valid baseline is available.
 
 ## Observed baseline and the current repair
 
@@ -186,14 +212,19 @@ The next implementation should use the following small, independently reviewable
 | Order / status | Proposed change and repository location | Responsible work | Evidence required before completion |
 | --- | --- | --- | --- |
 | 1 — planned | Add per-test and stage timing receipts to the existing CI reporting path, starting with `.github/workflows/ci.yml` and `scripts/ci-run-pages.mjs`. | CI/release, with browser/performance review | UTC timestamps and run/attempt/SHA/profile identities; separate queue, setup, execution and teardown; failed/cancelled observations retained. Establish a baseline before comparing improvements. |
-| 2 — planned | Experiment with measured-duration partitions in `scripts/ci-impact.mjs` and the browser runner. | CI/release and browser/performance | The same required test-ID union across all profiles, no duplication or omission, one GL worker per runner, unchanged retry/assertion budgets, artifact digest intact. Compare longest-shard duration and total runner-minutes on comparable workloads. |
-| 3 — planned | Introduce a clearly named native smoke stage consuming `pages-build` output. | Runtime/development and browser/QA | Real entry/navigation, source first draw and bounded failure journeys; build digest checked before and after; the same candidate still reaches its selected acceptance jobs and required gate. A smoke-only record cannot be published. |
-| 4 — planned, incremental | Move suitable regressions into portable tests alongside changes; retain engine-specific acceptance. | Developers and relevant interaction/source reviewers | A demonstrated defect caught by the earlier layer, with native layout, media, GPU and lifecycle behavior still verified in the browser where needed. No test-count target or fixed test-pyramid percentage. |
+| 2 — planned | Enforce the selected execution inventory in `scripts/ci-gate.mjs`, using structured browser receipts and selector/gate regression tests. | CI/release and browser/QA | Bind receipts to the exact plan, source SHA, run/attempt, profile, shard and build digest. Compare actual results with an independently generated expected inventory; fail on omissions, duplicates, unexpected skips/retries, unfinished cases or mismatched identities. Exercise empty, partial, stale and tampered receipt failures. |
+| 3 — planned | Experiment with measured-duration partitions in `scripts/ci-impact.mjs` and the browser runner. | CI/release and browser/performance | The same required test-ID union across all profiles, no duplication or omission, one GL worker per runner, unchanged retry/assertion budgets, artifact digest intact. Compare longest-shard duration and total runner-minutes on comparable workloads. |
+| 4 — planned | Introduce a clearly named native smoke stage consuming `pages-build` output. | Runtime/development and browser/QA | Real entry/navigation, source first draw and bounded failure journeys; build digest checked before and after; the same candidate still reaches its selected acceptance jobs and required gate. A smoke-only record cannot be published. |
+| Ongoing | Move suitable regressions into portable tests alongside changes; retain engine-specific acceptance. | Developers and relevant interaction/source reviewers | A demonstrated defect caught by the earlier layer, with native layout, media, GPU and lifecycle behavior still verified in the browser where needed. No test-count target or fixed test-pyramid percentage. |
 | 5 — planned | Exercise recovery against the existing deployment provenance checks and document the operation in `docs/CI_CD.md`. | CI/release and owner within the established publication scope | A verified eligible artifact, recorded failure/recovery times and successful live release/route checks. Do not weaken SHA/digest eligibility to promote an old artifact. Record any current gate limitation before claiming rollback is operational. |
 
 The developer responsible for a breaking change owns the initial diagnosis and repair, with CI/release work checking infrastructure and provenance failures. Repair a broken build before starting the next optimization. If a repair cannot be made promptly, evaluate reverting the offending change, with the same source protection and validation rules. Keep optimization failures separate from production incidents. This follows DORA's emphasis on frequent integration and immediate build repair; it does not authorize unrelated product changes. [DORA: Continuous integration](https://dora.dev/capabilities/continuous-integration/).
 
 For each experiment, retain the candidate and baseline SHAs, scope, raw observations, coverage union, artifact identity and outcome. Report sample count and workload differences before quoting a percentile or speedup. The first objective is a trustworthy feedback loop; adding a measurement dashboard is optional and should follow a demonstrated need. [DORA: Software delivery performance metrics](https://dora.dev/guides/dora-metrics/).
+
+The first receipt change should preserve raw Playwright outcomes rather than parse a green summary alone. Generate expected IDs from the candidate's selected specs and profile configuration; do not freeze a historical total such as 267, 342 or 372 into the gate. Keep collection failures visible and fail closed for required missing evidence. This is a proposed extension to the gate, not a claim about its current behavior.
+
+Before changing CI code, run `pnpm test:ci` for the current selector/gate baseline. An implementation must additionally pass `pnpm check`, relevant negative receipt/selection tests, and the actual required browser matrix against the recorded output. A Markdown-only amendment needs link/source and diff review; rerunning expensive browser suites would not validate the planning text.
 
 ## Measurement contract
 

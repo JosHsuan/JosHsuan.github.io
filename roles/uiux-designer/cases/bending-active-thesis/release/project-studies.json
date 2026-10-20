@@ -7,39 +7,39 @@
       "title": "Mode/s of Making",
       "shortTitle": "Mode/s of Making",
       "subtitle": "Heat rotate cutting",
-      "summary": "A studio investigation into how machine motion, cutting paths and material texture can shape the design of custom polystyrene units.",
+      "summary": "My studio study connects rotary heat cutting, custom polystyrene units and the textures left by fabrication.",
       "category": "Digital fabrication",
       "metadataTitle": "Mode/s of Making — JosHsuan Chao",
-      "metadataDescription": "A source-backed studio study connecting rotary heat cutting, custom polystyrene units, machine design and physical surface prototypes.",
+      "metadataDescription": "A studio study connecting rotary heat cutting, custom polystyrene units, machine design and physical surface prototypes.",
       "context": "National Cheng Kung University · Tainan, Taiwan",
       "yearLabel": "Studio project",
-      "role": "Studio design, toolpath development and fabrication research",
+      "role": "Studio design research - computational design and fabrication workflow",
       "hero": {
-        "src": "/assets/projects/mode-s-of-making/hero.webp",
-        "width": 2267,
-        "height": 3200,
-        "alt": "Digital visualization of curved polystyrene units assembled into a repeating wall.",
-        "caption": "Simulation detail of the proposed custom-unit assembly.",
-        "credit": "Design study: Chia-Hsuan Chao / National Cheng Kung University."
+        "width": 1920,
+        "height": 1080,
+        "alt": "Curvature-parameter assembly simulation from the original studio film.",
+        "caption": "Curvature-parameter assembly simulation from the original studio film.",
+        "credit": "Studio design and digital animation: Chia-Hsuan Chao / National Cheng Kung University.",
+        "src": "/assets/projects/mode-s-of-making/film-assembly-hero.webp"
       },
       "sections": [
         {
           "id": "context",
           "label": "Context",
           "kind": "form",
-          "title": "Design begins with the tool.",
+          "title": "Start with the making process.",
           "paragraphs": [
-            "Mode/s of Making investigates the machine as a design tool. The study connects the geometry of polystyrene units with the motion of a rotary heat-cutting prototype.",
-            "The proposed assemblies develop from individual curved units. Digital studies explore how those units meet and how changes in cutting profiles affect the larger pattern."
+            "I explored rotary heat cutting as a design tool, using the movement of the cutter to shape polystyrene units. The fabrication mechanism became part of the design process.",
+            "The unit geometry and its possible assemblies developed together, linking digital configurations with physical surface studies."
           ],
           "media": [
             {
-              "src": "/assets/projects/mode-s-of-making/fabrication-assembly-spread.webp",
-              "width": 3200,
-              "height": 2263,
-              "alt": "The complete landscape visualization joins curved-unit assemblies, a rotary cutting setup and its exploded machine components.",
-              "caption": "Imagined fabrication and assembly, with the cutting machine’s exploded components.",
-              "credit": "Design study: Chia-Hsuan Chao / National Cheng Kung University."
+              "width": 4096,
+              "height": 2304,
+              "alt": "Original unit-geometry animation from the studio film materials.",
+              "caption": "Original unit-geometry animation from the studio film materials.",
+              "credit": "Studio design and digital animation: Chia-Hsuan Chao / National Cheng Kung University.",
+              "src": "/assets/projects/mode-s-of-making/film-unit-geometry.webp"
             }
           ]
         },
@@ -47,27 +47,19 @@
           "id": "system",
           "label": "System",
           "kind": "system",
-          "title": "From geometry to coordinated motion.",
+          "title": "Coordinate tool and workpiece.",
           "paragraphs": [
-            "The recorded workflow links geometry development, cutting-path optimisation, G-code conversion, machine setup and assembly guided by the simulation model.",
-            "The system combines a CoreXY mechanism for planar movement with a stepper-controlled rotary holder. Arduino and Marlin provide existing control infrastructure for the design-to-fabrication workflow."
+            "The system combines planar tool movement with a rotating workpiece. The original CoreXY animation shows the motion frame, motors and carriage as a coordinated mechanism.",
+            "I connected geometry development, cutting-path optimisation, G-code conversion and machine setup in a design-to-fabrication workflow, using Arduino and Marlin as control foundations."
           ],
           "media": [
             {
-              "src": "/assets/projects/mode-s-of-making/design-workflow.webp",
-              "width": 2251,
-              "height": 2618,
-              "alt": "Diagram linking geometry and cutting profiles to G-code, a controller and the rotary cutting machine.",
-              "caption": "The original workflow from geometry development to fabrication and assembly.",
-              "credit": "Design study: Chia-Hsuan Chao / National Cheng Kung University."
-            },
-            {
-              "src": "/assets/projects/mode-s-of-making/machine-system.webp",
-              "width": 1783,
-              "height": 2606,
-              "alt": "Machine diagram showing CoreXY movement, the rotary holder, endstop and controller.",
-              "caption": "Planar tool motion and a rotating holder form the machine system.",
-              "credit": "Design study: Chia-Hsuan Chao / National Cheng Kung University."
+              "width": 4096,
+              "height": 2304,
+              "alt": "CoreXY movement study from the original studio animation.",
+              "caption": "CoreXY movement study from the original studio animation.",
+              "credit": "Studio design and digital animation: Chia-Hsuan Chao / National Cheng Kung University.",
+              "src": "/assets/projects/mode-s-of-making/film-corexy-system.webp"
             }
           ]
         },
@@ -75,27 +67,19 @@
           "id": "making",
           "label": "Making",
           "kind": "make",
-          "title": "Building a fabrication prototype.",
+          "title": "A machine for the study.",
           "paragraphs": [
-            "The prototype uses an aluminium frame, 3D-printed components and a holder that accommodates different material sizes. The rotating axis controls section position while planar movement follows the cutting profile.",
-            "The exploded model describes the relationships between motors, rods, belts, bearings and the cutting tool. The workshop photograph records an assembled prototype with a polystyrene blank."
+            "The machine study combines a CoreXY-style motion frame with a rotating holder for the polystyrene blank. Motors, rods, belts and bearings coordinate the relationship between tool and workpiece.",
+            "The original studio animation brings the machine and rotating blank together; the film diagram distinguishes its rotating area from the working area."
           ],
           "media": [
             {
-              "src": "/assets/projects/mode-s-of-making/fabrication-assembly-spread.webp",
-              "width": 3200,
-              "height": 2263,
-              "alt": "The complete landscape visualization joins curved-unit assemblies, a rotary cutting setup and its exploded machine components.",
-              "caption": "Imagined fabrication and assembly, with the cutting machine’s exploded components.",
-              "credit": "Design study: Chia-Hsuan Chao / National Cheng Kung University."
-            },
-            {
-              "src": "/assets/projects/mode-s-of-making/machine-prototype.webp",
-              "width": 3200,
-              "height": 2400,
-              "alt": "An aluminium-frame cutting machine holds a cylindrical polystyrene blank.",
-              "caption": "An original studio fabrication record of the rotary cutting prototype.",
-              "credit": "Studio fabrication record. Photographer not individually identified."
+              "width": 1920,
+              "height": 1080,
+              "alt": "Rotating area and working area in the film's digital machine study.",
+              "caption": "Rotating area and working area in the film's digital machine study.",
+              "credit": "Studio design and digital animation: Chia-Hsuan Chao / National Cheng Kung University.",
+              "src": "/assets/projects/mode-s-of-making/film-rotary-system.webp"
             }
           ]
         },
@@ -103,19 +87,19 @@
           "id": "results",
           "label": "Results",
           "kind": "make",
-          "title": "Toolpaths become surface texture.",
+          "title": "Connect the unit to the workflow.",
           "paragraphs": [
-            "The portfolio describes a roughing stage followed by a slower continuous finishing pass. The physical studies show how the path leaves a texture across the cut surface.",
-            "Those material traces feed back into the design investigation. Physical prototypes document joints and surface details, while the larger assemblies remain identified as digital visualisations."
+            "The original studio film connects the layered unit and cutting profile to a workflow from geometry development through cutting-path optimisation and G-code conversion.",
+            "I used the relationship between toolpaths and custom units to explore how fabrication can inform an assembly design."
           ],
           "media": [
             {
-              "src": "/assets/projects/mode-s-of-making/toolpath-textures.webp",
-              "width": 2235,
-              "height": 2546,
-              "alt": "Physical polystyrene prototypes show assembled joints and layered cutting textures.",
-              "caption": "Physical prototypes and the textures left by the cutting process.",
-              "credit": "Jan Kyselý (Figs. 5-09 and 5-10); other photographs not individually credited."
+              "width": 1920,
+              "height": 1080,
+              "alt": "The studio film connects a layered unit and cutting profile with the design-to-code workflow.",
+              "caption": "Recorded design-to-code workflow and unit cutting-profile study from the original studio film.",
+              "credit": "Studio design and digital animation: Chia-Hsuan Chao / National Cheng Kung University.",
+              "src": "/assets/projects/mode-s-of-making/film-design-workflow.webp"
             }
           ]
         }
@@ -135,14 +119,14 @@
         },
         {
           "role": "Photography",
-          "names": "Jan Kyselý (Figs. 5-09 and 5-10); other photographs not individually credited"
+          "names": "Jan Kyselý - project photography"
         },
         {
           "role": "Referenced control platforms and mechanism",
           "names": "Arduino / Marlin / CoreXY"
         }
       ],
-      "sourceNote": "Based on the 2025 portfolio, printed pp. 49–56 (physical PDF pp. 54–61), and original studio records. The chapter header states 2018 while the contents lists 2020, so a single project year is not assigned here. The recorded personal design scope does not assign every hardware-assembly or firmware task to one person.",
+      "sourceNote": "I developed the studio design by connecting the cutting mechanism, unit geometry, toolpaths and assembly configurations. The fabrication workflow uses Arduino, Marlin and a customised motion frame; Prof. Kane Yanagawa supervised the studio.",
       "related": {
         "href": "/projects/entrance-installation-art/",
         "title": "Entrance Installation Art"
@@ -171,17 +155,17 @@
           ]
         },
         "poster": {
-          "src": "/assets/projects/mode-s-of-making/hero.webp",
-          "width": 2267,
-          "height": 3200,
-          "alt": "Digital visualization of curved polystyrene units assembled into a repeating wall.",
-          "caption": "Simulation detail of the proposed custom-unit assembly.",
-          "credit": "Design study: Chia-Hsuan Chao / National Cheng Kung University."
+          "width": 4096,
+          "height": 2304,
+          "alt": "Original unit-geometry animation from the studio film materials.",
+          "caption": "Original unit-geometry animation from the studio film materials.",
+          "credit": "Studio design and digital animation: Chia-Hsuan Chao / National Cheng Kung University.",
+          "src": "/assets/projects/mode-s-of-making/film-unit-geometry.webp"
         },
         "alt": "Study model of the rotary-cut assembly. Drag to inspect the simulated units.",
         "chapters": [
           "context",
-          "results"
+          "system"
         ],
         "views": {
           "context": {
@@ -190,9 +174,9 @@
             "fov": 36,
             "zoom": 1.04
           },
-          "results": {
-            "yaw": 0.76,
-            "pitch": 0.28,
+          "system": {
+            "yaw": 0.56,
+            "pitch": 0.18,
             "fov": 36,
             "zoom": 1.04
           }
@@ -200,25 +184,25 @@
       },
       "motionMedia": [
         {
-          "id": "rotary-cutting-motion",
+          "id": "film-machine-simulation",
           "chapter": "making",
-          "src": "/assets/projects/mode-s-of-making/rotary-cutting-motion.mp4",
-          "poster": {
-            "src": "/assets/projects/mode-s-of-making/rotary-cutting-motion-poster.webp",
-            "width": 1280,
-            "height": 720,
-            "alt": "The studio rotary-cutting prototype shapes a foam blank with its moving cutter.",
-            "caption": "Original studio recording of the rotary-cutting prototype in operation.",
-            "credit": "NCKU studio fabrication record. Photographer and operator are not individually identified."
-          },
-          "width": 1280,
-          "height": 720,
-          "durationSeconds": 9.0289,
-          "frameCount": 269,
+          "width": 4096,
+          "height": 2304,
+          "durationSeconds": 4.8,
+          "frameCount": 120,
           "loop": true,
-          "alt": "The studio rotary-cutting prototype shapes a foam blank with its moving cutter.",
-          "caption": "Original studio recording of the rotary-cutting prototype in operation.",
-          "credit": "NCKU studio fabrication record. Photographer and operator are not individually identified."
+          "alt": "Original line animation of the rotary-cutting machine and rotating blank.",
+          "caption": "Original studio simulation of the complete rotary-cutting machine and rotating blank.",
+          "credit": "Studio design and digital animation: Chia-Hsuan Chao / National Cheng Kung University.",
+          "src": "/assets/projects/mode-s-of-making/film-machine-simulation.mp4",
+          "poster": {
+            "width": 4096,
+            "height": 2304,
+            "alt": "Full-machine rotary-cutting simulation from the original studio animation.",
+            "caption": "Full-machine rotary-cutting simulation from the original studio animation.",
+            "credit": "Studio design and digital animation: Chia-Hsuan Chao / National Cheng Kung University.",
+            "src": "/assets/projects/mode-s-of-making/film-machine-motion-poster.webp"
+          }
         }
       ]
     },
@@ -228,30 +212,30 @@
       "title": "Entrance Installation Art",
       "shortTitle": "Entrance Installation Art",
       "subtitle": "Taichung Nan Shan no.6 Square",
-      "summary": "Translating a patterned surface into folded metal panels, connection details and fabrication drawings for an entrance installation.",
+      "summary": "I helped turn a patterned entrance installation into coordinated 3D models and fabrication drawings within the PKD engineering team.",
       "category": "Computational design",
       "metadataTitle": "Entrance Installation Art — JosHsuan Chao",
       "metadataDescription": "Scheme development, 3D modelling and fabrication-drawing coordination for the Taichung Nan Shan no.6 Square entrance installation.",
       "context": "PKD Engineering Consultants · Taichung, Taiwan",
       "yearLabel": "Professional work",
-      "role": "Scheme development, 3D modelling and fabrication drawings",
+      "role": "Scheme development - 3D modelling - fabrication drawings",
       "hero": {
         "src": "/assets/projects/entrance-installation-art/hero.webp",
         "width": 2400,
         "height": 3200,
         "alt": "View upward along the completed installation, with folded triangular metal panels and openings.",
         "caption": "The folded panel surface of the Taichung Nan Shan no.6 Square entrance installation.",
-        "credit": "Project: PKD Engineering Consultants. Photographer not individually identified."
+        "credit": "Project: PKD Engineering Consultants."
       },
       "sections": [
         {
           "id": "context",
           "label": "Context",
           "kind": "form",
-          "title": "A surface becomes a panel system.",
+          "title": "From a surface to individual panels.",
           "paragraphs": [
-            "The installation begins with a NURBS surface. Triangular subdivision responds to fabrication constraints, and controlled panel depth gives the surface its relief.",
-            "A helical curve provides a distance relationship for varying the openings. The project develops several pattern schemes within the same overall geometry."
+            "I worked within the PKD team to develop an entrance installation from a continuous surface into individually defined folded panels.",
+            "The design connected the overall form with a practical system of openings, edges and supports that could be carried into fabrication."
           ],
           "media": [
             {
@@ -260,7 +244,7 @@
               "height": 783,
               "alt": "Four digital models progress from a smooth surface to triangulation, depth and openings.",
               "caption": "Surface subdivision, panel depth and a helical distance field develop the pattern.",
-              "credit": "Project documentation: PKD Engineering Consultants. Individual image author not separately identified."
+              "credit": "Project: PKD Engineering Consultants."
             },
             {
               "src": "/assets/projects/entrance-installation-art/pattern-variations.webp",
@@ -268,7 +252,7 @@
               "height": 782,
               "alt": "A grid of related installation models compares different panel opening patterns.",
               "caption": "Pattern schemes developed within the same overall installation geometry.",
-              "credit": "Project documentation: PKD Engineering Consultants. Individual image author not separately identified."
+              "credit": "Project: PKD Engineering Consultants."
             }
           ]
         },
@@ -276,10 +260,10 @@
           "id": "system",
           "label": "System",
           "kind": "system",
-          "title": "Connections organise the surface.",
+          "title": "Control variation through geometry.",
           "paragraphs": [
-            "The documented system uses two-ear and three-ear folded panels supported by module hangers. Each panel edge and connection responds to the required local depth.",
-            "Paired fixing and alignment holes coordinate neighbouring panels. The section and joint studies connect the outer pattern with its internal support system."
+            "My modelling work connected the triangulated surface with panel depth, opening patterns and a shared reference system. These relationships let local variation remain coordinated with the overall installation.",
+            "The model and drawings developed together so that each panel could be identified and related to its neighbours."
           ],
           "media": [
             {
@@ -288,7 +272,7 @@
               "height": 1300,
               "alt": "Section and joint illustrations show the support frame and two-ear and three-ear folded panels.",
               "caption": "The support system and the two families of folded panel connections.",
-              "credit": "Project documentation: PKD Engineering Consultants. Individual image author not separately identified."
+              "credit": "Project: PKD Engineering Consultants."
             }
           ]
         },
@@ -296,10 +280,10 @@
           "id": "making",
           "label": "Making",
           "kind": "make",
-          "title": "Turning model data into drawings.",
+          "title": "Translate the model for fabrication.",
           "paragraphs": [
-            "The work translates 3D geometry into flat fabrication information: cutting and folding lines, hole positions, panel dimensions and folding angles.",
-            "The drawings combine model-derived information with manual checks for delivery to the local fabrication team. Workshop photographs record the supports and modules during production."
+            "I translated the 3D panel geometry into fabrication drawings, bringing together fold angles, holes, tabs and reference information.",
+            "Model-derived information and manual checks were coordinated with the fabrication team. The physical modules were fabricated in the workshop and assembled by the project team."
           ],
           "media": [
             {
@@ -308,7 +292,7 @@
               "height": 594,
               "alt": "Flat panel drawings retain fold lines, holes, dimensions and folding-angle information.",
               "caption": "The model is translated into dimensioned fabrication drawings for individual panels.",
-              "credit": "Project documentation: PKD Engineering Consultants. Individual image author not separately identified."
+              "credit": "Project: PKD Engineering Consultants."
             },
             {
               "src": "/assets/projects/entrance-installation-art/workshop-assembly.webp",
@@ -316,7 +300,7 @@
               "height": 1130,
               "alt": "Workshop photographs show internal supports and the installation modules during fabrication.",
               "caption": "Workshop documentation of the internal supports and separately fabricated modules.",
-              "credit": "Project documentation: PKD Engineering Consultants. Individual image author not separately identified."
+              "credit": "Project: PKD Engineering Consultants."
             }
           ]
         },
@@ -324,10 +308,10 @@
           "id": "results",
           "label": "Results",
           "kind": "make",
-          "title": "Reading the assembled geometry.",
+          "title": "Read the assembled geometry.",
           "paragraphs": [
-            "The completed surface retains the variation of individual openings while forming a continuous entrance installation. Close views reveal folds, edges and the relationship between neighbouring panels.",
-            "My documented role covers scheme development, 3D modelling and fabrication drawings within the engineering team. The 2D and structural sectors are credited separately below."
+            "The completed surface brings the variation of individual openings into a continuous entrance installation. Close views reveal folds, edges and the relationship between neighbouring panels.",
+            "My contribution covered scheme development, 3D modelling and fabrication drawings within the wider engineering, fabrication and installation team."
           ],
           "media": [
             {
@@ -336,7 +320,7 @@
               "height": 1548,
               "alt": "Photographs show the completed installation, close panel details and its urban setting.",
               "caption": "Built surface details and the entrance installation in its site context.",
-              "credit": "Project documentation: PKD Engineering Consultants. Individual image author not separately identified."
+              "credit": "Project: PKD Engineering Consultants."
             }
           ]
         }
@@ -365,13 +349,9 @@
         {
           "role": "Commissioning context",
           "names": "Fu Tsu Construction"
-        },
-        {
-          "role": "Photography",
-          "names": "Individual photographers are not identified in the portfolio chapter"
         }
       ],
-      "sourceNote": "Based on the 2025 portfolio, printed pp. 1–8 (physical PDF pp. 6–13), with the original site photograph. The chapter header states 2021 while the contents lists 2022. Source records differ on panel material, quantities and some dimensional statements, so those values are not used as definitive specifications here.",
+      "sourceNote": "At PKD Engineering Consultants, I worked on scheme development, 3D modelling and fabrication drawings for the Taichung Nan Shan entrance installation. Zhi-Yu Guo contributed the 2D sector work and Monita the structural sector work; Peter Chen was the employer.",
       "related": {
         "href": "/projects/dot-based-3d-printing/",
         "title": "Dot-Based 3D Printing"
@@ -405,7 +385,7 @@
           "height": 3200,
           "alt": "View upward along the completed installation, with folded triangular metal panels and openings.",
           "caption": "The folded panel surface of the Taichung Nan Shan no.6 Square entrance installation.",
-          "credit": "Project: PKD Engineering Consultants. Photographer not individually identified."
+          "credit": "Project: PKD Engineering Consultants."
         },
         "alt": "Scheme model of the folded-panel installation, with its connections, supports, core and base.",
         "chapters": [
@@ -438,7 +418,7 @@
             "height": 960,
             "alt": "The completed entrance installation changes illumination in a night view.",
             "caption": "The built installation during a night lighting sequence.",
-            "credit": "PKD Engineering Consultants project record. Individual media author is not identified; project collaborators and commissioning credits remain in the case."
+            "credit": "Project: PKD Engineering Consultants."
           },
           "width": 540,
           "height": 960,
@@ -447,7 +427,7 @@
           "loop": true,
           "alt": "The completed entrance installation changes illumination in a night view.",
           "caption": "The built installation during a night lighting sequence.",
-          "credit": "PKD Engineering Consultants project record. Individual media author is not identified; project collaborators and commissioning credits remain in the case."
+          "credit": "Project: PKD Engineering Consultants."
         }
       ]
     },
@@ -457,20 +437,20 @@
       "title": "Dot-Based 3D Printing",
       "shortTitle": "Dot-Based 3D Printing",
       "subtitle": "Printing Architecture · Dot-based non-planar fabrication",
-      "summary": "A collaborative study of how layer height, density, speed and path delays produce surface patterns across different printed geometries.",
+      "summary": "I explored printing parameters and toolpath delays with Group1 to develop dotted surfaces across different geometries.",
       "category": "Robotic fabrication",
       "metadataTitle": "Dot-Based 3D Printing — JosHsuan Chao",
       "metadataDescription": "A 2023 ETH MAS DFab team project exploring dot-based non-planar printing through parameter samples, deposition strategies and physical prototypes.",
       "context": "MAS DFab, ETH Zurich · Zurich, Switzerland",
       "yearLabel": "2023",
-      "role": "Group1 collaborative printing research",
+      "role": "Printing research - computational toolpaths and physical experimentation with Group1",
       "hero": {
         "src": "/assets/projects/dot-based-3d-printing/hero.webp",
         "width": 2560,
         "height": 1661,
         "alt": "A translucent twisted printed object stands in snow against grass and trees.",
         "caption": "A physical prototype from the dot-based non-planar printing study.",
-        "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie. Photographer not individually identified."
+        "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie."
       },
       "sections": [
         {
@@ -479,8 +459,8 @@
           "kind": "form",
           "title": "Parameters become material patterns.",
           "paragraphs": [
-            "The study begins with printed samples that vary layer height, density, printing speed and pattern settings. Their surfaces provide a physical record of how those choices affect bead spacing and texture.",
-            "The same investigation extends from small samples to more complex forms, carrying the dotted surface language into curved and twisted geometries."
+            "I explored layer height, density, speed and pattern settings through printed samples with Group1. The surfaces reveal how those choices change bead spacing and texture.",
+            "We then carried the dotted surface language from small samples into curved and twisted geometries."
           ],
           "media": [
             {
@@ -489,7 +469,7 @@
               "height": 603,
               "alt": "A parameter diagram and twelve printed samples compare dotted and continuous textures.",
               "caption": "Layer height, density, pattern and speed are explored through a family of printed samples.",
-              "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie. Photographer not individually identified."
+              "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie."
             }
           ]
         },
@@ -497,10 +477,10 @@
           "id": "system",
           "label": "System",
           "kind": "system",
-          "title": "Coordinating paths and delays.",
+          "title": "Coordinate paths and delays.",
           "paragraphs": [
-            "The documented strategies vary the robotic path and introduce time delays during deposition. Smooth and dotted regions emerge through different combinations of movement and material placement.",
-            "Path diagrams sit beside printed samples so that the relationship between motion strategy and surface formation can be read directly."
+            "I worked on the relationship between robotic paths and deposition delays as part of our printing study. Different combinations of movement and material placement produced smooth and dotted regions.",
+            "Path studies and printed samples connect the motion strategy with the texture that appears in the material."
           ],
           "media": [
             {
@@ -509,7 +489,7 @@
               "height": 860,
               "alt": "Three path diagrams are paired with printed rings and close views of deposited beads.",
               "caption": "Different deposition paths and time-delay strategies produce different bead patterns.",
-              "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie. Photographer not individually identified."
+              "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie."
             },
             {
               "src": "/assets/projects/dot-based-3d-printing/form-development.webp",
@@ -517,7 +497,7 @@
               "height": 611,
               "alt": "Three printed shapes are paired with digital line models of their increasingly twisted geometries.",
               "caption": "The printing strategy is explored across a sequence of different overall forms.",
-              "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie. Photographer not individually identified."
+              "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie."
             }
           ]
         },
@@ -525,10 +505,10 @@
           "id": "making",
           "label": "Making",
           "kind": "make",
-          "title": "Observing the deposition process.",
+          "title": "Watch the pattern being deposited.",
           "paragraphs": [
-            "The fabrication record shows material deposited along the specimen edge by the printing nozzle. A still from the original Group1 recording preserves this stage of the process.",
-            "The project is documented as team research. The available sources confirm participation but do not separately allocate every slicer, robot-operation or photography task."
+            "The nozzle deposits material along the specimen edge, building the dotted pattern through the relationship between motion and extrusion.",
+            "Our printing experiments connected parameter studies with physical trials on different overall forms."
           ],
           "media": [
             {
@@ -537,7 +517,7 @@
               "height": 1304,
               "alt": "A printing nozzle deposits material along the upper edge of a dotted specimen.",
               "caption": "A still frame from the original Group1 fabrication recording.",
-              "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie. Photographer not individually identified."
+              "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie."
             }
           ]
         },
@@ -547,8 +527,8 @@
           "kind": "make",
           "title": "A family of physical experiments.",
           "paragraphs": [
-            "The geometry-development prototypes explore different overall twists while retaining visible patterns in the deposited material.",
-            "The portfolio also records a translucent TPU prototype family. Light reveals the bead structure and the variation of the surfaces across the assembled display."
+            "The prototypes explore different twists and overall shapes while retaining visible patterns in the deposited material.",
+            "A translucent TPU prototype family extends the study into a lit display, where light reveals the bead structure and variation between surfaces."
           ],
           "media": [
             {
@@ -557,30 +537,30 @@
               "height": 683,
               "alt": "Three white printed objects compare different degrees of twist and bead pattern.",
               "caption": "The physical geometry-development prototypes.",
-              "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie. Photographer not individually identified."
+              "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie."
             },
             {
               "src": "/assets/projects/dot-based-3d-printing/translucent-prototypes.webp",
               "width": 1024,
               "height": 758,
               "alt": "A group of translucent printed objects is lit from below, revealing their surface patterns.",
-              "caption": "The portfolio identifies this demonstration and prototype family as TPU.",
-              "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie. Photographer not individually identified."
+              "caption": "The translucent TPU prototype family in a lit display.",
+              "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie."
             }
           ]
         }
       ],
       "credits": [
         {
-          "role": "Project participation",
+          "role": "Computational design and printing research",
           "names": "Chia-Hsuan Chao"
         },
         {
-          "role": "Portfolio collaboration",
+          "role": "Collaborator",
           "names": "Namdev Talluru"
         },
         {
-          "role": "Group1 presentation roster",
+          "role": "Project team",
           "names": "JosHsuan / Namdev / JunJie"
         },
         {
@@ -590,13 +570,9 @@
         {
           "role": "Institution",
           "names": "MAS DFab, ETH Zurich"
-        },
-        {
-          "role": "Photography and recording",
-          "names": "Individual media authors are not separately identified"
         }
       ],
-      "sourceNote": "Based on the 2025 portfolio, printed pp. 65–70 (physical PDF pp. 70–75), and the original Group1 presentation. The portfolio names Namdev Talluru; the earlier Group1 roster also includes JunJie. Formula versions differ between the portfolio, presentation and team script. Residual off-page photography text is not used to assign the visible images to a photographer.",
+      "sourceNote": "I worked on printing-parameter studies, deposition paths and physical form experiments with Namdev Talluru and JunJie in Group1. We connected layer height, point density, movement speed and deposition delays with the texture and form of printed objects.",
       "related": {
         "href": "/projects/bending-active/",
         "title": "Bending-Active Metal Panel Deformation"
@@ -630,7 +606,7 @@
           "height": 1661,
           "alt": "A translucent twisted printed object stands in snow against grass and trees.",
           "caption": "A physical prototype from the dot-based non-planar printing study.",
-          "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie. Photographer not individually identified."
+          "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie."
         },
         "alt": "Recorded low-speed dot-path sample positions from Group 1. This point study describes the path rather than a finished solid.",
         "chapters": [
@@ -656,7 +632,7 @@
             "height": 1304,
             "alt": "A printing nozzle deposits material along the upper edge of a dotted specimen.",
             "caption": "Original Group1 recording of nozzle deposition during the printing study.",
-            "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie. Photographer not individually identified."
+            "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie."
           },
           "width": 2500,
           "height": 1304,
@@ -665,7 +641,7 @@
           "loop": true,
           "alt": "A printing nozzle deposits material along the upper edge of a dotted specimen.",
           "caption": "Original Group1 recording of nozzle deposition during the printing study.",
-          "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie. Photographer not individually identified."
+          "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie."
         }
       ]
     },
@@ -675,20 +651,20 @@
       "title": "HC3DP Caustics",
       "shortTitle": "HC3DP Caustics",
       "subtitle": "Inflation-based Pattern Exploration",
-      "summary": "Inflated printed shells and patterned paths shape the light around them.",
+      "summary": "I explored computational printing paths, inflated shells and their light patterns as part of Group-Red.",
       "category": "Robotic fabrication",
       "metadataTitle": "HC3DP Caustics — JosHsuan Chao",
       "metadataDescription": "A Group-Red study of inflated printed shells, computational paths and photographed caustic light patterns.",
       "context": "MAS DFab · ETH Zurich",
       "yearLabel": "Course project",
-      "role": "Group-Red team participation",
+      "role": "Computational design and fabrication research with Group-Red",
       "hero": {
         "src": "/assets/projects/hc3dp-caustics/hero.webp",
         "width": 2048,
         "height": 1365,
         "alt": "Transparent printed shells stand on a table, with light passing through their inflated surfaces.",
         "caption": "Physical shells from the Group-Red inflation and caustics study.",
-        "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao. Individual media authors are not separately identified."
+        "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao."
       },
       "sections": [
         {
@@ -697,8 +673,8 @@
           "kind": "form",
           "title": "Inflated shells and light.",
           "paragraphs": [
-            "The team explored complex caustic patterns through simple shell geometries. The initial concept drew on Greek meander motifs and the Hilbert curve.",
-            "The source workflow combines a pattern within each layer with planar layer addition."
+            "I explored complex caustic patterns through simple shell geometries with Group-Red, drawing on Greek meander motifs and the Hilbert curve.",
+            "The study combined pattern changes within each layer with planar layer addition, connecting the printing strategy with the form of the shell."
           ],
           "media": [
             {
@@ -707,7 +683,7 @@
               "height": 1448,
               "alt": "An original diagram pairs the printing tool and inflated shell with three parallel point rows.",
               "caption": "The original layer-slicing and curve-division diagram.",
-              "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao. Individual media authors are not separately identified."
+              "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao."
             }
           ]
         },
@@ -717,8 +693,8 @@
           "kind": "system",
           "title": "Paths and frames.",
           "paragraphs": [
-            "The computational workflow divides layers into bottom, middle and top point rows. Connections between those rows define the path.",
-            "The original diagrams show how the team arranged and tilted frames along that path."
+            "I worked on the computational path study as part of the team. We divided layers into bottom, middle and top point rows and used the connections between them to define the printing path.",
+            "Frame arrangement and tilt became part of the computational workflow for guiding the tool along that path."
           ],
           "media": [
             {
@@ -727,7 +703,7 @@
               "height": 1448,
               "alt": "An original diagram connects points across three rows below the printing-tool model.",
               "caption": "The original diagram of connections between bottom, middle and top point rows.",
-              "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao. Individual media authors are not separately identified."
+              "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao."
             },
             {
               "src": "/assets/projects/hc3dp-caustics/frame-arrangement.webp",
@@ -735,7 +711,7 @@
               "height": 1448,
               "alt": "An original diagram places tilted coordinate frames along a printing path.",
               "caption": "The original frame-arrangement diagram.",
-              "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao. Individual media authors are not separately identified."
+              "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao."
             }
           ]
         },
@@ -743,19 +719,19 @@
           "id": "making",
           "label": "Making",
           "kind": "make",
-          "title": "Printing motion.",
+          "title": "Connect a path with material behaviour.",
           "paragraphs": [
-            "The source animation presents the tool, shell geometry and path frames together. It records the fabrication strategy as a simulation.",
-            "The project notes describe sensitivity to air pressure and cooling during the physical printing experiments."
+            "The fabrication-path animation brings the tool, shell geometry and path frames together as a simulation of the printing strategy.",
+            "Our physical experiments were sensitive to air pressure and cooling. Adjusting the process meant working with the material as well as the digital path."
           ],
           "media": [
             {
               "src": "/assets/projects/hc3dp-caustics/fabrication-path.webp",
               "width": 2307,
               "height": 2500,
-              "alt": "A source simulation frame shows the printing tool and a row of red path frames.",
+              "alt": "A printing-path simulation frame shows the tool and a row of red path frames.",
               "caption": "A still from the original fabrication-path animation; this is a simulation.",
-              "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao. Individual media authors are not separately identified."
+              "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao."
             }
           ]
         },
@@ -763,10 +739,10 @@
           "id": "results",
           "label": "Results",
           "kind": "make",
-          "title": "Observed light patterns.",
+          "title": "Observe the light and the failures.",
           "paragraphs": [
-            "Photographs document the light patterns produced by different printed geometries. These images record the physical experiments.",
-            "The team also documented sticking and overinflation. The curved orange samples show the overinflation behaviour described in the presentation."
+            "The printed geometries produced different light patterns, which we studied through physical experiments.",
+            "Sticking and overinflation were also part of the investigation. The curved orange samples show how the material can depart from the intended shell geometry."
           ],
           "media": [
             {
@@ -775,15 +751,15 @@
               "height": 1365,
               "alt": "A translucent printed form creates a radiating light pattern on a wall.",
               "caption": "A photographed caustic pattern produced during the project experiments.",
-              "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao. Individual media authors are not separately identified."
+              "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao."
             },
             {
               "src": "/assets/projects/hc3dp-caustics/overinflation.webp",
               "width": 2048,
               "height": 1365,
               "alt": "Orange translucent printed samples curve into hook-like shapes.",
-              "caption": "The source presents this material behaviour as overinflation.",
-              "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao. Individual media authors are not separately identified."
+              "caption": "Overinflation deforms the curved shell samples.",
+              "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao."
             }
           ]
         }
@@ -796,17 +772,9 @@
         {
           "role": "Course context",
           "names": "MAS DFab, ETH Zurich"
-        },
-        {
-          "role": "Individual task assignments",
-          "names": "The source does not separately assign computation, machine operation or photography"
-        },
-        {
-          "role": "Photography and simulation",
-          "names": "Individual media authors are not separately identified"
         }
       ],
-      "sourceNote": "Based on Final Presentation Group-Red, slides 1–27. The title and team names follow the final presentation; no chapter was found in the designated 2025 VerFacade portfolio. Behnur is retained as written in the deck. A precise project year and separate personal task assignments are not established by this source. Printing statistics lack the underlying measurement record and are not presented as verified performance claims.",
+      "sourceNote": "I worked on computational printing paths and physical shell experiments with Paul Jaeggi, Behnur Baiju and Kevin Seav in Group-Red. We connected path geometry, inflation behaviour and the caustic patterns produced by the printed shells.",
       "related": {
         "href": "/projects/dot-based-3d-printing/",
         "title": "Dot-Based 3D Printing"
@@ -840,7 +808,7 @@
           "height": 1365,
           "alt": "Transparent printed shells stand on a table, with light passing through their inflated surfaces.",
           "caption": "Physical shells from the Group-Red inflation and caustics study.",
-          "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao. Individual media authors are not separately identified."
+          "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao."
         },
         "alt": "Original patterned lamp-shade model from the lighting study. The photographed light patterns remain the project evidence.",
         "chapters": [
@@ -871,18 +839,18 @@
             "src": "/assets/projects/hc3dp-caustics/fabrication-path.webp",
             "width": 2307,
             "height": 2500,
-            "alt": "A source-authored simulation presents the robotic printing tool, shell geometry and path frames.",
-            "caption": "Source-authored robotic printing-path study from the Group-Red presentation; this is a simulation.",
-            "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao. Individual media authors are not separately identified."
+            "alt": "A robotic printing-path simulation showing the tool, shell geometry and path frames.",
+            "caption": "Robotic printing-path simulation developed for the Group-Red study.",
+            "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao."
           },
           "width": 2308,
           "height": 2500,
           "durationSeconds": 2.17,
           "frameCount": 31,
           "loop": true,
-          "alt": "A source-authored simulation presents the robotic printing tool, shell geometry and path frames.",
-          "caption": "Source-authored robotic printing-path study from the Group-Red presentation; this is a simulation.",
-          "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao. Individual media authors are not separately identified."
+          "alt": "A robotic printing-path simulation showing the tool, shell geometry and path frames.",
+          "caption": "Robotic printing-path simulation developed for the Group-Red study.",
+          "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao."
         }
       ]
     },
@@ -892,20 +860,20 @@
       "title": "Special Assemblies",
       "shortTitle": "Special Assemblies",
       "subtitle": "V-Shape Modular Based Aggregation",
-      "summary": "A collaborative study of reciprocal V-shaped stick modules, directional aggregation and robotic assembly planning.",
+      "summary": "I worked with Kevin Seav and Megi Sinani to explore reciprocal V-shaped stick modules and robotic assembly planning.",
       "category": "Robotic assembly",
       "metadataTitle": "Special Assemblies — JosHsuan Chao",
       "metadataDescription": "A 2023 ETH MAS DFab team study connecting V-shaped stick aggregation with robot trajectories and physical assembly prototypes.",
       "context": "MAS DFab, ETH Zurich · Zurich, Switzerland",
       "yearLabel": "2023",
-      "role": "Collaborative aggregation and robotic assembly research",
+      "role": "Computational geometry and robotic-assembly research with Group6",
       "hero": {
         "src": "/assets/projects/special-assemblies/hero.webp",
         "width": 3120,
         "height": 2080,
         "alt": "A curved assembly of wooden sticks rises from a small base beside a robotic arm.",
         "caption": "The assembled prototype beside the robotic arm, documented in the original Group6 record.",
-        "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani. Photographer not individually identified."
+        "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani."
       },
       "sections": [
         {
@@ -914,8 +882,8 @@
           "kind": "form",
           "title": "A reciprocal starting point.",
           "paragraphs": [
-            "The project begins with V-shaped wooden-stick modules inspired by reciprocal structures. Each addition changes the relationships between neighbouring sticks.",
-            "Physical prototypes connect this bottom-up geometric study with the conditions of robotic assembly."
+            "I explored V-shaped wooden-stick modules with Kevin Seav and Megi Sinani, drawing on reciprocal structures. Each addition changes the relationships between neighbouring sticks.",
+            "Physical prototypes connected this bottom-up geometric study with the conditions of robotic assembly."
           ],
           "media": [
             {
@@ -924,7 +892,7 @@
               "height": 2080,
               "alt": "An early wooden-stick aggregation cantilevers from a small dome-shaped foundation.",
               "caption": "A physical study of the reciprocal stick aggregation and its foundation.",
-              "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani. Photographer not individually identified."
+              "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani."
             }
           ]
         },
@@ -934,8 +902,8 @@
           "kind": "system",
           "title": "Rules guide the next module.",
           "paragraphs": [
-            "The VStickModule study groups directional aggregation into four choices: NE, NW, SE and SW.",
-            "The documented workflow links geometry, assembly data and ROS/MoveIt planning through JSON, simulation and replanning."
+            "I worked on the geometric aggregation study as part of Group6. We organised directional growth into four choices: NE, NW, SE and SW, and explored module relationships through an object-oriented model.",
+            "The workflow connected geometry and assembly data with ROS/MoveIt planning through JSON, simulation and replanning."
           ],
           "media": [
             {
@@ -944,7 +912,7 @@
               "height": 2029,
               "alt": "Module diagrams and sequential stick assemblies show four directional aggregation choices.",
               "caption": "The original VStickModule and directional-aggregation diagrams, with their figure captions.",
-              "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani. Original portfolio diagram."
+              "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani. Project diagram."
             },
             {
               "src": "/assets/projects/special-assemblies/planning-workflow.webp",
@@ -952,7 +920,7 @@
               "height": 1903,
               "alt": "Workflow diagrams connect module generation, ROS and MoveIt planning, JSON data, simulation and replanning.",
               "caption": "The original software and JSON-based robotic planning workflow.",
-              "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani. Original portfolio diagram."
+              "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani. Project diagram."
             }
           ]
         },
@@ -962,8 +930,8 @@
           "kind": "make",
           "title": "Plan the assembly sequence.",
           "paragraphs": [
-            "Pick, place, exit and insert trajectories organise the robot movement around the growing structure.",
-            "The team studies stick ordering and tool-frame direction, including a Z-axis correction intended to reduce gripper interference with the table."
+            "Pick, place, exit and insert trajectories organised robot movement around the growing structure.",
+            "We studied stick ordering and tool-frame direction, including a Z-axis correction intended to reduce gripper interference with the table."
           ],
           "media": [
             {
@@ -972,7 +940,7 @@
               "height": 1375,
               "alt": "A robotic assembly diagram labels pick, approach, safe, place and exit frames around the stick prototype.",
               "caption": "The recorded pick, place, exit and insert trajectory stages for V-stick aggregation.",
-              "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani. Original portfolio diagram."
+              "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani. Project diagram."
             }
           ]
         },
@@ -982,8 +950,8 @@
           "kind": "make",
           "title": "From modules to a prototype.",
           "paragraphs": [
-            "The physical assembly records show the accumulated stick relationships from front and top views.",
-            "These are experimental prototypes; the source records do not establish exhaustive collision testing or measured fabrication performance."
+            "The physical assembly brings the accumulated stick relationships into view from the front and above.",
+            "The prototypes connect reciprocal aggregation with the practical task of placing the next stick in an increasingly complex arrangement."
           ],
           "media": [
             {
@@ -992,7 +960,7 @@
               "height": 2080,
               "alt": "A front view shows the rising wooden-stick assembly under the robot gripper.",
               "caption": "The physical prototype from a second viewpoint.",
-              "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani. Photographer not individually identified."
+              "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani."
             },
             {
               "src": "/assets/projects/special-assemblies/assembly-detail.webp",
@@ -1000,14 +968,14 @@
               "height": 2080,
               "alt": "A view from above shows crossing wooden sticks and their repeated contact points beside the robot.",
               "caption": "A top view of the stick relationships in the assembled prototype.",
-              "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani. Photographer not individually identified."
+              "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani."
             }
           ]
         }
       ],
       "credits": [
         {
-          "role": "Project participation",
+          "role": "Computational geometry and robotic-assembly research",
           "names": "Chia-Hsuan Chao"
         },
         {
@@ -1023,15 +991,11 @@
           "names": "MAS DFab, ETH Zurich"
         },
         {
-          "role": "Photography and diagrams",
-          "names": "Group6 source records; individual media authors are not separately identified"
-        },
-        {
           "role": "Referenced platforms",
           "names": "COMPAS / ROS / MoveIt / Docker / RTDE"
         }
       ],
-      "sourceNote": "Based on the 2025 portfolio, printed pp. 57–64 (physical PDF pp. 62–69), and original Group6 records. The sources establish collaborative participation but do not allocate every algorithm, machine-operation or media task to individual members.",
+      "sourceNote": "I explored reciprocal stick aggregation, computational geometry and robotic assembly planning with Kevin Seav and Megi Sinani. Our work connected module relationships and directional growth with the trajectories needed to assemble the next element.",
       "related": {
         "href": "/projects/dot-based-3d-printing/",
         "title": "Dot-Based 3D Printing"
@@ -1065,7 +1029,7 @@
           "height": 2080,
           "alt": "A curved assembly of wooden sticks rises from a small base beside a robotic arm.",
           "caption": "The assembled prototype beside the robotic arm, documented in the original Group6 record.",
-          "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani. Photographer not individually identified."
+          "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani."
         },
         "alt": "Original reciprocal stick-assembly data study. Drag to inspect its spatial relationships.",
         "chapters": [
@@ -1097,8 +1061,8 @@
             "width": 2508,
             "height": 1267,
             "alt": "The original robot-assembly simulation presents an arm and reciprocal stick modules with its authored framing.",
-            "caption": "Original robot-assembly simulation from the Group6 course records; the source framing is preserved.",
-            "credit": "MAS DFab Group6: JosHsuan Chao / Kevin Seav / Megi Sinani. Individual media authors are not separately identified."
+            "caption": "Robot-assembly simulation of the Group6 reciprocal stick study.",
+            "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani."
           },
           "width": 2508,
           "height": 1268,
@@ -1106,8 +1070,8 @@
           "frameCount": 108,
           "loop": false,
           "alt": "The original robot-assembly simulation presents an arm and reciprocal stick modules with its authored framing.",
-          "caption": "Original robot-assembly simulation from the Group6 course records; the source framing is preserved.",
-          "credit": "MAS DFab Group6: JosHsuan Chao / Kevin Seav / Megi Sinani. Individual media authors are not separately identified."
+          "caption": "Robot-assembly simulation of the Group6 reciprocal stick study.",
+          "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani."
         }
       ]
     },
@@ -1117,13 +1081,13 @@
       "title": "Project Caschlatsch",
       "shortTitle": "Caschlatsch",
       "subtitle": "Timber fabrication and AR assembly",
-      "summary": "Timber modules connect computational planning, CNC fabrication and AR-guided assembly.",
+      "summary": "I worked on computational design and XR production tools within the collective timber-tower project, connecting beam aggregation, digital fabrication and assembly.",
       "category": "Computational construction",
       "metadataTitle": "Project Caschlatsch — JosHsuan Chao",
       "metadataDescription": "Timber fabrication and AR-guided module assembly, with COMPAS XR feature development.",
       "context": "MAS DFab · ETH Zurich · Disentis/Mustér",
       "yearLabel": "2024",
-      "role": "COMPAS XR feature development",
+      "role": "Computational design and COMPAS XR development - ETH MAS DFab 2023-24 cohort project",
       "hero": {
         "src": "/assets/projects/project-caschlatsch/hero.webp",
         "width": 2000,
@@ -1137,9 +1101,10 @@
           "id": "context",
           "label": "Context",
           "kind": "form",
-          "title": "Timber tower.",
+          "title": "A collective timber tower.",
           "paragraphs": [
-            "The MAS DFab cohort built a modular timber installation at Disentis/Mustér."
+            "Project Caschlatsch brought the MAS DFab cohort together around a modular timber structure, connecting computational design, fabrication and assembly. The project developed at ETH Zurich and became a built installation at Disentis/Mustér.",
+            "We worked across a shared digital model, prefabricated timber modules and collaborative assembly. Within this collective project, my work connected computational design with the XR tools used during production."
           ],
           "media": [
             {
@@ -1156,10 +1121,10 @@
           "id": "system",
           "label": "System",
           "kind": "system",
-          "title": "Shared model.",
+          "title": "From voxels to beams.",
           "paragraphs": [
-            "A parametric model connects module planning with fabrication.",
-            "My COMPAS XR improvements covered module switching, beam IDs and sequence tracking."
+            "I worked on voxel-based beam aggregation as part of the cohort. Spatial cells, beam directions and neighbouring relationships made the repeated timber elements part of a coordinated system.",
+            "The computational workflow connected this aggregation with module planning and fabrication data. COMPAS Timber and the shared CAD model carried information from geometric relationships toward the individual pieces to be made."
           ],
           "media": [
             {
@@ -1173,12 +1138,34 @@
           ]
         },
         {
+          "id": "xr-guidance",
+          "label": "XR guidance",
+          "kind": "system",
+          "media": [
+            {
+              "src": "/assets/projects/project-caschlatsch/workflow.webp",
+              "width": 3200,
+              "height": 1000,
+              "alt": "Parametric model, module plan, CNC fabrication and AR assembly.",
+              "caption": "A conceptual public workflow.",
+              "credit": "Original website diagram based on public ETH Zurich descriptions."
+            }
+          ],
+          "title": "Keep the next beam in view.",
+          "paragraphs": [
+            "During production, I improved COMPAS XR for managing multiple assembly modules. Users could fetch and switch modules from a cloud server, identify the selected beam and follow the current step of the assembly sequence.",
+            "The app kept digital information available beside the physical work. Module selection and beam IDs helped connect the component in hand with its place in the shared assembly.",
+            "The wider workflow linked CAD, cloud data and AR visualisation. I developed multi-module management and the assembly-sequence interface within that collaborative system."
+          ]
+        },
+        {
           "id": "making",
           "label": "Making",
           "kind": "make",
-          "title": "CNC and AR.",
+          "title": "One model, many hands.",
           "paragraphs": [
-            "Robots cut the beams. Students used phone-based AR during module assembly."
+            "The digital model connected beam geometry with fabrication and module assembly. Robotic and CNC processes prepared timber elements, while students worked together to assemble the modules.",
+            "The workshop brought digital planning into contact with physical handling and coordination. XR guidance was one part of that shared making process, alongside the people, tools and prefabricated components."
           ],
           "media": [
             {
@@ -1203,9 +1190,10 @@
           "id": "results",
           "label": "Results",
           "kind": "make",
-          "title": "Built space.",
+          "title": "From modules to a place.",
           "paragraphs": [
-            "Steps lead through the timber interior to a lookout."
+            "The assembled modules create a route through the timber interior, with steps rising toward a lookout. Repeated beams form both the structure and the experience of moving through it.",
+            "The completed installation is a cohort and partner achievement. It brings computational aggregation, digital fabrication and collaborative assembly together in a place that can be entered and used."
           ],
           "media": [
             {
@@ -1228,6 +1216,10 @@
         }
       ],
       "credits": [
+        {
+          "role": "Computational design and COMPAS XR development",
+          "names": "JosHsuan Chao - cohort design work; multi-module selection and switching, beam IDs and assembly-sequence interface during production"
+        },
         {
           "role": "MAS ETH DFAB 2023–24 students",
           "names": "Amir Ali Amini-Aghdam / Benhur Baiju / Chia-Hsuan Chao / Joana Francisco Tomaz / Hamid Peiro / Junjie Huang / Paul Jaeggi / Jiaxiang Luo / Giacomo Montiani / Wataru Nomura / Panayiotis Papacharalambous / Sukhdevsinh Parmar / Kevin Seav / Gonzalo Seminario Garcia / Megi Sinani / Namdev Talluru / Kai Hsun Yeh"
@@ -1269,7 +1261,7 @@
           "names": "Original website graphic based on public ETH Zurich descriptions"
         }
       ],
-      "sourceNote": "Public project facts, photographs and cohort credits follow ETH Zurich. The personal COMPAS XR role follows the designated portfolio, physical pp. 34–35. Official spelling: Caschlatsch.",
+      "sourceNote": "I worked on computational aggregation and the digital-to-physical assembly workflow within the MAS DFab cohort. During production, I improved COMPAS XR so users could select and switch modules from the cloud, track beam IDs and follow the assembly sequence in real time.",
       "related": {
         "href": "/projects/xr-bending-active/",
         "title": "Extended Reality for Bending-Active Structures"

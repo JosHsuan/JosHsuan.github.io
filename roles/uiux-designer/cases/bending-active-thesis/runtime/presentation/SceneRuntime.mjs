@@ -222,7 +222,7 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
       setOverrides: (values = {}) => {overrides.current = {...values}; if (!input.get().hidden) invalidate();},
       hitTest: (clientX,clientY) => {
         const d=data.current,r=last.current?.representation;
-        if (!d?.ready || !r || input.entry.inspect().phase!=='entered' || input.get().presentationContext==='home' || !input.get().canvasPresented || input.get().canvasPlacement?.visible===false || !['form','system','pattern'].includes(r.chapterId) || !Number.isFinite(clientX+clientY)) return null;
+        if (!d?.ready || !r || input.entry.inspect().phase!=='entered' || input.get().presentationContext==='home' || !input.get().canvasPresented || input.get().canvasPlacement?.visible===false || input.get().canvasPlacement?.chapter!==r.chapterId || !['form','system','pattern'].includes(r.chapterId) || !Number.isFinite(clientX+clientY)) return null;
         const rect=gl.domElement.getBoundingClientRect(),x=(clientX-rect.left)/rect.width,y=(clientY-rect.top)/rect.height;
         if (x<0||x>1||y<0||y>1) return null;
         ray.setFromCamera(rayPoint.set(x*2-1,1-y*2),camera);

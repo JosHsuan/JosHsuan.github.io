@@ -185,7 +185,7 @@ test('an asynchronous first phone paint stays requested, reconciles native chapt
  }
 });
 
-test('chapter passage keeps the old scene until exit, waits for actual new paint, and closes superseded or disposed requests',async t=>{
+test('phone chapters keep the painted surface visible while the next source waits and close superseded or disposed requests',async t=>{
  for(const superseded of [false,true]){
   const f=fixture();t.after(f.cleanup);f.site('entered');f.scroll('adapt');await f.settle();
   assert.equal(f.director.inspect().scene.mode,'hold');assert.equal(f.director.inspect().scene.chapter,'adapt');
@@ -193,10 +193,10 @@ test('chapter passage keeps the old scene until exit, waits for actual new paint
   handle.present=state=>{const result=original(state);return state.chapter==='join'?paint.promise:result;};
   f.scroll('join');f.frame();
   let scene=f.director.inspect().scene;
-  assert.equal(scene.mode,'exit');assert.equal(scene.chapter,'adapt');assert.equal(handle.presents.at(-1).chapter,'adapt');
+   assert.equal(scene.mode,'waiting');assert.equal(scene.chapter,'join');assert.equal(scene.opacity,1);assert.equal(handle.presents.at(-1).chapter,'join');
   f.pointer('pointerdown');assert.equal(f.director.inspect().gesture,null);
   await f.settle();scene=f.director.inspect().scene;
-  assert.equal(scene.mode,'waiting');assert.equal(scene.chapter,'join');assert.equal(scene.opacity,0);assert.equal(scene.paintPending,true);
+   assert.equal(scene.mode,'waiting');assert.equal(scene.chapter,'join');assert.equal(scene.opacity,1);assert.equal(scene.paintPending,true);
   assert.equal(f.raf.size,0,'A pending native paint does not spin the Director clock');
   if(superseded){f.scroll('method');await f.settle();assert.equal(f.director.inspect().scene.chapter,'method');assert.equal(f.director.inspect().scene.mode,'hold');}
   paint.resolve();await f.settle();scene=f.director.inspect().scene;

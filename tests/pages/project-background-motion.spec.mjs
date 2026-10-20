@@ -126,6 +126,20 @@ test('Caschlatsch photographs use actual finite forward/reverse passages, latest
  await open(page,caschlatsch);await hold(page,imageKey(caschlatsch,'overview'));
  const forward=tracePassage(page,imageKey(caschlatsch,'context'));await select(page,'context');actualPassage(await forward,1);
  const reverse=tracePassage(page,imageKey(caschlatsch,'overview'));await select(page,'overview');actualPassage(await reverse,-1);
+ await select(page,'system');const workflow=await hold(page,imageKey(caschlatsch,'system'));
+ expect(imageKey(caschlatsch,'xr-guidance')).toBe(workflow.stage.key);
+ const continuation=await page.evaluateHandle(()=>{
+  let running=true,raf;const samples=[];
+  const read=()=>{if(!running)return;const s=window.__globalBackground.inspect().driver.projectStudy.backdrop.stage,node=document.querySelector('[data-project-media-active]');samples.push({chapter:document.querySelector('[data-project-study]').dataset.projectActiveChapter,sourceChapter:s.chapter,key:s.key,mode:s.mode,sequence:s.sequence,opacity:s.pose.opacity,cssOpacity:node?Number(getComputedStyle(node).opacity):null,transition:s.transition});raf=requestAnimationFrame(read);};read();
+  return{samples,dispose(){running=false;cancelAnimationFrame(raf);}};
+ });
+ try{
+  await select(page,'xr-guidance');await frames(page,8);const samples=await continuation.evaluate(value=>value.samples);
+  expect(samples.length).toBeGreaterThan(2);expect(samples.some(sample=>sample.chapter==='xr-guidance')).toBe(true);
+  for(const sample of samples)expect(sample).toMatchObject({key:workflow.stage.key,mode:'hold',sequence:workflow.stage.sequence,opacity:1,cssOpacity:1,transition:null});
+  expect((await backdrop(page)).stage.history).toEqual(workflow.stage.history);
+  await test.info().attach('continuous-Caschlatsch-workflow',{body:JSON.stringify(samples),contentType:'application/json'});
+ }finally{await continuation.evaluate(value=>value.dispose());await continuation.dispose();}
  await select(page,'context');
  await page.waitForFunction(()=>{const stage=window.__globalBackground.inspect().driver.projectStudy.backdrop.stage;return stage.mode==='exit'&&stage.pose.opacity>0&&stage.pose.opacity<1;},null,{timeout:WAIT});
  const superseded=(await backdrop(page)).stage.request.id;
@@ -168,7 +182,7 @@ for(const project of animated)test(`${project.shortTitle} decodes the pinned nat
 test('Dot exchanges photographs, the original model and video through one transaction while pause preserves native reading and media time',async({page})=>{
  test.setTimeout(scenarioTimeout(120000));const media=dot.motionMedia[0];
  await open(page,dot);await hold(page,imageKey(dot,'overview'));await select(page,'context');await hold(page,imageKey(dot,'context'));
- await select(page,'system');await hold(page,'model:system');
+ await select(page,'system');await hold(page,`model:${dot.model.sha256}`);
  const model=await page.evaluate(()=>window.__globalBackground.inspect().driver.projectStudy.scene);
  expect(model.externalStage).toBe(true);expect(model.resource.successfulPaint).toBe(true);expect(model.resource.sourceRevision).toBe(dot.model.sha256);expect(model.resource.view.chapter).toBe('system');
  await expect(page.locator('[data-project-model-stage]')).toHaveAttribute('data-project-model-active','');await expect(page.locator('[data-project-media-active]')).toHaveCount(0);

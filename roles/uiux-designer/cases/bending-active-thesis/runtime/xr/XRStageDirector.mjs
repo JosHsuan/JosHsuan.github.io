@@ -39,7 +39,7 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
    const scheduler=createFrameScheduler({request:fn=>win.requestAnimationFrame(fn),cancel:id=>win.cancelAnimationFrame(id),onFrame:tick});
    const listen=(node,type,fn,options)=>events.listen(scope,node,type,fn,options);
    const policy=()=>({reduced:!!reduced.matches,saveData:!!connection?.saveData,hidden:!!doc.hidden,siteReady:doc.documentElement.getAttribute('data-site-entry-state')==='entered'});
-   const canInspect=()=>{const p=policy(),painted=resource?.inspect();return !['overview','context'].includes(chapter)&&sceneMotion.chapter===chapter&&sceneMotion.mode==='hold'&&sceneMotion.settled&&!!resource&&painted?.mode==='webgl-model'&&painted.successfulPaint&&!disposed&&!scheduler.suspended&&!away&&visible&&!p.hidden&&!p.reduced&&!p.saveData&&p.siteReady;};
+    const canInspect=()=>{const p=policy(),painted=resource?.inspect();return chapter==='method'&&sceneMotion.chapter===chapter&&sceneMotion.mode==='hold'&&sceneMotion.settled&&!!resource&&painted?.mode==='webgl-model'&&painted.successfulPaint&&!disposed&&!scheduler.suspended&&!away&&visible&&!p.hidden&&!p.reduced&&!p.saveData&&p.siteReady;};
    const state=()=>{const p=policy(),s=lifecycle.inspect();return{phase:s.phase,reason:s.reason,chapter,sceneChapter:sceneMotion.chapter,sceneMode:sceneMotion.mode,reduced:p.reduced,saveData:p.saveData,paused};};
    const notify=()=>{if(disposed)return;const next=state(),key=JSON.stringify(next);if(key!==lastState){lastState=key;onState(next);}};
    const presentation=()=>({chapter:sceneMotion.chapter,progress,azimuth:value.azimuth,elevation:value.elevation,paused,reduced:policy().reduced});

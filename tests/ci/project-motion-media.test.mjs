@@ -18,10 +18,10 @@ const reject=change=>{const current=fixture();change(current);assert.throws(()=>
 
 test('five source motions and their posters have complete release provenance',()=>{
   const current=fixture(),images=validate(current);
-  assert.equal(images.length,47);
-  assert.equal(new Set(images.map(image=>image.src)).size,44);
+  assert.equal(images.length,46);
+  assert.equal(new Set(images.map(image=>image.src)).size,43);
   assert.equal(current.assets.motionAssets.length,5);
-  assert.equal(current.manifest.assets.length,117);
+  assert.equal(current.manifest.assets.length,124);
   assert.equal(project(current,'project-caschlatsch').motionMedia,undefined);
   assert.doesNotThrow(()=>assertProjectAssetRecord(current.assets,images,current.manifest));
 });
@@ -32,6 +32,14 @@ test('motion selection rejects an omitted source or unreviewed chapter, loop and
   reject(current=>motion(current,'special-assemblies').loop=true);
   reject(current=>project(current,'project-caschlatsch').motionMedia=[motion(current)]);
   reject(current=>motion(current,'hc3dp-caustics').caption='Verified physical optical result.');
+  reject(current=>motion(current).caption='Physical prototype operation.');
+});
+
+test('one source model cannot leave and return in separated story chapters',()=>{
+  const current=fixture(),mode=project(current);
+  mode.model.chapters=['context','results'];
+  mode.model.views={context:mode.model.views.context,results:structuredClone(mode.model.views.context)};
+  assert.throws(()=>assertProjectStudies(current.studies,current.manifest),/one ordered, continuous chapter interval/);
 });
 
 test('motion metadata rejects dropped frames, retiming, resizing and changed native posters',()=>{
@@ -86,7 +94,10 @@ test('native remux proofs preserve encoded packets, range, identity matrix and s
     reject(current=>provenance(current).processing[key]=false);
   }
   reject(current=>provenance(current).processing.trackMatrix[0]=0);
-  reject(current=>provenance(current).processing.colorRange='tv');
+  reject(current=>provenance(current).processing.colorRange='pc/full');
+  reject(current=>provenance(current).processing.pixelFormat='yuvj420p');
+  reject(current=>provenance(current,'entrance-installation-art').processing.colorRange='tv/limited');
+  reject(current=>provenance(current,'entrance-installation-art').processing.pixelFormat='yuv420p');
   reject(current=>provenance(current).processing.audio='Source audio retained.');
   reject(current=>provenance(current).source.privatePath='D:\\private\\source.mp4');
   reject(current=>provenance(current).source.privatePath='d:\\private\\source.mp4');

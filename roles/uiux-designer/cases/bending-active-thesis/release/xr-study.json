@@ -5,8 +5,8 @@
   "shortTitle": "Motion capture × bending-active",
   "year": 2024,
   "type": "Collaborative research / XR prototype",
-  "summary": "A feedback loop between physical bamboo, an adaptive digital model and on-site XR assembly guidance.",
-  "introduction": "Instead of asking natural bamboo to follow a fixed digital overlay, this collaborative study brings measured physical conditions back into the model. Motion capture, adaptive form-finding and a mobile XR interface connect design decisions with module assembly.",
+  "summary": "A collaborative feedback loop between physical bamboo, adaptive digital geometry and XR assembly guidance.",
+  "introduction": "I worked with Wataru Nomura to bring measured physical conditions into the digital design and assembly process. Motion capture, adaptive modelling and a mobile XR interface connect changes in bamboo geometry with decisions made during assembly.",
   "authors": [
     "Chia-Hsuan Chao",
     "Wataru Nomura"
@@ -17,8 +17,8 @@
     "width": 2000,
     "height": 1125,
     "alt": "Photographic close-up of woven bamboo modules with two original mobile-app interface views positioned between the strips.",
-    "caption": "The original main visual from the project’s opening portfolio page: a photographic bamboo study with the Adapt and Assemble interfaces.",
-    "credit": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024"
+    "caption": "Woven bamboo modules with the Adapt and Assemble interfaces.",
+    "credit": "Research: Chia-Hsuan Chao / Wataru Nomura - 2024."
   },
   "media": {
     "measurement": {
@@ -27,7 +27,7 @@
       "height": 1273,
       "alt": "Rendered reflective-marker assemblies on a measuring rail and a separate marker cluster with coordinate axes.",
       "caption": "Measurement-tool illustration. Marker arrangements make physical positions available to the computational workflow; this rendering is not a tracking-accuracy measurement.",
-      "credit": "Chia-Hsuan Chao / Wataru Nomura research, 2024; individual image creator not separately recorded."
+      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura - 2024."
     },
     "assembly": {
       "src": "/assets/xr/module-assembly.webp",
@@ -35,15 +35,15 @@
       "height": 1273,
       "alt": "Rendered bending-active bamboo module held on a support with reflective markers and a mobile-device stand.",
       "caption": "Illustration of one module's assembly setup. Module assembly and connecting the overall structure were distinct stages in the study.",
-      "credit": "Chia-Hsuan Chao / Wataru Nomura research, 2024; individual image creator not separately recorded."
+      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura - 2024."
     },
     "prototype": {
       "src": "/assets/xr/module-selection.png",
       "width": 960,
       "height": 1279,
       "alt": "Archived prototype recording frame showing a coloured digital module, module-selection control and FetchFoots and FetchMidPoints buttons.",
-      "caption": "An archived module-selection prototype recording at 14.883 seconds. The original player controls are retained. A single recorded frame documents the interface rather than proving continuous operation or performance.",
-      "credit": "Chia-Hsuan Chao / Wataru Nomura project; individual recording credit not separately recorded."
+      "caption": "Module selection in the bamboo assembly prototype.",
+      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura - 2024."
     },
     "motion": {
       "src": "/assets/xr/background-preview.mp4",
@@ -56,8 +56,8 @@
         "alt": "First frame of the archived four-panel XR prototype presentation, with digital geometry, bamboo assembly and Adapt, Assemble and Join controls."
       },
       "alt": "Archived four-panel XR prototype footage with bamboo assembly, tracked digital geometry and Adapt, Assemble and Join controls.",
-      "caption": "An eight-second excerpt from the original project presentation montage, showing recorded XR interface and assembly states. The original four-panel layout is preserved. This is archived footage, not a live tracking application on this website.",
-      "credit": "Chia-Hsuan Chao / Wataru Nomura research, 2024; individual recording and original presentation-edit authorship not separately recorded."
+      "caption": "Motion capture, adaptive modelling and XR-guided bamboo assembly.",
+      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura - 2024."
     },
     "adaptiveMethod": {
       "src": "/assets/xr/adaptive-method.webp",
@@ -65,7 +65,7 @@
       "height": 1574,
       "alt": "Original research diagram showing site planes, foundation and anchor controls, branch-radius adjustment, evaluation and modularization.",
       "caption": "Adaptive form-finding moves from reference planes to control points and branch radius, before converting the chosen form into Y-shaped weaving modules.",
-      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024"
+      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura - 2024."
     },
     "communication": {
       "src": "/assets/xr/communication-system.webp",
@@ -73,7 +73,7 @@
       "height": 1574,
       "alt": "Original system diagram connecting motion capture and the CAD-adaptive model to the XR application through MQTT and Firebase.",
       "caption": "Motion data and worker requests travel between CAD and the app through publish–subscribe messages; the database stores geometry and task state.",
-      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024"
+      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura - 2024."
     },
     "dataCategories": {
       "src": "/assets/xr/data-categories.webp",
@@ -81,7 +81,7 @@
       "height": 1574,
       "alt": "Original serialization diagram separating real-time mesh and rod data, configuration points, frames and radius, assembly data and project autosave.",
       "caption": "The shared software distinguishes real-time, configuration and assembly data, with JSON serialization between Rhino/Python and Unity/C#.",
-      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024"
+      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura - 2024."
     },
     "physicalCapture": {
       "src": "/assets/xr/physical-capture.webp",
@@ -89,7 +89,7 @@
       "height": 1200,
       "alt": "Close-up photograph of a green reflective-marker cluster attached to a woven bamboo module.",
       "caption": "A real reflective-marker cluster attached to bamboo supplies physical reference positions.",
-      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024"
+      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura - 2024."
     },
     "physicalAssembly": {
       "src": "/assets/xr/physical-assembly.webp",
@@ -97,7 +97,7 @@
       "height": 1200,
       "alt": "Photograph of hands assembling a bamboo module beside a phone showing the original XR guidance interface.",
       "caption": "The prototype in use during physical module assembly, with the mobile interface beside the work.",
-      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024"
+      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura - 2024."
     },
     "physicalResult": {
       "src": "/assets/xr/physical-result.webp",
@@ -105,7 +105,7 @@
       "height": 1333,
       "alt": "Photograph of the completed modular bamboo research demonstration in the original motion-capture space.",
       "caption": "The completed 2024 research demonstration. Individual module assembly and connecting the overall structure were separate stages.",
-      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024"
+      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura - 2024."
     }
   },
   "sections": {
@@ -118,7 +118,8 @@
     "method": {
       "title": "A model that can receive and return information.",
       "paragraphs": [
-        "Reflective markers and OptiTrack supply position information. Rhino, Grasshopper, Python and Kangaroo support the adaptive geometry; an extension to COMPAS XR connects it to the Unity app through MQTT and Firebase."
+        "Reflective markers and OptiTrack supply position information. Rhino, Grasshopper, Python and Kangaroo support the adaptive geometry; an extension to COMPAS XR connects it to the Unity app through MQTT and Firebase.",
+        "My development work included MoCap interface and event updates, measurement-frame and circle visualisation, and rod-coordinate and colour-data output between Rhino/COMPAS and the app."
       ]
     },
     "prototype": {
@@ -165,7 +166,7 @@
       "description": "I modified Rhino / COMPAS rod-coordinate and colour-output logic connecting geometry data with its downstream representation."
     }
   ],
-  "contributionNote": "These contributions are supported by source-code changes and Git history. The research, overall application, geometry and fabrication are collaborative work with Wataru Nomura; the sources do not resolve every task between the two researchers. The tracking SDKs and upstream COMPAS XR framework are third-party foundations.",
+  "contributionNote": "With Wataru Nomura, I researched motion-capture feedback, adaptive modelling and XR-guided bamboo assembly. My development work included MoCap interface and event updates, measurement-frame and circle visualisation, and rod-coordinate and colour-data output between Rhino/COMPAS and the app.",
   "limitations": [
     "The original research records update delays, virtual-to-physical registration differences and image-target instability.",
     "No controlled usability study or performance metrics established an improvement in assembly efficiency.",
@@ -190,7 +191,7 @@
       "names": "COMPAS XR and its prior research at Gramazio Kohler Research, ETH Zürich / TUM; OptiTrack, Motive and NatNet; Rhino, Grasshopper, Python, COMPAS, Kangaroo and Mola; Unity; MQTT / EMQX and Firebase."
     }
   ],
-  "sourceNote": "Narrative follows the newest inspected portfolio, JosHsuan_CV&Portfolio_2025.VerFacade (physical pp46–53), with the co-authored report and selected code history supporting contributions and limits. The main visual, diagrams, photographs and complete original phone GIF recordings retain shared-project attribution. The primary 3D model comes from the owner-designated only_interior.3dm and preserves its assembled bamboo geometry. Individual media authorship is not assigned where the sources do not identify it. Source documents, code, private configuration, native CAD files and full source videos remain outside the public release.",
+  "sourceNote": "I explored how physical measurement, adaptive modelling and XR guidance could support bamboo assembly with Wataru Nomura. I worked across the research workflow and its digital tools, including MoCap interface updates, measurement visualisation and the exchange of rod geometry and colour data.",
   "metadataTitle": "Motion capture × bending-active — JosHsuan Chao",
   "metadataDescription": "A collaborative 2024 XR research prototype connecting motion capture, adaptive digital geometry and bending-active bamboo assembly, with contributions, process and limits.",
   "phoneStages": [
@@ -202,7 +203,7 @@
       "src": "/assets/xr/adapt-interface.mp4",
       "width": 666,
       "height": 1440,
-      "durationSeconds": 13.0,
+      "durationSeconds": 13,
       "poster": {
         "src": "/assets/xr/adapt-poster.webp",
         "width": 666,
@@ -210,7 +211,7 @@
         "alt": "First frame of the original adapt app recording, preserving all screen controls."
       },
       "caption": "A thirteen-second original GIF recording of the Adapt interface and foundation-positioning feedback.",
-      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024",
+      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura - 2024.",
       "sha256": "c7a3ae4da483fe24830463d57882e8723b2a557b21732db2358d07587a2db845",
       "bytes": 793477
     },
@@ -230,7 +231,7 @@
         "alt": "First frame of the original assemble app recording, preserving all screen controls."
       },
       "caption": "The complete 24.96-second original GIF recording of rod feedback during module assembly.",
-      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024",
+      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura - 2024.",
       "sha256": "6bd92eb307fb65f17c71ce1b6196c7ddf4d834dd1fd924ce67050867ce62d2e8",
       "bytes": 2143502
     },
@@ -250,7 +251,7 @@
         "alt": "First frame of the original join app recording, preserving all screen controls."
       },
       "caption": "The complete 20.3-second original GIF recording of the Join interface and module-connection guidance.",
-      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024",
+      "credit": "Research: Chia-Hsuan Chao / Wataru Nomura - 2024.",
       "sha256": "360ecc723f6b2adeeb919a8dd580b69ea6e34d7ec1877c3bca7d0c8a9903911c",
       "bytes": 2475241
     }
@@ -270,7 +271,7 @@
       "bytes": 101448
     },
     "caption": "The assembled bamboo geometry from the original research scene, retaining its proportions, woven strips and source layer colour. This CAD model documents the design rather than a new survey of the built prototype.",
-    "credit": "Research: Chia-Hsuan Chao / Wataru Nomura · 2024",
+    "credit": "Research: Chia-Hsuan Chao / Wataru Nomura - 2024.",
     "sourceUnits": "Millimeters",
     "webUnits": "Metres",
     "units": "Metres",
@@ -321,5 +322,6 @@
       1
     ],
     "displayMaterial": "Original source layer diffuse colour and opacity; neutral conversion of legacy shininess to roughness. No source UV or bitmap exists on the selected meshes, and no texture mapping is invented."
-  }
+  },
+  "role": "Research and computational design - MoCap interface, measurement visualisation and geometry-data exchange"
 }

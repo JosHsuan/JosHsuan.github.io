@@ -4,7 +4,7 @@
   "owner": "JosHsuan Chao",
   "projectType": "Individual thesis",
   "institution": "National Cheng Kung University",
-  "summary": "Connecting target geometry, opening patterns and elastic sheet behaviour.",
+  "summary": "My individual thesis connects target geometry, opening patterns and elastic sheet behaviour.",
   "hero": {
     "category": "RESEARCH / MATERIAL SYSTEMS",
     "series": "THESIS STUDY — 01",
@@ -15,13 +15,11 @@
     "subtitle": "Metal Panel Deformation",
     "closingLine": "GEOMETRY BECOMES A MATERIAL RULE."
   },
-  "yearNote": "The thesis chapter is dated 2020; the portfolio index lists 2021.",
   "credits": {
-    "research": "JosHsuan Chao",
+    "research": "JosHsuan Chao - individual thesis research and computational design",
     "supervision": "Prof. Kane Yanagawa",
-    "assembly": "Collaborative; individual contributors are not fully identified in the reviewed source.",
-    "media": "Portfolio evidence credited to Chia-Hsuan Chao as printed. Individual image authorship remains to be confirmed.",
-    "sourceEdition": "Current role attribution follows the VerFacade portfolio chapter. Displayed source pages come from the earlier 2025 portfolio edition."
+    "assembly": "Collaborative prototype assembly",
+    "media": "Bending-Active Metal Panel Deformation project imagery."
   },
   "cinematic": {
     "revision": "layer-story-2026-10-08",
@@ -79,7 +77,7 @@
         "The research relates opening length and width to bending angle through a sampled function library.",
         "Arc, twist and saddle mock-ups explore how those local relationships accumulate into different surfaces."
       ],
-      "note": "The original calibration data and some sampling details remain unresolved. This page does not invent a live predictor."
+      "note": "The opening-pattern library links sampled dimensions with bending angle; the physical studies explore that relationship across several surface types."
     },
     "make": {
       "label": "MAKE",
@@ -101,7 +99,7 @@
           "label": "prototype, reported"
         }
       ],
-      "note": "Construction notes describe two workers over three days. These are source reports, not new measurements."
+      "note": "Two people assembled the spatial prototype over three days."
     },
     "validation": {
       "label": "EVIDENCE",
@@ -110,8 +108,8 @@
         "to the made object."
       ],
       "paragraphs": [
-        "Simulation, 3D scans and physical mock-ups are brought together in the portfolio. The assembled installation makes the research tangible.",
-        "The browser shows the supplied final geometry. Its camera, shading and contour treatments explain the surface; they do not calculate a new equilibrium shape."
+        "I compared simulated forms with physical mock-ups and brought the patterned panels together in a spatial installation. The assembled prototype made the relationship between openings, seams and curvature tangible.",
+        "The digital model lets the surface, connections and assembled form be examined together."
       ],
       "note": "The available evidence does not establish structural certification or universal prediction accuracy."
     },
@@ -122,8 +120,8 @@
         "translated."
       ],
       "summary": "Target geometry, local opening rules and physical prototyping become one connected design workflow.",
-      "contribution": "Individual thesis research by JosHsuan Chao, supervised by Prof. Kane Yanagawa at National Cheng Kung University.",
-      "collaboration": "Prototype assembly was collaborative. Individual fabrication tasks and image authorship are not fully identified in the reviewed source.",
+      "contribution": "I developed this individual thesis at National Cheng Kung University under the supervision of Prof. Kane Yanagawa. I combined Miura-inspired surface representation, an opening-pattern library, linear regression and dynamic physical simulation to connect target geometry with the deformation of metal panels.",
+      "collaboration": "Arc, twist and saddle studies led to a spatial prototype assembled collaboratively from patterned panels.",
       "limitation": "Geometry inspection only. No structural analysis or fabrication validation runs in the browser."
     },
     "media": {
@@ -132,8 +130,8 @@
         "width": 1110,
         "height": 300,
         "figure": "FIG. 3–04",
-        "caption": "The source moves from Miura representation to openings and a bending-active surface.",
-        "alt": "Four views of the same research geometry: folded representation, openings, bending-active form and a source curvature visualization.",
+        "caption": "Miura representation connects opening patterns with a bending-active surface.",
+        "alt": "Four views of the research geometry: folded representation, openings, bending-active form and curvature visualisation.",
         "source": "/assets/cinematic/source-p024.webp"
       },
       "library": {
@@ -141,8 +139,8 @@
         "width": 710,
         "height": 665,
         "figure": "FIG. 3–05",
-        "caption": "Opening dimensions and angle in the source function library.",
-        "alt": "A source chart showing opening length and width against bending angle.",
+        "caption": "Opening length, width and bending angle in the sampled function library.",
+        "alt": "A chart relating opening length and width to bending angle.",
         "source": "/assets/cinematic/source-p025.webp"
       },
       "connection": {

@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 export const PROJECT_SLUGS=['mode-s-of-making','entrance-installation-art','dot-based-3d-printing','hc3dp-caustics','special-assemblies','project-caschlatsch'];
 const text=(value,name)=>assert(typeof value==='string'&&value.trim().length>0,`Missing project ${name}`);
 export const PROJECT_MOTION_SPECS=Object.freeze({
-  'mode-s-of-making':{id:'rotary-cutting-motion',chapter:'making',loop:true,width:1280,height:720,sourceWidth:1280,sourceHeight:720,frameCount:269,durationSeconds:9.0289,file:'VID_20171226_170743.mp4',bytes:16868782,sha256:'1b9fc374bb02883f45a55875623cbf37bae2dd78ca048b9777e63cb58457c7b3',finalTicks:2611,timeBase:'1/90000',posterFrame:134,remux:true},
-  'entrance-installation-art':{id:'installation-lighting-motion',chapter:'results',loop:true,width:540,height:960,sourceWidth:540,sourceHeight:960,frameCount:662,durationSeconds:22.066666666666666,file:'657032932.686244.mp4',bytes:5232787,sha256:'a14c83ff6d9d40d9f4c175121d483e2c21cc9c56c5f3de5a86738331a090fe7e',finalTicks:20,timeBase:'1/600',posterFrame:330,remux:true},
+  'mode-s-of-making':{id:'film-machine-simulation',chapter:'making',loop:true,width:4096,height:2304,sourceWidth:4096,sourceHeight:2304,frameCount:120,durationSeconds:4.8,file:'cube.mp4',bytes:3454875,sha256:'341abcbfbb58e3a3861bd1acfe8ffb904a65a260926a808ac4379c6363e3ed3e',finalTicks:2000,timeBase:'1/50000',posterFrame:60,remux:true,pixelFormat:'yuv420p',colorRange:'tv/limited'},
+  'entrance-installation-art':{id:'installation-lighting-motion',chapter:'results',loop:true,width:540,height:960,sourceWidth:540,sourceHeight:960,frameCount:662,durationSeconds:22.066666666666666,file:'657032932.686244.mp4',bytes:5232787,sha256:'a14c83ff6d9d40d9f4c175121d483e2c21cc9c56c5f3de5a86738331a090fe7e',finalTicks:20,timeBase:'1/600',posterFrame:330,remux:true,pixelFormat:'yuvj420p',colorRange:'pc/full'},
   'dot-based-3d-printing':{id:'printing-process-motion',chapter:'making',loop:true,width:2500,height:1304,sourceWidth:2500,sourceHeight:1304,frameCount:27,durationSeconds:4.4,file:'image61.gif',bytes:40264322,sha256:'61a575b1c3863cb6b1becbef6cf9c7fa279778deccc94f3dfea30c26739fac68',finalTicks:13,timeBase:'1/100',posterFrame:0,remux:false,gifLoop:0,container:{file:'JosHsuan_Group01_PrintingArchitecture.pptx',bytes:131691431,sha256:'30f048ec92f7e539d5ffbc9fc51c54fa573674ee0424ed3d6b614aac3f68e117',slide:10,zipMember:'ppt/media/image61.gif',byteExactExtractedMember:true}},
   'hc3dp-caustics':{id:'fabrication-path-motion',chapter:'making',loop:true,width:2308,height:2500,sourceWidth:2307,sourceHeight:2500,frameCount:31,durationSeconds:2.17,file:'image68.gif',bytes:3033958,sha256:'f69592248ba9e63c044d87dc5ed5978f2c3acb57960d402361c4908509cdafc5',finalTicks:7,timeBase:'1/100',posterFrame:30,remux:false,gifLoop:0,container:{file:'Final Presentation Group-Red.pptx',bytes:112035652,sha256:'9016edfcd197cf268531f4074c6c26bd420fd581fb8783944e33b440c622ff55',slide:14,zipMember:'ppt/media/image68.gif',byteExactExtractedMember:true}},
   'special-assemblies':{id:'robot-assembly-motion',chapter:'making',loop:false,width:2508,height:1268,sourceWidth:2508,sourceHeight:1267,frameCount:108,durationSeconds:7.56,file:'animationfinal.gif',bytes:5945917,sha256:'34552b023b813144da97eb3b50acb5e066302110d6c4bba773f04ee23f6f02de',finalTicks:7,timeBase:'1/100',posterFrame:36,remux:false,gifLoop:null},
@@ -16,7 +16,7 @@ function assertMotionSelection(media,projectId){
   assert.equal(media.src,`/assets/projects/${projectId}/${spec.id}.mp4`);
   assert(Number.isFinite(media.durationSeconds)&&Math.abs(media.durationSeconds-spec.durationSeconds)<1e-6,'Reviewed complete motion duration');
   for(const key of ['alt','caption','credit'])text(media[key],`motion ${key}`);
-  if(['hc3dp-caustics','special-assemblies'].includes(projectId))assert.match(media.caption,/simulation/i,'Source-authored simulation remains explicitly labelled');
+  if(['mode-s-of-making','hc3dp-caustics','special-assemblies'].includes(projectId))assert.match(media.caption,/simulation/i,'Source-authored simulation remains explicitly labelled');
   assert(media.poster&&media.poster.width===spec.sourceWidth&&media.poster.height===spec.sourceHeight,'Motion poster preserves native source dimensions');
   return spec;
 }
@@ -31,7 +31,7 @@ export function assertProjectStudies(record,manifest){
   for(const project of record.projects){
     assert.equal(project.id,project.slug);
     for(const key of ['title','shortTitle','subtitle','summary','category','metadataTitle','metadataDescription','context','yearLabel','role','sourceNote'])text(project[key],key);
-    assert.equal(project.sections.length,4,'Four evidence-backed chapters plus opening and credits');
+    assert(project.sections.length>=4&&project.sections.length<=6,'Four to six source-backed story chapters plus opening and credits');
     const ids=project.sections.map(section=>section.id);
     assert.equal(new Set(ids).size,ids.length);
     for(const section of project.sections){
@@ -71,6 +71,8 @@ export function assertProjectStudies(record,manifest){
       assert((model.primitive==='points')?model.triangles===0:model.triangles>0);
       assert(model.chapters.length>0&&new Set(model.chapters).size===model.chapters.length);
       model.chapters.forEach(id=>assert(['overview',...ids,'credits'].includes(id),'Known model chapter'));
+      const order=['overview',...ids,'credits'],positions=model.chapters.map(id=>order.indexOf(id));
+      assert(positions.every((position,index)=>index===0||position===positions[index-1]+1),'A model has one ordered, continuous chapter interval; it cannot return after a different background');
       if(model.views){
         assert.deepEqual(Object.keys(model.views).sort(),[...model.chapters].sort(),'Every model chapter has one reviewed camera view');
         for(const view of Object.values(model.views)){
@@ -166,7 +168,7 @@ export function assertProjectAssetRecord(record,images,manifest,studies){
     if(spec.remux){
       for(const key of ['allPacketPTSExact','allPacketDTSExact','allPacketDurationsExact','identityTrackMatrixExact','sourceColorRangePreserved'])assert.equal(processing[key],true,`Native remux preserves ${key}`);
       assert.deepEqual(processing.trackMatrix,[65536,0,0,0,65536,0,0,0,1073741824]);
-      assert.equal(processing.pixelFormat,'yuvj420p');assert.equal(processing.colorRange,'pc/full');
+      assert.equal(processing.pixelFormat,spec.pixelFormat);assert.equal(processing.colorRange,spec.colorRange);
     }else assert.equal(processing.pixelFormat,'yuv420p');
     const poster=selected?.poster;
     if(poster){

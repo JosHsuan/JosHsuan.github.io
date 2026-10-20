@@ -30,8 +30,19 @@ test('fast jumps exit the displayed source once, enter only the latest request a
  advance(state,.3,{chapter:'join',readyChapter:'context'});assert.equal(state.chapter,'context');
  advance(state,.35,{chapter:'making',readyChapter:'context'});assert.equal(state.chapter,'making');assert.equal(state.pose.opacity,0);
  advance(state,CANVAS_ENTRY_SECONDS,{chapter:'making',readyChapter:'making'});
- assert.equal(state.mode,'hold');closed(state.history);
+ assert.equal(state.mode,'absent');assert.equal(state.pose.opacity,0);closed(state.history);
  assert.deepEqual(state.history.filter(item=>item.status==='cancelled').map(item=>item.chapter),['method','join']);
+});
+
+test('all three phone chapters retain a visible held surface through real source readiness and reverse reading',()=>{
+ const state=advanceXRStageMotion(createXRStageMotion(),0,{chapter:'adapt',readyChapter:'adapt',reduced:true});
+ for(const chapter of ['assemble','join','assemble','adapt']){
+  advanceXRStageMotion(state,0,{chapter,readyChapter:state.chapter});
+  assert.equal(state.chapter,chapter);assert.equal(state.mode,'waiting');assert.equal(state.transition,null);assert.deepEqual(state.pose,{x:0,y:0,opacity:1});
+  advanceXRStageMotion(state,0,{chapter,readyChapter:chapter});assert.equal(state.mode,'hold');assert.deepEqual(state.pose,{x:0,y:0,opacity:1});
+ }
+ advance(state,CANVAS_EXIT_SECONDS,{chapter:'making',readyChapter:'adapt'});assert.equal(state.mode,'absent');assert.equal(state.pose.opacity,0);
+ advanceXRStageMotion(state,0,{chapter:'credits',readyChapter:'making'});assert.equal(state.mode,'absent');assert.equal(state.pose.opacity,0);closed(state.history);
 });
 
 test('reversal begins from the current visible pose, and returning to the opening completes absence',()=>{

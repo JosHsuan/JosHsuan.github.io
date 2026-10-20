@@ -99,7 +99,7 @@ const sources = [
   'app/projects/bending-active/page.jsx', 'app/projects/xr-bending-active/page.jsx',
   'components/BendingProject.jsx', 'components/PortfolioHome.jsx', 'components/PortfolioNavigation.jsx',
   'components/ProjectStudyChrome.jsx', 'release/xr-workspace.json',
-  'components/ProjectCaseStudy.jsx', 'components/ProjectCaseStudy.module.css',
+  'components/ProjectCaseStudy.jsx', 'components/ProjectCaseStudy.module.css', 'components/project-study-media.mjs',
   'components/ProjectCaseStudyControls.jsx', 'release/project-studies.json',
   'components/ProjectCaseStudyStage.jsx', 'components/project-study-scene.mjs',
   'components/project-study-appearance.mjs',

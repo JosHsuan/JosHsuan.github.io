@@ -48,7 +48,7 @@ function closed(state){
  for(const id of new Set(state.scene.history.map(fact=>fact.id))){const own=state.scene.history.filter(fact=>fact.id===id);expect(own.filter(fact=>fact.status==='requested')).toHaveLength(1);expect(own.filter(fact=>['completed','cancelled'].includes(fact.status))).toHaveLength(1);}
 }
 async function settled(page,chapter){
- await page.waitForFunction(chapter=>{const state=document.querySelector('[data-xr-stage]')?.__xrStage?.inspect();return state?.chapter===chapter&&state.scene.chapter===chapter&&state.scene.mode===(chapter==='overview'?'absent':'hold')&&state.scene.settled&&!state.scene.paintPending&&state.camera.settled&&state.informationWindows.settled&&!state.lifecycle.scheduled;},chapter,{timeout:WAIT});
+  await page.waitForFunction(chapter=>{const state=document.querySelector('[data-xr-stage]')?.__xrStage?.inspect();return state?.chapter===chapter&&state.scene.chapter===chapter&&state.scene.mode===(['overview','making','credits'].includes(chapter)?'absent':'hold')&&state.scene.settled&&!state.scene.paintPending&&state.camera.settled&&state.informationWindows.settled&&!state.lifecycle.scheduled;},chapter,{timeout:WAIT});
  await frames(page,2);
 }
 async function scrollChapter(page,chapter){
@@ -197,6 +197,8 @@ test('native scrolling selects all three complete recordings in the same scene a
   const hosts=document.querySelectorAll('[data-xr-stage]');if(hosts.length!==1)throw Error('Expected exactly one XR stage');
   return hosts[0].__xrStage.inspect();
  },count);
+  let continuity;
+  try{
  await expect(page.locator('[data-phone-stage],[data-phone-front-toggle]')).toHaveCount(0);
  for(const [id,duration]of[['adapt',13],['assemble',24.96],['join',20.3]]){
   await phoneReady(page,id);
@@ -215,7 +217,17 @@ test('native scrolling selects all three complete recordings in the same scene a
   const draw=state.resource.surface;expect(draw.sourceCalls).toBe(0);expect(draw.phoneBodyCalls).toBe(1);expect(draw.phoneScreenCalls).toBe(1);expect(draw.phoneCalls).toBe(2);expect(draw.stageCalls).toBeGreaterThan(0);expect(draw.calls).toBe(draw.sourceCalls+draw.phoneCalls+draw.stageCalls);
   const first=await originalCanvas.screenshot(),count=await decodedFrames();
   await expect.poll(decodedFrames).toBeGreaterThan(count+2);expect((await originalCanvas.screenshot()).equals(first)).toBe(false);
+   if(id==='adapt')continuity=await stage(page).evaluateHandle(host=>{
+    let running=true,raf;const samples=[];
+    const read=()=>{if(!running)return;const s=host.__xrStage.inspect(),canvas=host.querySelector('canvas');samples.push({chapter:s.chapter,mode:s.scene.mode,opacity:s.scene.opacity,cssOpacity:Number(getComputedStyle(host.querySelector('[data-xr-scene-surface]')).opacity),painted:s.resource?.successfulPaint,rendering:s.resource?.mode,phoneCalls:s.resource?.surface?.phoneCalls,connected:!!canvas?.isConnected});raf=requestAnimationFrame(read);};read();
+    return{samples,dispose(){running=false;cancelAnimationFrame(raf);}};
+   });
  }
+  const continuous=await continuity.evaluate(value=>value.samples);expect(continuous.length).toBeGreaterThan(2);
+  expect(continuous.some(value=>value.chapter==='assemble')).toBe(true);expect(continuous.some(value=>value.chapter==='join')).toBe(true);
+  for(const value of continuous){expect(value.opacity).toBe(1);expect(value.cssOpacity).toBe(1);expect(value.painted).toBe(true);expect(value.rendering).toBe('webgl-phone');expect(value.phoneCalls).toBe(2);expect(value.connected).toBe(true);expect(['entry','exit']).not.toContain(value.mode);}
+  await test.info().attach('continuous-native-phone-passages',{body:JSON.stringify(continuous),contentType:'application/json'});
+  }finally{if(continuity){await continuity.evaluate(value=>value.dispose());await continuity.dispose();}}
  const url=page.url();await page.getByRole('button',{name:'Pause recording',exact:true}).click();
  await expect.poll(()=>originalCanvas.evaluate(()=>{
   const hosts=document.querySelectorAll('[data-xr-stage]');if(hosts.length!==1)throw Error('Expected exactly one XR stage');
@@ -238,6 +250,64 @@ test('native scrolling selects all three complete recordings in the same scene a
  await scrollChapter(page,'overview');await modelReady(page);await openingVisible(page);
  const returned=await originalCanvas.evaluate(()=>{const hosts=document.querySelectorAll('[data-xr-stage]');if(hosts.length!==1)throw Error('Expected exactly one XR stage');return{state:hosts[0].__xrStage.inspect(),videoSources:hosts[0].querySelectorAll('video[src]').length};});
  expect(returned.videoSources).toBe(0);expect(returned.state.resource.media.stage).toBeNull();expect(returned.state.acquisitions).toBe(1);expect(errors).toEqual([]);
+  for(const chapter of ['making','credits']){
+   await scrollChapter(page,chapter);const state=await facts(page);expect(state.scene).toMatchObject({chapter,mode:'absent',visible:false,opacity:0});
+   await expect(stage(page).locator('[data-xr-scene-surface]')).toHaveCSS('opacity','0');await expect(stage(page).locator('[data-xr-scene-surface]')).toHaveCSS('pointer-events','none');
+   await expect(stage(page).locator('[data-xr-model-poster]')).toBeHidden();await expect(page.locator('[data-xr-scene-controls]')).toBeHidden();await expect(stage(page).locator('video[src]')).toHaveCount(0);
+  }
+});
+
+test('a genuinely delayed recording preserves its paused native frame through a pending reverse and atomic replacement',async({page})=>{
+ let release;const held=new Promise(resolve=>{release=resolve;});let waiting=false;
+ await page.route('**/assets/xr/assemble-interface.mp4',async route=>{waiting=true;await held;await route.continue();});
+ let continuity;
+ try{
+  await enter(page);await phoneReady(page,'adapt');const canvas=stage(page).locator('canvas'),original=await canvas.elementHandle();
+  continuity=await stage(page).evaluateHandle(host=>{
+   let running=true,raf;const samples=[];
+   const read=()=>{if(!running)return;const s=host.__xrStage.inspect();samples.push({chapter:s.chapter,mode:s.scene.mode,opacity:s.scene.opacity,cssOpacity:Number(getComputedStyle(host.querySelector('[data-xr-scene-surface]')).opacity),painted:s.resource?.successfulPaint,phoneCalls:s.resource?.surface?.phoneCalls});raf=requestAnimationFrame(read);};read();
+   return{samples,dispose(){running=false;cancelAnimationFrame(raf);}};
+  });
+  await page.locator('[data-xr-chapter="assemble"]').evaluate(node=>node.scrollIntoView({block:'start',behavior:'instant'}));
+  await expect.poll(()=>waiting).toBe(true);
+  await page.waitForFunction(()=>{const s=document.querySelector('[data-xr-stage]').__xrStage.inspect();return s.chapter==='assemble'&&s.scene.mode==='waiting'&&s.resource.media.pending;},null,{timeout:WAIT});
+  await expect(video(page,'adapt')).toHaveAttribute('src',/adapt-interface\.mp4$/);expect(await video(page,'adapt').evaluate(node=>node.paused)).toBe(true);
+  // The transparent WebGL surface is composited with moving native reading
+  // and Layer 1. Compare the retained decoded source pixels directly instead
+  // of treating a screenshot of that whole composition as a paused frame.
+  const nativeFrame=()=>video(page,'adapt').evaluate(async node=>{
+   if(node.readyState<2||!node.videoWidth||!node.videoHeight)throw Error('Retained native frame is unavailable');
+   const sample=document.createElement('canvas');sample.width=node.videoWidth;sample.height=node.videoHeight;
+   const context=sample.getContext('2d');context.drawImage(node,0,0);const pixels=context.getImageData(0,0,sample.width,sample.height).data;
+   let min=255,max=0;for(let index=0;index<pixels.length;index+=4){min=Math.min(min,pixels[index],pixels[index+1],pixels[index+2]);max=Math.max(max,pixels[index],pixels[index+1],pixels[index+2]);}
+   const sha256=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',pixels)),value=>value.toString(16).padStart(2,'0')).join('');
+   return{sha256,width:sample.width,height:sample.height,contrast:max-min,position:node.currentTime,decodedFrames:node.getVideoPlaybackQuality().totalVideoFrames,paused:node.paused};
+  });
+  const frozen=await nativeFrame();await frames(page,8);const retained=await nativeFrame();expect(retained).toEqual(frozen);expect(retained.contrast).toBeGreaterThan(32);expect(retained.paused).toBe(true);
+  await test.info().attach('retained-native-frame-facts',{body:JSON.stringify({frozen,retained}),contentType:'application/json'});
+  await test.info().attach('pending-phone-composition',{body:await canvas.screenshot(),contentType:'image/png'});
+  const pending=await facts(page);expect(pending.scene.opacity).toBe(1);expect(pending.resource.successfulPaint).toBe(true);expect(pending.resource.mode).toBe('webgl-phone');expect(pending.resource.surface.phoneCalls).toBe(2);
+  await expect(video(page,'adapt')).toHaveAttribute('src',/adapt-interface\.mp4$/);expect(await video(page,'adapt').evaluate(node=>node.paused)).toBe(true);
+  // Reverse while the target HTTP response is still held. The retained video
+  // must become the current owner again; a superseded handle cannot clear it.
+  await phoneReady(page,'adapt');await expect(video(page,'adapt')).toHaveAttribute('src',/adapt-interface\.mp4$/);
+  expect(await original.evaluate(node=>node===document.querySelector('[data-xr-stage] canvas'))).toBe(true);
+  await expect(stage(page).locator('video[src]')).toHaveCount(1);
+  const restoredTime=await video(page,'adapt').evaluate(node=>node.currentTime);
+  await expect.poll(()=>video(page,'adapt').evaluate((node,before)=>Math.abs(node.currentTime-before),restoredTime)).toBeGreaterThan(.03);
+  const restored=await facts(page);expect(restored.scene.opacity).toBe(1);expect(restored.resource.mode).toBe('webgl-phone');expect(restored.resource.media).toMatchObject({stage:'adapt',pending:false,reason:null});
+  await test.info().attach('pending-reverse-restored-source',{body:JSON.stringify(restored),contentType:'application/json'});
+  release();await frames(page,8);expect((await facts(page)).chapter).toBe('adapt');await expect(video(page,'adapt')).toHaveAttribute('src',/adapt-interface\.mp4$/);
+  await phoneReady(page,'assemble');expect(await original.evaluate(node=>node===document.querySelector('[data-xr-stage] canvas'))).toBe(true);
+  await expect(video(page,'adapt')).not.toHaveAttribute('src');await expect(stage(page).locator('video[src]')).toHaveCount(1);
+  const before=await video(page,'assemble').evaluate(node=>node.currentTime);await expect.poll(()=>video(page,'assemble').evaluate(node=>node.currentTime)).toBeGreaterThan(before);closed(await facts(page));
+  const samples=await continuity.evaluate(value=>value.samples);expect(samples.some(sample=>sample.chapter==='assemble')).toBe(true);
+  for(const sample of samples){expect(sample).toMatchObject({opacity:1,cssOpacity:1,painted:true,phoneCalls:2});expect(['entry','exit']).not.toContain(sample.mode);}
+  await test.info().attach('continuous-pending-reverse-phone',{body:JSON.stringify(samples),contentType:'application/json'});
+ }finally{
+  try{if(continuity){try{await continuity.evaluate(value=>value.dispose());}finally{await continuity.dispose();}}}
+  finally{release();await page.unrouteAll({behavior:'wait'});}
+ }
 });
 
 test('Reduced Motion preserves the selected source posters, native reading and recording links and cancels an active enhancement',async({page})=>{

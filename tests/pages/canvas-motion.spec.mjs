@@ -65,14 +65,17 @@ test('keyboard inspection across the information and scene gap presents its requ
    const scene=window.__thesis.inspect(),canvas=document.querySelector('[data-cinematic-stage] canvas'),r=canvas.getBoundingClientRect(),v=scene.pose.viewport;
    let hit=false;
    for(let y=.1;y<1&&!hit;y+=.1)for(let x=.1;x<1&&!hit;x+=.1)hit=!!window.__thesis.hitTest(r.left+r.width*(v.left+v.width*x),r.top+r.height*(v.top+v.height*y));
-   window.__pendingSceneHits.push({chapter:story.canvasPlacement.chapter,presented:scene.canvasPresented,opacity:Number(document.querySelector('[data-cinematic-stage]').style.opacity),hit});
+   window.__pendingSceneHits.push({chapter:story.canvasPlacement.chapter,sourceChapter:scene.representation.chapterId,presented:scene.canvasPresented,opacity:Number(document.querySelector('[data-cinematic-stage]').style.opacity),hit});
   });
-  window.__pendingSceneObserver.observe(document.querySelector('[data-cinematic-stage]'),{attributes:true,attributeFilter:['style']});
+  window.__pendingSceneObserver.observe(document.body,{subtree:true,attributes:true,attributeFilter:['style']});
  });
  await page.keyboard.press('ArrowRight');await settle(page);
  const pending=await page.evaluate(()=>{window.__pendingSceneObserver.disconnect();return window.__pendingSceneHits;});
  expect(pending.length,'The real chapter retarget must traverse its renderer-acknowledgment window.').toBeGreaterThan(0);
- for(const value of pending)expect(value).toEqual({chapter:'form',presented:false,opacity:0,hit:false});
+ for(const value of pending){
+  expect(value).toMatchObject({chapter:'form',presented:true,opacity:1});
+  if(value.sourceChapter!=='form')expect(value.hit).toBe(false);
+ }
  const held=await page.evaluate(()=>{const story=window.__story.inspect();return {information:story.informationChapter,chapter:story.canvasPlacement.chapter,weights:story.playback.chapterWeights,engaged:story.modelEngaged,awaiting:story.canvasAwaitingPaint,source:window.__thesis.inspect().representation.chapterId,azimuth:story.inspection.value.azimuth,opacity:Number(document.querySelector('[data-cinematic-stage]').style.opacity)};});
  expect(held).toEqual({information:'form',chapter:'form',weights:[0,1,0,0,0,0,0],engaged:true,awaiting:false,source:'form',azimuth:23,opacity:1});
  await expectIdle(page);
@@ -83,7 +86,7 @@ test('keyboard inspection across the information and scene gap presents its requ
 test('absent evidence scenes sleep WebGL while the independent page ASCII keeps the shared clock',async({page})=>{
  test.setTimeout(scenarioTimeout(120000));await loadScene(page);
  const canvas=await page.locator(stageCanvas).elementHandle();
- for(const chapter of ['make','validation']){
+ for(const chapter of ['make','validation','credits']){
   await page.locator('[data-chapter-link="'+chapter+'"]').click();await settle(page);
   const before=await sample(page);expect(before.placement).toMatchObject({chapter,visible:false,settled:true,mode:'absent'});expect(before.suspended).toBe(true);
   await frames(page,12);const after=await sample(page);
@@ -150,8 +153,8 @@ test('with OS Reduced, a real visible source hit still compares geometry through
  await expect(page.locator(stageCanvas)).toHaveCount(1);await expect(page.locator('canvas[data-ascii-field]')).toHaveCount(1);await expectIdle(page);
 });
 
-test('a chapter hold exits only near its boundary and an interrupted scroll reverses without scaling or remounting',async({page})=>{
- test.setTimeout(scenarioTimeout(120000));await page.clock.install();await loadScene(page);await centerStudy(page,'system');
+test('the continuous source block exits only at Pattern and an interrupted scroll reverses without scaling or remounting',async({page})=>{
+ test.setTimeout(scenarioTimeout(120000));await page.clock.install();await loadScene(page);await centerStudy(page,'pattern');
  const canvas=await page.locator(stageCanvas).elementHandle(),held=await sample(page);
  const start=held.placement.holdEnd-60,target=held.placement.holdEnd+(held.placement.end-held.placement.holdEnd)*.55;
  await scrollTo(page,start);const initial=await sample(page);expect(initial.placement).toMatchObject({x:0,y:0,scale:1,opacity:1,mode:'hold'});
@@ -161,12 +164,35 @@ test('a chapter hold exits only near its boundary and an interrupted scroll reve
   for(let i=0;i<8;i++){await page.clock.fastForward(50);forward.push(await sample(page));}
   expect(forward.some(s=>!s.placement.settled&&s.placement.mode==='exit')).toBe(true);
   expect(forward.some(s=>s.placement.x<-20&&s.placement.opacity<.99)).toBe(true);
-  for(const current of forward){expect(current.placement.chapter).toBe('system');expect(current.placement.scale).toBe(1);expect(current.rect.width).toBe(initial.rect.width);}
+  for(const current of forward){expect(current.placement.chapter).toBe('pattern');expect(current.placement.scale).toBe(1);expect(current.rect.width).toBe(initial.rect.width);}
   await page.evaluate(top=>window.scrollTo({top,behavior:'instant'}),start);const reverse=[];
   for(let i=0;i<24;i++){await page.clock.fastForward(100);reverse.push(await sample(page));}
   expect(reverse.some(s=>!s.placement.settled&&s.placement.x>forward.at(-1).placement.x)).toBe(true);
-  expect(reverse.at(-1).placement).toMatchObject({chapter:'system',x:0,y:0,scale:1,opacity:1,visible:true,settled:true,mode:'hold'});
+  expect(reverse.at(-1).placement).toMatchObject({chapter:'pattern',x:0,y:0,scale:1,opacity:1,visible:true,settled:true,mode:'hold'});
   expect(await page.evaluate(el=>document.querySelector('[data-cinematic-stage] canvas')===el,canvas)).toBe(true);
   await expect(page.locator(stageCanvas)).toHaveCount(1);await expect(page.locator('canvas[data-ascii-field]')).toHaveCount(1);
  }finally{await page.clock.resume();}
+});
+
+test('native forward and reverse chapter scrolling never fades or remounts the already painted Bending source block',async({page})=>{
+ test.setTimeout(scenarioTimeout(120000));await loadScene(page);
+ const canvas=await page.locator(stageCanvas).elementHandle();
+ const trace=await page.evaluateHandle(()=>{
+  let running=true,raf;const samples=[];
+  const record=()=>{if(!running)return;const story=window.__story.inspect(),scene=window.__thesis.inspect(),stage=document.querySelector('[data-cinematic-stage]');samples.push({chapter:story.canvasPlacement.chapter,pose:{x:story.canvasPlacement.x,y:story.canvasPlacement.y,opacity:story.canvasPlacement.opacity},cssOpacity:Number(getComputedStyle(stage).opacity),source:scene.source,ready:scene.ready});raf=requestAnimationFrame(record);};record();
+  return{samples,dispose(){running=false;cancelAnimationFrame(raf);}};
+ });
+ try{
+  for(const chapter of ['form','system','pattern','system','form']){
+   const y=await page.locator(`[data-story-chapter="${chapter}"]`).evaluate(node=>{let y=0;for(let n=node;n;n=n.offsetParent)y+=n.offsetTop;return y;});
+   await scrollTo(page,y);expect((await sample(page)).placement.chapter).toBe(chapter);
+   expect(await page.evaluate(node=>node===document.querySelector('[data-cinematic-stage] canvas'),canvas)).toBe(true);
+  }
+  const samples=await trace.evaluate(value=>value.samples);expect(samples.length).toBeGreaterThan(5);
+  for(const current of samples){expect(current.pose).toEqual({x:0,y:0,opacity:1});expect(current.cssOpacity).toBe(1);expect(current.ready).toBe(true);}
+  await test.info().attach('continuous-bending-native-passage',{body:JSON.stringify(samples),contentType:'application/json'});
+ }finally{await trace.evaluate(value=>value.dispose());await trace.dispose();}
+ await page.locator('[data-chapter-link="credits"]').click();await settle(page);
+ expect((await sample(page)).placement).toMatchObject({chapter:'credits',visible:false,opacity:0,mode:'absent'});
+ await frames(page,8);expect((await sample(page)).suspended).toBe(true);
 });

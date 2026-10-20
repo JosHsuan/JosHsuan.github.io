@@ -154,5 +154,7 @@ test('latest-portfolio visual and all selected full-frame research figures agree
   assert(item.alt);assert.deepEqual(webpDimensions(await readFile(publicPath(item.src))),[item.width,item.height]);
  }
  assert.deepEqual(study.phoneStages.map(item=>item.id),['adapt','assemble','join']);
- assert.match(study.sourceNote,/VerFacade/);assert.match(study.sourceNote,/Individual media authorship is not assigned/);
+ assert.deepEqual(study.authors,['Chia-Hsuan Chao','Wataru Nomura']);
+ assert.match(study.sourceNote,/\bI\b/);assert.match(study.sourceNote,/Wataru Nomura/);
+ assert.doesNotMatch(study.sourceNote,/portfolio|VerFacade|Individual media authorship is not assigned/i,'Public prose states the reviewed contribution and collaborators directly');
 });

@@ -67,14 +67,47 @@ async function fullCanvas(page){
  if(['dot-based-3d-printing','special-assemblies'].includes(sample.project))expect(sample.surround).toContain('radial-gradient');else expect(sample.surround).toBe('none');
 }
 async function decodeSource(chapter,image){
- // The semantic source image keeps its descriptive alt even when a duplicate
- // reference thumbnail is intentionally decorative beside the model caption.
- const element=chapter.getByAltText(image.alt,{exact:true}).first();
+ const identity=await chapter.evaluate(node=>({project:node.closest('[data-project-study]').dataset.projectStudy,chapter:node.dataset.projectChapter}));
+ const project=studies.find(item=>item.id===identity.project),motion=project.motionMedia?.find(item=>item.chapter===identity.chapter&&item.poster.src===image.src);
+ const element=chapter.locator(`img[src="${image.src}"]`).first();
+ if(await element.count()===0){
+  // This exact image is intentionally shown once by another chapter's
+  // background. That owning chapter performs its native decode below; the
+  // duplicate placement must not be recreated just to satisfy an old fixture.
+  const root=chapter.locator('xpath=ancestor::main[@data-project-study]');
+  expect(await root.locator(`[data-project-media-poster][src="${image.src}"]`).count()).toBeGreaterThan(0);
+  await expect(root.locator(`a[href="${image.src}"]`).first()).toHaveAttribute('target','_blank');
+  await expect(chapter.locator(`[data-project-evidence-image][src="${image.src}"]`)).toHaveCount(0);
+  return;
+ }
  await expect(element).toHaveAttribute('src',image.src);
  await element.scrollIntoViewIfNeeded();
- expect(await element.evaluate(async node=>{await node.decode();return{width:node.naturalWidth,height:node.naturalHeight,fit:getComputedStyle(node).objectFit,alt:node.alt};})).toEqual({width:image.width,height:image.height,fit:'contain',alt:image.alt});
+ expect(await element.evaluate(async node=>{await node.decode();return{width:node.naturalWidth,height:node.naturalHeight,fit:getComputedStyle(node).objectFit,alt:node.alt};})).toEqual({width:image.width,height:image.height,fit:'contain',alt:motion?.alt??image.alt});
  await expect(chapter.locator(`a[href="${image.src}"]`).first()).toHaveAttribute('target','_blank');
- await expect(chapter).toContainText(image.caption);await expect(chapter).toContainText(image.credit);
+ await expect(chapter).toContainText(motion?.caption??image.caption);await expect(chapter).toContainText(motion?.credit??image.credit);
+}
+
+async function observeContinuousModel(page,chapter){
+ const handle=await page.evaluateHandle(({chapter,timeout})=>{
+  const samples=[];let raf=null,timer=null,held=0,cancel;
+  const stop=()=>{if(raf!==null)cancelAnimationFrame(raf);clearTimeout(timer);raf=null;timer=null;};
+  const promise=new Promise((resolve,reject)=>{
+   cancel=()=>{stop();reject(Error('Continuous-source observer cancelled'));};
+   timer=setTimeout(()=>{stop();reject(Error('Continuous source view did not paint: '+JSON.stringify(samples.at(-1))));},timeout);
+   const read=()=>{try{
+    const host=document.querySelector('[data-project-model-stage]'),surface=host.querySelector('[data-project-model-surface]'),scene=window.__globalBackground.inspect().driver.projectStudy.scene;
+    samples.push({visibility:getComputedStyle(host).visibility,opacity:Number(getComputedStyle(surface).opacity),pose:scene.motion.pose.opacity,mode:scene.motion.mode,view:scene.resource?.view.chapter,source:scene.resource?.sourceRevision});
+    if(scene.motion.chapter===chapter&&scene.motion.mode==='hold'&&scene.motion.settled&&scene.resource?.view.chapter===chapter)held++;else held=0;
+    if(held>=8){stop();resolve(samples);return;}
+    raf=requestAnimationFrame(read);
+   }catch(error){stop();reject(error);}};raf=requestAnimationFrame(read);
+  });
+  return{promise,dispose:()=>cancel()};
+ },{chapter,timeout:WAIT});
+ // Attach rejection handling immediately, including when a later native click
+ // or assertion fails before the observation is awaited.
+ const result=handle.evaluate(owner=>owner.promise).then(value=>({value}),error=>({error}));
+ return{result,async dispose(){try{await handle.evaluate(owner=>owner.dispose());}finally{await handle.dispose();}}};
 }
 async function modelChapter(page,project,chapter=project.model.chapters[0]){
  const control=page.locator(`[data-project-chapter="${chapter}"] [data-project-model-control]`);
@@ -133,8 +166,8 @@ for(const project of studies)test(`${project.shortTitle} has native evidence cha
  expect(openingType.scrollWidth).toBeLessThanOrEqual(openingType.clientWidth+1);
  expect(openingType.left).toBeGreaterThanOrEqual(-1);expect(openingType.right).toBeLessThanOrEqual(openingType.viewport+1);
  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href','https://joshsuan.github.io'+route(project));
- await expect(page.locator('[data-project-chapter]')).toHaveCount(6);
- await expect(page.locator('[data-project-chapter-link]')).toHaveCount(6);
+ await expect(page.locator('[data-project-chapter]')).toHaveCount(project.sections.length+2);
+ await expect(page.locator('[data-project-chapter-link]')).toHaveCount(project.sections.length+2);
  await expect(page.locator('canvas')).toHaveCount(project.model?2:1);
  await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);
  await expect(page.locator('[data-xr-stage],[data-cinematic-stage]')).toHaveCount(0);
@@ -147,9 +180,23 @@ for(const project of studies)test(`${project.shortTitle} has native evidence cha
   expect(await page.evaluate(()=>window.__site.inspect().readiness.previews)).toEqual([{mode:'model',reason:''}]);
  }else{await expect(stage(page)).toHaveCount(0);expect(models).toEqual([]);}
  await decodeSource(page.locator('[data-project-chapter="overview"]'),project.hero);
+ const visualOwnership=await page.evaluate(()=>{
+  const background=new Set([...document.querySelectorAll('[data-project-media-poster],[data-project-model-poster]')].map(image=>image.getAttribute('src')));
+  const evidence=[...document.querySelectorAll('[data-project-evidence-image]')].map(image=>image.getAttribute('src'));
+  return{duplicates:evidence.filter(src=>background.has(src)),unique:new Set(evidence).size,total:evidence.length,captionImages:document.querySelectorAll('[data-project-source-caption] img').length};
+ });
+ expect(visualOwnership.duplicates).toEqual([]);expect(visualOwnership.unique).toBe(visualOwnership.total);expect(visualOwnership.captionImages).toBe(0);
+ expect(await page.locator('main').innerText()).not.toMatch(/\bportfolio\b|source-backed/i);
  for(const section of project.sections){
-  await page.locator(`[data-project-chapter-link="${section.id}"]`).click();
+  const index=project.sections.indexOf(section),previous=project.sections[index-1]?.id;
   const chapter=page.locator(`[data-project-chapter="${section.id}"]`);
+  let continuity=null;
+  if(project.model?.chapters.includes(previous)&&project.model.chapters.includes(section.id)){
+   await page.locator(`[data-project-chapter-link="${previous}"]`).click();await settled(page,previous,project.model);
+   continuity=await observeContinuousModel(page,section.id);
+  }
+  try{
+  await page.locator(`[data-project-chapter-link="${section.id}"]`).click();
   if(project.model){
    await settled(page,section.id,project.model);
    const state=await facts(page);sourceDraw(state,project.model,page.viewportSize());closed(state);
@@ -157,6 +204,12 @@ for(const project of studies)test(`${project.shortTitle} has native evidence cha
    else await expect(stage(page)).not.toHaveAttribute('data-project-model-active','');
    expect(await sourceCanvas.evaluate(node=>node===document.querySelector('[data-project-study-canvas]'))).toBe(true);
   }
+  if(continuity){
+   const outcome=await continuity.result;if(outcome.error)throw outcome.error;
+   const samples=outcome.value;expect(samples.length).toBeGreaterThanOrEqual(8);
+   expect(samples.every(sample=>sample.visibility==='visible'&&sample.opacity===1&&sample.pose===1&&sample.source===project.model.sha256&&!['exit','entry'].includes(sample.mode))).toBe(true);
+  }
+  }finally{if(continuity)await continuity.dispose();}
   await expect(chapter).toBeInViewport();await expect(chapter.locator('h2')).toHaveText(section.title);
   // Native anchors must retain the shared label above h2 below fixed controls.
   const label=await chapter.locator('[data-project-section-label]').boundingBox(),navigation=await page.locator('[data-page-masthead] nav').boundingBox();
@@ -191,7 +244,7 @@ for(const project of studies)test(`${project.shortTitle} preserves every source 
    expect((await page.goto('http://127.0.0.1:4186'+route(project))).status()).toBe(200);
    await expect(page.locator('h1')).toHaveText(project.title);
    await expect(page.locator('[data-site-loader]')).toBeHidden();
-   await expect(page.locator('[data-project-chapter]')).toHaveCount(6);await expect(page.locator('canvas')).toHaveCount(1);await expect(page.locator('[data-project-study-canvas]')).toHaveCount(0);
+   await expect(page.locator('[data-project-chapter]')).toHaveCount(project.sections.length+2);await expect(page.locator('canvas')).toHaveCount(1);await expect(page.locator('[data-project-study-canvas]')).toHaveCount(0);
    await decodeSource(page.locator('[data-project-chapter="overview"]'),project.hero);
    for(const section of project.sections){
     await page.locator(`[data-project-chapter-link="${section.id}"]`).click();
@@ -211,7 +264,7 @@ test('a failed documentary image ends entry once and keeps the source narrative 
  await page.route('**'+project.hero.src,request=>request.abort());
  await page.goto(route(project));await entered(page,'failed');
  await expect(page.locator('h1')).toBeVisible();
- await expect(page.locator('[data-project-chapter-link]')).toHaveCount(6);
+ await expect(page.locator('[data-project-chapter-link]')).toHaveCount(project.sections.length+2);
  const state=await page.evaluate(()=>window.__site.inspect());
  expect(state.history.filter(fact=>fact.id===state.id&&['entered','failed','cancelled'].includes(fact.phase))).toHaveLength(1);
  await page.locator('[data-project-chapter-link="credits"]').click();

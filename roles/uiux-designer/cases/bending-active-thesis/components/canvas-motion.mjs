@@ -36,8 +36,10 @@ export function sampleCanvasHold(options, seekHold = null) {
   if (forcedChapter !== undefined && forcedChapter !== null) index = CANVAS_CHAPTERS.indexOf(forcedChapter);
   const chapter = CANVAS_CHAPTERS[index], span = anchors[index + 1] - anchors[index];
   const start = anchors[index] - viewport.height * CANVAS_SCENE_PROBE, end = start + span;
-  const entry = Math.min(span * .18, viewport.height * .45);
-  const exit = index === 6 ? 0 : Math.min(span * .20, viewport.height * .50);
+  // Overview through Pattern is one continuous source passage. Native chapter
+  // changes retain the outer surface while its original internal views change.
+  const entry = index === 0 ? Math.min(span * .18, viewport.height * .45) : 0;
+  const exit = index === 3 ? Math.min(span * .20, viewport.height * .50) : 0;
   const holdStart = start + entry, holdEnd = end - exit;
   // A history/navigation seek may land in a transition band. Its useful still
   // becomes the nearby hold boundary, so the first real scroll cannot flash.
@@ -46,7 +48,7 @@ export function sampleCanvasHold(options, seekHold = null) {
   const exitStart = sameSeek && seekHold.band === 'exit' ? Math.max(holdEnd, seekHold.docY) : holdEnd;
   const phase = clamp((docY - start) / span);
   let x = 0, y = 0, opacity = 1, mode = 'hold';
-  if (chapter === 'make' || chapter === 'validation') {
+  if (absent(chapter)) {
     x = -viewport.width * 1.08; opacity = 0; mode = 'absent';
   } else if (!(reducedMotion || hold || forcedChapter !== undefined && forcedChapter !== null)) {
     if (docY < entryEnd) {
@@ -74,7 +76,7 @@ export function createCanvasMotion() {
 
 const held = () => ({x:0,y:0,opacity:1});
 const outside = direction => direction > 0 ? {x:-1.08,y:-.05,opacity:0} : {x:.22,y:.035,opacity:0};
-const absent = chapter => chapter === 'make' || chapter === 'validation';
+const absent = chapter => ['make','validation','credits'].includes(chapter);
 function event(state,status,reason){
   const request=state.request;
   if(request)state.events.push({id:request.id,chapter:request.chapter,target:request.target,status,reason});
@@ -87,10 +89,10 @@ function begin(state,kind,direction){
 function reconcile(state){
   const request=state.request;
   if(state.chapter!==request.chapter){
-    if(state.pose.opacity>0){if(state.transition?.kind!=='exit')begin(state,'exit',request.direction);return;}
+    const sameSubject=!absent(state.chapter)&&!absent(request.chapter);
+    if(state.pose.opacity>0&&!sameSubject){if(state.transition?.kind!=='exit')begin(state,'exit',request.direction);return;}
     state.chapter=request.chapter;state.index=CANVAS_CHAPTERS.indexOf(state.chapter);
-    state.transition=null;
-    state.pose=outside(-request.direction);
+    if(!sameSubject){state.transition=null;state.pose=outside(-request.direction);}
   }
   if(request.target==='hold'){
     if(state.pose.opacity!==1||state.pose.x!==0){if(state.transition?.kind!=='entry')begin(state,'entry',request.direction);}
@@ -104,7 +106,8 @@ function reconcile(state){
 
 /** Scroll chooses a discrete intent. Only caller-owned active seconds advance
  * the fixed-duration passage; wheel magnitude and scroll distance never do.
- * A superseding chapter leaves the current scene before the latest one enters.
+ * Chapters within the source interval retain the current surface. A change
+ * between that interval and an absent chapter owns the outer passage.
  * Semantic seek/Reduced choose a useful still; resume only rebases the clock.
  * Events are a drainable per-update outbox, not an autonomous timer or bus.
  */

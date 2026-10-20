@@ -145,9 +145,9 @@ export default function Page() {
             <p className={styles.smallNote} data-protect data-choreography="caption">{story.credits.collaboration}</p>
             <p className={styles.smallNote} data-protect data-choreography="caption">{story.credits.limitation}</p>
             <details className={styles.sourceNotes} data-protect data-choreography="credit">
-              <summary>Source notes & credits</summary>
-              <p>{review.credits.media}</p><p>{review.credits.sourceEdition} {review.yearNote}</p>
-              <div className={styles.sourceLinks} aria-label="Original source pages">{Object.values(story.media).map(item => <a key={item.figure} href={item.source} target="_blank" rel="noreferrer">{item.figure} <span aria-hidden="true">↗</span></a>)}</div>
+              <summary>Project credits & reference figures</summary>
+              <p>{review.credits.media}</p>
+              <div className={styles.sourceLinks} aria-label="Original research figures">{Object.values(story.media).map(item => <a key={item.figure} href={item.source} target="_blank" rel="noreferrer">{item.figure} <span aria-hidden="true">↗</span></a>)}</div>
             </details>
           </div>
           <footer className={styles.endnote} data-protect data-choreography="credit"><a href="/#projects">Back to Project ↑</a><span>FORM / SYSTEM / MAKE</span></footer>
