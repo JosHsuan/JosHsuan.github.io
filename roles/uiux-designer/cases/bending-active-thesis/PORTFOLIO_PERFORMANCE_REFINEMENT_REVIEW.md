@@ -255,10 +255,168 @@ must not be reported as confirmed actual browser arguments.
 raw results. No field renderer, algorithm, density, cadence, recipe or visual
 effect was changed by the experiment.
 
-## Remaining evidence
+## Paired post-refactor measurements
 
-Post-refactor measurements, matched visual review and final CI/live acceptance
-remain pending. A green source/unit test run cannot close those rows. Root must
-append actual candidate identities, measured improvements/regressions and honest
-limitations after the paired protocol, including any unavailable physical-device
-check. These controlled native lab samples do not establish field INP or CrUX.
+Root completed the same native profiler on all eight routes at both desktop and
+mobile sizes, plus one separately labelled clean Mode/s mobile companion. All
+scenarios completed without page/scenario errors. The profiler remains the same
+`4c7d4eb3…f43cc91` implementation. This binds two uncommitted working-tree
+exports, not an exact final committed/CI/live candidate.
+
+| Raw post-refactor receipt | SHA-256 |
+| --- | --- |
+| `performance-after/after-chromium-desktop.json` | `79bcf1f4ec2f11f36fb1346858c6d33036efbf9640836466a33bc3ddbfdc0447` |
+| `performance-after/after-chromium-mobile.json` | `2760a406b3c69868b59ae14aff1e8783dbca8498fa9c2d9df93d49fa4bc2ca25` |
+| `performance-after-clean-mode/after-clean-chromium-mobile.json` | `cf8e338dffeb76de10b190bb551cf066188c79bfb26daee6c5fff9b6f4d88abc` |
+
+The first post-mobile Mode/s forward phase overlapped a roughly 3.4-second
+artifact hashing operation. Its raw receipt and observed 680 ms maximum remain
+preserved, but this interval is excluded from latency claims. The later clean
+companion completed from 16:21:20 to 16:22:09 UTC; it is reported separately,
+without replacing or hiding the contaminated run. Its forward/reverse maxima
+were 688 / 720 ms, against the original baseline's 752 / 752 ms. These individual
+observations do not establish a causal speedup.
+
+| Generic page | Desktop chapter reads, before → after | Mobile chapter reads, before → after |
+| --- | ---: | ---: |
+| Mode/s of Making | 294 → 288 | 254 → 288, also 288 in clean companion |
+| Entrance Installation Art | 164 → 96 | 144 → 90 |
+| Dot-Based 3D Printing | 157 → 102 | 153 → 102 |
+| HC3DP Caustics | 163 → 108 | 155 → 108 |
+| Special Assemblies | 156 → 114 | 153 → 114 |
+| Project Caschlatsch | 200 → 21 | 195 → 21 |
+| Total | 1,134 → 729 | 1,054 → 723 |
+
+Wheel phases delivered the same twelve wheel inputs per generic page. Chapter
+rectangle reads changed from 240 to 52 on desktop and 148 to zero on mobile.
+Cached selection therefore removes actual repeated geometry work; it does not
+eliminate legitimate late media/caption/layout invalidations. Mode/s's mobile
+journey reads increased, which is explicitly retained above. Chrome's total
+layout time and scene/field frame counts varied between runs; a lower rectangle
+count is not a sustained-FPS or overall responsiveness claim.
+
+All 108 requested chapter intents matched in each post-refactor eight-route
+profile. The five generic models' 64 same-chapter comparisons per size retained
+identical source revisions, source geometry counts, appearance/light facts,
+views and fitted camera poses; the clean Mode/s companion adds sixteen matching
+model comparisons. These inspector facts do not replace pixel comparisons or
+human visual review. Sampled native chapter positions showed at most one playing
+video. Every generic paused interval, including clean Mode/s, added zero
+controller/field frames, layout/style work, DOM mutations, native media
+operations and media-time change. Bending/XR's absent global pause control still
+limits that particular idle measurement; no paused result is fabricated.
+
+Latency remained mixed. Desktop Mode/s's forward tail increased from 648 to
+848 ms, Special Assemblies from 184 to 208 ms, and Bending's reverse tail from
+592 to 720 ms. The Mode/s 848 ms key event spent 0.8 ms in handlers and about
+846.9 ms awaiting presentation, near a 763 ms native/unattributed task. Special's
+208 ms key event spent 1.6 ms in handlers and 206.3 ms awaiting presentation.
+Bending's worst 720 ms keyup contained 396.7 ms input delay and 323.3 ms
+presentation delay. These observations do not demonstrate a newly expensive
+chapter handler or prove that the changed ownership caused the increases.
+
+Mobile Entrance's reverse tail changed from 1,016 to 1,056 ms, HC3DP's reverse
+tail from 5,168 to 5,432 ms, and protected XR's forward/reverse tails from
+96 / 120 to 184 / 144 ms. Other routes improved or remained similar. HC3DP's
+handler p95 remained approximately 1.8 ms; the known software/native cost persists.
+The measured results do not support a blanket performance improvement, field
+INP, hardware-accelerated or physical-device claim. Protected Bending/XR were
+included as references, and their mixed timings are not attributed to the
+generic chapter presenter that does not select their chapters.
+
+Independent CPU-only paired receipts are
+`performance-after/independent-paired-desktop-review.json` (SHA-256
+`d8787214c2b176c7526e1b22ff2d195a100f5fbc53845bfae8e757f8e0908e24`)
+and `performance-after/independent-paired-mobile-review.json` (SHA-256
+`7a701037f8f5ea4d7d72f95544be62fdc95587ae96accee0bc05aabb1e09add7`).
+
+## Native departure and BFCache limits
+
+The lifecycle-v3 eight-route diagnostic completed without scenario errors.
+Its only Chromium launch change omits the default BFCache-disabling argument;
+this is lifecycle evidence, not a paired performance sample. Raw
+`lifecycle-after/after-chromium-desktop-v3.json` SHA-256:
+`0924dcce7d8c8e729ab8b6535045abed95dd867dd456a93a0da586ff0f997fbd`.
+
+All eight late departure receipts were trusted `persisted=false`; Back produced
+another document token. CDP reported `MainResourceHasCacheControlNoStore`,
+`JsNetworkRequestReceivedCacheControlNoStoreResource`,
+`BrowsingInstanceNotSwapped` and `BackForwardCacheDisabledForDelegate`, with
+Caschlatsch reporting only the latter two. There is no successful persisted
+BFCache restoration proof. Further forced/synthetic restoration is not substituted
+for the browser's actual decision. Headless background-tab attempts also remained
+visible, so genuine native hidden behavior is not established by these samples.
+
+Six generic pages and XR released their background lease from one to zero at
+departure, then acquired exactly one lease in the new Back document. Their
+ordinary-page driver events/scopes reached zero, the generic backdrop and XR
+events/scopes reached zero, video sources were removed and paused, and the
+generic backdrop had no pending play, decoded-frame callback or media/poster
+deadline. This is actual nonpersisted source-controller disposal evidence.
+
+The late receipt also exposes boundaries that must not be called fully closed:
+Bending retains its suspended Director/background lease (`activeBindings=1`),
+with `scheduled=false`, `renderSuspended=true` and one renderer frame still
+reported pending. That R3F internal frame-budget counter is not, by itself,
+proof of a pending native animation callback and must not be forcibly zeroed.
+SiteNavigation retains one scope and seven native listeners
+on every route, although its pagehide path releases preparation/deadline/reveal
+work. Native document destruction can reclaim these resources, so the counters
+do not prove a cross-document memory leak; they also do not prove explicit
+all-owner disposal. These findings were sent to root and the senior architect
+for a bounded, visually neutral lifecycle decision. They remain open in this
+receipt rather than being hidden behind the eight successful navigation runs.
+
+The independent native lifecycle analysis is
+`lifecycle-after/independent-native-lifecycle-v3-review.json`. No CI, deployment,
+live-site, physical-device or successful BFCache acceptance is claimed here.
+
+## Explicit-false closure follow-up
+
+The senior architect subsequently corrected the two observed ownership gaps
+using the existing disposal paths only when native `pagehide.persisted` is
+explicitly false. The historical receipt above remains preserved. Root rebuilt
+a separate frozen `lifetime-export` and reran the unchanged lifecycle-v3 helper
+on all eight routes, completing at 16:40:33 UTC without scenario/page errors.
+Its release metadata names base `05cece4dbac044323e352b5e7ce5ff4c3fd71bbf`;
+the closure follow-up was still uncommitted, so that metadata is not the exact
+final complete source identity.
+
+Raw `lifecycle-after-closure/after-closure-chromium-desktop-v3.json` SHA-256:
+`1d6e20ea92e9ed5bef5f7600bb822617181ccced5aeb0471f15abf2b040c2ed1`.
+The independent `independent-native-closure-followup.json` beside it records
+all retained-port checks. No must-fix remains in this observed explicit-false
+native departure scope:
+
+- Every route now has zero SiteNavigation scopes/listeners/subscriptions, a
+  disposed event owner, background leases one → zero → one, and a fresh document
+  token on Back. The ordinary-page drivers are disposed with no scheduled frame,
+  zero native event scopes/listeners and released field atlases.
+- All six generic chapter/backdrop owners are disposed; model actor references
+  are released. No play operation, decoded-frame callback, video source or
+  media/poster deadline remains pending. All native videos are paused and have
+  no attached source. XR additionally reports one acquisition/one disposal,
+  no resource, no pending acquisition and zero event scopes/listeners.
+- Bending now reports a disposed, unscheduled Director and disposed Layer 1
+  field, zero background lease, no ready source, and released source/material/
+  compositor references. Renderer geometry counts are zero. The untouched
+  R3F frame-budget counter still reads one; the retained renderer diagnostic
+  also reports one texture and an undisposed budget bookkeeping object. Those
+  values are not native callback counts or proof of zero renderer/process
+  storage. No internal counter was changed to manufacture a clean result.
+
+Native BFCache restoration is still unproven: all observed departures remain
+trusted `persisted=false`, and the actual browser cache-miss reasons remain
+recorded. This follow-up establishes the explicit-false controller/source/event
+closure, not successful retained-document restoration, physical-device behavior,
+total GPU-memory release or CI/live acceptance.
+
+## Remaining evidence and ownership decisions
+
+The chapter ownership implementation has native paired measurement evidence;
+the original field renderer is deliberately retained after the bounded experiment.
+The explicit native-departure owner findings are closed by the bounded follow-up
+and eight-route native recheck above. Matched visual acceptance, the exact
+committed candidate, full required CI/deployment gate and live acceptance remain
+separate root-owned records. A green source test cannot close those rows, and
+these controlled lab samples do not establish field INP or CrUX.

@@ -169,6 +169,45 @@ from pending release acceptance, identifies the gate's current aggregate-result
 limit, and keeps real-device/software-rendering uncertainty visible. Source
 validation is recorded separately from native/CI/deployment acceptance.
 
+## Native departure follow-up
+
+Root's later native lifecycle capture reports genuine nonpersisted departure
+on all eight routes. It exposes a concrete contract gap: SiteNavigation closed
+its request resources but retained local event registrations, and Bending's
+Director suspended its existing lease while relying on React unmount for final
+release. Browser destruction may reclaim the document; these observations do
+not establish a memory leak or a physical-device failure. They do establish
+that the promised explicit permanent application closure was incomplete.
+
+The admitted visual-neutral correction changes only native destruction:
+
+- SiteNavigation first completes its existing handoff decision, then disposes
+  local registrations/resources when `persisted === false`. A tracked outgoing
+  ticket remains serialized and destination-owned: `handedOff` suppresses a
+  second cancellation. The receiving document still adopts the same request.
+- ExperienceProvider registers the minimal DocumentLifetime helper through
+  the existing Registrar. Explicit nonpersisted pagehide calls `input.dispose`;
+  connections release Director/background, scene assets/input and other scoped
+  features before the kernel closes. Effect unmount remains idempotent and
+  reconnectable while the document is alive.
+- Persisted pagehide retains the existing suspension/restoration path. Bare
+  synthetic events without a `persisted` value retain their established test
+  semantics. No scene, camera, material, source recipe, clock or timing code is
+  changed. No R3F private frame counter is rewritten: `rendererPendingFrames`
+  records the library's internal frame allowance and alone cannot prove a live
+  native callback after document destruction.
+
+The document-lifetime, navigation and existing Registrar suites pass **67/67**
+under Node 24.19.0, with no skips/retries; explicit lint of all five changed
+runtime/component/test files passes. New checks establish permanent feature/
+kernel/lease closure, pending-acquisition abort and late-handle disposal,
+tracked-ticket preservation with successful destination adoption, no late
+readiness revival, persisted/bare retention and idempotent unmount. Two older
+BFCache fixture departures now explicitly set `persisted: true` before testing
+restoration; a nonpersisted destroyed document cannot serve that scenario.
+These are portable/source-level results. Root's new build, native retained-port
+capture, matched Bending/XR regression and fresh candidate CI remain required.
+
 ## Measured performance interpretation
 
 The before profile records the frozen design export, Windows/Chromium desktop,
@@ -206,5 +245,5 @@ Matched Bending/XR desktop/mobile images and native interaction checks must
 remain equivalent because the accepted visual effect is protected. Focused
 CPU tests and `pnpm check` precede native tests on the built export. CI, artifact
 identity, same-artifact deployment and live acceptance remain root-owned and
-pending. The README rewrite follows implementation and measured review; it
-must not describe a proposal as installed behavior.
+pending. The rewritten README describes implemented boundaries and must not
+promote a proposal or an earlier candidate's acceptance to current evidence.

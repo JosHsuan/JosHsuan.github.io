@@ -1,7 +1,7 @@
 # Portfolio refinement verification
 
 Date: 20 October 2026. Status: local implementation and acceptance in progress;
-no new CI, deployment or live acceptance is claimed here yet.
+the first candidate's CI failed. No new deployment or live acceptance is claimed.
 
 [Decision 0019](../../../../docs/decisions/0019-portfolio-refinement-and-runtime.md)
 and the [integration contract](PORTFOLIO_REFINEMENT_INTEGRATION.md) define the
@@ -92,6 +92,51 @@ not proof that their changed code equals that commit. Frozen exports, native
 facts, source hashes and an output inventory are retained locally. Final release
 acceptance must bind the resulting actual commit and downloaded CI artifact.
 
+### Follow-up after the first CI failure
+
+The distinct Caschlatsch System/XR portfolio sources now have actual forward
+and reverse passage assertions. Dot's native source-link Home waits for native
+scroll and source-exit completion before the next command; exact canvas bounds,
+source geometry and all inspection checks remain. These six targeted executions
+passed across Chromium, WebKit and mobile Chromium. Their failed predecessor is
+retained, without claiming its exact cause from incomplete CI timing evidence.
+
+No-JavaScript coverage now enters the canonical source-first section and uses
+native wheel input to read complete headings, authored paragraphs, captions and
+credits within the fixed chrome. It opens an actual full-image source link and
+inherits the declared browser/device context. Fractional wheel destinations are
+not treated as exact browser pixel coordinates. The first revised run exposed
+that test assumption; the next passed 13 cases before a mobile source-link
+click was intercepted by the rail. Explicit native reading of that link before
+clicking resolved the missing action precondition; all five remaining mobile
+cases then passed. These are composite local results, not one final-source
+24-case run. Fresh CI must execute the complete current tests without retries.
+
+The late-listener native lifecycle diagnostic checked all eight routes and
+observed nonpersisted departure/new-document history return, not BFCache.
+It found Bending's retained suspended lease and SiteNavigation's remaining
+listeners. A narrow follow-up now calls their existing permanent disposal only
+for explicit `persisted === false`, preserving destination-owned handoff tickets
+and persisted/bare suspension behavior. The Registrar releases features before
+the kernel. No private R3F frame counter is forced to zero. Source review and
+the focused 67-test suite do not replace native proof.
+
+After this follow-up, `pnpm check` passed again, the public build passed with
+261 files/138 assets, and the portable suite passed **528 of 530 tests**, with
+zero failures. The two skipped tests require actual WebGL rear-layer rendering
+and actual SVG/React browser behavior respectively; portable execution does not
+establish those results. This latest local export has base metadata `05cece4`
+and uncommitted follow-up code; it is not a deployable exact-commit artifact.
+
+The rebuilt `lifetime-export` then passed a second all-eight-route late-listener
+native lifecycle diagnostic: every SiteNavigation was disposed with zero
+listeners; every departing background lease was released and every new history
+entry held exactly one lease. Bending's Director reported disposed and no
+scheduled work. Its unchanged R3F `rendererPendingFrames` allowance remained one;
+that counter alone is not evidence of a live browser callback. All eight rows
+reported zero scenario errors. Native events were again nonpersisted and Back
+created new documents; real persisted BFCache restoration remains unverified.
+
 ## Performance evidence and limits
 
 The before profile completed all eight routes at desktop/mobile. Six generic
@@ -100,6 +145,18 @@ journeys. Desktop rectangle work was only 2.3–7.6 ms per journey pair; elimina
 duplicate ownership cannot honestly explain seconds-long native stalls.
 All six generic paused three-second intervals had zero controller, layout,
 style, DOM-mutation or media-operation work.
+
+Paired after measurements completed all eight routes at both profiles. Generic
+journey rectangle reads changed from **1,134 to 729** on desktop and **1,054 to
+723** on mobile; wheel-phase reads changed from 240 to 52 and 148 to zero.
+Mode/s mobile journey reads increased from 254 to 288, so no uniform reduction
+is claimed. All six generic pause intervals still had zero measured work.
+All 128 paired source/model/appearance/view/camera comparisons matched; the
+clean Mode/s companion added 16 matching comparisons. Native operation latency
+was mixed. A contaminated initial mobile Mode/s phase remains in the evidence;
+the separate clean companion is identified rather than silently substituted.
+These measurements precede the permanent-departure cleanup follow-up, which
+changes no active reading/render algorithm.
 
 CPU/trace diagnostics identified native Canvas 2D `drawImage` in the unchanged
 decorative field as the regular callback cost on this software-rendered host.
@@ -121,6 +178,19 @@ browser mobile emulation establishes field INP, physical-device stability or a
 real persisted BFCache restoration.
 
 ## Remaining acceptance
+
+Candidate `05cece4dbac044323e352b5e7ce5ff4c3fd71bbf` was pushed and checked by
+[CI 39451663831](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39451663831).
+Quality, both framework exports, public export and five public browser shards
+passed; three public shards and the aggregate gate failed. The failed cases
+concern the former shared System/XR Caschlatsch image assumption, six no-JavaScript
+heading-at-entry assumptions after source-first chapter layout, and Dot's
+source-link Home followed by model selection. The last includes a desktop
+settlement timeout and a mobile canvas position assertion; those are retained
+failures requiring diagnosis, not accepted retries. Raw failed logs and the
+candidate's downloaded export remain local evidence. Its output digest is
+`51bd1e9c892cbc9b9c5f7524e6f92a42796cd6b0cd40f98643d232ac7d11aaf7`;
+there is no validated-release artifact and it must not be published.
 
 Complete current reading/interaction/visual acceptance, protected Bending/XR
 comparison, paired after measurements, updated maintained browser tests,

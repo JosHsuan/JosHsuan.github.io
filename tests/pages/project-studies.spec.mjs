@@ -236,24 +236,63 @@ for(const project of studies)test(`${project.shortTitle} has native evidence cha
  expect(errors).toEqual([]);
 });
 
-for(const project of studies)test(`${project.shortTitle} preserves every source chapter and image without JavaScript`,async({browser})=>{
- const context=await browser.newContext({javaScriptEnabled:false});
+for(const project of studies)test(`${project.shortTitle} preserves every source chapter and image without JavaScript`,async({browser,contextOptions,viewport,deviceScaleFactor,hasTouch,isMobile,userAgent})=>{
+ const context=await browser.newContext({...contextOptions,viewport,deviceScaleFactor,hasTouch,isMobile,userAgent,javaScriptEnabled:false});
  try{
   const page=await context.newPage();
+  const readingBox=element=>element.evaluate(node=>{
+   const box=node.getBoundingClientRect(),masthead=document.querySelector('[data-page-masthead]').getBoundingClientRect(),rail=document.querySelector('[data-project-chapter-navigation]').getBoundingClientRect();
+   const safeTop=Math.max(0,masthead.bottom)+12,safeBottom=rail.width>rail.height?Math.min(innerHeight,rail.top)-12:innerHeight-12;
+   const desiredY=Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,scrollY+box.top-safeTop-8));
+   const under=document.elementFromPoint(box.left+box.width/2,box.top+box.height/2);
+   return{top:box.top,bottom:box.bottom,safeTop,safeBottom,desiredY,y:scrollY,unobscured:under===node||node.contains(under)};
+  });
+  const readNative=async element=>{
+   await expect(element).toBeVisible();
+   const before=await readingBox(element);
+   // Native wheel delivery is asynchronous and can round fractional document
+   // coordinates. Leave an eight-pixel guard and verify actual reading geometry.
+   if(Math.abs(before.desiredY-before.y)>.5){
+    await page.mouse.move(page.viewportSize().width/2,(before.safeTop+before.safeBottom)/2);
+    await page.mouse.wheel(0,before.desiredY-before.y);
+   }
+   let previousY,last;
+   try{
+    await expect.poll(async()=>{
+     last=await readingBox(element);const stable=last.y===previousY;previousY=last.y;
+     return stable&&last.top>=last.safeTop&&last.bottom<=last.safeBottom&&last.unobscured;
+    }).toBe(true);
+   }catch(error){error.message+='\nNative reading geometry: '+JSON.stringify(last);throw error;}
+  };
   const models=[];page.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)/.test(request.url()))models.push(request.url());});
    expect((await page.goto('http://127.0.0.1:4186'+route(project))).status()).toBe(200);
+   expect(page.viewportSize()).toEqual(viewport);await page.evaluate(()=>document.fonts.ready);
    await expect(page.locator('h1')).toHaveText(project.title);
    await expect(page.locator('[data-site-loader]')).toBeHidden();
    await expect(page.locator('[data-project-chapter]')).toHaveCount(project.sections.length+2);await expect(page.locator('canvas')).toHaveCount(1);await expect(page.locator('[data-project-study-canvas]')).toHaveCount(0);
    await decodeSource(page.locator('[data-project-chapter="overview"]'),project.hero);
+   const fullSource=page.locator(`[data-project-chapter="overview"] a[href="${project.hero.src}"]`);
+   await readNative(fullSource);
+   const [sourcePage]=await Promise.all([context.waitForEvent('page'),fullSource.click()]);
+   await sourcePage.waitForURL(new URL(project.hero.src,page.url()).href);await sourcePage.waitForLoadState('domcontentloaded');expect(new URL(sourcePage.url()).pathname).toBe(project.hero.src);
+   await expect(sourcePage.locator('img')).toHaveJSProperty('naturalWidth',project.hero.width);await sourcePage.close();
    for(const section of project.sections){
+    const chapter=page.locator(`[data-project-chapter="${section.id}"]`),heading=chapter.locator('h2');
     await page.locator(`[data-project-chapter-link="${section.id}"]`).click();
-    await expect(page.locator(`[data-project-chapter="${section.id}"] h2`)).toBeInViewport();
-    for(const image of section.media)await decodeSource(page.locator(`[data-project-chapter="${section.id}"]`),image);
+    await expect(page).toHaveURL(new RegExp(`#${project.id}-${section.id}$`));
+    await expect(chapter).toHaveAttribute('id',`${project.id}-${section.id}`);await expect(chapter).toHaveAttribute('aria-labelledby',`${project.id}-${section.id}-heading`);
+    // A native chapter link enters the source-first section; its heading can
+    // follow a complete image/caption instead of sharing the initial viewport.
+    await expect(chapter).toBeInViewport();await expect(chapter.locator('[data-project-media] img')).toBeInViewport();
+    await expect(heading).toHaveText(section.title);await readNative(heading);
+    for(const paragraph of section.paragraphs)await readNative(chapter.getByText(paragraph,{exact:true}));
+    for(const image of section.media)await decodeSource(chapter,image);
+    for(const caption of await chapter.locator('[data-project-source-caption] > p[id$="-caption"],figure figcaption > p').all())await readNative(caption);
    }
    expect(await page.locator('[data-project-media] img,figure img').evaluateAll(images=>images.every(image=>image.alt.trim().length>10))).toBe(true);
    await page.locator('[data-project-chapter-link="credits"]').click();
-   for(const credit of project.credits)await expect(page.locator('[data-project-chapter="credits"]')).toContainText(credit.names);
+   await readNative(page.locator('[data-project-chapter="credits"] h2'));
+   for(const credit of project.credits){await expect(page.locator('[data-project-chapter="credits"]')).toContainText(credit.names);await readNative(page.locator('[data-project-chapter="credits"]').getByText(credit.names,{exact:true}));}
    expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
    expect(models).toEqual([]);
  }finally{await context.close();}
@@ -304,6 +343,16 @@ test('the original Dot source supports native drag and keyboard inspection, retu
    await modelChapter(page,dot);await source.evaluate(node=>node.focus({preventScroll:true}));await source.press(key);
    expect(await sourceKeys.evaluate(probe=>probe.events.at(-1))).toEqual({key,trusted:true,prevented:false});
    expect((await facts(page)).camera.target).toEqual({azimuth:0,elevation:0});
+   if(key==='Home'){
+    // Native Home keyup precedes the browser's default scroll completion.
+    // Observe that real operation and source exit before issuing another
+    // chapter command, rather than racing it or relaxing viewport geometry.
+    await page.waitForFunction(()=>{
+     const study=window.__globalBackground?.inspect().driver.projectStudy,scene=study?.scene,source=study?.backdrop.stage;
+     return scrollY===0&&study?.chapters.chapter==='overview'&&document.querySelector('[data-project-study]')?.dataset.projectActiveChapter==='overview'&&scene?.chapter==='overview'&&scene.motion.mode==='absent'&&scene.motion.settled&&!scene.motion.transition&&source?.chapter==='overview'&&source.mode==='hold'&&source.settled&&!source.transition;
+    },null,{timeout:WAIT});
+    await semanticChapter('overview',false);
+   }
   }
  }finally{try{await sourceKeys.evaluate(probe=>probe.dispose());}finally{await sourceKeys.dispose();}}
  await modelChapter(page,dot);await semanticChapter(chapter,false);

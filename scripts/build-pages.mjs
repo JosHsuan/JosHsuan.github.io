@@ -74,7 +74,7 @@ const sources = [
   'runtime/core/DisposableScope.ts', 'runtime/core/EventManager.ts',
   'runtime/features/ModelManager.mjs', 'runtime/features/EvidenceManager.mjs',
   'runtime/features/DiagramManager.mjs',
-  'runtime/features/LifecycleManager.mjs',
+  'runtime/features/LifecycleManager.mjs', 'runtime/features/DocumentLifetime.mjs',
   'runtime/features/EntryManager.mjs', 'runtime/motion/entry-motion.mjs',
   'runtime/motion/library-reveal.mjs', 'runtime/presentation/LibraryDiagramPresenter.mjs',
   'runtime/motion/liquid-glass.mjs', 'runtime/presentation/LiquidGlassPresenter.mjs',

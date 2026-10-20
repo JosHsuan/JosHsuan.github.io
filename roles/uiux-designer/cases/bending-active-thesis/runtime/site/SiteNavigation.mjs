@@ -38,7 +38,7 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
   for(const animation of owned)try{animation.cancel();}catch{/* Continue releasing the other owned animation. */}
   attr(element,'data-site-reveal',null);
  };
- const snapshot=()=>({id:active?.id??null,phase:active?.phase??'idle',kind:active?.kind??null,url:active?.url??win.location.href,
+ const snapshot=()=>({id:active?.id??null,phase:active?.phase??'idle',kind:active?.kind??null,url:active?.url??win.location.href,disposed,
   reason:active?.reason??'',delegated:sceneRoute,handedOff,readiness:documentResult,previews:previewResource?.inspect?.()??null,history:[...history],events:events.inspect()});
  const notify=()=>onChange(snapshot());
  const paint=phase=>{
@@ -248,6 +248,10 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
   // Later bubble listeners may still cancel the native activation.
   Promise.resolve().then(()=>{if(event.defaultPrevented&&active?.id===id){cancel('activation-prevented');}});
  };
+ const dispose=()=>{
+  if(disposed)return;if(!handedOff)cancel('disconnected');disposed=true;clearDeadlines();resource?.release();resource=null;previewResource=null;releaseScene?.();releaseScene=null;
+  restoreContent();attr(element,'hidden','');releaseReveal();attr(element,'data-site-connected',null);attr(doc.documentElement,'data-site-entry-state',null);events.dispose();
+ };
  return{
   start(){
    if(connected||disposed)throw Error('Site navigation already connected');connected=true;
@@ -255,11 +259,14 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
    events.listen(scope,doc,'click',click);
    events.listen(scope,win,'popstate',()=>{if(active?.kind==='navigation')cancel('history-navigation');});
    events.listen(scope,element,'animationend',event=>{if(revealMode==='css'&&event.target===element&&active?.kind==='arrival'&&active.phase==='revealing')completeReveal();});
-   events.listen(scope,win,'pagehide',()=>{
+   events.listen(scope,win,'pagehide',event=>{
     clearDeadlines();resource?.release();resource=null;restoreContent();
     if(active?.kind==='navigation'&&!terminal.has(active.phase)&&active.tracked)handedOff=true;
     else cancel(active?.kind==='navigation'?'untracked-handoff':'page-hidden');
     releaseReveal();
+    // Keep the serialized destination-owned ticket; only this document's
+    // registries close. A persisted/bare synthetic signal remains resumable.
+    if(event.persisted===false)dispose();
    });
    events.listen(scope,win,'pageshow',event=>{
     if(!event.persisted)return;
@@ -282,13 +289,10 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
     if(active.phase==='requested')completePreparation?.('reduced-motion');else if(['ready','revealing'].includes(active.phase))completeReveal('reduced-motion');
    });
    arrival();if(sceneRoute)releaseScene=subscribeScene(sceneFact);
-   return()=>this.dispose();
+   return dispose;
   },
   onReadiness(listener){return events.on(scope,'readiness',listener);},
   inspect:snapshot,
-  dispose(){
-   if(disposed)return;if(!handedOff)cancel('disconnected');disposed=true;clearDeadlines();resource?.release();resource=null;releaseScene?.();releaseScene=null;
-   restoreContent();attr(element,'hidden','');releaseReveal();attr(element,'data-site-connected',null);attr(doc.documentElement,'data-site-entry-state',null);events.dispose();
-  },
+  dispose,
  };
 }

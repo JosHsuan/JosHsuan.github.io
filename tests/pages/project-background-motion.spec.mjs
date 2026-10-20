@@ -121,25 +121,23 @@ function actualPassage(trace,direction){
  closed(trace.stage.history);
 }
 
-test('Caschlatsch photographs use actual finite forward/reverse passages, latest wins, and Credits retains the source',async({page})=>{
+test('Caschlatsch portfolio photographs and plates use actual finite forward/reverse passages, latest wins, and Credits retains the source',async({page})=>{
  test.setTimeout(scenarioTimeout(120000));
  await open(page,caschlatsch);await hold(page,imageKey(caschlatsch,'overview'));
  const forward=tracePassage(page,imageKey(caschlatsch,'context'));await select(page,'context');actualPassage(await forward,1);
  const reverse=tracePassage(page,imageKey(caschlatsch,'overview'));await select(page,'overview');actualPassage(await reverse,-1);
- await select(page,'system');const workflow=await hold(page,imageKey(caschlatsch,'system'));
- expect(imageKey(caschlatsch,'xr-guidance')).toBe(workflow.stage.key);
- const continuation=await page.evaluateHandle(()=>{
-  let running=true,raf;const samples=[];
-  const read=()=>{if(!running)return;const s=window.__globalBackground.inspect().driver.projectStudy.backdrop.stage,node=document.querySelector('[data-project-media-active]');samples.push({chapter:document.querySelector('[data-project-study]').dataset.projectActiveChapter,sourceChapter:s.chapter,key:s.key,mode:s.mode,sequence:s.sequence,opacity:s.pose.opacity,cssOpacity:node?Number(getComputedStyle(node).opacity):null,transition:s.transition});raf=requestAnimationFrame(read);};read();
-  return{samples,dispose(){running=false;cancelAnimationFrame(raf);}};
- });
- try{
-  await select(page,'xr-guidance');await frames(page,8);const samples=await continuation.evaluate(value=>value.samples);
-  expect(samples.length).toBeGreaterThan(2);expect(samples.some(sample=>sample.chapter==='xr-guidance')).toBe(true);
-  for(const sample of samples)expect(sample).toMatchObject({key:workflow.stage.key,mode:'hold',sequence:workflow.stage.sequence,opacity:1,cssOpacity:1,transition:null});
-  expect((await backdrop(page)).stage.history).toEqual(workflow.stage.history);
-  await test.info().attach('continuous-Caschlatsch-workflow',{body:JSON.stringify(samples),contentType:'application/json'});
- }finally{await continuation.evaluate(value=>value.dispose());await continuation.dispose();}
+ await select(page,'system');const system=await hold(page,imageKey(caschlatsch,'system'));
+ // The owner replaced the repeated conceptual workflow with two distinct
+ // original portfolio plates. Changing their identity must perform the real
+ // finite source passage; same-model continuity is covered by model cases.
+ const xrKey=imageKey(caschlatsch,'xr-guidance');expect(xrKey).not.toBe(system.stage.key);
+ const toXR=tracePassage(page,xrKey);await select(page,'xr-guidance');const xrPassage=await toXR;actualPassage(xrPassage,1);
+ await expect(page.locator('[data-project-media="xr-guidance"][data-project-media-active] [data-project-media-poster]')).toHaveAttribute('src',caschlatsch.sections.find(section=>section.id==='xr-guidance').media[0].src);
+ expect(xrPassage.stage.sequence).toBeGreaterThan(system.stage.sequence);
+ const toSystem=tracePassage(page,imageKey(caschlatsch,'system'));await select(page,'system');const systemPassage=await toSystem;actualPassage(systemPassage,-1);
+ await expect(page.locator('[data-project-media="system"][data-project-media-active] [data-project-media-poster]')).toHaveAttribute('src',caschlatsch.sections.find(section=>section.id==='system').media[0].src);
+ expect(systemPassage.stage.sequence).toBeGreaterThan(xrPassage.stage.sequence);
+ await test.info().attach('Caschlatsch-original-portfolio-source-passages',{body:JSON.stringify({systemKey:system.stage.key,xrKey,xrPassage,systemPassage}),contentType:'application/json'});
  await select(page,'context');
  await page.waitForFunction(()=>{const stage=window.__globalBackground.inspect().driver.projectStudy.backdrop.stage;return stage.mode==='exit'&&stage.pose.opacity>0&&stage.pose.opacity<1;},null,{timeout:WAIT});
  const superseded=(await backdrop(page)).stage.request.id;

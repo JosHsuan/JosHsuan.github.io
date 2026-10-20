@@ -440,7 +440,7 @@ test('native cross-document handoff continues the same request id, and supersedi
  f.click('https://example.test/about/');const cancelledId=first.inspect().id;
  f.click('https://example.test/contact/');const id=first.inspect().id;
  assert.notEqual(id,cancelledId);assert.equal(first.inspect().history.filter(fact=>fact.id===cancelledId&&fact.phase==='cancelled').length,1);
- assert.equal(f.loader.hasAttribute('hidden'),false);f.page('pagehide');assert.equal(first.inspect().handedOff,true);assert.equal(f.timers.size,0);
+ assert.equal(f.loader.hasAttribute('hidden'),false);f.page('pagehide',true);assert.equal(first.inspect().handedOff,true);assert.equal(f.timers.size,0);
  const destination=environment({url:'https://example.test/contact/',storage:f.storage}),second=connect(t,destination);await flush();
  assert.equal(second.inspect().id,id);destination.loader.dispatchEvent(new Event('animationend'));assert.deepEqual(second.inspect().history.filter(fact=>fact.id===id).map(fact=>fact.phase),['requested','ready','revealing','entered']);
  f.page('pageshow',true);await flush();assert.equal(first.inspect().phase,'entered');assert.equal(first.inspect().history.filter(fact=>fact.id===id&&fact.phase==='entered').length,1);
@@ -532,7 +532,8 @@ test('blocked session storage preserves native navigation and explicitly cancels
 
 test('source disposal after a tracked pagehide cannot cancel the destination-owned request',async t=>{
  const f=environment(),manager=connect(t,f);await flush();f.loader.dispatchEvent(new Event('animationend'));
- f.click('https://example.test/about/');const id=manager.inspect().id;f.page('pagehide');manager.dispose();
+ f.click('https://example.test/about/');const id=manager.inspect().id,ticket=f.storage.get(SITE_HANDOFF_KEY);f.page('pagehide');
+ assert.equal(manager.inspect().disposed,true);assert.equal(manager.inspect().events.disposed,true);assert.equal(manager.inspect().events.nativeListeners,0);assert.equal(manager.inspect().events.scopes,0);assert.equal(f.storage.get(SITE_HANDOFF_KEY),ticket,'Permanent local cleanup cannot rewrite or cancel the serialized destination ticket');manager.dispose();
  assert.equal(manager.inspect().history.filter(fact=>fact.id===id&&fact.phase==='cancelled').length,0);assert.equal(manager.inspect().events.nativeListeners,0);
  const destination=environment({url:'https://example.test/about/',storage:f.storage}),arrival=connect(t,destination);await flush();destination.loader.dispatchEvent(new Event('animationend'));
  assert.equal(arrival.inspect().id,id);assert.deepEqual(phases(arrival),['requested','ready','revealing','entered']);
@@ -572,9 +573,26 @@ test('closed receipts never receive another terminal and unrecognizable handoff 
 
 test('BFCache after an interrupted arrival restores one readable document without reusing a cancelled request',async t=>{
  const font=deferred(),f=environment({fonts:font.promise}),manager=connect(t,f);const initial=manager.inspect().id;
- f.page('pagehide');assert.equal(manager.inspect().phase,'cancelled');font.resolve();await flush();f.advance(1);
+ f.page('pagehide',true);assert.equal(manager.inspect().phase,'cancelled');font.resolve();await flush();f.advance(1);
  f.page('pageshow',true);await flush();assert.equal(manager.inspect().phase,'entered');assert.notEqual(manager.inspect().id,initial);assert.equal(f.timers.size,0);
  assert.equal(manager.inspect().history.filter(fact=>fact.id===initial&&fact.phase==='cancelled').length,1);
+});
+
+test('nonpersisted departure closes local registries and pending readiness without a late reveal, handoff or resurrected document',async t=>{
+ const font=deferred(),f=environment({fonts:font.promise}),native=nativeReveal(f),manager=connect(t,f),initial=manager.inspect().id;
+ f.page('pagehide',false);assert.equal(manager.inspect().disposed,true);assert.equal(manager.inspect().phase,'cancelled');assert.equal(manager.inspect().reason,'page-hidden');assert.equal(manager.inspect().events.nativeListeners,0);assert.equal(manager.inspect().events.subscriptions,0);assert.equal(manager.inspect().events.scopes,0);assert.equal(f.content.hasAttribute('inert'),false);assert.equal(f.timers.size,0);assert.equal(native.frames.size,0);
+ const history=manager.inspect().history;font.resolve();await flush();f.page('pageshow',true);f.click('https://example.test/about/');f.loader.dispatchEvent(new Event('animationend'));f.advance(20000);manager.dispose();
+ assert.equal(manager.inspect().id,initial);assert.deepEqual(manager.inspect().history,history);assert.equal(f.storage.has(SITE_HANDOFF_KEY),false);assert.equal(native.calls.length,0);assert.equal(native.frames.size,0);
+});
+
+test('persisted and bare synthetic pagehide keep local navigation registered for its existing readable restoration path',async t=>{
+ for(const persisted of [true,undefined]){
+  const f=environment(),manager=connect(t,f);f.media.matches=true;await flush();const initial=manager.inspect().id;
+  if(persisted===undefined)f.win.dispatchEvent(new Event('pagehide'));else f.page('pagehide',persisted);
+  assert.equal(manager.inspect().disposed,false);assert.equal(manager.inspect().events.disposed,false);assert(manager.inspect().events.nativeListeners>0);
+  f.page('pageshow',true);await flush();assert.equal(manager.inspect().disposed,false);assert.equal(manager.inspect().phase,'entered');assert.notEqual(manager.inspect().id,initial);
+  manager.dispose();assert.equal(manager.inspect().events.nativeListeners,0);
+ }
 });
 
 test('synchronous disposal from a readiness observer cannot schedule a reveal after cancellation',async t=>{
