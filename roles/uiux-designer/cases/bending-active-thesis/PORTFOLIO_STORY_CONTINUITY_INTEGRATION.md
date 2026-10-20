@@ -57,9 +57,9 @@ lines without crop, resize, grading or AI reconstruction. The silent MP4 remux
 preserves encoded video packets, avcC, PTS/DTS and packet durations exactly.
 Repetition is an explicit website presentation choice; scroll does not seek or
 retime the source. The near-white film frame at 85.085 seconds and the differing
-`動畫199.mp4` variant are excluded from this selection. The prior physical
-machine footage and photographs remain protected historical files, with no
-active use in the corrected page. The owner's stated design/animation work and
+`動畫199.mp4` variant are excluded from this selection. The preceding release
+kept physical footage inactive; the owner follow-up below now adds two explicitly
+confirmed physical recordings. Original assets remain protected. The owner's stated design/animation work and
 the existing tutor, platform and photographic credits retain their separate
 roles. Integration pins and fresh built-browser acceptance are recorded below
 when verified.
@@ -73,6 +73,54 @@ introduced as a new public image. Existing cohort/partner/client/sponsor credits
 remain alongside the personal computational-design/XR contribution.
 
 ## Source identity and visual lifetime
+
+### Owner follow-up: actual manufacturing and Caschlatsch development
+
+The subsequent 20 October request adds actual physical manufacturing footage
+to Mode/s and expands Caschlatsch's XR development and voxel-to-beam logic.
+It does not replace the accepted edited-film imagery or relabel the machine
+simulation as physical evidence. The owner explicitly requests source-frame
+confirmation before the physical recording is selected. After viewing native
+screenshots, the owner confirms `RELAX.mov`'s actual machine operation, excludes
+its animated diagrams, and also permits the black-background physical take.
+The overhead recording is not selected. Existing publication authorization
+continues through the exact-artifact release gate.
+
+Caschlatsch's existing System and XR guidance sections gain the portfolio's
+five-class processing/geometry split, 26-direction voxel-centre beam axes,
+occupied-space/intersection checks, framed module infill, and the CAD-to-cloud
+assembly workflow. The original portfolio's physical pages 32–35 and verified
+owner-authored development history support the wording. The shared system and
+its two AR applications remain team work; the owner's module/beam/sequence
+interface and data-preparation contributions are stated directly. Five chapters,
+the six accepted photographs and their credits, and the existing public workflow
+graphic remain. Private code, portfolio pages, interface screenshots and CAD are
+not added as public media.
+
+The reviewed motion registry resolves an exact project/clip pair. It now contains
+seven approved clips: the five preceding sources plus two physical Mode/s
+recordings, each with its own identity, caption, poster, chapter and provenance.
+Mode/s retains its machine simulation in Making, adds Fabrication and Cutting,
+and then reaches Results: six story sections plus opening and credits.
+
+| New chapter / recording | Exact selection | Derivative and evidence |
+| --- | --- | --- |
+| Fabrication / `film-physical-cutting` | `RELAX.mov`, zero-based frames `[90,390)`; 3.003–13.013 seconds in the source, 300 frames / 10.010 seconds | Complete 1920 × 1080 source frames; original encoded packets, avcC and all 300 decoded frames match. Native relative timing is preserved with only a constant `-90090`-tick origin shift at `1/30000`. The film's existing title over the real cut remains; later inset animated-diagram passages are excluded. |
+| Cutting / `prototype-cutting-operation` | Complete `MVI_9109.MOV`, 522 frames / 20.88 seconds | Native 1920 × 1080, full range, original PTS/DTS and durations. Its 115,620,720-byte packet-remux exceeds GitHub's single-file limit, so the web derivative uses reviewed H264 CRF 16 / slow / High 4.1 settings. All-frame SSIM averages 0.99439509, minimum 0.992620. It is explicitly transcoded, with no pixel/encoded-packet identity claim. |
+
+Both silent MP4s use faststart and omit source metadata. They are respectively
+75,965,366 and 43,864,914 bytes. Both posters are lossless full-frame 1080p WebPs
+from source frames 150 and 250; nothing is enlarged or geometrically altered.
+Existing project-photography attribution remains separate from the new studio
+design/fabrication credits. The five preceding clips retain their complete
+native sequence guarantees. This excerpt and photographic-transcode permission
+cannot be applied to another source through public metadata alone.
+
+The existing model interval,
+exclusive playback ownership, native timing, background/evidence separation,
+source geometry and single Director clock remain required. With source selection
+confirmed, completion still requires built native-browser/visual checks, CI,
+same-artifact publication and live verification of the resulting candidate.
 
 A chapter is reading intent, not a new identity for an unchanged model. A model
 occupies one ordered continuous interval. Within it, actual source-view repaint

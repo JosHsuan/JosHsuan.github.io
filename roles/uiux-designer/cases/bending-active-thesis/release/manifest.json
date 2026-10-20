@@ -696,6 +696,26 @@
       "bytes": 3295317,
       "sha256": "7a0fc1e886eb5ba63ad766a9864980dc19c5c29b0b6e131077fffd0d6acf4c46",
       "source": "Owner-selected native studio film material; complete-frame lossless still or unchanged H264 stream derivative."
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/film-physical-cutting-poster.webp",
+      "bytes": 336130,
+      "sha256": "69ac4d151f485784a6a56a3c9029fb1caf5c5a08a199842309c2acdf5264f6f9"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/film-physical-cutting.mp4",
+      "bytes": 75965366,
+      "sha256": "cead2cc6381b29c094f061f9290a1b33854c544f68346fce94a15c5e193c94dc"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/prototype-cutting-operation-poster.webp",
+      "bytes": 602534,
+      "sha256": "5aa9e9845fee86fbfc1f9ee90279a63d908d47118ab51445cc705844294eec2b"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/prototype-cutting-operation.mp4",
+      "bytes": 43864914,
+      "sha256": "771aadc5fd14107b861c78e632cbaf4a5ac43253b3a343a6de8ed0feba3a716a"
     }
   ],
   "limits": [
@@ -706,6 +726,6 @@
   "xrStudySHA256": "3605cb7ed9abefc0721091d7883fdc765d0f0471af1b7d4db49f326228a68001",
   "contactSHA256": "c68b4bc45a3ecc13eeee55bae43f3cab75f2085a095a5084e1494f90c5695882",
   "xrWorkspaceSHA256": "41c48db687e71332240a002e0892141a7eac887c94740ef4c175cc4ccc4e1211",
-  "projectStudiesSHA256": "44b227acd792c691c1b5dc7e693b3073fb8f53d5a80f79fb70e4882f8a09940a",
-  "projectAssetsSHA256": "9410291dee8dcdf85f2366d315ac570ebec2ff9dc4fc32afe215c835b4d70c8d"
+  "projectStudiesSHA256": "565286449653b66dd33c2ea8fddb337e6c062a8bfb52fc6d08705f7f2b25c261",
+  "projectAssetsSHA256": "0446962dbbc1936b992420f1bccbc6678623750e941c268a958465823bc6e45d"
 }

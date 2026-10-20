@@ -28,7 +28,7 @@ function PrimaryVisual({image,chapter,prefix,opening=false,model,motion}){
    <p id={`${prefix}-${chapter}-caption`} className={styles.sourceCaption}>{source.caption}</p>
    <p id={`${prefix}-${chapter}-credit`} className={styles.credit}>{source.credit}</p>
    {motion?<>
-    <a className={styles.sourceLink} data-project-motion-source href={motion.src} target="_blank" rel="noreferrer">View animation <span aria-hidden="true">↗</span></a>
+    <a className={styles.sourceLink} data-project-motion-source href={motion.src} target="_blank" rel="noreferrer">{motion.kind==='recording'?'View recording':'View animation'} <span aria-hidden="true">↗</span></a>
     <SourceLink image={poster}/>
     <div className={styles.motionControls}>
      <button type="button" data-project-motion-toggle={motion.id} aria-pressed="false" hidden>Play recording</button>

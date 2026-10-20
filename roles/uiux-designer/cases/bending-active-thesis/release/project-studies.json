@@ -84,6 +84,46 @@
           ]
         },
         {
+          "id": "fabrication",
+          "label": "Fabrication",
+          "kind": "make",
+          "title": "Watch the tool meet the material.",
+          "paragraphs": [
+            "The studio film records a physical heat-cutting operation at the tool and foam interface. The selected excerpt shows the heated tip and polystyrene in contact as the cut develops.",
+            "My workflow connected the cutting profile and machine setup with material trials. This recorded operation brings the mechanism back to the surface it produces."
+          ],
+          "media": [
+            {
+              "src": "/assets/projects/mode-s-of-making/film-physical-cutting-poster.webp",
+              "width": 1920,
+              "height": 1080,
+              "alt": "Physical heat-cutting operation from the original studio film.",
+              "caption": "Physical heat-cutting operation from the original studio film.",
+              "credit": "Studio design and fabrication: Chia-Hsuan Chao / National Cheng Kung University."
+            }
+          ]
+        },
+        {
+          "id": "cutting",
+          "label": "Cutting",
+          "kind": "make",
+          "title": "Follow the prototype in operation.",
+          "paragraphs": [
+            "A separate workshop recording shows the built prototype cutting a mounted polystyrene workpiece. The shaped blank rotates between its holders while the heated cutting tool engages the surface.",
+            "The view makes the relationship between machine movement, the changing profile and the resulting texture visible at the scale of a single unit."
+          ],
+          "media": [
+            {
+              "src": "/assets/projects/mode-s-of-making/prototype-cutting-operation-poster.webp",
+              "width": 1920,
+              "height": 1080,
+              "alt": "Original recording of the physical rotary-cutting prototype machining a polystyrene workpiece.",
+              "caption": "Original recording of the physical rotary-cutting prototype machining a polystyrene workpiece.",
+              "credit": "Studio design and fabrication: Chia-Hsuan Chao / National Cheng Kung University."
+            }
+          ]
+        },
+        {
           "id": "results",
           "label": "Results",
           "kind": "make",
@@ -202,6 +242,50 @@
             "caption": "Full-machine rotary-cutting simulation from the original studio animation.",
             "credit": "Studio design and digital animation: Chia-Hsuan Chao / National Cheng Kung University.",
             "src": "/assets/projects/mode-s-of-making/film-machine-motion-poster.webp"
+          }
+        },
+        {
+          "id": "film-physical-cutting",
+          "kind": "recording",
+          "chapter": "fabrication",
+          "src": "/assets/projects/mode-s-of-making/film-physical-cutting.mp4",
+          "width": 1920,
+          "height": 1080,
+          "durationSeconds": 10.01,
+          "frameCount": 300,
+          "loop": true,
+          "alt": "Physical heat-cutting operation from the original studio film.",
+          "caption": "Physical heat-cutting operation from the original studio film.",
+          "credit": "Studio design and fabrication: Chia-Hsuan Chao / National Cheng Kung University.",
+          "poster": {
+            "src": "/assets/projects/mode-s-of-making/film-physical-cutting-poster.webp",
+            "width": 1920,
+            "height": 1080,
+            "alt": "Physical heat-cutting operation from the original studio film.",
+            "caption": "Physical heat-cutting operation from the original studio film.",
+            "credit": "Studio design and fabrication: Chia-Hsuan Chao / National Cheng Kung University."
+          }
+        },
+        {
+          "id": "prototype-cutting-operation",
+          "kind": "recording",
+          "chapter": "cutting",
+          "src": "/assets/projects/mode-s-of-making/prototype-cutting-operation.mp4",
+          "width": 1920,
+          "height": 1080,
+          "durationSeconds": 20.88,
+          "frameCount": 522,
+          "loop": true,
+          "alt": "Original recording of the physical rotary-cutting prototype machining a polystyrene workpiece.",
+          "caption": "Original recording of the physical rotary-cutting prototype machining a polystyrene workpiece.",
+          "credit": "Studio design and fabrication: Chia-Hsuan Chao / National Cheng Kung University.",
+          "poster": {
+            "src": "/assets/projects/mode-s-of-making/prototype-cutting-operation-poster.webp",
+            "width": 1920,
+            "height": 1080,
+            "alt": "Original recording of the physical rotary-cutting prototype machining a polystyrene workpiece.",
+            "caption": "Original recording of the physical rotary-cutting prototype machining a polystyrene workpiece.",
+            "credit": "Studio design and fabrication: Chia-Hsuan Chao / National Cheng Kung University."
           }
         }
       ]
@@ -1121,10 +1205,13 @@
           "id": "system",
           "label": "System",
           "kind": "system",
-          "title": "From voxels to beams.",
+          "title": "From voxels to a beam system.",
           "paragraphs": [
-            "I worked on voxel-based beam aggregation as part of the cohort. Spatial cells, beam directions and neighbouring relationships made the repeated timber elements part of a coordinated system.",
-            "The computational workflow connected this aggregation with module planning and fabrication data. COMPAS Timber and the shared CAD model carried information from geometric relationships toward the individual pieces to be made."
+            "I worked on the cohort's voxel-to-beam aggregation in Python and Grasshopper. We used spatial cells to keep beam placement tied to indexed positions and neighbouring cells, so the timber modules grew through explicit geometric rules.",
+            "The shared framework separated processing from geometry: ID managed voxel indexing and neighbour relationships, while Discrete Vector Generator supplied candidate directions. Voxel represented spatial cells, Beam the timber elements, and Layer groups of voxels.",
+            "A 26-direction discretisation converted this spatial map into beam axes through voxel centres. Stored voxel data tracked existing beams to control new intersections and avoid redundant crossings.",
+            "The module strategy combined an edge frame with orthogonal and diagonal supports, then varied the beam infill. Five-beam and 30-beam configurations explored different densities within that common frame.",
+            "My code work included separating the aggregation solver and ID/vector tools for Grasshopper, and refining occupied-voxel checks for the flying-beam problem. This development was part of the shared research that connected aggregation, module planning and fabrication."
           ],
           "media": [
             {
@@ -1151,11 +1238,12 @@
               "credit": "Original website diagram based on public ETH Zurich descriptions."
             }
           ],
-          "title": "Keep the next beam in view.",
+          "title": "Developing XR for multi-module assembly.",
           "paragraphs": [
-            "During production, I improved COMPAS XR for managing multiple assembly modules. Users could fetch and switch modules from a cloud server, identify the selected beam and follow the current step of the assembly sequence.",
-            "The app kept digital information available beside the physical work. Module selection and beam IDs helped connect the component in hand with its place in the shared assembly.",
-            "The wider workflow linked CAD, cloud data and AR visualisation. I developed multi-module management and the assembly-sequence interface within that collaborative system."
+            "During production, I improved COMPAS XR so users could select and switch assembly modules from a cloud server, track beam IDs and follow the assembly sequence in real time. The current module, selected beam and sequence step kept the interface tied to the component being assembled.",
+            "The shared workflow began with a COMPAS Timber assembly plan. Building plans and checklists were serialised as JSON, with OBJ files carrying mesh geometry. Firebase connected this CAD data to the AR applications, which retrieved and deserialised it for use beside the physical work.",
+            "The project's assembly and stacking applications supported different workshop tasks. Beam selection, orientation arrows and a floating-beam view helped inspect a component and its cutting features; scaling, three-axis rotation and stacking/assembly modes supported module inspection and positioning.",
+            "I also worked on the Rhino-to-COMPAS data preparation, including converting stacking planes into frames and preparing module building-plan and mesh exports. My multi-module and sequence-interface development sat within this collaborative CAD, cloud and XR production system."
           ]
         },
         {

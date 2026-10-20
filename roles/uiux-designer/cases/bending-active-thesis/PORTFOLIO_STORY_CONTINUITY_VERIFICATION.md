@@ -384,3 +384,38 @@ adds this run's actual timings and preserves the distinction between implemented
 operation and proposed timing receipts, coverage enforcement, partitioning,
 smoke and recovery work. A later documentation-only repository commit does not
 change the published application's `9608cdb` identity or require rebuilding it.
+
+## Follow-up: physical manufacturing and Caschlatsch development
+
+The owner confirms A (`RELAX.mov`, actual cutting only, excluding animated
+diagrams) and also permits B (the black-background physical recording). The
+overhead C recording is not selected. The follow-up preserves all 124 preceding
+pins and adds two native-1080p recordings and two lossless full-frame posters.
+A contains source frames `[90,390)`, 300 frames / 10.010 seconds, with exact
+encoded packets and relative native timing. B contains all 522 frames / 20.88
+seconds; its explicitly lossy CRF-16 derivative preserves native dimensions,
+full range and frame timing. Independent all-frame SSIM is 0.99439509 on average
+and 0.992620 at minimum. These measurements do not improve the source's softness
+or assert pixel identity for B. Both are shown separately from the retained
+machine simulation, with individual native play/pause and reading lifetimes.
+
+Caschlatsch's System and XR guidance copy now explains the portfolio's class
+responsibilities, 26-direction voxel axes, occupancy/intersection checks, beam
+infill and CAD/JSON/OBJ/cloud assembly workflow. Personal development work is
+stated within the named team; the accepted photographs, credits and other
+sections remain. The source review verifies the original portfolio and actual
+owner-authored development history without publishing private preparation code.
+
+Local preparation passes `pnpm check`, 40 focused CPU checks and the 252-file /
+128-pin public export. Chromium and mobile Chromium pass all six new physical
+decode/forward/reverse/pause executions against that export. All three Windows
+WebKit executions fail before first frame; an isolated native-video probe also
+rejects the unchanged machine simulation and both new recordings with
+`NotSupportedError` and `MEDIA_ERR_SRC_NOT_SUPPORTED` (code 4). The controller's
+original trace does not preserve the native exception; the separate probe
+establishes the rejection, not its underlying decoder cause. `canPlayType`
+reports `probably`, which does not prove playback. No assertion, retry count or
+readiness timeout is relaxed. Linux WebKit CI, final exact-artifact checks and
+live publication are still required for this follow-up. The preceding release's
+402-case acceptance does not accept this candidate, and no physical-device
+acceptance is inferred.

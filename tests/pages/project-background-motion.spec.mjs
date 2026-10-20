@@ -157,11 +157,11 @@ test('Caschlatsch photographs use actual finite forward/reverse passages, latest
  await expect(page.locator('[data-project-model-stage]')).toHaveCount(0);
 });
 
-for(const project of animated)test(`${project.shortTitle} decodes the pinned native recording with original dimensions, timing and advancing media time`,async({page})=>{
+for(const project of animated)for(const media of project.motionMedia)test(`${project.shortTitle} (${media.id}) decodes the pinned native recording with original dimensions, timing and advancing media time`,async({page})=>{
  // The existing Caustics source is 50 MB / 1.9 million vertices and prepares on
  // page open. Its native decode scenario shares the established source budget.
  if(project.model?.bytes>40000000)test.setTimeout(scenarioTimeout(180000));
- const media=project.motionMedia[0],requests=[];page.on('request',request=>{if(new URL(request.url()).pathname===media.src)requests.push(request.url());});
+ const requests=[];page.on('request',request=>{if(new URL(request.url()).pathname===media.src)requests.push(request.url());});
  await open(page,project);expect(requests).toEqual([]);await select(page,media.chapter);const video=await nativeVideo(page,media);expect(requests.length).toBeGreaterThan(0);
  if(project.id==='special-assemblies'){
   expect(media.loop).toBe(false);
@@ -176,6 +176,43 @@ for(const project of animated)test(`${project.shortTitle} decodes the pinned nat
   const replay=page.locator(`[data-project-motion-replay="${media.id}"]`);await expect(replay).toBeVisible();await replay.click();await playing(page,media);
   expect(await video.evaluate(node=>node.currentTime)).toBeLessThan(ended.duration-.2);expect((await mediaFacts(page,media.id)).ended).toBe(false);
  }
+ closed((await backdrop(page)).stage.history);
+});
+
+test('Mode/s physical recordings and simulation retain separate native times through forward, reverse and manual pause',async({page})=>{
+ test.setTimeout(scenarioTimeout(120000));
+ const mode=projects.find(project=>project.id==='mode-s-of-making');
+ const [simulation,film,prototype]=['film-machine-simulation','film-physical-cutting','prototype-cutting-operation'].map(id=>mode.motionMedia.find(media=>media.id===id));
+ await open(page,mode);
+ await page.evaluate(()=>{
+  const samples=window.__testModeNativeMedia=[];
+  for(const type of ['play','pause','playing','timeupdate'])document.addEventListener(type,event=>{
+   if(!event.target.matches?.('[data-project-motion-media]'))return;
+   samples.push({type:event.type,trusted:event.isTrusted,playing:[...document.querySelectorAll('[data-project-motion-media]')].filter(video=>!video.paused).map(video=>video.dataset.projectMotionId)});
+  },{capture:true,passive:true});
+ });
+ await select(page,simulation.chapter);await nativeVideo(page,simulation);
+ await select(page,film.chapter);const filmVideo=await nativeVideo(page,film);
+ await expect(page.locator(`[data-project-motion-source][href="${film.src}"]`)).toContainText('View recording');
+ await page.locator(`[data-project-motion-toggle="${film.id}"]`).click();
+ await expect.poll(()=>filmVideo.evaluate(video=>video.paused),{timeout:WAIT}).toBe(true);
+ const filmTime=await filmVideo.evaluate(video=>video.currentTime);
+ await select(page,prototype.chapter);const prototypeVideo=await nativeVideo(page,prototype);
+ expect(await filmVideo.evaluate(video=>video.currentTime)).toBe(filmTime);
+ await expect(page.locator(`[data-project-motion-source][href="${prototype.src}"]`)).toContainText('View recording');
+ await select(page,film.chapter);await hold(page,`video:${film.id}`);
+ expect(await filmVideo.evaluate(video=>video.paused)).toBe(true);
+ expect(await filmVideo.evaluate(video=>video.currentTime)).toBe(filmTime);
+ const prototypeTime=await prototypeVideo.evaluate(video=>video.currentTime);
+ await page.locator(`[data-project-motion-toggle="${film.id}"]`).click();await nativeVideo(page,film);
+ await selectWithKeyboard(page,simulation.chapter);await nativeVideo(page,simulation);
+ expect(await prototypeVideo.evaluate(video=>video.currentTime)).toBe(prototypeTime);
+ await select(page,prototype.chapter);await nativeVideo(page,prototype);
+ const samples=await page.evaluate(()=>window.__testModeNativeMedia);
+ expect(samples.some(sample=>sample.trusted&&sample.type==='playing'&&sample.playing.includes(film.id))).toBe(true);
+ expect(samples.some(sample=>sample.trusted&&sample.type==='playing'&&sample.playing.includes(prototype.id))).toBe(true);
+ for(const sample of samples)expect(sample.playing.length,'Only one actual native video plays at a time').toBeLessThanOrEqual(1);
+ await test.info().attach('Mode-native-media-forward-reverse-pause',{body:JSON.stringify({filmTime,prototypeTime,samples}),contentType:'application/json'});
  closed((await backdrop(page)).stage.history);
 });
 

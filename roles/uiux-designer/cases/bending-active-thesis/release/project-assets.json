@@ -75,7 +75,7 @@
         "sha256": "8b7a0d0682852cf4aff31cb90f60621d11f804640738badd17a3868e43d3bb60",
         "locator": {
           "frameIndex": 0,
-          "timestampSeconds": 0.0
+          "timestampSeconds": 0
         },
         "nativeDimensions": [
           4096,
@@ -98,7 +98,7 @@
         "resize": null,
         "upscaled": false,
         "selectedFrame": 0,
-        "timestampSeconds": 0.0,
+        "timestampSeconds": 0,
         "decodedRGBExact": true,
         "encoding": {
           "format": "WebP",
@@ -125,7 +125,7 @@
         "sha256": "455c2f23a8d5084e739552a0cdebe46f19851490beb5fd66967e90c1b109ef62",
         "locator": {
           "frameIndex": 75,
-          "timestampSeconds": 3.0
+          "timestampSeconds": 3
         },
         "nativeDimensions": [
           4096,
@@ -148,7 +148,7 @@
         "resize": null,
         "upscaled": false,
         "selectedFrame": 75,
-        "timestampSeconds": 3.0,
+        "timestampSeconds": 3,
         "decodedRGBExact": true,
         "encoding": {
           "format": "WebP",
@@ -2192,6 +2192,104 @@
       "credit": "MAS DFab Group6: JosHsuan Chao / Kevin Seav / Megi Sinani. Individual media authors are not separately identified.",
       "authorStatus": "Project/team/employer attribution preserved; unrecorded individual media authors remain unidentified.",
       "rightsBasis": "Owner selected this exact source frame as the scoped project motion poster; no open licence is asserted."
+    },
+    {
+      "id": "film-physical-cutting-poster",
+      "projectId": "mode-s-of-making",
+      "path": "assets/projects/mode-s-of-making/film-physical-cutting-poster.webp",
+      "src": "/assets/projects/mode-s-of-making/film-physical-cutting-poster.webp",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 336130,
+      "sha256": "69ac4d151f485784a6a56a3c9029fb1caf5c5a08a199842309c2acdf5264f6f9",
+      "credit": "Studio design and fabrication: Chia-Hsuan Chao / National Cheng Kung University.",
+      "source": {
+        "file": "RELAX.mov",
+        "bytes": 766777591,
+        "sha256": "54d91bf859b86b46bc5f9a4d19a16244ebcd0ff8f4b46e4d51ce22d778a9e789",
+        "locator": {
+          "frameIndex": 150,
+          "timestampSeconds": 5.005
+        },
+        "nativeDimensions": [
+          1920,
+          1080
+        ],
+        "decodedPNGSHA256": "4ac33cffab7e9e23a5d4c26a79f4ca784bb4d61eb44cb487dc1611114fd75d29",
+        "identityReview": "Owner confirmed the original physical machine footage; this full-frame still is decoded from that actual recording."
+      },
+      "processing": {
+        "method": "Native complete-frame decode to RGB PNG, then lossless WebP; no resize, crop, retouch or AI.",
+        "inputPixels": [
+          1920,
+          1080
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          1920,
+          1080
+        ],
+        "resize": null,
+        "upscaled": false,
+        "selectedFrame": 150,
+        "decodedRGBExact": true,
+        "encoding": {
+          "format": "WebP",
+          "lossless": true,
+          "method": 6
+        },
+        "metadata": "EXIF/XMP omitted"
+      },
+      "authorStatus": "Owner-confirmed studio design and fabrication; existing project-photography credit remains separate."
+    },
+    {
+      "id": "prototype-cutting-operation-poster",
+      "projectId": "mode-s-of-making",
+      "path": "assets/projects/mode-s-of-making/prototype-cutting-operation-poster.webp",
+      "src": "/assets/projects/mode-s-of-making/prototype-cutting-operation-poster.webp",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 602534,
+      "sha256": "5aa9e9845fee86fbfc1f9ee90279a63d908d47118ab51445cc705844294eec2b",
+      "credit": "Studio design and fabrication: Chia-Hsuan Chao / National Cheng Kung University.",
+      "source": {
+        "file": "MVI_9109.MOV",
+        "bytes": 119726396,
+        "sha256": "0dfff18451db42602266d07fbdce50ef24f3e7aa87f62ca0c54a344ff18c841b",
+        "locator": {
+          "frameIndex": 250,
+          "timestampSeconds": 10
+        },
+        "nativeDimensions": [
+          1920,
+          1080
+        ],
+        "decodedPNGSHA256": "50e23154bab522ad1225e9c776a86b2f6cfb2b0cbe9963a6ce0df122368b3092",
+        "identityReview": "Owner confirmed the original physical machine footage; this full-frame still is decoded from that actual recording."
+      },
+      "processing": {
+        "method": "Native complete-frame decode to RGB PNG, then lossless WebP; no resize, crop, retouch or AI.",
+        "inputPixels": [
+          1920,
+          1080
+        ],
+        "cropPixels": null,
+        "preResizePixels": [
+          1920,
+          1080
+        ],
+        "resize": null,
+        "upscaled": false,
+        "selectedFrame": 250,
+        "decodedRGBExact": true,
+        "encoding": {
+          "format": "WebP",
+          "lossless": true,
+          "method": 6
+        },
+        "metadata": "EXIF/XMP omitted"
+      },
+      "authorStatus": "Owner-confirmed studio design and fabrication; existing project-photography credit remains separate."
     }
   ],
   "highResolutionReferences": [
@@ -2241,7 +2339,7 @@
       "processing": {
         "decimation": false,
         "deformation": false,
-        "maxFloat32PositionErrorMeters": 2.95639037695139e-08,
+        "maxFloat32PositionErrorMeters": 2.95639037695139e-8,
         "compression": {
           "encoding": "EXT_meshopt_compression v0",
           "decodedByteExact": true,
@@ -2358,7 +2456,7 @@
       "processing": {
         "decimation": false,
         "deformation": false,
-        "maxFloat32PositionErrorMeters": 4.730224603122224e-07,
+        "maxFloat32PositionErrorMeters": 4.730224603122224e-7,
         "compression": {
           "encoding": "EXT_meshopt_compression v0",
           "decodedByteExact": true,
@@ -2476,7 +2574,7 @@
       "processing": {
         "decimation": false,
         "deformation": false,
-        "maxFloat32PositionErrorMeters": 2.9739873563805475e-08,
+        "maxFloat32PositionErrorMeters": 2.9739873563805475e-8,
         "compression": {
           "encoding": "EXT_meshopt_compression v0",
           "decodedByteExact": true,
@@ -2712,7 +2810,7 @@
       "processing": {
         "decimation": false,
         "deformation": false,
-        "maxFloat32PositionErrorMeters": 1.5255199002695008e-08,
+        "maxFloat32PositionErrorMeters": 1.5255199002695008e-8,
         "compression": {
           "encoding": "none",
           "decodedByteExact": true,
@@ -3240,6 +3338,224 @@
       "credit": "MAS DFab Group6: JosHsuan Chao / Kevin Seav / Megi Sinani. Individual media authors are not separately identified.",
       "authorStatus": "Project/team/employer attribution is preserved; individual media authors not recorded in the source remain unidentified.",
       "rightsBasis": "Owner selected this exact source and scoped public derivative for the named project; no open licence is asserted."
+    },
+    {
+      "id": "film-physical-cutting",
+      "kind": "recording",
+      "projectId": "mode-s-of-making",
+      "path": "assets/projects/mode-s-of-making/film-physical-cutting.mp4",
+      "src": "/assets/projects/mode-s-of-making/film-physical-cutting.mp4",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 75965366,
+      "sha256": "cead2cc6381b29c094f061f9290a1b33854c544f68346fce94a15c5e193c94dc",
+      "durationSeconds": 10.01,
+      "frameCount": 300,
+      "loop": true,
+      "chapter": "fabrication",
+      "source": {
+        "file": "RELAX.mov",
+        "bytes": 766777591,
+        "sha256": "54d91bf859b86b46bc5f9a4d19a16244ebcd0ff8f4b46e4d51ce22d778a9e789",
+        "sourceMeaning": "Selected continuous physical cutting excerpt from the owner-confirmed edited studio film; animated diagram passages are excluded.",
+        "sourceUnchangedSHA256BeforeAfter": true,
+        "intrinsicGIFLoopExtension": null,
+        "loopPolicy": "No intrinsic movie loop instruction; repeat is an explicit website presentation policy. Native media time is unchanged; no chapter advance on ended.",
+        "nativeFrameRate": "30000/1001"
+      },
+      "processing": {
+        "fullNativeSequence": false,
+        "crop": null,
+        "trim": {
+          "startFrame": 90,
+          "endFrameExclusive": 390,
+          "sourceFrameCount": 3603,
+          "startPTSTicks": 90090,
+          "endPTSTicks": 390390,
+          "timeBase": "1/30000"
+        },
+        "retime": null,
+        "resize": null,
+        "upscaled": false,
+        "geometryDeformation": false,
+        "pad": {
+          "rightPixels": 0,
+          "bottomPixels": 0,
+          "color": null,
+          "sourcePixelBounds": {
+            "x": 0,
+            "y": 0,
+            "width": 1920,
+            "height": 1080
+          }
+        },
+        "frameCountExact": true,
+        "allFramePTSExact": false,
+        "allFrameDurationsExact": true,
+        "finalFrameDurationExact": true,
+        "finalFrameDurationTicks": 1001,
+        "finalFrameDurationTimeBase": "1/30000",
+        "absolutePTSOriginUnchanged": false,
+        "audio": "All source audio omitted.",
+        "metadata": "Source metadata and chapters omitted; no private paths in MP4 metadata.",
+        "faststartVerified": true,
+        "loop": true,
+        "loopPolicy": "No intrinsic movie loop instruction; repeat is an explicit website presentation policy. Native media time is unchanged; no chapter advance on ended.",
+        "noChapterAdvanceOnEnded": true,
+        "method": "Exact source-frame interval remux of the original H264 bitstream. All selected encoded packets, avcC and decoded frames are identical; only a constant timestamp-origin rebase is applied. Source-authored title over actual footage remains; no animated diagram is selected.",
+        "encodedVideoPacketsByteExact": true,
+        "allPacketPTSExact": false,
+        "allPacketDTSExact": false,
+        "allPacketDurationsExact": true,
+        "avcCExtradataByteExact": true,
+        "identityTrackMatrixExact": true,
+        "trackMatrix": [
+          65536,
+          0,
+          0,
+          0,
+          65536,
+          0,
+          0,
+          0,
+          1073741824
+        ],
+        "sourceColorRangePreserved": true,
+        "colorRange": "tv/limited",
+        "pixelFormat": "yuv420p",
+        "videoCodec": "h264",
+        "codecTag": "avc1",
+        "transcoded": false,
+        "nativeBrowserAcceptance": "Source verification only; native browser and release acceptance are recorded separately.",
+        "nativeFrameRate": "30000/1001",
+        "sourceColorSpace": "bt709",
+        "sourceColorTransfer": "bt709",
+        "sourceColorPrimaries": "bt709",
+        "decodedFramesByteExact": true,
+        "timestampRebase": {
+          "offsetTicks": -90090,
+          "timeBase": "1/30000"
+        },
+        "allRelativeFramePTSExact": true,
+        "allRelativePacketPTSExact": true,
+        "allRelativePacketDTSExact": true
+      },
+      "alt": "Physical heat-cutting operation from the original studio film.",
+      "caption": "Physical heat-cutting operation from the original studio film.",
+      "credit": "Studio design and fabrication: Chia-Hsuan Chao / National Cheng Kung University.",
+      "authorStatus": "Owner-confirmed studio design and fabrication; no claim of separate camera authorship.",
+      "rightsBasis": "Owner explicitly confirmed edited-film physical operation and black-background prototype footage for this project; no open licence is asserted."
+    },
+    {
+      "id": "prototype-cutting-operation",
+      "kind": "recording",
+      "projectId": "mode-s-of-making",
+      "path": "assets/projects/mode-s-of-making/prototype-cutting-operation.mp4",
+      "src": "/assets/projects/mode-s-of-making/prototype-cutting-operation.mp4",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 43864914,
+      "sha256": "771aadc5fd14107b861c78e632cbaf4a5ac43253b3a343a6de8ed0feba3a716a",
+      "durationSeconds": 20.88,
+      "frameCount": 522,
+      "loop": true,
+      "chapter": "cutting",
+      "source": {
+        "file": "MVI_9109.MOV",
+        "bytes": 119726396,
+        "sha256": "0dfff18451db42602266d07fbdce50ef24f3e7aa87f62ca0c54a344ff18c841b",
+        "sourceMeaning": "Complete original black-background physical prototype cutting recording.",
+        "sourceUnchangedSHA256BeforeAfter": true,
+        "intrinsicGIFLoopExtension": null,
+        "loopPolicy": "No intrinsic movie loop instruction; repeat is an explicit website presentation policy. Native media time is unchanged; no chapter advance on ended.",
+        "nativeFrameRate": "25/1"
+      },
+      "processing": {
+        "fullNativeSequence": true,
+        "crop": null,
+        "trim": null,
+        "retime": null,
+        "resize": null,
+        "upscaled": false,
+        "geometryDeformation": false,
+        "pad": {
+          "rightPixels": 0,
+          "bottomPixels": 0,
+          "color": null,
+          "sourcePixelBounds": {
+            "x": 0,
+            "y": 0,
+            "width": 1920,
+            "height": 1080
+          }
+        },
+        "frameCountExact": true,
+        "allFramePTSExact": true,
+        "allFrameDurationsExact": true,
+        "finalFrameDurationExact": true,
+        "finalFrameDurationTicks": 1000,
+        "finalFrameDurationTimeBase": "1/25000",
+        "absolutePTSOriginUnchanged": true,
+        "audio": "All source audio omitted.",
+        "metadata": "Source metadata and chapters omitted; no private paths in MP4 metadata.",
+        "faststartVerified": true,
+        "loop": true,
+        "loopPolicy": "No intrinsic movie loop instruction; repeat is an explicit website presentation policy. Native media time is unchanged; no chapter advance on ended.",
+        "noChapterAdvanceOnEnded": true,
+        "method": "High-quality native-resolution H264 transcode of the complete original physical recording. All frame times, durations, dimensions and full range are preserved. Encoded packets, avcC and decoded pixels are not claimed byte-identical; the all-frame SSIM receipt quantifies compression.",
+        "encodedVideoPacketsByteExact": false,
+        "allPacketPTSExact": true,
+        "allPacketDTSExact": true,
+        "allPacketDurationsExact": true,
+        "avcCExtradataByteExact": false,
+        "identityTrackMatrixExact": true,
+        "trackMatrix": [
+          65536,
+          0,
+          0,
+          0,
+          65536,
+          0,
+          0,
+          0,
+          1073741824
+        ],
+        "sourceColorRangePreserved": true,
+        "colorRange": "pc/full",
+        "pixelFormat": "yuvj420p",
+        "videoCodec": "h264",
+        "codecTag": "avc1",
+        "transcoded": true,
+        "nativeBrowserAcceptance": "Source verification only; native browser and release acceptance are recorded separately.",
+        "nativeFrameRate": "25/1",
+        "sourceColorSpace": "smpte170m",
+        "sourceColorTransfer": "bt709",
+        "sourceColorPrimaries": "bt709",
+        "decodedFramesByteExact": false,
+        "transcodeRecipe": {
+          "encoder": "libx264",
+          "crf": 16,
+          "preset": "slow",
+          "profile": "High",
+          "level": 41,
+          "bFrames": 0,
+          "refs": 4
+        },
+        "quality": {
+          "metric": "SSIM",
+          "comparedFrames": 522,
+          "allFramesCompared": true,
+          "mean": 0.9943950919540229,
+          "minimumFrame": 0.99262,
+          "maximumFrame": 0.997528,
+          "statsSHA256": "0a461b6a2af10b49885b45347d8ba9fcf4c5367571c75818378d0c9d265a5950"
+        }
+      },
+      "alt": "Original recording of the physical rotary-cutting prototype machining a polystyrene workpiece.",
+      "caption": "Original recording of the physical rotary-cutting prototype machining a polystyrene workpiece.",
+      "credit": "Studio design and fabrication: Chia-Hsuan Chao / National Cheng Kung University.",
+      "authorStatus": "Owner-confirmed studio design and fabrication; no claim of separate camera authorship.",
+      "rightsBasis": "Owner explicitly confirmed edited-film physical operation and black-background prototype footage for this project; no open licence is asserted."
     }
   ]
 }
