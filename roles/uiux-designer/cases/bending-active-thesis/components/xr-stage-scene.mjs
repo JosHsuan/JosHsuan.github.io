@@ -6,6 +6,7 @@ import {acquireVideo} from '../runtime/site/video-resource.mjs';
 import {createXRStageEnvironment} from './xr-stage-environment.mjs';
 
 const abortError=()=>new DOMException('XR stage released','AbortError');
+const boundedShaderLog=read=>{try{return String(read()??'').slice(0,2048);}catch(error){return String(error?.message??error).slice(0,2048);}};
 const phoneChapter=chapter=>['adapt','assemble','join'].includes(chapter);
 const sourcePoses={overview:[.72,.36,1],context:[.52,.29,1],method:[.92,.28,1],model:[.72,.36,1],making:[.55,.3,1],credits:[.72,.36,1.1]};
 
@@ -63,6 +64,7 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
  let state={chapter:'overview',azimuth:0,elevation:0,paused:false},size={width:0,height:0},pose=null;
  let gpuReason=null,mediaReason=null,draws=0,mediaFrames=0,lastPaintKey='',revision=null,vertices=0,triangles=0,shaderError=false,mode='poster';
  let contextListener=null,mediaTime=null,mediaPending=false,successfulPaint=false,selection=null,renderView=null;
+ let lastRenderFailure=null,shaderLogs=null;
  let drawCounts={source:0,phoneBody:0,phoneScreen:0,stage:0};
  const raycaster=new T.Raycaster(),ndc=new T.Vector2(),manager=new T.LoadingManager();
  const nativeNodes=new Map(stages.map(stage=>[stage.id,host.querySelector(`[data-xr-native-phone="${stage.id}"]`)]));
@@ -121,21 +123,38 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
   camera.setViewOffset(size.width,size.height,renderView.offsetX,renderView.offsetY,renderView.width,renderView.height);camera.lookAt(...pose.target);camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
   Object.assign(renderer.domElement.style,{inset:'auto',left:renderView.left+'px',top:renderView.top+'px',width:renderView.width+'px',height:renderView.height+'px'});
  }
+ function rememberRenderFailure(error,operation){
+  const caught={operation,name:String(error?.name??'Error'),message:String(error?.message??error).slice(0,2048)};
+  try{
+   lastRenderFailure={...caught,state:{...state},viewport:{...size},pose:pose?structuredClone(pose):null,renderView:renderView?{...renderView}:null,
+    budget:budget?structuredClone(budget.inspect()):null,drawCounts:{...drawCounts},rendererCalls:renderer?.info.render.calls??null,
+    contextLost:renderer?.getContext().isContextLost()??null,shaderError,shaderLogs:shaderLogs?{...shaderLogs}:null,
+    environment:environment?structuredClone(environment.inspect()):null};
+  }catch(diagnosticError){lastRenderFailure={...caught,diagnosticError:String(diagnosticError?.message??diagnosticError).slice(0,2048)};}
+ }
  function draw(force=false){
   if(disposed||!renderer||!size.width||!size.height)return;
   const isPhone=phoneChapter(state.chapter);if(isPhone&&!phone)return;if(!isPhone&&!support)return;
   const key=JSON.stringify([size,state.chapter,state.azimuth,state.elevation,isPhone?mediaFrames:0]);if(!force&&key===lastPaintKey&&successfulPaint)return;
+  let operation='context-before';
   try{
-   if(renderer.getContext().isContextLost())return fallbackGPU('context-lost');
+   if(renderer.getContext().isContextLost()){rememberRenderFailure(new Error('XR context lost before draw'),operation);return fallbackGPU('context-lost');}
+   operation='source-visibility';
    gltf.scene.visible=!isPhone;if(phone)phone.group.visible=isPhone;
+   operation='camera';
    applyPose(isPhone?phone.support:support);
+   operation='budget';
    budget.sync(renderView.width,renderView.height);
+   operation='environment';
    environment?.update({camera,chapter:state.chapter,bounds:isPhone?phone.bounds:model.bounds,viewportWidth:size.width,renderView,drawingBuffer:{width:renderer.domElement.width,height:renderer.domElement.height}});
+   operation='render';
    drawCounts={source:0,phoneBody:0,phoneScreen:0,stage:0};renderer.render(scene,camera);
-   if(renderer.getContext().isContextLost())return fallbackGPU('context-lost');
+   operation='context-after';
+   if(renderer.getContext().isContextLost()){rememberRenderFailure(new Error('XR context lost after draw'),operation);return fallbackGPU('context-lost');}
+   operation='participation';
    if(!xrStagePaintReady({phone:isPhone,shaderError,calls:renderer.info.render.calls,...drawCounts}))throw Error('XR source or recorded screen did not paint');
    lastPaintKey=key;draws++;successfulPaint=true;host.dataset.xrScenePainted=isPhone?'phone':'model';announce(isPhone?'webgl-phone':'webgl-model');
-  }catch{fallbackGPU(renderer?.getContext().isContextLost()?'context-lost':'render-unavailable');}
+  }catch(error){rememberRenderFailure(error,operation);fallbackGPU(renderer?.getContext().isContextLost()?'context-lost':'render-unavailable');}
  }
  function nextFrame(){
   if(disposed||!renderer||!activeStage||state.paused||!mediaHandle||frameCallback!==null)return;
@@ -191,7 +210,7 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
  try{
   try{
    renderer=createRenderer({alpha:true,antialias:true,powerPreference:'default'});renderer.setClearColor(0,0);renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1;
-   renderer.debug.onShaderError=()=>{shaderError=true;};const canvas=renderer.domElement;canvas.dataset.xrWebglCanvas='';canvas.setAttribute('aria-hidden','true');Object.assign(canvas.style,{position:'absolute',inset:'0',width:'100%',height:'100%',display:'block',pointerEvents:'none'});
+   renderer.debug.onShaderError=(gl,program,vertex,fragment)=>{shaderError=true;shaderLogs={program:boundedShaderLog(()=>gl.getProgramInfoLog(program)),vertex:boundedShaderLog(()=>gl.getShaderInfoLog(vertex)),fragment:boundedShaderLog(()=>gl.getShaderInfoLog(fragment))};};const canvas=renderer.domElement;canvas.dataset.xrWebglCanvas='';canvas.setAttribute('aria-hidden','true');Object.assign(canvas.style,{position:'absolute',inset:'0',width:'100%',height:'100%',display:'block',pointerEvents:'none'});
    contextListener=event=>{event.preventDefault();fallbackGPU('context-lost');};canvas.addEventListener('webglcontextlost',contextListener);
    budget=createRendererBudget(renderer,()=>({deviceDpr:win.devicePixelRatio||1,pixelBudget:phoneChapter(state.chapter)?RESEARCH_PHONE_PIXELS:RESEARCH_MODEL_PIXELS}));
    scene=new T.Scene();camera=new T.PerspectiveCamera();scene.add(new T.HemisphereLight('#d8e9f4','#484b40',2));
@@ -227,7 +246,7 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
     const rect=renderer.domElement.getBoundingClientRect();if(clientX<rect.left||clientX>rect.right||clientY<rect.top||clientY>rect.bottom)return false;ndc.set((clientX-rect.left)/rect.width*2-1,-(clientY-rect.top)/rect.height*2+1);raycaster.setFromCamera(ndc,camera);
     return raycaster.intersectObject(gltf.scene,true).length?{source:true,kind:'model'}:false;
    },
-   inspect:()=>({mode,chapter:state.chapter,successfulPaint,sourceRevision:revision,sourceUnits:model.sourceUnits,webUnits:model.webUnits,vertices,triangles,pose,view:{azimuth:state.azimuth,elevation:state.elevation},sourceTransforms:gltf?.scene.children.map(node=>({position:node.position.toArray(),scale:node.scale.toArray(),quaternion:node.quaternion.toArray()})),surface:renderer?{draws,calls:renderer.info.render.calls,sourceCalls:drawCounts.source,phoneCalls:drawCounts.phoneBody+drawCounts.phoneScreen,phoneBodyCalls:drawCounts.phoneBody,phoneScreenCalls:drawCounts.phoneScreen,stageCalls:drawCounts.stage,environment:environment?.inspect()??null,viewport:renderView?{...renderView}:null,clearAlpha:renderer.getClearAlpha(),budget:budget.inspect(),pixelBudget:phoneChapter(state.chapter)?RESEARCH_PHONE_PIXELS:RESEARCH_MODEL_PIXELS}:null,media:{stage:activeStage?.id??null,pending:mediaPending,frames:mediaFrames,time:mediaTime,native:mediaHandle?.inspect()??null,reason:mediaReason,position:activeStage?videos[activeStage.id].currentTime:null},fallbackReason:gpuReason,paused:state.paused,disposed}),
+   inspect:()=>({mode,chapter:state.chapter,successfulPaint,sourceRevision:revision,sourceUnits:model.sourceUnits,webUnits:model.webUnits,vertices,triangles,pose,view:{azimuth:state.azimuth,elevation:state.elevation},sourceTransforms:gltf?.scene.children.map(node=>({position:node.position.toArray(),scale:node.scale.toArray(),quaternion:node.quaternion.toArray()})),surface:renderer?{draws,calls:renderer.info.render.calls,sourceCalls:drawCounts.source,phoneCalls:drawCounts.phoneBody+drawCounts.phoneScreen,phoneBodyCalls:drawCounts.phoneBody,phoneScreenCalls:drawCounts.phoneScreen,stageCalls:drawCounts.stage,environment:environment?.inspect()??null,viewport:renderView?{...renderView}:null,clearAlpha:renderer.getClearAlpha(),budget:budget.inspect(),pixelBudget:phoneChapter(state.chapter)?RESEARCH_PHONE_PIXELS:RESEARCH_MODEL_PIXELS}:null,media:{stage:activeStage?.id??null,pending:mediaPending,frames:mediaFrames,time:mediaTime,native:mediaHandle?.inspect()??null,reason:mediaReason,position:activeStage?videos[activeStage.id].currentTime:null},fallbackReason:gpuReason,lastRenderFailure,paused:state.paused,disposed}),
    dispose,
   };
  }catch(error){dispose();throw error;}

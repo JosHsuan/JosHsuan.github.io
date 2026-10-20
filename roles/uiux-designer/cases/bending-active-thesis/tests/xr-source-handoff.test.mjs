@@ -157,4 +157,7 @@ test('latest-portfolio visual and all selected full-frame research figures agree
  assert.deepEqual(study.authors,['Chia-Hsuan Chao','Wataru Nomura']);
  assert.match(study.sourceNote,/\bI\b/);assert.match(study.sourceNote,/Wataru Nomura/);
  assert.doesNotMatch(study.sourceNote,/portfolio|VerFacade|Individual media authorship is not assigned/i,'Public prose states the reviewed contribution and collaborators directly');
+ const workspace=JSON.parse(await readFile(new URL('../release/xr-workspace.json',import.meta.url),'utf8'));
+ assert.match(workspace.credit,/Chia-Hsuan Chao/);assert.match(workspace.credit,/Wataru Nomura/);
+ assert.doesNotMatch(workspace.credit,/portfolio|individual (?:model|media) author(?:ship)?[^.]{0,80}(?:not (?:separately )?recorded|not assigned)/i,'The visible workspace credit names the research collaborators without private authorship-review prose');
 });

@@ -57,7 +57,17 @@ async function scrollChapter(page,chapter){
  await viewportFits(page);
 }
 async function modelReady(page,chapter='overview'){
- await page.waitForFunction(chapter=>{const state=document.querySelector('[data-xr-stage]')?.__xrStage?.inspect();return state?.phase==='ready'&&state.chapter===chapter&&state.resource?.chapter===chapter&&state.resource.mode==='webgl-model'&&state.resource.successfulPaint;},chapter,{timeout:WAIT});
+ try{
+  await page.waitForFunction(chapter=>{const state=document.querySelector('[data-xr-stage]')?.__xrStage?.inspect();return state?.phase==='failed'||!!state?.resource?.fallbackReason||state?.phase==='ready'&&state.chapter===chapter&&state.resource?.chapter===chapter&&state.resource.mode==='webgl-model'&&state.resource.successfulPaint;},chapter,{timeout:WAIT});
+  const current=await facts(page);
+  if(current.phase!=='ready'||current.chapter!==chapter||current.resource?.chapter!==chapter||current.resource?.mode!=='webgl-model'||!current.resource?.successfulPaint){
+   await test.info().attach('xr-model-readiness-failure',{body:JSON.stringify({expectedChapter:chapter,observed:current},null,2),contentType:'application/json'});
+   expect(current).toMatchObject({phase:'ready',chapter,resource:{chapter,mode:'webgl-model',successfulPaint:true}});
+  }
+ }catch(error){
+  try{await test.info().attach('xr-model-readiness-diagnostics',{body:JSON.stringify({expectedChapter:chapter,observed:await facts(page)},null,2),contentType:'application/json'});}catch{/* Preserve the original failure if the test deadline already closed the page. */}
+  throw error;
+ }
  await settled(page,chapter);
 }
 async function phoneReady(page,id,{native=false}={}){

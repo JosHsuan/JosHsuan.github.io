@@ -17,11 +17,16 @@ class Video{
 }
 function renderer(){
  const canvas=new Canvas(),context={lost:false,isContextLost(){return this.lost;}};let width=1,height=1,dpr=1;
- return{domElement:canvas,debug:{},capabilities:{maxTextureSize:8192},info:{render:{calls:0}},
+ return{domElement:canvas,debug:{},capabilities:{maxTextureSize:8192},info:{render:{calls:0}},failure:null,shaderLogs:null,skipSource:false,disposed:0,forced:0,
   setClearColor(){},getClearAlpha:()=>0,getContext:()=>context,
   getSize(target){return target.set(width,height);},getPixelRatio:()=>dpr,
   setSize(){},setPixelRatio(){},setViewport(){},setDrawingBufferSize(w,h,p){width=w;height=h;dpr=p;canvas.width=Math.floor(w*p);canvas.height=Math.floor(h*p);},
-  render(scene,camera){this.info.render.calls=0;scene.traverseVisible(node=>{if(!node.isMesh)return;node.onBeforeRender(this,scene,camera,node.geometry,node.material,null);this.info.render.calls++;});},dispose(){},forceContextLoss(){context.lost=true;},
+  render(scene,camera){
+   this.info.render.calls=0;
+   if(this.shaderLogs){const logs=this.shaderLogs;this.debug.onShaderError({getProgramInfoLog:()=>logs.program,getShaderInfoLog:shader=>logs[shader]},'program','vertex','fragment');}
+   if(this.failure)throw this.failure;
+   scene.traverseVisible(node=>{if(!node.isMesh||this.skipSource&&node.userData.sourceGeometry!==false)return;node.onBeforeRender(this,scene,camera,node.geometry,node.material,null);this.info.render.calls++;});
+  },dispose(){this.disposed++;},forceContextLoss(){this.forced++;context.lost=true;},
  };
 }
 
@@ -129,4 +134,29 @@ test('context loss during pending replacement clears texture layout ownership an
  assert.equal(Object.values(videos).filter(video=>video.source).length,1);assert.equal(timers.size,0);
  scene.present({chapter:'making'});assert.deepEqual(textureSources(nodes),[]);
  for(const video of Object.values(videos)){assert.equal(video.source,null);assert.equal(video.callbacks.size,0);}
+});
+
+test('a real renderer exception retains bounded pre-disposal failure facts without changing fallback or cleanup',async t=>{
+ const {scene,gpu,videos,nodes,timers}=await setup(t);scene.present({chapter:'method'});assert.equal(scene.inspect().mode,'webgl-model');
+ const error=new Error('Unique XR return diagnostic failure');error.name='XRDiagnosticFixtureError';gpu.failure=error;
+ gpu.shaderLogs={program:'program-'.repeat(400),vertex:'vertex-'.repeat(400),fragment:'fragment-'.repeat(400)};
+ scene.present({chapter:'method',azimuth:.12});const failed=scene.inspect(),diagnostic=failed.lastRenderFailure;
+ assert.equal(failed.mode,'poster');assert.equal(failed.fallbackReason,'render-unavailable');assert.equal(failed.surface,null);assert.equal(failed.successfulPaint,false);
+ assert.equal(diagnostic.operation,'render');assert.equal(diagnostic.name,'XRDiagnosticFixtureError');assert.equal(diagnostic.message,'Unique XR return diagnostic failure');
+ assert.equal(diagnostic.state.chapter,'method');assert.equal(diagnostic.state.azimuth,.12);assert.deepEqual(diagnostic.viewport,{width:1440,height:1000});assert.equal(diagnostic.renderView.width,1440);
+ assert(diagnostic.pose.position.every(Number.isFinite));assert(diagnostic.budget.budget.pixels<=524288);assert.equal(diagnostic.budget.disposed,false,'Capture the allocation facts before disposing the GPU');
+ assert.deepEqual(diagnostic.drawCounts,{source:0,phoneBody:0,phoneScreen:0,stage:0});assert.equal(diagnostic.rendererCalls,0);assert.equal(diagnostic.contextLost,false);assert.equal(diagnostic.shaderError,true);assert.equal(diagnostic.environment.owner,'exhibition-stage');
+ for(const key of ['program','vertex','fragment'])assert.equal(diagnostic.shaderLogs[key],gpu.shaderLogs[key].slice(0,2048));
+ assert.equal(gpu.disposed,1);assert.equal(gpu.forced,1);assert.equal(gpu.domElement.removed,true);assert.deepEqual(textureSources(nodes),[]);assert.equal(timers.size,0);
+ for(const video of Object.values(videos)){assert.equal(video.source,null);assert.equal(video.callbacks.size,0);}
+ scene.dispose();scene.dispose();assert.equal(gpu.disposed,1);assert.equal(gpu.forced,1);
+});
+
+test('missing real source participation still fails closed and records its exact cause before disposal',async t=>{
+ const {scene,gpu,nodes}=await setup(t);scene.present({chapter:'method'});assert.equal(scene.inspect().surface.sourceCalls,1);
+ gpu.skipSource=true;scene.present({chapter:'method',azimuth:.12});const failed=scene.inspect(),diagnostic=failed.lastRenderFailure;
+ assert.equal(failed.mode,'poster');assert.equal(failed.fallbackReason,'render-unavailable');assert.equal(failed.successfulPaint,false);
+ assert.equal(diagnostic.operation,'participation');assert.equal(diagnostic.name,'Error');assert.equal(diagnostic.message,'XR source or recorded screen did not paint');
+ assert.equal(diagnostic.drawCounts.source,0);assert.equal(diagnostic.drawCounts.stage,3);assert.equal(diagnostic.rendererCalls,3);assert.equal(diagnostic.shaderError,false);assert.equal(diagnostic.shaderLogs,null);assert.equal(diagnostic.contextLost,false);
+ assert.equal(gpu.disposed,1);assert.deepEqual(textureSources(nodes),[]);
 });

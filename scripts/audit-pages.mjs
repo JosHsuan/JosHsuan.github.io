@@ -16,7 +16,7 @@ const tagAttribute=(tag,name)=>(tag??'').match(new RegExp(`(?:^|\\s)${name}="([^
 const assertProjectVoice=(html,route)=>{
   const main=html.match(/<main\b[^>]*>[\s\S]*?<\/main>/i)?.[0];assert(main,`${route}: native project main`);
   const readable=main.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi,'').replace(/<[^>]*>/g,' ');
-  assert(!/\bportfolio\b|source-backed/i.test(readable),`${route}: public narrative describes the work rather than its preparation source`);
+  assert(!/\bportfolio\b|source-backed|individual (?:model|media) author(?:ship)?[^.]{0,80}(?:not (?:separately )?recorded|not assigned)/i.test(readable),`${route}: public narrative describes the work rather than its preparation source`);
 };
 const tagWith=(html,name,marker)=>[...html.matchAll(new RegExp(`<${name}\\b[^>]*>`,'g'))].map(match=>match[0]).find(tag=>new RegExp(`\\b${marker}(?:=|(?=[\\s>]))`).test(tag));
 

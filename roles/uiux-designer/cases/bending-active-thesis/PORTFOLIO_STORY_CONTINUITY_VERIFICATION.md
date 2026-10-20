@@ -180,7 +180,12 @@ and `backdrop-native-progress-receipt.json` (SHA-256
 The combined replacement portable run reports **508 declared, 506 passing and
 two existing opt-in skips**, with no failures. `pnpm check`, the 248-file/124-pin
 local public build and explicit lint for the three modified native specs pass.
-A further native run against that rebuilt replacement is in progress. The
+A further native run against that rebuilt replacement passes **64 desktop/mobile
+executions without retries in 16.4 minutes**. It covers all model-inspection,
+project-background-motion, window-integration and XR scenarios, including both
+corrected exit fixtures, the retained native pixels/reverse and actual Dot
+playback/transport. Raw evidence is `replacement-native.log` and its results.
+This is the local pre-caption-amendment runtime build, not hosted acceptance. The
 preceding 18-run XR result predates the Dot repair and the final diagnostic-only
 comparison adjustment, and is not substituted for that run or hosted CI.
 
@@ -216,6 +221,71 @@ annotations and are recorded as such. The combined receipt is
 The source-panel animation/full-image links receive a small spacing correction
 after the visual review. Replacement-artifact and post-deployment verification
 remain required; these first-candidate images cannot accept an unknown build.
+
+## Final visible workspace credit amendment
+
+An additional rendered-copy review finds a remaining Context caption in
+`xr-workspace.json` saying that the individual model author is not separately
+recorded. This is visible authorship-review prose and conflicts with the owner's
+direct-work presentation request. Only that trailing sentence is removed; the
+credit remains `Research: Chia-Hsuan Chao / Wataru Nomura · 2024.` This does not
+assign individual room props or TV photographs to either researcher.
+
+The workspace record becomes SHA-256
+`41c48db687e71332240a002e0892141a7eac887c94740ef4c175cc4ccc4e1211`;
+the manifest records that new text identity. Independent structural comparison
+confirms every other workspace field and every manifest field other than its
+workspace-record hash is unchanged. The two public workspace image bytes/hashes
+and all original geometry/render/TV/source metadata remain exact. The six
+source-handoff checks pass with the visible credit included in the existing
+collaboration/voice check; the built-main voice audit now also rejects this
+class of public authorship-review prose. Final build, exact-candidate visual,
+hosted CI and publication verification must include this amendment. Runtime
+candidate `c940b3935863503e4fa4a44ee93223c54199925c` is not to be published as
+the complete story correction.
+
+## Second hosted candidate and retained render diagnostics
+
+[CI 39361102346](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39361102346)
+validates the exact `c940b39` runtime candidate and completes all 402 declared
+browser executions: **401 pass, one fails**. Chromium and mobile each pass all
+126 public executions; WebKit passes 125 of 126; framework root and subpath each
+pass twelve. Linux WebKit now passes the real Dot native recording/transaction
+and strengthened delayed-XR retained-frame checks. Their successes remain scoped
+observations. The required gate rejects the single failure; no validated-release
+exists and this candidate is not deployed. Original run/jobs/artifacts, ten raw
+logs and failure traces are bound by
+`ci-39361102346/ci-raw-evidence-final.json`, SHA-256
+`a0dc3efd3897d2d90503b0708e5de9c4354f4214c78e172ce68fc94d4d4794d3`.
+
+The failing WebKit geometry/interaction case reaches `render-unavailable` after
+the actual Method mouse-drag return, before returning to Overview. The original
+GLB and ten relevant asset responses are exact and successful; this is not a
+source HTTP failure or acquisition deadline. Increasing the case's sixty-second
+budget would not repair that fallback. The old trace does not preserve the
+caught render exception, shader logs or draw-count failure, so its cause remains
+unconfirmed. A Windows WebKit execution of that same native case passes once in
+21.6 seconds; a 192-pose CPU probe finds finite camera values and correct source
+participation. Neither result disproves the Linux failure.
+
+The next candidate retains bounded failure diagnostics through GPU disposal:
+operation, caught error, source pose/view, dimensions/budget, draw counts,
+context/shader state and environment report. Shader logs are capped at 2048
+characters each. It adds no UI, clock, retry, timeout, pose or source-material
+change. Injected renderer and missing-source-participation checks still fail
+closed and release resources; eight focused and 41 related CPU checks pass.
+The ignored `xr-render-diagnostic-receipt.json` is SHA-256
+`8a9df515a9ecf7bb84ac6e8e467d67c9fa57cfc8c709c577b2160d0f68713ea4`.
+Native model-readiness checks now save the real inspector facts and reject a
+terminal fallback immediately with their original readiness assertions, rather
+than waiting pointlessly for it to become a WebGL model. Normal readiness and
+all timing/resource budgets are unchanged. This improves diagnosis; it is not
+claimed as a proven repair of the unconfirmed Linux render cause.
+
+The combined pre-commit diagnostic/caption candidate passes **510 portable
+checks declared, 508 passing and two existing opt-in skips**, the root check and
+complete 248-file/124-pin local export. Final native, exact pushed CI/artifact,
+visual and live results remain required.
 
 Physical iPhone/Safari and Android device acceptance is not established by
 desktop browser emulation or CI. No frame-rate, physical-device crash-resolution
