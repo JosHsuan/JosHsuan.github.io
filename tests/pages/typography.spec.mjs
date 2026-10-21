@@ -109,7 +109,11 @@ for(const route of routes)test(`the published ${route} document renders a cohere
  // cascade, not an unattached style-token specimen. Restore it immediately.
  const cjk=await page.evaluate(()=>{const node=document.querySelector('main p[data-editorial-copy],main p[class*="_prose__"],main [class*="_panel__"]>p:not([class*="_eyebrow__"]),main p[class*="_description__"]');if(!node)return null;const lang=node.getAttribute('lang');node.lang='zh-Hant';const css=getComputedStyle(node),result={leading:parseFloat(css.lineHeight)/parseFloat(css.fontSize),family:css.fontFamily};if(lang===null)node.removeAttribute('lang');else node.setAttribute('lang',lang);return result;});
  if(cjk){expect(cjk.leading).toBeCloseTo(1.65,2);expect(cjk.family).toContain('Noto Sans CJK TC');}
- if(['/','/about/','/projects/bending-active/','/projects/xr-bending-active/','/projects/mode-s-of-making/'].includes(route))await test.info().attach('typography-native-'+(route.replaceAll('/','-')||'home'),{body:await page.screenshot({fullPage:false}),contentType:'image/png'});
+ if(['/','/about/','/projects/bending-active/','/projects/xr-bending-active/','/projects/mode-s-of-making/'].includes(route)){
+  const name='typography-native-'+(route.replaceAll('/','-')||'home'),path=test.info().outputPath(name+'.png');
+  await page.screenshot({path,fullPage:false});
+  await test.info().attach(name,{path,contentType:'image/png'});
+ }
  expect(errors).toEqual([]);
 });
 
