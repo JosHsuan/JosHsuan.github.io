@@ -56,8 +56,24 @@ test('model information follows autonomous changes and explicit comparison relea
  const initial=await page.evaluate(()=>window.__thesis.inspect().representation.id);
  await expect.poll(()=>page.evaluate(()=>window.__thesis.inspect().representation.id),{timeout:WAIT}).not.toBe(initial);
  await holdView(page);await expectSourceInformation(page,'form');
- await surface(page).press('Enter');await holdView(page);await expectSourceInformation(page,'form');
- expect(await page.evaluate(()=>window.__thesis.inspect().representation.pinned)).toBe(true);
+ // Observe the actual painted comparison before slow driver roundtrips can
+ // consume its eight-second lease; keyboard hold has independent ownership.
+ const pinObservation=await surface(page).evaluateHandle(node=>{
+  const before=window.__thesis.inspect().representation,expectedIndex=(before.index+1)%before.count;
+  let sample=null;
+  const observer=new MutationObserver(()=>{
+   const current=window.__thesis.inspect().representation;
+   if(current.pinned&&current.chapterId===before.chapterId&&current.index===expectedIndex){sample={index:current.index,id:current.id};observer.disconnect();}
+  });
+  observer.observe(node.closest('[data-model-study]'),{subtree:true,attributes:true,childList:true,characterData:true});
+  return{get sample(){return sample;},dispose(){observer.disconnect();}};
+ });
+ try{
+  await surface(page).press('Enter');
+  await expect.poll(()=>pinObservation.evaluate(value=>value.sample!==null)).toBe(true);
+ }finally{await pinObservation.evaluate(value=>value.dispose());await pinObservation.dispose();}
+ await holdView(page);await expectSourceInformation(page,'form');
+ expect(await page.evaluate(()=>window.__thesis.inspect().representation.held)).toBe(true);
  const heldTime=await page.evaluate(()=>window.__story.inspect().playback.activeSeconds);
  await surface(page).press('Escape');await settle(page);
  expect(await page.evaluate(()=>({engaged:window.__story.inspect().modelEngaged,selection:window.__story.inspect().sourceSelection,held:window.__story.inspect().modelHeldSource}))).toEqual({engaged:false,selection:null,held:null});

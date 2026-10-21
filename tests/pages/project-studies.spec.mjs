@@ -260,7 +260,10 @@ for(const project of studies)test(`${project.shortTitle} preserves every source 
    try{
     await expect.poll(async()=>{
      last=await readingBox(element);const stable=last.y===previousY;previousY=last.y;
-     return stable&&last.top>=last.safeTop&&last.bottom<=last.safeBottom&&last.unobscured;
+     // Two equal samples can precede WebKit's asynchronous wheel delivery.
+     // Do not let the next reading step measure against an unfinished scroll.
+     const delivered=Math.abs(last.y-before.desiredY)<=1;
+     return delivered&&stable&&last.top>=last.safeTop&&last.bottom<=last.safeBottom&&last.unobscured;
     }).toBe(true);
    }catch(error){error.message+='\nNative reading geometry: '+JSON.stringify(last);throw error;}
   };
