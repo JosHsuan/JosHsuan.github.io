@@ -46,3 +46,21 @@ test('the complete 3D phone fits narrow and desktop display frames in front and 
  }
  phone.dispose();
 });
+
+
+test('nonfinite camera fitting fails closed with bounded arithmetic evidence, never a substituted pose',()=>{
+ const points=new Float64Array([-1,-2,-3,1,2,3]),before=Array.from(points);
+ const original=T.Vector3.prototype.dot;let calls=0;
+ try{
+  T.Vector3.prototype.dot=function(value){return calls++===0?NaN:original.call(this,value);};
+  assert.throws(()=>fitResearchCamera(points,1),error=>{
+   assert(error instanceof RangeError);assert(error.message.startsWith('Non-finite research camera fit: '));
+   const diagnostic=JSON.parse(error.message.slice('Non-finite research camera fit: '.length));
+   assert.equal(diagnostic.distance,'NaN');assert(diagnostic.position.every(value=>value==='NaN'));
+   assert(Number.isFinite(diagnostic.recheckDistance));assert.equal(diagnostic.firstNonFiniteProjection,null);
+   assert.equal(diagnostic.count,2);assert(error.message.length<2048);return true;
+  });
+ }finally{T.Vector3.prototype.dot=original;}
+ assert.deepEqual(Array.from(points),before);
+ assert(fitResearchCamera(points,1).position.every(Number.isFinite));
+});

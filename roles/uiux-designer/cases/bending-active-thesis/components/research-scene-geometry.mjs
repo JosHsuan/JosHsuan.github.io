@@ -19,7 +19,23 @@ export function fitResearchCamera(points,aspect,{yaw=.72,pitch=.36,fov=36,zoom=1
   const depth=delta.dot(direction);distance=Math.max(distance,depth+Math.abs(delta.dot(right))/tanX,depth+Math.abs(delta.dot(up))/tanY);
  }
  radius=Math.max(radius,1e-6);distance=Math.max(distance,radius*1.1)*zoom;
- return {position:center.clone().addScaledVector(direction,distance).toArray(),target:center.toArray(),up:[0,1,0],fov,near:radius*.001,far:distance+radius*8,radius,distance};
+ const position=center.clone().addScaledVector(direction,distance).toArray(),far=distance+radius*8;
+ if(![...position,distance,far].every(Number.isFinite)){
+  // Exceptional diagnostics only: keep ordinary framing and its hot loop
+  // unchanged. A scalar recheck is evidence, never a replacement camera.
+  let recheckDistance=0,firstNonFiniteProjection=null;
+  for(let i=0;i<points.length;i+=3){
+   const dx=points[i]-center.x,dy=points[i+1]-center.y,dz=points[i+2]-center.z;
+   const depth=dx*direction.x+dy*direction.y+dz*direction.z;
+   const x=depth+Math.abs(dx*right.x+dy*right.y+dz*right.z)/tanX;
+   const y=depth+Math.abs(dx*up.x+dy*up.y+dz*up.z)/tanY;
+   if(![depth,x,y].every(Number.isFinite)&&firstNonFiniteProjection===null)firstNonFiniteProjection={index:i/3,delta:[dx,dy,dz],depth,x,y};
+   recheckDistance=Math.max(recheckDistance,x,y);
+  }
+  const diagnostic={aspect,yaw,pitch,fov,zoom,count:points.length/3,center:center.toArray(),direction:direction.toArray(),right:right.toArray(),up:up.toArray(),tanX,tanY,radius,distance,position,far,recheckDistance:Math.max(recheckDistance,radius*1.1)*zoom,firstNonFiniteProjection};
+  throw new RangeError('Non-finite research camera fit: '+JSON.stringify(diagnostic,(_key,value)=>typeof value==='number'&&!Number.isFinite(value)?String(value):value));
+ }
+ return {position,target:center.toArray(),up:[0,1,0],fov,near:radius*.001,far,radius,distance};
 }
 
 export function fitResearchPhoneCamera(points,aspect,{front=false}={}){
