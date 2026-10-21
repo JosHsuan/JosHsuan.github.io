@@ -45,7 +45,15 @@ export function createProjectStudyBackdropPresenter({root,window:win,document:do
   record.generation++;if(record.callback!==null)record.video.cancelVideoFrameCallback?.(record.callback);record.callback=null;closeTimer(record);
  };
  const pause=record=>{
-  if(!record.video)return;cancelFrame(record);
+  if(!record.video)return;
+  // The ambient field can keep publishing while this recording is inactive.
+  // A native paused flag alone is insufficient: pending play/decode callbacks
+  // still need invalidation. Only an already-closed transport is a no-op.
+  if(record.video.paused&&!record.playPending&&!record.preparing&&!record.playing&&
+   record.callback===null&&record.timer===null&&record.progressGeneration===0&&
+   record.progressReceipt===null&&!record.transportWaiting&&
+   record.transportSeeking===!!record.video.seeking)return;
+  cancelFrame(record);
   record.playGeneration++;record.playPending=false;record.preparing=false;record.video.pause();record.playing=false;
   record.progressGeneration=0;record.progressBaseline=safeTime(record.video);record.progressReceipt=null;record.transportWaiting=false;record.transportSeeking=!!record.video.seeking;
   if(record.started&&!record.failed&&!record.ended)record.phase='paused';

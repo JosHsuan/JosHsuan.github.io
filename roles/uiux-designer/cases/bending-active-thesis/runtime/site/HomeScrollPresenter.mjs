@@ -5,7 +5,8 @@ import {createInformationWindowPresenter} from '../presentation/InformationWindo
  * this adapter creates no observer, listener, timer or animation frame.
  */
 export function createHomeScrollPresenter({root,publisher}){
-  const windows=createInformationWindowPresenter({root,publisher});
+  const profile=root.getAttribute?.('data-information-motion-profile')==='velocity-skin'?'velocity-skin':'ink';
+  const windows=createInformationWindowPresenter({root,publisher,profile});
   let disposed=false,enabled=false;
   let policy={ready:false,reduced:false,suspended:false,saveData:false,forcedColors:false};
   return{

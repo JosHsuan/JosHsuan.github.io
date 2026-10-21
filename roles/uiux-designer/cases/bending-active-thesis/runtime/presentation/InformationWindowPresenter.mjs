@@ -3,6 +3,8 @@ import {
   advanceWindowMotion, scrollingEffect, sampleScrollingPose, sampleWindowOutline,
 } from '../motion/window-motion-api.mjs';
 
+import {createVelocitySkin,advanceVelocitySkin,sampleVelocitySkin} from '../motion/velocity-skin.mjs';
+
 const MARKER='[data-information-window]';
 const POINTS=['tl','tr','br','bl','et','er','eb','el'];
 const VARIABLES=['background','border-width','border-color','radius','shadow','x','y','rz','skin-path'];
@@ -22,6 +24,7 @@ function material(style){
 }
 
 function presentationPose(item){
+  if(item.velocitySkin)return sampleVelocitySkin(item.velocitySkin,item.width,item.height,item.radius);
   const pose=sampleScrollingPose(item.effect,item.state);
   pose.x=clamp(pose.x,-12,12);pose.y=clamp(pose.y,-12,12);pose.rz=clamp(pose.rz,-1.5,1.5);pose.radius=item.radius;
   // Preserve relative follower positions with one common geometric gain.
@@ -37,11 +40,13 @@ function presentationPose(item){
  * every skin. The director owns measurement invalidation and active elapsed time;
  * this presenter creates no DOM, observer, native listener, timer or frame loop.
  */
-export function createInformationWindowPresenter({publisher,root=globalThis.document}){
+export function createInformationWindowPresenter({publisher,root=globalThis.document,profile='ink'}){
   const document=root.ownerDocument??root;
   const recipe=getWindowMotionRecipe('ink');
   const registry=new Map(),materials=new WeakMap(),nested=new Set();
-  let viewportHeight=1,disposed=false,ticks=0,moving=false;
+  let viewportHeight=1,disposed=false,ticks=0,moving=false,outlineSamples=0;
+  const velocityProfile=profile==='velocity-skin';
+  function outline(item,pose){outlineSamples++;return sampleWindowOutline(recipe,pose,item.width,item.height);}
 
   function release(element){
     publisher.attribute(element,'data-information-ready',null);
@@ -81,7 +86,7 @@ export function createInformationWindowPresenter({publisher,root=globalThis.docu
       if(!item){
         const state=createWindowMotion(effect,{region:'inside'});
         setWindowScrollTarget(state,row.fixed?0:targetAt(row.top,row.height,docY,viewportHeight),{reduced:true});
-        item={state,active:false,visible:false,pose:{x:0,y:0,rz:0},effect};
+        item={state,active:false,visible:false,pose:{x:0,y:0,rz:0},effect,velocitySkin:velocityProfile?createVelocitySkin(docY):null};
         registry.set(row.element,item);
       }else{
         item.state.axis=[...effect.axis];item.state.path={key:effect.key,axis:item.state.axis};
@@ -94,8 +99,9 @@ export function createInformationWindowPresenter({publisher,root=globalThis.docu
       publisher.style(row.element,'--information-radius',row.radius+'px');
       // Re-sample the current material state at the new dimensions; a layout
       // invalidation neither replays nor briefly erases an active deformation.
-      publisher.style(row.element,'--information-skin-path',sampleWindowOutline(recipe,presentationPose(item).pose,row.width,row.height));
+      publisher.style(row.element,'--information-skin-path',outline(item,presentationPose(item).pose));
       publisher.attribute(row.element,'data-information-ready','');
+      item.dirty=true;
     }
   }
 
@@ -117,26 +123,33 @@ export function createInformationWindowPresenter({publisher,root=globalThis.docu
       // the same finite fluid catch-up on the director clock, then follow placement.
       if(item.fixed&&active&&!item.active&&!immediate)setWindowScrollTarget(state,target-.16,{reduced:true});
       const energy=immediate?0:clamp(Math.abs(target-state.target)*2,0,.3);
-      setWindowScrollTarget(state,target,{energy,reduced:!!immediate});
-      advanceWindowMotion(state,seconds,{reduced:!!immediate});
+      setWindowScrollTarget(state,target,{energy,reduced:!!immediate||velocityProfile});
+      if(item.velocitySkin)advanceVelocitySkin(item.velocitySkin,{docY,dt:seconds,viewportHeight,immediate});
+      else advanceWindowMotion(state,seconds,{reduced:!!immediate});
       item.active=active;item.visible=visible;
+      const resting=item.velocitySkin?item.velocitySkin.resting:state.resting;
+      const isMoving=visible&&!resting;
+      // Ambient 3D may keep the Director ticking. A settled unchanged skin must
+      // not regenerate Bezier strings on each of those frames. Measurement
+      // invalidation marks it dirty; the first neutral frame is still published.
+      const neutral=item.pose.x===0&&item.pose.y===0&&item.pose.rz===0&&item.pose.edgeMaximum===0;
+      if(resting&&neutral&&!item.dirty&&item.publishedMoving===isMoving){moving ||= isMoving;continue;}
       const {pose,edgeMaximum}=presentationPose(item);
-      const isMoving=visible&&!state.resting;
       publisher.style(element,'--information-x',pose.x.toFixed(3)+'px');
       publisher.style(element,'--information-y',pose.y.toFixed(3)+'px');
       publisher.style(element,'--information-rz',pose.rz.toFixed(3)+'deg');
-      publisher.style(element,'--information-skin-path',sampleWindowOutline(recipe,pose,item.width,item.height));
-      publisher.attribute(element,'data-information-moving',String(isMoving));
-      item.pose={x:pose.x,y:pose.y,rz:pose.rz,edgeMaximum};
+      publisher.style(element,'--information-skin-path',outline(item,pose));
+      publisher.attribute(element,'data-information-moving',String(isMoving));item.publishedMoving=isMoving;
+      item.pose={x:pose.x,y:pose.y,rz:pose.rz,edgeMaximum};item.dirty=false;
       moving ||= isMoving;
     }
     return moving;
   }
 
   function inspect(){
-    return {recipe:recipe.key,count:registry.size,nested:nested.size,ticks,moving,settled:!moving,items:[...registry.values()].map(item=>({
+    return {recipe:recipe.key,profile,outlineSamples,count:registry.size,nested:nested.size,ticks,moving,settled:!moving,items:[...registry.values()].map(item=>({
       kind:item.kind,chapter:item.chapter,fixed:item.fixed,visible:item.visible,width:item.width,height:item.height,top:item.top,
-      progress:item.state.progress,target:item.state.target,velocity:item.state.velocity,resting:item.state.resting,settled:item.state.resting,...item.pose,
+      progress:item.state.progress,target:item.state.target,velocity:item.state.velocity,resting:item.velocitySkin?item.velocitySkin.resting:item.state.resting,settled:item.velocitySkin?item.velocitySkin.resting:item.state.resting,skinStrength:item.velocitySkin?.strength??0,...item.pose,
     }))};
   }
 

@@ -13,6 +13,13 @@ html[data-presentation-context=home] [data-story-progress]{visibility:hidden}
   --type-tracking-display:-.025em;--type-tracking-subheading:-.015em;--type-tracking-body:0em;
   --type-tracking-caption:.01em;--type-tracking-control:.02em;--type-tracking-label:.06em;
   --type-size-caption:.75rem;--type-size-label:.6875rem;--type-size-control:.75rem;
+  /* Compact developer-portfolio hierarchy. Keep native root sizing, reading
+     floors and control hit areas; only display hierarchy becomes quieter. */
+  --type-size-hero:clamp(2rem,4.5vw,4rem);
+  --type-size-title:clamp(1.875rem,3.2vw,3rem);
+  --type-size-heading:clamp(1.5rem,2.4vw,2.125rem);
+  --type-size-subheading:clamp(1.125rem,1.5vw,1.375rem);
+  --type-size-body:1rem;--type-size-intro:1.125rem;
 }
 /* One web material family, informed by Apple's material hierarchy. Reading
    surfaces use a regular material; floating navigation uses a lighter variant.

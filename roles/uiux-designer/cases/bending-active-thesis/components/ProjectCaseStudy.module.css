@@ -122,3 +122,12 @@
  .panel,.sourcePanel{max-width:none;padding:1rem!important;break-inside:avoid}.panel h1{font-size:2.6rem}.panel h2{font-size:2rem}.readingTools,.backLink,.readingLink{display:none!important}.evidenceBand{display:block;padding:1rem 0}.evidence{margin-bottom:2rem}
  .page:global([data-home-scrolling-ready]) :global([data-information-window][data-information-ready]){transform:none!important}
 }
+
+/* Shared compact hierarchy keeps native reading and original source apertures. */
+@media screen{
+ .panel h1,.openingPanel h1{font-size:var(--type-size-title);margin-bottom:1.25rem}
+ .panel h2{font-size:var(--type-size-heading);margin-bottom:1.25rem}
+ .panel>p{font-size:var(--type-size-body)}
+ .panel>.sourceCaption,.panel>.credit,.panel>.sourceNote{font-size:var(--type-size-caption)}
+ .related strong{font-size:var(--type-size-subheading)}
+}

@@ -452,3 +452,14 @@
 .owner,.siteLinks,.siteLinks a,.chapterRail,.railLabel,.sourceLinks a,.sourceNotes summary,.sourceComparison>summary,.mediaAction,.methodSequence summary{line-height:var(--type-leading-control);letter-spacing:var(--type-tracking-control)}
 .siteLinks,.chapterRail,.sourceLinks a,.mediaAction{font-size:var(--type-size-control)}
 @media(max-width:780px){.siteLinks{font-size:var(--type-size-label)}}
+
+/* The owner requested smaller typography, not a new Bending scene. Retain
+   composition, source recipes, clocks, reading floors and control hit areas. */
+@media screen{
+ .openingCopy h1,.homeCopy h1{font-size:var(--type-size-hero);margin-bottom:1.5rem}
+ .chapterHeading,.pattern .chapterHeading,.validation .chapterHeading,.closingCopy .chapterHeading{font-size:var(--type-size-heading);margin-bottom:1.25rem}
+ .copy>p,.closingCopy>p,.openingText,.homeDescription{font-size:var(--type-size-body)}
+ .subtitle,.homeStatement,.closingCopy .closingSummary{font-size:var(--type-size-intro)}
+ .copy .smallNote,.closingCopy .smallNote,.sourceNotes{font-size:var(--type-size-caption)}
+ .copy .marginNote{font-size:.875rem}
+}

@@ -67,7 +67,7 @@ export default function ProjectCaseStudy({project}){
  return <>
   <ProjectStudyChrome chapters={chapters} prefix={prefix} navigationLabel={`${project.shortTitle} project sections`} railClassName={styles.chapterRail}/>
   <ProjectCaseStudyControls projectId={project.id} chapterCount={chapters.length}/>
-  <main id="portfolio-main" tabIndex={-1} className={styles.page} data-project-study={project.id} data-portfolio-root data-portfolio-section="project-study">
+  <main id="portfolio-main" tabIndex={-1} className={styles.page} data-project-study={project.id} data-information-motion-profile={project.id==='mode-s-of-making'?'velocity-skin':undefined} data-portfolio-root data-portfolio-section="project-study">
    {project.model&&<ProjectCaseStudyStage projectId={project.id} model={project.model}/>}
    <article aria-labelledby={`${prefix}-overview-heading`}>
     <header id={`${prefix}-overview`} tabIndex={-1} className={`${styles.chapter} ${styles.opening}`} data-project-chapter="overview" {...layoutAttributes(projectStudyLayout(project,'overview'))}>

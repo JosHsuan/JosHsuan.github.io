@@ -191,3 +191,16 @@
 /* CI measured a Contact hit area at 361.375px in a 361px viewport. Native
    wrapping retains every label and hit area when the two groups need a row. */
 @media(max-width:375px){.navigation{flex-wrap:wrap;row-gap:.5rem}.identity{font-size:var(--type-size-label);padding-inline:.5rem}.navigationLinks a{font-size:var(--type-size-label);padding-inline:.3rem}}
+
+/* Owner-requested compact type: preserve the original grid, source framing,
+   typography families and 44px controls rather than scaling the whole page. */
+@media screen{
+.homeTitle{font-size:var(--type-size-hero);margin-bottom:1.5rem}
+.sectionTitle{font-size:var(--type-size-heading);margin-bottom:1.25rem}
+.sectionTitle:is(h1){font-size:var(--type-size-title)}
+.statement,.sectionIntro{font-size:var(--type-size-intro)}
+.description,.prose{font-size:var(--type-size-body)}
+.approaches :is(h2,h3),.cardCopy :is(h2,h3){font-size:var(--type-size-subheading)}
+.invitationTitle{font-size:1.0625rem}
+.contactHandle{font-size:clamp(1rem,1.3vw,1.25rem)}
+}

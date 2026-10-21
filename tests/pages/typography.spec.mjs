@@ -44,6 +44,18 @@ for(const route of routes)test(`the published ${route} document renders Space Gr
  expect(reading.loaded).toEqual({body:true,display:true});expect(reading.wrong).toEqual([]);expect(reading.clipped).toEqual([]);expect(reading.textNodes).toBeGreaterThan(10);expect(reading.headingVisible).toBe(true);expect(reading.headingFamily).toContain(families.display);expect(reading.bodyFamily).toContain(families.body);expect(reading.bodyProbeSelector).toBeTruthy();expect(reading.scrollWidth).toBeLessThanOrEqual(reading.clientWidth);
  const spacing=(value,leading,tracking)=>{const context=`${route}: ${value.tag} ${value.text}`;expect(value.leading,context+' leading').toBeCloseTo(leading,2);expect(value.tracking,context+' tracking').toBeCloseTo(tracking,3);};
  spacing(reading.roles.body,1.65,0);
+ // The compact hierarchy changes display scale, not the native root size or
+ // reading/control floors. Measure resolved CSS on every published route;
+ // checking token strings alone would miss a later responsive override.
+ expect(reading.roles.body.size,`${route}: native body size`).toBeGreaterThanOrEqual(16);
+ const mainTitle=reading.roles.display.find(role=>role.tag==='H1');
+ expect(mainTitle,`${route}: primary heading`).toBeTruthy();
+ const hero=route==='/'||route==='/projects/bending-active/';
+ expect(mainTitle.size,`${route}: compact primary heading maximum`).toBeLessThanOrEqual(hero?64:48);
+ expect(mainTitle.size,`${route}: primary heading remains distinct`).toBeGreaterThanOrEqual(hero?32:30);
+ for(const role of reading.roles.display.filter(role=>role.tag==='H2')){
+  expect(role.size,`${route}: compact chapter/card heading ${role.text}`).toBeLessThanOrEqual(34);
+ }
  for(const role of reading.roles.display)spacing(role,role.tag==='H1'?1.12:role.tag==='H2'&&!role.compact?1.18:1.3,['H1','H2'].includes(role.tag)&&!role.compact?-.025:-.015);
  for(const [kind,leading,tracking]of [['controls',1.4,.02],['captions',1.55,.01],['labels',1.45,.06]])for(const role of reading.roles[kind])spacing(role,leading,tracking);
  for(const suffix of ['/assets/fonts/portfolio-ocr-b.woff2','/assets/fonts/space-grotesk-variable.woff2'])expect(fonts.some(url=>url.endsWith(suffix))).toBe(true);

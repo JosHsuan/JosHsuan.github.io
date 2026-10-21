@@ -116,6 +116,28 @@ test('a queued native pause from departure cannot overwrite resumed playback on 
  f.presenter.dispose();terminal(f.presenter.inspect().stage.history);
 });
 
+test('continuous ambient ticks leave a closed inactive video transport untouched',async()=>{
+ const f=fixture({video:true});await flush();f.step();
+ const initial=f.presenter.inspect().media.find(item=>item.id),pauses=f.pauses;
+ for(let frame=0;frame<600;frame++)f.step(1/60);
+ const idle=f.presenter.inspect().media.find(item=>item.id);
+ assert.equal(f.pauses,pauses,'No repeated native pause while the ambient clock continues');
+ assert.equal(idle.transport.playGeneration,initial.transport.playGeneration);
+ assert.equal(f.loads,0);assert.equal(f.callbacks.size,0);assert.equal(f.timers.size,0);
+ f.select('making');f.step(1);f.frame();await flush();f.step();f.settle();await flush();
+ assert.equal(f.video.paused,false);
+ f.video.currentTime=1.25;f.select('results');f.settle();
+ const closed=f.presenter.inspect().media.find(item=>item.id),closedPauses=f.pauses;
+ for(let frame=0;frame<600;frame++)f.step(1/60);
+ const retained=f.presenter.inspect().media.find(item=>item.id);
+ assert.equal(f.pauses,closedPauses);assert.equal(retained.transport.playGeneration,closed.transport.playGeneration);
+ assert.equal(retained.currentTime,1.25);assert.equal(retained.phase,'paused');
+ // A disallowed native restart is not covered by the no-op fast path.
+ f.video.paused=false;f.video.fire('playing');
+ assert.equal(f.video.paused,true);assert.equal(f.pauses,closedPauses+1);
+ f.presenter.dispose();terminal(f.presenter.inspect().stage.history);
+});
+
 async function pendingRevisit(){
  const f=fixture({video:true});await flush();f.step();f.select('making');f.step(1);f.frame();await flush();f.step();f.settle();await flush();f.video.currentTime=1.000437469;f.select('results');f.settle();f.deferPlay();f.select('making');f.settle();await flush();assert.equal(f.pendingPlays.length,1);assert.equal(f.video.paused,false);return f;
 }

@@ -4,7 +4,7 @@ import {createInformationWindowPresenter} from '../runtime/presentation/Informat
 
 const original={background:'linear-gradient(145deg, rgb(27,38,39), rgb(17,26,27))',borderTopWidth:'1px',borderRightWidth:'1px',borderBottomWidth:'1px',borderLeftWidth:'1px',borderTopColor:'rgb(180,199,183)',borderRightColor:'rgb(180,199,183)',borderBottomColor:'rgb(180,199,183)',borderLeftColor:'rgb(180,199,183)',outlineStyle:'none',outlineWidth:'0px',outlineColor:'black',boxShadow:'rgba(0,0,0,.2) 0px 16px 36px',borderTopLeftRadius:'28px'};
 
-function fixture(specs){
+function fixture(specs,options={}){
   const operations=[],nodes=[];
   const root={activeElement:null,querySelectorAll:()=>nodes,defaultView:{getComputedStyle(element){
     operations.push('read:style');
@@ -22,7 +22,7 @@ function fixture(specs){
     nodes.push(node);
   }
   const publisher={style(element,key,value){operations.push('write:'+key);if(value==='')element.styles.delete(key);else element.styles.set(key,String(value));},attribute(element,key,value){operations.push('write:'+key);if(value===null)element.attrs.delete(key);else element.attrs.set(key,String(value));}};
-  const presenter=createInformationWindowPresenter({root,publisher});
+  const presenter=createInformationWindowPresenter({root,publisher,...options});
   const measure=(docY=0)=>presenter.measure({naturalY:element=>{operations.push('read:top');return element.top;},viewportHeight:800,docY});
   const publish=(args={})=>presenter.publish({docY:0,dt:1/60,...args});
   return {root,nodes,operations,presenter,measure,publish};
@@ -118,4 +118,38 @@ test('details and dynamically inserted portal skins follow layout invalidation a
   assert.equal(f.presenter.inspect().count,0);assert.equal(f.presenter.inspect().settled,true);
   for(const node of f.nodes){assert.equal(node.styles.size,0);assert.equal(node.attrs.has('data-information-ready'),false);assert.equal(node.attrs.has('data-information-nested'),false);}
   assert.equal(f.publish({docY:500}),false);
+});
+
+
+test('settled skins skip outline work on the ambient clock but remeasure and scroll invalidate',()=>{
+  const f=fixture([{}, {top:3000}]);f.measure();f.publish();
+  const count=f.presenter.inspect().outlineSamples;f.operations.length=0;
+  for(let i=0;i<120;i++)f.publish();
+  assert.equal(f.presenter.inspect().outlineSamples,count);
+  assert.equal(f.operations.length,0,'ambient frames publish no unchanged window properties');
+  f.measure();assert(f.presenter.inspect().outlineSamples>count);
+  const measured=f.presenter.inspect().outlineSamples;
+  f.publish({docY:200});assert(f.presenter.inspect().outlineSamples>measured);
+});
+
+test('opt-in velocity skin bends paint only, reverses and resets without moving content',()=>{
+  const f=fixture([{}],{profile:'velocity-skin'});f.measure();f.publish();
+  assert.equal(f.publish({docY:80}),true);
+  let item=f.presenter.inspect().items[0];
+  assert(item.skinStrength>0);assert(item.edgeMaximum>0&&item.edgeMaximum<=9);
+  assert.equal(item.x,0);assert.equal(item.y,0);assert.equal(item.rz,0);
+  assert.match(f.nodes[0].styles.get('--information-skin-path'),/^path\('/);
+  for(let i=0;i<8;i++)f.publish({docY:80-(i+1)*10});
+  assert(f.presenter.inspect().items[0].skinStrength<0);
+  for(let i=0;i<120;i++)f.publish({docY:0});
+  assert.equal(f.presenter.inspect().settled,true);
+  assert.equal(f.nodes[0].attrs.get('data-information-moving'),'false');
+  assert.equal(f.nodes[0].styles.get('--information-skin-path'),'inset(0 round 28px)');
+  for(const option of [{reduced:true},{seek:true},{resumed:true},{dt:1.1},{docY:3000}]){
+    f.publish({docY:80});f.publish({docY:80,...option});
+    assert.equal(f.presenter.inspect().settled,true);
+    assert.equal(f.presenter.inspect().items[0].skinStrength,0);
+  }
+  f.publish({docY:80});f.root.activeElement={parentElement:f.nodes[0]};f.publish({docY:90});
+  assert.equal(f.presenter.inspect().items[0].skinStrength,0);
 });
