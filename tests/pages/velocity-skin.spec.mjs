@@ -21,7 +21,8 @@ test('Mode/s pilot responds to native scroll with skin-only motion and finite re
  });
  try{
   await page.mouse.wheel(0,180);
-  await expect.poll(()=>observation.evaluate(value=>value.samples.some(s=>s.y>0&&s.path.startsWith("path('")))).toBe(true);
+  // WebKit serializes CSS strings with double quotes; require a valid closed path, not a quote style.
+  await expect.poll(()=>observation.evaluate(value=>value.samples.some(s=>s.y>0&&(/^path\((['"])M[\s\S]+Z\1\)$/.test(s.path)&&CSS.supports('clip-path',s.path))))).toBe(true);
   expect(await observation.evaluate(value=>value.samples.every(s=>s.neutral&&s.clip==='none'&&s.opacity==='1'))).toBe(true);
   await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.informationWindows.settled)).toBe(true);
   await expect(panel).toHaveAttribute('data-information-moving','false');
