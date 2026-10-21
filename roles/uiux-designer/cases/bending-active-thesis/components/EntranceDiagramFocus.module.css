@@ -1,0 +1,33 @@
+.guide{grid-column:1/-1;width:100%;min-width:0;box-sizing:border-box;position:relative;isolation:isolate;max-width:1100px;margin:2rem auto 4rem;padding:clamp(1rem,3vw,2rem);border:1px solid var(--glass-border);border-radius:24px;background:var(--glass-background);color:var(--glass-foreground)}
+.guide h3{font:400 var(--type-size-subheading)/var(--type-leading-subheading) var(--ocr);margin:0 0 1rem}
+.note{font:400 var(--type-size-caption)/var(--type-leading-caption) var(--ocr);max-width:68ch;color:var(--glass-muted);margin:.75rem 0}
+.choices{display:flex;flex-wrap:wrap;gap:.5rem;border:0;padding:0;margin:1.25rem 0}
+.choices legend{font:400 var(--type-size-label)/1.5 var(--ocr);margin-bottom:.5rem}
+.choices label{display:flex;align-items:center;gap:.5rem;min-height:44px;max-width:100%;padding:.5rem .75rem;border:1px solid var(--glass-border);border-radius:12px;font:400 var(--type-size-control)/var(--type-leading-control) var(--ocr);cursor:pointer;box-sizing:border-box}
+.choices input{accent-color:var(--accent);flex-shrink:0;margin:0}
+.choices label:has(input:checked){border-color:var(--accent);background:var(--glass-control-hover)}
+.choices label:focus-within{outline:2px solid var(--paper);outline-offset:3px}
+.plate{position:relative;background:white;line-height:0}
+.plate img{display:block;width:100%;height:auto;object-fit:contain}
+.overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.overlay rect{fill:none;stroke:#ad3e16;stroke-width:2;stroke-dasharray:1;stroke-dashoffset:1;opacity:0;transition:stroke-dashoffset 220ms ease-out}
+.descriptions{display:grid;margin:1rem 0}
+.descriptions p{grid-area:1/1;margin:0;max-width:60ch;font:400 var(--type-size-body)/var(--type-leading-body) var(--ocr);visibility:hidden}
+.guide:has(input[value=all]:checked) [data-focus-description=all]{visibility:visible}
+.source{display:inline-flex;align-items:center;min-height:44px;color:inherit;font:400 var(--type-size-control)/var(--type-leading-control) var(--ocr);text-underline-offset:.25em}
+.source:focus-visible{outline:2px solid var(--paper);outline-offset:3px}
+.guide:has(input[value="0"]:checked) [data-focus-region="0"]{opacity:1;stroke-dashoffset:0}
+.guide:has(input[value="0"]:checked) [data-focus-description="0"]{visibility:visible}
+.guide:has(input[value="1"]:checked) [data-focus-region="1"]{opacity:1;stroke-dashoffset:0}
+.guide:has(input[value="1"]:checked) [data-focus-description="1"]{visibility:visible}
+.guide:has(input[value="2"]:checked) [data-focus-region="2"]{opacity:1;stroke-dashoffset:0}
+.guide:has(input[value="2"]:checked) [data-focus-description="2"]{visibility:visible}
+.guide:has(input[value="3"]:checked) [data-focus-region="3"]{opacity:1;stroke-dashoffset:0}
+.guide:has(input[value="3"]:checked) [data-focus-description="3"]{visibility:visible}
+.guide:has(input[value="4"]:checked) [data-focus-region="4"]{opacity:1;stroke-dashoffset:0}
+.guide:has(input[value="4"]:checked) [data-focus-description="4"]{visibility:visible}
+:global([data-study-paused]) .overlay rect{transition:none}
+@media(prefers-reduced-motion:reduce){.overlay rect{transition:none}}
+@media print{.choices,.overlay{display:none}.descriptions{display:block}.descriptions p{visibility:visible;margin:1em 0}}
+
+.guide figcaption{font:400 var(--type-size-caption)/var(--type-leading-caption) var(--ocr)}

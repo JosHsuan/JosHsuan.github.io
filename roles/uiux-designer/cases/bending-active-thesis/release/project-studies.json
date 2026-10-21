@@ -333,10 +333,10 @@
           "id": "context",
           "label": "Context",
           "kind": "form",
-          "title": "From a surface to individual panels.",
+          "title": "Develop the surface, then its openings.",
           "paragraphs": [
             "I worked within the PKD team to develop an entrance installation from a continuous surface into individually defined folded panels.",
-            "The design connected the overall form with a practical system of openings, edges and supports that could be carried into fabrication."
+            "The original study moves from a smooth surface through subdivision and panel depth to openings. Read these four states before comparing the alternative pattern schemes below."
           ],
           "media": [
             {
@@ -355,16 +355,62 @@
               "caption": "Pattern schemes developed within the same overall installation geometry.",
               "credit": "Project: PKD Engineering Consultants."
             }
-          ]
+          ],
+          "diagramFocus": {
+            "title": "Read the four surface states",
+            "source": "/assets/projects/entrance-installation-art/pattern-development.webp",
+            "steps": [
+              {
+                "label": "1 · Surface",
+                "description": "Begin with the smooth overall surface at the left of the original study.",
+                "bounds": [
+                  65,
+                  195,
+                  230,
+                  385
+                ]
+              },
+              {
+                "label": "2 · Subdivision",
+                "description": "The second model introduces the triangular subdivision on the same overall form.",
+                "bounds": [
+                  300,
+                  195,
+                  220,
+                  385
+                ]
+              },
+              {
+                "label": "3 · Depth",
+                "description": "The third model makes the triangular panel depth visible.",
+                "bounds": [
+                  525,
+                  195,
+                  220,
+                  385
+                ]
+              },
+              {
+                "label": "4 · Openings",
+                "description": "The final model introduces openings; the original helical guide remains visible beside it.",
+                "bounds": [
+                  750,
+                  175,
+                  280,
+                  405
+                ]
+              }
+            ]
+          }
         },
         {
           "id": "system",
           "label": "System",
           "kind": "system",
-          "title": "Control variation through geometry.",
+          "title": "Connect the surface to its panel joints.",
           "paragraphs": [
             "My modelling work connected the triangulated surface with panel depth, opening patterns and a shared reference system. These relationships let local variation remain coordinated with the overall installation.",
-            "The model and drawings developed together so that each panel could be identified and related to its neighbours."
+            "The source plate relates the overall support section to three-joint and two-joint panel assemblies. Compare those details with the two folded-panel families before moving to their fabrication information."
           ],
           "media": [
             {
@@ -375,7 +421,63 @@
               "caption": "The support system and the two families of folded panel connections.",
               "credit": "Project: PKD Engineering Consultants."
             }
-          ]
+          ],
+          "diagramFocus": {
+            "title": "From the support section to a panel",
+            "source": "/assets/projects/entrance-installation-art/panel-system.webp",
+            "steps": [
+              {
+                "label": "1 · Section",
+                "description": "Fig. 1-05 locates the panel surface and supporting structure together.",
+                "bounds": [
+                  4,
+                  5,
+                  620,
+                  911
+                ]
+              },
+              {
+                "label": "2 · Three joints",
+                "description": "Fig. 1-06 shows the exploded relationship for the three-joint panel assembly. This is the original illustration, not a new assembly simulation.",
+                "bounds": [
+                  644,
+                  5,
+                  896,
+                  450
+                ]
+              },
+              {
+                "label": "3 · Two joints",
+                "description": "Fig. 1-07 shows the corresponding two-joint panel assembly.",
+                "bounds": [
+                  644,
+                  469,
+                  896,
+                  447
+                ]
+              },
+              {
+                "label": "4 · Three-joint panel",
+                "description": "Fig. 1-08 isolates the folded three-joint panel family.",
+                "bounds": [
+                  4,
+                  933,
+                  758,
+                  363
+                ]
+              },
+              {
+                "label": "5 · Two-joint panel",
+                "description": "Fig. 1-09 isolates the folded two-joint panel family.",
+                "bounds": [
+                  781,
+                  933,
+                  759,
+                  363
+                ]
+              }
+            ]
+          }
         },
         {
           "id": "making",
@@ -384,7 +486,7 @@
           "title": "Translate the model for fabrication.",
           "paragraphs": [
             "I translated the 3D panel geometry into fabrication drawings, bringing together fold angles, holes, tabs and reference information.",
-            "Model-derived information and manual checks were coordinated with the fabrication team. The physical modules were fabricated in the workshop and assembled by the project team."
+            "Read the dimensioned panel outlines alongside their lettered folding-angle details. Model-derived information and manual checks were coordinated with the fabrication team; the workshop photographs below document separately fabricated modules and internal supports."
           ],
           "media": [
             {
@@ -403,7 +505,33 @@
               "caption": "Workshop documentation of the internal supports and separately fabricated modules.",
               "credit": "Project: PKD Engineering Consultants."
             }
-          ]
+          ],
+          "diagramFocus": {
+            "title": "Read the drawing with its angle details",
+            "source": "/assets/projects/entrance-installation-art/fabrication-drawings.webp",
+            "steps": [
+              {
+                "label": "1 · Panel drawings",
+                "description": "The upper row retains the original dimensions, hole notes, folding lines and welding lines. Open the full image to inspect the small source lettering.",
+                "bounds": [
+                  3,
+                  3,
+                  1540,
+                  353
+                ]
+              },
+              {
+                "label": "2 · Folding angles",
+                "description": "The lower rows retain the original a–f angle details associated with the panel drawings above. These values are source information, not recalculated instructions.",
+                "bounds": [
+                  3,
+                  372,
+                  1540,
+                  177
+                ]
+              }
+            ]
+          }
         },
         {
           "id": "results",

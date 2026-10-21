@@ -3,6 +3,7 @@ import ProjectStudyChrome,{StudyLabel} from './ProjectStudyChrome';
 import ProjectCaseStudyControls from './ProjectCaseStudyControls';
 import ProjectCaseStudyStage from './ProjectCaseStudyStage';
 import InformationSkin from './InformationSkin';
+import EntranceDiagramFocus from './EntranceDiagramFocus';
 import {projectStudyEvidence} from './project-study-media.mjs';
 import {projectStudyLayout,projectStudyEvidenceLayout} from './project-study-layout.mjs';
 import styles from './ProjectCaseStudy.module.css';
@@ -98,6 +99,7 @@ export default function ProjectCaseStudy({project}){
        {section.paragraphs.map(paragraph=><p key={paragraph}>{paragraph}</p>)}
       </Panel>
      </div>
+     {project.id==='entrance-installation-art'&&section.diagramFocus&&<div className={styles.evidenceBand}><EntranceDiagramFocus guide={section.diagramFocus} image={section.media.find(image=>image.src===section.diagramFocus.source)} id={`${prefix}-${section.id}-guide`}/></div>}
      {evidence.length>0&&<div className={styles.evidenceBand}>{evidence.map(image=><EvidenceFigure key={image.src} image={image}/>)}</div>}
     </section>;})}
     <footer id={`${prefix}-credits`} tabIndex={-1} className={`${styles.chapter} ${styles.creditsChapter}`} data-project-chapter="credits" aria-labelledby={`${prefix}-credits-heading`} {...layoutAttributes(projectStudyLayout(project,'credits'))}>

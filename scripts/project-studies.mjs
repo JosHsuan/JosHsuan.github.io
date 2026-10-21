@@ -159,6 +159,24 @@ export function assertProjectStudies(record,manifest){
       assert(['form','system','make'].includes(section.kind));
       assert(section.paragraphs.length>0);section.paragraphs.forEach(paragraph=>text(paragraph,'paragraph'));
       assert(section.media.length>0,'Every chapter has actual source evidence');
+      if(section.diagramFocus!==undefined){
+        assert.equal(project.id,'entrance-installation-art','Diagram focus is the bounded Entrance pilot only');
+        assert(['context','system','making'].includes(section.id),'Only reviewed Entrance explanatory chapters');
+        const guide=section.diagramFocus,source=section.media[0];
+        assert(guide&&typeof guide==='object'&&!Array.isArray(guide));
+        assert.deepEqual(Object.keys(guide).sort(),['source','steps','title'],'No hidden diagram sources or unsupported transforms');
+        text(guide.title,'diagram focus title');
+        assert.equal(guide.source,source.src,'Focus uses the complete pinned primary raster, not a reconstructed drawing');
+        assert(Array.isArray(guide.steps)&&guide.steps.length>=2&&guide.steps.length<=5,'Two to five source-authored focus groups');
+        assert.equal(new Set(guide.steps.map(step=>step.label)).size,guide.steps.length,'Distinct explanatory controls');
+        for(const step of guide.steps){
+          assert.deepEqual(Object.keys(step).sort(),['bounds','description','label']);
+          text(step.label,'diagram focus label');text(step.description,'diagram focus description');
+          assert(Array.isArray(step.bounds)&&step.bounds.length===4&&step.bounds.every(Number.isFinite),'Finite source-pixel bounds');
+          const [x,y,w,h]=step.bounds;
+          assert(x>=0&&y>=0&&w>0&&h>0&&x+w<=source.width&&y+h<=source.height,'Focus remains inside the complete source raster');
+        }
+      }
     }
     const motions=project.motionMedia??[];
     assert(Array.isArray(motions));
