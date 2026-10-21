@@ -41,13 +41,11 @@ for(const image of [xrWorkspace.image,xrWorkspace.image?.mobile]){
   const pin=manifest.assets.find(asset=>'/'+asset.path===image.src);
   assert(pin&&pin.sha256===image.sha256&&pin.bytes===image.bytes,'Workspace image matches its approved asset pin');
 }
-const typographyAsset=manifest.assets.find(asset=>asset.path==='assets/fonts/portfolio-ocr-b.woff2');
-const typographyNotice=manifest.assets.find(asset=>asset.path==='licenses/ocr-b-NOTICE.txt');
-assert(typographyAsset&&typographyNotice,'OCR B source-derived font and original notices are pinned together');
-const displayTypographyAsset=manifest.assets.find(asset=>asset.path==='assets/fonts/space-grotesk-variable.woff2');
-const displayTypographyNotice=manifest.assets.find(asset=>asset.path==='licenses/space-grotesk-OFL.txt');
-assert(displayTypographyAsset&&displayTypographyNotice,'Space Grotesk headings and the original OFL are pinned together');
-assert.equal(displayTypographyAsset.sha256,'8e085aa438094f11487a836652edd5c054fa6a96f63fc7c282105ee3a4b08c07','Unmodified upstream Space Grotesk variable font');
+const typographyAsset=manifest.assets.find(asset=>asset.path==='assets/fonts/roboto-mono-variable.woff2');
+const typographyNotice=manifest.assets.find(asset=>asset.path==='licenses/roboto-mono-OFL.txt');
+assert(typographyAsset&&typographyNotice,'Roboto Mono and its original OFL are pinned together');
+assert.equal(typographyAsset.sha256,'aafaa5d57a7180d02d1c6a5925523e06b3bcde4b182544a4d793d5ee87e61817','Unmodified upstream Roboto Mono variable font');
+const displayTypographyAsset=typographyAsset,displayTypographyNotice=typographyNotice;
 assert.equal(digest(await readFile(path.join(release, 'contact.json'))), manifest.contactSHA256);
 // Verify the complete public handoff before replacing generated workspace files.
 for (const asset of manifest.assets) {
@@ -155,7 +153,7 @@ await writeFile(path.join(work, 'public/robots.txt'), `User-agent: *\nAllow: /\n
 const routes=['/','/about/','/projects/','/contact/','/projects/bending-active/','/projects/xr-bending-active/',...PROJECT_SLUGS.map(slug=>`/projects/${slug}/`)];
 await writeFile(path.join(work, 'public/sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${routes.map(route=>`<url><loc>${manifest.origin}${route}</loc></url>`).join('')}</urlset>\n`);
 const commit = process.env.GITHUB_SHA || execFileSync('git', ['rev-parse', 'HEAD'], {cwd: root, encoding: 'utf8'}).trim();
-await writeFile(path.join(work, 'public/release.json'), JSON.stringify({release: manifest.id, commit, storyRevision:manifest.storySHA256, introductionRevision:manifest.introductionSHA256, modelRevision: 'ff112b90be104cca7e3705b5eee481ba3973d25e2f3d4a7350faa2f732cae47e', diagramRevision: manifest.assets.find(asset => asset.path === 'assets/thesis/source-diagrams.glb').sha256, xrModelRevision: xrStudy.model.sha256, xrStudyRevision: manifest.xrStudySHA256, xrWorkspaceRevision:manifest.xrWorkspaceSHA256,projectStudiesRevision:manifest.projectStudiesSHA256,projectAssetsRevision:manifest.projectAssetsSHA256, typography: 'Portfolio OCR B',typographyRevision:typographyAsset.sha256,typographyNoticeRevision:typographyNotice.sha256,displayTypography:'Space Grotesk',displayTypographyRevision:displayTypographyAsset.sha256,displayTypographyNoticeRevision:displayTypographyNotice.sha256}) + '\n');
+await writeFile(path.join(work, 'public/release.json'), JSON.stringify({release: manifest.id, commit, storyRevision:manifest.storySHA256, introductionRevision:manifest.introductionSHA256, modelRevision: 'ff112b90be104cca7e3705b5eee481ba3973d25e2f3d4a7350faa2f732cae47e', diagramRevision: manifest.assets.find(asset => asset.path === 'assets/thesis/source-diagrams.glb').sha256, xrModelRevision: xrStudy.model.sha256, xrStudyRevision: manifest.xrStudySHA256, xrWorkspaceRevision:manifest.xrWorkspaceSHA256,projectStudiesRevision:manifest.projectStudiesSHA256,projectAssetsRevision:manifest.projectAssetsSHA256, typography: 'Roboto Mono',typographyRevision:typographyAsset.sha256,typographyNoticeRevision:typographyNotice.sha256,displayTypography:'Roboto Mono',displayTypographyRevision:displayTypographyAsset.sha256,displayTypographyNoticeRevision:displayTypographyNotice.sha256}) + '\n');
 const result = spawnSync(process.execPath, [path.join(root, 'node_modules/next/dist/bin/next'), 'build', work, '--webpack'], {cwd: root, stdio: 'inherit', env: {...process.env, THESIS_PUBLIC_RELEASE: '1', NEXT_PUBLIC_BASE_PATH: '', NEXT_TELEMETRY_DISABLED: '1'}});
 if (result.error) throw result.error;
 assert.equal(result.status, 0, 'Public static build failed');

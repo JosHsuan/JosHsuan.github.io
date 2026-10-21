@@ -419,47 +419,20 @@
 @media(max-height:650px){.homeInner{position:relative;padding-top:7rem;padding-bottom:3rem}.homeProject{margin-top:2rem}.home{min-height:100svh}}
 @media print{.home{min-height:0;break-after:page}.homeInner{position:relative;min-height:0;padding:2rem}.home::before,.homeNotation,.homeSignature{display:none}.homeDescription,.homeEyebrow,.homeProjectIndex{color:inherit}.homeProjectAction{color:inherit}.homeCopy h1{font-size:4rem}}
 
-/* The owner-selected OCR family replaces proportional/serif contrasts. Its
-   wider .723em cells need smaller headings; stage, camera and reading geometry
-   remain owned by the original Bending implementation. */
-.owner{font-weight:400;letter-spacing:0}
-.discipline,.openingLabel,.chapterLabel,.projectType{letter-spacing:.055em}
-/* The 336px OCR identity overlaps centred navigation at tablet widths.
-   Use the existing compact identity above the mobile breakpoint as well;
-   retain the name, native links, their hit areas and the optical skin. */
+/* Typography is shared with the portfolio; Bending's scene remains untouched. */
+.owner{font-weight:400;letter-spacing:0;font-size:var(--type-size-control)}
 @media(max-width:1100px){.masthead .owner>span:not(:global([data-liquid-skin])){display:none}}
-.openingCopy h1{font-size:clamp(3rem,7.1vw,8rem);font-weight:400;font-stretch:normal;letter-spacing:-.025em;line-height:1.03}
-.chapterHeading,.pattern .chapterHeading,.validation .chapterHeading{font-size:clamp(2.1rem,3.6vw,4.2rem);font-weight:400;letter-spacing:-.025em;line-height:1.12}
-.headingLast{font-style:normal;letter-spacing:-.025em}
-.closingCopy .chapterHeading{font-size:clamp(2.5rem,4.8vw,5.5rem);letter-spacing:-.025em;line-height:1.12}
-.subtitle,.measurements dd{letter-spacing:-.02em}
-@media(max-width:780px){
-  .openingCopy h1{font-size:clamp(2.35rem,12.2vw,5.8rem);letter-spacing:-.025em;line-height:1.05}
-  .chapterHeading,.pattern .chapterHeading,.validation .chapterHeading{font-size:clamp(1.9rem,8.2vw,3rem)}
-  .closingCopy .chapterHeading{font-size:clamp(2.25rem,9vw,3.4rem)}
-}
-@media print{.openingCopy h1{font-size:4rem}.chapterHeading,.closingCopy .chapterHeading{font-size:2.5rem}}
-
-/* The paired display face and OCR reading roles share the site type scale. */
-.openingCopy h1,.homeCopy h1,.homeCopy h1>span:first-child{font-family:var(--display);font-weight:500;line-height:var(--type-leading-display);letter-spacing:var(--type-tracking-display)}
-.chapterHeading,.pattern .chapterHeading,.validation .chapterHeading,.closingCopy .chapterHeading{font-family:var(--display);font-weight:500;line-height:var(--type-leading-heading);letter-spacing:var(--type-tracking-display)}
-.headingLast{font-family:var(--display);line-height:var(--type-leading-heading);letter-spacing:var(--type-tracking-display)}
+.openingCopy h1,.homeCopy h1,.homeCopy h1>span:first-child{font-family:var(--display);font-weight:400;font-stretch:normal;line-height:var(--type-leading-display);letter-spacing:var(--type-tracking-display)}
+.chapterHeading,.pattern .chapterHeading,.validation .chapterHeading,.closingCopy .chapterHeading,.headingLast{font-family:var(--display);font-style:normal;font-weight:400;line-height:var(--type-leading-heading);letter-spacing:var(--type-tracking-display)}
 .copy>p,.closingCopy>p,.openingText,.subtitle,.measurements dd,.methodSequence li,.homeStatement,.homeDescription{line-height:var(--type-leading-body);letter-spacing:var(--type-tracking-body)}
 .discipline,.openingLabel,.chapterLabel,.projectType,.scrollCue,.spatialNotation,.methodSequence li>span,.measurements dt,.endnote,.figureIndex,.homeEyebrow,.homeNotation,.homeProjectIndex,.homeSignature{font-size:var(--type-size-label);line-height:var(--type-leading-label);letter-spacing:var(--type-tracking-label)}
-.evidence figcaption,.evidence figcaption>p,.copy .marginNote,.copy .smallNote,.closingCopy .smallNote,.sourceNotes,.methodSequence details p{line-height:var(--type-leading-caption);letter-spacing:var(--type-tracking-caption)}
-.evidence figcaption>p,.copy .smallNote,.closingCopy .smallNote,.sourceNotes{font-size:max(var(--type-size-caption),.75rem)}
+.evidence figcaption,.evidence figcaption>p,.copy .marginNote,.copy .smallNote,.closingCopy .smallNote,.sourceNotes,.methodSequence details p{font-size:var(--type-size-caption);line-height:var(--type-leading-caption);letter-spacing:var(--type-tracking-caption)}
 .evidence figcaption>span{font-size:var(--type-size-label);line-height:var(--type-leading-label);letter-spacing:var(--type-tracking-label)}
-.owner,.siteLinks,.siteLinks a,.chapterRail,.railLabel,.sourceLinks a,.sourceNotes summary,.sourceComparison>summary,.mediaAction,.methodSequence summary{line-height:var(--type-leading-control);letter-spacing:var(--type-tracking-control)}
-.siteLinks,.chapterRail,.sourceLinks a,.mediaAction{font-size:var(--type-size-control)}
-@media(max-width:780px){.siteLinks{font-size:var(--type-size-label)}}
-
-/* The owner requested smaller typography, not a new Bending scene. Retain
-   composition, source recipes, clocks, reading floors and control hit areas. */
+.owner,.siteLinks,.siteLinks a,.chapterRail,.railLabel,.sourceLinks a,.sourceNotes summary,.sourceComparison>summary,.mediaAction,.methodSequence summary{font-size:var(--type-size-control);line-height:var(--type-leading-control);letter-spacing:var(--type-tracking-control)}
 @media screen{
  .openingCopy h1,.homeCopy h1{font-size:var(--type-size-hero);margin-bottom:1.5rem}
- .chapterHeading,.pattern .chapterHeading,.validation .chapterHeading,.closingCopy .chapterHeading{font-size:var(--type-size-heading);margin-bottom:1.25rem}
- .copy>p,.closingCopy>p,.openingText,.homeDescription{font-size:var(--type-size-body)}
- .subtitle,.homeStatement,.closingCopy .closingSummary{font-size:var(--type-size-intro)}
- .copy .smallNote,.closingCopy .smallNote,.sourceNotes{font-size:var(--type-size-caption)}
- .copy .marginNote{font-size:.875rem}
+ .chapterHeading,.pattern .chapterHeading,.validation .chapterHeading,.closingCopy .chapterHeading{font-size:var(--type-size-heading);margin-bottom:1rem}
+ .copy>p,.closingCopy>p,.closingCopy>p:not(.closingSummary),.openingText,.homeDescription,.subtitle,.homeStatement,.closingCopy .closingSummary{font-size:var(--type-size-body);max-width:var(--type-measure-body);margin-bottom:var(--type-space-paragraph)}
+ .methodSequence li,.measurements dd{font-size:var(--type-size-secondary)}
+ .evidence figcaption>p,.copy .smallNote,.closingCopy .smallNote,.sourceNotes,.copy .marginNote{font-size:var(--type-size-caption);max-width:var(--type-measure-caption)}
 }

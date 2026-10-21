@@ -7,7 +7,7 @@ import {createVelocitySkin,advanceVelocitySkin,sampleVelocitySkin} from '../moti
 
 const MARKER='[data-information-window]';
 const POINTS=['tl','tr','br','bl','et','er','eb','el'];
-const VARIABLES=['background','border-width','border-color','radius','shadow','x','y','rz','skin-path'];
+const VARIABLES=['background','border-width','border-color','radius','shadow','x','y','rz','rx','ry','skew','perspective','skin-path'];
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const number=value=>Number.parseFloat(value)||0;
 const targetAt=(top,height,docY,viewport)=>clamp((docY+viewport/2-top-height/2)*2/(viewport+height),-1,1);
@@ -134,13 +134,17 @@ export function createInformationWindowPresenter({publisher,root=globalThis.docu
       // invalidation marks it dirty; the first neutral frame is still published.
       const neutral=item.pose.x===0&&item.pose.y===0&&item.pose.rz===0&&item.pose.edgeMaximum===0;
       if(resting&&neutral&&!item.dirty&&item.publishedMoving===isMoving){moving ||= isMoving;continue;}
-      const {pose,edgeMaximum}=presentationPose(item);
+      const {pose,edgeMaximum,perspective}=presentationPose(item);
       publisher.style(element,'--information-x',pose.x.toFixed(3)+'px');
       publisher.style(element,'--information-y',pose.y.toFixed(3)+'px');
       publisher.style(element,'--information-rz',pose.rz.toFixed(3)+'deg');
+      if(item.velocitySkin){
+        for(const key of ['rx','ry','skew'])publisher.style(element,'--information-'+key,pose[key].toFixed(3)+'deg');
+        publisher.style(element,'--information-perspective',perspective.toFixed(1)+'px');
+      }
       publisher.style(element,'--information-skin-path',outline(item,pose));
       publisher.attribute(element,'data-information-moving',String(isMoving));item.publishedMoving=isMoving;
-      item.pose={x:pose.x,y:pose.y,rz:pose.rz,edgeMaximum};item.dirty=false;
+      item.pose={x:pose.x,y:pose.y,rz:pose.rz,rx:pose.rx,ry:pose.ry,skew:pose.skew,edgeMaximum};item.dirty=false;
       moving ||= isMoving;
     }
     return moving;

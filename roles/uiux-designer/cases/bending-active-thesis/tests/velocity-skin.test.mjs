@@ -15,11 +15,17 @@ test('viewport-normalized speed response is consistent across sample rates and v
  assert(run(60,800,1000).strength<=1,'extreme flick remains bounded');
 });
 
-test('decorative pose keeps every content transform neutral and smaller skins remain bounded',()=>{
+test('whole-panel pose is perceptible, bounded and reversible without opacity or scale changes',()=>{
  const state={strength:1};
  for(const [width,height] of [[100,80],[390,300],[700,500]]){
-  const {pose,edgeMaximum}=sampleVelocitySkin(state,width,height,24);
-  assert.equal(pose.x,0);assert.equal(pose.y,0);assert.equal(pose.rz,0);
+  const {pose,edgeMaximum,perspective}=sampleVelocitySkin(state,width,height,24);
+  assert.equal(pose.x,0);assert.equal(pose.y,0);
+  assert.equal(pose.rx,-8);assert.equal(pose.ry,4);assert.equal(pose.rz,-1.1);assert.equal(pose.skew,.7);
+  assert(perspective>=height*3&&perspective>=width*3&&perspective>=800);
+  const reversed=sampleVelocitySkin({strength:-1},width,height,24).pose;
+  for(const key of ['rx','ry','rz','skew'])assert.equal(reversed[key],-pose[key]);
+  const rest=sampleVelocitySkin({strength:0},width,height,24).pose;
+  for(const key of ['rx','ry','rz','skew'])assert(rest[key]===0);
   assert.equal(pose.sx,1);assert.equal(pose.sy,1);assert.equal(pose.alpha,1);
   assert(edgeMaximum<=Math.min(width,height)*.025);
   if(width<480)assert(edgeMaximum<=5);

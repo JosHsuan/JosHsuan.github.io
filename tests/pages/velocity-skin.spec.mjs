@@ -1,7 +1,9 @@
 import {test,expect} from '@playwright/test';
 import {WAIT,scenarioTimeout} from './case-helpers.mjs';
 
-test('Mode/s pilot responds to native scroll with skin-only motion and finite readable rest',async({page})=>{
+test.use({video:'on'});
+
+test('Mode/s pilot responds to native scroll with whole-panel motion and finite readable rest',async({page})=>{
  test.setTimeout(scenarioTimeout(120000));
  await page.goto('/projects/mode-s-of-making/');
  await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});
@@ -23,9 +25,11 @@ test('Mode/s pilot responds to native scroll with skin-only motion and finite re
   await page.mouse.wheel(0,180);
   // WebKit serializes CSS strings with double quotes; require a valid closed path, not a quote style.
   await expect.poll(()=>observation.evaluate(value=>value.samples.some(s=>s.y>0&&(/^path\((['"])M[\s\S]+Z\1\)$/.test(s.path)&&CSS.supports('clip-path',s.path))))).toBe(true);
-  expect(await observation.evaluate(value=>value.samples.every(s=>s.neutral&&s.clip==='none'&&s.opacity==='1'))).toBe(true);
+  expect(await observation.evaluate(value=>value.samples.some(s=>!s.neutral))).toBe(true);
+  expect(await observation.evaluate(value=>value.samples.every(s=>s.clip==='none'&&s.opacity==='1'))).toBe(true);
   await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.informationWindows.settled)).toBe(true);
   await expect(panel).toHaveAttribute('data-information-moving','false');
+  expect(await panel.evaluate(node=>new DOMMatrix(getComputedStyle(node).transform==='none'?undefined:getComputedStyle(node).transform).isIdentity)).toBe(true);
   await page.mouse.wheel(0,-100);
   await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.informationWindows.settled)).toBe(true);
   await panel.locator('a').first().focus();

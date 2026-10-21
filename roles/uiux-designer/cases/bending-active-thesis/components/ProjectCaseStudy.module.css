@@ -81,6 +81,8 @@
 .chapterRail a[aria-current]:not(:focus-visible)>span:nth-child(2){opacity:0}
 .page :focus-visible{outline:2px solid var(--material-reading-accent);outline-offset:5px}
 .page:global([data-home-scrolling-ready]) :global([data-information-window][data-information-ready]):not(:focus-within){transform:translate3d(var(--information-x,0px),var(--information-y,0px),0) rotateZ(var(--information-rz,0deg))}
+/* Confirmed whole-card pilot: native contents share the glass plane; fixed chrome stays outside. */
+.page:global([data-information-motion-profile="velocity-skin"][data-home-scrolling-ready]) :global([data-information-window][data-information-ready][data-information-moving="true"]):not(:focus-within){transform:perspective(var(--information-perspective,1200px)) rotateX(var(--information-rx,0deg)) rotateY(var(--information-ry,0deg)) rotateZ(var(--information-rz,0deg)) skewY(var(--information-skew,0deg));transform-origin:50% 50%}
 .page:global([data-study-paused]) :global([data-information-window]){transform:none!important}
 .readingTools[hidden]{display:none}.readingTools button{white-space:nowrap}
 .imageFailure{display:none;position:absolute;left:10%;right:10%;top:35%;padding:1rem;border:1px solid var(--material-reading-border);border-radius:16px;background:var(--glass-fallback);color:var(--paper);font-size:var(--type-size-caption);line-height:var(--type-leading-caption);letter-spacing:var(--type-tracking-caption);text-align:center}
@@ -125,9 +127,12 @@
 
 /* Shared compact hierarchy keeps native reading and original source apertures. */
 @media screen{
- .panel h1,.openingPanel h1{font-size:var(--type-size-title);margin-bottom:1.25rem}
- .panel h2{font-size:var(--type-size-heading);margin-bottom:1.25rem}
- .panel>p{font-size:var(--type-size-body)}
+ .panel h1,.openingPanel h1{font-size:var(--type-size-title);margin-bottom:1rem;font-weight:400}
+ .panel h2{font-size:var(--type-size-heading);margin-bottom:1rem;font-weight:400}
+ .panel>p{font-size:var(--type-size-body);max-width:var(--type-measure-body);margin-block:var(--type-space-paragraph)}
  .panel>.sourceCaption,.panel>.credit,.panel>.sourceNote{font-size:var(--type-size-caption)}
- .related strong{font-size:var(--type-size-subheading)}
+ .metadata dd,.credits dd{font-size:var(--type-size-secondary)}
+ .metadata dt,.credits dt{text-transform:none;margin-bottom:.25rem}
+ .evidence figcaption p,.sourcePanel>p{max-width:var(--type-measure-caption)}
+ .related strong{font-size:var(--type-size-subheading);font-weight:400}
 }

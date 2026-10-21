@@ -350,18 +350,6 @@
       "source": "Owner-designated only_interior.3dm; complete assembled bamboo geometry selected by native source groups; shared Chao / Nomura research"
     },
     {
-      "path": "assets/fonts/portfolio-ocr-b.woff2",
-      "bytes": 12952,
-      "sha256": "a3fdc31584a87ed2c612a9c0243241c0d44a65b0a22efaf2297d083712f03d5b",
-      "source": "Portfolio OCR B derivative of Matthew Skala OCR B 0.3.1; original Norbert Schwarz unrestricted notices and source provenance retained in OCR_TYPOGRAPHY_INTEGRATION.md; retrieved 2026-10-18"
-    },
-    {
-      "path": "licenses/ocr-b-NOTICE.txt",
-      "bytes": 2161,
-      "sha256": "4aa5a5712130c58178b00d518d422ccb96845ed59cd09b1155a7087acebd7ebc",
-      "source": "Original Norbert Schwarz / Matthew Skala OCR B notices plus explicitly identified public-domain project symbol additions; source package 0.3.1, retrieved 2026-10-18"
-    },
-    {
       "path": "assets/xr/research-workspace.webp",
       "bytes": 3715044,
       "sha256": "d691463248ac34d7dd71c7f8211363f9dd51a46e55cfa22a90006d7e400b27da",
@@ -372,18 +360,6 @@
       "bytes": 1248596,
       "sha256": "937e8d388a3b4156bc19671ad7d614bee12fbbe3c54d79e9669d9fbe67ef135e",
       "source": "Owner-authorized high-resolution native Rhino Rendered transparent front capture of the original architectural XR research room and working setup; original geometry/materials/TV UVs preserved, with documented front-only visibility opening and temporary native capture lighting."
-    },
-    {
-      "path": "assets/fonts/space-grotesk-variable.woff2",
-      "bytes": 49256,
-      "sha256": "8e085aa438094f11487a836652edd5c054fa6a96f63fc7c282105ee3a4b08c07",
-      "source": "Unmodified Space Grotesk 2.000 variable WOFF2 (wght 300-700), Florian Karsten project, GitHub commit 03507d024a01282884232081fc6011c09ff4e849; SIL OFL 1.1, retrieved 2026-10-18. See OCR_TYPOGRAPHY_INTEGRATION.md."
-    },
-    {
-      "path": "licenses/space-grotesk-OFL.txt",
-      "bytes": 4402,
-      "sha256": "c6dec685825f73b18c20926fddc65e8315642e12986f15db0699170940a09efc",
-      "source": "Original Space Grotesk Project Authors copyright and SIL Open Font License 1.1 from GitHub commit 03507d024a01282884232081fc6011c09ff4e849; identical text normalized from CRLF to LF for portable public bytes, retrieved 2026-10-18."
     },
     {
       "path": "assets/projects/mode-s-of-making/hero.webp",
@@ -776,6 +752,18 @@
       "bytes": 418822,
       "sha256": "26ec566d90605d45930d2175d68925aa584f0b8fbfd586eaa58bbac4062e31f0",
       "source": "Owner-authorized original portfolio Caschlatsch derivative; original source preserved."
+    },
+    {
+      "path": "assets/fonts/roboto-mono-variable.woff2",
+      "bytes": 105204,
+      "sha256": "aafaa5d57a7180d02d1c6a5925523e06b3bcde4b182544a4d793d5ee87e61817",
+      "source": "Unmodified upstream Roboto Mono variable WOFF2; googlefonts/RobotoMono GitHub commit 895ec691990d041dd727c7b5afa3ce56525d98e6; retrieved 2026-10-21. See TYPOGRAPHY_REFERENCE_REVISION.md."
+    },
+    {
+      "path": "licenses/roboto-mono-OFL.txt",
+      "bytes": 4395,
+      "sha256": "50ab8dd54680d3473f649c9db86fece88434d097c7834475c1c72d2f8c429215",
+      "source": "Unmodified original Roboto Mono copyright and SIL Open Font License 1.1; googlefonts/RobotoMono GitHub commit 895ec691990d041dd727c7b5afa3ce56525d98e6; retrieved 2026-10-21. See TYPOGRAPHY_REFERENCE_REVISION.md."
     }
   ],
   "limits": [

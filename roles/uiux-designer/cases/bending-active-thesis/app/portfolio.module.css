@@ -150,57 +150,25 @@
 @media(forced-colors:active){.portfolio{background:Canvas;color:CanvasText;--portfolio-line:CanvasText;--portfolio-muted:CanvasText;--portfolio-copper:LinkText}.identity,.navigationLinks,.projectCard,.projectImage{background:Canvas;color:CanvasText}.eyebrow,.invitationLabel,.projectCount,.cardCategory,.footer{color:CanvasText}.cardCopy{opacity:1;translate:none;background:Canvas;color:CanvasText}.cardAction{color:LinkText}.main:global([data-home-scrolling-ready]) :global([data-information-window][data-information-ready]){transform:none!important}}
 @media print{.portfolio{background:#fff;color:#151b17;--portfolio-muted:#333b35;--portfolio-copper:#813e26;--portfolio-line:#8b9991}.navigation,.skip,.notation,.signature{display:none}.introduction,.introductionInner,.standalone,.contactPage{min-height:0;padding-top:2rem}.homeTitle{font-size:4rem}.projectGrid{grid-template-rows:none;grid-auto-rows:auto;grid-template-columns:repeat(2,minmax(0,1fr));background:none}.projectCard{break-inside:avoid;aspect-ratio:1;background:transparent}.cardCopy{opacity:1;translate:none;background:#fff;color:#151b17;padding:1rem}.projectImage button{display:none}.section{padding-top:2rem;padding-bottom:2rem}.eyebrow,.invitationLabel,.cardCategory,.footer{color:#333b35}.main:global([data-home-scrolling-ready]) :global([data-information-window][data-information-ready]){transform:none!important}}
 
-/* OCR B has a true .723em advance. Fit the name and reading hierarchy to that
-   metric while preserving native layout, card geometry and scroll ownership. */
-.identity{font-weight:400;letter-spacing:0}
-.identityDiscipline{letter-spacing:.04em}
-.homeTitle{font-size:clamp(3.6rem,7.3vw,8.2rem);font-weight:400;font-stretch:normal;letter-spacing:-.025em;line-height:1.04}
-.homeTitle>span:first-child{font-weight:400;letter-spacing:0;line-height:1.4}
-.statement{max-width:33rem;font-size:clamp(1.15rem,1.65vw,1.6rem);letter-spacing:-.015em;line-height:1.5}
-.description{max-width:36rem;letter-spacing:0;line-height:1.8}
-.sectionTitle{font-size:clamp(2.2rem,3.8vw,4rem);letter-spacing:-.025em;line-height:1.14}
-.sectionIntro{font-size:clamp(1.1rem,1.45vw,1.4rem);letter-spacing:-.01em;line-height:1.6}
-.prose,.approaches article>p:last-child{letter-spacing:0}
-.cardCopy :is(h2,h3){letter-spacing:-.02em;line-height:1.2}
-.contactHandle{letter-spacing:-.02em}
-@media(max-width:640px){
-  .homeTitle{font-size:clamp(2.5rem,12.4vw,4.4rem)}
-  .statement{font-size:1.15rem;line-height:1.55}
-  .sectionTitle{font-size:clamp(1.9rem,7.8vw,2.7rem)}
-  .sectionIntro{font-size:1.1rem;line-height:1.65}
-  .identity{font-size:.66rem}
-  .navigationLinks a{font-size:.65rem;padding-inline:.55rem}
-}
-@media(max-width:360px){.identity{font-size:.61rem;padding-inline:.5rem}.navigationLinks a{font-size:.6rem;padding-inline:.3rem}}
-@media print{.homeTitle{font-size:3rem}}
-
-/* Shared display/reading roles; values are project choices, not SF metrics. */
-.homeTitle,.homeTitle>span:first-child{line-height:var(--type-leading-display);letter-spacing:var(--type-tracking-display)}
-.homeTitle{font-weight:500}
-.sectionTitle{font-weight:500;line-height:var(--type-leading-heading);letter-spacing:var(--type-tracking-display)}
+/* Unified reading hierarchy; preserve grids, source geometry and hit areas. */
+.homeTitle,.homeTitle>span:first-child{font-weight:400;font-stretch:normal;line-height:var(--type-leading-display);letter-spacing:var(--type-tracking-display)}
+.sectionTitle{font-weight:400;line-height:var(--type-leading-heading);letter-spacing:var(--type-tracking-display)}
 .sectionTitle:is(h1){line-height:var(--type-leading-display)}
-.approaches :is(h2,h3){font-weight:500;line-height:var(--type-leading-subheading);letter-spacing:var(--type-tracking-subheading)}
-.cardCopy h2{font-weight:500;line-height:var(--type-leading-heading);letter-spacing:var(--type-tracking-display)}
-.cardCopy h3{font-weight:500;line-height:var(--type-leading-subheading);letter-spacing:var(--type-tracking-subheading)}
+.approaches :is(h2,h3),.cardCopy h3,.invitationTitle{font-family:var(--display);font-weight:400;line-height:var(--type-leading-subheading);letter-spacing:var(--type-tracking-subheading)}
+.cardCopy h2{font-weight:400;line-height:var(--type-leading-heading);letter-spacing:var(--type-tracking-display)}
 .statement,.description,.sectionIntro,.prose,.approaches article>p:last-child,.contactHandle{line-height:var(--type-leading-body);letter-spacing:var(--type-tracking-body)}
 .eyebrow,.invitationLabel,.identityDiscipline,.notation,.signature,.projectCount,.cardCategory,.footer>span:nth-child(2){font-size:var(--type-size-label);line-height:var(--type-leading-label);letter-spacing:var(--type-tracking-label)}
-.identity,.navigationLinks,.navigationLinks a,.textLink,.invitationAction,.cardAction,.socialLinks a,.footer a{line-height:var(--type-leading-control);letter-spacing:var(--type-tracking-control)}
-.invitationTitle{font-family:var(--display);font-weight:500;line-height:var(--type-leading-subheading);letter-spacing:var(--type-tracking-subheading)}
-.gridNote,.footer{line-height:var(--type-leading-caption);letter-spacing:var(--type-tracking-caption)}
-@media(max-width:640px){.identity,.navigationLinks a{font-size:var(--type-size-label)}.navigationLinks a{min-width:44px;padding-inline:.4rem}}
-/* CI measured a Contact hit area at 361.375px in a 361px viewport. Native
-   wrapping retains every label and hit area when the two groups need a row. */
-@media(max-width:375px){.navigation{flex-wrap:wrap;row-gap:.5rem}.identity{font-size:var(--type-size-label);padding-inline:.5rem}.navigationLinks a{font-size:var(--type-size-label);padding-inline:.3rem}}
-
-/* Owner-requested compact type: preserve the original grid, source framing,
-   typography families and 44px controls rather than scaling the whole page. */
+.identity,.navigationLinks,.navigationLinks a,.textLink,.invitationAction,.cardAction,.socialLinks a,.footer a{font-size:var(--type-size-control);font-weight:400;line-height:var(--type-leading-control);letter-spacing:var(--type-tracking-control)}
+.gridNote,.footer{font-size:var(--type-size-caption);line-height:var(--type-leading-caption);letter-spacing:var(--type-tracking-caption)}
 @media screen{
 .homeTitle{font-size:var(--type-size-hero);margin-bottom:1.5rem}
-.sectionTitle{font-size:var(--type-size-heading);margin-bottom:1.25rem}
+.homeTitle>span:first-child{font-size:var(--type-size-secondary);letter-spacing:0;margin-bottom:.75rem}
+.sectionTitle{font-size:var(--type-size-heading);margin-bottom:1rem}
 .sectionTitle:is(h1){font-size:var(--type-size-title)}
-.statement,.sectionIntro{font-size:var(--type-size-intro)}
-.description,.prose{font-size:var(--type-size-body)}
-.approaches :is(h2,h3),.cardCopy :is(h2,h3){font-size:var(--type-size-subheading)}
-.invitationTitle{font-size:1.0625rem}
-.contactHandle{font-size:clamp(1rem,1.3vw,1.25rem)}
+.statement,.sectionIntro,.description,.prose,.approaches article>p:last-child{font-size:var(--type-size-body);max-width:var(--type-measure-body);margin-bottom:var(--type-space-paragraph)}
+.approaches :is(h2,h3),.cardCopy :is(h2,h3),.invitationTitle{font-size:var(--type-size-subheading);margin-bottom:.75rem}
+.contactHandle{font-size:var(--type-size-body)}
+.gridNote{max-width:var(--type-measure-caption)}
 }
+/* Wrap groups instead of shrinking native text below the 14px UI role. */
+@media(max-width:640px){.navigation{flex-wrap:wrap;row-gap:.5rem}.navigationLinks a{min-width:44px;padding-inline:.5rem}.identity{padding-inline:.75rem}}

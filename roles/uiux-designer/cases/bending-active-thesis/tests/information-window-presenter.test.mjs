@@ -132,18 +132,19 @@ test('settled skins skip outline work on the ambient clock but remeasure and scr
   f.publish({docY:200});assert(f.presenter.inspect().outlineSamples>measured);
 });
 
-test('opt-in velocity skin bends paint only, reverses and resets without moving content',()=>{
+test('opt-in full-panel velocity pose reverses and resets with native content',()=>{
   const f=fixture([{}],{profile:'velocity-skin'});f.measure();f.publish();
   assert.equal(f.publish({docY:80}),true);
   let item=f.presenter.inspect().items[0];
   assert(item.skinStrength>0);assert(item.edgeMaximum>0&&item.edgeMaximum<=9);
-  assert.equal(item.x,0);assert.equal(item.y,0);assert.equal(item.rz,0);
+  assert.equal(item.x,0);assert.equal(item.y,0);assert(item.rz<0);assert(item.rx<0);assert(item.ry>0);
   assert.match(f.nodes[0].styles.get('--information-skin-path'),/^path\('/);
   for(let i=0;i<8;i++)f.publish({docY:80-(i+1)*10});
   assert(f.presenter.inspect().items[0].skinStrength<0);
   for(let i=0;i<120;i++)f.publish({docY:0});
   assert.equal(f.presenter.inspect().settled,true);
   assert.equal(f.nodes[0].attrs.get('data-information-moving'),'false');
+  for(const key of ['rx','ry','rz','skew'])assert.equal(Number.parseFloat(f.nodes[0].styles.get('--information-'+key)),0);
   assert.equal(f.nodes[0].styles.get('--information-skin-path'),'inset(0 round 28px)');
   for(const option of [{reduced:true},{seek:true},{resumed:true},{dt:1.1},{docY:3000}]){
     f.publish({docY:80});f.publish({docY:80,...option});

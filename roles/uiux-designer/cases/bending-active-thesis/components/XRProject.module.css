@@ -66,11 +66,14 @@
 
 /* Typography-only refinement; XR's source stage, camera and motion are intact. */
 @media screen{
- .heroCopy h1{font-size:var(--type-size-title);margin-bottom:1.25rem}
- .panel h2{font-size:var(--type-size-heading);margin-bottom:1.25rem}
- .panel h3,.workflow h3,.modelExplanation h3,.nextProject strong{font-size:var(--type-size-subheading)}
- .panel>p{font-size:var(--type-size-body)}
- .panel>.introduction{font-size:var(--type-size-intro)}
+ .heroCopy h1{font-size:var(--type-size-title);margin-bottom:1rem;font-weight:400}
+ .panel h2{font-size:var(--type-size-heading);margin-bottom:1rem;font-weight:400}
+ .panel h3,.workflow h3,.modelExplanation h3,.nextProject strong{font-size:var(--type-size-subheading);font-weight:400}
+ .panel>p,.panel>.introduction{font-size:var(--type-size-body);max-width:var(--type-measure-body);margin-block:var(--type-space-paragraph)}
+ .workflow p,.modelExplanation p,.metadata dd,.credits dd{font-size:var(--type-size-secondary);max-width:var(--type-measure-body)}
+ .metadata dt,.credits dt{text-transform:none;margin-bottom:.25rem}
  .panel>.eyebrow{font-size:var(--type-size-label)}
- .panel>.caption,.panel>.credit,.panel>.recordingNote,.panel>.sourceNote{font-size:var(--type-size-caption)}
+ .panel>.caption,.panel>.credit,.panel>.recordingNote,.panel>.sourceNote,.recordingSource>p{font-size:var(--type-size-caption);max-width:var(--type-measure-caption)}
+ .figure figcaption p{max-width:var(--type-measure-caption)}
+ .backLink,.readingLink,.recordingLink{font-size:var(--type-size-control)}
 }

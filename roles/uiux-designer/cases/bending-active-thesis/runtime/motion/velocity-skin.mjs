@@ -23,9 +23,14 @@ export function advanceVelocitySkin(state,{docY,dt,viewportHeight,immediate=fals
 }
 export function sampleVelocitySkin(state,width,height,radius){
  const pose={...WINDOW_REST_POSE,radius};
- // Only the decorative skin's top/bottom edge centres bend. No text/image
- // transformation, UV warp, opacity change or content clipping is introduced.
+ // User-confirmed whole-card response. The native panel and its contents share
+ // one plane; external navigation and source scene retain their own ownership.
+ // These are bounded adaptation parameters, not measured Lusion constants.
+ const strength=state.strength;
+ pose.rx=-8*strength;pose.ry=4*strength;pose.rz=-1.1*strength;pose.skew=.7*strength;
+ // Keep projected expansion bounded for tall editorial panels as well as cards.
+ const perspective=Math.max(800,height*3,width*3);
  const amplitude=Math.min(width<480?5:9,Math.min(width,height)*.025)*state.strength;
  pose.ety=amplitude;pose.eby=-amplitude*.7;
- return {pose,edgeMaximum:Math.abs(amplitude)};
+ return {pose,edgeMaximum:Math.abs(amplitude),perspective};
 }
