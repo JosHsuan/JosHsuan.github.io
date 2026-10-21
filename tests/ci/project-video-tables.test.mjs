@@ -84,11 +84,11 @@ function oneBox(bytes,parent,type){
   const boxes=boundedBoxes(bytes,parent.payload,parent.end).filter(box=>box.type===type);
   assert.equal(boxes.length,1,'One reviewed '+type+' box');return boxes[0];
 }
-function actualWebPresentation(bytes){
+function actualWebPresentation(bytes,{variableFrameRate=false}={}){
   const actual=readProjectVideo(bytes),moov=boundedBoxes(bytes).find(box=>box.type==='moov');
   const track=oneBox(bytes,moov,'trak'),mdia=oneBox(bytes,track,'mdia'),table=oneBox(bytes,oneBox(bytes,mdia,'minf'),'stbl');
-  const timing=oneBox(bytes,table,'stts'),composition=oneBox(bytes,table,'ctts'),edit=oneBox(bytes,oneBox(bytes,track,'edts'),'elst');
-  assert.equal(bytes[composition.payload],0,'Reviewed nonnegative composition-offset table');
+  const timing=oneBox(bytes,table,'stts'),composition=variableFrameRate?boundedBoxes(bytes,table.payload,table.end).find(box=>box.type==='ctts'):oneBox(bytes,table,'ctts'),edit=oneBox(bytes,oneBox(bytes,track,'edts'),'elst');
+  if(composition)assert.equal(bytes[composition.payload],0,'Reviewed nonnegative composition-offset table');
   assert.equal(bytes[edit.payload],0);assert.equal(bytes.readUInt32BE(edit.payload+4),1,'One native edit origin');
   assert.equal(edit.payload+20,edit.end);assert.equal(bytes.readInt16BE(edit.payload+16),1);assert.equal(bytes.readInt16BE(edit.payload+18),0,'Unit native edit rate');
   const mediaOrigin=bytes.readInt32BE(edit.payload+12),durations=[],offsets=[];
@@ -96,13 +96,17 @@ function actualWebPresentation(bytes){
     const at=timing.payload+8+i*8,frames=bytes.readUInt32BE(at),delta=bytes.readUInt32BE(at+4);
     for(let frame=0;frame<frames;frame++)durations.push(delta);
   }
-  const entries=bytes.readUInt32BE(composition.payload+4);assert.equal(composition.payload+8+entries*8,composition.end);
+  const entries=composition?bytes.readUInt32BE(composition.payload+4):0;if(composition)assert.equal(composition.payload+8+entries*8,composition.end);
+  else offsets.push(...Array(actual.frameCount).fill(0));
   for(let i=0;i<entries;i++){
     const at=composition.payload+8+i*8,frames=bytes.readUInt32BE(at),offset=bytes.readUInt32BE(at+4);
     for(let frame=0;frame<frames;frame++)offsets.push(offset);
   }
   assert.equal(durations.length,actual.frameCount);assert.equal(offsets.length,actual.frameCount);
   let dts=0;const frames=durations.map((duration,i)=>{const frame={pts:dts+offsets[i]-mediaOrigin,duration};dts+=duration;return frame;}).sort((a,b)=>a.pts-b.pts);
+  // With reordered VFR, stts describes decode intervals, not display holds.
+  // Display intervals are successive composition timestamps and the edit end.
+  if(variableFrameRate)for(let i=0;i<frames.length;i++)frames[i].duration=(frames[i+1]?.pts??actual.durationTicks)-frames[i].pts;
   assert.equal(frames[0].pts,0,'Native presentation begins at the reviewed normalized origin');
   for(let i=1;i<frames.length;i++)assert.equal(frames[i].pts,frames[i-1].pts+frames[i-1].duration,'Every native presentation-frame interval is continuous');
   assert.equal(frames.at(-1).pts+frames.at(-1).duration,actual.durationTicks,'The final displayed frame retains its entire duration');
@@ -126,4 +130,27 @@ test('actual compact H264 tables retain every normalized source presentation tim
     assert.throws(()=>actualWebPresentation(wrongOrigin),/presentation/);
   }
   assert.equal(total,6841683);assert(total<=8000000);
+});
+
+
+test('Dot delivery preserves every native VFR presentation interval and retains its original input',async()=>{
+  const spec=PROJECT_MOTION_SPECS['dot-based-3d-printing'][0],delivery=spec.deliveryDerivative;
+  const bytes=await load(delivery.src),original=await load(delivery.input.src);
+  for(const [data,pin] of [[bytes,delivery],[original,delivery.input]]){
+    assert.equal(data.length,pin.bytes);
+    assert.equal(createHash('sha256').update(data).digest('hex'),pin.sha256);
+  }
+  assert(bytes.length<original.length*.55,'At least 45 percent fewer requested video bytes');
+  const actual=actualWebPresentation(bytes,{variableFrameRate:true}),input=actualWebPresentation(original,{variableFrameRate:true});
+  const pts=[0,16,31,46,60,75,91,108,125,141,157,173,189,205,221,238,255,271,288,304,320,338,354,371,388,406,427];
+  const expected=pts.map((value,i)=>({pts:value/100,duration:((pts[i+1]??440)-value)/100}));
+  const receipt=JSON.parse(await readFile(new URL('dot-web-delivery.json',release)));
+  const rational=value=>{const [n,d=1]=value.split('/').map(Number);return n/d;};
+  assert.equal(receipt.input.sha256,delivery.input.sha256);assert.equal(receipt.output.sha256,delivery.sha256);
+  assert.deepEqual(receipt.timeline.presentationSecondsExactFractions.map(rational),expected.map(frame=>frame.pts));
+  assert.deepEqual(receipt.timeline.durationSecondsExactFractions.map(rational),expected.map(frame=>frame.duration));
+  for(const video of [actual,input]){
+    assert.deepEqual([video.width,video.height,video.frameCount],[2500,1304,27]);
+    assert.deepEqual(video.frames.map(frame=>({pts:frame.pts/video.timescale,duration:frame.duration/video.timescale})),expected);
+  }
 });

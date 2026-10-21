@@ -304,3 +304,27 @@ test('native HTTP failure, rejected playback and a real pending-source deadline 
   await failed('media-timeout');if(release)await release();await page.unroute(pattern);await frames(page,4);expect((await mediaFacts(page,media.id))).toMatchObject({reason:'media-timeout',firstFrame:false,sourceAttached:false});
  }finally{if(release)await release();await page.unroute(pattern);}
 });
+
+const dotDeliveryTest=test.extend({video:'on'});
+dotDeliveryTest('the smaller Dot delivery decodes and completes a genuine native loop without retiming',async({page})=>{
+  const media=dot.motionMedia[0];
+  expect(media.src).toBe('/assets/projects/dot-based-3d-printing/printing-process-motion-web.mp4');
+  await open(page,dot);await selectWithKeyboard(page,media.chapter);
+  const video=await nativeVideo(page,media);
+  // Read-only native timeupdate observation: never seek, synthesize an event,
+  // or drive the application clock to manufacture a loop.
+  await video.evaluate(node=>{
+   window.__dotLoop={previous:node.currentTime,wrapped:false,samples:[]};
+   node.addEventListener('timeupdate',event=>{
+    const state=window.__dotLoop,time=node.currentTime;
+    if(event.isTrusted&&state.previous>node.duration*.7&&time<node.duration*.3)state.wrapped=true;
+    state.previous=time;state.samples.push({time,trusted:event.isTrusted});
+   });
+  });
+  await expect.poll(()=>page.evaluate(()=>window.__dotLoop.wrapped),{timeout:WAIT}).toBe(true);
+  const receipt=await page.evaluate(()=>window.__dotLoop);
+  expect(receipt.samples.every(sample=>sample.trusted)).toBe(true);
+  const path=test.info().outputPath('dot-compact-native-playback.png');
+  await page.screenshot({path,fullPage:false});
+  await test.info().attach('dot-compact-native-playback',{path,contentType:'image/png'});
+ });

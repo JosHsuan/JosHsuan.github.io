@@ -764,6 +764,12 @@
       "bytes": 4395,
       "sha256": "50ab8dd54680d3473f649c9db86fece88434d097c7834475c1c72d2f8c429215",
       "source": "Unmodified original Roboto Mono copyright and SIL Open Font License 1.1; googlefonts/RobotoMono GitHub commit 895ec691990d041dd727c7b5afa3ce56525d98e6; retrieved 2026-10-21. See TYPOGRAPHY_REFERENCE_REVISION.md."
+    },
+    {
+      "path": "assets/projects/dot-based-3d-printing/printing-process-motion-web.mp4",
+      "bytes": 13211595,
+      "sha256": "2d6931de3caac7d44b6e02206e90556d695d8d763ac8d26ecc7fa8773a9f28e3",
+      "source": "Reviewed second-generation Dot web delivery; prior public MP4 and original GIF/container provenance retained; see DOT_WEB_DELIVERY.md"
     }
   ],
   "limits": [
@@ -774,6 +780,6 @@
   "xrStudySHA256": "3605cb7ed9abefc0721091d7883fdc765d0f0471af1b7d4db49f326228a68001",
   "contactSHA256": "c68b4bc45a3ecc13eeee55bae43f3cab75f2085a095a5084e1494f90c5695882",
   "xrWorkspaceSHA256": "41c48db687e71332240a002e0892141a7eac887c94740ef4c175cc4ccc4e1211",
-  "projectStudiesSHA256": "7acdad9cdbc433553b7511b2d578be14efc9ad8708283e44a6d6bb0fdf76bcf9",
-  "projectAssetsSHA256": "7215f72717af17154d896c7e1789ee552139f1406c96305fc6300b50f38b1a2e"
+  "projectStudiesSHA256": "d129dc92f2a65fdf7e120231abbd75868c5f2f71d2b6c38379ed39ea0d0f0c98",
+  "projectAssetsSHA256": "83f51a9847419f66f9ddde151b135fd3c2c58d4744d01631579497aad2916244"
 }

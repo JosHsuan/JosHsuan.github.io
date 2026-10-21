@@ -2496,7 +2496,7 @@
       "processing": {
         "decimation": false,
         "deformation": false,
-        "maxFloat32PositionErrorMeters": 2.95639037695139e-8,
+        "maxFloat32PositionErrorMeters": 2.95639037695139e-08,
         "compression": {
           "encoding": "EXT_meshopt_compression v0",
           "decodedByteExact": true,
@@ -2613,7 +2613,7 @@
       "processing": {
         "decimation": false,
         "deformation": false,
-        "maxFloat32PositionErrorMeters": 4.730224603122224e-7,
+        "maxFloat32PositionErrorMeters": 4.730224603122224e-07,
         "compression": {
           "encoding": "EXT_meshopt_compression v0",
           "decodedByteExact": true,
@@ -2731,7 +2731,7 @@
       "processing": {
         "decimation": false,
         "deformation": false,
-        "maxFloat32PositionErrorMeters": 2.9739873563805475e-8,
+        "maxFloat32PositionErrorMeters": 2.9739873563805475e-08,
         "compression": {
           "encoding": "EXT_meshopt_compression v0",
           "decodedByteExact": true,
@@ -2967,7 +2967,7 @@
       "processing": {
         "decimation": false,
         "deformation": false,
-        "maxFloat32PositionErrorMeters": 1.5255199002695008e-8,
+        "maxFloat32PositionErrorMeters": 1.5255199002695008e-08,
         "compression": {
           "encoding": "none",
           "decodedByteExact": true,
@@ -3318,12 +3318,12 @@
     {
       "id": "printing-process-motion",
       "projectId": "dot-based-3d-printing",
-      "path": "assets/projects/dot-based-3d-printing/printing-process-motion.mp4",
-      "src": "/assets/projects/dot-based-3d-printing/printing-process-motion.mp4",
+      "path": "assets/projects/dot-based-3d-printing/printing-process-motion-web.mp4",
+      "src": "/assets/projects/dot-based-3d-printing/printing-process-motion-web.mp4",
       "width": 2500,
       "height": 1304,
-      "bytes": 24383755,
-      "sha256": "1d9014c6bc56e57e6dd80c8d47fb76c7e696ba6c1d7b4d1b1e04444c6b8d6821",
+      "bytes": 13211595,
+      "sha256": "2d6931de3caac7d44b6e02206e90556d695d8d763ac8d26ecc7fa8773a9f28e3",
       "durationSeconds": 4.4,
       "frameCount": 27,
       "loop": true,
@@ -3377,15 +3377,61 @@
         "loop": true,
         "loopPolicy": "repeat chosen by the owner-selected background presentation",
         "noChapterAdvanceOnEnded": true,
-        "method": "Complete native GIF sequence encoded with libx264 to yuv420p. Original VFR timestamps and every original frame delay, including final delay, are exact. No forced frame rate or frame interpolation.",
-        "nativeVFRMethod": "Original timebase passthrough with explicit final packet duration.",
+        "method": "Second-generation native-size H264 delivery from the retained prior public MP4. All 27 presentation timestamps and durations remain exact; lossy pixels are not original GIF equality.",
+        "nativeVFRMethod": "Prior public MP4 presentation-timestamp passthrough at 1/12800 timebase; composition timestamps preserve all 27 native display holds and the final presentation endpoint. Reordered encoded packet durations are not claimed identical.",
         "encodedVideoPacketsByteExact": false,
         "avcCExtradataByteExact": false,
         "transcoded": true,
         "pixelFormat": "yuv420p",
         "videoCodec": "h264",
         "codecTag": "avc1",
-        "colorPolicy": "Standard TV-range conversion at native dimensions after only the recorded 1px padding. No creative grading; H264 is lossy, so encoded pixel-byte equivalence is not claimed."
+        "colorPolicy": "Prior public MP4 and delivery both retain unspecified color tags and yuv420p. No creative grading; original GIF color conversion is inherited, not re-verified against absent GIF.",
+        "inputDerivative": {
+          "src": "/assets/projects/dot-based-3d-printing/printing-process-motion.mp4",
+          "bytes": 24383755,
+          "sha256": "1d9014c6bc56e57e6dd80c8d47fb76c7e696ba6c1d7b4d1b1e04444c6b8d6821",
+          "generation": "previous public MP4 derivative; not the original GIF"
+        },
+        "transcodeRecipe": {
+          "encoder": "libx264",
+          "preset": "slow",
+          "crf": 22,
+          "pixelFormat": "yuv420p",
+          "fpsMode": "passthrough",
+          "encoderTimeBase": "1/12800",
+          "videoTrackTimescale": 12800,
+          "faststart": true,
+          "resize": null,
+          "crop": null
+        },
+        "quality": {
+          "metric": "SSIM",
+          "comparedFrames": 27,
+          "allFramesCompared": true,
+          "mean": 0.963079037037037,
+          "minimumFrame": 0.954977,
+          "maximumFrame": 0.988619,
+          "statsSHA256": "6ee03749e8acdc966e48ba2d70b429259fbef82e31a52d30017baaef080f9a86",
+          "reference": "Decoded prior public MP4, not the original GIF. Second-generation lossy compression; no pixel identity claim."
+        },
+        "decodedFramesByteExact": false,
+        "allPacketPTSExact": false,
+        "allPacketDTSExact": false,
+        "allPacketDurationsExact": false,
+        "sourceColorTagsUnchanged": true,
+        "colorRange": "unspecified",
+        "identityTrackMatrixExact": true,
+        "trackMatrix": [
+          65536,
+          0,
+          0,
+          0,
+          65536,
+          0,
+          0,
+          0,
+          1073741824
+        ]
       },
       "alt": "A printing nozzle deposits material along the upper edge of a dotted specimen.",
       "caption": "Original Group1 recording of nozzle deposition during the printing study.",

@@ -28,8 +28,8 @@ test('seven source motions and their posters have complete release provenance',(
   assert.equal(images.length,54);
   assert.equal(new Set(images.map(image=>image.src)).size,48);
   assert.equal(current.assets.motionAssets.length,7);
-  // One licensed Roboto Mono font/notice pair replaces two previous pairs.
-  assert.equal(current.manifest.assets.length,136);
+  // The original Dot MP4 is retained alongside its smaller delivery derivative.
+  assert.equal(current.manifest.assets.length,137);
   assert.equal(project(current,'project-caschlatsch').motionMedia,undefined);
   assert.doesNotThrow(()=>assertProjectAssetRecord(current.assets,images,current.manifest));
 });
@@ -388,4 +388,13 @@ test('Caschlatsch active evidence is exactly the ten original portfolio extracts
   assert(images.every(image=>!image.src.endsWith('/workflow.webp')&&!image.caption.includes('Design, fabrication and assembly')));
   assert.deepEqual(p.sections.map(section=>[section.id,section.media.length]),[['context',1],['system',2],['xr-guidance',3],['making',2],['results',1]]);
   for(const name of ['portfolio-voxel-framework','portfolio-module-infill','portfolio-xr-assembly-sequence','portfolio-xr-data-exchange','portfolio-xr-interface'])assert(images.some(image=>image.src.endsWith('/'+name+'.webp')));
+});
+
+test('Dot second-generation delivery cannot lose input, quality or lossy provenance',()=>{
+ const id='dot-based-3d-printing',clip='printing-process-motion';
+ reject(current=>{provenance(current,id,clip).processing.inputDerivative.sha256='0'.repeat(64);});
+ reject(current=>{provenance(current,id,clip).processing.quality.reference='Original GIF';});
+ reject(current=>{provenance(current,id,clip).processing.decodedFramesByteExact=true;});
+ reject(current=>{provenance(current,id,clip).processing.transcodeRecipe.resize=[1280,668];});
+ reject(current=>{current.manifest.assets=current.manifest.assets.filter(asset=>!asset.path.endsWith('/printing-process-motion.mp4'));});
 });

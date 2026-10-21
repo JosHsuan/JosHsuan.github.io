@@ -5,6 +5,7 @@ const text=(value,name)=>assert(typeof value==='string'&&value.trim().length>0,`
 const freezeReview=value=>{if(value&&typeof value==='object'){Object.values(value).forEach(freezeReview);Object.freeze(value);}return value;};
 const reviewedMotions=specs=>freezeReview(specs);
 const motionIdentity=media=>JSON.stringify([media.projectId,media.id]);
+const DOT_WEB_DELIVERY=freezeReview({"src":"/assets/projects/dot-based-3d-printing/printing-process-motion-web.mp4","bytes":13211595,"sha256":"2d6931de3caac7d44b6e02206e90556d695d8d763ac8d26ecc7fa8773a9f28e3","input":{"src":"/assets/projects/dot-based-3d-printing/printing-process-motion.mp4","bytes":24383755,"sha256":"1d9014c6bc56e57e6dd80c8d47fb76c7e696ba6c1d7b4d1b1e04444c6b8d6821","generation":"previous public MP4 derivative; not the original GIF"},"recipe":{"encoder":"libx264","preset":"slow","crf":22,"pixelFormat":"yuv420p","fpsMode":"passthrough","encoderTimeBase":"1/12800","videoTrackTimescale":12800,"faststart":true,"resize":null,"crop":null},"quality":{"metric":"SSIM","comparedFrames":27,"allFramesCompared":true,"mean":0.963079037037037,"minimumFrame":0.954977,"maximumFrame":0.988619,"statsSHA256":"6ee03749e8acdc966e48ba2d70b429259fbef82e31a52d30017baaef080f9a86","reference":"Decoded prior public MP4, not the original GIF. Second-generation lossy compression; no pixel identity claim."}});
 export const PROJECT_MOTION_SPECS=Object.freeze({
   'mode-s-of-making':reviewedMotions([
     {"id":"film-machine-simulation","chapter":"making","loop":true,"width":1920,"height":1080,"frameCount":120,"durationSeconds":4.8,"kind":"simulation","sourceWidth":4096,"sourceHeight":2304,"file":"cube.mp4","bytes":3454875,"sha256":"341abcbfbb58e3a3861bd1acfe8ffb904a65a260926a808ac4379c6363e3ed3e","finalTicks":2000,"timeBase":"1/50000","posterFrame":60,"remux":false,"pixelFormat":"yuv420p","colorRange":"tv/limited","webDelivery":true,"outputBytes":498303,"outputSHA256":"522911028b4c3956b2376b1dad470534813f2d12c4ae20c7b73a4cc3ad3877eb","timestampRebase":{"offsetTicks":-2000,"timeBase":"1/50000"},"resize":{"from":[4096,2304],"to":[1920,1080],"method":"Lanczos","uniformScale":0.46875},"transcodeRecipe":{"encoder":"libx264","crf":21,"preset":"slow","profile":"High","level":41,"bFrames":3,"refs":4,"keyframeInterval":60,"minimumKeyframeInterval":30,"resize":[1920,1080]},"qualityReceipt":{"metric":"SSIM","comparedFrames":120,"mean":0.9996269583333334,"minimumFrame":0.999477,"maximumFrame":0.999786,"statsSHA256":"99286cf4a5df88f75c8ed29aea75ecd57512d0433e0483113bf9a11c63a04a2a","allFramesCompared":true,"reference":"Original source uniformly downsampled with the same Lanczos transform to the reviewed output size before SSIM. This is compression quality at 1080p, not a claim of native-4K pixel equality."},"sourceDecodePolicy":"ignore_editlist=1 to recover complete 120 original coded frames; original has an edit-list-discarded first frame. Constant PTS origin is normalized. Existing public remux already presents all 120 frames.","nativeFrameRate":"25/1","sourceColorSpace":"bt709","sourceColorTransfer":"bt709","sourceColorPrimaries":"bt709","posterSrc":"/assets/projects/mode-s-of-making/film-machine-motion-poster.webp","posterBytes":571200,"posterSHA256":"d059423c2fa4ce63eaad53f8630a7eab7c6a8442fce3822700ea73dc53a7b8e0"},
@@ -12,7 +13,7 @@ export const PROJECT_MOTION_SPECS=Object.freeze({
     {"id":"prototype-cutting-operation","chapter":"cutting","loop":true,"width":1920,"height":1080,"frameCount":200,"durationSeconds":8.0,"kind":"recording","sourceWidth":1920,"sourceHeight":1080,"file":"MVI_9109.MOV","bytes":119726396,"sha256":"0dfff18451db42602266d07fbdce50ef24f3e7aa87f62ca0c54a344ff18c841b","finalTicks":1000,"timeBase":"1/25000","posterFrame":250,"remux":false,"pixelFormat":"yuvj420p","colorRange":"pc/full","webDelivery":true,"outputBytes":3176212,"outputSHA256":"dd5ad72944afc12d00fa6ab3456cf7369e003455ee242d0d7f4c0f9813e0209d","timestampRebase":{"offsetTicks":-150000,"timeBase":"1/25000"},"resize":null,"transcodeRecipe":{"encoder":"libx264","crf":23,"preset":"slow","profile":"High","level":41,"bFrames":3,"refs":4,"keyframeInterval":60,"minimumKeyframeInterval":30,"resize":null},"qualityReceipt":{"metric":"SSIM","comparedFrames":200,"mean":0.988161265,"minimumFrame":0.985489,"maximumFrame":0.992829,"statsSHA256":"50b71294a2642a23d7aa28ef89617f8203e9c3f78953b1350db7683d00ce8a3f","allFramesCompared":true,"reference":"Original native-size selected source frames."},"sourceDecodePolicy":"Default native input decoding.","nativeFrameRate":"25/1","sourceColorSpace":"smpte170m","sourceColorTransfer":"bt709","sourceColorPrimaries":"bt709","sourceInterval":{"startFrame":150,"endFrameExclusive":350,"sourceFrameCount":522,"startPTSTicks":150000,"endPTSTicks":350000,"timeBase":"1/25000"},"posterSrc":"/assets/projects/mode-s-of-making/prototype-cutting-operation-poster.webp","posterBytes":602534,"posterSHA256":"5aa9e9845fee86fbfc1f9ee90279a63d908d47118ab51445cc705844294eec2b"},
   ]),
   'entrance-installation-art':reviewedMotions([{id:'installation-lighting-motion',kind:'recording',chapter:'results',loop:true,width:540,height:960,sourceWidth:540,sourceHeight:960,frameCount:662,durationSeconds:22.066666666666666,file:'657032932.686244.mp4',bytes:5232787,sha256:'a14c83ff6d9d40d9f4c175121d483e2c21cc9c56c5f3de5a86738331a090fe7e',finalTicks:20,timeBase:'1/600',posterFrame:330,remux:true,pixelFormat:'yuvj420p',colorRange:'pc/full'}]),
-  'dot-based-3d-printing':reviewedMotions([{id:'printing-process-motion',kind:'recording',chapter:'making',loop:true,width:2500,height:1304,sourceWidth:2500,sourceHeight:1304,frameCount:27,durationSeconds:4.4,file:'image61.gif',bytes:40264322,sha256:'61a575b1c3863cb6b1becbef6cf9c7fa279778deccc94f3dfea30c26739fac68',finalTicks:13,timeBase:'1/100',posterFrame:0,remux:false,gifLoop:0,container:{file:'JosHsuan_Group01_PrintingArchitecture.pptx',bytes:131691431,sha256:'30f048ec92f7e539d5ffbc9fc51c54fa573674ee0424ed3d6b614aac3f68e117',slide:10,zipMember:'ppt/media/image61.gif',byteExactExtractedMember:true}}]),
+  'dot-based-3d-printing':reviewedMotions([{id:'printing-process-motion',deliveryDerivative:DOT_WEB_DELIVERY,kind:'recording',chapter:'making',loop:true,width:2500,height:1304,sourceWidth:2500,sourceHeight:1304,frameCount:27,durationSeconds:4.4,file:'image61.gif',bytes:40264322,sha256:'61a575b1c3863cb6b1becbef6cf9c7fa279778deccc94f3dfea30c26739fac68',finalTicks:13,timeBase:'1/100',posterFrame:0,remux:false,gifLoop:0,container:{file:'JosHsuan_Group01_PrintingArchitecture.pptx',bytes:131691431,sha256:'30f048ec92f7e539d5ffbc9fc51c54fa573674ee0424ed3d6b614aac3f68e117',slide:10,zipMember:'ppt/media/image61.gif',byteExactExtractedMember:true}}]),
   'hc3dp-caustics':reviewedMotions([{id:'fabrication-path-motion',kind:'simulation',chapter:'making',loop:true,width:2308,height:2500,sourceWidth:2307,sourceHeight:2500,frameCount:31,durationSeconds:2.17,file:'image68.gif',bytes:3033958,sha256:'f69592248ba9e63c044d87dc5ed5978f2c3acb57960d402361c4908509cdafc5',finalTicks:7,timeBase:'1/100',posterFrame:30,remux:false,gifLoop:0,container:{file:'Final Presentation Group-Red.pptx',bytes:112035652,sha256:'9016edfcd197cf268531f4074c6c26bd420fd581fb8783944e33b440c622ff55',slide:14,zipMember:'ppt/media/image68.gif',byteExactExtractedMember:true}}]),
   'special-assemblies':reviewedMotions([{id:'robot-assembly-motion',kind:'simulation',chapter:'making',loop:false,width:2508,height:1268,sourceWidth:2508,sourceHeight:1267,frameCount:108,durationSeconds:7.56,file:'animationfinal.gif',bytes:5945917,sha256:'34552b023b813144da97eb3b50acb5e066302110d6c4bba773f04ee23f6f02de',finalTicks:7,timeBase:'1/100',posterFrame:36,remux:false,gifLoop:null}]),
 });
@@ -20,7 +21,7 @@ export const PROJECT_MOTION_SPECS=Object.freeze({
 function assertMotionSelection(media,projectId){
   const spec=PROJECT_MOTION_SPECS[projectId]?.find(spec=>spec.id===media.id);assert(spec,'Only the exact source-reviewed project and motion identity');
   for(const key of ['id','chapter','loop','width','height','frameCount'])assert.equal(media[key],spec[key],`Reviewed motion ${key}: ${projectId}`);
-  assert.equal(media.src,`/assets/projects/${projectId}/${spec.id}.mp4`);
+  assert.equal(media.src,spec.deliveryDerivative?.src??`/assets/projects/${projectId}/${spec.id}.mp4`);
   assert(Number.isFinite(media.durationSeconds)&&Math.abs(media.durationSeconds-spec.durationSeconds)<1e-6,'Reviewed source-selection duration');
   for(const key of ['alt','caption','credit'])text(media[key],`motion ${key}`);
   if(spec.kind==='recording'&&(spec.sourceInterval||spec.transcodeRecipe))assert.equal(media.kind,spec.kind,'Reviewed photographic clips retain their recording classification');
@@ -102,6 +103,18 @@ export function assertProjectMotionEncoding(processing,spec){
     assert(quality.minimumFrame<=quality.mean&&quality.mean<=quality.maximumFrame);
     assert.match(quality.statsSHA256,/^[a-f0-9]{64}$/);
     text(quality.reference,'measured web quality reference');
+  }else if(spec.deliveryDerivative){
+    const delivery=spec.deliveryDerivative;
+    assert.deepEqual(processing.inputDerivative,delivery.input,'Exact retained previous-public derivative input; not original GIF pixels');
+    assert.deepEqual(processing.transcodeRecipe,delivery.recipe,'Exact reviewed second-generation native-resolution recipe');
+    assert.deepEqual(processing.quality,delivery.quality,'Exact all-frame comparison against the named prior public MP4');
+    assert.equal(processing.decodedFramesByteExact,false,'Second-generation lossy pixels cannot claim byte identity');
+    for(const key of ['allPacketPTSExact','allPacketDTSExact','allPacketDurationsExact'])assert.equal(processing[key],false,'Reordered encoded packets are not source packet identity');
+    assert.equal(processing.pixelFormat,'yuv420p');
+    assert.equal(processing.sourceColorTagsUnchanged,true,'Original unspecified color tags remain unspecified');
+    assert.equal(processing.colorRange,'unspecified');
+    assert.equal(processing.identityTrackMatrixExact,true);
+    assert.deepEqual(processing.trackMatrix,[65536,0,0,0,65536,0,0,0,1073741824]);
   }else if(spec.remux){
     for(const key of ['allPacketDurationsExact','identityTrackMatrixExact','sourceColorRangePreserved'])assert.equal(processing[key],true,`Native remux preserves ${key}`);
     assert.deepEqual(processing.trackMatrix,[65536,0,0,0,65536,0,0,0,1073741824]);
@@ -156,6 +169,12 @@ export function assertProjectStudies(record,manifest){
       const spec=assertMotionSelection(media,project.id);
       assert(ids.includes(media.chapter),'Motion belongs to an actual source chapter');
       const pin=pins.get(media.src);assert(pin&&Number.isInteger(pin.bytes)&&pin.bytes>0&&/^[a-f0-9]{64}$/.test(pin.sha256),'Selected motion has a release pin');
+      if(spec.deliveryDerivative){
+        const delivery=spec.deliveryDerivative,original=pins.get(delivery.input.src);
+        assert.equal(pin.bytes,delivery.bytes);assert.equal(pin.sha256,delivery.sha256);
+        assert(original&&original.bytes===delivery.input.bytes&&original.sha256===delivery.input.sha256,'The prior public MP4 remains published byte-for-byte');
+        assert(pin.bytes<original.bytes*.55,'Reviewed Dot transfer reduction exceeds 45 percent');
+      }
       if(spec.webDelivery){assert.equal(pin.bytes,spec.outputBytes,'Exact reviewed compact video bytes');assert.equal(pin.sha256,spec.outputSHA256,'Exact reviewed compact video hash');assert(pin.bytes<=4000000,'Each Mode/s web video is at most 4 MB');assert(media.durationSeconds<=10,'Each Mode/s web video is at most ten seconds');const posterPin=pins.get(media.poster.src);assert(posterPin&&posterPin.bytes===spec.posterBytes&&posterPin.sha256===spec.posterSHA256,'Original Mode/s poster bytes remain pinned');}
 
     }
@@ -264,6 +283,7 @@ export function assertProjectAssetRecord(record,images,manifest,studies){
     for(const key of ['id','chapter','width','height','frameCount','durationSeconds','loop'])assert.equal(media[key],(selected??spec)[key],`Motion provenance ${key} matches selection`);
     if(spec.kind==='recording'&&(spec.sourceInterval||spec.transcodeRecipe))assert.equal(media.kind,spec.kind,'Reviewed photographic provenance retains its recording classification');
     if(media.kind!==undefined)assert.equal(media.kind,spec.kind,'Explicit provenance classification matches the reviewed source');
+    if(spec.deliveryDerivative){assert.equal(media.bytes,spec.deliveryDerivative.bytes);assert.equal(media.sha256,spec.deliveryDerivative.sha256);}
     if(spec.webDelivery){assert.equal(media.bytes,spec.outputBytes,'Reviewed web output bytes');assert.equal(media.sha256,spec.outputSHA256,'Reviewed web output hash');assert(media.bytes<=4000000&&media.durationSeconds<=10,'Reviewed web delivery budget');}
     const source=media.source,processing=media.processing;
     for(const key of ['file','bytes','sha256'])assert.equal(source[key],spec[key],`Reviewed original motion source ${key}`);
