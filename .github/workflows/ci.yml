@@ -172,10 +172,11 @@ jobs:
       - name: Ensure tests left the public output unchanged
         run: node scripts/ci-artifact.mjs check-build
       - uses: actions/upload-artifact@v4
-        if: failure()
+        if: always()
         with:
-          name: public-case-failures-${{ matrix.browser }}-${{ strategy.job-index }}
+          name: public-case-review-${{ matrix.browser }}-${{ strategy.job-index }}
           path: pages-test-results/
+          retention-days: 14
 
   gate:
     name: Required validation gate
