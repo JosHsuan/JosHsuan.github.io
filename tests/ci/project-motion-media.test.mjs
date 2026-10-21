@@ -24,7 +24,8 @@ const originalPairs=[
 
 test('seven source motions and their posters have complete release provenance',()=>{
   const current=fixture(),images=validate(current);
-  assert.equal(images.length,52);
+  // Two additional Mode/s evidence placements reuse the same original sources.
+  assert.equal(images.length,54);
   assert.equal(new Set(images.map(image=>image.src)).size,48);
   assert.equal(current.assets.motionAssets.length,7);
   // One licensed Roboto Mono font/notice pair replaces two previous pairs.

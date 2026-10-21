@@ -136,3 +136,15 @@
  .evidence figcaption p,.sourcePanel>p{max-width:var(--type-measure-caption)}
  .related strong{font-size:var(--type-size-subheading);font-weight:400}
 }
+
+/* Mode/s mobile: keep the complete source inside the reading column. The old
+   20px source inset protruded beyond the 24px panel as bright vertical rails.
+   Match the column plus its border; do not crop, recolor or hide the source. */
+@media(max-width:799px){
+ .page:global([data-project-study=mode-s-of-making]){--study-mobile-reading-inset:1.5rem}
+ .page:global([data-project-study=mode-s-of-making]):global([data-project-study-ready]) .mediaFrame,
+ .page:global([data-project-study=mode-s-of-making]):global([data-project-study-ready]) .chapter:global([data-study-layout=broad]) .mediaFrame{
+  left:calc(var(--study-mobile-reading-inset) + 1px);right:calc(var(--study-mobile-reading-inset) + 1px);
+ }
+}
+@media(max-width:360px){.page:global([data-project-study=mode-s-of-making]){--study-mobile-reading-inset:1.25rem}}

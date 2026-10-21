@@ -7,7 +7,7 @@
       "title": "Mode/s of Making",
       "shortTitle": "Mode/s of Making",
       "subtitle": "Heat rotate cutting",
-      "summary": "My studio study connects rotary heat cutting, custom polystyrene units and the textures left by fabrication.",
+      "summary": "I used rotary heat cutting to connect the shape of a polystyrene unit with the way it is made, then explored how those units could form an assembly.",
       "category": "Digital fabrication",
       "metadataTitle": "Mode/s of Making — JosHsuan Chao",
       "metadataDescription": "A studio study connecting rotary heat cutting, custom polystyrene units, machine design and physical surface prototypes.",
@@ -27,10 +27,10 @@
           "id": "context",
           "label": "Context",
           "kind": "form",
-          "title": "Start with the making process.",
+          "title": "Begin with one unit.",
           "paragraphs": [
-            "I explored rotary heat cutting as a design tool, using the movement of the cutter to shape polystyrene units. The fabrication mechanism became part of the design process.",
-            "The unit geometry and its possible assemblies developed together, linking digital configurations with physical surface studies."
+            "Rotating the polystyrene blank changes how the cutter meets its surface. I explored this relationship as a way to develop custom units rather than treating fabrication as a final step.",
+            "The unit-geometry study provides the starting point: a shaped part that can be considered both as a cutting problem and as an element in a larger assembly."
           ],
           "media": [
             {
@@ -45,14 +45,50 @@
         },
         {
           "id": "system",
-          "label": "System",
+          "label": "Profile to path",
           "kind": "system",
-          "title": "Coordinate tool and workpiece.",
+          "title": "Turn the unit into a cutting workflow.",
           "paragraphs": [
-            "The system combines planar tool movement with a rotating workpiece. The original CoreXY animation shows the motion frame, motors and carriage as a coordinated mechanism.",
-            "I connected geometry development, cutting-path optimisation, G-code conversion and machine setup in a design-to-fabrication workflow, using Arduino and Marlin as control foundations."
+            "I connected geometry development with cutting-path optimisation, G-code conversion and machine setup. The original workflow figure relates the layered unit and its cutting profile to these steps.",
+            "The unit model and the recorded workflow describe different parts of the same design process: what is being made, and how its geometry reaches the machine."
           ],
           "media": [
+            {
+              "width": 4096,
+              "height": 2304,
+              "alt": "Original unit-geometry animation from the studio film materials.",
+              "caption": "Original unit-geometry animation from the studio film materials.",
+              "credit": "Studio design and digital animation: Chia-Hsuan Chao / National Cheng Kung University.",
+              "src": "/assets/projects/mode-s-of-making/film-unit-geometry.webp"
+            },
+            {
+              "width": 1920,
+              "height": 1080,
+              "alt": "The studio film connects a layered unit and cutting profile with the design-to-code workflow.",
+              "caption": "Recorded design-to-code workflow and unit cutting-profile study from the original studio film.",
+              "credit": "Studio design and digital animation: Chia-Hsuan Chao / National Cheng Kung University.",
+              "src": "/assets/projects/mode-s-of-making/film-design-workflow.webp"
+            }
+          ]
+        },
+        {
+          "id": "making",
+          "label": "Tool and blank",
+          "kind": "make",
+          "title": "Coordinate the tool and the rotating blank.",
+          "paragraphs": [
+            "The machine study combines planar CoreXY-style tool movement with a rotating holder for the polystyrene blank. Motors, rods, belts and bearings coordinate tool and workpiece.",
+            "The original digital simulation shows the whole mechanism. The accompanying diagrams distinguish rotating and working areas and show the CoreXY motion frame; Arduino and Marlin provided control foundations for the workflow."
+          ],
+          "media": [
+            {
+              "width": 1920,
+              "height": 1080,
+              "alt": "Rotating area and working area in the film's digital machine study.",
+              "caption": "Rotating area and working area in the film's digital machine study.",
+              "credit": "Studio design and digital animation: Chia-Hsuan Chao / National Cheng Kung University.",
+              "src": "/assets/projects/mode-s-of-making/film-rotary-system.webp"
+            },
             {
               "width": 4096,
               "height": 2304,
@@ -64,53 +100,13 @@
           ]
         },
         {
-          "id": "making",
-          "label": "Making",
-          "kind": "make",
-          "title": "A machine for the study.",
-          "paragraphs": [
-            "The machine study combines a CoreXY-style motion frame with a rotating holder for the polystyrene blank. Motors, rods, belts and bearings coordinate the relationship between tool and workpiece.",
-            "The original studio animation brings the machine and rotating blank together; the film diagram distinguishes its rotating area from the working area."
-          ],
-          "media": [
-            {
-              "width": 1920,
-              "height": 1080,
-              "alt": "Rotating area and working area in the film's digital machine study.",
-              "caption": "Rotating area and working area in the film's digital machine study.",
-              "credit": "Studio design and digital animation: Chia-Hsuan Chao / National Cheng Kung University.",
-              "src": "/assets/projects/mode-s-of-making/film-rotary-system.webp"
-            }
-          ]
-        },
-        {
-          "id": "fabrication",
-          "label": "Fabrication",
-          "kind": "make",
-          "title": "Watch the tool meet the material.",
-          "paragraphs": [
-            "The studio film records a physical heat-cutting operation at the tool and foam interface. The selected excerpt shows the heated tip and polystyrene in contact as the cut develops.",
-            "My workflow connected the cutting profile and machine setup with material trials. This recorded operation brings the mechanism back to the surface it produces."
-          ],
-          "media": [
-            {
-              "src": "/assets/projects/mode-s-of-making/film-physical-cutting-poster.webp",
-              "width": 1920,
-              "height": 1080,
-              "alt": "Physical heat-cutting operation from the original studio film.",
-              "caption": "Physical heat-cutting operation from the original studio film.",
-              "credit": "Studio design and fabrication: Chia-Hsuan Chao / National Cheng Kung University."
-            }
-          ]
-        },
-        {
           "id": "cutting",
-          "label": "Cutting",
+          "label": "Whole operation",
           "kind": "make",
-          "title": "Follow the prototype in operation.",
+          "title": "See the prototype make a cut.",
           "paragraphs": [
-            "A separate workshop recording shows the built prototype cutting a mounted polystyrene workpiece. The shaped blank rotates between its holders while the heated cutting tool engages the surface.",
-            "The view makes the relationship between machine movement, the changing profile and the resulting texture visible at the scale of a single unit."
+            "The workshop recording moves from the digital mechanism to the built prototype. A mounted polystyrene workpiece rotates between its holders while the heated tool engages the surface.",
+            "This wider view keeps the blank, supports and cutter together. It establishes the operation before the next recording looks closely at the material contact."
           ],
           "media": [
             {
@@ -124,22 +120,42 @@
           ]
         },
         {
-          "id": "results",
-          "label": "Results",
+          "id": "fabrication",
+          "label": "Material contact",
           "kind": "make",
-          "title": "Connect the unit to the workflow.",
+          "title": "Look closer at the tool and material.",
           "paragraphs": [
-            "The original studio film connects the layered unit and cutting profile to a workflow from geometry development through cutting-path optimisation and G-code conversion.",
-            "I used the relationship between toolpaths and custom units to explore how fabrication can inform an assembly design."
+            "The studio film records the heated tip meeting the polystyrene as the cut develops. This closer view makes the material encounter visible at a different scale from the preceding prototype recording.",
+            "I connected the cutting profile and machine setup with material trials, using the resulting surface texture as part of the design study. The two recordings document physical cutting, not a simulated fabrication result."
+          ],
+          "media": [
+            {
+              "src": "/assets/projects/mode-s-of-making/film-physical-cutting-poster.webp",
+              "width": 1920,
+              "height": 1080,
+              "alt": "Physical heat-cutting operation from the original studio film.",
+              "caption": "Physical heat-cutting operation from the original studio film.",
+              "credit": "Studio design and fabrication: Chia-Hsuan Chao / National Cheng Kung University."
+            }
+          ]
+        },
+        {
+          "id": "results",
+          "label": "Assembly study",
+          "kind": "make",
+          "title": "Return from the cut to the assembly.",
+          "paragraphs": [
+            "The opening assembly study can now be read through the unit, toolpath and physical cutting operation that informed it. I used custom units to explore how fabrication could shape an assembly design.",
+            "The image shown here is a digital assembly simulation from the studio film. The physical evidence on this page documents the cutting prototype and material trials; it does not establish a completed physical version of this assembly."
           ],
           "media": [
             {
               "width": 1920,
               "height": 1080,
-              "alt": "The studio film connects a layered unit and cutting profile with the design-to-code workflow.",
-              "caption": "Recorded design-to-code workflow and unit cutting-profile study from the original studio film.",
+              "alt": "Curvature-parameter assembly simulation from the original studio film.",
+              "caption": "Curvature-parameter assembly simulation from the original studio film.",
               "credit": "Studio design and digital animation: Chia-Hsuan Chao / National Cheng Kung University.",
-              "src": "/assets/projects/mode-s-of-making/film-design-workflow.webp"
+              "src": "/assets/projects/mode-s-of-making/film-assembly-hero.webp"
             }
           ]
         }
