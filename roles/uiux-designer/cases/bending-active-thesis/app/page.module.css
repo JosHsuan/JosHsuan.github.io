@@ -436,3 +436,9 @@
  .methodSequence li,.measurements dd{font-size:var(--type-size-secondary)}
  .evidence figcaption>p,.copy .smallNote,.closingCopy .smallNote,.sourceNotes,.copy .marginNote{font-size:var(--type-size-caption);max-width:var(--type-measure-caption)}
 }
+
+/* The source annotation follows its reserved model space in native mobile flow. */
+.nativeModelInformation{display:none}
+@media(max-width:780px){.nativeModelInformation{display:block;padding-top:43svh;pointer-events:auto}}
+
+@media print{.nativeModelInformation{display:none}}

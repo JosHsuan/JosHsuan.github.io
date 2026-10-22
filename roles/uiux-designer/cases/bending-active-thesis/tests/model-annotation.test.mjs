@@ -63,3 +63,14 @@ test('removed or zero-size presentation surfaces hide safely',()=>{
  assert.equal(placeModelAnnotation(null,{anchor:null}),null);
  assert.equal(placeModelAnnotation({querySelector:()=>null},{anchor:null}),null);
 });
+
+test('a native-flow portal suppresses only the decorative fixed leader without geometry reads',()=>{
+ const f=fixture();f.study.dataset.studyChapter='form';
+ const panel={dataset:{modelLabelPlacement:'native'},querySelector:()=>{throw Error('Native card requires no fixed caption rectangle');}};
+ f.study.ownerDocument={querySelector:selector=>{assert.equal(selector,'[data-model-side-label][data-study-chapter="form"]');return panel;}};
+ assert.equal(publishModelAnnotation(f.study,{present:true}),null);
+ assert.equal(f.svg.dataset.annotationVisible,'false');assert.equal(f.reads(),0);
+ // An already-painted projection cannot reintroduce a line across native copy.
+ assert.equal(placeModelAnnotation(f.study,{anchor:{x:800,y:300},...size,canvasRect}),null);
+ assert.equal(f.reads(),0);
+});

@@ -54,3 +54,33 @@
   .calloutIndex{flex:none;white-space:nowrap}
   .keyboardHint{margin-top:4px}
 }
+
+/* One source card moves into the native study host on compact screens; it is
+   not layered over the following workflow or duplicated for accessibility. */
+@media(max-width:780px){
+ .sideLabel:global([data-model-label-placement=native]){position:relative;inset:auto;width:100%;max-width:none;padding:16px;border-radius:18px}
+ .sideLabel:global([data-model-label-placement=native]) .information h3{min-height:0;margin-top:10px;overflow-wrap:normal}
+ .sideLabel:global([data-model-label-placement=native]) .callout{min-height:0;margin-block:12px}
+ .sideLabel:global([data-model-label-placement=native]) .keyboardHint{margin-top:8px}
+}
+
+.titleSlot{display:contents}
+.titleSizer{display:none}
+@media(max-width:780px){
+ .sideLabel:global([data-model-label-placement=native]) .titleSlot{display:grid;margin:10px 0 8px}
+ .sideLabel:global([data-model-label-placement=native]) .titleSlot h3{grid-area:1/1;margin:0}
+ .sideLabel:global([data-model-label-placement=native]) .titleSizer{display:grid;grid-area:1/1;visibility:hidden;pointer-events:none;user-select:none;font-family:var(--display);font-size:14px;line-height:var(--type-leading-subheading);font-weight:500;letter-spacing:var(--type-tracking-subheading)}
+ .titleSizer>span{grid-area:1/1}
+}
+
+.positionSlot,.annotationSlot{display:contents}
+.positionSizer,.annotationSizer{display:none}
+@media(max-width:780px){
+ .sideLabel:global([data-model-label-placement=native]) .positionSlot,
+ .sideLabel:global([data-model-label-placement=native]) .annotationSlot{display:grid;min-width:0}
+ .sideLabel:global([data-model-label-placement=native]) .positionSlot>.position,
+ .sideLabel:global([data-model-label-placement=native]) .annotationSlot>span{grid-area:1/1}
+ .sideLabel:global([data-model-label-placement=native]) .positionSizer,
+ .sideLabel:global([data-model-label-placement=native]) .annotationSizer{display:grid;visibility:hidden;pointer-events:none;user-select:none}
+ .positionSizer>span,.annotationSizer>span{grid-area:1/1}
+}

@@ -2,7 +2,7 @@ import {test,expect} from '@playwright/test';
 import {readFileSync} from 'node:fs';
 import {PerspectiveCamera,Vector3} from 'three';
 import {viewportStageSourceViewport} from '../../roles/uiux-designer/cases/bending-active-thesis/components/source-scene-score.mjs';
-import {modelInformationSummary} from '../../roles/uiux-designer/cases/bending-active-thesis/components/model-information.mjs';
+import {modelInformationSummary,modelAnnotationLabel} from '../../roles/uiux-designer/cases/bending-active-thesis/components/model-information.mjs';
 import {WAIT,scenarioTimeout,surface,frames,settle,loadScene,centerStudy,hitPoint,expectIdle} from './case-helpers.mjs';
 const catalog=JSON.parse(readFileSync(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/public/assets/thesis/source-diagrams.json',import.meta.url),'utf8'));
 // A real keyboard inspection owns the view for geometric measurements. Both
@@ -16,15 +16,18 @@ async function expectSourceInformation(page,chapter) {
  const record=catalog.representations.find(item=>item.id===r.id),count=chapter==='pattern'?3:4;
  const description=record.description+(r.id==='curvature'?' '+catalog.limits[0]:'');
  const study=page.locator(`[data-model-study][data-study-chapter="${chapter}"]`);
- await expect(study.locator('[data-source-label]')).toHaveText(record.label);
- await expect(study.locator('[data-model-caption-current]')).toHaveText(modelInformationSummary(record));
- await expect(study.locator('[data-source-position]')).toHaveText(`${chapter==='pattern'?'Experiment':'Representation'} ${r.index+1} / ${count}`);
+ const label=page.locator(`[data-model-side-label][data-study-chapter="${chapter}"]`);
+ await expect(label).toHaveCount(1);
+ await expect(label.locator('[data-source-label]')).toHaveText(record.label);
+ await expect(label.locator('[data-model-caption-current]')).toHaveText(modelInformationSummary(record));
+ await expect(label.locator('[data-source-position]')).toHaveText(`${chapter==='pattern'?'Experiment':'Representation'} ${r.index+1} / ${count}`);
  expect(r.description).toBe(description);expect(r.count).toBe(count);
- await expect(study.locator('[data-model-side-label]')).toBeVisible();
- await expect(study.locator('[data-model-connector]')).toHaveAttribute('data-annotation-visible','true');
- expect(r.annotation).toBeTruthy();
- await expect(study.locator('[data-source-description]')).toHaveCSS('display','grid');
- expect(await study.locator('[data-source-description]').evaluate(el=>{
+ await expect(label).toBeVisible();
+ await expect(study.locator('[data-model-connector]')).toHaveAttribute('data-annotation-visible',await label.getAttribute('data-model-label-placement')==='native'?'false':'true');
+ if(await label.getAttribute('data-model-label-placement')==='native')expect(r.annotation).toBeNull();else expect(r.annotation).toBeTruthy();
+ await expect(label.locator('[data-model-annotation-text]')).toHaveText(modelAnnotationLabel(r.id));
+ await expect(label.locator('[data-source-description]')).toHaveCSS('display','grid');
+ expect(await label.locator('[data-source-description]').evaluate(el=>{
   const current=el.querySelector('[data-model-caption-current]');return current.getBoundingClientRect().height<=el.getBoundingClientRect().height+.1;
  })).toBe(true);
 }
@@ -66,6 +69,7 @@ test('model information follows autonomous changes and explicit comparison relea
    if(current.pinned&&current.chapterId===before.chapterId&&current.index===expectedIndex){sample={index:current.index,id:current.id};observer.disconnect();}
   });
   observer.observe(node.closest('[data-model-study]'),{subtree:true,attributes:true,childList:true,characterData:true});
+  observer.observe(document.querySelector(`[data-model-side-label][data-study-chapter="${node.dataset.studyChapter}"]`),{subtree:true,attributes:true,childList:true,characterData:true});
   return{get sample(){return sample;},dispose(){observer.disconnect();}};
  });
  try{
@@ -84,19 +88,24 @@ test('model information follows autonomous changes and explicit comparison relea
  await holdView(page);await expectSourceInformation(page,'form');await expectIdle(page);
 });
 
-test('permanent side information and source annotations stay beside the model and follow inspection',async({page})=>{
+test('source information uses desktop side placement or stable native mobile flow and follows inspection',async({page})=>{
  test.setTimeout(scenarioTimeout(150000));await loadScene(page);
  for(const [width,height] of [[1440,1000],[820,1180],[390,844],[320,700]]){
   await page.setViewportSize({width,height});await centerStudy(page,'pattern');await surface(page,'pattern').press('Enter');await holdView(page,'pattern');
   const sample=()=>page.evaluate(()=>{
-   const study=document.querySelector('[data-model-study][data-model-active="true"]'),panel=study.querySelector('[data-model-side-label]').getBoundingClientRect(),model=study.querySelector('[data-model-viewport]').getBoundingClientRect();
+   const study=document.querySelector('[data-model-study][data-model-active="true"]'),label=document.querySelector(`[data-model-side-label][data-study-chapter="${study.dataset.studyChapter}"]`),panel=label.getBoundingClientRect(),model=study.querySelector('[data-model-viewport]').getBoundingClientRect();
+   const host=document.querySelector(`[data-model-study-host="${study.dataset.studyChapter}"]`),next=host.nextElementSibling.getBoundingClientRect();
    const r=window.__thesis.inspect().representation;
-   return {panel:{left:panel.left,right:panel.right,top:panel.top,bottom:panel.bottom},model:{left:model.left,right:model.right,top:model.top,bottom:model.bottom},annotation:r.annotation,source:r.id};
+   return {native:label.dataset.modelLabelPlacement==='native',position:getComputedStyle(label).position,inHost:label.parentElement===host.querySelector('[data-model-information-host]'),nextTop:next.top,documentY:panel.top+scrollY,documentHeight:document.documentElement.scrollHeight,panel:{left:panel.left,right:panel.right,top:panel.top,bottom:panel.bottom},model:{left:model.left,right:model.right,top:model.top,bottom:model.bottom},annotation:r.annotation,poseAzimuth:window.__thesis.inspect().pose.azimuth,source:r.id};
   });
-  const before=await sample();expect(before.panel.left).toBeGreaterThan(before.model.right);expect(before.panel.right).toBeLessThanOrEqual(width);expect(before.panel.top).toBeCloseTo(before.model.top,1);expect(before.panel.bottom).toBeLessThan(height-40);
+  const before=await sample();expect(before.native).toBe(width<=780);
+  if(width<=780){expect(before.position).toBe('relative');expect(before.inHost).toBe(true);expect(before.panel.left).toBeGreaterThanOrEqual(0);expect(before.panel.right).toBeLessThanOrEqual(width);expect(before.panel.bottom).toBeLessThanOrEqual(before.nextTop);expect(before.panel.bottom-before.panel.top).toBeGreaterThan(0);}
+  else{expect(before.panel.left).toBeGreaterThan(before.model.right);expect(before.panel.right).toBeLessThanOrEqual(width);expect(before.panel.top).toBeCloseTo(before.model.top,1);expect(before.panel.bottom).toBeLessThan(height-40);}
   await expect(page.locator('[data-model-study-host] header,[data-model-study-host] footer')).toHaveCount(0);
   await surface(page,'pattern').press('ArrowRight');await settle(page);await expectSourceInformation(page,'pattern');await fit(page);
-  const after=await sample();expect(after.panel).toEqual(before.panel);expect(after.annotation.index).toBe(before.annotation.index);expect(Math.abs(after.annotation.x-before.annotation.x)+Math.abs(after.annotation.y-before.annotation.y)).toBeGreaterThan(.1);
+  const after=await sample();expect(after.panel).toEqual(before.panel);expect(after.documentY).toBe(before.documentY);expect(after.documentHeight).toBe(before.documentHeight);expect(after.poseAzimuth).not.toBe(before.poseAzimuth);
+  if(width<=780){expect(before.annotation).toBeNull();expect(after.annotation).toBeNull();}
+  else{expect(after.annotation.index).toBe(before.annotation.index);expect(Math.abs(after.annotation.x-before.annotation.x)+Math.abs(after.annotation.y-before.annotation.y)).toBeGreaterThan(.1);}
   await surface(page,'pattern').press('Escape');await settle(page);
  }
 });
@@ -105,8 +114,8 @@ test('side information and its leader follow the displayed Canvas throughout the
  // The final source chapter owns departure; Form-to-System is continuous.
  test.setTimeout(scenarioTimeout(120000));await page.clock.install();await loadScene(page);await centerStudy(page,'pattern');
  const canvas=await page.locator('[data-cinematic-stage] canvas').elementHandle();
- const panel=page.locator('[data-model-study][data-study-chapter="pattern"] [data-model-side-label]');
- const before=await panel.boundingBox();
+ const panel=page.locator('[data-model-side-label][data-study-chapter="pattern"]');
+ const before=await panel.boundingBox(),beforeY=await page.evaluate(()=>scrollY),native=await panel.getAttribute('data-model-label-placement')==='native';
  const exit=await page.evaluate(()=>{const p=window.__story.inspect().canvasPlacement;return p.holdEnd+(p.end-p.holdEnd)*.4;});
  await page.clock.pauseAt(new Date(Date.now()+3600000));
  try{
@@ -118,19 +127,25 @@ test('side information and its leader follow the displayed Canvas throughout the
     const p=window.__story.inspect().canvasPlacement,r=window.__thesis.inspect().representation;
     const canvas=document.querySelector('[data-cinematic-stage] canvas'),display=canvas.getBoundingClientRect();
     const study=document.querySelector('[data-model-study][data-study-chapter="pattern"]'),outer=study.getBoundingClientRect();
-    const dot=study.querySelector('[data-model-anchor]'),caption=study.querySelector('[data-model-annotation-label]').getBoundingClientRect();
-    const points=study.querySelector('[data-model-leader]').getAttribute('points').trim().split(/\s+/).map(point=>point.split(',').map(Number));
+    const dot=study.querySelector('[data-model-anchor]'),caption=document.querySelector('[data-model-side-label][data-study-chapter="pattern"] [data-model-annotation-label]').getBoundingClientRect();
+    const points=study.querySelector('[data-model-leader]').getAttribute('points')?.trim().split(/\s+/).map(point=>point.split(',').map(Number));
     return{p,annotation:r.annotation,visible:study.querySelector('[data-model-connector]').dataset.annotationVisible,
-     expectedX:display.left-outer.left+r.annotation.x*display.width/canvas.clientWidth,expectedY:display.top-outer.top+r.annotation.y*display.height/canvas.clientHeight,
-     dotX:Number(dot.getAttribute('cx')),dotY:Number(dot.getAttribute('cy')),end:points.at(-1),expectedEnd:[caption.left-outer.left-10,caption.top-outer.top+caption.height/2]};
+     expectedX:display.left-outer.left+(r.annotation?.x??NaN)*display.width/canvas.clientWidth,expectedY:display.top-outer.top+(r.annotation?.y??NaN)*display.height/canvas.clientHeight,
+     dotX:Number(dot.getAttribute('cx')),dotY:Number(dot.getAttribute('cy')),end:points?.at(-1)??null,expectedEnd:[caption.left-outer.left-10,caption.top-outer.top+caption.height/2]};
    });
    if(sample.p.transition?.kind!=='exit'||sample.p.transition.elapsed<phases[captured])continue;
    captured++;requestId??=sample.p.request.id;
    expect(sample.p.request.id).toBe(requestId);expect(sample.p.scale).toBe(1);
-   expect(sample.visible).toBe('true');expect(sample.annotation.visible).toBe(true);
+   expect(sample.visible).toBe(native?'false':'true');
+   if(native)expect(sample.annotation).toBeNull();
+   if(!native){
+   expect(sample.annotation.visible).toBe(true);
    expect(sample.dotX).toBeCloseTo(sample.expectedX,2);expect(sample.dotY).toBeCloseTo(sample.expectedY,2);
    expect(sample.end[0]).toBeCloseTo(sample.expectedEnd[0],2);expect(sample.end[1]).toBeCloseTo(sample.expectedEnd[1],2);
-   const after=await panel.boundingBox();expect(Math.abs(after.x-before.x)).toBeLessThanOrEqual(12.01);expect(Math.abs(after.y-before.y)).toBeLessThanOrEqual(12.01);
+   }
+   const after=await panel.boundingBox();
+   if(native){expect(after.x).toBe(before.x);expect(after.y+await page.evaluate(()=>scrollY)).toBeCloseTo(before.y+beforeY,2);}
+   else{expect(Math.abs(after.x-before.x)).toBeLessThanOrEqual(12.01);expect(Math.abs(after.y-before.y)).toBeLessThanOrEqual(12.01);}
   }
   expect(captured).toBe(phases.length);
   // Stopping native scroll must finish this passage, not leave a scrubbed pose.
@@ -158,7 +173,7 @@ test('tablet source fits beside the reading copy and clear of fixed navigation',
 });
 test('three source surfaces share one WebGL Canvas and preserve every fitted original representation',async({page})=>{
  test.setTimeout(scenarioTimeout(180000));const models=[],errors=[];page.on('request',r=>{if(/\.glb(?:\?|$)/.test(r.url()))models.push(r.url());});page.on('pageerror',e=>errors.push(e.message));await loadScene(page);const canvas=await page.locator('[data-cinematic-stage] canvas').elementHandle();
- await expect(page.locator('[data-model-study]')).toHaveCount(3);await expect(page.locator('[data-model-study] input,[data-model-study] select,[data-model-study] [role="tab"],[data-model-study] [role="slider"]')).toHaveCount(0);
+ await expect(page.locator('[data-model-study]')).toHaveCount(3);await expect(page.locator('[data-model-study] input,[data-model-study] select,[data-model-study] [role="tab"],[data-model-study] [role="slider"],[data-model-side-label] input,[data-model-side-label] select,[data-model-side-label] [role="tab"],[data-model-side-label] [role="slider"]')).toHaveCount(0);
  expect(await page.evaluate(()=>window.__thesis.inspect().source)).toMatchObject({vertices:172789,triangles:227521,sourceObjects:51});
  const layout=()=>page.evaluate(()=>({document:document.documentElement.scrollHeight})),before=await layout();
  for(const id of ['form','system','pattern']){await centerStudy(page,id);const count=id==='pattern'?3:4;const seen=new Set();

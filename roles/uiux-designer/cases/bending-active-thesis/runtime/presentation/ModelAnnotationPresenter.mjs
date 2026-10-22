@@ -1,5 +1,12 @@
 import {Vector3} from 'three';
 
+// The one authoritative label may live in the native mobile reading flow.
+// Its IDs and chapter identity remain the same across a responsive portal move.
+export function modelInformationElement(study){
+ const chapter=study?.dataset?.studyChapter;
+ return (chapter&&study.ownerDocument?.querySelector(`[data-model-side-label][data-study-chapter="${chapter}"]`))||study?.querySelector('[data-model-side-label]')||null;
+}
+
 // The supplied camera is read-only. Points come from verified source support.
 export function projectModelAnnotation(points,matrixWorld,camera,width,height){
  const point=new Vector3();let best=null;
@@ -14,6 +21,7 @@ export function projectModelAnnotation(points,matrixWorld,camera,width,height){
  return best;
 }
 export function publishModelAnnotation(study,{points,mesh,camera,width,height,present,canvasRect}){
+ if(modelInformationElement(study)?.dataset?.modelLabelPlacement==='native')return placeModelAnnotation(study,{anchor:null});
  const same=mesh&&study.dataset.annotationSource===mesh.userData.representationId;
  const previous=same?Number(study.dataset.annotationSupport):NaN;
  const tracked=Number.isInteger(previous)&&points?.[previous];
@@ -28,9 +36,12 @@ export function publishModelAnnotation(study,{points,mesh,camera,width,height,pr
 // The anchor belongs to a successful scene paint. DOM-only passage/label motion
 // remaps that same projection; it must never sample an unpainted camera or mesh.
 export function placeModelAnnotation(study,{anchor,width,height,canvasRect}){
- const svg=study?.querySelector('[data-model-connector]'),label=study?.querySelector('[data-model-annotation-label]');
+ const panel=modelInformationElement(study);
+ const svg=study?.querySelector('[data-model-connector]');
  if(!svg)return null;
- const present=!!anchor&&!!label&&!!canvasRect&&width>0&&height>0;
+ if(panel?.dataset?.modelLabelPlacement==='native'){svg.dataset.annotationVisible='false';return null;}
+ const label=panel?.querySelector?.('[data-model-annotation-label]')??study?.querySelector('[data-model-annotation-label]');
+ const present=panel?.dataset?.modelLabelPlacement!=='native'&&!!anchor&&!!label&&!!canvasRect&&width>0&&height>0;
  svg.dataset.annotationVisible=String(present);
  if(!present)return null;
  const outer=study.getBoundingClientRect(),caption=label.getBoundingClientRect();

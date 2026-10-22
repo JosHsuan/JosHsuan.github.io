@@ -78,7 +78,7 @@ export default function Page() {
             <p className={styles.marginNote} data-protect data-choreography="caption">{story.form.aside}</p>
             <a className={styles.studyLink} data-protect href="#model-study"><span data-choreography="nav">Explore the surface</span><span aria-hidden="true">↓</span><small>Scroll to explore. Click or tap the model to compare sources.</small></a>
           </div>
-          <div id="model-study" tabIndex={-1} className={styles.inlineStudy} data-model-study-host="form" />
+          <div id="model-study" tabIndex={-1} className={styles.inlineStudy} data-model-study-host="form"><div className={styles.nativeModelInformation} data-model-information-host="form"/></div>
           <div className={styles.diagramWide}><SourceDiagram kind="miura" title="From a flat grid to a folded surface" /></div>
           <div className={styles.spatialNotation} aria-hidden="true"><span /><p>LOCAL OPENING<br />CONTINUOUS SURFACE</p></div>
         </div>
@@ -92,7 +92,7 @@ export default function Page() {
             <ol className={styles.methodSequence}>{story.system.sequence.map((step, index) => <li key={step} style={{'--step-index':index}} data-protect><details><summary><span>{String(index + 1).padStart(2, '0')}</span><span data-choreography="diagram">{step}</span><span className={styles.stepArrow} aria-hidden="true">↗</span></summary><p>{methodNotes[index]}</p></details></li>)}</ol>
 
           </div>
-          <div className={styles.inlineStudy} data-model-study-host="system" />
+          <div className={styles.inlineStudy} data-model-study-host="system"><div className={styles.nativeModelInformation} data-model-information-host="system"/></div>
           <div className={styles.diagramWide}><SourceDiagram kind="workflow" title="Read the design-to-fabrication sequence" />
             <details className={styles.sourceComparison} data-information-window="source-details"><InformationSkin/><summary data-protect>Compare with the original thesis figure</summary><EvidenceImage item={story.media.geometry} kind="diagram" /></details>
           </div>
@@ -106,7 +106,7 @@ export default function Page() {
             <Paragraphs paragraphs={story.pattern.paragraphs} />
             <p className={styles.smallNote} data-protect data-choreography="caption">{story.pattern.note}</p>
           </div>
-          <div className={styles.inlineStudy} data-model-study-host="pattern" />
+          <div className={styles.inlineStudy} data-model-study-host="pattern"><div className={styles.nativeModelInformation} data-model-information-host="pattern"/></div>
           <div className={styles.diagramWide}><SourceDiagram kind="library" title="Follow the sampled function library" />
             <details className={styles.sourceComparison} data-information-window="source-details"><InformationSkin/><summary data-protect>Read the original library figure</summary><EvidenceImage item={story.media.library} kind="diagram" /></details>
           </div>

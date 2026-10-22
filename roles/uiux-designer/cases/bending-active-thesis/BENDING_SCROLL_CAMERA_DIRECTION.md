@@ -39,7 +39,8 @@ adds a small lateral study of the representation; System gently reverses
 with a slightly higher pitch; Pattern uses the complementary lateral view.
 These are authored intentions, not verified claims that a particular joint
 is exposed. Make and Validation retain zero offset and the original source
-absence. Credits returns through a modest offset to neutral.
+absence. Credits also retains its actual source absence; its orientation score returns
+through a modest offset to neutral without forcing any geometry to appear.
 
 Composition adds these angles before the existing exact source fit. Original
 base chapter poses, source geometry/families, presence, comparison identity
@@ -73,3 +74,30 @@ At 320×700 verify readable side labels including the three-line keyboard
 hint, 44px controls, no brand/reading-tools collision and no document overflow.
 Current source/build evidence does not establish physical-device FPS, smooth
 playback or a live release. See [site-wide coverage](PORTFOLIO_SITEWIDE_COVERAGE.md).
+
+## Native annotation correction after preflight
+
+The 60f5e5 affected-only preflight passed its three-engine motion checks and
+received scoped motion acceptance. Actual 320px screenshots nevertheless exposed
+the fixed side label being covered by the following Research Study workflow.
+Viewport containment alone did not prove readable, unoccluded information.
+
+The next candidate moves the single source-information aside into its existing
+chapter study host at widths up to 780px. Original 43svh model space precedes
+the full-width native card; the card then pushes subsequent content naturally.
+Desktop overlay, model fit and original source geometry remain unchanged.
+Chapter-keyed authoritative publication follows the card; its fixed connector
+is suppressed only for native placement. There are no duplicate accessible
+labels or IDs.
+
+Intrinsic hidden envelopes reserve the actual longest title, source-position
+and annotation variants, alongside the existing description envelope. Current
+text remains complete and accessible, with normal full-width title wrapping;
+fonts are not reduced to force a fit. Event-driven breakpoint placement
+invalidates existing layout measurements, without per-frame React work.
+Print excludes the portaled interactive card just as it excluded the previous
+overlay; original static evidence remains available.
+
+This layout correction still requires fresh exact-candidate screenshots, source
+identity and native reading checks. It is not visually accepted merely because
+the earlier motion preflight or the new source/build checks pass.

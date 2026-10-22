@@ -13,7 +13,7 @@ import {sampleChapterScene, applyChapterLighting} from '../../components/chapter
 import {SOURCE_DIAGRAM_REVISION, prepareSourceFamilies, resolveSourceSelection, sampleSourceScenePose} from '../../components/source-scene-score.mjs';
 import {waitForSceneVisibility} from '../../components/scene-visibility.mjs';
 import {modelInformationSummary,modelAnnotationLabel} from '../../components/model-information.mjs';
-import {publishModelAnnotation,placeModelAnnotation} from './ModelAnnotationPresenter.mjs';
+import {publishModelAnnotation,placeModelAnnotation,modelInformationElement} from './ModelAnnotationPresenter.mjs';
 
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 async function loadSourceDiagrams(signal, manager) {
@@ -201,7 +201,16 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
         compositor = createSceneCompositor(gl); exhibition = createExhibitionStage({bounds:meta.bounds}); root.add(gltf.scene, diagrams.scene, rig, exhibition.group);
         captionSlots=prepareLayerCaptions([...diagramMeta.representations.map(record=>record.description),sampleSourceSeparation(0).caption,sampleSourceSeparation(1).caption]);
         const modelDescriptions=diagramMeta.representations.map(modelInformationSummary);
-        modelCaptionSlots=prepareLayerCaptions(modelDescriptions,'[data-source-description]','model');
+        const refreshModelCaptions=()=>{
+          modelCaptionSlots?.dispose();
+          modelCaptionSlots=prepareLayerCaptions(modelDescriptions,'[data-source-description]','model');
+        };
+        refreshModelCaptions();
+        // React moves one label at the responsive breakpoint. Rebuild intrinsic
+        // caption reserves only on that committed layout event, never per frame.
+        input.events.on(scope,'layoutInvalidated',request=>{
+          if(request.reason==='model-information-placement')refreshModelCaptions();
+        });
         data.current = {meta,diagramMeta,diagramRoot:diagrams.scene,diagramNodes,families,inspectionBounds,previousBackground,studyBackground:new T.Color(),sourceRoot:gltf.scene,exhibition,layers,lights,ground,adapters,compositor,ready:false,failed:false,captions:captionSlots.captions,caption:null,visibleSource:[],presentationKey:null};
         invalidate();
       } catch (error) {cleanup(); if (!cancelled) {console.error('Local source scene unavailable:', error.message); onFailure();}}
@@ -342,9 +351,9 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
       for(const surface of document.querySelectorAll(`[data-model-viewport][data-study-chapter="${selected.chapterId}"]`)) {
         if(surface.dataset.sourceIndex!==String(selected.index))surface.dataset.sourceIndex=String(selected.index);
         if(surface.dataset.representationId!==selected.id)surface.dataset.representationId=selected.id;
-        const study=surface.closest('[data-model-study]');
+        const study=surface.closest('[data-model-study]'),information=modelInformationElement(study);
         for(const [selector,text] of [['[data-source-label]',label],['[data-model-caption-current]',summary],['[data-model-annotation-text]',modelAnnotationLabel(selected.id)],['[data-source-position]',`${selected.family==='experiment'?'Experiment':'Representation'} ${selected.index+1} / ${count}`]]) {
-          const node=study?.querySelector(selector);if(node&&node.textContent!==text)node.textContent=text;
+          const node=information?.querySelector(selector);if(node&&node.textContent!==text)node.textContent=text;
         }
         representation.annotation=publishModelAnnotation(study,{points:entry?.record.framingSupport.points,mesh:entry?.mesh,camera,width:size.width,height:size.height,present,canvasRect:gl.domElement.getBoundingClientRect()});
         nextAnnotations.set(study,{anchor:representation.annotation,width:size.width,height:size.height,chapterId:selected.chapterId,representation});

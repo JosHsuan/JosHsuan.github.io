@@ -154,3 +154,13 @@ test('opt-in full-panel velocity pose reverses and resets with native content',(
   f.publish({docY:80});f.root.activeElement={parentElement:f.nodes[0]};f.publish({docY:90});
   assert.equal(f.presenter.inspect().items[0].skinStrength,0);
 });
+
+test('a native source label follows document geometry instead of the fixed Canvas passage',()=>{
+ const f=fixture([{kind:'model-label',top:1000}]);
+ f.nodes[0].attrs.set('data-model-label-placement','native');
+ f.measure(900);f.publish({docY:900,reduced:true,canvasPlacement:{visible:false,chapter:'make'}});
+ const item=f.presenter.inspect().items[0];
+ assert.equal(item.fixed,false);assert.equal(item.top,1000);assert.equal(item.visible,true);
+ f.publish({docY:2500,reduced:true,canvasPlacement:{visible:true,chapter:'form'}});
+ assert.equal(f.presenter.inspect().items[0].visible,false);
+});

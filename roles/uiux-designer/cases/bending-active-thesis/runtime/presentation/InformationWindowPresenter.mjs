@@ -68,7 +68,7 @@ export function createInformationWindowPresenter({publisher,root=globalThis.docu
       if(!(width>0&&windowHeight>0))continue;
       const style=document.defaultView.getComputedStyle(element);
       const kind=element.getAttribute('data-information-window');
-      const fixed=kind==='model-label';
+      const fixed=kind==='model-label'&&element.getAttribute('data-model-label-placement')!=='native';
       const top=fixed?0:naturalY(element);
       const chapter=fixed?element.closest('[data-model-study]')?.dataset.studyChapter:null;
       const surface=materials.get(element)??material(style);
