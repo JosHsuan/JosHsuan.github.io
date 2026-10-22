@@ -119,3 +119,18 @@ Complete aspect preservation does not establish that every embedded label is
 legible inline. Native captions and original full-image links remain necessary
 for orientation and detailed reading; no invented sharpening, labels, measured
 performance or physical research outcomes are inferred from these screenshots.
+
+## Forced-palette navigation follow-up (pending exact validation)
+
+The later `d1cff51` full run exposed an About mobile fixed-navigation palette
+check failure before keyboard focus: the paint-owner helper rejected a
+translucent ancestor. Trace review locates the first, current About link roughly
+187ms after the media change, but the failing RGBA was not retained. The existing
+180ms background/color transition is therefore a plausible interpolation cause,
+not a numerically proven diagnosis.
+
+The bounded accessibility policy correction disables transitions on ordinary
+portfolio navigation links only inside `forced-colors: active`, making system
+palette changes immediate. It does not change normal-theme transitions, geometry,
+fonts, source materials, test waits or contrast tolerances. Exact rendering and
+full-gate validation remain pending; no root-cause or release success is inferred.

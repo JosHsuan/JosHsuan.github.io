@@ -53,6 +53,11 @@ async function ownership(page){
 function forcedPalette(panel,{allowDecorativeHidden=false}={}){
  const rgba=value=>{const parts=value.match(/^rgba?\(([^)]+)\)$/)?.[1].replace('/',' ').split(/[,\s]+/).filter(Boolean).map(Number);if(!parts||parts.some(n=>!Number.isFinite(n)))throw Error('Unsupported computed color '+value);return[...parts.slice(0,3),parts[3]??1];};
  const luminance=rgb=>rgb.slice(0,3).map(c=>c/255).map(c=>c<=.04045?c/12.92:((c+.055)/1.055)**2.4).reduce((sum,c,i)=>sum+c*[.2126,.7152,.0722][i],0);
+ const paintFacts=(element,css)=>({tag:element.tagName,class:(element.getAttribute('class')??'').slice(0,160),
+  href:(element.getAttribute('href')??'').slice(0,160),ariaCurrent:element.getAttribute('aria-current'),
+  background:css.backgroundColor,opacity:css.opacity,transitionProperty:css.transitionProperty.slice(0,160),
+  transitionDuration:css.transitionDuration.slice(0,120),transitionDelay:css.transitionDelay.slice(0,120),
+  animations:element.getAnimations().slice(0,4).map(animation=>({property:String(animation.transitionProperty??animation.animationName??'').slice(0,80),playState:animation.playState}))});
  const opaque=(element,color,owner,scheme)=>{
   // Group opacity also composites the background; a foreground-only formula
   // cannot certify that case. Keep it fail-closed and inspect the saved PNG.
@@ -73,7 +78,7 @@ function forcedPalette(panel,{allowDecorativeHidden=false}={}){
     }
    }
    const alpha=rgba(css.backgroundColor)[3];
-   if(alpha>0){if(alpha!==1)throw Error('Unsupported translucent ancestor paint');return opaque(current,css.backgroundColor,current.tagName+(current.id?'#'+current.id:''),css.colorScheme);}
+   if(alpha>0){if(alpha!==1)throw Error('Unsupported translucent ancestor paint '+JSON.stringify(paintFacts(current,css)).slice(0,1400));return opaque(current,css.backgroundColor,current.tagName+(current.id?'#'+current.id:''),css.colorScheme);}
   }return null;
  };
  const samples=[],walker=document.createTreeWalker(panel,NodeFilter.SHOW_TEXT);
@@ -212,7 +217,9 @@ for(const [key,route] of routes)(recorded.has(key)?filmed:test)(`${key}: native 
     await expect(navigation).toHaveCount(3);
     for(const link of await navigation.all()){
      await expect(link).toBeVisible();await expect(link).toBeInViewport();
-     receipt.forcedColors.fixedNavigation.push({href:await link.getAttribute('href'),...await link.evaluate(forcedPalette)});
+     const transition=await link.evaluate(node=>{const css=getComputedStyle(node);return{property:css.transitionProperty,duration:css.transitionDuration,delay:css.transitionDelay};});
+     if(['home','about','projects','contact'].includes(key))expect(transition.duration.split(',').map(value=>value.trim()).every(value=>value==='0s'),'Ordinary forced-palette navigation must switch atomically').toBe(true);
+     receipt.forcedColors.fixedNavigation.push({href:await link.getAttribute('href'),transition,...await link.evaluate(forcedPalette)});
     }
     const focusY=await page.evaluate(()=>scrollY);
     await navigation.first().evaluate(node=>node.focus({preventScroll:true}));
