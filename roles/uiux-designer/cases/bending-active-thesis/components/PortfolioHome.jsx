@@ -47,8 +47,8 @@ function Introduction(){
           <span className={styles.invitationArrow}><Arrow/></span>
         </a>
       </div>
-      <div className={styles.notation} aria-hidden="true"><span>FORM</span><span>SYSTEM</span><span>MAKE</span></div>
-      <span className={styles.signature} aria-hidden="true">DESIGN INFORMATION INTO FABRICATION</span>
+      <div className={styles.notation} data-portfolio-notation aria-hidden="true"><span>FORM</span><span>SYSTEM</span><span>MAKE</span></div>
+      <span className={styles.signature} data-portfolio-signature aria-hidden="true">DESIGN INFORMATION INTO FABRICATION</span>
     </div>
   </section>;
 }

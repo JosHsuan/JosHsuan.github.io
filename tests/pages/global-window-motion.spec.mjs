@@ -50,7 +50,7 @@ async function ownership(page){
 
 // Default emulated forced palette only: resolved opaque paint, not a claim
 // about every user-selected high-contrast theme or photographic source pixels.
-function forcedPalette(panel){
+function forcedPalette(panel,{allowDecorativeHidden=false}={}){
  const rgba=value=>{const parts=value.match(/^rgba?\(([^)]+)\)$/)?.[1].replace('/',' ').split(/[,\s]+/).filter(Boolean).map(Number);if(!parts||parts.some(n=>!Number.isFinite(n)))throw Error('Unsupported computed color '+value);return[...parts.slice(0,3),parts[3]??1];};
  const luminance=rgb=>rgb.slice(0,3).map(c=>c/255).map(c=>c<=.04045?c/12.92:((c+.055)/1.055)**2.4).reduce((sum,c,i)=>sum+c*[.2126,.7152,.0722][i],0);
  const opaque=(element,color,owner,scheme)=>{
@@ -78,7 +78,9 @@ function forcedPalette(panel){
  };
  const samples=[],walker=document.createTreeWalker(panel,NodeFilter.SHOW_TEXT);
  while(walker.nextNode()&&samples.length<32){
-  const node=walker.currentNode,element=node.parentElement;if(!node.textContent.trim()||!element.checkVisibility({visibilityProperty:true,opacityProperty:true})||element.closest('[aria-hidden="true"]'))continue;
+  const node=walker.currentNode,element=node.parentElement,hidden=element.closest('[aria-hidden="true"]');
+  const allowedHiddenRoot=allowDecorativeHidden&&hidden===panel&&!panel.parentElement?.closest('[aria-hidden="true"]');
+  if(!node.textContent.trim()||!element.checkVisibility({visibilityProperty:true,opacityProperty:true})||(hidden&&!allowedHiddenRoot))continue;
   const range=document.createRange();range.selectNodeContents(node);
   if(![...range.getClientRects()].some(r=>r.width>0&&r.height>0&&r.bottom>0&&r.top<innerHeight&&r.right>0&&r.left<innerWidth))continue;
   const css=getComputedStyle(element),paint=owner(element),foreground=rgba(css.color);let opacity=1;
@@ -205,10 +207,40 @@ for(const [key,route] of routes)(recorded.has(key)?filmed:test)(`${key}: native 
     // Return to the actual selected reading card; XR Pause navigated to Method.
     await nativeY(page,chosen.start);await neutral(page);
     receipt.forcedColors=await panel.evaluate(forcedPalette);
+    receipt.forcedColors.fixedNavigation=[];
+    const navigation=page.locator('nav[aria-label="Portfolio"] a[href],[data-portfolio-navigation] a[href]');
+    await expect(navigation).toHaveCount(3);
+    for(const link of await navigation.all()){
+     await expect(link).toBeVisible();await expect(link).toBeInViewport();
+     receipt.forcedColors.fixedNavigation.push({href:await link.getAttribute('href'),...await link.evaluate(forcedPalette)});
+    }
+    const focusY=await page.evaluate(()=>scrollY);
+    await navigation.first().evaluate(node=>node.focus({preventScroll:true}));
+    expect(await page.evaluate(()=>scrollY)).toBe(focusY);
+    await page.keyboard.press('Tab');
+    const focusedLink=navigation.nth(1);
+    expect(await focusedLink.evaluate(node=>document.activeElement===node&&node.matches(':focus-visible'))).toBe(true);
+    expect(await page.evaluate(()=>scrollY)).toBe(focusY);
+    receipt.forcedColors.focusedNavigation={href:await focusedLink.getAttribute('href'),y:focusY,...await focusedLink.evaluate(forcedPalette)};
+    await focusedLink.evaluate(node=>node.blur());
+    expect(await page.evaluate(()=>scrollY)).toBe(focusY);
+    receipt.forcedColors.decorative=[];
+    if(key==='home')for(const selector of ['[data-portfolio-notation]','[data-portfolio-signature]']){
+     const label=page.locator(selector);await expect(label).toHaveCount(1);await expect(label).toHaveAttribute('aria-hidden','true');
+     const compact=await page.evaluate(()=>matchMedia('(max-width:640px)').matches);
+     if(compact){
+      expect(await label.evaluate(node=>getComputedStyle(node).display)).toBe('none');
+      receipt.forcedColors.decorative.push({selector,compactHidden:true});
+     }else{
+      await expect(label).toBeVisible();await expect(label).toBeInViewport();
+      receipt.forcedColors.decorative.push({selector,...await label.evaluate(forcedPalette,{allowDecorativeHidden:true})});
+     }
+    }
     const forcedPng=info.outputPath(`global-plane-${key}-forced-colors.png`);
     await page.screenshot({path:forcedPng});await info.attach('global-plane-forced-colors',{path:forcedPng,contentType:'image/png'});
-    expect(receipt.forcedColors.samples.length).toBeGreaterThan(0);
-    for(const row of receipt.forcedColors.samples){
+    const audits=[receipt.forcedColors,receipt.forcedColors.focusedNavigation,...receipt.forcedColors.fixedNavigation,...receipt.forcedColors.decorative.filter(row=>!row.compactHidden)];
+    for(const audit of audits)expect(audit.samples.length,`Visible text required: ${audit.href??audit.selector??'selected plane'}`).toBeGreaterThan(0);
+    for(const row of audits.flatMap(audit=>audit.samples)){
      expect(row.backgroundOwner,`${row.text}: opaque painted owner`).not.toBeNull();
      expect(row.ratio,`${row.text}: ${row.foreground} on ${row.background} (${row.backgroundOwner})`).toBeGreaterThanOrEqual(row.required);
     }

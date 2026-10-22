@@ -106,3 +106,24 @@ confirmation. Acceptance must retain forced-colors PNGs and inspect effective
 text/background owners and contrast across all twelve routes; a neutral
 transform alone does not establish readability. No corrected visual pass or
 site-wide release is claimed here.
+
+
+### Fixed chrome and secondary notation — follow-up candidate
+
+The `604e8bd` three-profile preflight passed all 36 route tests and retained
+all 36 forced-colors screenshots. Actual image review confirms the Home body
+contrast correction, but identifies a remaining WebKit gap outside the selected
+reading plane: shared project navigation still paints its literal dark fill
+behind dark system text. Home's decorative, `aria-hidden` FORM/SYSTEM/MAKE
+notation and signature also retain pale literal text against the light Canvas.
+Chromium and mobile Chromium do not show those palette failures; their passing
+results do not waive WebKit acceptance.
+
+The follow-up changes only forced-colors CSS: shared `.siteLinks a` now uses
+`Canvas` / `LinkText` with a `CanvasText` border and paired `Highlight` /
+`HighlightText` for hover or keyboard focus; `.notation` and `.signature` join
+the existing `CanvasText` mapping. Normal-theme styling, geometry and source
+images are unchanged. Shared navigation must be checked independently of a
+selected moving plane; decorative notation remains hidden from accessibility
+APIs and is not promoted to new content. These corrections are source-only
+pending the next retained WebKit images and final cross-profile gate.

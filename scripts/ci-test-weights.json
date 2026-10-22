@@ -32,7 +32,9 @@
       "tests/pages/velocity-skin.spec.mjs": 6.209,
       "tests/pages/xr-scroll-camera.spec.mjs": 23.207,
       "tests/pages/window-integration.spec.mjs": 315.091,
-      "tests/pages/xr-research.spec.mjs": 148.981
+      "tests/pages/xr-research.spec.mjs": 148.981,
+      "tests/pages/bending-scroll-camera.spec.mjs": 234.927,
+      "tests/pages/global-window-motion.spec.mjs": 327.119
     },
     "webkit": {
       "tests/pages/canvas-motion.spec.mjs": 162.572,
@@ -62,7 +64,9 @@
       "tests/pages/source-artwork.spec.mjs": 110.286,
       "tests/pages/typography.spec.mjs": 26.167,
       "tests/pages/window-integration.spec.mjs": 79.171,
-      "tests/pages/xr-research.spec.mjs": 147.666
+      "tests/pages/xr-research.spec.mjs": 147.666,
+      "tests/pages/bending-scroll-camera.spec.mjs": 56.632,
+      "tests/pages/global-window-motion.spec.mjs": 183.289
     },
     "mobile-chromium": {
       "tests/pages/canvas-motion.spec.mjs": 186.831,
@@ -92,7 +96,77 @@
       "tests/pages/source-artwork.spec.mjs": 101.809,
       "tests/pages/typography.spec.mjs": 13.877,
       "tests/pages/window-integration.spec.mjs": 92.897,
-      "tests/pages/xr-research.spec.mjs": 124.187
+      "tests/pages/xr-research.spec.mjs": 124.187,
+      "tests/pages/bending-scroll-camera.spec.mjs": 105.495,
+      "tests/pages/global-window-motion.spec.mjs": 195.052
+    }
+  },
+  "calibrationSources": {
+    "scope": "Original top-level sourceRun/sourceCommit/measurement apply to unchanged entries; these per-profile/file records override their provenance only. Mixed historical measurements are scheduling hints, not comparable speedup measurements or runtime guarantees.",
+    "profiles": {
+      "chromium": {
+        "tests/pages/bending-scroll-camera.spec.mjs": {
+          "sourceRun": "39813261739",
+          "sourceCommit": "146e8938b5937d2eb2ea0e4eed106cf004249325",
+          "runAttempt": 1,
+          "artifactId": "12441209704",
+          "receipt": "ci-receipt-chromium-1-4.json",
+          "measurement": "Sum of passed, zero-retry reporter test durations for this file; excludes suite/job setup and some teardown. Fully green full-gate run."
+        },
+        "tests/pages/global-window-motion.spec.mjs": {
+          "sourceRun": "39830893383",
+          "sourceCommit": "604e8bd126b9566db1403f17b15aef4f205b1675",
+          "runAttempt": 1,
+          "artifactId": "12448493359",
+          "log": "chromium.log",
+          "firstTestStartedAt": "2026-10-22T18:24:54.2057916Z",
+          "passedSummaryAt": "2026-10-22T18:30:21.3246983Z",
+          "testsPassed": 12,
+          "measurement": "Single-file elapsed seconds from first logged test start to 12-passed summary; includes intervening setup/teardown and final reporter overhead, excludes earlier build/browser startup. Healthy nonpublishable preflight."
+        }
+      },
+      "webkit": {
+        "tests/pages/bending-scroll-camera.spec.mjs": {
+          "sourceRun": "39813261739",
+          "sourceCommit": "146e8938b5937d2eb2ea0e4eed106cf004249325",
+          "runAttempt": 1,
+          "artifactId": "12443065252",
+          "receipt": "ci-receipt-webkit-1-2.json",
+          "measurement": "Sum of passed, zero-retry reporter test durations for this file; excludes suite/job setup and some teardown. Fully green full-gate run."
+        },
+        "tests/pages/global-window-motion.spec.mjs": {
+          "sourceRun": "39831042827",
+          "sourceCommit": "604e8bd126b9566db1403f17b15aef4f205b1675",
+          "runAttempt": 1,
+          "artifactId": "12447899754",
+          "log": "webkit.log",
+          "firstTestStartedAt": "2026-10-22T18:25:34.0235695Z",
+          "passedSummaryAt": "2026-10-22T18:28:37.3121191Z",
+          "testsPassed": 12,
+          "measurement": "Single-file elapsed seconds from first logged test start to 12-passed summary; includes intervening setup/teardown and final reporter overhead, excludes earlier build/browser startup. Healthy nonpublishable preflight."
+        }
+      },
+      "mobile-chromium": {
+        "tests/pages/bending-scroll-camera.spec.mjs": {
+          "sourceRun": "39813261739",
+          "sourceCommit": "146e8938b5937d2eb2ea0e4eed106cf004249325",
+          "runAttempt": 1,
+          "artifactId": "12442047770",
+          "receipt": "ci-receipt-mobile-chromium-1-2.json",
+          "measurement": "Sum of passed, zero-retry reporter test durations for this file; excludes suite/job setup and some teardown. Fully green full-gate run."
+        },
+        "tests/pages/global-window-motion.spec.mjs": {
+          "sourceRun": "39831177660",
+          "sourceCommit": "604e8bd126b9566db1403f17b15aef4f205b1675",
+          "runAttempt": 1,
+          "artifactId": "12448393479",
+          "log": "mobile-chromium.log",
+          "firstTestStartedAt": "2026-10-22T18:26:39.5810832Z",
+          "passedSummaryAt": "2026-10-22T18:29:54.6331176Z",
+          "testsPassed": 12,
+          "measurement": "Single-file elapsed seconds from first logged test start to 12-passed summary; includes intervening setup/teardown and final reporter overhead, excludes earlier build/browser startup. Healthy nonpublishable preflight."
+        }
+      }
     }
   }
 }

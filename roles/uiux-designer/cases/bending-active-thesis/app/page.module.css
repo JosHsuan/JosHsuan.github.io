@@ -442,3 +442,10 @@
 @media(max-width:780px){.nativeModelInformation{display:block;padding-top:43svh;pointer-events:auto}}
 
 @media print{.nativeModelInformation{display:none}}
+
+/* Keep fixed project navigation readable in the system contrast palette;
+   these controls are intentionally outside the moving information planes. */
+@media(forced-colors:active){
+  .siteLinks a{background:Canvas;color:LinkText;border-color:CanvasText}
+  .siteLinks a:hover,.siteLinks a:focus-visible{background:Highlight;color:HighlightText;outline-color:Highlight}
+}
