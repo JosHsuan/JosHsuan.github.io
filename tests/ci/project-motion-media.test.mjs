@@ -24,8 +24,9 @@ const originalPairs=[
 
 test('seven source motions and their posters have complete release provenance',()=>{
   const current=fixture(),images=validate(current);
-  // Two additional Mode/s evidence placements reuse the same original sources.
-  assert.equal(images.length,54);
+  // Mode/s support and HC model-fallback placements reuse original sources;
+  // HC adds two placements, not two new image identities or asset approvals.
+  assert.equal(images.length,56);
   assert.equal(new Set(images.map(image=>image.src)).size,48);
   assert.equal(current.assets.motionAssets.length,7);
   // The original Dot MP4 is retained alongside its smaller delivery derivative.

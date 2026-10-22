@@ -882,7 +882,7 @@
       "title": "HC3DP Caustics",
       "shortTitle": "HC3DP Caustics",
       "subtitle": "Inflation-based Pattern Exploration",
-      "summary": "I explored computational printing paths, inflated shells and their light patterns as part of Group-Red.",
+      "summary": "With Group-Red, I explored how computational printing paths and inflated shells could produce different light patterns, moving between digital path studies and physical samples.",
       "category": "Robotic fabrication",
       "metadataTitle": "HC3DP Caustics — JosHsuan Chao",
       "metadataDescription": "A Group-Red study of inflated printed shells, computational paths and photographed caustic light patterns.",
@@ -890,24 +890,32 @@
       "yearLabel": "Course project",
       "role": "Computational design and fabrication research with Group-Red",
       "hero": {
-        "src": "/assets/projects/hc3dp-caustics/hero.webp",
+        "src": "/assets/projects/hc3dp-caustics/caustic-observation.webp",
         "width": 2048,
         "height": 1365,
-        "alt": "Transparent printed shells stand on a table, with light passing through their inflated surfaces.",
-        "caption": "Physical shells from the Group-Red inflation and caustics study.",
+        "alt": "A translucent printed form creates a radiating light pattern on a wall.",
+        "caption": "A photographed caustic pattern from the Group-Red experiments, not a measured optical-performance result.",
         "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao."
       },
       "sections": [
         {
           "id": "context",
-          "label": "Context",
+          "label": "Shell and layers",
           "kind": "form",
-          "title": "Inflated shells and light.",
+          "title": "Begin with the shell and its layers.",
           "paragraphs": [
-            "I explored complex caustic patterns through simple shell geometries with Group-Red, drawing on Greek meander motifs and the Hilbert curve.",
-            "The study combined pattern changes within each layer with planar layer addition, connecting the printing strategy with the form of the shell."
+            "I explored caustic patterns through simple shell geometries with Group-Red, drawing on Greek meander motifs and the Hilbert curve. The opening photograph shows a physical light experiment; the model introduces the patterned shell geometry.",
+            "The layer study below separates the bottom, middle and top point rows. Changes within each layer and planar layer addition provided the starting structure for the printing-path study."
           ],
           "media": [
+            {
+              "src": "/assets/projects/hc3dp-caustics/hero.webp",
+              "width": 2048,
+              "height": 1365,
+              "alt": "Transparent printed shells stand on a table, with light passing through their inflated surfaces.",
+              "caption": "Physical shells from the Group-Red inflation and caustics study.",
+              "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao."
+            },
             {
               "src": "/assets/projects/hc3dp-caustics/layer-system.webp",
               "width": 2048,
@@ -920,14 +928,22 @@
         },
         {
           "id": "system",
-          "label": "System",
+          "label": "Points to frames",
           "kind": "system",
-          "title": "Paths and frames.",
+          "title": "Connect the points, then orient the tool.",
           "paragraphs": [
-            "I worked on the computational path study as part of the team. We divided layers into bottom, middle and top point rows and used the connections between them to define the printing path.",
-            "Frame arrangement and tilt became part of the computational workflow for guiding the tool along that path."
+            "I worked on the computational path study as part of the team. Connections between the bottom, middle and top point rows define the path in the first diagram below.",
+            "The second diagram adds tilted coordinate frames along that path. Read these as two parts of the computational workflow: where the tool travels, then how its orientation is arranged."
           ],
           "media": [
+            {
+              "src": "/assets/projects/hc3dp-caustics/hero.webp",
+              "width": 2048,
+              "height": 1365,
+              "alt": "Transparent printed shells stand on a table, with light passing through their inflated surfaces.",
+              "caption": "Physical shells from the Group-Red inflation and caustics study.",
+              "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao."
+            },
             {
               "src": "/assets/projects/hc3dp-caustics/path-logic.webp",
               "width": 2048,
@@ -948,12 +964,12 @@
         },
         {
           "id": "making",
-          "label": "Making",
+          "label": "Path simulation",
           "kind": "make",
-          "title": "Connect a path with material behaviour.",
+          "title": "Bring the path and tool together.",
           "paragraphs": [
-            "The fabrication-path animation brings the tool, shell geometry and path frames together as a simulation of the printing strategy.",
-            "Our physical experiments were sensitive to air pressure and cooling. Adjusting the process meant working with the material as well as the digital path."
+            "The original fabrication-path animation brings the tool, shell geometry and path frames together as a simulation of the printing strategy. It is not a recording of physical fabrication or a simulation of the resulting light pattern.",
+            "Our physical experiments were sensitive to air pressure and cooling. The digital path was therefore one part of the investigation, not a substitute for material trials."
           ],
           "media": [
             {
@@ -968,20 +984,20 @@
         },
         {
           "id": "results",
-          "label": "Results",
+          "label": "Samples and limits",
           "kind": "make",
-          "title": "Observe the light and the failures.",
+          "title": "Read the samples and their limits.",
           "paragraphs": [
-            "The printed geometries produced different light patterns, which we studied through physical experiments.",
-            "Sticking and overinflation were also part of the investigation. The curved orange samples show how the material can depart from the intended shell geometry."
+            "The physical shells connect the path study back to the light experiment shown at the beginning. The photographs document observed forms and light patterns; they do not establish a quantified relation between a particular toolpath and optical performance.",
+            "Sticking and overinflation were also part of the investigation. The orange samples below show material departing from the intended shell geometry, keeping the process limitations alongside its visual results."
           ],
           "media": [
             {
-              "src": "/assets/projects/hc3dp-caustics/caustic-observation.webp",
+              "src": "/assets/projects/hc3dp-caustics/hero.webp",
               "width": 2048,
               "height": 1365,
-              "alt": "A translucent printed form creates a radiating light pattern on a wall.",
-              "caption": "A photographed caustic pattern produced during the project experiments.",
+              "alt": "Transparent printed shells stand on a table, with light passing through their inflated surfaces.",
+              "caption": "Physical shells from the Group-Red inflation and caustics study.",
               "credit": "Group-Red: Paul Jaeggi / Behnur Baiju / Kevin Seav / JosHsuan Chao."
             },
             {

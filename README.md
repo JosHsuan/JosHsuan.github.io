@@ -13,6 +13,10 @@ Implemented source, local acceptance and a deployed release are separate facts;
 the public [`release.json`](https://joshsuan.github.io/release.json) identifies
 the deployed commit and source revisions.
 
+The [site-wide refinement coverage matrix](roles/uiux-designer/cases/bending-active-thesis/PORTFOLIO_SITEWIDE_COVERAGE.md)
+tracks global typography, the bounded motion pilot, scroll-led camera plans and
+remaining narrative/route acceptance; individual case releases are rollout slices.
+
 ## System boundaries
 
 | Application | Source and purpose | Build output |
