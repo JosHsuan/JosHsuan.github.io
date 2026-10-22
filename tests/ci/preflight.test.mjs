@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync, existsSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
 import {preflightSelection, preflightArguments} from '../../scripts/ci-preflight.mjs';
 
@@ -14,7 +14,9 @@ test('preflight is pinned, allowlisted and explicitly nonpublishable', () => {
   assert.equal(plan.publishable, false);
   assert.equal(plan.commit, valid.GITHUB_SHA);
   assert.equal(plan.files.length, 2);
-  assert.deepEqual(preflightArguments(plan).slice(-2), plan.files);
+  const argv = preflightArguments(plan);
+  assert.deepEqual(argv.slice(2, 2 + plan.files.length), plan.files);
+  assert.deepEqual(argv.slice(-2), ['--project', plan.browser]);
   for (const browser of ['chromium', 'webkit', 'mobile-chromium'])
     assert.equal(preflightSelection({...valid, PREFLIGHT_BROWSER: browser}).engine, browser === 'webkit' ? 'webkit' : 'chromium');
 });
@@ -47,7 +49,7 @@ test('workflow is manual-only, read-only, candidate-pinned and contains no publi
   assert.doesNotMatch(source, /validated-release|static-export-pages|publishable: true|pages: write|id-token: write|secrets\./);
   assert.doesNotMatch(source, /run:.*inputs\./);
   assert.match(source, /name: preflight-\$\{\{ github.run_id \}\}/);
-  assert.match(source, /pnpm install --frozen-lockfile/);
+  assert.match(source, /pnpm install --frozen-lockfile\n      - name: Validate pinned preflight CLI selection\n        run: node --test tests\/ci\/preflight\.test\.mjs\n      - run: pnpm build:pages/);
 });
 
 
@@ -58,3 +60,40 @@ test('runner refuses a checkout other than the exact dispatched SHA before build
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /Checkout does not match dispatched candidate SHA/);
 });
+
+test('all preflight profiles put positional files before the variadic project option', () => {
+  for (const browser of ['chromium', 'webkit', 'mobile-chromium']) {
+    const plan = preflightSelection({...valid, PREFLIGHT_BROWSER: browser,
+      PREFLIGHT_TESTS: 'tests/pages/model-inspection.spec.mjs tests/pages/model-drag.spec.mjs'});
+    assert.deepEqual(preflightArguments(plan), ['node_modules/@playwright/test/cli.js', 'test', ...plan.files,
+      '--config', 'playwright.pages.config.mjs', '--project', browser]);
+  }
+});
+
+const pinnedCLI = new URL('../../node_modules/@playwright/test/cli.js', import.meta.url);
+for (const browser of ['chromium', 'webkit', 'mobile-chromium']) {
+  test(`pinned CLI enumerates exactly the preflight files for ${browser}`, {
+    skip: !existsSync(pinnedCLI) && 'Dependency-free plan phase: run this regression again after frozen dependency installation',
+  }, () => {
+    const plan = preflightSelection({...valid, PREFLIGHT_BROWSER: browser,
+      PREFLIGHT_TESTS: 'tests/pages/model-inspection.spec.mjs tests/pages/model-drag.spec.mjs'});
+    const argv = preflightArguments(plan);
+    // Preserve the production arguments; add only no-browser enumeration/reporting.
+    argv.splice(2, 0, '--list', '--reporter=json');
+    const result = spawnSync(process.execPath, argv, {
+      cwd: new URL('../../', import.meta.url), encoding: 'utf8', timeout: 30000,
+      env: {...process.env, CI: '1'}, maxBuffer: 4 * 1024 * 1024,
+    });
+    assert.equal(result.error, undefined);
+    assert.equal(result.status, 0, result.stderr);
+    const report = JSON.parse(result.stdout);
+    assert.deepEqual(report.suites.map(suite => `tests/pages/${suite.file}`).sort(), plan.files);
+    const collectTests = suite => [
+      ...(suite.specs ?? []).flatMap(spec => spec.tests),
+      ...(suite.suites ?? []).flatMap(collectTests),
+    ];
+    const tests = report.suites.flatMap(collectTests);
+    assert.equal(tests.length, 10);
+    assert.ok(tests.every(selected => selected.projectName === browser));
+  });
+}

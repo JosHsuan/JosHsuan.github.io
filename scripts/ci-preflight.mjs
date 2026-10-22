@@ -22,8 +22,9 @@ export function preflightSelection(env) {
 }
 
 export function preflightArguments(selection) {
-  return ['node_modules/@playwright/test/cli.js', 'test', '--config', 'playwright.pages.config.mjs',
-    '--project', selection.browser, ...selection.files];
+  // --project is variadic: positional file filters must precede it.
+  return ['node_modules/@playwright/test/cli.js', 'test', ...selection.files,
+    '--config', 'playwright.pages.config.mjs', '--project', selection.browser];
 }
 
 async function main() {

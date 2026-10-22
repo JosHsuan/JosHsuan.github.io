@@ -44,6 +44,8 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Validate pinned preflight CLI selection
+        run: node --test tests/ci/preflight.test.mjs
       - run: pnpm build:pages
       - name: Install OS browser dependencies (bounded)
         timeout-minutes: 8
