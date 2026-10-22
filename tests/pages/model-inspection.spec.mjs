@@ -112,26 +112,25 @@ test('source information uses desktop side placement or stable native mobile flo
 
 // Native cards retain layout while the existing information presenter applies
 // finite pan/roll. Capture layout, CSS matrix and rendered corners synchronously.
-async function nativeCardGeometry(panel){
- return panel.evaluate(el=>{
-  const style=getComputedStyle(el),host=el.parentElement,parentStyle=getComputedStyle(host),parent=host.getBoundingClientRect();
+async function nativeCardGeometry(panel,baseline=null){
+ return panel.evaluate((el,baseline)=>{
+  const style=getComputedStyle(el),host=el.parentElement,parent=host.getBoundingClientRect(),rect=el.getBoundingClientRect();
   const number=value=>parseFloat(value)||0;
   const natural={x:0,y:0};for(let node=el;node;node=node.offsetParent){natural.x+=node.offsetLeft;natural.y+=node.offsetTop;}
-  const edges=(axis)=>axis==='x'?['Left','Right']:['Top','Bottom'];
-  const size=(axis)=>number(style[axis==='x'?'width':'height'])+(style.boxSizing==='border-box'?0:edges(axis).reduce((sum,side)=>sum+number(style['padding'+side])+number(style['border'+side+'Width']),0));
-  const width=size('x'),height=size('y');
-  const left=parent.left+number(parentStyle.borderLeftWidth)+number(parentStyle.paddingLeft)+number(style.marginLeft);
-  const top=parent.top+number(parentStyle.borderTopWidth)+number(parentStyle.paddingTop)+number(style.marginTop);
+  // Initial capture is permitted only after the presenter is genuinely neutral.
+  // Native used layout can differ from serialized CSS padding by a layout unit.
+  const box=baseline??{width:rect.width,height:rect.height,left:rect.left-parent.left,top:rect.top-parent.top};
+  const {width,height}=box,left=parent.left+box.left,top=parent.top+box.top;
   const origin=style.transformOrigin.split(' ').map(Number.parseFloat),matrix=new DOMMatrix(style.transform==='none'?undefined:style.transform);
   const points=[[0,0],[width,0],[width,height],[0,height]].map(([x,y])=>{
    const point=new DOMPoint(x-origin[0],y-origin[1]).matrixTransform(matrix);return {x:left+origin[0]+point.x,y:top+origin[1]+point.y};
   });
-  const rect=el.getBoundingClientRect(),ancestors=[];for(let node=host;node;node=node.parentElement)ancestors.push(getComputedStyle(node).transform);
-  return {natural,documentHeight:document.documentElement.scrollHeight,position:style.position,insets:[style.left,style.right,style.top,style.bottom],onlyChild:host.children.length===1,ancestors,
+  const ancestors=[];for(let node=host;node;node=node.parentElement)ancestors.push(getComputedStyle(node).transform);
+  return {box,computedSize:[style.width,style.height],natural,documentHeight:document.documentElement.scrollHeight,position:style.position,insets:[style.left,style.right,style.top,style.bottom],onlyChild:host.children.length===1,ancestors,
    width,height,vars:{x:number(style.getPropertyValue('--information-x')),y:number(style.getPropertyValue('--information-y')),rz:number(style.getPropertyValue('--information-rz'))},
    matrix:{a:matrix.a,b:matrix.b,c:matrix.c,d:matrix.d,e:matrix.e,f:matrix.f,offPlane:[matrix.m13,matrix.m14,matrix.m23,matrix.m24,matrix.m31,matrix.m32,matrix.m34,matrix.m43],depth:[matrix.m33,matrix.m44]},
    actual:{left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom},expected:{left:Math.min(...points.map(p=>p.x)),right:Math.max(...points.map(p=>p.x)),top:Math.min(...points.map(p=>p.y)),bottom:Math.max(...points.map(p=>p.y))}};
- });
+ },baseline);
 }
 function expectNativeCardGeometry(value){
  expect(value.position).toBe('relative');for(const inset of value.insets)expect(['auto','0px']).toContain(inset);expect(value.onlyChild).toBe(true);
@@ -141,7 +140,7 @@ function expectNativeCardGeometry(value){
  const angle=value.vars.rz*Math.PI/180,expected={a:Math.cos(angle),b:Math.sin(angle),c:-Math.sin(angle),d:Math.cos(angle),e:value.vars.x,f:value.vars.y};
  for(const [key,number] of Object.entries(expected))expect(value.matrix[key]).toBeCloseTo(number,6);
  expect(value.matrix.offPlane.every(coefficient=>coefficient===0)).toBe(true);expect(value.matrix.depth).toEqual([1,1]);
- for(const side of ['left','right','top','bottom'])expect(Math.abs(value.actual[side]-value.expected[side])).toBeLessThanOrEqual(.01);
+ for(const side of ['left','right','top','bottom'])expect(Math.abs(value.actual[side]-value.expected[side]),`${side}: ${JSON.stringify(value)}`).toBeLessThanOrEqual(.01);
 }
 
 test('side information and its leader follow the displayed Canvas throughout the timed exit',async({page})=>{
@@ -150,7 +149,13 @@ test('side information and its leader follow the displayed Canvas throughout the
  const canvas=await page.locator('[data-cinematic-stage] canvas').elementHandle();
  const panel=page.locator('[data-model-side-label][data-study-chapter="pattern"]');
  const before=await panel.boundingBox(),native=await panel.getAttribute('data-model-label-placement')==='native';
- const nativeBefore=native?await nativeCardGeometry(panel):null;if(native)expectNativeCardGeometry(nativeBefore);
+ if(native)await page.waitForFunction(()=>{
+  const el=document.querySelector('[data-model-side-label][data-study-chapter="pattern"]'),style=getComputedStyle(el);
+  const matrix=new DOMMatrix(style.transform==='none'?undefined:style.transform);
+  return el.dataset.informationMoving==='false'&&['x','y','rz'].every(key=>parseFloat(style.getPropertyValue('--information-'+key))===0)&&matrix.isIdentity;
+ },null,{timeout:WAIT});
+ const nativeBefore=native?await nativeCardGeometry(panel):null;
+ if(native){expect(Object.values(nativeBefore.vars).every(value=>value===0)).toBe(true);expectNativeCardGeometry(nativeBefore);}
  const exit=await page.evaluate(()=>{const p=window.__story.inspect().canvasPlacement;return p.holdEnd+(p.end-p.holdEnd)*.4;});
  await page.clock.pauseAt(new Date(Date.now()+3600000));
  try{
@@ -179,7 +184,7 @@ test('side information and its leader follow the displayed Canvas throughout the
    expect(sample.end[0]).toBeCloseTo(sample.expectedEnd[0],2);expect(sample.end[1]).toBeCloseTo(sample.expectedEnd[1],2);
    }
    const after=await panel.boundingBox();
-   if(native){const geometry=await nativeCardGeometry(panel);expectNativeCardGeometry(geometry);expect(geometry.natural).toEqual(nativeBefore.natural);expect(geometry.documentHeight).toBe(nativeBefore.documentHeight);}
+   if(native){const geometry=await nativeCardGeometry(panel,nativeBefore.box);expectNativeCardGeometry(geometry);expect(geometry.computedSize).toEqual(nativeBefore.computedSize);expect(geometry.natural).toEqual(nativeBefore.natural);expect(geometry.documentHeight).toBe(nativeBefore.documentHeight);}
    else{expect(Math.abs(after.x-before.x)).toBeLessThanOrEqual(12.01);expect(Math.abs(after.y-before.y)).toBeLessThanOrEqual(12.01);}
   }
   expect(captured).toBe(phases.length);
