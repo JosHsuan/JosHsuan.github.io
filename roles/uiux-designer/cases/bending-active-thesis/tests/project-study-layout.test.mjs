@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {projectStudyLayout,projectStudyEvidenceLayout} from '../components/project-study-layout.mjs';
+import {projectStudyEvidence} from '../components/project-study-media.mjs';
 
 const studies=JSON.parse(await readFile(new URL('../release/project-studies.json',import.meta.url),'utf8')).projects;
 const study=id=>studies.find(project=>project.id===id);
@@ -39,14 +40,23 @@ test('every eligible model keeps the spatial split; movies use actual motion dim
  }
 });
 
-test('authored Caschlatsch technical plates receive full reading space regardless of aspect',()=>{
- const project=study('project-caschlatsch');
- for(const chapter of ['system','xr-guidance']){
-  const result=projectStudyLayout(project,chapter);
-  assert.equal(result.composition,'documentary');assert.equal(result.sourceRole,'technical-plate');assert.equal(result.layout,'broad');
-  assert.equal(result.readingDensity,'extended');
-  assert.equal(result.sourceShape,'balanced','Purpose, rather than only width, gives dense original figures a broad composition');
-  for(const image of project.sections.find(section=>section.id===chapter).media)assert.equal(projectStudyEvidenceLayout(image),'full');
+test('Caschlatsch documentary primaries remain distinct from five full-width foreground technical plates',()=>{
+ const project=study('project-caschlatsch'),evidence=projectStudyEvidence(project);
+ const expected=[
+  {chapter:'system',primary:project.hero,shape:'balanced',layout:'split',plates:['portfolio-voxel-framework','portfolio-module-infill']},
+  {chapter:'xr-guidance',primary:project.sections.find(section=>section.id==='making').media[0],shape:'wide',layout:'broad',plates:['portfolio-xr-assembly-sequence','portfolio-xr-interface','portfolio-xr-data-exchange']},
+ ];
+ for(const {chapter,primary,shape,layout,plates} of expected){
+  const section=project.sections.find(section=>section.id===chapter);
+  assert.deepEqual(section.media[0],primary,'Narrative primaries reuse the approved documentary photographs');
+  assert.equal(section.paragraphs.length,3);
+  assert.deepEqual(projectStudyLayout(project,chapter),{composition:'documentary',sourceRole:'photograph',layout,readingDensity:'normal',sourceShape:shape});
+  const foreground=evidence.get(chapter);
+  assert.deepEqual(foreground.map(image=>image.src),plates.map(name=>`/assets/projects/project-caschlatsch/${name}.webp`));
+  for(const image of foreground){
+   assert.equal(image.purpose,'diagram');
+   assert.equal(projectStudyEvidenceLayout(image),'full','Every complete technical plate retains a full row independently of the primary photograph');
+  }
  }
  assert.equal(projectStudyLayout(project,'context').sourceShape,'portrait');
  assert.equal(projectStudyLayout(project,'context').layout,'split');

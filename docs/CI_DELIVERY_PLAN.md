@@ -355,3 +355,14 @@ The new `tests/pages/three-case-narrative.spec.mjs` adds six tests per browser p
 Each value sums the six matching file-test intervals from a logged test start to the next logged test start. In all three runs these are positions 14–19; the boundary is test 20, `project-background-motion.spec.mjs`, not the final suite summary. This preserves fixture interleaving: the later Dot native-loop test, earlier files, build, final reporting and upload are not charged to the new file. Intervening setup/teardown remains included. Per-profile metadata records the exact SHA, run/attempt, job ID, selected positions and timestamp boundaries for reconstruction.
 
 This removes the new file's conservative maximum-file fallback without changing the deterministic whole-file algorithm, 4/2/2 runner budget, required test IDs or release gate. The mixed historical weights remain placement hints, not predicted runtime savings. Actual pinned CLI enumeration now contains **483 tests across 31 files, 161 per profile**; inventory listing is not execution. The 60 healthy targeted executions are nonpublishable feedback, not full release acceptance. Complete current-candidate browser/framework/quality validation and same-artifact publication checks remain required.
+
+### Pre-main integration checklist
+
+Before moving a reviewed candidate to `main`, retain results for **both** portable test layers, not only the CI-planning contracts:
+
+- `node --test tests/ci/*.test.mjs`
+- `node --test roles/uiux-designer/cases/bending-active-thesis/tests/*.test.mjs roles/uiux-designer/tools/*.test.mjs`
+- Repository type checking, scoped/full lint as applicable, and the normal `build:pages` export/audit command.
+- Actual pinned Playwright inventory plus independent source review and affected cloud preflight evidence.
+
+If an execution-environment restriction blocks a command, record it as unexecuted rather than treating a different test layer as a substitute. The October 22 narrative integration initially missed an existing Caschlatsch primary-layout expectation because only the CI-planning tests had been run locally; the full cloud quality job correctly blocked release. This checklist does not replace the complete current-SHA cloud quality/framework/browser gate or authorize publication from preflight results.
