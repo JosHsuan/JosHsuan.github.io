@@ -5,11 +5,24 @@ import {createRendererBudget} from './renderer-budget.mjs';
 import {fitResearchCamera,RESEARCH_MODEL_PIXELS} from './research-scene-geometry.mjs';
 import {installProjectStudyAppearance} from './project-study-appearance.mjs';
 
+const ZERO_HANDHELD=Object.freeze({xPx:0,yPx:0,rollRad:0});
 const aborted=()=>new DOMException('Project study released','AbortError');
 function releaseObject(root){
  const geometries=new Set(),materials=new Set(),textures=new Set();
  root?.traverse(node=>{if(node.geometry)geometries.add(node.geometry);for(const material of(Array.isArray(node.material)?node.material:node.material?[node.material]:[])){materials.add(material);for(const value of Object.values(material))if(value?.isTexture)textures.add(value);}});
  geometries.forEach(value=>value.dispose());materials.forEach(value=>value.dispose());textures.forEach(value=>{value.image?.close?.();value.dispose();});
+}
+/** Invert this canvas-only framing transform; parent hold-stage translation or
+ * axis scaling is represented by its actual bounding rectangle. */
+export function projectStudyCanvasPoint(x,y,rect,size,handheld){
+ const {width,height}=size,{xPx=0,yPx=0,rollRad=0,originX=width*.5,originY=height*.5}=handheld;
+ const c=Math.cos(rollRad),s=Math.sin(rollRad);
+ const corners=[[0,0],[width,0],[0,height],[width,height]].map(([px,py])=>({x:originX+xPx+c*(px-originX)-s*(py-originY),y:originY+yPx+s*(px-originX)+c*(py-originY)}));
+ const minX=Math.min(...corners.map(p=>p.x)),maxX=Math.max(...corners.map(p=>p.x)),minY=Math.min(...corners.map(p=>p.y)),maxY=Math.max(...corners.map(p=>p.y));
+ if(!(rect.width>0&&rect.height>0&&width>0&&height>0))return null;
+ const tx=(x-rect.left)*(maxX-minX)/rect.width+minX-originX-xPx,ty=(y-rect.top)*(maxY-minY)/rect.height+minY-originY-yPx;
+ const px=originX+c*tx+s*ty,py=originY-s*tx+c*ty;
+ const epsilon=1e-7;return px< -epsilon||px>width+epsilon||py< -epsilon||py>height+epsilon?null:{x:Math.max(0,Math.min(width,px)),y:Math.max(0,Math.min(height,py))};
 }
 /** A single full-viewport renderer. Original source transforms, geometry and UVs
  * stay exact. Scoped material clones and a static light rig own presentation;
@@ -19,6 +32,7 @@ export async function acquireProjectStudyScene({host,model,signal,onFailure=()=>
  const win=host.ownerDocument.defaultView,manager=new T.LoadingManager();
  let renderer=null,budget=null,scene=null,camera=null,gltf=null,support=null,appearance=null,disposed=false,shaderError=false;
  let size={width:0,height:0},state={chapter:model.chapters[0],azimuth:0,elevation:0},lastDraw=null,cameraFits=0,draws=0,firstDraw=null,successfulPaint=false,pose=null;
+ let handheld={xPx:0,yPx:0,rollRad:0,originX:0,originY:0},compositorWrites=0,lastRenderSubmitMs=0,totalRenderSubmitMs=0;
  let revision=null,vertices=0,triangles=0,meshes=0,drawnMeshes=0,sourceCalls=0,sourcePoints=0;
  const ray=new T.Raycaster(),point=new T.Vector2(),painted=new Set();
  const lost=event=>{event.preventDefault();successfulPaint=false;onFailure('context-lost');};
@@ -31,24 +45,40 @@ export async function acquireProjectStudyScene({host,model,signal,onFailure=()=>
  const draw=()=>{
   if(disposed||!renderer||!size.width||!size.height)return;
   const narrow=size.width<800,slot=narrow?{x:.5,y:.42,width:.94,height:.45}:{x:.735,y:.53,width:.51,height:.78},view=model.views?.[state.chapter]??{};
-  // The presenter owns main + idle + optional inspection composition. Never
+  // The presenter owns main + optional inspection composition. Never
   // add legacy inspection twice; the renderer remains the only camera writer.
   const intent=state.cameraIntent;
   if(intent!=null&&(!Number.isFinite(intent.yawRad)||!Number.isFinite(intent.pitchRad)||!Number.isFinite(intent.fovDeg)||!Number.isFinite(intent.zoom)))throw RangeError('Finite composed project camera intent required');
   const yaw=intent?.yawRad??((view.yaw??.72)+state.azimuth),pitch=Math.max(-.1,Math.min(1.15,intent?.pitchRad??((view.pitch??.3)+state.elevation))),fov=intent?.fovDeg??view.fov??36,zoom=intent?.zoom??view.zoom??1;
+  // Continuous generic handheld is an honest 2D pan/roll, without parallax.
+  // Its canvas owns only this transform; the parent stage still owns entry/exit.
+  const micro=state.handheld??ZERO_HANDHELD;
+  if((!Number.isFinite(micro.xPx)||!Number.isFinite(micro.yPx)||!Number.isFinite(micro.rollRad))||Math.abs(micro.xPx)>1.2||Math.abs(micro.yPx)>1.2||Math.abs(micro.rollRad)>.0012)throw RangeError('Bounded compositor handheld required');
+  const hint=state.handheld?'transform':'';if(renderer.domElement.style.willChange!==hint)renderer.domElement.style.willChange=hint;
+  const originX=size.width*slot.x,originY=size.height*slot.y;
+  if(micro.xPx!==handheld.xPx||micro.yPx!==handheld.yPx||micro.rollRad!==handheld.rollRad||originX!==handheld.originX||originY!==handheld.originY){
+   handheld={xPx:micro.xPx,yPx:micro.yPx,rollRad:micro.rollRad,originX,originY};compositorWrites++;
+   renderer.domElement.style.transformOrigin=`${slot.x*100}% ${slot.y*100}%`;
+   renderer.domElement.style.transform=micro.xPx||micro.yPx||micro.rollRad?`translate3d(${micro.xPx}px,${micro.yPx}px,0) rotate(${micro.rollRad}rad)`:'none';
+  }
   if(successfulPaint&&lastDraw?.width===size.width&&lastDraw.height===size.height&&lastDraw.yaw===yaw&&lastDraw.pitch===pitch&&lastDraw.fov===fov&&lastDraw.zoom===zoom)return;
-  if(renderer.getContext().isContextLost())throw Error('Project model context is unavailable');
+  // Native context loss may become observable before its queued DOM event.
+  // Both paths must retain the same terminal failure classification.
+  if(renderer.getContext().isContextLost())throw Error('context-lost');
   cameraFits++;
   pose=fitResearchCamera(support,size.width*slot.width/(size.height*slot.height),{yaw,pitch,fov,zoom});
   camera.position.fromArray(pose.position);camera.up.fromArray(pose.up);camera.aspect=size.width/size.height;
   camera.fov=T.MathUtils.radToDeg(2*Math.atan(Math.tan(T.MathUtils.degToRad(pose.fov/2))/slot.height));camera.near=pose.near;camera.far=pose.far;
   camera.setViewOffset(size.width,size.height,size.width*(.5-slot.x),size.height*(.5-slot.y),size.width,size.height);camera.lookAt(...pose.target);camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
-  budget.sync(size.width,size.height);painted.clear();sourceCalls=0;renderer.render(scene,camera);
+  budget.sync(size.width,size.height);painted.clear();sourceCalls=0;
+  // CPU-side submission observation only; this is not a GPU timer or FPS claim.
+  const submitStarted=performance.now();renderer.render(scene,camera);lastRenderSubmitMs=performance.now()-submitStarted;totalRenderSubmitMs+=lastRenderSubmitMs;
   drawnMeshes=painted.size;
   // A genuine transparent double-sided source material can issue two native
   // draw calls for one onBeforeRender callback. Every source object must still
   // participate; a decorative or empty render can never satisfy this boundary.
-  if(shaderError||renderer.getContext().isContextLost()||drawnMeshes!==meshes||sourceCalls<meshes||renderer.info.render.calls<sourceCalls)throw Error('The complete original project model did not draw');
+  if(renderer.getContext().isContextLost())throw Error('context-lost');
+  if(shaderError||drawnMeshes!==meshes||sourceCalls<meshes||renderer.info.render.calls<sourceCalls)throw Error('The complete original project model did not draw');
   successfulPaint=true;lastDraw={width:size.width,height:size.height,yaw,pitch,fov,zoom};draws++;firstDraw??={completed:true,sourceRevision:revision,meshes:drawnMeshes,sourceCalls,width:size.width,height:size.height};
  };
  try{
@@ -101,8 +131,8 @@ export async function acquireProjectStudyScene({host,model,signal,onFailure=()=>
   return{
    resize(width,height){if(disposed||!(width>0&&height>0))return;size={width,height};draw();},
    present(next){if(disposed)return;state={...state,...next};draw();},
-   hitTest(x,y){if(disposed||!successfulPaint||!renderer)return false;const rect=renderer.domElement.getBoundingClientRect();if(x<rect.left||x>rect.right||y<rect.top||y>rect.bottom)return false;point.set((x-rect.left)/rect.width*2-1,-(y-rect.top)/rect.height*2+1);ray.setFromCamera(point,camera);return ray.intersectObject(gltf.scene,true).length>0;},
-   inspect:()=>({sourceRevision:revision,primitive:model.primitive??'triangles',vertices,triangles,renderables:meshes,sourcePoints,meshes,drawnMeshes,sourceCalls,successfulPaint,firstDraw:firstDraw?{...firstDraw}:null,draws,cameraFits,supportPoints:(support?.length??0)/3,pose,view:{...state},size:{...size},appearance:appearance?.inspect()??null,pixelBudget:RESEARCH_MODEL_PIXELS,budget:budget?.inspect()??null,canvasCount:disposed?0:1,disposed}),
+   hitTest(x,y){if(disposed||!successfulPaint||!renderer)return false;const rect=renderer.domElement.getBoundingClientRect();if(x<rect.left||x>rect.right||y<rect.top||y>rect.bottom)return false;const local=projectStudyCanvasPoint(x,y,rect,size,handheld);if(!local)return false;point.set(local.x/size.width*2-1,-local.y/size.height*2+1);ray.setFromCamera(point,camera);return ray.intersectObject(gltf.scene,true).length>0;},
+   inspect:()=>({sourceRevision:revision,primitive:model.primitive??'triangles',vertices,triangles,renderables:meshes,sourcePoints,meshes,drawnMeshes,sourceCalls,successfulPaint,firstDraw:firstDraw?{...firstDraw}:null,draws,cameraFits,renderSubmit:{lastMs:lastRenderSubmitMs,totalMs:totalRenderSubmitMs,kind:'cpu-submission-only'},compositor:{...handheld,writes:compositorWrites,kind:'2d-pan-roll'},supportPoints:(support?.length??0)/3,pose,view:{...state},size:{...size},appearance:appearance?.inspect()??null,pixelBudget:RESEARCH_MODEL_PIXELS,budget:budget?.inspect()??null,canvasCount:disposed?0:1,disposed}),
    dispose,
   };
  }catch(error){dispose();throw error;}

@@ -114,11 +114,14 @@ vertices once. Node 24.19.0 warm batch-mean fit medians were approximately
 0.36–0.45 microseconds across the five models; this is not GPU/frame-rate or
 individual-tail latency evidence. No new geometry approximation is justified.
 The candidate compares final composed camera values before fitting/drawing,
-including idle and inspection, and retains support only for that acquisition.
+including inspection, and retains support only for that acquisition.
 XR's full-source fitting is a different path requiring its own measurement.
 
-Continuous handheld now requires original-model draws while its stage is visible.
-Cheap CPU fitting does not establish cheap GPU work. The bounded browser receipt
-records actual RAF intervals, draw/fit counts, buffer allocations and pixel caps;
-these and retained source-framing videos must be reviewed without claiming
-physical-device FPS or replacing original geometry to manufacture a speedup.
+The initial continuous 3D idle candidate failed browser throughput acceptance and
+was not released. Its correction keeps genuine scroll/inspection camera changes,
+but gives generic idle an explicitly **2D canvas pan/roll without parallax** on the
+same clock; stable camera intent reuses the complete rendered source. Bending's
+existing handheld recipe is unchanged. Bounded receipts require changing canvas
+framing with no settled-idle WebGL draws/fits, fixed pixel/allocation budgets and
+retained source framing. Actual engine/mobile videos and replacement CI remain
+pending; no physical-device FPS or site-wide completion claim follows.

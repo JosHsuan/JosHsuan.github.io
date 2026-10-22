@@ -75,3 +75,11 @@ export function composeCameraIntent(main, {idle = EMPTY, inspection = EMPTY, red
   addLayer(output, inspection);
   return pose(output);
 }
+
+/** Compositor-only 2D handheld; not a 3D orbit or parallax simulation. */
+export function sampleHandheldSurface(activeSeconds, gain=1){
+ finite(activeSeconds,'activeSeconds');finite(gain,'gain');
+ if(activeSeconds<0||gain<0||gain>1)throw RangeError('Nonnegative active seconds and handheld gain within [0,1] required');
+ if(gain===0)return{xPx:0,yPx:0,rollRad:0};
+ return{xPx:Math.sin(activeSeconds*.61)*.8*gain,yPx:Math.sin(activeSeconds*.83)*.65*gain,rollRad:Math.sin(activeSeconds*.47)*.00065*gain};
+}

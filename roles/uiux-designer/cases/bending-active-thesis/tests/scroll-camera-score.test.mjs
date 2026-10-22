@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createScrollCameraPath, sampleScrollCamera, composeCameraIntent} from '../runtime/motion/scroll-camera-score.mjs';
+import {createScrollCameraPath, sampleScrollCamera, composeCameraIntent, sampleHandheldSurface} from '../runtime/motion/scroll-camera-score.mjs';
 const key=(at,yawRad=0)=>({at,yawRad,pitchRad:.3,fovDeg:36,zoom:1});
 const close=(a,b)=>assert.ok(Math.abs(a-b)<1e-9,`${a} != ${b}`);
 const path=createScrollCameraPath([key(0),key(.4,.5),key(1,1)]);
@@ -49,4 +49,9 @@ test('arithmetic overflow and malformed prepared paths fail closed',()=>{
  for(const malformed of [null,undefined,{},[],[key(0)],[key(0),key(1)]]) assert.throws(()=>sampleScrollCamera(malformed,.5),RangeError);
  assert.throws(()=>composeCameraIntent({...key(0),yawRad:1e308},{idle:{yawRad:1e308}}),RangeError);
  assert.throws(()=>composeCameraIntent({...key(0),zoom:1e308},{inspection:{zoomScale:1e308}}),RangeError);
+});
+
+test('compositor handheld is bounded, finite and exactly neutral at zero gain',()=>{
+ for(let seconds=0;seconds<100;seconds+=.17){const pose=sampleHandheldSurface(seconds);assert(Math.abs(pose.xPx)<=.8);assert(Math.abs(pose.yPx)<=.65);assert(Math.abs(pose.rollRad)<=.00065);assert.deepEqual(sampleHandheldSurface(seconds,0),{xPx:0,yPx:0,rollRad:0});}
+ for(const [time,gain] of [[NaN,1],[-1,1],[0,Infinity],[0,-.1],[0,1.1]])assert.throws(()=>sampleHandheldSurface(time,gain),RangeError);
 });

@@ -25,18 +25,18 @@ class Target{
 }
 function fixture({pending=false,firstDraw=true,reduced=false,externalStage=false,posterPending=false,camera=false}={}){
  const doc=new Target(),win=new Target(),root=new Target(),host=new Target(),surface=new Target(),timers=new Map(),policy={hidden:false,reduced,saveData:false,paused:false,siteReady:false},waiting=deferred();
- const modelUI=Object.fromEntries(models.map(key=>{const row=Object.fromEntries(['target','state','help','reset'].map(field=>{const node=new Target();node.dataset['projectModel'+field[0].toUpperCase()+field.slice(1)]=key;node.markers=[`[data-project-model-${field}]`];if(field==='target')node.markers.push('[data-project-model-control]');if(['help','reset'].includes(field))node.setAttribute('hidden','');return[field,node];}));return[key,row];})),control=modelUI.context.target;
- let timerId=0,schedules=0,disposed=0,starts=0,fixtureSignal,failResource,now=0;const presentations=[],sizes=[],poster=posterPending?Object.assign(new Target(),{complete:false,naturalWidth:0}):null;
+ const modelUI=Object.fromEntries(models.map(key=>{const row=Object.fromEntries(['target','state','help','reset'].map(field=>{const node=new Target();node.id=`${key}-${field}`;node.dataset['projectModel'+field[0].toUpperCase()+field.slice(1)]=key;node.markers=[`[data-project-model-${field}]`];if(field==='target')node.markers.push('[data-project-model-control]');if(['help','reset'].includes(field))node.setAttribute('hidden','');return[field,node];}));row.target.setAttribute('aria-describedby',`${row.state.id} ${row.help.id}`);return[key,row];})),control=modelUI.context.target;
+ let timerId=0,schedules=0,disposed=0,starts=0,fixtureSignal,failResource,now=0;const presentations=[],calls=[],sizes=[],poster=posterPending?Object.assign(new Target(),{complete:false,naturalWidth:0}):null;
  doc.documentElement=new Target();doc.querySelectorAll=()=>[host];root.dataset.projectActiveChapter='overview';root.querySelectorAll=selector=>selector==='[data-project-chapter]'?keys.map(key=>({dataset:{projectChapter:key}})):Object.values(modelUI).flatMap(row=>Object.values(row).filter(node=>node.markers.includes(selector)));host.querySelector=selector=>selector==='[data-project-model-surface]'?surface:selector==='[data-project-model-poster]'?poster:null;
  Object.assign(win,{innerWidth:1440,innerHeight:1000,performance:{now:()=>now},setTimeout:(fn,delay)=>{timers.set(++timerId,{fn,delay});return timerId;},clearTimeout:id=>timers.delete(id)});
- const model={chapters:models,alt:'Verified source geometry',...(camera?{views:{context:{yaw:.56,pitch:.18,fov:36,zoom:1.04},system:{yaw:.84,pitch:.26,fov:36,zoom:1.04}},cameraPath:[{chapter:'context',progress:0,yawRad:.56,pitchRad:.18,fovDeg:36,zoom:1.04},{chapter:'system',progress:0,yawRad:.84,pitchRad:.26,fovDeg:36,zoom:1.04},{chapter:'system',progress:1,yawRad:.98,pitchRad:.30,fovDeg:36,zoom:1.04}]}:{})},handle={resize(w,h){sizes.push([w,h]);},present(value){presentations.push({...value});},inspect:()=>({firstDraw:firstDraw?{completed:true}:null,successfulPaint:firstDraw,view:presentations.at(-1)}),hitTest:()=>true,dispose(){disposed++;}};
+ const model={chapters:models,alt:'Verified source geometry',...(camera?{views:{context:{yaw:.56,pitch:.18,fov:36,zoom:1.04},system:{yaw:.84,pitch:.26,fov:36,zoom:1.04}},cameraPath:[{chapter:'context',progress:0,yawRad:.56,pitchRad:.18,fovDeg:36,zoom:1.04},{chapter:'system',progress:0,yawRad:.84,pitchRad:.26,fovDeg:36,zoom:1.04},{chapter:'system',progress:1,yawRad:.98,pitchRad:.30,fovDeg:36,zoom:1.04}]}:{})},handle={resize(w,h){calls.push('resize');sizes.push([w,h]);},present(value){calls.push('present');presentations.push({...value});},inspect:()=>({firstDraw:firstDraw?{completed:true}:null,successfulPaint:firstDraw,view:presentations.at(-1)}),hitTest:()=>true,dispose(){disposed++;}};
  const publisher=new DOMPresenter().forOwner('test-scene'),scene=createProjectStudyScenePresenter({root,host,model,externalStage,window:win,document:doc,publisher,schedule:()=>schedules++,policy:()=>policy,acquire:options=>{starts++;fixtureSignal=options.signal;failResource=options.onFailure;return pending?waiting.promise:Promise.resolve(handle);}});
  const step=(dt=.016,resumed=false)=>scene.publish({dt,resumed});
  const settle=()=>{let remaining=240;while(step()&&remaining-->0);assert(remaining>0,'Finite work settles on supplied active seconds');};
  const select=key=>{root.dataset.projectActiveChapter=key;step();settle();};
  const pointer=(type,overrides={})=>{const event={type,target:control,pointerId:1,pointerType:'mouse',isPrimary:true,button:0,clientX:600,clientY:400,prevented:0,preventDefault(){this.prevented++;},...overrides};doc.fire(type,event);return event;};
  const key=(name,target=control,overrides={})=>{const event={target,key:name,prevented:0,preventDefault(){this.prevented++;},...overrides};doc.fire('keydown',event);return event;};
- return{doc,win,root,host,surface,control,modelUI,publisher,policy,timers,waiting,handle,scene,step,settle,select,pointer,key,presentations,sizes,poster,advanceClock:ms=>{now+=ms;},fail:reason=>failResource(reason),get starts(){return starts;},get disposed(){return disposed;},get schedules(){return schedules;},get signal(){return fixtureSignal;}};
+ return{doc,win,root,host,surface,control,modelUI,publisher,policy,timers,waiting,handle,scene,step,settle,select,pointer,key,presentations,calls,sizes,poster,advanceClock:ms=>{now+=ms;},fail:reason=>failResource(reason),get starts(){return starts;},get disposed(){return disposed;},get schedules(){return schedules;},get signal(){return fixtureSignal;}};
 }
 
 test('a pending static model poster has no timer until selected and preserves its active preparation bound across suspension and source departure',async()=>{
@@ -199,7 +199,7 @@ test('the actual site driver composes source drawing, information and glass with
  const frame=(seconds=.016)=>{now+=seconds*1000;const callbacks=[...raf.values()];raf.clear();for(const fn of callbacks)fn(now);};
  await flush();for(let i=0;i<150&&raf.size;i++)frame();assert.equal(raf.size,1,'Visible idle retains exactly one frame even when shared field is not ready');assert.equal(acquisitions,1);assert.equal(driver.inspect().projectStudy.scene.motion.mode,'hold');
  assert.equal(driver.inspect().projectStudy.chapters.chapter,'context');assert.equal(root.dataset.projectActiveChapter,'context');assert.equal(counter.textContent,'02 / 06');assert(chapterReads>=keys.length);
- const readsBefore=chapterReads,intentBefore={...source.view.cameraIntent};frame();assert.equal(chapterReads,readsBefore);assert.notEqual(source.view.cameraIntent.yawRad,intentBefore.yawRad);
+ const readsBefore=chapterReads,intentBefore={...source.view.cameraIntent},handheldBefore={...source.view.handheld};frame();assert.equal(chapterReads,readsBefore);assert.deepEqual(source.view.cameraIntent,intentBefore);assert.notDeepEqual(source.view.handheld,handheldBefore);
  assert.equal(driver.inspect().projectStudy.liquidGlass.ticks,driver.inspect().frames);assert.equal(maxPending,1);assert.equal(timers.size,0);
  root.setAttribute('data-study-paused','');for(const observer of observers)if(observer.target===root)observer.fn([{attributeName:'data-study-paused'}]);frame();const activeSeconds=driver.inspect().playback.activeSeconds;
  win.fire('wheel',{deltaY:100,deltaMode:0});win.fire('scroll');frame(10);assert.equal(driver.inspect().playback.activeSeconds,activeSeconds);assert.equal(maxPending,1);
@@ -252,7 +252,7 @@ test('scroll camera changes without holding, retains eligible idle, freezes paus
  assert.equal(read('context',0,0),true,'Visible model idle owns demand on the existing driver');
  const start=f.presentations.at(-1).cameraIntent;
  read('context',.6,0);const mid=f.presentations.at(-1).cameraIntent;assert(mid.yawRad>start.yawRad);
- read('context',.6,1);assert.notEqual(f.presentations.at(-1).cameraIntent.yawRad,mid.yawRad,'Idle is independent from native reading progress');
+ const beforeHandheld=f.presentations.at(-1).handheld;read('context',.6,1);assert.deepEqual(f.presentations.at(-1).cameraIntent,mid,'Idle does not redraw a new physical camera pose');assert.notDeepEqual(f.presentations.at(-1).handheld,beforeHandheld,'Independent handheld is compositor-only');
  f.root.dataset.projectActiveChapter='system';f.scene.setReading({chapter:'system',progress:.3},1);
  assert.equal(f.scene.prepare('system'),true);const prepared=f.presentations.at(-1).cameraIntent;
  f.scene.publish({dt:0,stage:stage('system')});assert.deepEqual(f.presentations.at(-1).cameraIntent,prepared,'Preparation cannot prepaint an endpoint and jump back');
@@ -301,4 +301,23 @@ test('pause resume recovers on the existing clock even with focused controls, th
  f.scene.publish({dt:1/60,stage});assert(f.presentations.at(-1).cameraIntent.yawRad>original.yawRad);
  for(let i=0;i<30;i++)f.scene.publish({dt:1/60,stage});assert.equal(f.scene.inspect().camera.recovering,false);assert.equal(f.scene.publish({dt:0,stage}),false);
  f.scene.setReading({chapter:'context',progress:0},0);assert.equal(f.scene.publish({dt:0,stage}),false);assert.deepEqual(f.presentations.at(-1).cameraIntent,original,'Steady native scroll is not filtered');f.scene.dispose();
+});
+
+test('compositor handheld retains pause, returns focus finitely, reserves controls before acquisition, and presents intent before sizing',async()=>{
+ const f=fixture({externalStage:true,camera:true});assert.equal(f.host.getAttribute('data-project-model-controls-layout'),'reserved');await flush();assert.deepEqual(f.calls.slice(0,2),['present','resize']);f.policy.siteReady=true;
+ const stage={kind:'model',chapter:'context',mode:'hold',settled:true,pose:{opacity:1},history:[]};f.root.dataset.projectActiveChapter='context';f.scene.setReading({chapter:'context',progress:.4},2);f.scene.publish({dt:0,stage});
+ const intent=f.presentations.at(-1).cameraIntent,handheld=f.presentations.at(-1).handheld;assert(handheld.xPx>0);
+ f.policy.paused=true;f.scene.setReading({chapter:'context',progress:.4},20);assert.equal(f.scene.publish({dt:.1,stage}),false);assert.deepEqual(f.presentations.at(-1).handheld,handheld);
+ f.policy.paused=false;f.doc.activeElement={closest:()=>true};f.scene.setReading({chapter:'context',progress:.4},2);
+ f.scene.publish({dt:1/60,stage});assert(f.presentations.at(-1).handheld.xPx>0);assert(f.presentations.at(-1).handheld.xPx<handheld.xPx);
+ for(let i=0;i<30;i++)f.scene.publish({dt:1/60,stage});assert.equal(f.scene.publish({dt:0,stage}),false);assert.deepEqual(f.presentations.at(-1).handheld,{xPx:0,yPx:0,rollRad:0});assert.deepEqual(f.presentations.at(-1).cameraIntent,intent);
+ f.scene.dispose();assert.equal(f.host.getAttribute('data-project-model-controls-layout'),null);
+ const reduced=fixture({camera:true,reduced:true});assert.equal(reduced.host.getAttribute('data-project-model-controls-layout'),null);reduced.scene.dispose();
+});
+
+test('only usable model controls describe help; reserve survives pause but clears fallback/dispose',async()=>{
+ const f=fixture({externalStage:true,camera:true});await flush();assert.equal(f.modelUI.context.target.getAttribute('aria-describedby'),'context-state');f.policy.siteReady=true;f.root.dataset.projectActiveChapter='context';
+ const stage={kind:'model',chapter:'context',mode:'hold',settled:true,pose:{opacity:1},history:[]};f.scene.setReading({chapter:'context',progress:0},0);f.scene.publish({dt:0,stage});
+ assert.equal(f.modelUI.context.target.getAttribute('aria-describedby'),'context-state context-help');f.policy.paused=true;f.scene.publish({dt:0,stage});assert.equal(f.modelUI.context.target.getAttribute('aria-describedby'),'context-state');assert.equal(f.host.getAttribute('data-project-model-controls-layout'),'reserved');
+ f.fail('context-lost');assert.equal(f.host.getAttribute('data-project-model-controls-layout'),null);f.scene.dispose();assert.equal(f.modelUI.context.target.getAttribute('aria-describedby'),'context-state context-help');
 });

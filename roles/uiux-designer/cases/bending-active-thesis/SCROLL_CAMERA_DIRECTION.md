@@ -61,8 +61,8 @@ Source review found and corrected two continuity edges before browser validation
 same-model chapter joins return optional inspection through the existing finite
 damper; policy resume after scrolling uses a bounded 0.35-second correction driven
 by the existing frame delta. Ordinary native-scroll sampling has no added lag or
-clock. Pause still retains the full composed pose, including its idle/inspection
-contribution.
+clock. Pause retains both the composed inspection/camera pose and the separate idle
+canvas framing.
 
 The final local portable run reports 614 tests: 612 pass and two existing skips.
 The public build/audit passes with 259 output files and 137 approved assets. The
@@ -73,3 +73,54 @@ release gate. The new browser case records bounded RAF intervals and buffer
 allocations without treating software-browser observations as GPU time or field
 FPS. Its idle baseline waits for published help and measured reading geometry to
 agree before retaining strict no-scroll equality.
+
+
+## Generic idle performance correction (22 October 2026)
+
+The first browser candidate `472ef58`, CI [39725174008](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39725174008), was **not released**:
+405/423 browser executions passed and 18 failed. Continuous yaw/pitch idle made
+large original meshes redraw on every frame. One retained Entrance Chromium
+trace records nine RAF samples spanning 7,616.3 ms, with eight additional source
+draws/fits, unchanged 523,404 pixels and one allocation. This establishes a real
+software-CI throughput concern, not a GPU timer or physical-device FPS diagnosis.
+Other failures exposed normal-flow help/reset layout changes, an obsolete exact
+view-object assertion, and native context loss detected before its queued event.
+
+The corrected generic-only candidate separates two honest mechanisms:
+
+- **Genuine 3D:** native scroll and optional inspection still change the authored
+  camera, fit the verified eight-corner source support, and render original meshes.
+- **Idle framing:** the same Director active-seconds value supplies canvas-only
+  2D pan/roll (up to 0.8 px horizontally, 0.65 px vertically and 0.00065 radians).
+  This creates no parallax and is not claimed equivalent to a moving 3D camera.
+  Unchanged physical intent neither refits nor redraws WebGL. Bending's existing
+  handheld/source score is untouched; XR remains a separate adapter.
+
+The parent stage retains entry/exit ownership. Text/navigation are not transformed.
+Inverse hit mapping accounts for canvas pan/roll and existing parent translation/
+axis scale. Portable projection checks retain all five verified source boxes at
+1440, 390 and 320 px widths, authored endpoints and inspection extremes. No source
+cropping, decimation, larger pixel budget or new animation clock is introduced.
+Pause/hidden preserve framing; control focus returns the micro-layer to neutral
+finitely using existing frame delta; reduced/save-data retain native posters.
+
+Intrinsic help/reset space is reserved on eligible JS pages before lazy model
+acquisition, not after first draw; no-JS/static fallback keeps its native flow.
+Only usable controls reference inspection help. Initial authored intent is supplied
+before size to avoid a redundant legacy-camera first draw. Verified native context
+loss has the same terminal reason whether detected in render or its DOM event.
+
+Browser acceptance retains the original absolute native-scroll destination and
+geometry checks. At settled reading it now requires continuous canvas transform
+changes **and exact stable physical camera, draw and fit counts**, then exact Pause
+stability. Receipts include bounded RAF samples and CPU-side render-submission
+observations (not GPU time). Cross-engine videos, source framing, actual throughput
+and exact-artifact CI remain pending; portable tests alone do not approve release.
+
+Correction local checkpoint: 620 portable tests, 618 pass and two existing skips;
+public build/audit passes with the same 259 files and 137 approved assets. The
+browser inventory remains all 423 executions across 27 files, with no dropped
+scenarios or increased timeouts. Actual replacement CI/visual acceptance is pending.
+The local `pnpm check` wrapper could not start the `tsx` IPC listener (`EPERM`).
+The same validators, lint, typecheck, nine framework tests and build/audit passed
+through `node --import tsx`; the CI workflow and its original gates are unchanged.

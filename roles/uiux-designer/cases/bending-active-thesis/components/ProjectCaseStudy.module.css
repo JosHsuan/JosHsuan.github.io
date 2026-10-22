@@ -48,6 +48,11 @@
 .motionControls button,.sourceAction{min-height:44px;padding:.55rem .8rem;border:1px solid var(--material-reading-border);border-radius:10px;background:var(--material-inner-fill);color:var(--glass-control-accent);font:inherit;font-size:var(--type-size-control);line-height:var(--type-leading-control);letter-spacing:var(--type-tracking-control);cursor:pointer}
 .sourceAction{margin:.2rem 0 .9rem}.motionControls button:hover,.sourceAction:hover{background:var(--material-inner-hover)}
 .motionControls button[hidden],.sourceAction[hidden],.modelHelp[hidden]{display:none}
+/* Reserve intrinsic instruction/control space as soon as enhancement is eligible,
+   before lazy model acquisition or the first native scroll. Hidden controls remain
+   invisible and unfocusable; static/native fallback keeps its compact flow. */
+.page:has(:global([data-project-model-controls-layout=reserved])) .modelHelp[hidden]{display:block;visibility:hidden;pointer-events:none}
+.page:has(:global([data-project-model-controls-layout=reserved])) .sourceAction[hidden]{display:inline-block;visibility:hidden;pointer-events:none}
 .sourcePanel>.motionStatus:empty{display:none}.sourcePanel>.motionStatus{margin-top:.75rem;margin-bottom:0}
 
 .panel{grid-column:1/6;grid-row:1;position:relative;z-index:2;min-width:0;width:100%;max-width:35rem;padding:clamp(1.5rem,2.6vw,2.8rem);border:1px solid var(--material-reading-border);border-radius:24px;overflow:visible}

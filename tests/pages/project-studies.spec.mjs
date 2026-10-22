@@ -335,7 +335,8 @@ test('the original Dot source supports native drag and keyboard inspection, retu
  await page.keyboard.press('Tab');await expect(reset).toBeFocused();
  expect((await facts(page)).camera.target.azimuth).toBeCloseTo(.12,8);expect((await facts(page)).camera.value.azimuth).toBeGreaterThan(.01);
  await reset.press('Enter');await expect.poll(()=>inspection(page),{timeout:WAIT}).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});
- await expect.poll(async()=>(await facts(page)).resource.view).toEqual({chapter,azimuth:0,elevation:0});await expect(state).toHaveAttribute('data-project-model-availability','ready');await expect(reset).toBeHidden();
+ await expect.poll(async()=>{const {chapter:current,azimuth,elevation}= (await facts(page)).resource.view;return{chapter:current,azimuth,elevation};}).toEqual({chapter,azimuth:0,elevation:0});
+ const returned=await facts(page);expect(returned.resource.view.cameraIntent).toEqual(returned.camera.intent);await expect(state).toHaveAttribute('data-project-model-availability','ready');await expect(reset).toBeHidden();
  await modelChapter(page,dot);await control.evaluate(node=>node.focus({preventScroll:true}));await control.press('ArrowLeft');
  await expect.poll(async()=>(await facts(page)).camera.value.azimuth,{timeout:WAIT}).toBeGreaterThan(.01);await control.press('Escape');
  await expect.poll(()=>inspection(page)).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});
