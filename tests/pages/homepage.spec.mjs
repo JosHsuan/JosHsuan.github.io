@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-import {readFile} from 'node:fs/promises';
+import {readFile,writeFile} from 'node:fs/promises';
 import {WAIT,frames,scenarioTimeout} from './case-helpers.mjs';
 
 const xrWorkspace=JSON.parse(await readFile(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/xr-workspace.json',import.meta.url),'utf8'));
@@ -44,7 +44,7 @@ test('all portfolio categories and selected projects have direct readable no-Jav
  }finally{await context.close();}
 });
 
-test('Home keeps its introduction model-free and enters with its live project card already prepared',async({page,isMobile})=>{
+test('Home keeps its introduction model-free and enters with its live project card already prepared',async({page,isMobile},info)=>{
  const modelRequests=[],errors=[];
  page.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)/.test(request.url()))modelRequests.push(request.url());});
  page.on('pageerror',error=>errors.push(error.message));
@@ -69,8 +69,35 @@ test('Home keeps its introduction model-free and enters with its live project ca
  const geometry=await page.locator('[data-project-grid]').evaluate(element=>{const css=getComputedStyle(element);return{columns:css.gridTemplateColumns.split(' ').length,rows:css.gridTemplateRows.split(' ').length};});
  expect(geometry.columns).toBe(isMobile?1:3);if(!isMobile)expect(geometry.rows).toBe(3);
  await expect(page.locator('[data-project-card]')).toHaveCount(cardCount);
- const cards=await page.locator('[data-project-tile]').evaluateAll(tiles=>tiles.map(tile=>{const image=tile.querySelector('img');const rect=tile.getBoundingClientRect();return{loaded:image.complete&&image.naturalWidth>0,alt:image.alt,square:Math.abs(rect.width-rect.height)<1};}));
- expect(cards.every(card=>card.loaded&&card.alt.length>15&&card.square)).toBe(true);
+ // During native scrolling a square layout intentionally has a non-square
+ // perspective AABB. Preserve immediate source readiness, then verify that
+ // the existing finite motion returns the original square projected surface.
+ const measureCards=()=>page.locator('[data-project-tile]').evaluateAll(tiles=>tiles.map(tile=>{
+  const image=tile.querySelector('img'),css=getComputedStyle(tile),rect=tile.getBoundingClientRect();
+  const add=keys=>keys.reduce((sum,key)=>sum+parseFloat(css[key]),0);
+  const borderWidth=parseFloat(css.width)+(css.boxSizing==='border-box'?0:add(['paddingLeft','paddingRight','borderLeftWidth','borderRightWidth']));
+  const borderHeight=parseFloat(css.height)+(css.boxSizing==='border-box'?0:add(['paddingTop','paddingBottom','borderTopWidth','borderBottomWidth']));
+  return{id:tile.dataset.projectTile,loaded:image.complete&&image.naturalWidth>0,alt:image.alt,
+   boxSizing:css.boxSizing,borderWidth,borderHeight,offsetWidth:tile.offsetWidth,offsetHeight:tile.offsetHeight,
+   projectedWidth:rect.width,projectedHeight:rect.height,transform:css.transform,moving:tile.dataset.informationMoving,
+   plane:tile.hasAttribute('data-information-plane'),rx:tile.style.getPropertyValue('--information-rx'),ry:tile.style.getPropertyValue('--information-ry')};
+ }));
+ const geometryReceipt={immediate:await measureCards()};let geometryError;
+ try{
+  expect(geometryReceipt.immediate.every(card=>card.loaded&&card.alt.length>15&&Number.isFinite(card.borderWidth+card.borderHeight)&&card.borderWidth>0&&card.borderHeight>0&&Math.abs(card.borderWidth-card.borderHeight)<1)).toBe(true);
+  await page.waitForFunction(()=>{
+   const cards=[...document.querySelectorAll('[data-project-tile]')];
+   return window.__globalBackground?.inspect().driver.homeScrolling.informationWindows.settled&&cards.length>0&&cards.every(card=>{
+    const transform=getComputedStyle(card).transform;
+    return card.dataset.informationMoving==='false'&&new DOMMatrix(transform==='none'?undefined:transform).isIdentity;
+   });
+  },null,{timeout:WAIT});
+  geometryReceipt.rest=await measureCards();
+  expect(geometryReceipt.rest.every(card=>card.loaded&&card.alt.length>15&&Math.abs(card.projectedWidth-card.projectedHeight)<1)).toBe(true);
+ }catch(error){geometryError=error;throw error;}finally{
+  try{const path=info.outputPath('home-card-square-geometry.json');await writeFile(path,JSON.stringify(geometryReceipt,null,2));await info.attach('home-card-square-geometry',{path,contentType:'application/json'});}
+  catch(error){if(!geometryError)throw error;}
+ }
  expect(errors).toEqual([]);
 });
 
