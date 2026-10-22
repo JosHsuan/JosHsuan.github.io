@@ -57,9 +57,37 @@ async function inspectPlates(page,definition,info,{noJS=false}={}){
    expect(geometry.x).toBeGreaterThanOrEqual(0);expect(geometry.x+geometry.width).toBeLessThanOrEqual(geometry.viewportWidth);
    expect(geometry.fit).toBe('contain');expect(geometry.opacity).toBe('1');expect(geometry.clip).toBe('none');
    await caption.scrollIntoViewIfNeeded();await expect(caption).toBeVisible();
-   const text=await caption.evaluate(node=>({width:node.clientWidth,scrollWidth:node.scrollWidth,height:node.clientHeight,scrollHeight:node.scrollHeight,text:node.innerText}));
+   const text=await caption.evaluate(node=>{
+    const rect=element=>{const r=element.getBoundingClientRect();return{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height};};
+    const css=getComputedStyle(node),box=rect(node);
+    const content={left:box.left+parseFloat(css.borderLeftWidth)+parseFloat(css.paddingLeft),right:box.right-parseFloat(css.borderRightWidth)-parseFloat(css.paddingRight),top:box.top+parseFloat(css.borderTopWidth)+parseFloat(css.paddingTop),bottom:box.bottom-parseFloat(css.borderBottomWidth)-parseFloat(css.paddingBottom)};
+    const runs=[...node.querySelectorAll(':scope > p,:scope > span:not([data-information-skin])')].map(element=>{
+     const range=document.createRange();range.selectNodeContents(element);
+     return{text:element.textContent.trim(),width:element.clientWidth,scrollWidth:element.scrollWidth,height:element.clientHeight,scrollHeight:element.scrollHeight,box:rect(element),lines:[...range.getClientRects()].filter(r=>r.width>0&&r.height>0).map(r=>({left:r.left,right:r.right,top:r.top,bottom:r.bottom}))};
+    });
+    const skin=node.querySelector(':scope > [data-information-skin]');let decoration=null;
+    if(skin){
+     const style=getComputedStyle(skin),before=getComputedStyle(skin,'::before');
+     decoration={visible:skin.checkVisibility({visibilityProperty:true,opacityProperty:true}),ariaHidden:skin.getAttribute('aria-hidden'),text:skin.textContent.trim(),children:skin.childElementCount,pointerEvents:style.pointerEvents,clip:style.clipPath,box:rect(skin),display:style.display,before:{inset:before.inset,top:before.top,right:before.right,bottom:before.bottom,left:before.left,width:before.width,height:before.height,clip:before.clipPath,content:before.content,pointerEvents:before.pointerEvents}};
+    }
+    return{width:node.clientWidth,scrollWidth:node.scrollWidth,height:node.clientHeight,scrollHeight:node.scrollHeight,text:node.innerText,box,content,runs,decoration};
+   });
    receipt.plates.at(-1).captionGeometry=text;
-   expect(text.scrollWidth).toBeLessThanOrEqual(text.width+1);expect(text.scrollHeight).toBeLessThanOrEqual(text.height+1);
+   expect(text.runs.map(run=>run.text)).toEqual([source.caption,source.credit]);
+   for(const run of text.runs){
+    expect(run.text.length).toBeGreaterThan(0);expect(run.lines.length).toBeGreaterThan(0);
+    expect(run.scrollWidth).toBeLessThanOrEqual(run.width+1);expect(run.scrollHeight).toBeLessThanOrEqual(run.height+1);
+    for(const line of run.lines)for(const container of [run.box,text.content]){
+     expect(line.left).toBeGreaterThanOrEqual(container.left-1);expect(line.right).toBeLessThanOrEqual(container.right+1);
+     expect(line.top).toBeGreaterThanOrEqual(container.top-1);expect(line.bottom).toBeLessThanOrEqual(container.bottom+1);
+    }
+   }
+   expect(text.decoration).not.toBeNull();
+   if(text.decoration.visible){
+    expect(text.decoration.ariaHidden).toBe('true');expect(text.decoration.text).toBe('');expect(text.decoration.children).toBe(0);
+    expect(text.decoration.pointerEvents).toBe('none');expect(text.decoration.before.pointerEvents).toBe('none');
+    expect(text.decoration.clip).not.toBe('none');
+   }else expect(noJS).toBe(true);
    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth)).toBe(true);
    // Full element capture preserves the complete source, not a fabricated crop.
    // A tall technical plate can exceed the native viewport; this does not claim

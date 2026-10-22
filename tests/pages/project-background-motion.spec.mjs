@@ -42,6 +42,40 @@ async function hold(page,key){
  },key,{timeout:WAIT});
  return backdrop(page);
 }
+// Semantic chapters can intentionally reuse one image source. The backdrop
+// owns one physical figure per source key, not one painted copy per chapter.
+async function heldImageOwnership(page,project,chapter){
+ const expected=chapter==='overview'?project.hero:project.sections.find(section=>section.id===chapter).media[0];
+ const receipt=await page.evaluate(()=>{
+  const root=document.querySelector('[data-project-study]');
+  const stage=window.__globalBackground.inspect().driver.projectStudy.backdrop.stage;
+  const active=[...document.querySelectorAll('[data-project-media][data-project-media-active]')];
+  const owners=active.slice(0,2).map(figure=>{
+   const images=[...figure.querySelectorAll('[data-project-media-poster]')],image=images[0];
+   const css=getComputedStyle(figure),imageCSS=image?getComputedStyle(image):null,box=image?.getBoundingClientRect();
+   return {chapter:figure.dataset.projectMedia,imageCount:images.length,src:image?.getAttribute('src'),currentSrc:image?.currentSrc,
+    complete:image?.complete,naturalWidth:image?.naturalWidth,naturalHeight:image?.naturalHeight,
+    opacity:css.opacity,display:css.display,visibility:css.visibility,imageOpacity:imageCSS?.opacity,imageDisplay:imageCSS?.display,imageVisibility:imageCSS?.visibility,
+    box:box?{x:box.x,y:box.y,width:box.width,height:box.height}:null};
+  });
+  return {semanticChapter:root.dataset.projectActiveChapter,presentedSource:root.dataset.projectPresentedSource,
+   stage:{key:stage.key,chapter:stage.chapter,mode:stage.mode,settled:stage.settled,pose:stage.pose,sequence:stage.sequence},
+   activeCount:active.length,owners,viewport:{width:innerWidth,height:innerHeight}};
+ });
+ expect(receipt.semanticChapter).toBe(chapter);expect(receipt.presentedSource).toBe(imageKey(project,chapter));
+ expect(receipt.stage).toMatchObject({key:imageKey(project,chapter),mode:'hold',settled:true,pose:{x:0,y:0,opacity:1}});
+ expect(receipt.activeCount).toBe(1);const owner=receipt.owners[0];
+ expect(owner.chapter).toBe(receipt.stage.chapter);expect(owner.imageCount).toBe(1);
+ expect(owner.src).toBe(expected.src);expect(new URL(owner.currentSrc).pathname).toBe(expected.src);
+ expect(owner.complete).toBe(true);expect(owner.naturalWidth).toBe(expected.width);expect(owner.naturalHeight).toBe(expected.height);
+ expect(owner.opacity).toBe('1');expect(owner.imageOpacity).toBe('1');
+ expect(owner.display).not.toBe('none');expect(owner.imageDisplay).not.toBe('none');
+ expect(owner.visibility).toBe('visible');expect(owner.imageVisibility).toBe('visible');
+ expect(owner.box.width).toBeGreaterThan(0);expect(owner.box.height).toBeGreaterThan(0);
+ expect(owner.box.x).toBeLessThan(receipt.viewport.width);expect(owner.box.x+owner.box.width).toBeGreaterThan(0);
+ expect(owner.box.y).toBeLessThan(receipt.viewport.height);expect(owner.box.y+owner.box.height).toBeGreaterThan(0);
+ return receipt;
+}
 // Failure-only evidence; never retries, seeks, resumes or polls the source.
 async function attachNativeMediaFailure(page,media,phase,initialTime=null){
  try{
@@ -148,17 +182,17 @@ test('Caschlatsch portfolio photographs and plates use actual finite forward/rev
  const forward=tracePassage(page,imageKey(caschlatsch,'context'));await select(page,'context');actualPassage(await forward,1);
  const reverse=tracePassage(page,imageKey(caschlatsch,'overview'));await select(page,'overview');actualPassage(await reverse,-1);
  await select(page,'system');const system=await hold(page,imageKey(caschlatsch,'system'));
- // The owner replaced the repeated conceptual workflow with two distinct
- // original portfolio plates. Changing their identity must perform the real
- // finite source passage; same-model continuity is covered by model cases.
+ // These chapters use distinct original photographs while their complete
+ // technical plates remain foreground evidence. Reused photographs share a
+ // physical source owner; changing source still requires a finite passage.
  const xrKey=imageKey(caschlatsch,'xr-guidance');expect(xrKey).not.toBe(system.stage.key);
  const toXR=tracePassage(page,xrKey);await select(page,'xr-guidance');const xrPassage=await toXR;actualPassage(xrPassage,1);
- await expect(page.locator('[data-project-media="xr-guidance"][data-project-media-active] [data-project-media-poster]')).toHaveAttribute('src',caschlatsch.sections.find(section=>section.id==='xr-guidance').media[0].src);
+ const xrOwnership=await heldImageOwnership(page,caschlatsch,'xr-guidance');
  expect(xrPassage.stage.sequence).toBeGreaterThan(system.stage.sequence);
  const toSystem=tracePassage(page,imageKey(caschlatsch,'system'));await select(page,'system');const systemPassage=await toSystem;actualPassage(systemPassage,-1);
- await expect(page.locator('[data-project-media="system"][data-project-media-active] [data-project-media-poster]')).toHaveAttribute('src',caschlatsch.sections.find(section=>section.id==='system').media[0].src);
+ const systemOwnership=await heldImageOwnership(page,caschlatsch,'system');
  expect(systemPassage.stage.sequence).toBeGreaterThan(xrPassage.stage.sequence);
- await test.info().attach('Caschlatsch-original-portfolio-source-passages',{body:JSON.stringify({systemKey:system.stage.key,xrKey,xrPassage,systemPassage}),contentType:'application/json'});
+ await test.info().attach('Caschlatsch-original-portfolio-source-passages',{body:JSON.stringify({systemKey:system.stage.key,xrKey,xrPassage,systemPassage,ownership:[xrOwnership,systemOwnership]}),contentType:'application/json'});
  await select(page,'context');
  await page.waitForFunction(()=>{const stage=window.__globalBackground.inspect().driver.projectStudy.backdrop.stage;return stage.mode==='exit'&&stage.pose.opacity>0&&stage.pose.opacity<1;},null,{timeout:WAIT});
  const superseded=(await backdrop(page)).stage.request.id;
