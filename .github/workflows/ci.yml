@@ -1,6 +1,7 @@
 name: Validate static export
 on:
   push:
+    branches-ignore: ['preflight/**']
   pull_request:
   workflow_dispatch:
     inputs:
@@ -124,7 +125,17 @@ jobs:
           restore-keys: ${{ runner.os }}-pages-${{ hashFiles('pnpm-lock.yaml') }}-
       - name: Build and audit the complete public export once
         run: pnpm build:pages
+      - uses: actions/download-artifact@v4
+        with:
+          name: validation-plan
       - run: node scripts/ci-artifact.mjs record
+      - name: Enumerate exact candidate browser inventory
+        run: node scripts/ci-inventory.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pages-test-inventory
+          path: ci-inventory.json
+          retention-days: 14
       - uses: actions/upload-artifact@v4
         with:
           name: static-export-pages
@@ -165,10 +176,20 @@ jobs:
         with:
           name: static-export-pages
           path: .pages-workspace/out
+      - uses: actions/download-artifact@v4
+        with:
+          name: pages-test-inventory
       - name: Verify exact shared output before browser checks
         run: node scripts/ci-artifact.mjs check-build
       - run: pnpm exec playwright install --with-deps ${{ matrix.engine }}
       - run: node scripts/ci-run-pages.mjs ${{ matrix.browser }} ${{ matrix.shard }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pages-receipt-${{ matrix.browser }}-${{ strategy.job-index }}
+          path: ci-receipt-*.json
+          if-no-files-found: error
+          retention-days: 14
       - name: Ensure tests left the public output unchanged
         run: node scripts/ci-artifact.mjs check-build
       - uses: actions/upload-artifact@v4
@@ -195,6 +216,16 @@ jobs:
         if: needs.plan.outputs.pages == 'true'
         with:
           name: pages-build-record
+      - uses: actions/download-artifact@v4
+        if: needs.plan.outputs.pages == 'true'
+        with:
+          name: pages-test-inventory
+      - uses: actions/download-artifact@v4
+        if: needs.plan.outputs.pages == 'true'
+        with:
+          pattern: pages-receipt-*
+          path: ci-receipts
+          merge-multiple: true
       - name: Require every selected job, reject unexpected skips
         env:
           CI_JOB_RESULTS: ${{ toJSON(needs) }}

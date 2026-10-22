@@ -1,0 +1,58 @@
+name: Targeted candidate preflight (not publishable)
+on:
+  workflow_dispatch:
+    inputs:
+      tests:
+        description: Exact tests/pages/*.spec.mjs paths, separated by spaces or commas
+        type: string
+        required: true
+      browser:
+        description: Browser profile for targeted feedback only
+        type: choice
+        required: true
+        options:
+          - chromium
+          - webkit
+          - mobile-chromium
+permissions:
+  contents: read
+concurrency:
+  group: preflight-${{ github.ref }}-${{ inputs.browser }}
+  cancel-in-progress: true
+env:
+  NEXT_TELEMETRY_DISABLED: '1'
+  PREFLIGHT_TESTS: ${{ inputs.tests }}
+  PREFLIGHT_BROWSER: ${{ inputs.browser }}
+jobs:
+  targeted-feedback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+      - name: Validate reserved candidate ref, exact checkout and selected files
+        id: plan
+        run: node scripts/ci-preflight.mjs plan
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:pages
+      - run: pnpm exec playwright install --with-deps ${{ steps.plan.outputs.engine }}
+      - name: Run selected tests (cannot satisfy release acceptance)
+        run: node scripts/ci-preflight.mjs run
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: preflight-${{ github.run_id }}-${{ inputs.browser }}
+          path: |
+            preflight-results/
+            pages-test-results/
+          retention-days: 7

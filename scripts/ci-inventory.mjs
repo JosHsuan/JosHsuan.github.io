@@ -1,0 +1,10 @@
+import {readFile,writeFile} from 'node:fs/promises';
+import {spawnSync} from 'node:child_process';
+const plan=JSON.parse(await readFile('ci-plan.json','utf8'));
+const build=JSON.parse(await readFile('ci-build.json','utf8'));
+if(plan.head!==process.env.GITHUB_SHA || build.commit!==plan.head) throw Error('Inventory provenance mismatch');
+const result=spawnSync(process.execPath,['node_modules/@playwright/test/cli.js','test','--config','playwright.pages.config.mjs','--list','--reporter','./scripts/ci-receipt-reporter.mjs',...plan.browserTests],{stdio:'inherit',env:{...process.env,CI_RECEIPT_OUTPUT:'ci-inventory-list.json'}});
+if(result.error || result.status!==0) throw Error('Cannot enumerate candidate tests');
+const listed=JSON.parse(await readFile('ci-inventory-list.json','utf8'));
+if(!listed.tests.length || new Set(listed.tests.map(t=>t.id)).size!==listed.tests.length) throw Error('Invalid inventory');
+await writeFile('ci-inventory.json',JSON.stringify({version:1,commit:plan.head,runId:process.env.GITHUB_RUN_ID,runAttempt:process.env.GITHUB_RUN_ATTEMPT,digest:build.digest,tests:listed.tests},null,2)+'\n');

@@ -1,3 +1,4 @@
+import {shardFiles} from '../../scripts/ci-shards.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {mkdtemp, writeFile, mkdir, rm, readFile, readdir, symlink} from 'node:fs/promises';
@@ -73,13 +74,25 @@ test('workflow CLI passes real plan/build records through the gate and rejects s
     await writeFile(path.join(out, 'index.html'), 'public');
     const jobs = Object.fromEntries(['plan', 'quality', 'framework', 'pages-build', 'pages-browser'].map(name => [name, {result: 'success'}]));
     const env = {...process.env, GITHUB_SHA: sha, CI_FORCE_FULL: 'true', CI_BASE_SHA: '', GITHUB_EVENT_PATH: '',
-      GITHUB_EVENT_NAME: 'push', GITHUB_REF_NAME: 'main', CI_DEFAULT_BRANCH: 'main', GITHUB_RUN_ID: '42',
+      GITHUB_EVENT_NAME: 'push', GITHUB_REF_NAME: 'main', CI_DEFAULT_BRANCH: 'main', GITHUB_RUN_ID: '42', GITHUB_RUN_ATTEMPT: '1',
       CI_JOB_RESULTS: JSON.stringify(jobs), GITHUB_OUTPUT: '', GITHUB_STEP_SUMMARY: '',
       EXPECTED_SHA: sha, RUN_ID: '42', EXPECTED_BRANCH: 'main'};
     const run = (name, args = [], override = {}) => spawnSync(process.execPath,
       [fileURLToPath(new URL(`../../scripts/${name}.mjs`, import.meta.url)), ...args],
       {cwd: folder, env: {...env, ...override}, encoding: 'utf8'});
     for (const [name, args] of [['ci-plan', []], ['ci-artifact', ['record', out]], ['ci-gate', []], ['ci-artifact', ['verify', out]]]) {
+      if(name==='ci-gate') {
+        const plan=JSON.parse(await readFile(path.join(folder,'ci-plan.json'),'utf8'));
+        const build=JSON.parse(await readFile(path.join(folder,'ci-build.json'),'utf8'));
+        const provenance={version:1,commit:sha,runId:'42',runAttempt:'1',digest:build.digest};
+        const tests=['chromium','webkit','mobile-chromium'].flatMap(browser=>plan.browserTests.map(file=>({id:`${browser}:${file}`,browser,file,title:[file],expectedStatus:'passed'})));
+        await writeFile(path.join(folder,'ci-inventory.json'),JSON.stringify({...provenance,tests}));
+        await mkdir(path.join(folder,'ci-receipts'));
+        for(const {browser,shard} of plan.browserMatrix) {
+          const files=shardFiles(plan,browser,shard), selected=tests.filter(t=>t.browser===browser && files.includes(t.file));
+          await writeFile(path.join(folder,'ci-receipts',`${browser}-${shard.replace('/','-')}.json`),JSON.stringify({...provenance,browser,shard,files,tests:selected,status:'passed',results:selected.map(t=>({id:t.id,status:'passed',expectedStatus:'passed',retry:0,duration:1}))}));
+        }
+      }
       const result = run(name, args); assert.equal(result.status, 0, result.stderr);
     }
     const record = () => readFile(path.join(folder, 'ci-validation.json'), 'utf8').then(JSON.parse);
