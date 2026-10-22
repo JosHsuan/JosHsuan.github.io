@@ -2,6 +2,10 @@ name: Targeted candidate preflight (not publishable)
 on:
   workflow_dispatch:
     inputs:
+      qualify_image:
+        description: Opt in to isolated official-image qualification (not release acceptance)
+        type: boolean
+        default: false
       tests:
         description: Exact tests/pages/*.spec.mjs paths, separated by spaces or commas
         type: string
@@ -25,6 +29,7 @@ env:
   PREFLIGHT_BROWSER: ${{ inputs.browser }}
 jobs:
   targeted-feedback:
+    if: ${{ !inputs.qualify_image }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -59,6 +64,65 @@ jobs:
         if: always()
         with:
           name: preflight-${{ github.run_id }}-${{ inputs.browser }}
+          path: |
+            preflight-results/
+            pages-test-results/
+          retention-days: 7
+
+  image-qualification:
+    if: ${{ inputs.qualify_image }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    container:
+      image: mcr.microsoft.com/playwright@sha256:bc6ab0d6d44ff4826e4cb8c1e6d801e185bfc42bb0753f8e2a30efc70db054c7
+      options: --user pwuser --shm-size=1g
+    env:
+      CI_QUALIFICATION_IMAGE: mcr.microsoft.com/playwright@sha256:bc6ab0d6d44ff4826e4cb8c1e6d801e185bfc42bb0753f8e2a30efc70db054c7
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+    steps:
+      - name: Require nonroot identity and writable runner mounts
+        shell: bash
+        run: |
+          set -euo pipefail
+          id
+          test "$(id -u)" -ne 0
+          test "$(id -un)" = pwuser
+          for directory in "$GITHUB_WORKSPACE" "$HOME" "$RUNNER_TEMP" "$RUNNER_TOOL_CACHE"; do
+            printf 'Checking writable directory: %s\n' "$directory"
+            test -d "$directory"
+            test -w "$directory"
+          done
+          printf 'Checking writable environment file: %s\n' "$GITHUB_ENV"
+          test -w "$GITHUB_ENV"
+          printf 'Checking writable path file: %s\n' "$GITHUB_PATH"
+          test -w "$GITHUB_PATH"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+      - name: Validate reserved candidate ref and exact checkout
+        run: node scripts/ci-preflight.mjs plan
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Validate pinned preflight CLI selection
+        run: node --test tests/ci/preflight.test.mjs tests/ci/image-qualification.test.mjs
+      - name: Record and verify pinned image runtime fingerprint
+        run: node scripts/ci-image-fingerprint.mjs
+      - run: pnpm build:pages
+      - name: Qualify selected tests without changing browser launch configuration
+        run: node scripts/ci-preflight.mjs run
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: preflight-image-${{ github.run_id }}-${{ inputs.browser }}
           path: |
             preflight-results/
             pages-test-results/
