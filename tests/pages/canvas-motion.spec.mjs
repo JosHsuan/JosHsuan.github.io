@@ -141,9 +141,22 @@ test('with OS Reduced, a real visible source hit still compares geometry through
  await test.info().attach('outside-slot-native-hit-search',{body:JSON.stringify({range,rays,attempts}),contentType:'application/json'});
   expect(point,'The narrow chapter hold must expose an unobscured real source hit through the transparent UI.').not.toBeNull();
  const last=attempts.at(-1);expect(last).toMatchObject({chapter:'system',mode:'hold',presented:true});
- // The real touch-enabled aperture now receives pointer input. It must still
- // resolve the actual source mesh before a comparison is allowed.
- expect(await page.evaluate(p=>{const viewport=document.elementFromPoint(p.x,p.y).closest('[data-model-viewport]'),hit=window.__thesis.hitTest(p.x,p.y);return{active:viewport?.closest('[data-model-study]')?.dataset.modelActive,disabled:viewport?.getAttribute('aria-disabled'),source:hit?.source,chapter:hit?.chapterId};},point)).toEqual({active:'true',disabled:'false',source:true,chapter:'system'});
+ // Native information slots can be the transparent DOM target above the real
+ // source. Production delegates that hit to its registered chapter surface;
+ // the fixed overlay still requires the original viewport ancestry.
+ const ownership=await page.evaluate(p=>{
+  const target=document.elementFromPoint(p.x,p.y),hit=window.__thesis.hitTest(p.x,p.y);
+  const chapter=hit?.chapterId,selector=`[data-study-chapter="${CSS.escape(chapter??'')}"]`;
+  const surface=document.querySelector('[data-model-viewport]'+selector),viewport=target?.closest('[data-model-viewport]');
+  const label=document.querySelector('[data-model-side-label]'+selector),native=label?.dataset.modelLabelPlacement==='native';
+  const host=target?.closest('[data-model-information-host],[data-model-study-host]');
+  const nativeChapter=host?.dataset.modelInformationHost??host?.dataset.modelStudyHost;
+  const ancestors=[];for(let node=target;node&&ancestors.length<8;node=node.parentElement)ancestors.push({tag:node.tagName,chapter:node.dataset.studyChapter??null,informationHost:node.dataset.modelInformationHost??null,studyHost:node.dataset.modelStudyHost??null,viewport:node.hasAttribute('data-model-viewport')});
+  return{native,nativeChapter:nativeChapter??null,targetPresent:!!target,ownsPoint:!!surface&&(native||viewport===surface),protected:!!target?.closest('button,a,select,input,summary,[data-protect],[data-feedback-plane]'),target:target?.tagName??null,ancestors,
+   active:surface?.closest('[data-model-study]')?.dataset.modelActive,disabled:surface?.getAttribute('aria-disabled'),source:hit?.source,chapter};
+ },point);
+ await test.info().attach('reduced-source-hit-ownership',{body:JSON.stringify({point,ownership}),contentType:'application/json'});
+ expect(ownership).toMatchObject({targetPresent:true,ownsPoint:true,protected:false,active:'true',disabled:'false',source:true,chapter:'system'});
  const resources=()=>page.evaluate(()=>{const scene=window.__thesis.inspect(),canvas=document.querySelector('[data-cinematic-stage] canvas');return {id:scene.representation.id,index:scene.representation.index,source:scene.source,diagrams:scene.diagramSource,budget:scene.renderBudget,initialization:scene.initialization,native:[canvas.width,canvas.height],writes:window.__stageStorageWrites(canvas),docY:scrollY};});
  const before=await resources();await page.mouse.click(point.x,point.y);await settle(page);const after=await resources();
  expect(after.id).not.toBe(before.id);expect(after.index).toBe((before.index+1)%4);

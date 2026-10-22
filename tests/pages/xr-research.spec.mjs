@@ -40,7 +40,7 @@ async function observePhoneLifecycle(page){
 test.afterEach(async({page},info)=>{
  const receipt=phoneDiagnostics.get(page);if(!receipt)return;
  receipt.dispose();phoneDiagnostics.delete(page);
- await info.attach('xr-phone-lifecycle',{body:JSON.stringify(receipt.entries,null,2),contentType:'application/json'});
+ try{await info.attach('xr-phone-lifecycle',{body:JSON.stringify(receipt.entries,null,2),contentType:'application/json'});}catch{/* Diagnostic attachment cannot replace the original test outcome. */}
 });
 async function openingVisible(page){
  await expect(stage(page)).toHaveAttribute('data-xr-opening','true');
@@ -331,9 +331,10 @@ test('native scrolling selects all three complete recordings in the same scene a
 });
 
 test('a genuinely delayed recording preserves its paused native frame through a pending reverse and atomic replacement',async({page})=>{
+ await observePhoneLifecycle(page);
  let release;const held=new Promise(resolve=>{release=resolve;});let waiting=false;
  await page.route('**/assets/xr/assemble-interface.mp4',async route=>{waiting=true;await held;await route.continue();});
- let continuity;
+ let continuity,primaryError;
  const nativeFrame=()=>video(page,'adapt').evaluate(async node=>{
   if(node.readyState<2||!node.videoWidth||!node.videoHeight)throw Error('Retained native frame is unavailable');
   const sample=document.createElement('canvas');sample.width=node.videoWidth;sample.height=node.videoHeight;
@@ -387,9 +388,16 @@ test('a genuinely delayed recording preserves its paused native frame through a 
   const samples=await continuity.evaluate(value=>value.samples);expect(samples.some(sample=>sample.chapter==='assemble')).toBe(true);
   for(const sample of samples){expect(sample).toMatchObject({opacity:1,cssOpacity:1,painted:true,phoneCalls:2});expect(['entry','exit']).not.toContain(sample.mode);}
   await test.info().attach('continuous-pending-reverse-phone',{body:JSON.stringify(samples),contentType:'application/json'});
- }finally{
-  try{if(continuity){try{await continuity.evaluate(value=>value.dispose());}finally{await continuity.dispose();}}}
-  finally{release();await page.unrouteAll({behavior:'wait'});}
+ }catch(error){primaryError=error;throw error;}
+ finally{
+  try{
+   try{if(continuity){try{await continuity.evaluate(value=>value.dispose());}finally{await continuity.dispose();}}}
+   finally{release();await page.unrouteAll({behavior:'wait'});}
+  }catch(cleanupError){
+   // A closed/unresponsive page must not replace the failed readiness or
+   // transaction assertion. Cleanup failures still fail an otherwise passed test.
+   if(!primaryError)throw cleanupError;
+  }
  }
 });
 

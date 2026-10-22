@@ -22,7 +22,7 @@ test('published story, canonical metadata and every linked asset work without Ja
   await context.close();
 });
 
-test('public model initializes in Full and preserves chapter navigation without quality or pause controls', async ({page,isMobile}) => {
+test('public model initializes in Full and preserves chapter navigation without quality controls and with accessible motion pause', async ({page,isMobile}) => {
   test.setTimeout(scenarioTimeout(120000));
   const errors=[]; page.on('pageerror', error=>errors.push(error.message));
   // Exercise the visitor's real entry once in the public release baseline.
@@ -49,7 +49,8 @@ test('public model initializes in Full and preserves chapter navigation without 
   expect(initial.compositor.requestedSamples).toBe(isMobile?0:2);
   expect(initial.renderSuspended).toBe(false);
   await expect(page.getByRole('combobox',{name:'Visual detail',exact:true})).toHaveCount(0);
-  await expect(page.getByRole('button',{name:/^(Pause|Resume) motion$/})).toHaveCount(0);
+  const motion=page.locator('[data-bending-motion-toggle]');
+  await expect(motion).toHaveCount(1);await expect(motion).toHaveAccessibleName('Pause motion');await expect(motion).toBeEnabled();await expect(motion).toHaveAttribute('aria-pressed','false');
   await page.locator('[data-chapter-link="system"]').click();
   // Native document input drives one visible reading plane and scene score.
   // Linux software rendering can exceed the default five-second assertion budget.
@@ -73,6 +74,15 @@ test('public model initializes in Full and preserves chapter navigation without 
   await centerStudy(page,'form');
   await page.waitForFunction(()=>{const story=window.__story?.inspect(),scene=window.__thesis?.inspect();return story?.settled&&scene?.pose.chapter.id==='form'&&scene.sourceVisible&&!scene.renderSuspended&&scene.canvasPlacement?.visible;},null,{timeout:30000});
   expect(await page.evaluate(()=>window.__thesis.inspect().frames)).toBeGreaterThan(resting);
+  const runningTime=await page.evaluate(()=>window.__story.inspect().playback.activeSeconds);
+  await expect.poll(()=>page.evaluate(()=>window.__story.inspect().playback.activeSeconds),{timeout:WAIT}).toBeGreaterThan(runningTime);
+  await motion.click();await expect(motion).toHaveAccessibleName('Resume motion');await expect(motion).toHaveAttribute('aria-pressed','true');await settle(page);await expectIdle(page);
+  const paused=await page.evaluate(()=>({time:window.__story.inspect().playback.activeSeconds,frames:window.__thesis.inspect().frames,y:scrollY,paused:window.__thesis.inspect().motionPaused}));
+  expect(paused.paused).toBe(true);await frames(page,5);
+  expect(await page.evaluate(()=>({time:window.__story.inspect().playback.activeSeconds,frames:window.__thesis.inspect().frames,y:scrollY,paused:window.__thesis.inspect().motionPaused}))).toEqual(paused);
+  await motion.click();await expect(motion).toHaveAccessibleName('Pause motion');await expect(motion).toHaveAttribute('aria-pressed','false');await settle(page);
+  await expect.poll(()=>page.evaluate(()=>window.__story.inspect().playback.activeSeconds),{timeout:WAIT}).toBeGreaterThan(paused.time);
+  expect(await page.evaluate(()=>({y:scrollY,paused:window.__thesis.inspect().motionPaused}))).toEqual({y:paused.y,paused:false});
   await holdModel(page);await expectIdle(page);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
   expect(errors).toEqual([]);
