@@ -7,12 +7,18 @@ const routes=[['home','/'],['about','/about/'],['projects','/projects/'],['conta
 const filmed=test.extend({video:'on'}),plane='[data-information-window][data-information-ready][data-information-plane]';
 const recorded=new Set(['home','mode-s-of-making','bending','xr']);
 
-async function nativeY(page,target){
- const from=await page.evaluate(()=>scrollY);
+async function nativeY(page,target,diagnostics){
+ const sample=()=>page.evaluate(()=>{
+  const s=window.__story?.inspect(),policy=window.__thesis?.inspect();
+  return{y:scrollY,controllerFrame:s?.controllerFrame,frameDelta:s?.frameDelta,entry:s?.entry?.phase,
+   informationWindows:s?{ticks:s.informationWindows.ticks,moving:s.informationWindows.moving,settled:s.informationWindows.settled,items:s.informationWindows.items.slice(0,32)}:null,policy:{reduced:policy?.reduced,motionPaused:policy?.motionPaused,hidden:document.hidden,saveData:!!navigator.connection?.saveData,forcedColors:matchMedia('(forced-colors: active)').matches,static:document.documentElement.hasAttribute('data-cinematic-static'),focused:document.activeElement?.tagName}};
+ });
+ const before=diagnostics?await sample():{y:await page.evaluate(()=>scrollY)},from=before.y;
  await page.mouse.move(page.viewportSize().width-4,page.viewportSize().height*.5);
  await page.mouse.wheel(0,target-from);
  await page.waitForFunction(y=>scrollY===y,target,{timeout:WAIT});
- return page.evaluate(()=>scrollY);
+ if(!diagnostics)return page.evaluate(()=>scrollY);
+ const after=await sample();if(diagnostics.length<32)diagnostics.push({target,before,after});return after.y;
 }
 async function neutral(page,selector=plane){
  await page.waitForFunction(selector=>{
@@ -41,37 +47,90 @@ async function ownership(page){
  },plane);
 }
 
+
+// Default emulated forced palette only: resolved opaque paint, not a claim
+// about every user-selected high-contrast theme or photographic source pixels.
+function forcedPalette(panel){
+ const rgba=value=>{const parts=value.match(/^rgba?\(([^)]+)\)$/)?.[1].replace('/',' ').split(/[,\s]+/).filter(Boolean).map(Number);if(!parts||parts.some(n=>!Number.isFinite(n)))throw Error('Unsupported computed color '+value);return[...parts.slice(0,3),parts[3]??1];};
+ const luminance=rgb=>rgb.slice(0,3).map(c=>c/255).map(c=>c<=.04045?c/12.92:((c+.055)/1.055)**2.4).reduce((sum,c,i)=>sum+c*[.2126,.7152,.0722][i],0);
+ const opaque=(element,color,owner,scheme)=>{
+  // Group opacity also composites the background; a foreground-only formula
+  // cannot certify that case. Keep it fail-closed and inspect the saved PNG.
+  for(let current=element;current;current=current.parentElement)if(Number(getComputedStyle(current).opacity)!==1)throw Error('Unsupported translucent paint-owner group '+owner);
+  return{color,owner,scheme};
+ };
+ const owner=element=>{
+  for(let current=element;current;current=current.parentElement){
+   const css=getComputedStyle(current),skin=current.querySelector(':scope > [data-information-skin]');
+   if(skin){
+    const skinCSS=getComputedStyle(skin),paint=getComputedStyle(skin,'::before');
+    if(skinCSS.display!=='none'&&skinCSS.visibility==='visible'&&Number(skinCSS.opacity)>0&&paint.content!=='none'&&paint.display!=='none'&&paint.visibility==='visible'&&Number(paint.opacity)>0){
+     const alpha=rgba(paint.backgroundColor)[3];
+     if(alpha>0){
+      if(alpha!==1||Number(skinCSS.opacity)!==1||Number(paint.opacity)!==1)throw Error('Unsupported translucent skin paint');
+      return opaque(current,paint.backgroundColor,current.tagName+'[data-information-window="'+current.dataset.informationWindow+'"] skin::before',paint.colorScheme);
+     }
+    }
+   }
+   const alpha=rgba(css.backgroundColor)[3];
+   if(alpha>0){if(alpha!==1)throw Error('Unsupported translucent ancestor paint');return opaque(current,css.backgroundColor,current.tagName+(current.id?'#'+current.id:''),css.colorScheme);}
+  }return null;
+ };
+ const samples=[],walker=document.createTreeWalker(panel,NodeFilter.SHOW_TEXT);
+ while(walker.nextNode()&&samples.length<32){
+  const node=walker.currentNode,element=node.parentElement;if(!node.textContent.trim()||!element.checkVisibility({visibilityProperty:true,opacityProperty:true})||element.closest('[aria-hidden="true"]'))continue;
+  const range=document.createRange();range.selectNodeContents(node);
+  if(![...range.getClientRects()].some(r=>r.width>0&&r.height>0&&r.bottom>0&&r.top<innerHeight&&r.right>0&&r.left<innerWidth))continue;
+  const css=getComputedStyle(element),paint=owner(element),foreground=rgba(css.color);let opacity=1;
+  for(let current=element;current;current=current.parentElement)opacity*=Number(getComputedStyle(current).opacity);
+  const background=paint?rgba(paint.color):null,alpha=foreground[3]*opacity;
+  const actual=background?foreground.slice(0,3).map((c,i)=>c*alpha+background[i]*(1-alpha)):null;
+  const a=actual?luminance(actual):0,b=background?luminance(background):0;
+  samples.push({text:node.textContent.trim().slice(0,100),link:!!element.closest('a[href]'),foreground:css.color,opacity,background:paint?.color??null,backgroundOwner:paint?.owner??null,backgroundScheme:paint?.scheme??null,scheme:css.colorScheme,ratio:paint?(Math.max(a,b)+.05)/(Math.min(a,b)+.05):0,required:parseFloat(css.fontSize)>=24||(parseFloat(css.fontSize)>=18.6667&&Number(css.fontWeight)>=700)?3:4.5});
+ }
+ return{rootScheme:getComputedStyle(document.documentElement).colorScheme,cardScheme:getComputedStyle(panel).colorScheme,samples};
+}
+
 for(const [key,route] of routes)(recorded.has(key)?filmed:test)(`${key}: native whole-plane motion has reversible feedback, readable rest and independent source ownership`,async({page,isMobile},info)=>{
  info.setTimeout(scenarioTimeout(120000));
  let observation,primaryError;const receipt={route,originalViewport:page.viewportSize()};
  try{
   // Tall Contact legitimately needs no decorative movement when it has no
   // overflow. Exercise its real compact-height layout, never artificial space.
-  if(key==='contact'&&!isMobile)await page.setViewportSize({width:receipt.originalViewport.width,height:600});
-  receipt.viewport=page.viewportSize();
+
   const response=await page.goto(route);expect(response.status()).toBe(200);
   await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});
   await page.evaluate(()=>document.fonts.ready);
   if(key==='bending')await page.waitForFunction(()=>window.__thesis?.inspect().ready&&!document.documentElement.hasAttribute('data-cinematic-static'),null,{timeout:WAIT});
   await page.waitForFunction(selector=>document.querySelectorAll(selector).length>0,plane,{timeout:WAIT});
+  if(key==='contact'){
+   await neutral(page);
+   receipt.originalContact=await page.evaluate(()=>({y:scrollY,height:innerHeight,scrollHeight:document.documentElement.scrollHeight,overflow:Math.max(0,document.documentElement.scrollHeight-innerHeight)}));
+   receipt.originalContact.neutral=true;
+   await page.setViewportSize({width:receipt.originalViewport.width,height:600});
+   await neutral(page);
+  }
+  receipt.viewport=page.viewportSize();
+  const desktopBending=key==='bending'&&!isMobile;
+  const nativeDiagnostics=key==='bending'?(receipt.nativeDiagnostics=[]):undefined;
   receipt.ownership=await ownership(page);expect(receipt.ownership.problems).toEqual([]);expect(receipt.ownership.count).toBeGreaterThan(0);
   for(const image of receipt.ownership.images){expect(image.owner).toBe(true);expect(image.fixed).toBe(false);}
   // Choose actual native layout, not the first DOM panel or a transformed rect.
   // Keep the same panel visibly intersecting the viewport in both directions.
-  const selection=await page.evaluate(selector=>{
+  const selection=await page.evaluate(({selector,largeGesture})=>{
    const naturalY=node=>{let top=0;for(;node;node=node.offsetParent)top+=node.offsetTop;return top;};
    const max=Math.floor(document.documentElement.scrollHeight-innerHeight),nodes=[...document.querySelectorAll(selector)];
    const candidates=nodes.map((node,index)=>{
     const top=naturalY(node),height=node.offsetHeight,margin=Math.min(40,height/3);
     const low=Math.ceil(Math.max(0,top+margin-innerHeight)),high=Math.floor(Math.min(max,top+height-margin));
-    const step=Math.min(96,high-low);
+    const step=Math.min(largeGesture?Math.round(innerHeight*.6):96,high-low);
     const link=node.matches('a[href]')?node:[...node.querySelectorAll('a[href]')].find(a=>a.checkVisibility({visibilityProperty:true,opacityProperty:true}));
     const start=Math.max(low,Math.min(high-step,Math.round(top+height/2-innerHeight/2)));
     return{index,top,height,low,high,step,start,linked:!!link,visible:node.checkVisibility({visibilityProperty:true,opacityProperty:true})};
    }).filter(row=>row.visible&&row.linked&&row.step>=16);
    candidates.sort((a,b)=>Math.abs(a.start-scrollY)-Math.abs(b.start-scrollY));
    return{chosen:candidates[0]??null,max,candidates};
-  },plane);
+  },{selector:plane,largeGesture:desktopBending});
   receipt.selection=selection;expect(selection.chosen,'Route needs a real linked eligible plane and measurable native scroll excursion').not.toBeNull();
   const chosen=selection.chosen,panel=page.locator(plane).nth(chosen.index);
   await nativeY(page,chosen.start);await neutral(page);
@@ -91,7 +150,10 @@ for(const [key,route] of routes)(recorded.has(key)?filmed:test)(`${key}: native 
   });
   const travel=async(phase,from,to)=>{
    await observation.evaluate((value,phase)=>{value.state.phase=phase;},phase);
-   for(let step=1;step<=4;step++)await nativeY(page,Math.round(from+(to-from)*step/4));
+   // A genuine desktop Bending gesture, not four tiny serial protocol steps
+   // that can fall below the .08 viewport/s deadzone on slow source frames.
+   const steps=desktopBending?1:4;
+   for(let step=1;step<=steps;step++)await nativeY(page,Math.round(from+(to-from)*step/steps),nativeDiagnostics);
    await expect.poll(()=>observation.evaluate((value,phase)=>value.state.samples.some(s=>s.phase===phase&&s.visible&&s.depth>1e-8&&s.rx!==0&&s.ry!==0),phase),{timeout:WAIT}).toBe(true);
    await neutral(page);
   };
@@ -139,6 +201,18 @@ for(const [key,route] of routes)(recorded.has(key)?filmed:test)(`${key}: native 
    await neutral(page);
    const from=await page.evaluate(()=>scrollY),to=from>=16?from-16:from+16;
    await nativeY(page,to);await neutral(page);
+   if(media.forcedColors==='active'){
+    // Return to the actual selected reading card; XR Pause navigated to Method.
+    await nativeY(page,chosen.start);await neutral(page);
+    receipt.forcedColors=await panel.evaluate(forcedPalette);
+    const forcedPng=info.outputPath(`global-plane-${key}-forced-colors.png`);
+    await page.screenshot({path:forcedPng});await info.attach('global-plane-forced-colors',{path:forcedPng,contentType:'image/png'});
+    expect(receipt.forcedColors.samples.length).toBeGreaterThan(0);
+    for(const row of receipt.forcedColors.samples){
+     expect(row.backgroundOwner,`${row.text}: opaque painted owner`).not.toBeNull();
+     expect(row.ratio,`${row.text}: ${row.foreground} on ${row.background} (${row.backgroundOwner})`).toBeGreaterThanOrEqual(row.required);
+    }
+   }
   }
   receipt.finalOwnership=await ownership(page);expect(receipt.finalOwnership.problems).toEqual([]);
  }catch(error){primaryError=error;throw error;}finally{

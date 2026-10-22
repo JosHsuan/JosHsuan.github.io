@@ -80,3 +80,29 @@ short Contact scrolling, Bending native-card/workflow non-occlusion, nested-owne
 exclusion and original source/camera independence. Review actual desktop/mobile
 captures and interruption states before publication. Software browser evidence
 must not be presented as physical-device FPS or Lusion equivalence.
+
+
+## Forced-colors contrast correction — rendering pending
+
+The exact `dd50071` WebKit Home recording retains near-black description text
+on a dark Canvas in its final forced-colors frames; Chromium's same test phase
+uses readable dark text on a light Canvas. Before-frame extracts are
+`/tmp/forced-webkit.png` and `/tmp/forced-chromium.png` (each 0.3 seconds before
+its retained recording ends). This is a visible accessibility blocker, not a
+passing transform-neutrality result or a verified normal-theme regression.
+
+The document root previously fixed `color-scheme: dark`, while forced-colors
+material surfaces selected `light dark`. Transparent reading surfaces therefore
+could resolve explicit system text colors against a different scheme from the
+ancestor Canvas. The scoped correction makes the forced-colors root use the
+same `--material-color-scheme` as material surfaces and pairs root background,
+`--bg` and `--surface` with `Canvas`, and root foreground/`--ink` with
+`CanvasText`. Existing `--paper`/`--muted` system text and `LinkText` mappings
+remain. It does not force black/white, disable forced-color adjustment, change
+the normal theme, or modify source imagery.
+
+This causal explanation is source-grounded and still requires rendered
+confirmation. Acceptance must retain forced-colors PNGs and inspect effective
+text/background owners and contrast across all twelve routes; a neutral
+transform alone does not establish readability. No corrected visual pass or
+site-wide release is claimed here.

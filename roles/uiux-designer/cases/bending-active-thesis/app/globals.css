@@ -57,6 +57,11 @@ html body main p:is(:lang(zh),:lang(ja),:lang(ko)){line-height:1.65!important}
 }
 @media(forced-colors:active){
   :root{
+    /* Transparent reading surfaces must resolve system colors in the same
+       scheme as their document Canvas, including WebKit forced-colors. */
+    color-scheme:var(--material-color-scheme);
+    --bg:Canvas;--surface:Canvas;--ink:CanvasText;
+    background:Canvas;color:CanvasText;
     --glass-fallback:Canvas;--glass-background:Canvas;--glass-navigation-background:Canvas;
     --glass-backdrop:none;--glass-navigation-backdrop:none;
     --glass-border:CanvasText;--glass-foreground:CanvasText;--glass-muted:CanvasText;
