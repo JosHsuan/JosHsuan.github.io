@@ -63,9 +63,38 @@ async function settled(page,chapter,model){
 }
 async function fullCanvas(page){
  await expect(page.locator('canvas')).toHaveCount(2);await expect(page.locator('[data-project-study-canvas]')).toHaveCount(1);await expect(stage(page).locator('canvas')).toBeVisible();
- const sample=await stage(page).evaluate(node=>({host:node.getBoundingClientRect().toJSON(),canvas:node.querySelector('canvas').getBoundingClientRect().toJSON(),position:getComputedStyle(node).position,project:node.closest('[data-project-study]').dataset.projectStudy,surround:getComputedStyle(node.querySelector('[data-project-model-surface]')).backgroundImage})),viewport=page.viewportSize();
+ // One synchronous snapshot keeps the continuously changing compositor receipt,
+ // computed transform and actual DOM bounds on the same animation frame.
+ const sample=await stage(page).evaluate(node=>{
+  const canvas=node.querySelector('canvas'),surface=node.querySelector('[data-project-model-surface]'),css=getComputedStyle(canvas),surfaceBox=surface.getBoundingClientRect();
+  const width=parseFloat(css.width),height=parseFloat(css.height),origin=css.transformOrigin.split(' ').map(Number.parseFloat),matrix=new DOMMatrix(css.transform==='none'?undefined:css.transform);
+  const corners=[[0,0],[width,0],[0,height],[width,height]].map(([x,y])=>{const p=new DOMPoint(x-origin[0],y-origin[1]).matrixTransform(matrix);return{x:p.x+origin[0]+surfaceBox.x,y:p.y+origin[1]+surfaceBox.y};});
+  const minX=Math.min(...corners.map(p=>p.x)),maxX=Math.max(...corners.map(p=>p.x)),minY=Math.min(...corners.map(p=>p.y)),maxY=Math.max(...corners.map(p=>p.y));
+  return{host:node.getBoundingClientRect().toJSON(),surface:surfaceBox.toJSON(),canvas:canvas.getBoundingClientRect().toJSON(),position:getComputedStyle(node).position,
+   layout:{position:css.position,width,height,left:parseFloat(css.left),top:parseFloat(css.top),right:parseFloat(css.right),bottom:parseFloat(css.bottom),offsetLeft:canvas.offsetLeft,offsetTop:canvas.offsetTop,offsetWidth:canvas.offsetWidth,offsetHeight:canvas.offsetHeight},
+   origin,matrix:Object.fromEntries(['a','b','c','d','e','f','m13','m14','m23','m24','m31','m32','m33','m34','m43','m44'].map(key=>[key,matrix[key]])),expected:{x:minX,y:minY,width:maxX-minX,height:maxY-minY},
+   compositor:window.__globalBackground.inspect().driver.projectStudy.scene.resource.compositor,
+   project:node.closest('[data-project-study]').dataset.projectStudy,surround:getComputedStyle(surface).backgroundImage};
+ }),viewport=page.viewportSize();
  expect(sample.position).toBe('fixed');
- for(const box of [sample.host,sample.canvas]){expect(box.x).toBeCloseTo(0,0);expect(box.y).toBeCloseTo(0,0);expect(box.width).toBeCloseTo(viewport.width,0);expect(box.height).toBeCloseTo(viewport.height,0);}
+ for(const box of [sample.host,sample.surface]){expect(box.x).toBeCloseTo(0,0);expect(box.y).toBeCloseTo(0,0);expect(box.width).toBeCloseTo(viewport.width,0);expect(box.height).toBeCloseTo(viewport.height,0);}
+ expect(sample.layout.position).toBe('absolute');
+ for(const key of ['left','top','right','bottom','offsetLeft','offsetTop'])expect(sample.layout[key]).toBeCloseTo(0,0);
+ for(const key of ['width','offsetWidth'])expect(sample.layout[key]).toBeCloseTo(viewport.width,0);
+ for(const key of ['height','offsetHeight'])expect(sample.layout[key]).toBeCloseTo(viewport.height,0);
+ const micro=sample.compositor;expect(micro.kind).toBe('2d-pan-roll');
+ expect(Math.abs(micro.xPx)).toBeLessThanOrEqual(1.2);expect(Math.abs(micro.yPx)).toBeLessThanOrEqual(1.2);expect(Math.abs(micro.rollRad)).toBeLessThanOrEqual(.0012);
+ // Equivalent matrix()/matrix3d() serialization must have the same effective
+ // 2D affine coefficients, without perspective, depth translation or tilt.
+ for(const key of ['m13','m14','m23','m24','m31','m32','m34','m43'])expect(sample.matrix[key]===0).toBe(true);
+ for(const key of ['m33','m44'])expect(sample.matrix[key]).toBe(1);
+ const intended={a:Math.cos(micro.rollRad),b:Math.sin(micro.rollRad),c:-Math.sin(micro.rollRad),d:Math.cos(micro.rollRad),e:micro.xPx,f:micro.yPx};
+ for(const key of Object.keys(intended))expect(sample.matrix[key]).toBeCloseTo(intended[key],5);
+ expect(sample.origin[0]).toBeCloseTo(micro.originX,2);expect(sample.origin[1]).toBeCloseTo(micro.originY,2);
+ // The canvas layout remains exactly full viewport; its intentional pan/roll
+ // changes only the visual AABB, which must match transformed corners, not an
+ // arbitrary widened tolerance or a frozen idle snapshot.
+ for(const key of ['x','y','width','height'])expect(sample.canvas[key]).toBeCloseTo(sample.expected[key],0);
  if(['dot-based-3d-printing','special-assemblies'].includes(sample.project))expect(sample.surround).toContain('radial-gradient');else expect(sample.surround).toBe('none');
 }
 async function decodeSource(chapter,image){
