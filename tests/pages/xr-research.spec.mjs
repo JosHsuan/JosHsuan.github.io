@@ -11,6 +11,37 @@ const video=(page,id)=>stage(page).locator(`[data-xr-stage-video="${id}"]`);
 const facts=page=>stage(page).evaluate(node=>node.__xrStage.inspect());
 const workspace=JSON.parse(await readFile(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/xr-workspace.json',import.meta.url),'utf8'));
 const studies=JSON.parse(await readFile(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/project-studies.json',import.meta.url),'utf8')).projects;
+const phoneDiagnostics=new WeakMap();
+async function observePhoneLifecycle(page){
+ // Test-only, bounded event receipts survive an unresponsive page. No polling,
+ // playback changes, extra animation clock, recovery or timeout extension.
+ const entries=[],prefix='xr-phone-lifecycle:',browser=page.context().browser();
+ const push=value=>{if(entries.length<50)entries.push(value);};
+ const consoleEntry=message=>{const value=message.text();if(value.startsWith(prefix)){try{push(JSON.parse(value.slice(prefix.length)));}catch{/* Keep the original application/test failure. */}}};
+ const crashed=()=>push({event:'page-crash',hostTime:Date.now()});
+ const disconnected=()=>push({event:'browser-disconnected',hostTime:Date.now()});
+ page.on('console',consoleEntry);page.on('crash',crashed);browser?.on('disconnected',disconnected);
+ phoneDiagnostics.set(page,{entries,dispose(){page.off('console',consoleEntry);page.off('crash',crashed);browser?.off('disconnected',disconnected);}});
+ await page.addInitScript(({prefix})=>{
+  let count=0;
+  const record=event=>{
+   const video=event.target;if(!video?.matches?.('[data-xr-stage-video]')||count>=48)return;count++;
+   try{
+    const state=document.querySelector('[data-xr-stage]')?.__xrStage?.inspect();
+    console.debug(prefix+JSON.stringify({event:event.type,at:performance.now(),source:video.dataset.xrStageVideo,
+     native:{readyState:video.readyState,networkState:video.networkState,paused:video.paused,seeking:video.seeking,time:video.currentTime,error:video.error?.code??null},
+     owner:state?{phase:state.phase,chapter:state.chapter,scene:state.scene?.mode,sceneSettled:state.scene?.settled,paintPending:state.scene?.paintPending,cameraSettled:state.camera?.settled,windowsSettled:state.informationWindows?.settled,scheduled:state.lifecycle?.scheduled,
+      rendering:state.resource?.mode,mediaStage:state.resource?.media?.stage,mediaPending:state.resource?.media?.pending,mediaFrames:state.resource?.media?.frames,fallback:state.resource?.fallbackReason,lastRenderFailure:state.resource?.lastRenderFailure}:null}));
+   }catch{/* Diagnostics never alter the page's native event delivery. */}
+  };
+  for(const name of ['loadstart','loadedmetadata','loadeddata','canplay','play','playing','waiting','stalled','error','pause','seeking','seeked'])document.addEventListener(name,record,true);
+ },{prefix});
+}
+test.afterEach(async({page},info)=>{
+ const receipt=phoneDiagnostics.get(page);if(!receipt)return;
+ receipt.dispose();phoneDiagnostics.delete(page);
+ await info.attach('xr-phone-lifecycle',{body:JSON.stringify(receipt.entries,null,2),contentType:'application/json'});
+});
 async function openingVisible(page){
  await expect(stage(page)).toHaveAttribute('data-xr-opening','true');
  await expect(stage(page).locator('[data-xr-opening-visual]')).toHaveCount(0);
@@ -193,6 +224,7 @@ test('one project background stage preserves source geometry, stays idle, and fo
 });
 
 test('native scrolling selects all three complete recordings in the same scene and pause preserves native media time',async({page})=>{
+ await observePhoneLifecycle(page);
  const errors=[];page.on('pageerror',error=>errors.push(error.message));await enter(page);await modelReady(page);
  const originalCanvas=await stage(page).locator('canvas').elementHandle();
  // Keep the same retained canvas and native screenshot action. Batch related

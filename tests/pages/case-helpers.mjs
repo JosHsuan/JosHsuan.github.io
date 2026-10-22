@@ -1,4 +1,4 @@
-import {expect} from '@playwright/test';
+import {expect,test} from '@playwright/test';
 export const WAIT = 45000;
 // Functional assertions keep their precision; shared Linux software-GPU runners
 // need a larger wall-clock budget than a local hardware-rendered browser.
@@ -66,13 +66,39 @@ export async function holdModel(page,chapter='form'){
 }
 export async function expectIdle(page){
  await settle(page);
- await page.waitForFunction(()=>{
+ const checkpoint=await page.waitForFunction(()=>{
   const story=window.__story.inspect(),scene=window.__thesis.inspect();
   // A controller can be idle while Fiber still owes its final requested paint.
   // Require the latest controller acknowledgment and an empty renderer queue
   // before measuring zero work; an absent scene deliberately need not paint.
-  return !story.scheduled&&(story.canvasPlacement?.visible===false||!scene.ready||scene.renderedControllerFrame>=story.controllerFrame&&(scene.rendererPendingFrames??0)===0);
+  const idle=!story.scheduled&&(story.canvasPlacement?.visible===false||!scene.ready||scene.renderedControllerFrame>=story.controllerFrame&&(scene.rendererPendingFrames??0)===0);
+  return idle?{controllerFrame:story.controllerFrame,renderedControllerFrame:scene.renderedControllerFrame,rendererPendingFrames:scene.rendererPendingFrames,scheduled:story.scheduled,canvasVisible:story.canvasPlacement?.visible,ready:scene.ready}:false;
  },null,{timeout:WAIT});
+ const precondition=await checkpoint.jsonValue();await checkpoint.dispose();
  const sample=()=>page.evaluate(()=>({frames:window.__thesis.inspect().frames,time:window.__story.inspect().playback.activeSeconds,fieldDraws:window.__story.inspect().pageField.draws}));
- const before=await sample();await frames(page,8);expect(await sample()).toEqual(before);
+ const before=await sample();
+ // Observe the same eight native RAF deliveries, not an extra drain or retry.
+ // Keep only bounded state summaries; these diagnose a late invalidation and
+ // do not turn a changed work counter into an accepted idle result.
+ const observations=await page.evaluate(async()=>{
+  const read=()=>{
+   const story=window.__story.inspect(),scene=window.__thesis.inspect();
+   return {frames:scene.frames,time:story.playback.activeSeconds,fieldDraws:story.pageField.draws,
+    controllerFrame:story.controllerFrame,renderedControllerFrame:scene.renderedControllerFrame,rendererPendingFrames:scene.rendererPendingFrames,
+    scheduled:story.scheduled,settled:story.settled,readingPending:story.readingPending,canvasAwaitingPaint:story.canvasAwaitingPaint,
+    canvasVisible:story.canvasPlacement?.visible,canvasSettled:story.canvasPlacement?.settled,ready:scene.ready,hidden:scene.hidden,reduced:scene.systemReduced,
+    chapter:story.canvasPlacement?.chapter,representation:scene.representation?.id,
+    scrollY,nativeDocY:story.nativeDocY,documentVisibility:document.visibilityState,viewport:[innerWidth,innerHeight],documentHeight:document.documentElement.scrollHeight,
+    canvases:[...document.querySelectorAll('canvas')].slice(0,4).map(canvas=>({width:canvas.width,height:canvas.height,clientWidth:canvas.clientWidth,clientHeight:canvas.clientHeight,connected:canvas.isConnected}))};
+  };
+  const samples=[{delivery:0,...read()}];
+  for(let i=1;i<=8;i++){await new Promise(requestAnimationFrame);samples.push({delivery:i,...read()});}
+  return samples;
+ });
+ const after=await sample();
+ try{expect(after).toEqual(before);}
+ catch(error){
+  try{await test.info().attach('idle-work-diagnostic',{body:JSON.stringify({precondition,before,observations,after},null,2),contentType:'application/json'});}catch{/* Preserve the original assertion if diagnostic attachment fails. */}
+  throw error;
+ }
 }
