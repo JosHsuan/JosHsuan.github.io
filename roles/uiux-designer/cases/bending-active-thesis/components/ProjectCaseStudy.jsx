@@ -9,7 +9,7 @@ import {projectStudyLayout,projectStudyEvidenceLayout} from './project-study-lay
 import styles from './ProjectCaseStudy.module.css';
 
 function Panel({children,opening=false}){
- return <div className={`${styles.panel} ${opening?styles.openingPanel:''}`} data-information-window="editorial" data-home-scroll-window="project-narrative"><InformationSkin/>{children}</div>;
+ return <div className={`${styles.panel} ${opening?styles.openingPanel:''}`} data-information-window="editorial" data-information-motion-surface="plane" data-home-scroll-window="project-narrative"><InformationSkin/>{children}</div>;
 }
 function SourceLink({image}){
  return <a className={styles.sourceLink} href={image.src} target="_blank" rel="noreferrer">View full image <span aria-hidden="true">↗</span></a>;
@@ -30,7 +30,7 @@ function PrimaryVisual({image,chapter,prefix,opening=false,model,motion}){
   </figure>
   {inspect&&<div className={styles.modelTarget} data-project-model-control data-project-model-target={chapter} tabIndex={0} role="group" aria-label={`${model.alt} When 3D is available, scroll to follow the camera. With keyboard focus, use arrow keys to inspect. Home or Escape returns to the current scroll view.`} aria-describedby={`${prefix}-${chapter}-model-state ${prefix}-${chapter}-model-help`}/>}
   </div>
-  <div className={styles.sourcePanel} data-project-source-caption={chapter} data-information-window="evidence-caption" data-home-scroll-window="project-caption">
+  <div className={styles.sourcePanel} data-project-source-caption={chapter} data-information-window="evidence-caption" data-information-motion-surface="plane" data-home-scroll-window="project-caption">
    <InformationSkin/>
    {inspect&&<>
     <p className={styles.modelState} id={`${prefix}-${chapter}-model-state`} data-project-model-state={chapter} role="status">Original source view.</p>
@@ -56,8 +56,8 @@ function PrimaryVisual({image,chapter,prefix,opening=false,model,motion}){
 }
 function EvidenceFigure({image}){
  return <figure className={styles.evidence} data-study-evidence-layout={projectStudyEvidenceLayout(image)} data-study-evidence-role={image.purpose==='diagram'?'technical-plate':'photograph'}>
-  <a className={styles.evidenceImage} href={image.src} target="_blank" rel="noreferrer" aria-label={`View full image: ${image.alt}`}><img data-project-evidence-image src={image.src} width={image.width} height={image.height} alt={image.alt} loading="lazy" decoding="async"/></a>
-  <figcaption data-information-window="evidence-caption" data-home-scroll-window="project-caption"><InformationSkin/><p>{image.caption}</p><span>{image.credit}</span></figcaption>
+  <a className={styles.evidenceImage} data-information-window="evidence-image" data-information-motion-surface="plane" data-home-scroll-window="project-evidence" href={image.src} target="_blank" rel="noreferrer" aria-label={`View full image: ${image.alt}`}><InformationSkin/><img data-project-evidence-image src={image.src} width={image.width} height={image.height} alt={image.alt} loading="lazy" decoding="async"/></a>
+  <figcaption data-information-window="evidence-caption" data-information-motion-surface="plane" data-home-scroll-window="project-caption"><InformationSkin/><p>{image.caption}</p><span>{image.credit}</span></figcaption>
  </figure>;
 }
 
@@ -68,7 +68,7 @@ export default function ProjectCaseStudy({project}){
  return <>
   <ProjectStudyChrome chapters={chapters} prefix={prefix} navigationLabel={`${project.shortTitle} project sections`} railClassName={styles.chapterRail}/>
   <ProjectCaseStudyControls projectId={project.id} chapterCount={chapters.length}/>
-  <main id="portfolio-main" tabIndex={-1} className={styles.page} data-project-study={project.id} data-information-motion-profile={project.id==='mode-s-of-making'?'velocity-skin':undefined} data-portfolio-root data-portfolio-section="project-study">
+  <main id="portfolio-main" tabIndex={-1} className={styles.page} data-project-study={project.id} data-information-motion-profile="velocity-skin" data-portfolio-root data-portfolio-section="project-study">
    {project.model&&<ProjectCaseStudyStage projectId={project.id} model={project.model}/>}
    <article aria-labelledby={`${prefix}-overview-heading`}>
     <header id={`${prefix}-overview`} tabIndex={-1} className={`${styles.chapter} ${styles.opening}`} data-project-chapter="overview" {...layoutAttributes(projectStudyLayout(project,'overview'))}>

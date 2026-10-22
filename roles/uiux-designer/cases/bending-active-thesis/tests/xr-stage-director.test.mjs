@@ -28,7 +28,7 @@ class Element extends Target{
 const flush=async()=>{for(let i=0;i<14;i++)await Promise.resolve();};
 const deferred=()=>{let resolve,reject;const promise=new Promise((yes,no)=>{resolve=yes;reject=no;});return{promise,resolve,reject};};
 
-function fixture({pending=false,firstPaintFailure=false,firstPaint,workspacePending=false,workspaceDecode}={}){
+function fixture({pending=false,firstPaintFailure=false,firstPaint,workspacePending=false,workspaceDecode,plane=false}={}){
  const win=new Target(),doc=new Target(),queries=new Map(),raf=new Map(),timers=new Map(),observers=[];let serial=0,now=100;
  const connection=Object.assign(new Target(),{saveData:false});doc.hidden=false;
  Object.assign(win,{innerWidth:1440,innerHeight:1000,scrollY:0,navigator:{connection,userAgent:'Mozilla/5.0 Version/26.0 Safari/605.1.15'},CSS:{supports:()=>true},requestAnimationFrame:fn=>{const id=++serial;raf.set(id,fn);return id;},cancelAnimationFrame:id=>raf.delete(id),setTimeout:(fn,delay)=>{const id=++serial;timers.set(id,{fn,delay});return id;},clearTimeout:id=>timers.delete(id),matchMedia(query){if(!queries.has(query))queries.set(query,Object.assign(new Target(),{matches:false}));return queries.get(query);}});
@@ -48,6 +48,7 @@ function fixture({pending=false,firstPaintFailure=false,firstPaint,workspacePend
  });
  doc.querySelectorAll=selector=>selector==='[data-liquid-glass]'?glass:selector==='[data-xr-chapter-link]'?links:[];
  const info=new Element(doc,{top:1200,width:500,height:160,marker:'[data-information-window]'}),skin=new Element(doc);info.parentElement=root;info.setAttribute('data-information-window','editorial');info.querySelector=selector=>selector===':scope > [data-information-skin]'?skin:null;
+ if(plane){root.setAttribute('data-information-motion-profile','velocity-skin');info.setAttribute('data-information-motion-surface','plane');}
  root.querySelectorAll=selector=>selector==='[data-xr-chapter]'?chapters:selector==='a[href^="#"]'?links:selector==='[data-information-window]'?[info]:[];
  doc.getElementById=id=>chapters.find(node=>node.id===id)??null;
  const control=new Element(doc,{marker:'[data-xr-model-control]'});control.parentElement=root;doc.activeElement=control; // Default fixtures exercise focused, finite reading; idle is tested explicitly below.
@@ -296,4 +297,25 @@ test('visible XR model idle changes only handheld intent on one scheduler; focus
  f.director.setPaused(true);await f.settle();const held=handle.presents.at(-1);f.win.scrollY+=250;f.win.fire('scroll');await f.settle();assert.deepEqual(handle.presents.at(-1).cameraIntent,held.cameraIntent);assert.deepEqual(handle.presents.at(-1).handheld,held.handheld);
  f.doc.activeElement=f.control;f.director.setPaused(false);f.frame();await flush();assert.equal(f.director.inspect().camera.recovering,true);await f.settle();assert.equal(f.director.inspect().camera.recovering,false);assert.deepEqual(handle.presents.at(-1).handheld,{xPx:0,yPx:0,rollRad:0});assert.notDeepEqual(handle.presents.at(-1).cameraIntent,held.cameraIntent);
  const stopped=f.director.inspect().camera.activeSeconds;f.doc.hidden=true;f.doc.fire('visibilitychange');f.frame(10000);assert.equal(f.director.inspect().camera.activeSeconds,stopped);assert.equal(f.raf.size,0);
+});
+
+
+test('XR plane windows use the existing clock and neutralize Pause, entry, static preferences and suspension',async t=>{
+ const f=fixture({plane:true});t.after(f.cleanup);await f.settle();
+ const item=()=>f.director.inspect().informationWindows.items[0];
+ assert.equal(item().plane,true);assert.equal(item().skinStrength,0);f.site('entered');f.scroll('context');await f.settle();
+ const animate=()=>{f.win.scrollY=f.win.scrollY===1100?1180:1100;f.win.fire('scroll');f.frame();assert.notEqual(item().skinStrength,0);assert.equal(f.raf.size,1);};
+ const policies=[
+  value=>f.director.setPaused(value),
+  value=>{const q=f.queries.get('(forced-colors: active)');q.matches=value;q.fire('change');},
+  value=>{f.connection.saveData=value;f.connection.fire('change');},
+  value=>{const q=f.queries.get('(prefers-reduced-motion: reduce)');q.matches=value;q.fire('change');},
+  value=>f.site(value?'requested':'entered'),
+  value=>{f.doc.hidden=value;f.doc.fire('visibilitychange');},
+ ];
+ for(const policy of policies){
+  animate();policy(true);await f.settle();assert.equal(item().skinStrength,0);assert.equal(f.director.inspect().informationWindows.settled,true);assert.equal(f.raf.size,0);
+  policy(false);await f.settle();assert.equal(item().skinStrength,0);
+ }
+ animate();await f.settle();assert.equal(item().skinStrength,0);f.cleanup();assert.equal(f.info.getAttribute('data-information-plane'),null);assert.equal(f.info.style.getPropertyValue('--information-rx'),'');assert.equal(f.director.inspect().events.nativeListeners,0);
 });

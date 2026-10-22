@@ -256,3 +256,21 @@ html [data-liquid-glass][data-liquid-mode="opaque"]>[data-liquid-skin]::after{di
   html [data-liquid-glass]{background:transparent;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
   html [data-liquid-glass]>[data-liquid-skin]{display:none!important}
 }
+
+/* One shared whole-plane writer. The runtime marker is granted only to explicit,
+   non-nested native surfaces; unmarked surfaces retain their existing ink path. */
+html body [data-information-window][data-information-ready][data-information-plane]:not([data-information-nested])[data-information-moving="true"]:not(:focus-within){
+  transform:perspective(var(--information-perspective,1200px)) rotateX(var(--information-rx,0deg)) rotateY(var(--information-ry,0deg)) rotateZ(var(--information-rz,0deg)) skewY(var(--information-skew,0deg))!important;
+  transform-origin:50% 50%;translate:none!important;rotate:none!important;scale:none!important;
+}
+html body [data-information-window][data-information-ready][data-information-plane]:not([data-information-nested]):is(:focus-within,:not([data-information-moving="true"])),
+html[data-cinematic-static] body [data-information-window][data-information-ready][data-information-plane]:not([data-information-nested])[data-information-moving="true"],
+html body [data-study-paused] [data-information-window][data-information-ready][data-information-plane]:not([data-information-nested])[data-information-moving="true"]{
+  transform:none!important;translate:none!important;rotate:none!important;scale:none!important;
+}
+@media(prefers-reduced-motion:reduce),(forced-colors:active){
+  html body [data-information-window][data-information-ready][data-information-plane]:not([data-information-nested])[data-information-moving="true"]:not(:focus-within){transform:none!important;translate:none!important;rotate:none!important;scale:none!important}
+}
+@media print{
+  html body [data-information-window][data-information-ready][data-information-plane]:not([data-information-nested])[data-information-moving="true"]:not(:focus-within){transform:none!important;translate:none!important;rotate:none!important;scale:none!important}
+}

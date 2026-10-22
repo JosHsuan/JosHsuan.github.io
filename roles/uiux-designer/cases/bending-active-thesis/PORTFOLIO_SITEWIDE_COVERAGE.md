@@ -7,13 +7,14 @@ native scrolling and the empty reusable framework.
 
 ## Evidence boundary
 
-The accepted live baseline is `2a7e74bfb59309d4b666cc331f29f0cff1a4fafd`:
-[CI 39718175039](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39718175039)
-passed all 408 public browser executions and 24 framework executions;
-[deployment 39721368820](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39721368820)
-published the same tested artifact. Live verification at 04:20 UTC checked all
-12 route HTML files and 25 JS/CSS resources against the actual validated artifact,
-and the nine HC image/model/video files against pinned bytes and hashes.
+The accepted live baseline is `146e8938`:
+[CI 39813261739](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39813261739)
+passed all 429 public browser executions and 24 framework executions;
+[deployment 39818623755](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39818623755)
+published the same tested artifact. Integration's live verification checked all
+12 portfolio routes, 52 resources and 32 source assets against that artifact.
+The generic, XR and Bending scroll-camera adapters are included. Earlier HC and
+adapter acceptance records remain historical evidence, not the current release.
 These are dated checks, not proof of future changes or physical-device quality.
 
 **Global typography is implemented; global whole-plane deformation is not.**
@@ -39,23 +40,25 @@ Chromium, WebKit and mobile Chromium. It does not mean every possible glyph,
 scroll position or physical device has been visually reviewed.
 `Default` means existing information motion, **not** the new whole-plane pilot.
 All rows inherit baseline native/fallback and CI coverage; specific new rollout
-acceptance remains pending unless stated below.
+acceptance remains pending unless stated below. The final column describes the
+isolated shared-glass candidate, not the live 146e8938 baseline. See
+[the candidate direction and acceptance boundary](GLOBAL_GLASS_DIRECTION.md).
 
-| Route | Type | Glass-panel motion | Narrative / model transitions | Source diagrams / media | Outstanding acceptance |
-| --- | --- | --- | --- | --- | --- |
-| `/` | T | Default | Shared introduction and project-card entry; no project model in introduction | Pinned project cards | Shared deformation policy and card/readability review |
-| `/about/` | T | Default | Native biography/approach reading | Existing public content | Shared deformation, focus and long-reading review |
-| `/projects/` | T | Default | Native project selection; prepared-card lifecycle | Pinned case previews | Shared deformation policy without transforming hit geometry unpredictably |
-| `/contact/` | T | Default | Native contact actions | Existing public links | Shared deformation with link/focus safety |
-| `/projects/bending-active/` | T | Protected route-specific presenter | Isolated candidate: additive nativeU authored orientation before original exact fit; original chapter poses, genuine 3D idle and eight-active-second comparisons retained | Original source families/presence and evidence unchanged | Native touch, actual Pause/Resume, keyboard return and 320px labels/controls require exact visual/CI acceptance; not live. See [Bending direction](BENDING_SCROLL_CAMERA_DIRECTION.md) |
-| `/projects/xr-bending-active/` | T | Protected route-specific presenter | Candidate: Method-only authored scroll camera; optional inspection returns to current scroll view | Original model and all source points preserved; phone recordings/workspace unchanged | New model Pause/Resume and 2D idle/prepared-support acceptance pending exact browser captures; numerical camera anomaly remains unresolved, diagnostics retained. See [XR direction](XR_SCROLL_CAMERA_DIRECTION.md) |
-| `/projects/mode-s-of-making/` | T | Whole-plane pilot accepted in scoped captures/tests | Revised causal sequence accepted; model interval and three clips preserved | Native recordings/simulation distinguished; mobile external white rails corrected | Extend successful grammar systematically; pilot is a bounded planar approximation, not Lusion equivalence |
-| `/projects/entrance-installation-art/` | T | Default | Existing model interval preserved | Three native source-focus guides accepted, including mobile/no-JS | Shared deformation rollout; fine source lettering still uses full-image links |
-| `/projects/dot-based-3d-printing/` | T | Default | Existing narrative, not yet accepted as a new narrative revision | Reviewed smaller delivery MP4; original retained; native timing/loop checks passed | Narrative/readability review plus shared deformation rollout |
-| `/projects/hc3dp-caustics/` | T | Default | Accepted HC slice: observed light first, visible computational plates, explicit physical limits; original camera interval unchanged | Three complete plates become foreground evidence; path clip remains explicitly simulation | HC desktop/mobile/no-JS and exact CI/live accepted; shared camera/deformation remain separate |
-| `/projects/special-assemblies/` | T | Default | Existing presentation; proposed module → neighbor → planner → recording → physical closure | Source identity must not be misrepresented as chronology | Evidence-backed narrative slice and shared deformation rollout |
-| `/projects/project-caschlatsch/` | T | Default | Existing presentation; proposed user-task-first XR sequence and shorter semantic steps | Existing reviewed original-portfolio figures | Evidence-backed narrative slice and shared deformation rollout |
-| `/404.html` | T | Native fallback page | Clear recovery/navigation, no case choreography | Not applicable | Preserve semantic recovery and focus; do not force decorative case motion |
+| Route | Type | Glass-panel motion | Narrative / model transitions | Source diagrams / media | Outstanding acceptance  Shared-glass candidate (not live) |
+| --- | --- | --- | --- | --- | ---  --- |
+| `/` | T | Default | Shared introduction and project-card entry; no project model in introduction | Pinned project cards | Shared deformation policy and card/readability review  Registered reading/card planes; interactive Bending preview tile excluded |
+| `/about/` | T | Default | Native biography/approach reading | Existing public content | Shared deformation, focus and long-reading review  Registered introduction, approach articles, CTA and contact reading surfaces |
+| `/projects/` | T | Default | Native project selection; prepared-card lifecycle | Pinned case previews | Shared deformation policy without transforming hit geometry unpredictably  Registered reading/card planes; interactive Bending preview tile excluded |
+| `/contact/` | T | Default | Native contact actions | Existing public links | Shared deformation with link/focus safety  Registered contact copy/channels; native links/focus preserved |
+| `/projects/bending-active/` | T | Protected route-specific presenter | Live at 146e8938: additive nativeU authored orientation before original exact fit; original chapter poses, genuine 3D idle and eight-active-second comparisons retained | Original source families/presence and evidence unchanged | Native touch, actual Pause/Resume, keyboard return and native-flow 320px source cards accepted in exact CI and retained visuals; shared whole-plane rollout remains pending. See [Bending direction](BENDING_SCROLL_CAMERA_DIRECTION.md)  Outer reading/diagram/evidence planes and native source card; fixed label excluded |
+| `/projects/xr-bending-active/` | T | Protected route-specific presenter | Live at 146e8938: Method-only authored scroll camera; optional inspection returns to current scroll view | Original model and all source points preserved; phone recordings/workspace unchanged | Model Pause/Resume, 2D canvas-only idle and exact prepared-source support accepted in CI/retained captures; earlier numerical camera anomaly has no proven root cause, diagnostics retained. Shared whole-plane rollout pending. See [XR direction](XR_SCROLL_CAMERA_DIRECTION.md)  Editorial/evidence planes; model, phone and workspace excluded |
+| `/projects/mode-s-of-making/` | T | Whole-plane pilot accepted in scoped captures/tests | Revised causal sequence accepted; model interval and three clips preserved | Native recordings/simulation distinguished; mobile external white rails corrected | Extend successful grammar systematically; pilot is a bounded planar approximation, not Lusion equivalence  Editorial/caption/foreground evidence planes; independent source stage excluded |
+| `/projects/entrance-installation-art/` | T | Default | Existing model interval preserved | Three native source-focus guides accepted, including mobile/no-JS | Shared deformation rollout; fine source lettering still uses full-image links  Editorial/caption/evidence planes plus one outer diagram-guide owner |
+| `/projects/dot-based-3d-printing/` | T | Default | Existing narrative, not yet accepted as a new narrative revision | Reviewed smaller delivery MP4; original retained; native timing/loop checks passed | Narrative/readability review plus shared deformation rollout  Editorial/caption/foreground evidence planes; independent source stage excluded |
+| `/projects/hc3dp-caustics/` | T | Default | Accepted HC slice: observed light first, visible computational plates, explicit physical limits; original camera interval unchanged | Three complete plates become foreground evidence; path clip remains explicitly simulation | HC desktop/mobile/no-JS and exact CI/live accepted; generic authored camera now live; shared deformation remains pending  Editorial/caption/foreground evidence planes; independent source stage excluded |
+| `/projects/special-assemblies/` | T | Default | Existing presentation; proposed module → neighbor → planner → recording → physical closure | Source identity must not be misrepresented as chronology | Evidence-backed narrative slice and shared deformation rollout  Editorial/caption/foreground evidence planes; independent source stage excluded |
+| `/projects/project-caschlatsch/` | T | Default | Existing presentation; proposed user-task-first XR sequence and shorter semantic steps | Existing reviewed original-portfolio figures | Evidence-backed narrative slice and shared deformation rollout  Editorial/caption/foreground evidence planes; independent source stage excluded |
+| `/404.html` | T | Native fallback page | Clear recovery/navigation, no case choreography | Not applicable | Preserve semantic recovery and focus; do not force decorative case motion  Excluded: native recovery remains unchanged |
 
 ## Next shared rollout and release gates
 
@@ -80,8 +83,8 @@ acceptance remains pending unless stated below.
    Bending/XR adapter compatibility against their reference compositions and
    source geometry before changing their presentation. Route differences require
    an explicit rationale, not an untracked exemption from site-wide thinking.
-   The current HC editorial slice intentionally leaves cameras unchanged until
-   this dedicated camera rollout has its own validated replacement.
+   The camera rollout is now live at 146e8938; its route-specific evidence does
+   not authorize treating the remaining shared glass rollout as complete.
 4. Continue the remaining evidence-backed narrative slices while checking the
    common opening, reading, source-link, transition and closing grammar. Source
    diagrams, fabrication footage and XR workflows need different explanations.
@@ -105,7 +108,8 @@ The generic adapter is **accepted and live at `c6ede4`**: [CI 39734469697](https
 Mode/s, Entrance, Dot, HC and Special Assemblies have authored chapter-local
 paths, optional existing inspection and a small independent idle layer. Original
 model views and all source bytes remain intact. Caschlatsch has no model. XR and
-Bending adapter implementation and route-specific acceptance remain pending.
+Bending adapters subsequently passed their separate acceptance and are included
+in live 146e8938; the c6ede4 evidence above remains the generic milestone.
 See [camera direction](SCROLL_CAMERA_DIRECTION.md).
 
 A source-supported CPU baseline confirms generic models already fit eight exact
@@ -126,5 +130,7 @@ framing with no settled-idle WebGL draws/fits, fixed pixel/allocation budgets an
 retained source framing. All five generic routes have accepted retained Chromium, WebKit and mobile
 Chromium captures at that exact release. Settled-idle receipts showed eight CSS
 updates with zero extra WebGL draws/fits. This does not establish physical-device
-FPS or site-wide completion. XR is the next bounded candidate; Bending remains
-a separate adapter.
+FPS or site-wide completion. XR now also uses its accepted separate 2D canvas
+idle layer and exact prepared source support; Bending retains genuine 3D chapter
+idle, its source-family timing and eight-active-second comparison policy. Both
+are live at 146e8938, not interchangeable idle implementations.

@@ -40,12 +40,13 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
     if (!root || sections.length !== 7) return;
     const scope=input.events.createScope('director');
     const fine = matchMedia('(hover: hover) and (pointer: fine)');
+    const connection=window.navigator?.connection;
     const glassPreferences=['(prefers-reduced-transparency: reduce)','(prefers-contrast: more)','(forced-colors: active)'].map(query=>matchMedia(query));
     const opaqueGlass=()=>glassPreferences.some(query=>query.matches);
     const links = [...document.querySelectorAll('[data-chapter-link]')];
     const planeMap = new Map(), publisher = input.dom.forOwner('director');
     const pageField=background.acquire({owner:'bending-director',canvas:fieldCanvas.current,backdrop,publisher});
-    const windowPresenter=createInformationWindowPresenter({publisher:input.dom.forOwner('information-windows')});
+    const windowPresenter=createInformationWindowPresenter({profile:root.getAttribute('data-information-motion-profile')??'ink',publisher:input.dom.forOwner('information-windows')});
     const libraryPresenter=createLibraryDiagramPresenter({publisher:input.dom.forOwner('library-diagram'),emit:value=>input.events.emit('diagramReveal',value)});
     const liquidPresenter=createLiquidGlassPresenter({publisher:input.dom.forOwner('liquid-glass')});
     const informationObserved=new Set();
@@ -183,14 +184,15 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       let moving=Math.abs(pointer.x-next.x)+Math.abs(pointer.y-next.y)>.001;if(!moving)pointer={...next};
 
       moving=publishEditorial({choreography,stickyRects,reading,playbackScore,state,didSeek,didResume,sections,planes,hovered,focused,fine,dt,publisher,viewportHeight:innerHeight,chapter})||moving;
-      moving=windowPresenter.publish({docY:scrollY,dt,reduced:state.reduced||state.motionPaused,seek:didSeek,resumed:didResume,canvasPlacement})||moving;
+      const informationNeutral=state.reduced||state.motionPaused||state.hidden||!!connection?.saveData||glassPreferences[2].matches||input.entry.inspect().phase!=='entered';
+      moving=windowPresenter.publish({docY:scrollY,dt,reduced:informationNeutral,seek:didSeek,resumed:didResume,canvasPlacement})||moving;
       moving=input.entry.advance(dt,{resumed:didResume,hidden:state.hidden,systemReduced:state.systemReduced})||moving;
       presentNavigation();
       // Home is a visible document destination. Its offscreen library must
       // close through normal viewport sampling; only real suspension/startup
       // withholds delivery without cancelling the existing reveal.
       moving=libraryPresenter.publish({docY:scrollY,dt,reduced:state.systemReduced,resumed:didResume,hidden:state.hidden||input.entry.inspect().phase!=='entered'})||moving;
-      moving=liquidPresenter.publish({dt,reduced:state.reduced||state.motionPaused,resumed:didResume,hidden:state.hidden,opaque:opaqueGlass(),keyboardFocus:liquidKeyboardFocus})||moving;
+      moving=liquidPresenter.publish({dt,reduced:informationNeutral,resumed:didResume,hidden:state.hidden,opaque:opaqueGlass(),keyboardFocus:liquidKeyboardFocus})||moving;
 
       // Chapter boundaries own the viewport hold. Information rectangles never
       // determine the scene size or camera framing.
@@ -329,6 +331,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       if(scheduler.suspended){
         previous=0;pendingImpulse=0;touchY=null;
         advanceChapterPlayback(playback,0,{hidden:true});
+        windowPresenter.publish({docY:scrollY,dt:0,reduced:true,resumed:true,canvasPlacement});
         input.publishFrame({hidden:true,playback:sampleChapterPlayback(playback)});reset();
       }else{
         pointer={x:0,y:0};resumed=true;previous=0;
@@ -353,6 +356,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
     listen(window,'touchstart',touchstart,{passive:true});listen(window,'touchmove',touchmove,{passive:true});listen(window,'touchend',touchend,{passive:true});listen(window,'touchcancel',touchend,{passive:true});listen(window,'thesis:representation',representation);
     listen(document.documentElement,'pointerleave',reset);listen(window,'blur',reset);listen(document,'visibilitychange',visibility);listen(fine,'change',reset);
     for(const query of glassPreferences)listen(query,'change',()=>{liquidPresenter.reset();layout.invalidate('liquid-preferences');});
+    if(connection?.addEventListener)listen(connection,'change',()=>schedule('input:saveData'));
     listen(window,'pagehide',pagehide);listen(window,'pageshow',pageshow);listen(document,'freeze',freeze);listen(document,'resume',resume);
     listen(document,'focusin',focus);listen(document,'focusout',focusout);listen(document,'click',anchor);listen(window,'hashchange',hash);listen(document,'keydown',keyboard);
     const unsubscribe=input.subscribe(()=>{

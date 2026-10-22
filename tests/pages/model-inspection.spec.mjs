@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 import {readFileSync} from 'node:fs';
-import {PerspectiveCamera,Vector3} from 'three';
+import {PerspectiveCamera,Vector3,Matrix4} from 'three';
 import {viewportStageSourceViewport} from '../../roles/uiux-designer/cases/bending-active-thesis/components/source-scene-score.mjs';
 import {modelInformationSummary,modelAnnotationLabel} from '../../roles/uiux-designer/cases/bending-active-thesis/components/model-information.mjs';
 import {WAIT,scenarioTimeout,surface,frames,settle,loadScene,centerStudy,hitPoint,expectIdle} from './case-helpers.mjs';
@@ -111,7 +111,18 @@ test('source information uses desktop side placement or stable native mobile flo
 });
 
 // Native cards retain layout while the existing information presenter applies
-// finite pan/roll. Capture layout, CSS matrix and rendered corners synchronously.
+// the explicit perspective plane. Capture used layout and projected corners
+// synchronously; the fixed desktop annotation keeps its separate ink contract.
+function authoredPlaneMatrix({rx,ry,rz,skew,perspective},moving){
+ const matrix=new Matrix4();if(!moving)return matrix.elements;
+ matrix.elements[11]=-1/perspective;
+ const radians=angle=>angle*Math.PI/180;
+ matrix.multiply(new Matrix4().makeRotationX(radians(rx)));
+ matrix.multiply(new Matrix4().makeRotationY(radians(ry)));
+ matrix.multiply(new Matrix4().makeRotationZ(radians(rz)));
+ const shear=new Matrix4();shear.elements[1]=Math.tan(radians(skew));
+ return matrix.multiply(shear).elements;
+}
 async function nativeCardGeometry(panel,baseline=null){
  return panel.evaluate((el,baseline)=>{
   const style=getComputedStyle(el),host=el.parentElement,parent=host.getBoundingClientRect(),rect=el.getBoundingClientRect();
@@ -123,12 +134,13 @@ async function nativeCardGeometry(panel,baseline=null){
   const {width,height}=box,left=parent.left+box.left,top=parent.top+box.top;
   const origin=style.transformOrigin.split(' ').map(Number.parseFloat),matrix=new DOMMatrix(style.transform==='none'?undefined:style.transform);
   const points=[[0,0],[width,0],[width,height],[0,height]].map(([x,y])=>{
-   const point=new DOMPoint(x-origin[0],y-origin[1]).matrixTransform(matrix);return {x:left+origin[0]+point.x,y:top+origin[1]+point.y};
+   const point=new DOMPoint(x-origin[0],y-origin[1]).matrixTransform(matrix);return {x:left+origin[0]+point.x/point.w,y:top+origin[1]+point.y/point.w,w:point.w};
   });
   const ancestors=[];for(let node=host;node;node=node.parentElement)ancestors.push(getComputedStyle(node).transform);
   return {box,computedSize:[style.width,style.height],natural,documentHeight:document.documentElement.scrollHeight,position:style.position,insets:[style.left,style.right,style.top,style.bottom],onlyChild:host.children.length===1,ancestors,
-   width,height,vars:{x:number(style.getPropertyValue('--information-x')),y:number(style.getPropertyValue('--information-y')),rz:number(style.getPropertyValue('--information-rz'))},
-   matrix:{a:matrix.a,b:matrix.b,c:matrix.c,d:matrix.d,e:matrix.e,f:matrix.f,offPlane:[matrix.m13,matrix.m14,matrix.m23,matrix.m24,matrix.m31,matrix.m32,matrix.m34,matrix.m43],depth:[matrix.m33,matrix.m44]},
+   width,height,clientSize:[el.clientWidth,el.clientHeight],plane:el.hasAttribute('data-information-plane'),moving:el.dataset.informationMoving==='true',identity:matrix.isIdentity,
+   vars:Object.fromEntries(['x','y','rz','rx','ry','skew','perspective'].map(key=>[key,number(style.getPropertyValue('--information-'+key))])),
+   matrix:Array.from(matrix.toFloat64Array()),weights:points.map(point=>point.w),
    actual:{left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom},expected:{left:Math.min(...points.map(p=>p.x)),right:Math.max(...points.map(p=>p.x)),top:Math.min(...points.map(p=>p.y)),bottom:Math.max(...points.map(p=>p.y))}};
  },baseline);
 }
@@ -136,10 +148,13 @@ function expectNativeCardGeometry(value){
  expect(value.position).toBe('relative');for(const inset of value.insets)expect(['auto','0px']).toContain(inset);expect(value.onlyChild).toBe(true);
  expect(value.ancestors.every(transform=>transform==='none')).toBe(true);
  expect(value.width).toBeGreaterThan(0);expect(value.height).toBeGreaterThan(0);
- expect(Math.abs(value.vars.x)).toBeLessThanOrEqual(12);expect(Math.abs(value.vars.y)).toBeLessThanOrEqual(12);expect(Math.abs(value.vars.rz)).toBeLessThanOrEqual(1.5);
- const angle=value.vars.rz*Math.PI/180,expected={a:Math.cos(angle),b:Math.sin(angle),c:-Math.sin(angle),d:Math.cos(angle),e:value.vars.x,f:value.vars.y};
- for(const [key,number] of Object.entries(expected))expect(value.matrix[key]).toBeCloseTo(number,6);
- expect(value.matrix.offPlane.every(coefficient=>coefficient===0)).toBe(true);expect(value.matrix.depth).toEqual([1,1]);
+ expect(value.plane).toBe(true);expect(value.vars.x).toBe(0);expect(value.vars.y).toBe(0);
+ for(const [key,limit] of [['rx',8],['ry',4],['rz',1.1],['skew',.7]])expect(Math.abs(value.vars[key])).toBeLessThanOrEqual(limit);
+ expect(value.vars.perspective).toBeGreaterThanOrEqual(Math.max(800,...value.clientSize.map(size=>size*3)));
+ const expected=authoredPlaneMatrix(value.vars,value.moving);
+ for(let i=0;i<16;i++)expect(value.matrix[i]).toBeCloseTo(expected[i],6);
+ for(const weight of value.weights){expect(Number.isFinite(weight)).toBe(true);expect(weight).toBeGreaterThan(0);}
+ if(!value.moving){expect(value.identity).toBe(true);for(const key of ['x','y','rz','rx','ry','skew'])expect(value.vars[key]).toBe(0);}
  for(const side of ['left','right','top','bottom'])expect(Math.abs(value.actual[side]-value.expected[side]),`${side}: ${JSON.stringify(value)}`).toBeLessThanOrEqual(.01);
 }
 
@@ -152,10 +167,10 @@ test('side information and its leader follow the displayed Canvas throughout the
  if(native)await page.waitForFunction(()=>{
   const el=document.querySelector('[data-model-side-label][data-study-chapter="pattern"]'),style=getComputedStyle(el);
   const matrix=new DOMMatrix(style.transform==='none'?undefined:style.transform);
-  return el.dataset.informationMoving==='false'&&['x','y','rz'].every(key=>parseFloat(style.getPropertyValue('--information-'+key))===0)&&matrix.isIdentity;
+  return el.dataset.informationMoving==='false'&&['x','y','rz','rx','ry','skew'].every(key=>parseFloat(style.getPropertyValue('--information-'+key))===0)&&matrix.isIdentity;
  },null,{timeout:WAIT});
  const nativeBefore=native?await nativeCardGeometry(panel):null;
- if(native){expect(Object.values(nativeBefore.vars).every(value=>value===0)).toBe(true);expectNativeCardGeometry(nativeBefore);}
+ if(native){expect(['x','y','rz','rx','ry','skew'].every(key=>nativeBefore.vars[key]===0)).toBe(true);expectNativeCardGeometry(nativeBefore);}
  const exit=await page.evaluate(()=>{const p=window.__story.inspect().canvasPlacement;return p.holdEnd+(p.end-p.holdEnd)*.4;});
  await page.clock.pauseAt(new Date(Date.now()+3600000));
  try{

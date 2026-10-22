@@ -121,3 +121,13 @@ test('NUL git diffs include cumulative changes and both sides of feature-to-core
     await rm(folder, {recursive: true, force: true});
   }
 });
+
+// Explicit plane opt-ins and their native input owners must keep site-wide
+// ownership/focus/static-policy coverage even when other case tests are scoped.
+test('native model, diagram and reading changes retain whole-plane integration coverage',()=>{
+ for(const file of ['components/ModelInspector.jsx','components/SourceDiagram.jsx','runtime/features/ReadingManager.mjs']){
+  const plan=classifyChanges([CASE_ROOT+file]);
+  assert(plan.browserTests.includes('tests/pages/global-window-motion.spec.mjs'),file);
+  assert.equal(plan.framework,false);
+ }
+});

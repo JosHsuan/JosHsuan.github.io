@@ -1,5 +1,17 @@
 # Compatibility record — empty framework
 
+## 22 October 2026 security maintenance (current pins)
+
+Next and eslint-config-next are now pinned to **16.4.2**, including every Next-family platform/compiler entry in the committed lockfile and the existing exact-version release-age exceptions. Node **24.19.0**, pnpm **11.19.0**, React, Playwright and all unrelated dependency snapshots remain unchanged. The older compatibility table and results below are historical, not acceptance evidence for this patch.
+
+The [official 14 October advisory](https://nextjs.org/blog/nextjs-security-update-october-14-2026) identifies fixes from 16.4.1 for Cache Components typed-array RCE, SVG image-optimizer RCE and Server Actions denial of service. Official npm metadata and downloaded tarball SHA-512 were verified for [Next 16.4.2](https://registry.npmjs.org/next/16.4.2) and [eslint-config-next 16.4.2](https://registry.npmjs.org/eslint-config-next/16.4.2). The locked sharp version was already 0.35.5 and remains unchanged. No advisory-provided upgrade-agent command was executed or warning suppressed.
+
+Both published applications use static export with unoptimized images; GitHub Pages does not expose a request-time Next server, image optimizer or Server Actions endpoint. This narrows the deployed attack surface but does **not** establish absence of all dependency/build/development risk. Upgrade the toolchain rather than treating static hosting as an exemption. Public assets, browser configuration, permissions and exact-artifact publication checks are unchanged.
+
+Validation: isolated exact-pnpm frozen installation and the normal `pnpm build:pages` passed with Next 16.4.2: 260 output files and 137 approved assets. The read-only installed security assessment returned `affected: false`; 102 CI contracts, direct ESLint and TypeScript checks passed. No shared build dependency tree was modified. Aggregate `pnpm check` stopped at the existing tsx CLI UNIX-socket permission restriction, including with a private writable TMPDIR; normal cloud quality remains mandatory. Candidate browser/full-gate acceptance is still pending. This document does not authorize release of an unvalidated candidate.
+
+## Historical framework baseline
+
 Test date: 2026-10-06 (Europe/Berlin). Host: Windows. Node: 24.19.0. pnpm: 11.19.0. Framework baseline commit: `0bfe8d6` (parent `19d8387`); the framework was tested in the working tree and committed without runtime changes. Content schema: 1; no model or motion revisions exist yet.
 
 Registry metadata was retrieved directly from `https://registry.npmjs.org/<package>/latest`. Exact installed versions are in `package.json` and `pnpm-lock.yaml`.

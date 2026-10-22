@@ -5,7 +5,7 @@ import styles from './EntranceDiagramFocus.module.css';
 /** Native radio choices remain usable without hydration. Finite CSS emphasis
  * adds no observer, state loop or competing Director clock. */
 export default function EntranceDiagramFocus({guide,image,id}){
- return <figure className={styles.guide} data-entrance-diagram={id} data-information-window="source-diagram" data-home-scroll-window="project-caption">
+ return <figure className={styles.guide} data-entrance-diagram={id} data-information-window="source-diagram" data-information-motion-surface="plane" data-home-scroll-window="project-caption">
   <InformationSkin/>
   <figcaption><h3>{guide.title}</h3><p className={styles.note}>Reading guide over the original raster plate. Outlines mark areas of attention, not new geometry. All source labels remain in the complete image.</p></figcaption>
   <fieldset className={styles.choices}>

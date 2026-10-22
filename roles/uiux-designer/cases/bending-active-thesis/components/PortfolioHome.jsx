@@ -36,13 +36,13 @@ function Introduction(){
   return <section id="about" tabIndex={-1} className={styles.introduction} data-home-introduction aria-labelledby="home-title">
     <div className={styles.introductionInner}>
       <div className={styles.introductionCopy}>
-        <div className={styles.scrollCopy} data-information-window="home-introduction" data-home-scroll-window="introduction"><InformationSkin/>
+        <div className={styles.scrollCopy} data-information-window="home-introduction" data-information-motion-surface="plane" data-home-scroll-window="introduction"><InformationSkin/>
           <p className={styles.eyebrow}>{introduction.discipline}</p>
           <h1 id="home-title" className={styles.homeTitle}><span>{introduction.greeting}{' '}</span><span>{introduction.name}<span className={styles.period}>.</span></span></h1>
           <p className={styles.statement} data-introduction-statement>{introduction.statement}</p>
           <p className={styles.description} data-introduction-description>{introduction.description}</p>
         </div>
-        <a href="#projects" className={`${styles.projectInvitation} ${styles.scrollCopy}`} data-home-project-link data-information-window="home-invitation" data-home-scroll-window="invitation"><InformationSkin/>
+        <a href="#projects" className={`${styles.projectInvitation} ${styles.scrollCopy}`} data-home-project-link data-information-window="home-invitation" data-information-motion-surface="plane" data-home-scroll-window="invitation"><InformationSkin/>
           <span className={styles.invitationCopy}><span className={styles.invitationLabel}>SELECTED WORK / {String(projects.length).padStart(2,'0')}</span><span className={styles.invitationTitle} data-display-type>Between physical and digital.</span><span className={styles.invitationAction}>Explore the projects</span></span>
           <span className={styles.invitationArrow}><Arrow/></span>
         </a>
@@ -57,7 +57,7 @@ function About({standalone=false}){
   const Heading=standalone?'h1':'h2';
   const ApproachHeading=standalone?'h2':'h3';
   return <section id="about" className={[styles.section,standalone?styles.standalone:''].join(' ')} aria-labelledby="about-title" data-portfolio-about data-home-introduction={standalone?'':undefined}>
-    <div className={styles.sectionLead}>
+    <div className={`${styles.sectionLead} ${styles.scrollCopy}`} data-information-window="about-introduction" data-information-motion-surface="plane" data-home-scroll-window="about-introduction"><InformationSkin/>
       <p className={styles.eyebrow}>01 / ABOUT</p>
       <div><Heading id="about-title" className={styles.sectionTitle}>Between physical and digital.</Heading>
         <p className={styles.sectionIntro} data-introduction-statement>{introduction.statement}</p>
@@ -65,24 +65,24 @@ function About({standalone=false}){
         {!standalone&&<a href="/about/" className={styles.textLink}>More about my approach <Arrow diagonal/></a>}
       </div>
     </div>
-    <div className={styles.approaches}>{approaches.map(approach=><article key={approach.name}>
+    <div className={styles.approaches}>{approaches.map(approach=><article key={approach.name} className={styles.scrollCopy} data-information-window="about-approach" data-information-motion-surface="plane" data-home-scroll-window={approach.name}><InformationSkin/>
       <p className={styles.eyebrow}>{approach.name}</p><ApproachHeading>{approach.title}</ApproachHeading><p>{approach.description}</p>
     </article>)}</div>
-    {standalone&&<a href="/projects/" className={styles.textLink}>Explore the tools and workflows <Arrow diagonal/></a>}
+    {standalone&&<a href="/projects/" className={`${styles.textLink} ${styles.scrollCopy}`} data-information-window="about-project-link" data-information-motion-surface="plane" data-home-scroll-window="about-project-link"><InformationSkin/>Explore the tools and workflows <Arrow diagonal/></a>}
   </section>;
 }
 
-function Projects({standalone=false,scrolling=false}){
+function Projects({standalone=false,scrolling=true}){
   const Heading=standalone?'h1':'h2';
   const CardHeading=standalone?'h2':'h3';
   return <section id="projects" className={[styles.section,styles.projects,standalone?styles.standalone:''].join(' ')} aria-labelledby="projects-title" data-portfolio-projects>
-    <div className={scrolling?`${styles.projectHeading} ${styles.scrollCopy}`:styles.projectHeading} data-information-window={scrolling?'home-project-heading':undefined} data-home-scroll-window={scrolling?'project-heading':undefined}>
+    <div className={scrolling?`${styles.projectHeading} ${styles.scrollCopy}`:styles.projectHeading} data-information-window={scrolling?'home-project-heading':undefined} data-information-motion-surface={scrolling?'plane':undefined} data-home-scroll-window={scrolling?'project-heading':undefined}>
       {scrolling&&<InformationSkin/>}
       <div><p className={styles.eyebrow}>02 / SELECTED PROJECTS</p><Heading id="projects-title" className={styles.sectionTitle}>Design systems, made tangible.</Heading></div>
       <p className={styles.projectCount}>{String(projects.length).padStart(2,'0')} projects<br/>Computation / fabrication / interaction</p>
     </div>
     <ul className={styles.projectGrid} style={{'--project-grid-rows':projectGridRows(projects.length)}} data-project-grid data-project-grid-cells={projectGridRows(projects.length)*3}>
-      {projects.map(project=><li key={project.id} className={project.id==='xr-bending-active'?`${styles.projectCard} ${styles.xrProjectCard}`:styles.projectCard} data-project-tile={project.id} data-information-window={scrolling?'home-project-card':undefined} data-home-scroll-window={scrolling?project.id:undefined}>
+      {projects.map(project=><li key={project.id} className={project.id==='xr-bending-active'?`${styles.projectCard} ${styles.xrProjectCard}`:styles.projectCard} data-project-tile={project.id} data-information-window={scrolling?'home-project-card':undefined} data-information-motion-surface={scrolling&&project.id!=='bending-active'?'plane':undefined} data-home-scroll-window={scrolling?project.id:undefined}>
         {scrolling&&<InformationSkin/>}
         <div className={styles.projectImage}>
           {project.id==='bending-active'
@@ -97,15 +97,15 @@ function Projects({standalone=false,scrolling=false}){
         </a>
       </li>)}
     </ul>
-    <p className={scrolling?`${styles.gridNote} ${styles.scrollCopy}`:styles.gridNote} data-information-window={scrolling?'home-project-note':undefined} data-home-scroll-window={scrolling?'project-note':undefined}>{scrolling&&<InformationSkin/>}Studies connecting computational design, spatial interaction and physical fabrication.</p>
+    <p className={scrolling?`${styles.gridNote} ${styles.scrollCopy}`:styles.gridNote} data-information-window={scrolling?'home-project-note':undefined} data-information-motion-surface={scrolling?'plane':undefined} data-home-scroll-window={scrolling?'project-note':undefined}>{scrolling&&<InformationSkin/>}Studies connecting computational design, spatial interaction and physical fabrication.</p>
   </section>;
 }
 
-function Contact({standalone=false,scrolling=false}){
+function Contact({standalone=false,scrolling=true}){
   const Heading=standalone?'h1':'h2';
   return <section id="contact" className={[styles.section,styles.contact,standalone?styles.contactPage:''].join(' ')} aria-labelledby="contact-title" data-portfolio-contact>
-    <div className={scrolling?styles.scrollCopy:undefined} data-information-window={scrolling?'home-contact':undefined} data-home-scroll-window={scrolling?'contact':undefined}>{scrolling&&<InformationSkin/>}<p className={styles.eyebrow}>03 / CONTACT</p><Heading id="contact-title" className={styles.sectionTitle}>Let’s connect.</Heading><p className={styles.prose}>Have a question about the work or an idea to share? I’d be happy to hear from you.</p></div>
-    <div className={scrolling?`${styles.contactChannels} ${styles.scrollCopy}`:styles.contactChannels} data-information-window={scrolling?'home-contact-channels':undefined} data-home-scroll-window={scrolling?'contact-channels':undefined}>{scrolling&&<InformationSkin/>}
+    <div className={scrolling?styles.scrollCopy:undefined} data-information-window={scrolling?'home-contact':undefined} data-information-motion-surface={scrolling?'plane':undefined} data-home-scroll-window={scrolling?'contact':undefined}>{scrolling&&<InformationSkin/>}<p className={styles.eyebrow}>03 / CONTACT</p><Heading id="contact-title" className={styles.sectionTitle}>Let’s connect.</Heading><p className={styles.prose}>Have a question about the work or an idea to share? I’d be happy to hear from you.</p></div>
+    <div className={scrolling?`${styles.contactChannels} ${styles.scrollCopy}`:styles.contactChannels} data-information-window={scrolling?'home-contact-channels':undefined} data-information-motion-surface={scrolling?'plane':undefined} data-home-scroll-window={scrolling?'contact-channels':undefined}>{scrolling&&<InformationSkin/>}
       <a href={`mailto:${contact.email}`} className={styles.contactLink} data-contact-email><span><span className={styles.invitationLabel}>EMAIL</span><span className={styles.contactHandle}>{contact.email}</span></span><Arrow diagonal/></a>
       <nav className={styles.socialLinks} aria-label="Public profiles" data-contact-social-links>{contact.socialLinks.map(link=><a key={link.id} href={link.href} target="_blank" rel="noreferrer">{link.label}<Arrow diagonal/></a>)}</nav>
     </div>
@@ -116,7 +116,7 @@ function Contact({standalone=false,scrolling=false}){
 export default function PortfolioHome({section='home'}){
   return <div className={styles.portfolio}>
     <PortfolioNavigation current={section}/>
-    <main id="portfolio-main" tabIndex={-1} className={styles.main} data-portfolio-root data-portfolio-section={section}>
+    <main id="portfolio-main" tabIndex={-1} className={styles.main} data-portfolio-root data-information-motion-profile="velocity-skin" data-portfolio-section={section}>
       {section==='home'&&<><Introduction/><Projects scrolling/><Contact scrolling/></>}
       {section==='about'&&<><About standalone/><Contact/></>}
       {section==='projects'&&<><Projects standalone/><Contact/></>}

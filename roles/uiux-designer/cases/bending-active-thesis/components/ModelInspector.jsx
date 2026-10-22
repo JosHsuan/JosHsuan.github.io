@@ -9,7 +9,7 @@ const ANNOTATION_LABELS=[...new Set(['origami','opening','bending','curvature','
 import InformationSkin from './InformationSkin';
 
 function SourceInformation({study,ready,failed,activate,native=false}) {
-  return <aside className={styles.sideLabel} data-model-side-label data-study-chapter={study.id} data-model-label-placement={native?'native':'overlay'} data-protect data-information-window="model-label"><InformationSkin/>
+  return <aside className={styles.sideLabel} data-model-side-label data-study-chapter={study.id} data-model-label-placement={native?'native':'overlay'} data-protect data-information-window="model-label" data-information-motion-surface={native?'plane':undefined}><InformationSkin/>
       <span className={styles.eyebrow}>THESIS SOURCE / {study.id.toUpperCase()}</span>
       <div className={styles.information}>
         <div className={styles.titleSlot}><h3 id={`model-source-label-${study.id}`} data-source-label data-study-chapter={study.id}>{ready ? 'Source geometry' : 'Assembly reference'}</h3><div className={styles.titleSizer} aria-hidden="true">{[...study.labels,'Source geometry','Assembly reference'].map(label=><span key={label}>{label}</span>)}</div></div>

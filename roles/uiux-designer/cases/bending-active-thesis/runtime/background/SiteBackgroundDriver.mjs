@@ -23,7 +23,9 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
   const reduced=win.matchMedia('(prefers-reduced-motion: reduce)');
   const fine=win.matchMedia('(hover: hover) and (pointer: fine)');
   const studyRoot=doc.querySelector?.('[data-project-study]')??null;
-  const homeRoot=doc.querySelector?.('[data-portfolio-root][data-portfolio-section="home"]')??studyRoot;
+  // Ordinary editorial routes share this existing clock. XR and Bending keep
+  // their independent Directors and must never acquire a second window owner.
+  const homeRoot=['home','about','projects','contact'].map(section=>doc.querySelector?.(`[data-portfolio-root][data-portfolio-section="${section}"]`)).find(Boolean)??studyRoot;
   const home=homeRoot?createHomeScrollPresenter({root:homeRoot,publisher:dom.forOwner('home-information')}):null;
   const liquid=studyRoot?createLiquidGlassPresenter({root:doc,publisher:dom.forOwner('project-liquid-glass')}):null;
   const glassPreferences=studyRoot?['(forced-colors: active)','(prefers-contrast: more)','(prefers-reduced-transparency: reduce)'].map(query=>win.matchMedia(query)):[];

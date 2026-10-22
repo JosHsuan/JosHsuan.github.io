@@ -51,6 +51,7 @@ export function createInformationWindowPresenter({publisher,root=globalThis.docu
   function release(element){
     publisher.attribute(element,'data-information-ready',null);
     publisher.attribute(element,'data-information-moving',null);
+    publisher.attribute(element,'data-information-plane',null);
     for(const key of VARIABLES)publisher.style(element,'--information-'+key,'');
   }
 
@@ -69,11 +70,12 @@ export function createInformationWindowPresenter({publisher,root=globalThis.docu
       const style=document.defaultView.getComputedStyle(element);
       const kind=element.getAttribute('data-information-window');
       const fixed=kind==='model-label'&&element.getAttribute('data-model-label-placement')!=='native';
+      const plane=velocityProfile&&!fixed&&element.getAttribute('data-information-motion-surface')==='plane';
       const top=fixed?0:naturalY(element);
       const chapter=fixed?element.closest('[data-model-study]')?.dataset.studyChapter:null;
       const surface=materials.get(element)??material(style);
       materials.set(element,surface);
-      rows.push({element,width,height:windowHeight,top,kind,fixed,chapter,surface,radius:number(style.borderTopLeftRadius)});
+      rows.push({element,width,height:windowHeight,top,kind,fixed,plane,chapter,surface,radius:number(style.borderTopLeftRadius)});
     }
     const retained=new Set(rows.map(row=>row.element));
     for(const [element] of registry)if(!retained.has(element)){release(element);registry.delete(element);}
@@ -83,10 +85,16 @@ export function createInformationWindowPresenter({publisher,root=globalThis.docu
     for(const row of rows){
       let item=registry.get(row.element);
       const effect=scrollingEffect(recipe,viewportHeight);
+      // A portal can retain its exact DOM node while moving between native
+      // flow and a fixed model annotation. Reclassification starts neutral;
+      // no stale perspective variables or old material trajectory survive.
+      if(item&&(!!item.velocitySkin!==row.plane||item.fixed!==row.fixed)){
+        release(row.element);item=null;
+      }
       if(!item){
         const state=createWindowMotion(effect,{region:'inside'});
         setWindowScrollTarget(state,row.fixed?0:targetAt(row.top,row.height,docY,viewportHeight),{reduced:true});
-        item={state,active:false,visible:false,pose:{x:0,y:0,rz:0},effect,velocitySkin:velocityProfile?createVelocitySkin(docY):null};
+        item={state,active:false,visible:false,pose:{x:0,y:0,rz:0},effect,velocitySkin:row.plane?createVelocitySkin(docY):null};
         registry.set(row.element,item);
       }else{
         item.state.axis=[...effect.axis];item.state.path={key:effect.key,axis:item.state.axis};
@@ -101,6 +109,7 @@ export function createInformationWindowPresenter({publisher,root=globalThis.docu
       // invalidation neither replays nor briefly erases an active deformation.
       publisher.style(row.element,'--information-skin-path',outline(item,presentationPose(item).pose));
       publisher.attribute(row.element,'data-information-ready','');
+      publisher.attribute(row.element,'data-information-plane',row.plane?'':null);
       item.dirty=true;
     }
   }
@@ -123,7 +132,7 @@ export function createInformationWindowPresenter({publisher,root=globalThis.docu
       // the same finite fluid catch-up on the director clock, then follow placement.
       if(item.fixed&&active&&!item.active&&!immediate)setWindowScrollTarget(state,target-.16,{reduced:true});
       const energy=immediate?0:clamp(Math.abs(target-state.target)*2,0,.3);
-      setWindowScrollTarget(state,target,{energy,reduced:!!immediate||velocityProfile});
+      setWindowScrollTarget(state,target,{energy,reduced:!!immediate||!!item.velocitySkin});
       if(item.velocitySkin)advanceVelocitySkin(item.velocitySkin,{docY,dt:seconds,viewportHeight,immediate});
       else advanceWindowMotion(state,seconds,{reduced:!!immediate});
       item.active=active;item.visible=visible;
@@ -152,7 +161,7 @@ export function createInformationWindowPresenter({publisher,root=globalThis.docu
 
   function inspect(){
     return {recipe:recipe.key,profile,outlineSamples,count:registry.size,nested:nested.size,ticks,moving,settled:!moving,items:[...registry.values()].map(item=>({
-      kind:item.kind,chapter:item.chapter,fixed:item.fixed,visible:item.visible,width:item.width,height:item.height,top:item.top,
+      kind:item.kind,chapter:item.chapter,fixed:item.fixed,plane:!!item.velocitySkin,visible:item.visible,width:item.width,height:item.height,top:item.top,
       progress:item.state.progress,target:item.state.target,velocity:item.state.velocity,resting:item.velocitySkin?item.velocitySkin.resting:item.state.resting,settled:item.velocitySkin?item.velocitySkin.resting:item.state.resting,skinStrength:item.velocitySkin?.strength??0,...item.pose,
     }))};
   }

@@ -4,14 +4,15 @@ import {createHomeScrollPresenter} from '../runtime/site/HomeScrollPresenter.mjs
 import {createInformationWindowPresenter} from '../runtime/presentation/InformationWindowPresenter.mjs';
 import {projectGridRows} from '../components/project-grid-layout.mjs';
 
-function fixture(factory=createHomeScrollPresenter){
+function fixture(factory=createHomeScrollPresenter,{profile=null,plane=false}={}){
   const root={attrs:new Map(),activeElement:null,querySelectorAll:()=>nodes};
   const document={activeElement:null,defaultView:{getComputedStyle:()=>({
     background:'transparent',borderTopWidth:'0px',borderRightWidth:'0px',borderBottomWidth:'0px',borderLeftWidth:'0px',
     borderTopColor:'transparent',borderRightColor:'transparent',borderBottomColor:'transparent',borderLeftColor:'transparent',
     outlineStyle:'none',outlineWidth:'0px',boxShadow:'none',borderTopLeftRadius:'0px',
   })}};
-  root.ownerDocument=document;
+  root.ownerDocument=document;root.getAttribute=name=>root.attrs.get(name)??null;
+  if(profile)root.attrs.set('data-information-motion-profile',profile);
   const nodes=[{attrs:new Map([['data-information-window','home-introduction']]),styles:new Map(),tagName:'DIV',
     clientWidth:480,clientHeight:300,top:100,parentElement:null,
     querySelector:()=>({}),getAttribute(name){return this.attrs.get(name)??null;},contains:node=>node?.parentElement===nodes[0],
@@ -20,6 +21,7 @@ function fixture(factory=createHomeScrollPresenter){
     style(element,name,value){if(value==='')element.styles.delete(name);else element.styles.set(name,String(value));},
     attribute(element,name,value){if(value===null)element.attrs.delete(name);else element.attrs.set(name,String(value));},
   };
+  if(plane)nodes[0].attrs.set('data-information-motion-surface','plane');
   const presenter=factory({root,publisher});
   const measure=(docY=0)=>presenter.measure({naturalY:element=>element.top,viewportHeight:800,docY});
   const publish=(input={})=>presenter.publish({dt:1/60,docY:0,ready:true,...input});
@@ -98,4 +100,20 @@ test('disposal releases Home markers and all owned material properties; stale sa
   assert.equal(f.publish({docY:500}),false);
   f.measure();f.presenter.dispose();
   assert.equal(f.nodes[0].styles.size,0);
+});
+
+
+test('ordinary page adapter applies existing static policies to explicit whole planes only',()=>{
+ for(const option of [{reduced:true},{saveData:true},{forcedColors:true},{suspended:true},{ready:false},{resumed:true},{seek:true}]){
+  const f=fixture(createHomeScrollPresenter,{profile:'velocity-skin',plane:true});f.measure();f.publish();f.publish({docY:80});
+  assert(f.presenter.inspect().informationWindows.items[0].skinStrength>0);
+  f.publish({docY:80,...option});const item=f.presenter.inspect().informationWindows.items[0];
+  assert.equal(item.skinStrength,0);assert.equal(item.settled,true);
+  const count=f.presenter.inspect().informationWindows.outlineSamples;
+  for(let i=0;i<60;i++)f.publish({docY:80,...option});
+  assert.equal(f.presenter.inspect().informationWindows.outlineSamples,count);
+  f.presenter.dispose();assert(!f.nodes[0].attrs.has('data-information-plane'));
+ }
+ const unmarked=fixture(createHomeScrollPresenter,{profile:'velocity-skin'});unmarked.measure();unmarked.publish({docY:80});
+ assert.equal(unmarked.presenter.inspect().informationWindows.items[0].plane,false);
 });

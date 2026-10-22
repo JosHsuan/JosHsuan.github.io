@@ -9,7 +9,7 @@ import styles from './XRProject.module.css';
 const MODEL_GUIDANCE='When 3D is available, scroll to follow the camera. For optional keyboard inspection, focus the model and use arrow keys; Home or Escape returns to the current scroll view.';
 
 function Panel({children,className=''}) {
-  return <div className={`${styles.panel} ${className}`} data-information-window="editorial"><InformationSkin/>{children}</div>;
+  return <div className={`${styles.panel} ${className}`} data-information-window="editorial" data-information-motion-surface="plane"><InformationSkin/>{children}</div>;
 }
 function Heading({number,label,title,id,kind='system'}) {
   return <><StudyLabel kind={kind}>{number} / {label}</StudyLabel><h2 id={id}>{title}</h2></>;
@@ -17,10 +17,10 @@ function Heading({number,label,title,id,kind='system'}) {
 function EvidenceFigure({item,label,eager=false}) {
   return <figure className={styles.figure} data-xr-evidence={item.src}>
     <div className={styles.figureIndex}>{label}</div>
-    <a className={styles.mediaFrame} data-information-window="evidence-image" href={item.src} target="_blank" rel="noreferrer" aria-label={`View full image: ${item.alt}`}>
+    <a className={styles.mediaFrame} data-information-window="evidence-image" data-information-motion-surface="plane" href={item.src} target="_blank" rel="noreferrer" aria-label={`View full image: ${item.alt}`}>
       <InformationSkin/><span className={styles.mediaPlane}><img src={item.src} width={item.width} height={item.height} alt={item.alt} loading={eager?'eager':'lazy'} decoding="async" data-site-critical={eager?'':undefined}/></span>
     </a>
-    <figcaption data-information-window="evidence-caption"><InformationSkin/><p>{item.caption}</p><span>{item.credit}</span></figcaption>
+    <figcaption data-information-window="evidence-caption" data-information-motion-surface="plane"><InformationSkin/><p>{item.caption}</p><span>{item.credit}</span></figcaption>
   </figure>;
 }
 function SceneSlot({stage,inspect=false,context=false}) {
@@ -49,7 +49,7 @@ export default function XRProject() {
   return <>
     <ProjectStudyChrome chapters={[{id:'overview',label:'Overview'},{id:'context',label:'Context'},{id:'method',label:'Method'},{id:'adapt',label:'Adapt'},{id:'assemble',label:'Assemble'},{id:'join',label:'Join'},{id:'making',label:'Physical study'},{id:'credits',label:'Credits'}]}/>
     <XRSceneStage model={study.model} stages={study.phoneStages} workspaceVisual={workspace.image}/>
-    <main id="portfolio-main" tabIndex={-1} className={styles.page} data-xr-study data-portfolio-root data-portfolio-section="xr-project">
+    <main id="portfolio-main" tabIndex={-1} className={styles.page} data-xr-study data-information-motion-profile="velocity-skin" data-portfolio-root data-portfolio-section="xr-project">
       <article aria-labelledby="xr-title">
         <header id="xr-overview" className={`${styles.chapter} ${styles.hero}`} data-xr-chapter="overview">
           <div className={styles.chapterInner}>

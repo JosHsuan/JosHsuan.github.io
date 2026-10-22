@@ -50,7 +50,7 @@ test('a document lease rejects a second driver and releases idempotently without
 });
 
 class Target{constructor(){this.listeners=new Map();}addEventListener(type,fn,options){const list=this.listeners.get(type)??[];list.push({fn,options});this.listeners.set(type,list);}removeEventListener(type,fn){this.listeners.set(type,(this.listeners.get(type)??[]).filter(item=>item.fn!==fn));}fire(type,event={}){for(const {fn} of [...this.listeners.get(type)??[]])fn(event);}}
-function environment({home=false}={}){
+function environment({home=false,section='home',plane=false}={}){
  const win=new Target(),doc=new Target(),html=new Target(),pending=new Map(),queries=new Map(),observers=[];
  const frameStats={requested:0,cancelled:0,delivered:0,maxPending:0};let next=0;
  html.phase='requested';html.getAttribute=()=>html.phase;doc.documentElement=html;doc.hidden=false;
@@ -69,7 +69,8 @@ function environment({home=false}={}){
   homeRoot=element();homeWindow=element();Object.assign(homeWindow,{parentElement:homeRoot,clientWidth:480,clientHeight:300,tagName:'DIV',offsetTop:100,
    querySelector:selector=>selector===':scope > [data-information-skin]'?{}:null,
   });homeWindow.setAttribute('data-information-window','home-introduction');
-  homeRoot.querySelectorAll=()=>[homeWindow];doc.querySelector=selector=>selector==='[data-portfolio-root][data-portfolio-section="home"]'?homeRoot:null;
+  homeRoot.querySelectorAll=()=>[homeWindow];doc.querySelector=selector=>selector===`[data-portfolio-root][data-portfolio-section="${section}"]`?homeRoot:null;
+  if(plane){homeRoot.setAttribute('data-information-motion-profile','velocity-skin');homeWindow.setAttribute('data-information-motion-surface','plane');}
   doc.defaultView=win;doc.activeElement=null;doc.fonts={ready:Promise.resolve()};
   win.navigator={connection:Object.assign(new Target(),{saveData:false})};
   win.getComputedStyle=()=>({background:'transparent',borderTopWidth:'0px',borderRightWidth:'0px',borderBottomWidth:'0px',borderLeftWidth:'0px',
@@ -313,4 +314,28 @@ test('a non-persisted document exit releases the field lease and scoped resource
  assert.equal(runtime.inspect().activeBindings,0);assert.equal(runtime.inspect().releases,1);assert.equal(surface.width,1);assert.equal(surface.height,1);
  env.win.fire('pageshow',{persisted:false});env.frame(5000);assert.equal(runtime.inspect().acquisitions,1);
  driver.dispose();assert.equal(runtime.inspect().releases,1);
+});
+
+for(const section of ['home','about','projects','contact'])test(`${section} explicitly owns one finite plane presenter and resets all ordinary-page policies`,async()=>{
+ const env=environment({home:true,section,plane:true}),surface=canvas();surface.getContext=()=>null;
+ const runtime=createBackgroundRuntime({createRenderer:fieldFactory}),driver=createSiteBackgroundDriver({window:env.win,document:env.doc,runtime,canvas:surface,backdrop:{style:{getPropertyValue(){return'';},setProperty(){}}}});
+ try{
+  await Promise.resolve();let now=100;const step=()=>env.frame(now+=16),item=()=>driver.inspect().homeScrolling.informationWindows.items[0];
+  step();assert.equal(item().plane,true);assert.equal(item().skinStrength,0);env.siteReady();step();
+  const animate=()=>{env.win.scrollY=env.win.scrollY===200?100:200;env.win.fire('scroll');step();assert.notEqual(item().skinStrength,0);assert.equal(env.pending.size,1);};
+  for(const [target,key,event] of [[env.queries.get('(prefers-reduced-motion: reduce)'),'matches','change'],[env.queries.get('(forced-colors: active)'),'matches','change'],[env.win.navigator.connection,'saveData','change'],[env.doc,'hidden','visibilitychange']]){
+   animate();target[key]=true;target.fire(event);step();assert.equal(item().skinStrength,0);assert.equal(driver.inspect().homeScrolling.informationWindows.settled,true);assert.equal(env.pending.size,0);
+   target[key]=false;target.fire(event);step();assert.equal(item().skinStrength,0);
+  }
+  animate();for(let i=0;i<180&&env.pending.size;i++)step();assert.equal(env.pending.size,0);assert.equal(item().skinStrength,0);assert.equal(env.frameStats.maxPending,1);
+ }finally{driver.dispose();}
+ assert.equal(env.homeWindow.getAttribute('data-information-plane'),null);assert.equal(env.homeWindow.style.getPropertyValue('--information-rx'),'');assert.equal(driver.inspect().events.nativeListeners,0);assert.equal(runtime.inspect().releases,1);
+});
+
+test('the generic site owner does not acquire information windows for specialist or unknown route roots',()=>{
+ for(const section of ['bending-active','xr-bending-active','unknown']){
+  const env=environment({home:true,section,plane:true}),surface=canvas();surface.getContext=()=>null;
+  const runtime=createBackgroundRuntime({createRenderer:fieldFactory}),driver=createSiteBackgroundDriver({window:env.win,document:env.doc,runtime,canvas:surface,backdrop:{style:{getPropertyValue(){return'';},setProperty(){}}}});
+  try{env.siteReady();env.frame(100);assert.equal(driver.inspect().homeScrolling,null);assert.equal(env.homeWindow.getAttribute('data-information-ready'),null);}finally{driver.dispose();}
+ }
 });

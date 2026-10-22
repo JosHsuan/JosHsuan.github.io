@@ -133,7 +133,7 @@ test('settled skins skip outline work on the ambient clock but remeasure and scr
 });
 
 test('opt-in full-panel velocity pose reverses and resets with native content',()=>{
-  const f=fixture([{}],{profile:'velocity-skin'});f.measure();f.publish();
+  const f=fixture([{}],{profile:'velocity-skin'});f.nodes[0].attrs.set('data-information-motion-surface','plane');f.measure();f.publish();
   assert.equal(f.publish({docY:80}),true);
   let item=f.presenter.inspect().items[0];
   assert(item.skinStrength>0);assert(item.edgeMaximum>0&&item.edgeMaximum<=9);
@@ -163,4 +163,55 @@ test('a native source label follows document geometry instead of the fixed Canva
  assert.equal(item.fixed,false);assert.equal(item.top,1000);assert.equal(item.visible,true);
  f.publish({docY:2500,reduced:true,canvasPlacement:{visible:true,chapter:'form'}});
  assert.equal(f.presenter.inspect().items[0].visible,false);
+});
+
+test('mixed explicit planes preserve unmarked and fixed ink trajectories and exclude nested skins',()=>{
+ const f=fixture([{}, {}, {kind:'model-label',chapter:'form'}, {parent:0}],{profile:'velocity-skin'});
+ for(const i of [0,2,3])f.nodes[i].attrs.set('data-information-motion-surface','plane');
+ const legacy=fixture([{}, {kind:'model-label',chapter:'form'}]);
+ f.measure();legacy.measure();
+ assert.deepEqual(f.presenter.inspect().items.map(x=>x.plane),[true,false,false]);
+ assert(f.nodes[0].attrs.has('data-information-plane'));
+ for(const i of [1,2,3])assert(!f.nodes[i].attrs.has('data-information-plane'));
+ for(const docY of [0,80,120,40]){
+  const args={docY,canvasPlacement:{chapter:'form',visible:true,y:20}};f.publish(args);legacy.publish(args);
+  const items=f.presenter.inspect().items,old=legacy.presenter.inspect().items;
+  for(const key of ['progress','velocity','x','y','rz','edgeMaximum']){
+   assert.equal(items[1][key],old[0][key],`unmarked ${key}`);
+   assert.equal(items[2][key],old[1][key],`fixed ${key}`);
+  }
+ }
+ assert(f.presenter.inspect().items[0].skinStrength!==0);
+ f.presenter.dispose();for(const node of f.nodes)assert(!node.attrs.has('data-information-plane'));
+});
+
+test('surface opt-in alone cannot enable a plane under legacy profile',()=>{
+ const f=fixture([{}]);f.nodes[0].attrs.set('data-information-motion-surface','plane');f.measure();f.publish({docY:80});
+ assert.equal(f.presenter.inspect().items[0].plane,false);assert(!f.nodes[0].attrs.has('data-information-plane'));
+});
+
+test('same-node native/fixed portal reclassification clears plane state and restarts at current document Y',()=>{
+ const f=fixture([{kind:'model-label',chapter:'form',top:100}],{profile:'velocity-skin'}),node=f.nodes[0];
+ node.attrs.set('data-information-motion-surface','plane');node.attrs.set('data-model-label-placement','native');
+ f.measure();f.publish({docY:80});assert(f.presenter.inspect().items[0].skinStrength>0);
+ node.attrs.set('data-model-label-placement','overlay');f.measure(80);
+ assert(!node.attrs.has('data-information-plane'));
+ for(const key of ['x','y','rz','rx','ry','skew','perspective'])assert(!node.styles.has('--information-'+key));
+ assert.equal(f.presenter.inspect().items[0].plane,false);assert.equal(f.presenter.inspect().items[0].fixed,true);
+ node.attrs.set('data-model-label-placement','native');f.measure(80);f.publish({docY:80});
+ assert(node.attrs.has('data-information-plane'));assert.equal(f.presenter.inspect().items[0].skinStrength,0);
+ f.publish({docY:100});assert(f.presenter.inspect().items[0].skinStrength>0);
+ node.attrs.delete('data-information-motion-surface');f.measure(100);
+ assert(!node.attrs.has('data-information-plane'));assert.equal(f.presenter.inspect().items[0].skinStrength,0);
+ assert(!node.styles.has('--information-rx'));
+});
+
+test('reparenting an active plane beneath another information owner releases its transform ownership',()=>{
+ const f=fixture([{},{}],{profile:'velocity-skin'});for(const n of f.nodes)n.attrs.set('data-information-motion-surface','plane');
+ f.measure();f.publish({docY:80});assert(f.nodes[1].attrs.has('data-information-plane'));
+ f.nodes[1].parentElement=f.nodes[0];f.measure(80);
+ assert.equal(f.presenter.inspect().count,1);assert(f.nodes[1].attrs.has('data-information-nested'));
+ assert(!f.nodes[1].attrs.has('data-information-plane'));assert.equal(f.nodes[1].styles.size,0);
+ f.nodes[1].parentElement=null;f.measure(80);f.publish({docY:80});
+ assert.equal(f.presenter.inspect().count,2);assert.equal(f.presenter.inspect().items[1].skinStrength,0);
 });

@@ -26,7 +26,7 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
    if(binding)throw Error('XR director is already connected');
    const events=new EventManager(),scope=events.createScope('xr-stage');
    const dom=new DOMPresenter(),publisher=dom.forOwner('xr-director');
-   const windows=createInformationWindowPresenter({root,publisher:dom.forOwner('xr-information')});
+   const windows=createInformationWindowPresenter({root,profile:root.getAttribute('data-information-motion-profile')??'ink',publisher:dom.forOwner('xr-information')});
    const liquid=createLiquidGlassPresenter({root:doc,publisher:dom.forOwner('xr-liquid-glass')});
    const sceneMotion=createXRStageMotion(),sceneSurface=host.querySelector('[data-xr-scene-surface]')??host;
    const workspaceImage=host.querySelector('[data-xr-workspace-visual]');
@@ -171,8 +171,9 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
      if(cameraRecovery){cameraRecovery.elapsed=Math.min(.35,cameraRecovery.elapsed+delta);if(cameraRecovery.elapsed>=.35)cameraRecovery=null;}
     }
     if(p.reduced||p.saveData||lifecycle.inspect().phase==='failed'){handheldGain=0;cameraRecovery=null;cameraWasPaused=false;}
-    const moving=windows.publish({docY:win.scrollY,dt,reduced:policy().reduced,seek:resumed,resumed});
-    const glassMoving=liquid.publish({dt,reduced:p.reduced,resumed,hidden:p.hidden,opaque:opaqueGlass(),keyboardFocus:liquidKeyboardFocus});
+    const informationNeutral=p.reduced||p.saveData||p.hidden||!p.siteReady||paused||away||!visible||glassPreferences[0].matches;
+    const moving=windows.publish({docY:win.scrollY,dt,reduced:informationNeutral,seek:resumed,resumed});
+    const glassMoving=liquid.publish({dt,reduced:informationNeutral,resumed,hidden:p.hidden,opaque:opaqueGlass(),keyboardFocus:liquidKeyboardFocus});
     resumed=false;paint();notify();
     if(!settled||moving||glassMoving||sceneMotion.transition||cameraActive&&(!focusedReading()||handheldGain>0||cameraRecovery))scheduler.schedule();else previous=0;
    }

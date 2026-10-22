@@ -50,7 +50,7 @@ export default function SourceDiagram({kind = 'library', title, className = ''})
 
   const available = data?.kind === validKind ? data : null;
   const paths = available ? new Map(available.paths.map(path => [path.id, path])) : null;
-  return <figure ref={frame} className={`${styles.frame} ${className}`} data-source-diagram={validKind} data-information-window="source-diagram"
+  return <figure ref={frame} className={`${styles.frame} ${className}`} data-source-diagram={validKind} data-information-window="source-diagram" data-information-motion-surface="plane"
     data-diagram-count={available?.groups.length ?? (validKind === 'library' ? 11 : validKind === 'miura' ? 3 : 4)}
     onKeyDown={validKind==='library'?undefined:manager.key}
     onBlur={validKind==='library'?undefined:manager.blur}>
