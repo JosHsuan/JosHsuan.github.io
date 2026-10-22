@@ -42,6 +42,26 @@ async function hold(page,key){
  },key,{timeout:WAIT});
  return backdrop(page);
 }
+// Failure-only evidence; never retries, seeks, resumes or polls the source.
+async function attachNativeMediaFailure(page,media,phase,initialTime=null){
+ try{
+  const facts=await page.evaluate(({id,phase,initialTime})=>{
+   const ranges=value=>Array.from({length:Math.min(value.length,8)},(_,i)=>[value.start(i),value.end(i)]);
+   return {at:performance.now(),id,phase,initialTime,visibility:document.visibilityState,
+    activeElement:document.activeElement?{tag:document.activeElement.tagName,id:document.activeElement.id}:null,
+    backdrop:window.__globalBackground?.inspect().driver.projectStudy?.backdrop,
+    receipts:(window.__testProjectMediaReceipts??[]).slice(-256),modeReceipts:(window.__testModeNativeMedia??[]).slice(-256),
+    native:[...document.querySelectorAll('[data-project-motion-media]')].filter(video=>video.dataset.projectMotionId===id).slice(0,4).map(video=>({
+     paused:video.paused,ended:video.ended,seeking:video.seeking,readyState:video.readyState,networkState:video.networkState,
+     currentTime:video.currentTime,duration:video.duration,currentSrc:video.currentSrc,loop:video.loop,playbackRate:video.playbackRate,
+     width:video.videoWidth,height:video.videoHeight,buffered:ranges(video.buffered),seekable:ranges(video.seekable),
+     error:video.error?{code:video.error.code,message:video.error.message}:null,
+    })),
+   };
+  },{id:media.id,phase,initialTime});
+  await test.info().attach('native-media-failure',{body:JSON.stringify(facts,null,2),contentType:'application/json'});
+ }catch{/* Diagnostic failure or teardown must never replace the original assertion. */}
+}
 async function playing(page,media){
  await page.evaluate(()=>{
   if(window.__testProjectMediaReceipts)return;
@@ -60,8 +80,7 @@ async function playing(page,media){
    return state?.firstFrame&&!state.failed&&state.playing&&video&&video.readyState>=2&&!video.paused;
   },media.id,{timeout:WAIT});
  }catch(error){
-  const facts=await page.evaluate(id=>({at:performance.now(),backdrop:window.__globalBackground.inspect().driver.projectStudy.backdrop,receipts:window.__testProjectMediaReceipts,native:[...document.querySelectorAll('[data-project-motion-media]')].filter(video=>video.dataset.projectMotionId===id).map(video=>({paused:video.paused,readyState:video.readyState,currentTime:video.currentTime,currentSrc:video.currentSrc,networkState:video.networkState,error:video.error?{code:video.error.code,message:video.error.message}:null}))}),media.id);
-  await test.info().attach('native-media-failure',{body:JSON.stringify(facts,null,2),contentType:'application/json'});throw error;
+  await attachNativeMediaFailure(page,media,'playing');throw error;
  }
 }
 async function nativeVideo(page,media){
@@ -78,7 +97,9 @@ async function nativeVideo(page,media){
  const initial=await video.evaluate(node=>node.currentTime);
  // A source loop may wrap. Either a forward delta or the genuine wrap proves
  // native media time; no test scroll or controller writes currentTime.
+ try{
  await expect.poll(()=>video.evaluate((node,before)=>Math.abs(node.currentTime-before),initial),{timeout:WAIT}).toBeGreaterThan(.03);
+ }catch(error){await attachNativeMediaFailure(page,media,'advancement',initial);throw error;}
  await expect(page.locator(`[data-project-source-caption="${media.chapter}"]`)).toContainText(media.caption);
  await expect(page.locator(`[data-project-source-caption="${media.chapter}"]`)).toContainText(media.credit);
  await expect(page.locator(`[data-project-motion-source][href="${media.src}"]`)).toHaveAttribute('target','_blank');
