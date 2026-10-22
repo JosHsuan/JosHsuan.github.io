@@ -50,7 +50,7 @@ function fixture({pending=false,firstPaintFailure=false,firstPaint,workspacePend
  const info=new Element(doc,{top:1200,width:500,height:160,marker:'[data-information-window]'}),skin=new Element(doc);info.parentElement=root;info.setAttribute('data-information-window','editorial');info.querySelector=selector=>selector===':scope > [data-information-skin]'?skin:null;
  root.querySelectorAll=selector=>selector==='[data-xr-chapter]'?chapters:selector==='a[href^="#"]'?links:selector==='[data-information-window]'?[info]:[];
  doc.getElementById=id=>chapters.find(node=>node.id===id)??null;
- const control=new Element(doc,{marker:'[data-xr-model-control]'});control.parentElement=root;
+ const control=new Element(doc,{marker:'[data-xr-model-control]'});control.parentElement=root;doc.activeElement=control; // Default fixtures exercise focused, finite reading; idle is tested explicitly below.
  const protectedNode=new Element(doc,{marker:'[data-protect]'});protectedNode.parentElement=root;
  const starts=[],handles=[],states=[],acquired=deferred();let hit={source:true,kind:'model'};
  const makeHandle=()=>{
@@ -109,8 +109,8 @@ test('source-hit gestures follow Bending camera direction, keep vertical touch n
  const f=fixture();t.after(f.cleanup);f.site('entered');f.scroll('method');await f.settle();
  for(const hit of [false,{source:false,kind:'model'},{source:true,kind:'phone'}]){f.setHit(hit);f.pointer('pointerdown');assert.equal(f.director.inspect().gesture,null);}
  f.setHit({source:true,kind:'model'});f.pointer('pointerdown',{target:f.protectedNode});assert.equal(f.director.inspect().gesture,null);
- f.pointer('pointerdown',{pointerType:'touch'});const vertical=f.pointer('pointermove',{pointerType:'touch',clientX:604,clientY:440});assert.equal(vertical.prevented,0);assert.equal(f.director.inspect().gesture,null);assert.equal(f.control.captured.size,0);assert.equal(f.director.inspect().gestures.at(-1).reason,'native-scroll');
- f.pointer('pointerdown',{pointerType:'touch'});const drag=f.pointer('pointermove',{pointerType:'touch',clientX:670,clientY:408});await f.settle();assert.equal(drag.prevented,1);assert.ok(f.director.inspect().camera.value.azimuth<0);assert.equal(f.control.captured.size,1);
+ f.pointer('pointerdown',{pointerType:'touch'});const vertical=f.pointer('pointermove',{pointerType:'touch',clientX:604,clientY:440});assert.equal(vertical.prevented,0);assert.equal(f.director.inspect().gesture,null);assert.equal(f.control.captured.size,0);assert.equal(f.director.inspect().gesture,null);
+ f.pointer('pointerdown',{pointerType:'touch'});const horizontal=f.pointer('pointermove',{pointerType:'touch',clientX:670,clientY:408});assert.equal(horizontal.prevented,0);assert.equal(f.control.captured.size,0);f.pointer('pointerdown');const drag=f.pointer('pointermove',{clientX:670,clientY:408});await f.settle();assert.equal(drag.prevented,1);assert.ok(f.director.inspect().camera.value.azimuth<0);assert.equal(f.control.captured.size,1);
  f.pointer('pointerup');await f.settle();assert.deepEqual(f.director.inspect().camera.value,{azimuth:0,elevation:0});assert.equal(f.control.captured.size,0);
  f.pointer('pointerdown');f.pointer('pointermove',{clientX:680,clientY:430});f.pointer('pointercancel');await f.settle();assert.equal(f.director.inspect().gesture,null);assert.deepEqual(f.director.inspect().camera.value,{azimuth:0,elevation:0});
  f.pointer('pointerdown');f.pointer('pointermove',{clientX:640});f.frame();f.pointer('pointermove',{clientX:720});f.frame(1300);assert.deepEqual(f.director.inspect().camera.value,f.director.inspect().camera.target,'A long foreground frame retains the latest held pointer intent');assert.ok(f.director.inspect().gesture.locked);f.doc.fire('lostpointercapture',{pointerId:1});await f.settle();assert.equal(f.director.inspect().gesture,null);assert.equal(f.director.inspect().gestures.at(-1).reason,'lost-capture');
@@ -278,4 +278,22 @@ test('the three shared glass groups use the XR Director scheduler, engine fallba
  const contrast=f.queries.get('(prefers-contrast: more)');contrast.matches=true;contrast.fire('change');await f.settle();assert.equal(f.director.inspect().liquidGlass.mode,'opaque');
  assert.ok(f.glass.every(node=>node.getAttribute('data-liquid-mode')==='opaque'));assert.equal(f.director.inspect().liquidGlass.mapPixels,0);
  f.cleanup();assert.equal(f.director.inspect().events.nativeListeners,0);assert.equal(f.director.inspect().liquidGlass.count,0);assert.ok(f.glass.every(node=>node.getAttribute('data-liquid-ready')===null&&node.getAttribute('data-liquid-mode')===null));assert.equal(f.raf.size,0);
+});
+
+test('model native progress drives genuine camera reversibly and outgoing model uses its own clamped interval',async t=>{
+ const f=fixture();t.after(f.cleanup);f.site('entered');f.scroll('method');await f.settle();const handle=f.handles[0],method=f.chapters.find(row=>row.dataset.xrChapter==='method');
+ const read=async progress=>{f.win.scrollY=method.offsetTop+progress*method.offsetHeight-f.win.innerHeight*.42;f.win.fire('scroll');await f.settle();return handle.presents.at(-1);};
+ const a=await read(.1),b=await read(.8);assert(b.cameraIntent.yawRad>a.cameraIntent.yawRad);assert(b.cameraIntent.pitchRad>a.cameraIntent.pitchRad);assert.deepEqual((await read(.1)).cameraIntent,a.cameraIntent);assert.equal(f.starts.length,1);
+ f.scroll('adapt');f.frame();assert.equal(f.director.inspect().scene.chapter,'method');assert.equal(f.director.inspect().camera.modelProgress,1);assert(Math.abs(handle.presents.at(-1).cameraIntent.yawRad-1.16)<1e-12);await f.settle();assert.equal(handle.presents.at(-1).cameraIntent,null);assert.deepEqual(handle.presents.at(-1).handheld,{xPx:0,yPx:0,rollRad:0});
+ f.scroll('method');await f.settle();f.scroll('context');f.frame();assert.equal(f.director.inspect().scene.chapter,'method');assert.equal(f.director.inspect().camera.modelProgress,0);assert.equal(handle.presents.at(-1).cameraIntent.yawRad,.92);await f.settle();assert.equal(handle.presents.at(-1).cameraIntent,null);
+});
+
+test('visible XR model idle changes only handheld intent on one scheduler; focus settles and pause resumes finitely',async t=>{
+ const f=fixture();t.after(f.cleanup);f.site('entered');f.scroll('method');await f.settle();const handle=f.handles[0];
+ f.doc.activeElement=null;f.root.fire('focusout',{target:f.control});for(let i=0;i<30;i++){f.frame();await flush();assert(f.raf.size<=1);}
+ const before=handle.presents.at(-1),clock=f.director.inspect().camera.activeSeconds;f.frame();await flush();const after=handle.presents.at(-1);
+ assert.deepEqual(after.cameraIntent,before.cameraIntent);assert.notDeepEqual(after.handheld,before.handheld);assert(f.director.inspect().camera.activeSeconds>clock);assert.equal(f.raf.size,1);
+ f.director.setPaused(true);await f.settle();const held=handle.presents.at(-1);f.win.scrollY+=250;f.win.fire('scroll');await f.settle();assert.deepEqual(handle.presents.at(-1).cameraIntent,held.cameraIntent);assert.deepEqual(handle.presents.at(-1).handheld,held.handheld);
+ f.doc.activeElement=f.control;f.director.setPaused(false);f.frame();await flush();assert.equal(f.director.inspect().camera.recovering,true);await f.settle();assert.equal(f.director.inspect().camera.recovering,false);assert.deepEqual(handle.presents.at(-1).handheld,{xPx:0,yPx:0,rollRad:0});assert.notDeepEqual(handle.presents.at(-1).cameraIntent,held.cameraIntent);
+ const stopped=f.director.inspect().camera.activeSeconds;f.doc.hidden=true;f.doc.fire('visibilitychange');f.frame(10000);assert.equal(f.director.inspect().camera.activeSeconds,stopped);assert.equal(f.raf.size,0);
 });

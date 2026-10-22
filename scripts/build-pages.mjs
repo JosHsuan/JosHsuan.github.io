@@ -109,7 +109,7 @@ const sources = [
   'components/ProjectModelPreview.jsx', 'components/project-model-scene.mjs', 'components/project-model-recipe.mjs', 'components/project-grid-layout.mjs',
   'components/GlobalBackground.jsx', 'runtime/background/BackgroundRuntime.mjs', 'runtime/background/SiteBackgroundDriver.mjs',
   'components/XRModelStudy.jsx', 'components/XRPhoneStudy.jsx', 'components/research-media.module.css',
-  'components/research-scene.mjs', 'components/research-scene-geometry.mjs',
+  'components/research-scene.mjs', 'components/research-scene-geometry.mjs', 'components/prepared-research-support.mjs',
   'components/XRSceneStage.jsx', 'components/xr-stage-scene.mjs', 'components/xr-scene-stage.module.css',
   'runtime/xr/XRStageDirector.mjs', 'runtime/xr/XRStageMotion.mjs', 'components/xr-stage-environment.mjs',
   'components/ProjectAnimationPreview.jsx', 'runtime/site/PreviewLifecycle.mjs', 'runtime/site/video-resource.mjs',

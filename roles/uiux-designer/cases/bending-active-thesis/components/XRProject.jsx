@@ -6,6 +6,8 @@ import study from '../release/xr-study.json';
 import workspace from '../release/xr-workspace.json';
 import styles from './XRProject.module.css';
 
+const MODEL_GUIDANCE='When 3D is available, scroll to follow the camera. For optional keyboard inspection, focus the model and use arrow keys; Home or Escape returns to the current scroll view.';
+
 function Panel({children,className=''}) {
   return <div className={`${styles.panel} ${className}`} data-information-window="editorial"><InformationSkin/>{children}</div>;
 }
@@ -25,7 +27,7 @@ function SceneSlot({stage,inspect=false,context=false}) {
   const poster=context?workspace.image:stage?.poster??study.model.poster;
   return <div className={styles.sceneSlot} data-xr-scene-slot data-xr-scene-kind={context?'workspace':stage?'phone':'model'}
     data-xr-model-control={inspect?'':undefined} tabIndex={inspect?0:undefined} role={inspect?'group':undefined}
-    aria-label={inspect?'Original bamboo assembly. When 3D is available, drag horizontally or use arrow keys to inspect. Home resets; Escape returns to the chapter view.':undefined}>
+    aria-label={inspect?`Original bamboo assembly. ${MODEL_GUIDANCE}`:undefined}>
     <noscript><figure className={styles.staticFigure}><picture>{context&&workspace.image.mobile&&<source media="(max-width:799px)" srcSet={workspace.image.mobile.src}/>}<img src={poster.src} width={poster.width} height={poster.height} alt={poster.alt} loading="lazy"/></picture><figcaption>{context?workspace.caption:stage?stage.caption:study.model.caption}</figcaption></figure></noscript>
   </div>;
 }
@@ -81,6 +83,7 @@ export default function XRProject() {
             {study.sections.method.paragraphs.map(text=><p key={text}>{text}</p>)}
             <ol className={styles.workflow} aria-label="Research feedback workflow">{study.workflow.map((step,index)=><li key={step.label}><span>{String(index+1).padStart(2,'0')} / {step.label}</span><h3>{step.title}</h3><p>{step.description}</p></li>)}</ol>
             <div className={styles.modelExplanation}><h3>{study.model.title}</h3><p>{study.model.description}</p></div>
+            <p className={styles.caption} data-xr-model-guidance>{MODEL_GUIDANCE}</p>
             <p className={styles.caption}>{study.model.caption}</p><p className={styles.credit}>{study.model.credit}</p>
           </Panel></div>
           <div className={styles.evidenceBand}><EvidenceFigure item={study.media.communication} label="MEASUREMENT → MODEL → XR / ORIGINAL SYSTEM DIAGRAM"/><EvidenceFigure item={study.media.dataCategories} label="DATA FLOW / LIVE GEOMETRY, CONFIGURATION + ASSEMBLY"/></div>

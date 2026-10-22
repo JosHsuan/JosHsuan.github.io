@@ -48,7 +48,7 @@ acceptance remains pending unless stated below.
 | `/projects/` | T | Default | Native project selection; prepared-card lifecycle | Pinned case previews | Shared deformation policy without transforming hit geometry unpredictably |
 | `/contact/` | T | Default | Native contact actions | Existing public links | Shared deformation with link/focus safety |
 | `/projects/bending-active/` | T | Protected route-specific presenter | Reference chapter/camera choreography | Established model and source-inspection tools | Adapt shared motion grammar only after reference comparison; source/idle recipes protected; reviewed scroll-camera adapter pending |
-| `/projects/xr-bending-active/` | T | Protected route-specific presenter | Existing model/phone narrative | Verified XR source records | Shared motion adapter review; numerical camera anomaly remains unresolved, diagnostics retained |
+| `/projects/xr-bending-active/` | T | Protected route-specific presenter | Candidate: Method-only authored scroll camera; optional inspection returns to current scroll view | Original model and all source points preserved; phone recordings/workspace unchanged | New model Pause/Resume and 2D idle/prepared-support acceptance pending exact browser captures; numerical camera anomaly remains unresolved, diagnostics retained. See [XR direction](XR_SCROLL_CAMERA_DIRECTION.md) |
 | `/projects/mode-s-of-making/` | T | Whole-plane pilot accepted in scoped captures/tests | Revised causal sequence accepted; model interval and three clips preserved | Native recordings/simulation distinguished; mobile external white rails corrected | Extend successful grammar systematically; pilot is a bounded planar approximation, not Lusion equivalence |
 | `/projects/entrance-installation-art/` | T | Default | Existing model interval preserved | Three native source-focus guides accepted, including mobile/no-JS | Shared deformation rollout; fine source lettering still uses full-image links |
 | `/projects/dot-based-3d-printing/` | T | Default | Existing narrative, not yet accepted as a new narrative revision | Reviewed smaller delivery MP4; original retained; native timing/loop checks passed | Narrative/readability review plus shared deformation rollout |
@@ -101,7 +101,7 @@ unbounded full-CI retries or speculative visual/runtime workarounds.
 
 ## Scroll-camera implementation checkpoint
 
-The generic adapter is a new **unpublished candidate**, not the live baseline:
+The generic adapter is **accepted and live at `c6ede4`**: [CI 39734469697](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39734469697) passed 423 public browser executions; [deployment 39738687810](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39738687810) published the accepted artifact.
 Mode/s, Entrance, Dot, HC and Special Assemblies have authored chapter-local
 paths, optional existing inspection and a small independent idle layer. Original
 model views and all source bytes remain intact. Caschlatsch has no model. XR and
@@ -123,5 +123,8 @@ but gives generic idle an explicitly **2D canvas pan/roll without parallax** on 
 same clock; stable camera intent reuses the complete rendered source. Bending's
 existing handheld recipe is unchanged. Bounded receipts require changing canvas
 framing with no settled-idle WebGL draws/fits, fixed pixel/allocation budgets and
-retained source framing. Actual engine/mobile videos and replacement CI remain
-pending; no physical-device FPS or site-wide completion claim follows.
+retained source framing. All five generic routes have accepted retained Chromium, WebKit and mobile
+Chromium captures at that exact release. Settled-idle receipts showed eight CSS
+updates with zero extra WebGL draws/fits. This does not establish physical-device
+FPS or site-wide completion. XR is the next bounded candidate; Bending remains
+a separate adapter.

@@ -1,5 +1,6 @@
 import * as T from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {prepareResearchSupport} from './prepared-research-support.mjs';
 import {createRendererBudget} from './renderer-budget.mjs';
 import {collectResearchSupport,createResearchPhoneGeometry,fitResearchCamera,RESEARCH_MODEL_PIXELS,RESEARCH_PHONE_PIXELS} from './research-scene-geometry.mjs';
 import {acquireVideo} from '../runtime/site/video-resource.mjs';
@@ -22,15 +23,15 @@ export function xrStagePaintReady({phone=false,shaderError=false,calls,source,ph
 /** Camera presentation only: source positions, normals, units and materials are
  * untouched. The subject has a reading-safe composition inside a full viewport;
  * that composition never limits the canvas or its project-owned surroundings. */
-export function stageCameraPose(points,width,height,{chapter='overview',azimuth=0,elevation=0}={}){
- const narrow=width<800,phone=phoneChapter(chapter);
- const slot= narrow
-  ?{x:.5,y:phone?.51:.32,width:.94,height:phone?.76:.45}
-  :{x:.735,y:.53,width:.51,height:.78};
- const base=sourcePoses[chapter]??sourcePoses.overview;
- const pose=fitResearchCamera(points,width*slot.width/(height*slot.height),{
-  yaw:phone?.1:base[0]+azimuth,pitch:phone?-.025:Math.max(-.1,Math.min(1.15,base[1]+elevation)),fov:phone?32:36,zoom:phone?.98:base[2],
- });
+function cameraOptions({chapter='overview',azimuth=0,elevation=0,cameraIntent=null}={}){
+ const phone=phoneChapter(chapter),base=sourcePoses[chapter]??sourcePoses.overview,intent=chapter==='method'?cameraIntent:null;
+ if(intent&&![intent.yawRad,intent.pitchRad,intent.fovDeg,intent.zoom].every(Number.isFinite))throw RangeError('Finite composed XR camera intent required');
+ return {yaw:phone?.1:intent?.yawRad??base[0]+azimuth,pitch:phone?-.025:Math.max(-.1,Math.min(1.15,intent?.pitchRad??base[1]+elevation)),fov:phone?32:intent?.fovDeg??36,zoom:phone?.98:intent?.zoom??base[2]};
+}
+const cameraSlot=(width,phone)=>width<800?{x:.5,y:phone?.51:.32,width:.94,height:phone?.76:.45}:{x:.735,y:.53,width:.51,height:.78};
+export function stageCameraPose(points,width,height,state={}){
+ const phone=phoneChapter(state.chapter),slot=cameraSlot(width,phone),options=cameraOptions(state),aspect=width*slot.width/(height*slot.height);
+ const pose=typeof points?.fit==='function'?points.fit(aspect,options):fitResearchCamera(points,aspect,options);
  const fov=T.MathUtils.radToDeg(2*Math.atan(Math.tan(T.MathUtils.degToRad(pose.fov/2))/slot.height));
  return {...pose,fov,...(phone?{near:pose.radius*.08,far:pose.distance+pose.radius*2.5}:{}),slot,
   offset:{x:width*(.5-slot.x),y:height*(.5-slot.y)}};
@@ -43,17 +44,24 @@ export function stageRenderView(pose,width,height){
  return {left:0,top:0,width,height,fullWidth:width,fullHeight:height,offsetX:pose.offset.x,offsetY:pose.offset.y};
 }
 
+/** Invert this canvas-only framing transform; parent hold-stage translation or
+ * axis scaling is represented by its actual bounding rectangle. */
+export function xrStageCanvasPoint(x,y,rect,size,handheld){
+ const {width,height}=size,{xPx=0,yPx=0,rollRad=0,originX=width*.5,originY=height*.5}=handheld;
+ const c=Math.cos(rollRad),s=Math.sin(rollRad);
+ const corners=[[0,0],[width,0],[0,height],[width,height]].map(([px,py])=>({x:originX+xPx+c*(px-originX)-s*(py-originY),y:originY+yPx+s*(px-originX)+c*(py-originY)}));
+ const minX=Math.min(...corners.map(p=>p.x)),maxX=Math.max(...corners.map(p=>p.x)),minY=Math.min(...corners.map(p=>p.y)),maxY=Math.max(...corners.map(p=>p.y));
+ if(!(rect.width>0&&rect.height>0&&width>0&&height>0))return null;
+ const tx=(x-rect.left)*(maxX-minX)/rect.width+minX-originX-xPx,ty=(y-rect.top)*(maxY-minY)/rect.height+minY-originY-yPx;
+ const px=originX+c*tx+s*ty,py=originY-s*tx+c*ty;
+ const epsilon=1e-7;return px< -epsilon||px>width+epsilon||py< -epsilon||py>height+epsilon?null:{x:Math.max(0,Math.min(width,px)),y:Math.max(0,Math.min(height,py))};
+}
+
 function releaseObject(root){
  const geometries=new Set(),materials=new Set(),textures=new Set();
  root?.traverse(node=>{if(node.geometry)geometries.add(node.geometry);for(const material of(Array.isArray(node.material)?node.material:node.material?[node.material]:[])){materials.add(material);for(const value of Object.values(material))if(value?.isTexture)textures.add(value);}});
  geometries.forEach(v=>v.dispose());materials.forEach(v=>v.dispose());textures.forEach(v=>v.dispose());
 }
-function supportBounds(points){
- const min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];
- for(let i=0;i<points.length;i++){const axis=i%3;min[axis]=Math.min(min[axis],points[i]);max[axis]=Math.max(max[axis],points[i]);}
- return{min,max};
-}
-
 /** One project renderer/camera. Director supplies chapter and interaction facts;
  * native video supplies decoded frames. Neither owns another animation clock. */
 export async function acquireXRStage({host,signal,model,stages,videos,positions=new Map(),onMode=()=>{},createRenderer=options=>new T.WebGLRenderer(options),acquireMedia=acquireVideo}){
@@ -64,7 +72,8 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
  let state={chapter:'overview',azimuth:0,elevation:0,paused:false},size={width:0,height:0},pose=null;
  let gpuReason=null,mediaReason=null,draws=0,mediaFrames=0,lastPaintKey='',revision=null,vertices=0,triangles=0,shaderError=false,mode='poster';
  let contextListener=null,mediaTime=null,mediaPending=false,successfulPaint=false,selection=null,renderView=null;
- let lastRenderFailure=null,shaderLogs=null;
+ let lastRenderFailure=null,shaderLogs=null,lastFit=null,cameraFits=0;
+ let handheld={xPx:0,yPx:0,rollRad:0,originX:0,originY:0},compositorWrites=0;
  let drawCounts={source:0,phoneBody:0,phoneScreen:0,stage:0};
  const raycaster=new T.Raycaster(),ndc=new T.Vector2(),manager=new T.LoadingManager();
  const nativeNodes=new Map(stages.map(stage=>[stage.id,host.querySelector(`[data-xr-native-phone="${stage.id}"]`)]));
@@ -72,7 +81,7 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
  const announce=(next,reason='')=>{const changed=mode!==next||host.dataset.xrFallback!==reason;mode=next;host.dataset.xrRendering=next;host.dataset.xrFallback=reason;if(changed)onMode(next,reason);};
  const stopFrames=()=>{if(frameCallback!==null&&activeStage){videos[activeStage.id]?.cancelVideoFrameCallback?.(frameCallback);frameCallback=null;}};
  function disposePhone(){
-  stopFrames();if(phone){scene?.remove(phone.group);releaseObject(phone.group);}phone=null;texture=null;
+  stopFrames();if(phone){scene?.remove(phone.group);releaseObject(phone.group);phone.support.dispose();}phone=null;texture=null;lastFit=null;
   for(const node of nativeNodes.values())delete node.dataset.videoTextureSource;
  }
  function releaseRetainedMedia(){
@@ -108,7 +117,7 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
  }
  function disposeGPU(){
   stopFrames();if(renderer){renderer.domElement.removeEventListener('webglcontextlost',contextListener);renderer.domElement.remove();budget?.dispose();renderer.dispose();renderer.forceContextLoss();}renderer=null;budget=null;
-   disposePhone();releaseRetainedMedia();environment?.dispose();environment=null;releaseObject(gltf?.scene);gltf=null;support=null;scene?.clear();scene=null;camera=null;successfulPaint=false;delete host.dataset.xrScenePainted;
+   disposePhone();releaseRetainedMedia();environment?.dispose();environment=null;releaseObject(gltf?.scene);gltf=null;support?.dispose();support=null;lastFit=null;scene?.clear();scene=null;camera=null;successfulPaint=false;delete host.dataset.xrScenePainted;
  }
  function fallbackGPU(reason){
   if(disposed)return;gpuReason=reason;disposeGPU();announce(activeStage&&mediaHandle?'native-video':'poster',reason);
@@ -118,9 +127,11 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
  }
  signal.addEventListener('abort',dispose,{once:true});
  function applyPose(points){
-  pose=stageCameraPose(points,size.width,size.height,state);camera.position.fromArray(pose.position);camera.up.fromArray(pose.up);camera.aspect=size.width/size.height;camera.fov=pose.fov;camera.near=pose.near;camera.far=pose.far;
+  const key=JSON.stringify([size,cameraOptions(state)]);if(lastFit?.points===points&&lastFit.key===key)return;
+  cameraFits++;pose=stageCameraPose(points,size.width,size.height,state);camera.position.fromArray(pose.position);camera.up.fromArray(pose.up);camera.aspect=size.width/size.height;camera.fov=pose.fov;camera.near=pose.near;camera.far=pose.far;
   renderView=stageRenderView(pose,size.width,size.height);
   camera.setViewOffset(size.width,size.height,renderView.offsetX,renderView.offsetY,renderView.width,renderView.height);camera.lookAt(...pose.target);camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
+  lastFit={points,key};
   Object.assign(renderer.domElement.style,{inset:'auto',left:renderView.left+'px',top:renderView.top+'px',width:renderView.width+'px',height:renderView.height+'px'});
  }
  function rememberRenderFailure(error,operation){
@@ -135,7 +146,17 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
  function draw(force=false){
   if(disposed||!renderer||!size.width||!size.height)return;
   const isPhone=phoneChapter(state.chapter);if(isPhone&&!phone)return;if(!isPhone&&!support)return;
-  const key=JSON.stringify([size,state.chapter,state.azimuth,state.elevation,isPhone?mediaFrames:0]);if(!force&&key===lastPaintKey&&successfulPaint)return;
+  const options=cameraOptions(state);
+  const micro=state.chapter==='method'&&state.handheld?state.handheld:{xPx:0,yPx:0,rollRad:0},slot=cameraSlot(size.width,isPhone);
+  if(![micro.xPx,micro.yPx,micro.rollRad].every(Number.isFinite)||Math.abs(micro.xPx)>1.2||Math.abs(micro.yPx)>1.2||Math.abs(micro.rollRad)>.0012)throw RangeError('Bounded compositor handheld required');
+  const originX=size.width*slot.x,originY=size.height*slot.y;
+  const hint=state.chapter==='method'&&state.handheld?'transform':'';if(renderer.domElement.style.willChange!==hint)renderer.domElement.style.willChange=hint;
+  if(micro.xPx!==handheld.xPx||micro.yPx!==handheld.yPx||micro.rollRad!==handheld.rollRad||originX!==handheld.originX||originY!==handheld.originY){
+   handheld={...micro,originX,originY};compositorWrites++;
+   renderer.domElement.style.transformOrigin=`${slot.x*100}% ${slot.y*100}%`;
+   renderer.domElement.style.transform=micro.xPx||micro.yPx||micro.rollRad?`translate3d(${micro.xPx}px,${micro.yPx}px,0) rotate(${micro.rollRad}rad)`:'none';
+  }
+  const key=JSON.stringify([size,state.chapter,options,isPhone?mediaFrames:0]);if(!force&&key===lastPaintKey&&successfulPaint)return;
   let operation='context-before';
   try{
    if(renderer.getContext().isContextLost()){rememberRenderFailure(new Error('XR context lost before draw'),operation);return fallbackGPU('context-lost');}
@@ -196,7 +217,8 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
     const geometry=createResearchPhoneGeometry(stage.width/stage.height);texture=new T.VideoTexture(video);texture.colorSpace=T.SRGBColorSpace;texture.generateMipmaps=false;
     const group=new T.Group(),body=new T.Mesh(geometry.body,new T.MeshStandardMaterial({color:'#292e30',metalness:.65,roughness:.33})),screen=new T.Mesh(geometry.screen,new T.MeshBasicMaterial({map:texture,toneMapped:false}));
     group.add(body,screen);countDraws(body,'phoneBody');countDraws(screen,'phoneScreen');
-    phone={group,support:geometry.support,dimensions:geometry.dimensions,bounds:supportBounds(geometry.support)};scene.add(group);
+    const phoneSupport=prepareResearchSupport(geometry.support);
+    phone={group,support:phoneSupport,dimensions:geometry.dimensions,bounds:phoneSupport.inspect().bounds};scene.add(group);
     // React owns chapter visibility. Keep the VideoTexture's actual native
     // source in layout until this phone is released, including a pending
     // chapter or a reverse before React commits its new hidden attributes.
@@ -223,7 +245,7 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
    if(disposed||signal.aborted)throw abortError();
    const parsed=await new GLTFLoader(manager).parseAsync(bytes,'');if(disposed||signal.aborted){releaseObject(parsed.scene);throw abortError();}gltf=parsed;
    gltf.scene.traverse(node=>{if(node.isMesh){vertices+=node.geometry.getAttribute('position').count;triangles+=(node.geometry.index?.count??node.geometry.getAttribute('position').count)/3;}});
-   if(vertices!==model.vertices||triangles!==model.triangles)throw Error('XR source geometry differs');support=collectResearchSupport(gltf.scene);countDraws(gltf.scene,'source');scene.add(gltf.scene);
+   if(vertices!==model.vertices||triangles!==model.triangles)throw Error('XR source geometry differs');support=prepareResearchSupport(collectResearchSupport(gltf.scene));countDraws(gltf.scene,'source');scene.add(gltf.scene);
    environment=createXRStageEnvironment({bounds:model.bounds});countDraws(environment.group,'stage');scene.add(environment.group);
    (host.querySelector('[data-xr-scene-surface]')??host).appendChild(renderer.domElement);
   }
@@ -243,10 +265,10 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
    setPaused:applyPaused,
    hitTest(clientX,clientY){
     if(disposed||!renderer||!successfulPaint||phoneChapter(state.chapter)||!gltf)return false;
-    const rect=renderer.domElement.getBoundingClientRect();if(clientX<rect.left||clientX>rect.right||clientY<rect.top||clientY>rect.bottom)return false;ndc.set((clientX-rect.left)/rect.width*2-1,-(clientY-rect.top)/rect.height*2+1);raycaster.setFromCamera(ndc,camera);
+    const rect=renderer.domElement.getBoundingClientRect();if(clientX<rect.left||clientX>rect.right||clientY<rect.top||clientY>rect.bottom)return false;const local=xrStageCanvasPoint(clientX,clientY,rect,size,handheld);if(!local)return false;ndc.set(local.x/size.width*2-1,-local.y/size.height*2+1);raycaster.setFromCamera(ndc,camera);
     return raycaster.intersectObject(gltf.scene,true).length?{source:true,kind:'model'}:false;
    },
-   inspect:()=>({mode,chapter:state.chapter,successfulPaint,sourceRevision:revision,sourceUnits:model.sourceUnits,webUnits:model.webUnits,vertices,triangles,pose,view:{azimuth:state.azimuth,elevation:state.elevation},sourceTransforms:gltf?.scene.children.map(node=>({position:node.position.toArray(),scale:node.scale.toArray(),quaternion:node.quaternion.toArray()})),surface:renderer?{draws,calls:renderer.info.render.calls,sourceCalls:drawCounts.source,phoneCalls:drawCounts.phoneBody+drawCounts.phoneScreen,phoneBodyCalls:drawCounts.phoneBody,phoneScreenCalls:drawCounts.phoneScreen,stageCalls:drawCounts.stage,environment:environment?.inspect()??null,viewport:renderView?{...renderView}:null,clearAlpha:renderer.getClearAlpha(),budget:budget.inspect(),pixelBudget:phoneChapter(state.chapter)?RESEARCH_PHONE_PIXELS:RESEARCH_MODEL_PIXELS}:null,media:{stage:activeStage?.id??null,pending:mediaPending,frames:mediaFrames,time:mediaTime,native:mediaHandle?.inspect()??null,reason:mediaReason,position:activeStage?videos[activeStage.id].currentTime:null},fallbackReason:gpuReason,lastRenderFailure,paused:state.paused,disposed}),
+   inspect:()=>({mode,chapter:state.chapter,successfulPaint,sourceRevision:revision,sourceUnits:model.sourceUnits,webUnits:model.webUnits,vertices,triangles,pose,view:{azimuth:state.azimuth,elevation:state.elevation,cameraIntent:state.cameraIntent??null},support:support?.inspect()??{disposed:true,points:0,bytes:0,bounds:null},sourceTransforms:gltf?.scene.children.map(node=>({position:node.position.toArray(),scale:node.scale.toArray(),quaternion:node.quaternion.toArray()})),surface:renderer?{draws,cameraFits,compositor:{...handheld,writes:compositorWrites,kind:'2d-pan-roll'},calls:renderer.info.render.calls,sourceCalls:drawCounts.source,phoneCalls:drawCounts.phoneBody+drawCounts.phoneScreen,phoneBodyCalls:drawCounts.phoneBody,phoneScreenCalls:drawCounts.phoneScreen,stageCalls:drawCounts.stage,environment:environment?.inspect()??null,viewport:renderView?{...renderView}:null,clearAlpha:renderer.getClearAlpha(),budget:budget.inspect(),pixelBudget:phoneChapter(state.chapter)?RESEARCH_PHONE_PIXELS:RESEARCH_MODEL_PIXELS}:null,media:{stage:activeStage?.id??null,pending:mediaPending,frames:mediaFrames,time:mediaTime,native:mediaHandle?.inspect()??null,reason:mediaReason,position:activeStage?videos[activeStage.id].currentTime:null},fallbackReason:gpuReason,lastRenderFailure,paused:state.paused,disposed}),
    dispose,
   };
  }catch(error){dispose();throw error;}

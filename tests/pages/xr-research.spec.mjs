@@ -59,9 +59,40 @@ async function contextVisible(page){
  expect((await facts(page)).workspace.phase).toBe('ready');
 }
 async function fullCanvas(page){
- const sample=await page.evaluate(()=>{const host=document.querySelector('[data-xr-stage]'),canvas=host.querySelector('canvas');return{box:canvas.getBoundingClientRect().toJSON(),view:host.__xrStage.inspect().resource.surface.viewport};}),viewport=page.viewportSize(),{box,view}=sample;
- expect(box.x).toBeCloseTo(0,0);expect(box.y).toBeCloseTo(0,0);expect(box.width).toBeCloseTo(viewport.width,0);expect(box.height).toBeCloseTo(viewport.height,0);
- expect({left:view.left,top:view.top,width:view.width,height:view.height}).toEqual({left:0,top:0,...viewport});
+ await expect(stage(page).locator('canvas')).toHaveCount(1);
+ // One synchronous snapshot keeps the continuously changing compositor receipt,
+ // computed transform and actual DOM bounds on the same animation frame.
+ const sample=await stage(page).evaluate(node=>{
+  const canvas=node.querySelector('canvas'),surface=node.querySelector('[data-xr-scene-surface]'),css=getComputedStyle(canvas),surfaceBox=surface.getBoundingClientRect();
+  const width=parseFloat(css.width),height=parseFloat(css.height),origin=css.transformOrigin.split(' ').map(Number.parseFloat),matrix=new DOMMatrix(css.transform==='none'?undefined:css.transform);
+  const corners=[[0,0],[width,0],[0,height],[width,height]].map(([x,y])=>{const p=new DOMPoint(x-origin[0],y-origin[1]).matrixTransform(matrix);return{x:p.x+origin[0]+surfaceBox.x,y:p.y+origin[1]+surfaceBox.y};});
+  const minX=Math.min(...corners.map(p=>p.x)),maxX=Math.max(...corners.map(p=>p.x)),minY=Math.min(...corners.map(p=>p.y)),maxY=Math.max(...corners.map(p=>p.y));
+  return{host:node.getBoundingClientRect().toJSON(),surface:surfaceBox.toJSON(),canvas:canvas.getBoundingClientRect().toJSON(),position:getComputedStyle(node).position,
+   layout:{position:css.position,width,height,left:parseFloat(css.left),top:parseFloat(css.top),right:parseFloat(css.right),bottom:parseFloat(css.bottom),offsetLeft:canvas.offsetLeft,offsetTop:canvas.offsetTop,offsetWidth:canvas.offsetWidth,offsetHeight:canvas.offsetHeight},
+   origin,matrix:Object.fromEntries(['a','b','c','d','e','f','m13','m14','m23','m24','m31','m32','m33','m34','m43','m44'].map(key=>[key,matrix[key]])),expected:{x:minX,y:minY,width:maxX-minX,height:maxY-minY},
+   compositor:node.__xrStage.inspect().resource.surface.compositor,
+   view:node.__xrStage.inspect().resource.surface.viewport};
+ }),viewport=page.viewportSize();
+ expect(sample.position).toBe('fixed');
+ for(const box of [sample.host,sample.surface]){expect(box.x).toBeCloseTo(0,0);expect(box.y).toBeCloseTo(0,0);expect(box.width).toBeCloseTo(viewport.width,0);expect(box.height).toBeCloseTo(viewport.height,0);}
+ expect(sample.layout.position).toBe('absolute');
+ for(const key of ['left','top','offsetLeft','offsetTop'])expect(sample.layout[key]).toBeCloseTo(0,0);
+ for(const key of ['width','offsetWidth'])expect(sample.layout[key]).toBeCloseTo(viewport.width,0);
+ for(const key of ['height','offsetHeight'])expect(sample.layout[key]).toBeCloseTo(viewport.height,0);
+ const micro=sample.compositor;expect(micro.kind).toBe('2d-pan-roll');
+ expect(Math.abs(micro.xPx)).toBeLessThanOrEqual(1.2);expect(Math.abs(micro.yPx)).toBeLessThanOrEqual(1.2);expect(Math.abs(micro.rollRad)).toBeLessThanOrEqual(.0012);
+ // Equivalent matrix()/matrix3d() serialization must have the same effective
+ // 2D affine coefficients, without perspective, depth translation or tilt.
+ for(const key of ['m13','m14','m23','m24','m31','m32','m34','m43'])expect(sample.matrix[key]===0).toBe(true);
+ for(const key of ['m33','m44'])expect(sample.matrix[key]).toBe(1);
+ const intended={a:Math.cos(micro.rollRad),b:Math.sin(micro.rollRad),c:-Math.sin(micro.rollRad),d:Math.cos(micro.rollRad),e:micro.xPx,f:micro.yPx};
+ for(const key of Object.keys(intended))expect(sample.matrix[key]).toBeCloseTo(intended[key],5);
+ expect(sample.origin[0]).toBeCloseTo(micro.originX,2);expect(sample.origin[1]).toBeCloseTo(micro.originY,2);
+ // The canvas layout remains exactly full viewport; its intentional pan/roll
+ // changes only the visual AABB, which must match transformed corners, not an
+ // arbitrary widened tolerance or a frozen idle snapshot.
+ for(const key of ['x','y','width','height'])expect(sample.canvas[key]).toBeCloseTo(sample.expected[key],0);
+ expect({left:sample.view.left,top:sample.view.top,width:sample.view.width,height:sample.view.height}).toEqual({left:0,top:0,...viewport});
 }
 async function viewportFits(page){
  const viewport=page.viewportSize(),actual=await page.evaluate(()=>({clientWidth:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth,innerWidth,innerHeight,visualWidth:visualViewport?.width,visualHeight:visualViewport?.height}));
@@ -79,7 +110,7 @@ function closed(state){
  for(const id of new Set(state.scene.history.map(fact=>fact.id))){const own=state.scene.history.filter(fact=>fact.id===id);expect(own.filter(fact=>fact.status==='requested')).toHaveLength(1);expect(own.filter(fact=>['completed','cancelled'].includes(fact.status))).toHaveLength(1);}
 }
 async function settled(page,chapter){
-  await page.waitForFunction(chapter=>{const state=document.querySelector('[data-xr-stage]')?.__xrStage?.inspect();return state?.chapter===chapter&&state.scene.chapter===chapter&&state.scene.mode===(['overview','making','credits'].includes(chapter)?'absent':'hold')&&state.scene.settled&&!state.scene.paintPending&&state.camera.settled&&state.informationWindows.settled&&!state.lifecycle.scheduled;},chapter,{timeout:WAIT});
+  await page.waitForFunction(chapter=>{const state=document.querySelector('[data-xr-stage]')?.__xrStage?.inspect();return state?.chapter===chapter&&state.scene.chapter===chapter&&state.scene.mode===(['overview','making','credits'].includes(chapter)?'absent':'hold')&&state.scene.settled&&!state.scene.paintPending&&state.camera.settled&&state.informationWindows.settled&&!state.camera.recovering&&(!state.lifecycle.scheduled||state.camera.idleActive&&state.resource?.mode==='webgl-model'&&state.scene.mode==='hold');},chapter,{timeout:WAIT});
  await frames(page,2);
 }
 async function scrollChapter(page,chapter){
@@ -207,7 +238,7 @@ test('one project background stage preserves source geometry, stays idle, and fo
   try{
    await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[point]});touching=true;
    for(const dx of [18,36,60])await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:point.x+dx,y:point.y}]});
-   await expect.poll(async()=>(await facts(page)).gesture?.locked).toBe(true);expect(await control(page).evaluate(node=>node.hasPointerCapture(document.querySelector('[data-xr-stage]').__xrStage.inspect().gesture.pointerId))).toBe(true);await expect.poll(async()=>(await facts(page)).camera.value.azimuth).toBeLessThan(0);
+   expect((await facts(page)).gesture).toBeNull();expect((await facts(page)).camera.value).toEqual({azimuth:0,elevation:0});
    await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});touching=false;await settled(page,'method');expect((await facts(page)).gesture).toBeNull();expect((await facts(page)).camera.value).toEqual({azimuth:0,elevation:0});
    const vertical=await hitPoint(page),before=await page.evaluate(()=>scrollY);await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[vertical]});touching=true;
    for(const dy of [30,60,100,150])await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:vertical.x,y:vertical.y-dy}]});

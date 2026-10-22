@@ -1,3 +1,4 @@
+import {createScrollCameraPath,sampleScrollCamera,composeCameraIntent,sampleHandheldSurface} from '../motion/scroll-camera-score.mjs';
 import {EventManager} from '../core/EventManager.ts';
 import {DOMPresenter} from '../presentation/DOMPresenter.ts';
 import {createInformationWindowPresenter} from '../presentation/InformationWindowPresenter.mjs';
@@ -7,7 +8,9 @@ import {createPreviewLifecycle} from '../site/PreviewLifecycle.mjs';
 import {createXRStageMotion,advanceXRStageMotion,cancelXRStageMotion} from './XRStageMotion.mjs';
 
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
-const BLOCKED='a,button,input,select,textarea,summary,[data-protect],[data-information-window]';
+const BLOCKED='a,button,input,select,textarea,summary,[contenteditable]:not([contenteditable="false"]),[role="textbox"],[data-protect],[data-information-window]';
+const MODEL_CAMERA_PATH=createScrollCameraPath([{at:0,yawRad:.92,pitchRad:.28,fovDeg:36,zoom:1},{at:.5,yawRad:1.06,pitchRad:.32,fovDeg:36,zoom:1},{at:1,yawRad:1.16,pitchRad:.36,fovDeg:36,zoom:1}]);
+const neutralHandheld=()=>({xPx:0,yPx:0,rollRad:0});
 const zero=()=>({azimuth:0,elevation:0});
 const naturalY=element=>{let top=0;for(let node=element;node;node=node.offsetParent)top+=node.offsetTop;return top;};
 
@@ -35,14 +38,27 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
    let disposed=false,away=false,visible=true,dirty=true,resumed=true,previous=0,frames=0,frameDelta=0;
    let chapters=[],links=[],chapter='overview',progress=0,size={width:0,height:0},resource=null,windowSize={width:win.innerWidth,height:win.innerHeight};
    let target=zero(),value=zero(),velocity=zero(),settled=true,press=null,gestureId=0,lastState='',lastPaint='';
+   let modelProgress=0,activeSeconds=0,handheldGain=1,lastModelIntent=null,lastHandheld=neutralHandheld(),cameraWasPaused=false,cameraRecovery=null;
    let paintedChapter=null,paintPending=false,paintGeneration=0,workspaceGeneration=0,liquidKeyboardFocus=true;
    const scheduler=createFrameScheduler({request:fn=>win.requestAnimationFrame(fn),cancel:id=>win.cancelAnimationFrame(id),onFrame:tick});
    const listen=(node,type,fn,options)=>events.listen(scope,node,type,fn,options);
    const policy=()=>({reduced:!!reduced.matches,saveData:!!connection?.saveData,hidden:!!doc.hidden,siteReady:doc.documentElement.getAttribute('data-site-entry-state')==='entered'});
-    const canInspect=()=>{const p=policy(),painted=resource?.inspect();return chapter==='method'&&sceneMotion.chapter===chapter&&sceneMotion.mode==='hold'&&sceneMotion.settled&&!!resource&&painted?.mode==='webgl-model'&&painted.successfulPaint&&!disposed&&!scheduler.suspended&&!away&&visible&&!p.hidden&&!p.reduced&&!p.saveData&&p.siteReady;};
+    const canInspect=()=>{const p=policy(),painted=resource?.inspect();return chapter==='method'&&sceneMotion.chapter===chapter&&sceneMotion.mode==='hold'&&sceneMotion.settled&&!!resource&&painted?.mode==='webgl-model'&&painted.successfulPaint&&!disposed&&!scheduler.suspended&&!away&&visible&&!p.hidden&&!p.reduced&&!p.saveData&&!paused&&p.siteReady;};
    const state=()=>{const p=policy(),s=lifecycle.inspect();return{phase:s.phase,reason:s.reason,chapter,sceneChapter:sceneMotion.chapter,sceneMode:sceneMotion.mode,reduced:p.reduced,saveData:p.saveData,paused};};
    const notify=()=>{if(disposed)return;const next=state(),key=JSON.stringify(next);if(key!==lastState){lastState=key;onState(next);}};
-   const presentation=()=>({chapter:sceneMotion.chapter,progress,azimuth:value.azimuth,elevation:value.elevation,paused,reduced:policy().reduced});
+   const focusedReading=()=>!!doc.activeElement?.closest?.(BLOCKED+', [data-xr-model-control]');
+   const modelMotionEligible=()=>{const p=policy();return!!(sceneMotion.chapter==='method'&&sceneMotion.pose.opacity>0&&resource?.inspect().mode==='webgl-model'&&!paused&&!p.hidden&&!p.reduced&&!p.saveData&&p.siteReady&&!away&&visible&&!scheduler.suspended&&!disposed);};
+   const presentation=()=>{
+    const next={chapter:sceneMotion.chapter,progress,azimuth:value.azimuth,elevation:value.elevation,paused,reduced:policy().reduced,cameraIntent:null,handheld:neutralHandheld()};
+    if(sceneMotion.chapter!=='method'){cameraRecovery=null;cameraWasPaused=false;return next;}
+    if(paused&&lastModelIntent){cameraWasPaused=true;cameraRecovery=null;return{...next,cameraIntent:lastModelIntent,handheld:lastHandheld};}
+    const desired=composeCameraIntent(sampleScrollCamera(MODEL_CAMERA_PATH,modelProgress),{inspection:{yawRad:value.azimuth,pitchRad:value.elevation}});
+    if(cameraWasPaused&&lastModelIntent){const yaw=lastModelIntent.yawRad-desired.yawRad,tau=Math.PI*2;cameraRecovery={elapsed:0,yawRad:Math.abs(yaw)<=Math.PI?yaw:((yaw+Math.PI)%tau+tau)%tau-Math.PI,pitchRad:lastModelIntent.pitchRad-desired.pitchRad};}
+    cameraWasPaused=false;
+    if(cameraRecovery){const t=clamp(cameraRecovery.elapsed/.35,0,1),weight=1-t*t*(3-2*t);desired.yawRad+=cameraRecovery.yawRad*weight;desired.pitchRad+=cameraRecovery.pitchRad*weight;}
+    lastModelIntent=desired;lastHandheld=sampleHandheldSurface(activeSeconds,handheldGain);
+    return{...next,cameraIntent:desired,handheld:lastHandheld};
+   };
    const paint=()=>{
     if(!resource)return;
     const next=presentation(),key=JSON.stringify(next);if(key===lastPaint)return;
@@ -65,8 +81,8 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
       // reading changes made during that wait before publishing ready.
       do{
        if(signal.aborted||disposed)throw new DOMException('XR scene released','AbortError');
-       handle.resize(size.width||width,size.height||height);const next=presentation();
-       await handle.present(next);painted=JSON.stringify(next);
+       const next=presentation(),preparation=handle.present(next);
+       handle.resize(size.width||width,size.height||height);await preparation;painted=JSON.stringify(next);
       }while(!signal.aborted&&!disposed&&painted!==JSON.stringify(presentation()));
      }catch(error){signal.removeEventListener('abort',release);release();throw error;}
      if(signal.aborted||disposed){signal.removeEventListener('abort',release);release();throw new DOMException('XR scene released','AbortError');}
@@ -112,8 +128,10 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
     let selected=chapters[0];for(const candidate of chapters){if(candidate.top>line)break;selected=candidate;}
     if(!selected)return;
     const next=chapters[chapters.indexOf(selected)+1],end=next?.top??selected.top+selected.height;
-    if(chapter!==selected.key){closeGesture('chapter-change',true);chapter=selected.key;notify();}
+    if(chapter!==selected.key){closeGesture('chapter-change',!(sceneMotion.chapter==='method'&&sceneMotion.pose.opacity>0));chapter=selected.key;notify();}
     progress=clamp((line-selected.top)/Math.max(1,end-selected.top),0,1);
+    const methodIndex=chapters.findIndex(item=>item.key==='method'),method=chapters[methodIndex];
+    if(method)modelProgress=clamp((line-method.top)/Math.max(1,(chapters[methodIndex+1]?.top??method.top+method.height)-method.top),0,1);
     publisher.attribute(root,'data-xr-active-chapter',chapter);
     for(const link of links){
      const id=link.getAttribute('href')?.slice(1),section=id&&doc.getElementById(id);
@@ -145,14 +163,22 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
     const readyChapter=sceneMotion.chapter==='context'?(workspace.phase==='ready'?'context':null):paintedChapter;
     advanceXRStageMotion(sceneMotion,dt,{chapter,readyChapter,reduced:p.reduced||p.saveData||lifecycle.inspect().phase==='failed'||chapter==='context'&&workspace.phase==='failed',resumed});
     publishScene();
+    const cameraActive=modelMotionEligible();
+    const delta=resumed?0:Math.min(.1,Math.max(0,dt));
+    if(cameraActive){
+     activeSeconds+=delta;
+     const goal=focusedReading()?0:1,step=delta/.2;handheldGain=goal>handheldGain?Math.min(goal,handheldGain+step):Math.max(goal,handheldGain-step);
+     if(cameraRecovery){cameraRecovery.elapsed=Math.min(.35,cameraRecovery.elapsed+delta);if(cameraRecovery.elapsed>=.35)cameraRecovery=null;}
+    }
+    if(p.reduced||p.saveData||lifecycle.inspect().phase==='failed'){handheldGain=0;cameraRecovery=null;cameraWasPaused=false;}
     const moving=windows.publish({docY:win.scrollY,dt,reduced:policy().reduced,seek:resumed,resumed});
     const glassMoving=liquid.publish({dt,reduced:p.reduced,resumed,hidden:p.hidden,opaque:opaqueGlass(),keyboardFocus:liquidKeyboardFocus});
     resumed=false;paint();notify();
-    if(!settled||moving||glassMoving||sceneMotion.transition)scheduler.schedule();else previous=0;
+    if(!settled||moving||glassMoving||sceneMotion.transition||cameraActive&&(!focusedReading()||handheldGain>0||cameraRecovery))scheduler.schedule();else previous=0;
    }
    function invalidate(){if(disposed)return;dirty=true;scheduler.schedule();}
    function down(event){
-    if(!canInspect()||event.button!==0||event.isPrimary===false||press||event.target.closest?.(BLOCKED))return;
+    if(event.pointerType==='touch'||!canInspect()||event.button!==0||event.isPrimary===false||press||event.target.closest?.(BLOCKED))return;
     const hit=resource.hitTest?.(event.clientX,event.clientY);if(hit?.source!==true||hit.kind!=='model')return;
     const surface=event.target.closest?.('[data-xr-model-control]')??host;
     press={id:++gestureId,pointerId:event.pointerId,surface,x:event.clientX,y:event.clientY,azimuth:target.azimuth,elevation:target.elevation,touch:event.pointerType==='touch',locked:false};
@@ -170,7 +196,7 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
    }
    function end(event,cancelled=false){if(press?.pointerId!==event.pointerId)return;closeGesture(cancelled?'pointer-cancelled':'released',cancelled);scheduler.schedule();}
    function key(event){
-    if(!canInspect()||!['overview','context','method','making'].includes(chapter)||!event.target.closest?.('[data-xr-model-control]'))return;
+    if(event.defaultPrevented||event.isComposing||event.altKey||event.ctrlKey||event.metaKey||!canInspect()||!['overview','context','method','making'].includes(chapter)||!event.target.closest?.('[data-xr-model-control]'))return;
     const change={ArrowLeft:{azimuth:.12},ArrowRight:{azimuth:-.12},ArrowUp:{elevation:-.09},ArrowDown:{elevation:.09}}[event.key];
     if(change){event.preventDefault();for(const [name,delta]of Object.entries(change))target[name]=clamp(target[name]+delta,...(name==='azimuth'?[-.9,.9]:[-.4,.5]));settled=false;scheduler.schedule();}
     else if(event.key==='Escape'||event.key==='Home'){event.preventDefault();closeGesture('keyboard-return',true);scheduler.schedule();}
@@ -189,7 +215,8 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
    listen(doc,'lostpointercapture',event=>{if(press?.pointerId===event.pointerId){closeGesture('lost-capture',true);scheduler.schedule();}});
    listen(doc.documentElement,'pointerleave',()=>{if(press){closeGesture('pointer-left',true);if(!scheduler.suspended)scheduler.schedule();}});
    listen(doc,'keydown',event=>{liquidKeyboardFocus=true;liquid.reset();key(event);});listen(win,'blur',()=>{liquid.reset();if(press||!settled||Object.values(target).some(Boolean)){closeGesture('blur',true);if(!scheduler.suspended)scheduler.schedule();}});
-   listen(root,'focusout',event=>{if(event.target.closest?.('[data-xr-model-control]')){closeGesture('focus-left',true);if(!scheduler.suspended)scheduler.schedule();}});
+   listen(root,'focusin',()=>{if(!scheduler.suspended)scheduler.schedule();});
+   listen(root,'focusout',event=>{if(event.target.closest?.('[data-xr-model-control]'))closeGesture('focus-left',true);if(!scheduler.suspended)scheduler.schedule();});
    listen(doc,'visibilitychange',()=>suspend('visibility',doc.hidden));listen(doc,'freeze',()=>{away=true;suspend('freeze',true);});listen(doc,'resume',()=>{away=false;suspend('freeze',false);});
    listen(win,'pagehide',event=>{away=true;if(event.persisted)suspend('page',true);else dispose();});
    listen(win,'pageshow',()=>{away=false;scheduler.suspend('visibility',doc.hidden);suspend('page',false);});
@@ -214,12 +241,12 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
    }
    if(workspaceImage){listen(workspaceImage,'load',decodeWorkspace);listen(workspaceImage,'error',()=>{workspaceGeneration++;workspace.phase='failed';workspace.reason='workspace-image-unavailable';if(!scheduler.suspended)scheduler.schedule();});void decodeWorkspace();}
    function dispose(){
-    if(disposed)return;closeGesture('disposed',true);cancelXRStageMotion(sceneMotion,'disposed');disposed=true;lifecycle.dispose();scheduler.dispose();windows.dispose();liquid.dispose();
+    if(disposed)return;cameraRecovery=null;cameraWasPaused=false;closeGesture('disposed',true);cancelXRStageMotion(sceneMotion,'disposed');disposed=true;lifecycle.dispose();scheduler.dispose();windows.dispose();liquid.dispose();
     observerList.forEach(observer=>observer.disconnect());observed.clear();scope.dispose();events.dispose();
     publisher.attribute(root,'data-xr-director-ready',null);publisher.attribute(root,'data-xr-active-chapter',null);links.forEach(link=>publisher.attribute(link,'aria-current',null));
     publisher.style(sceneSurface,'transform','');publisher.style(sceneSurface,'opacity','');publisher.attribute(host,'data-xr-scene-mode',null);publisher.attribute(host,'data-xr-presented-chapter',null);publisher.attribute(host,'data-xr-workspace-phase',null);
    }
-   const inspect=()=>({...lifecycle.inspect(),chapter,progress,paused,...policy(),size:{...size},workspace:{...workspace},scene:{chapter:sceneMotion.chapter,requestedChapter:sceneMotion.requestedChapter,mode:sceneMotion.mode,settled:sceneMotion.settled,visible:sceneMotion.visible,...sceneMotion.pose,paintPending,paintedChapter,history:sceneMotion.history.map(item=>({...item}))},camera:{target:{...target},value:{...value},settled},gesture:press?{id:press.id,pointerId:press.pointerId,locked:press.locked}:null,gestures:[...gestureHistory],frames,frameDelta,lifecycle:scheduler.inspect(),events:events.inspect(),informationWindows:windows.inspect(),liquidGlass:liquid.inspect(),domPublication:dom.inspect(),disposed});
+   const inspect=()=>({...lifecycle.inspect(),chapter,progress,paused,...policy(),size:{...size},workspace:{...workspace},scene:{chapter:sceneMotion.chapter,requestedChapter:sceneMotion.requestedChapter,mode:sceneMotion.mode,settled:sceneMotion.settled,visible:sceneMotion.visible,...sceneMotion.pose,paintPending,paintedChapter,history:sceneMotion.history.map(item=>({...item}))},camera:{target:{...target},value:{...value},settled,idleActive:modelMotionEligible()&&!focusedReading(),needsFrame:modelMotionEligible()&&(!focusedReading()||handheldGain>0||!!cameraRecovery),modelProgress,activeSeconds,intent:lastModelIntent,handheld:lastHandheld,handheldGain,recovering:!!cameraRecovery},gesture:press?{id:press.id,pointerId:press.pointerId,locked:press.locked}:null,gestures:[...gestureHistory],frames,frameDelta,lifecycle:scheduler.inspect(),events:events.inspect(),informationWindows:windows.inspect(),liquidGlass:liquid.inspect(),domPublication:dom.inspect(),disposed});
    binding={dispose,inspect,hitTest:(x,y)=>canInspect()&&[x,y].every(Number.isFinite)?resource.hitTest?.(x,y)??false:false,pause(value){
     if(disposed||paused===value)return;paused=value;
     // Native media commands acknowledge before the UI, independently of the
