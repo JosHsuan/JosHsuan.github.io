@@ -64,3 +64,13 @@ a later passing run does not establish its cause.
   batch-mean median 1.813 ms raw versus 0.593 ms prepared; this is not a browser,
   GPU or FPS claim. The owned 2,311,488-byte copy temporarily overlaps original
   collection during acquisition, then the unneeded collection is released.
+
+## Compact control correction
+
+Actual a0c9d290 Chromium/mobile 320px captures exposed the new control bar
+overlapping the brand/home link despite viewport bounds passing. At widths
+up to 360px, Method alone now hides the redundant SCROLL VIEW hint; the real
+44px-minimum Pause button and full native/accessible guidance remain. Phone
+controls are unchanged. The compact browser gate now also requires zero
+intersection between the reading-tools box and brand/home target. Corrected
+visual acceptance remains pending; earlier captures are diagnosis, not approval.

@@ -68,6 +68,8 @@ test('XR native scrolling directs the complete model while idle is compositor-on
  const targets=await page.locator('[data-xr-motion-toggle]').evaluateAll(nodes=>nodes.map(node=>{const r=node.getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom};}));
  expect(targets).toHaveLength(1);for(const r of targets){expect(r.width).toBeGreaterThanOrEqual(44);expect(r.height).toBeGreaterThanOrEqual(44);expect(r.x).toBeGreaterThanOrEqual(0);expect(r.right).toBeLessThanOrEqual(320);expect(r.y).toBeGreaterThanOrEqual(0);expect(r.bottom).toBeLessThanOrEqual(844);}
  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
+ const chrome=await page.evaluate(()=>{const brand=document.querySelector('[data-home-link]').getBoundingClientRect(),tools=document.querySelector('[data-xr-reading-tools]').getBoundingClientRect();return {overlapX:Math.max(0,Math.min(brand.right,tools.right)-Math.max(brand.left,tools.left)),overlapY:Math.max(0,Math.min(brand.bottom,tools.bottom)-Math.max(brand.top,tools.top))};});
+ expect(chrome.overlapX*chrome.overlapY,'Compact XR motion controls must not cover the brand/home target').toBe(0);
  const narrowPNG=test.info().outputPath('xr-scroll-camera-320.png');await page.screenshot({path:narrowPNG});await test.info().attach('xr-compact-controls',{path:narrowPNG,contentType:'image/png'});
  await page.emulateMedia({reducedMotion:'reduce'});await expect(page.locator('[data-xr-webgl-canvas]')).toHaveCount(0);const reduced=await facts(page);expect(reduced.reduced).toBe(true);expect(reduced.camera.idleActive).toBe(false);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);expect(errors).toEqual([]);

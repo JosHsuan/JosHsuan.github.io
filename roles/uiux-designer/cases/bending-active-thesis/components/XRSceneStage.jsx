@@ -39,7 +39,7 @@ export default function XRSceneStage({model,stages,workspaceVisual}){
   </div>
   <div className={cinematic.readingTools} data-xr-reading-tools data-protect data-liquid-glass="reading-controls">
    <span aria-live="polite">{String(chapterOrder.indexOf(state.chapter)+1).padStart(2,'0')} / 08</span>
-   <div className={styles.controls} data-xr-scene-controls hidden={state.sceneMode!=='hold'||state.sceneChapter!==state.chapter||['overview','context'].includes(state.chapter)||state.phase!=='ready'||!['webgl-model','webgl-phone','native-video'].includes(rendering)}>
+   <div className={`${styles.controls} ${state.chapter==='method'?styles.modelControls:''}`} data-xr-scene-controls hidden={state.sceneMode!=='hold'||state.sceneChapter!==state.chapter||['overview','context'].includes(state.chapter)||state.phase!=='ready'||!['webgl-model','webgl-phone','native-video'].includes(rendering)}>
     {['adapt','assemble','join'].includes(state.chapter)?<button type="button" data-xr-motion-toggle disabled={state.reduced||state.saveData||state.phase!=='ready'} aria-pressed={state.paused} onClick={()=>director.current?.setPaused(!state.paused)}>{state.paused?'Play recording':'Pause recording'}</button>:state.chapter==='method'?<><span className={styles.inspectionHint}>SCROLL VIEW</span><button type="button" data-xr-motion-toggle disabled={state.reduced||state.saveData||state.phase!=='ready'} aria-pressed={state.paused} onClick={()=>director.current?.setPaused(!state.paused)}>{state.paused?'Resume motion':'Pause motion'}</button></>:null}
    </div>
    <LiquidGlassSkin id="reading-controls"/>
