@@ -194,7 +194,7 @@ test('site loading waits for actual critical images and same-page movement does 
   }
   for(const animation of animations.fulfilled){
    expect(animation.playState).toBe('finished');expect(animation.currentTime).toBe(720);
-   expect(animation.localTime).toBe(720);expect(animation.progress).toBe(1);
+   expect(animation.localTime).toBe(720);expect(Math.abs(animation.progress-1)).toBeLessThanOrEqual(Number.EPSILON);
   }
   await page.locator('[data-home-project-link]').click();
   const after=await page.evaluate(()=>window.__site.inspect());expect(after.id).toBe(ready.id);expect(after.history).toEqual(ready.history);

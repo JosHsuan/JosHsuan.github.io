@@ -15,6 +15,17 @@ import {createInformationWindowPresenter} from '../presentation/InformationWindo
 import {createLibraryDiagramPresenter} from '../presentation/LibraryDiagramPresenter.mjs';
 import {createLiquidGlassPresenter} from '../presentation/LiquidGlassPresenter.mjs';
 
+/** Opt-in diagnostic receipts only; never owns scheduling or a clock. */
+export function createDirectorWakeDiagnostics(readFacts){
+ let enabled=false,events=[];
+ return{
+  get enabled(){return enabled;},
+  setEnabled(value){enabled=!!value;events=[];},
+  record(reason){if(!enabled||reason==='continuation')return;events.push({reason,...readFacts()});if(events.length>32)events.shift();},
+  inspect(){return{enabled,events:events.map(event=>structuredClone(event))};},
+ };
+}
+
 /** Owns chapter time and frame coordination, independently of React presentation. */
 export function createExperienceDirector({input,inspection,lifecycle,stage,fieldCanvas,progress,status,background}){
   return {connect(){
@@ -58,7 +69,9 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
     let pointerSurface=null,pointerClient={x:0,y:0},pointerMoved=false,lastHoverCheck=-Infinity,disposed=false;
     let liquidKeyboardFocus=true;
     const scheduler=createFrameScheduler({request:callback=>requestAnimationFrame(callback),cancel:id=>cancelAnimationFrame(id),onFrame:now=>tick(now)});
-    const layout=new LayoutScheduler(()=>scheduler.schedule());
+    let wakeOrigin=null;
+    const wakeDiagnostics=createDirectorWakeDiagnostics(()=>({at:performance.now(),controllerFrame,origin:wakeOrigin,scheduled:scheduler.inspect().scheduled,layout:layout.inspect()}));
+    const layout=new LayoutScheduler(()=>schedule('layout'));
     scheduler.suspend('visibility',document.hidden);
     function presentNavigation(){
       const unavailable=presentationContext==='home'||input.entry.inspect().phase!=='entered';
@@ -116,7 +129,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
         const host=element.closest('[data-model-study-host]');
         Object.assign(choreography.get(element),{top:naturalY(element),height:element.offsetHeight,viewportFixed:!!element.closest('[data-page-masthead],[data-story-navigation],[data-reading-tools]'),stickyStudy:!!host&&getComputedStyle(host).position==='sticky'});
       });
-      if(readingManager.initialHash)hash();schedule();
+      if(readingManager.initialHash)hash();schedule('measure');
     };
     const tick = now => {
       if(scheduler.suspended||!plan)return;
@@ -264,9 +277,9 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       moving=canvasEvents.flush({presented:input.getPresentation(),requiresScene:state.sceneEnabled&&!state.sceneFailed})||moving;
       history.push({time:now,...reading,...readingScore,playback:{chapterId:playbackScore.chapterId,activeSeconds:playbackScore.activeSeconds,loopPhase:playbackScore.loopPhase,tempo:playbackScore.tempo,needsFrame:playbackScore.needsFrame}});
       if(history.length>240)history.shift();
-      if(playbackScore.needsFrame||moving||!reading.settled||!inspection.settled)schedule();else previous=0;
+      if(playbackScore.needsFrame||moving||!reading.settled||!inspection.settled)schedule('continuation');else previous=0;
     };
-    function schedule(){scheduler.schedule();}
+    function schedule(reason){wakeDiagnostics.record(reason??wakeOrigin??'internal');scheduler.schedule();}
     const move=event=>{
       if(scheduler.suspended)return;
       if(liquidPresenter.pointer(event))schedule();
@@ -325,7 +338,10 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
     const resize=new ResizeObserver(()=>layout.invalidate('element-size'));sections.forEach(el=>resize.observe(el));
     if(home)resize.observe(home);
     if(stage.current)resize.observe(stage.current);
-    const listen=(target,type,handler,options)=>input.events.listen(scope,target,type,handler,options);
+    const listen=(target,type,handler,options)=>input.events.listen(scope,target,type,event=>{
+      if(!wakeDiagnostics.enabled)return handler(event);
+      const prior=wakeOrigin;wakeOrigin='event:'+type;try{return handler(event);}finally{wakeOrigin=prior;}
+    },options);
     listen(window,'scroll',scroll,{passive:true});listen(window,'wheel',wheel,{passive:true});listen(window,'popstate',pop);listen(document,'pointerdown',press);listen(document,'pointerup',press);listen(document,'pointercancel',press);listen(window,'resize',resizeWindow);listen(window,'pointermove',move,{passive:true});
     listen(window,'touchstart',touchstart,{passive:true});listen(window,'touchmove',touchmove,{passive:true});listen(window,'touchend',touchend,{passive:true});listen(window,'touchcancel',touchend,{passive:true});listen(window,'thesis:representation',representation);
     listen(document.documentElement,'pointerleave',reset);listen(window,'blur',reset);listen(document,'visibilitychange',visibility);listen(fine,'change',reset);
@@ -333,13 +349,13 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
     listen(window,'pagehide',pagehide);listen(window,'pageshow',pageshow);listen(document,'freeze',freeze);listen(document,'resume',resume);
     listen(document,'focusin',focus);listen(document,'focusout',focusout);listen(document,'click',anchor);listen(window,'hashchange',hash);listen(document,'keydown',keyboard);
     const unsubscribe=input.subscribe(()=>{
-      const state=input.get();if((state.inspectionRevision??0)!==inspectionRevision){inspectionRevision=state.inspectionRevision??0;schedule();}
-      if(state.reduced!==wasReduced){wasReduced=state.reduced;seekPending=true;schedule();}
-      const key=[state.systemReduced,state.sceneEnabled,state.sceneFailed,state.sceneReady].join('/');if(key!==preferenceKey){preferenceKey=key;schedule();}
+      const state=input.get();if((state.inspectionRevision??0)!==inspectionRevision){inspectionRevision=state.inspectionRevision??0;schedule('input:inspectionRevision');}
+      if(state.reduced!==wasReduced){wasReduced=state.reduced;seekPending=true;schedule('input:reduced');}
+      const key=[state.systemReduced,state.sceneEnabled,state.sceneFailed,state.sceneReady].join('/');if(key!==preferenceKey){preferenceKey=key;schedule('input:preferences');}
     });
-    window.__story={inspect:()=>({...reading,...sampleReadingScore(reading,plan),controllerFrame,frameDelta,presentationContext,projectStart,readingPending:seekPending||resumed||Math.abs(reading.nativeDocY-scrollY)>.01,playback:sampleChapterPlayback(playback),chapterScene:latestScene,informationChapter:lastChapter,pageField:pageField.inspect(),canvasPlacement:canvasPlacement?{...canvasPlacement}:null,canvasSurface,canvasAwaitingPaint,canvasTransitions:canvasEvents.inspect(),informationWindows:windowPresenter.inspect(),liquidGlass:liquidPresenter.inspect(),entry:input.entry.inspect(),libraryDiagram:libraryPresenter.inspect(),history:[...history],stops:plan.stops,scheduled:scheduler.inspect().scheduled,lifecycle:scheduler.inspect(),domPublication:publisher.inspect(),inspectionActive:!!input.get().inspectionActive,inspectionWeight:input.get().inspectionWeight,modelViewports:input.get().modelViewports,modelEngaged:!!input.get().modelEngaged,modelRecovering:!!input.get().modelRecovering,sourceSelection:input.get().sourceSelection,modelHeldSource:input.get().modelHeldSource,choreography:[...choreography].map(([element,item])=>({kind:item.kind,firstVisibleAt:item.firstVisibleAt,phase:element.dataset.choreographyPhase,settled:item.last?.settled??false})),inspection:{target:{...inspection.target},value:{...inspection.value},lightMix:0,settled:inspection.settled}})};
+    window.__story={setWakeDiagnostics:value=>wakeDiagnostics.setEnabled(value),inspect:()=>({...reading,...sampleReadingScore(reading,plan),controllerFrame,frameDelta,presentationContext,projectStart,wakeDiagnostics:wakeDiagnostics.enabled?wakeDiagnostics.inspect():null,readingPending:seekPending||resumed||Math.abs(reading.nativeDocY-scrollY)>.01,playback:sampleChapterPlayback(playback),chapterScene:latestScene,informationChapter:lastChapter,pageField:pageField.inspect(),canvasPlacement:canvasPlacement?{...canvasPlacement}:null,canvasSurface,canvasAwaitingPaint,canvasTransitions:canvasEvents.inspect(),informationWindows:windowPresenter.inspect(),liquidGlass:liquidPresenter.inspect(),entry:input.entry.inspect(),libraryDiagram:libraryPresenter.inspect(),history:[...history],stops:plan.stops,scheduled:scheduler.inspect().scheduled,lifecycle:scheduler.inspect(),domPublication:publisher.inspect(),inspectionActive:!!input.get().inspectionActive,inspectionWeight:input.get().inspectionWeight,modelViewports:input.get().modelViewports,modelEngaged:!!input.get().modelEngaged,modelRecovering:!!input.get().modelRecovering,sourceSelection:input.get().sourceSelection,modelHeldSource:input.get().modelHeldSource,choreography:[...choreography].map(([element,item])=>({kind:item.kind,firstVisibleAt:item.firstVisibleAt,phase:element.dataset.choreographyPhase,settled:item.last?.settled??false})),inspection:{target:{...inspection.target},value:{...inspection.value},lightMix:0,settled:inspection.settled}})};
     input.publishFrame({hidden:scheduler.suspended});document.documentElement.setAttribute('data-cinematic-ready','');measure();if(location.hash)hash();
-    return()=>{disposed=true;canvasEvents.dispose();windowPresenter.dispose();libraryPresenter.dispose();liquidPresenter.dispose();pageField.dispose();readingManager.dispose();layout.dispose();scheduler.dispose();scope.dispose();resize.disconnect();unsubscribe();publisher.attribute(document.documentElement,'data-presentation-context',null);publisher.attribute(stage.current,'data-presentation-context',null);publisher.attribute(navigation,'inert',null);publisher.attribute(navigation,'aria-hidden',null);homeLinks.forEach(link=>publisher.attribute(link,'aria-current',null));document.documentElement.removeAttribute('data-cinematic-ready');delete document.documentElement.dataset.activeChapter;delete document.documentElement.dataset.chapterBeat;delete window.__story;};
+    return()=>{disposed=true;wakeDiagnostics.setEnabled(false);canvasEvents.dispose();windowPresenter.dispose();libraryPresenter.dispose();liquidPresenter.dispose();pageField.dispose();readingManager.dispose();layout.dispose();scheduler.dispose();scope.dispose();resize.disconnect();unsubscribe();publisher.attribute(document.documentElement,'data-presentation-context',null);publisher.attribute(stage.current,'data-presentation-context',null);publisher.attribute(navigation,'inert',null);publisher.attribute(navigation,'aria-hidden',null);homeLinks.forEach(link=>publisher.attribute(link,'aria-current',null));document.documentElement.removeAttribute('data-cinematic-ready');delete document.documentElement.dataset.activeChapter;delete document.documentElement.dataset.chapterBeat;delete window.__story;};
 
   }};
 }

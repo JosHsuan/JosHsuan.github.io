@@ -65,6 +65,8 @@ export async function holdModel(page,chapter='form'){
  await page.waitForFunction(()=>window.__story.inspect().modelEngaged,null,{timeout:WAIT});await settle(page);
 }
 export async function expectIdle(page){
+ await page.evaluate(()=>window.__story.setWakeDiagnostics(true));
+ try{
  await settle(page);
  const checkpoint=await page.waitForFunction(()=>{
   const story=window.__story.inspect(),scene=window.__thesis.inspect();
@@ -85,7 +87,7 @@ export async function expectIdle(page){
    const story=window.__story.inspect(),scene=window.__thesis.inspect();
    return {frames:scene.frames,time:story.playback.activeSeconds,fieldDraws:story.pageField.draws,
     controllerFrame:story.controllerFrame,renderedControllerFrame:scene.renderedControllerFrame,rendererPendingFrames:scene.rendererPendingFrames,
-    scheduled:story.scheduled,settled:story.settled,readingPending:story.readingPending,canvasAwaitingPaint:story.canvasAwaitingPaint,
+    wakeDiagnostics:story.wakeDiagnostics,scheduled:story.scheduled,settled:story.settled,readingPending:story.readingPending,canvasAwaitingPaint:story.canvasAwaitingPaint,
     canvasVisible:story.canvasPlacement?.visible,canvasSettled:story.canvasPlacement?.settled,ready:scene.ready,hidden:scene.hidden,reduced:scene.systemReduced,
     chapter:story.canvasPlacement?.chapter,representation:scene.representation?.id,
     scrollY,nativeDocY:story.nativeDocY,documentVisibility:document.visibilityState,viewport:[innerWidth,innerHeight],documentHeight:document.documentElement.scrollHeight,
@@ -101,4 +103,5 @@ export async function expectIdle(page){
   try{await test.info().attach('idle-work-diagnostic',{body:JSON.stringify({precondition,before,observations,after},null,2),contentType:'application/json'});}catch{/* Preserve the original assertion if diagnostic attachment fails. */}
   throw error;
  }
+ }finally{try{await page.evaluate(()=>window.__story?.setWakeDiagnostics(false));}catch{/* Teardown must not replace the original test result. */}}
 }
