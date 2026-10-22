@@ -100,7 +100,7 @@ async function neutralReadingMaterials(page,testInfo){
  // Native reading must lay out the real model information column before its
  // geometry is preserved. An inactive hidden study has no usable label box.
  await centerStudy(page,'form',{ready:false});
- const modelLabel=page.locator('[data-model-study][data-study-chapter="form"] [data-model-side-label]');
+ const modelLabel=page.locator('[data-model-side-label][data-study-chapter="form"]');
  await expect(modelLabel).toBeVisible();
  await expect.poll(async()=>(await modelLabel.boundingBox())?.width??0,{timeout:WAIT}).toBeGreaterThan(60);
  // Check every existing UI variant, including metadata outside the seven
@@ -126,7 +126,7 @@ async function neutralReadingMaterials(page,testInfo){
  const selectors=[
   '#form [data-information-window="editorial"]','[data-source-diagram="miura"]',
   '#make [data-information-window="evidence-image"]','#make [data-information-window="evidence-caption"]',
-  '[data-model-study][data-study-chapter="form"] [data-model-side-label]','#pattern [data-information-window="source-details"]','[data-source-comparison]',
+  '[data-model-side-label][data-study-chapter="form"]','#pattern [data-information-window="source-details"]','[data-source-comparison]',
  ];
  const viewport=page.viewportSize(),results=[];
  await page.evaluate(()=>{
