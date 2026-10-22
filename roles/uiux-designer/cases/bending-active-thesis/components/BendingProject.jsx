@@ -76,7 +76,7 @@ export default function Page() {
             <Heading number="01" label={story.form.label} lines={story.form.heading} id="form-heading" kind="form" />
             <Paragraphs paragraphs={story.form.paragraphs} />
             <p className={styles.marginNote} data-protect data-choreography="caption">{story.form.aside}</p>
-            <a className={styles.studyLink} data-protect href="#model-study"><span data-choreography="nav">Explore the surface</span><span aria-hidden="true">↓</span><small>Hover the model. Click to compare. Drag to explore.</small></a>
+            <a className={styles.studyLink} data-protect href="#model-study"><span data-choreography="nav">Explore the surface</span><span aria-hidden="true">↓</span><small>Scroll to explore. Click or tap the model to compare sources.</small></a>
           </div>
           <div id="model-study" tabIndex={-1} className={styles.inlineStudy} data-model-study-host="form" />
           <div className={styles.diagramWide}><SourceDiagram kind="miura" title="From a flat grid to a folded surface" /></div>

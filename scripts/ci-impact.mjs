@@ -5,10 +5,10 @@ export const ALL_BROWSER_TESTS = readdirSync(new URL('../tests/pages/', import.m
   .filter(name => name.endsWith('.spec.mjs')).sort().map(name => `tests/pages/${name}`);
 const baseline = ['public-release'];
 const features = {
-  model: ['model-inspection', 'model-drag', 'canvas-motion', 'source-artwork', 'runtime-lifecycle', 'mobile-stability'],
+  model: ['bending-scroll-camera', 'model-inspection', 'model-drag', 'canvas-motion', 'source-artwork', 'runtime-lifecycle', 'mobile-stability'],
   evidence: ['source-artwork', 'motion-feedback'],
   diagram: ['source-artwork', 'library-reveal', 'model-inspection', 'canvas-motion'],
-  reading: ['motion-feedback', 'canvas-motion', 'source-artwork', 'model-inspection'],
+  reading: ['bending-scroll-camera', 'motion-feedback', 'canvas-motion', 'source-artwork', 'model-inspection'],
 };
 // Explicit cross-feature coverage includes CSS and delegated event contracts.
 // An import-only dependency graph cannot establish those relationships.

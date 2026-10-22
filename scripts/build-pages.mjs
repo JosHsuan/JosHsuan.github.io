@@ -130,7 +130,7 @@ const sources = [
   'components/element-score.mjs', 'components/optical-score.mjs', 'components/scene-compositor.mjs',
   'components/scene-direction.mjs', 'components/vendor/cinematic-plan.mjs', 'components/vendor/camera-plan.mjs',
   'components/exhibition-stage.mjs', 'components/editorial-score.mjs',
-  'components/source-scene-score.mjs', 'components/chapter-playback.mjs', 'components/chapter-scene-score.mjs', 'components/element-choreography.mjs',
+  'components/source-scene-score.mjs', 'components/source-scroll-orientation.mjs', 'components/source-scroll-camera-state.mjs', 'components/chapter-playback.mjs', 'components/chapter-scene-score.mjs', 'components/element-choreography.mjs',
   'components/SourceDiagram.jsx', 'components/source-diagram.module.css',
   'components/ModelInspector.jsx', 'components/model-inspector.module.css',
   'components/model-information.mjs',

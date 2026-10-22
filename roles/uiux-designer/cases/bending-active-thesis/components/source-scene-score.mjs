@@ -105,7 +105,8 @@ export function fitSourcePose({bounds, points, aspect, azimuth=30, elevation=30,
  * slots blend into a support-fitted shot; intermediate crops are intentional.
  * User angles are bounded offsets, not a second camera or independent clock.
  */
-export function sampleSourceScenePose({playback,chapterScene,families,selection,aspect,viewport,viewportWidth,weight=0,inspection,interactionChapter,pointer={x:0,y:0},reducedMotion=false,canvasLocal=false,compositionMode}) {
+export function sampleSourceScenePose({playback,chapterScene,families,selection,aspect,viewport,viewportWidth,weight=0,inspection,interactionChapter,pointer={x:0,y:0},reducedMotion=false,canvasLocal=false,compositionMode,scrollOrientation}) {
+  if(scrollOrientation!==undefined&&(!Number.isFinite(scrollOrientation?.azimuthOffsetDeg)||!Number.isFinite(scrollOrientation?.elevationOffsetDeg)||Math.abs(scrollOrientation.azimuthOffsetDeg)>30||Math.abs(scrollOrientation.elevationOffsetDeg)>10))throw RangeError('Finite scroll orientation offsets required');
   const raw=playback?.chapterWeights ?? [1,0,0,0,0,0,0], total=raw.reduce((a,b)=>a+b,0), weights=raw.map(v=>v/total);
   const poses=weights.map((w,i)=>w>0?sampleCinematicPose((i+.5)/7,aspect,reducedMotion?{x:0,y:0}:pointer,
     {bounds:families[i===1||i===2?'representation':i===3?'experiment':'assembly'].bounds,sharedStage:true,reducedMotion:false}):null);
@@ -118,8 +119,10 @@ export function sampleSourceScenePose({playback,chapterScene,families,selection,
   const controlled=interactionChapter===selection.chapterId;
   const userAz=controlled?clamp(inspection?.azimuth??30,-40,100)-30:0;
   const userEl=controlled?clamp(inspection?.elevation??30,12,70)-30:0;
-  const azimuth=scalar(p=>polar(p).az)+(cue.azimuthOffsetDeg??0)+userAz*w;
-  const elevation=clamp(scalar(p=>polar(p).el)+(cue.elevationOffsetDeg??0)+userEl*w,8,78);
+  const baseAzimuth=scalar(p=>polar(p).az)+(cue.azimuthOffsetDeg??0)+userAz*w;
+  const azimuth=scrollOrientation===undefined?baseAzimuth:baseAzimuth+scrollOrientation.azimuthOffsetDeg;
+  const baseElevation=scalar(p=>polar(p).el)+(cue.elevationOffsetDeg??0)+userEl*w;
+  const elevation=clamp(scrollOrientation===undefined?baseElevation:baseElevation+scrollOrientation.elevationOffsetDeg,8,78);
   const fov=clamp(scalar(p=>p.fov)*(cue.fovScale??1),24,65), back=backAt(azimuth,elevation);
   const target=vec(p=>p.target), distance=scalar(p=>polar(p).d)*(cue.distanceScale??1);
   const shift={x:scalar(p=>p.viewOffsetNormalized.x),y:scalar(p=>p.viewOffsetNormalized.y)};

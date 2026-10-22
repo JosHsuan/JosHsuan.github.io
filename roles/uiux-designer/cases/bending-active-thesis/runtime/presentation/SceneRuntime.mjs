@@ -92,7 +92,7 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
         // Director publishes after stage and information DOM writes. Refresh
         // both endpoints now, even if Fiber next paints on a later RAF.
         refreshAnnotations(state);
-        if(state.hidden||state.canvasPlacement?.visible===false||state.systemReduced||state.modelEngaged||state.modelRecovering)runtime.pressure.suspend('inactive');
+        if(state.hidden||state.canvasPlacement?.visible===false||state.systemReduced||state.motionPaused||state.modelEngaged||state.modelRecovering)runtime.pressure.suspend('inactive');
         if(!state.hidden&&(state.canvasPlacement?.visible!==false||!data.current?.ready))invalidate();
       });
       return ()=>{unsubscribe();clearAnnotations();};
@@ -266,8 +266,11 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
       // shadow coverage. No model rescaling and no floor following a loop offset.
       const stageLayout = resolveSceneStage(family.bounds, direction);
       const pointer = Number.isFinite(debug.stageU) ? {x: 0, y: 0} : state.pointer;
+      // Explicit legacy debug fixtures retain their authored chapter pose.
+      // Live input uses the same Director-owned native orientation snapshot.
+      const scrollOrientation=Number.isFinite(debug.stageU)||debug.playback?undefined:state.scrollCamera?.orientation;
       const pose=sampleSourceScenePose({playback,chapterScene,families:d.families,selection:selected,aspect,viewportWidth:size.width,viewport:slot.viewport,weight:studyWeight,
-        inspection:state.inspection,interactionChapter:state.modelInteractionChapter,pointer,reducedMotion:reduced,compositionMode:state.compositionMode,canvasLocal:!!state.canvasLocal});
+        inspection:state.inspection,interactionChapter:state.modelInteractionChapter,pointer,reducedMotion:reduced,compositionMode:state.compositionMode,canvasLocal:!!state.canvasLocal,scrollOrientation});
       const opticalInput={stageU,visualU,energy:state.energy,dwellWeight:state.dwellWeight,aspect,reducedMotion:reduced,chapterScene};
       const optics=sampleOpticalScore(opticalInput,pose,{bounds});
       optics.focalLengthMm=Number.isFinite(debug.focalLengthMm)?clamp(debug.focalLengthMm,10,160):focalLengthForFov(pose.fov,aspect,optics.filmGaugeMm);
@@ -327,7 +330,7 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
       const presentationKey=`${selected.chapterId}:${selected.id}:${selected.pinned}`;
       const caption=entry?entry.record.description:elements.caption;
       if (caption !== d.caption) {d.caption = caption; d.captions.forEach(element => {element.textContent = caption;});}
-      runtime.pressure.observe(performance.now(),{eligible:d.ready&&!reduced&&!state.modelEngaged&&!state.modelRecovering&&(state.energy??0)<.02,reason:'interaction-or-still'});
+      runtime.pressure.observe(performance.now(),{eligible:d.ready&&!reduced&&!state.motionPaused&&!state.modelEngaged&&!state.modelRecovering&&(state.energy??0)<.02,reason:'interaction-or-still'});
       d.renderBudget=runtime.budget.sync(size.width,size.height);
       const dpr=d.renderBudget.dpr;
       gl.info.reset();
@@ -358,7 +361,7 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
       for(const program of gl.info.programs??[])if(!d.seenPrograms.has(program)){
         d.seenPrograms.add(program);runtime.pressure.suspend('shader-warmup');
       }
-      last.current = {mode:'autonomous-source-story',renderedControllerFrame:state.controllerFrame??0,studyWeight,representation,playback,chapterScene,pose: {...pose, fov: camera.fov, focalLengthMm: optics.focalLengthMm}, optics, lights: direction, elements, bounds, detail:'full', stageLayout, exhibition:exhibitionState, shadowUpdated,keyIntensity: d.lights.key.intensity};
+      last.current = {mode:'autonomous-source-story',scrollCameraPainted:scrollOrientation?{...scrollOrientation}:null,renderedControllerFrame:state.controllerFrame??0,studyWeight,representation,playback,chapterScene,pose: {...pose, fov: camera.fov, focalLengthMm: optics.focalLengthMm}, optics, lights: direction, elements, bounds, detail:'full', stageLayout, exhibition:exhibitionState, shadowUpdated,keyIntensity: d.lights.key.intensity};
       if(presentationKey!==d.presentationKey) {
         d.presentationKey=presentationKey;
         input.events.emit('representationResolved',{chapterId:selected.chapterId,index:selected.index,representationId:selected.id,label,description,count,pinned:selected.pinned});

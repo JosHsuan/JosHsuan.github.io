@@ -34,7 +34,7 @@ export function createModelManager({input,inspection,hitTest}){
   const current=press;press=null;
   if(current?.surface.hasPointerCapture(current.id))current.surface.releasePointerCapture(current.id);
   surfaces.forEach(element=>{if(element)delete element.dataset.modelDragging;});
-  returnView();
+  if(!current?.touch)returnView();
  };
  function hit(event,chapterId,ready){
   if(!ready)return false;
@@ -64,13 +64,14 @@ export function createModelManager({input,inspection,hitTest}){
   // requested selection must not rename geometry that is still on screen.
   const parent=surface.closest('[data-model-study]');
   const announcement=parent?.querySelector('[data-source-announcement]');
-  if(announcement)announcement.textContent=`${study.labels[index]}. Comparison requested. Escape returns to the chapter.`;
+  if(announcement)announcement.textContent=`${study.labels[index]}. Comparison requested. Escape returns to the current scroll view.`;
  }
  function begin(event,study,surface=event.currentTarget,ready=false){
   if(!ready||event.button!==0||event.isPrimary===false||press)return;
   const result=hit(event,study.id,ready),held=result&&sourceAt(study,result.index);
   if(!held)return;
   press={id:event.pointerId,surface,study,x:event.clientX,y:event.clientY,at:event.timeStamp,moved:false,touch:event.pointerType==='touch',azimuth:inspection.value.azimuth,elevation:inspection.value.elevation};
+  if(press.touch)return; // Track a real tap without taking native gesture ownership.
   surface.setPointerCapture(event.pointerId);surface.dataset.modelDragging='true';
   // The raycast names the successfully painted source, which may precede the
   // latest controller frame. Ownership must retain what the pointer grabbed.
@@ -81,7 +82,7 @@ export function createModelManager({input,inspection,hitTest}){
   if(!ready){cancelPress();return;}
   const dx=event.clientX-current.x,dy=event.clientY-current.y;
   current.moved||=Math.hypot(dx,dy)>(current.touch?10:4);
-  if(!current.moved)return;
+  if(current.touch||!current.moved)return;
   // Inspection orbits the camera around unchanged source geometry. Move the
   // camera opposite the dragged surface so the visible model follows the hand.
   setInspectionTarget(inspection,{azimuth:current.azimuth-dx*.23,elevation:current.elevation+dy*.18});
@@ -91,8 +92,10 @@ export function createModelManager({input,inspection,hitTest}){
   const current=press;if(!current||current.id!==event.pointerId)return;
   press=null;
   if(current.surface.hasPointerCapture(current.id))current.surface.releasePointerCapture(current.id);
-  delete current.surface.dataset.modelDragging;returnView();
-  if(!cancelled&&!current.moved&&event.timeStamp-current.at<650)choose(current.study,current.surface,ready);
+  delete current.surface.dataset.modelDragging;
+  if(!current.touch)returnView();
+  const duration=event.timeStamp-current.at,travel=Math.hypot(event.clientX-current.x,event.clientY-current.y);
+  if(!cancelled&&!current.moved&&travel<=(current.touch?10:4)&&duration>=0&&duration<650&&(!current.touch||hit(event,current.study.id,ready)))choose(current.study,current.surface,ready);
  }
  function key(event,study,ready){
   if(!ready)return;
@@ -105,7 +108,7 @@ export function createModelManager({input,inspection,hitTest}){
   }else if(event.key==='Escape'||event.key==='Home'){
    event.preventDefault();cancelPress();returnView(true);clearHover();
    const announcement=event.currentTarget.closest('[data-model-study]')?.querySelector('[data-source-announcement]');
-   if(announcement)announcement.textContent='Returned to the chapter view.';
+   if(announcement)announcement.textContent='Returned to the current scroll view.';
   }
  }
  function connectLifecycle({window:windowTarget,document:documentTarget}){
@@ -119,7 +122,7 @@ export function createModelManager({input,inspection,hitTest}){
  function connectPointer(documentTarget,hosts,ready){
   const scope=input.events.createScope('model-pointer');
   input.events.on(scope,'stateChanged',({current})=>{
-   if(press&&(!current.modelEngaged||current.modelInteractionChapter!==press.study.id))cancelPress();
+   if(press&&!press.touch&&(!current.modelEngaged||current.modelInteractionChapter!==press.study.id))cancelPress();
   });
   input.events.listen(scope,documentTarget,'pointerdown',event=>{
    if(event.target.closest?.('button,a,select,input,summary,[data-protect],[data-feedback-plane]'))return;
@@ -136,7 +139,7 @@ export function createModelManager({input,inspection,hitTest}){
   unavailable(){cancelPress();clearHover();},
   lostCapture(event){if(press?.id===event.pointerId)cancelPress();},
   leave(){if(!press)clearHover();},
-  blur(){if(pinned){pinned=false;if(!press)returnView();}clearHover();},
+  blur(){if(press?.touch){clearHover();return;}if(pinned){pinned=false;if(!press)returnView();}clearHover();},
   inspect(){return{pointerId:press?.id??null,pinned,surfaces:surfaces.size};},
  };
 }

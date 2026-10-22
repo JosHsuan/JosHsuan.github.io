@@ -45,7 +45,12 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build:pages
-      - run: pnpm exec playwright install --with-deps ${{ steps.plan.outputs.engine }}
+      - name: Install OS browser dependencies (bounded)
+        timeout-minutes: 8
+        run: pnpm exec playwright install-deps ${{ steps.plan.outputs.engine }}
+      - name: Install pinned browser binary (bounded)
+        timeout-minutes: 3
+        run: pnpm exec playwright install ${{ steps.plan.outputs.engine }}
       - name: Run selected tests (cannot satisfy release acceptance)
         run: node scripts/ci-preflight.mjs run
       - uses: actions/upload-artifact@v4

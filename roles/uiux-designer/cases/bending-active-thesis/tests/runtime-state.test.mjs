@@ -95,3 +95,19 @@ test('held sources are atomic, chapter-bound inspection intent and do not publis
  assert.equal(input.state.get().modelHeldSource,null);assert.equal(input.state.get().modelEngaged,false);assert.equal(comparisons,1);
  input.dispose();
 });
+
+
+test('motion pause is a discrete preference, not scene disposal or reduced-motion substitution',()=>{
+ const input=createRuntimeInput();
+ const prefs={systemReduced:false,sceneEnabled:true,sceneReady:true,sceneFailed:false,motionPaused:true};
+ assert.equal(input.commands.execute('preferences.apply',prefs).status,'accepted');
+ assert.equal(input.get().motionPaused,true);assert.equal(input.get().sceneEnabled,true);
+ assert.equal(input.get().sceneReady,true);assert.equal(input.get().reduced,false);
+ assert.throws(()=>input.publishFrame({motionPaused:false}),/Frame data cannot change/);
+ const version=input.state.version;
+ assert.equal(input.commands.execute('preferences.apply',{...prefs,motionPaused:'yes'}).status,'rejected');
+ assert.equal(input.state.version,version);
+ assert.equal(input.commands.execute('preferences.apply',{...prefs,motionPaused:false}).status,'accepted');
+ assert.equal(input.get().motionPaused,false);assert.equal(input.get().sceneReady,true);
+ input.dispose();
+});

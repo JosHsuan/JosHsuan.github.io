@@ -181,7 +181,12 @@ jobs:
           name: pages-test-inventory
       - name: Verify exact shared output before browser checks
         run: node scripts/ci-artifact.mjs check-build
-      - run: pnpm exec playwright install --with-deps ${{ matrix.engine }}
+      - name: Install OS browser dependencies (bounded)
+        timeout-minutes: 8
+        run: pnpm exec playwright install-deps ${{ matrix.engine }}
+      - name: Install pinned browser binary (bounded)
+        timeout-minutes: 3
+        run: pnpm exec playwright install ${{ matrix.engine }}
       - run: node scripts/ci-run-pages.mjs ${{ matrix.browser }} ${{ matrix.shard }}
       - uses: actions/upload-artifact@v4
         if: always()

@@ -29,3 +29,6 @@
 
 .readingTools,.readingTools button{font-size:var(--type-size-control);line-height:var(--type-leading-control);letter-spacing:var(--type-tracking-control)}
 .readingTools [data-scene-fallback]{font-size:var(--type-size-label);line-height:var(--type-leading-caption);letter-spacing:var(--type-tracking-caption)}
+
+/* The new motion toggle retains a touch-sized target at every reading width. */
+.readingTools [data-bending-motion-toggle]{min-width:44px;min-height:44px}

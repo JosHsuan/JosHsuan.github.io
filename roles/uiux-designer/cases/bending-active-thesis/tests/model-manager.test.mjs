@@ -31,14 +31,14 @@ test('only a real source press captures; visible object follows both drag axes a
  assert.equal(f.input.get().modelHeldSource,null);
 });
 
-test('a captured touch tap compares; touch dragging rotates both axes without selecting',()=>{
+test('native touch tap compares without capture; touch pan never rotates or selects',()=>{
  for(const drag of [false,true]){
   const f=setup(),study=MODEL_STUDIES[0];
   f.manager.begin(f.pointer({pointerType:'touch'}),study,f.surface,true);
-  assert(f.captures.has(1));assert.equal(f.input.get().modelEngaged,true);
+  assert.equal(f.captures.size,0);assert.equal(f.input.get().modelEngaged,false);
   if(drag){
    f.manager.move(f.pointer({pointerType:'touch',clientX:40,clientY:60}),true);
-   assert.equal(f.inspection.target.azimuth,23.1);assert.equal(f.inspection.target.elevation,37.2);
+   assert.equal(f.inspection.target.azimuth,30);assert.equal(f.inspection.target.elevation,30);
   }
   f.manager.end(f.pointer({pointerType:'touch',timeStamp:200}),false,true);
   assert.equal(f.input.get().sourceSelection?.index,drag?undefined:1);
@@ -64,7 +64,7 @@ test('touch cancellation, lost capture, unavailable scene and listener teardown 
   const disconnect=f.manager.connectPointer(documentTarget,MODEL_STUDIES,true);
   f.manager.begin(f.pointer({pointerType:'touch'}),MODEL_STUDIES[0],f.surface,true);
   f.manager.move(f.pointer({pointerType:'touch',clientY:80}),true);
-  assert.equal(f.inspection.target.elevation,40.8);
+  assert.equal(f.inspection.target.elevation,30);
   if(end==='cancel')f.manager.end(f.pointer({pointerType:'touch',timeStamp:200}),true,true);
   if(end==='lost')f.manager.lostCapture(f.pointer());
   if(end==='unavailable')f.manager.unavailable();
@@ -181,4 +181,30 @@ test('hidden, resumed, Reduced and held time do not consume the comparison lifet
  assert.equal(expireSourceSelection(f.input,playback.activeSeconds),false);assert.equal(f.input.get().sourceSelection.index,1);
  advanceChapterPlayback(playback,4,{chapter:'form'});assert.equal(expireSourceSelection(f.input,playback.activeSeconds),true);
  f.input.dispose();
+});
+
+
+test('touch cancellation and pan leave unrelated keyboard inspection untouched until an actual comparison',()=>{
+ for(const ending of ['cancel','pan','lost','tap']){
+  const f=setup(),study=MODEL_STUDIES[0];
+  f.manager.key({key:'ArrowRight',currentTarget:f.surface,preventDefault(){}},study,true);
+  const before={...f.inspection.target},held=f.input.get().modelHeldSource;
+  const event=patch=>f.pointer({pointerType:'touch',preventDefault(){throw Error('Touch must stay native');},...patch});
+  f.manager.begin(event(),study,f.surface,true);f.manager.blur();
+  assert.equal(f.captures.size,0);assert.deepEqual(f.inspection.target,before);assert.equal(f.input.get().modelEngaged,true);
+  if(ending==='pan')f.manager.move(event({clientY:100}),true);
+  if(ending==='lost')f.manager.lostCapture(event());
+  else f.manager.end(event({timeStamp:200}),ending==='cancel',true);
+  if(ending==='tap'){assert.equal(f.input.get().sourceSelection.index,1);assert.equal(f.input.get().modelEngaged,false);}
+  else{assert.deepEqual(f.inspection.target,before);assert.deepEqual(f.input.get().modelHeldSource,held);assert.equal(f.input.get().modelEngaged,true);assert.equal(f.input.get().sourceSelection,null);}
+ }
+});
+
+test('touch up travel, negative duration, expired press and no-longer-hit source do not compare',()=>{
+ for(const patch of [{clientX:100,timeStamp:100},{timeStamp:-1},{timeStamp:650},{timeStamp:100,outside:true}]){
+  const f=setup();f.manager.begin(f.pointer({pointerType:'touch'}),MODEL_STUDIES[0],f.surface,true);
+  if(patch.outside)f.setSource(false);
+  f.manager.end(f.pointer({pointerType:'touch',...patch}),false,true);
+  assert.equal(f.input.get().sourceSelection,null);assert.equal(f.captures.size,0);
+ }
 });

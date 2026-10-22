@@ -22,6 +22,7 @@ export default function CinematicExperience() {
   const inspection = useMemo(() => createInspectionState(), []);
   const [enabled, setEnabled] = useState(false), [ready, setReady] = useState(false), [failed, setFailed] = useState(false);
   const [systemReduced, setSystemReduced] = useState(false), [hydrated, setHydrated] = useState(false);
+  const [motionPaused, setMotionPaused] = useState(false);
   const activateStudy = useCallback(() => setEnabled(true), []);
   const lifecycle=useMemo(()=>input.features.create('lifecycle',{onSystemReduced:setSystemReduced,onHydrated:setHydrated,onAutomaticEnable:()=>setEnabled(true),onPolicy:value=>input.entry.scenePolicy(value)}),[input]);
   const stage = useRef(null), fieldCanvas=useRef(null), progress = useRef(null), status = useRef(null);
@@ -30,16 +31,16 @@ export default function CinematicExperience() {
   useEffect(()=>input.features.connect('lifecycle.lease',()=>lifecycle.connectLease(window,{enabled,failed})),[input,lifecycle,enabled,failed]);
   useEffect(()=>input.entry.bindFailure(onFailure),[input,onFailure]);
   useEffect(() => {
-    const reduce = systemReduced || !enabled || failed;
-    input.commands.execute('preferences.apply',{systemReduced,sceneEnabled:enabled,sceneFailed:failed,sceneReady:ready});
-    document.documentElement.toggleAttribute('data-cinematic-static', reduce);
+    const staticMotion = systemReduced || !enabled || failed || motionPaused;
+    input.commands.execute('preferences.apply',{systemReduced,sceneEnabled:enabled,sceneFailed:failed,sceneReady:ready,motionPaused});
+    document.documentElement.toggleAttribute('data-cinematic-static', staticMotion);
     return () => {document.documentElement.removeAttribute('data-cinematic-static');};
-  }, [input, systemReduced, enabled, failed, ready]);
+  }, [input, systemReduced, enabled, failed, ready, motionPaused]);
   useEffect(() => {document.documentElement.toggleAttribute('data-canvas-available',ready&&!failed);return()=>document.documentElement.removeAttribute('data-canvas-available');},[ready,failed]);
   useEffect(()=>input.features.connect('director',()=>input.features.create('director',{inspection,lifecycle,stage,fieldCanvas,progress,status,background}).connect()),[input,inspection,lifecycle,background]);
 
   // Discrete preference changes also wake the DOM decoration controller once.
-  useEffect(() => {input.invalidateLayout('preferences');}, [input,systemReduced,enabled,failed,ready,hydrated]);
+  useEffect(() => {input.invalidateLayout('preferences');}, [input,systemReduced,enabled,failed,ready,hydrated,motionPaused]);
   return <>
     <BackgroundBackdrop>
       {!ready&&<picture><source media="(max-width:780px)" srcSet="/assets/cinematic/model-poster-mobile.webp"/><img className={styles.poster} src="/assets/cinematic/model-poster.webp" alt=""/></picture>}
@@ -51,6 +52,7 @@ export default function CinematicExperience() {
     {hydrated && <div className={styles.readingTools} data-protect data-reading-tools data-liquid-glass="reading-controls">
       <span ref={status} aria-hidden="true" data-choreography="nav">01 / 07</span>
       {!enabled&&!failed&&<button type="button" onClick={activateStudy}><span data-choreography="nav">Enable 3D</span></button>}
+      {enabled&&ready&&!failed&&<button type="button" data-bending-motion-toggle disabled={systemReduced} aria-pressed={motionPaused} onClick={()=>setMotionPaused(value=>!value)}>{motionPaused?'Resume motion':'Pause motion'}</button>}
       {failed&&<span role="status" data-scene-fallback>Source study available · 3D unavailable</span>}
       <LiquidGlassSkin id="reading-controls" />
     </div>}
