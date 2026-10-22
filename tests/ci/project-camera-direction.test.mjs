@@ -50,12 +50,14 @@ test('native reading leads optional keyboard inspection without a drag instructi
 const protectedCaseHashes={
  "mode-s-of-making": "f9fddd9ff143121d989f5d2d7bab34e3f6d5442aa648772aed1481bb8544e8e6",
  "entrance-installation-art": "fae4716ed78f692062f483dcecfbb2085c02d8dcbfe536bf89a02c22a6110e66",
- "dot-based-3d-printing": "cc3e422f62aa6bff1c560647c7729209e134369e00125b57826380cca7ada8ec",
+ "dot-based-3d-printing": "4d6f8b85a87c315a1e015c726e43c4a9cf10f07d5d006024d0e5a0110c9a9575",
  "hc3dp-caustics": "7f8858c96d92da4a40ceb4263cfb7738bec11ef300c1fdac6af533246bd84aa2",
- "special-assemblies": "2a88ce084ce03dae280fac96ce2f5eafb84fabeae4a657c466c064570efbbb8f",
- "project-caschlatsch": "7c21805f54245e858bf108389048190cfe3fca8e393d41aa47171024776cd120"
+ "special-assemblies": "fe13ac6b75d9baddd1c674b3c77c3ae7be98c48f50f3d9fbc63452576abaeb56",
+ "project-caschlatsch": "e5dc8f6f3f6a4cf957146b75569b9c1e2c7ff22e3ff8179103e85a34e988a77a"
 };
-test('only cameraPath and two obsolete imperative sentences change case data',async()=>{
+// Three narrative digests advanced only after independently pinned source contracts
+// in three-case-narrative.test.mjs passed; the other three digests stay unchanged.
+test('approved case snapshots remain fixed apart from separately tested camera paths',async()=>{
  const {createHash}=await import('node:crypto');
  for(const project of projects){
   const protectedCopy=structuredClone(project);

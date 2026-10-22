@@ -24,9 +24,9 @@ const originalPairs=[
 
 test('seven source motions and their posters have complete release provenance',()=>{
   const current=fixture(),images=validate(current);
-  // Mode/s support and HC model-fallback placements reuse original sources;
-  // HC adds two placements, not two new image identities or asset approvals.
-  assert.equal(images.length,56);
+  // Existing Mode/s and HC placements plus four three-case narrative primaries
+  // reuse original sources: 60 placements, still 48 identities / 137 approvals.
+  assert.equal(images.length,60);
   assert.equal(new Set(images.map(image=>image.src)).size,48);
   assert.equal(current.assets.motionAssets.length,7);
   // The original Dot MP4 is retained alongside its smaller delivery derivative.
@@ -384,10 +384,10 @@ test('only the reviewed simulation may downsample uniformly and its complete sou
 test('Caschlatsch active evidence is exactly the ten original portfolio extracts with complete XR and voxel plates',()=>{
   const current=fixture();validate(current);const p=project(current,'project-caschlatsch');
   const images=[p.hero,...p.sections.flatMap(section=>section.media)];
-  assert.equal(images.length,10);assert.equal(new Set(images.map(image=>image.src)).size,10);
+  assert.equal(images.length,12);assert.equal(new Set(images.map(image=>image.src)).size,10);
   assert(images.every(image=>image.src.includes('/portfolio-')));
   assert(images.every(image=>!image.src.endsWith('/workflow.webp')&&!image.caption.includes('Design, fabrication and assembly')));
-  assert.deepEqual(p.sections.map(section=>[section.id,section.media.length]),[['context',1],['system',2],['xr-guidance',3],['making',2],['results',1]]);
+  assert.deepEqual(p.sections.map(section=>[section.id,section.media.length]),[['context',1],['system',3],['xr-guidance',4],['making',2],['results',1]]);
   for(const name of ['portfolio-voxel-framework','portfolio-module-infill','portfolio-xr-assembly-sequence','portfolio-xr-data-exchange','portfolio-xr-interface'])assert(images.some(image=>image.src.endsWith('/'+name+'.webp')));
 });
 

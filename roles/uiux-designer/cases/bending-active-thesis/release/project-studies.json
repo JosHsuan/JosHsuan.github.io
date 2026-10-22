@@ -767,19 +767,28 @@
           "id": "system",
           "label": "System",
           "kind": "system",
-          "title": "Coordinate paths and delays.",
+          "title": "Read the path through the deposited beads.",
           "paragraphs": [
-            "I worked on the relationship between robotic paths and deposition delays as part of our printing study. Different combinations of movement and material placement produced smooth and dotted regions.",
-            "Path studies and printed samples connect the motion strategy with the texture that appears in the material."
+            "I worked on robotic paths and deposition delays with Group1. The original plate compares three path strategies alongside printed rings and close views of the deposited beads: read each row from movement diagram to material pattern.",
+            "The point model shows recorded low-speed path sample positions, not a finished solid or a complete fabrication sequence. The separate form study pairs printed shapes with line models to explore the strategy across different geometries."
           ],
           "media": [
+            {
+              "src": "/assets/projects/dot-based-3d-printing/hero.webp",
+              "width": 2560,
+              "height": 1661,
+              "alt": "A translucent twisted printed object stands in snow against grass and trees.",
+              "caption": "A physical prototype from the dot-based non-planar printing study.",
+              "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie."
+            },
             {
               "src": "/assets/projects/dot-based-3d-printing/path-strategies.webp",
               "width": 1524,
               "height": 860,
               "alt": "Three path diagrams are paired with printed rings and close views of deposited beads.",
               "caption": "Different deposition paths and time-delay strategies produce different bead patterns.",
-              "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie."
+              "credit": "Group1 project: Chia-Hsuan Chao / Namdev Talluru / JunJie.",
+              "purpose": "diagram"
             },
             {
               "src": "/assets/projects/dot-based-3d-printing/form-development.webp",
@@ -797,8 +806,8 @@
           "kind": "make",
           "title": "Watch the pattern being deposited.",
           "paragraphs": [
-            "The nozzle deposits material along the specimen edge, building the dotted pattern through the relationship between motion and extrusion.",
-            "Our printing experiments connected parameter studies with physical trials on different overall forms."
+            "The original fabrication recording shows a nozzle depositing material along the specimen edge. It makes the relationship between movement, extrusion and the dotted pattern visible in a physical trial.",
+            "This recording, the sampled point path and the comparison plates are different kinds of evidence from our printing study; they are not presented as one continuous recorded operation."
           ],
           "media": [
             {
@@ -817,7 +826,7 @@
           "kind": "make",
           "title": "A family of physical experiments.",
           "paragraphs": [
-            "The prototypes explore different twists and overall shapes while retaining visible patterns in the deposited material.",
+            "The physical prototypes carry the dotted surface study into different twists and overall shapes. They show a family of material experiments rather than a ranked set of optimal printing settings.",
             "A translucent TPU prototype family extends the study into a lit display, where light reveals the bead structure and variation between surfaces."
           ],
           "media": [
@@ -1260,19 +1269,28 @@
           "id": "system",
           "label": "System",
           "kind": "system",
-          "title": "Rules guide the next module.",
+          "title": "Define a module, then its next neighbour.",
           "paragraphs": [
-            "I worked on the geometric aggregation study as part of Group6. We organised directional growth into four choices: NE, NW, SE and SW, and explored module relationships through an object-oriented model.",
-            "The workflow connected geometry and assembly data with ROS/MoveIt planning through JSON, simulation and replanning."
+            "I worked on the geometric aggregation study with Group6. The VStickModule diagram separates creating a V-shaped module from generating the next module using previous sticks. NE, NW, SE and SW choices organise directional growth.",
+            "The planning diagram then connects that geometry to robot trajectories: generate the assembly, plan through ROS/MoveIt, export JSON and inspect the simulation. Its failure-index branch supports replanning an identified trajectory rather than treating the first plan as final."
           ],
           "media": [
+            {
+              "src": "/assets/projects/special-assemblies/hero.webp",
+              "width": 3120,
+              "height": 2080,
+              "alt": "A curved assembly of wooden sticks rises from a small base beside a robotic arm.",
+              "caption": "The assembled prototype beside the robotic arm, documented in the original Group6 record.",
+              "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani."
+            },
             {
               "src": "/assets/projects/special-assemblies/module-aggregation.webp",
               "width": 1546,
               "height": 2029,
               "alt": "Module diagrams and sequential stick assemblies show four directional aggregation choices.",
               "caption": "The original VStickModule and directional-aggregation diagrams, with their figure captions.",
-              "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani. Project diagram."
+              "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani. Project diagram.",
+              "purpose": "diagram"
             },
             {
               "src": "/assets/projects/special-assemblies/planning-workflow.webp",
@@ -1280,7 +1298,8 @@
               "height": 1903,
               "alt": "Workflow diagrams connect module generation, ROS and MoveIt planning, JSON data, simulation and replanning.",
               "caption": "The original software and JSON-based robotic planning workflow.",
-              "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani. Project diagram."
+              "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani. Project diagram.",
+              "purpose": "diagram"
             }
           ]
         },
@@ -1288,10 +1307,10 @@
           "id": "making",
           "label": "Making",
           "kind": "make",
-          "title": "Plan the assembly sequence.",
+          "title": "Inspect the planned robot movements.",
           "paragraphs": [
-            "Pick, place, exit and insert trajectories organised robot movement around the growing structure.",
-            "We studied stick ordering and tool-frame direction, including a Z-axis correction intended to reduce gripper interference with the table."
+            "The trajectory plate distinguishes pick, place, exit and insert movements around the growing structure. We studied stick ordering and tool-frame direction, including a Z-axis correction intended to reduce gripper interference with the table.",
+            "The moving source is a robot-assembly simulation, not footage of a completed physical assembly. Read it alongside the trajectory diagram; the original assembly model and the physical photographs provide separate views of the study."
           ],
           "media": [
             {
@@ -1300,7 +1319,8 @@
               "height": 1375,
               "alt": "A robotic assembly diagram labels pick, approach, safe, place and exit frames around the stick prototype.",
               "caption": "The recorded pick, place, exit and insert trajectory stages for V-stick aggregation.",
-              "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani. Project diagram."
+              "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani. Project diagram.",
+              "purpose": "diagram"
             }
           ]
         },
@@ -1310,8 +1330,8 @@
           "kind": "make",
           "title": "From modules to a prototype.",
           "paragraphs": [
-            "The physical assembly brings the accumulated stick relationships into view from the front and above.",
-            "The prototypes connect reciprocal aggregation with the practical task of placing the next stick in an increasingly complex arrangement."
+            "The front and top photographs show the physical prototype and the repeated contacts between its sticks. They bring the geometric relationships back to the material assembly.",
+            "These prototypes document the team’s physical exploration alongside the planning work. The photographs and simulation do not by themselves establish collision-free execution or a verified assembly sequence for every model part."
           ],
           "media": [
             {
@@ -1510,15 +1530,22 @@
           "id": "system",
           "label": "System",
           "kind": "system",
-          "title": "From voxels to a beam system.",
+          "title": "Connect indexed cells to timber modules.",
           "paragraphs": [
-            "I worked on the cohort's voxel-to-beam aggregation in Python and Grasshopper. We used spatial cells to keep beam placement tied to indexed positions and neighbouring cells, so the timber modules grew through explicit geometric rules.",
-            "The shared framework separated processing from geometry: ID managed voxel indexing and neighbour relationships, while Discrete Vector Generator supplied candidate directions. Voxel represented spatial cells, Beam the timber elements, and Layer groups of voxels.",
-            "A 26-direction discretisation converted this spatial map into beam axes through voxel centres. Stored voxel data tracked existing beams to control new intersections and avoid redundant crossings.",
-            "The module strategy combined an edge frame with orthogonal and diagonal supports, then varied the beam infill. Five-beam and 30-beam configurations explored different densities within that common frame.",
-            "My code work included separating the aggregation solver and ID/vector tools for Grasshopper, and refining occupied-voxel checks for the flying-beam problem. This development was part of the shared research that connected aggregation, module planning and fabrication."
+            "I worked on the cohort’s voxel-to-beam aggregation in Python and Grasshopper. The five-class framework separates processing from geometry: ID manages indexing and neighbours, Discrete Vector Generator supplies directions, Voxel represents spatial cells, Beam the timber elements, and Layer groups of voxels.",
+            "A 26-direction discretisation defines candidate beam axes through voxel centres. Stored voxel data tracks existing beams to control intersections and avoid redundant crossings. The module plate then shows the material arrangement: an edge frame, orthogonal and diagonal supports, and five-beam or 30-beam infill.",
+            "My code work separated the aggregation solver and ID/vector tools for Grasshopper and refined occupied-voxel checks for the flying-beam problem. This was part of the shared research linking aggregation, module planning and fabrication; the original framework and infill plates below retain the detailed labels."
           ],
           "media": [
+            {
+              "src": "/assets/projects/project-caschlatsch/portfolio-timber-model.webp",
+              "width": 1141,
+              "height": 761,
+              "alt": "Timber tower model on a stepped white site model in front of a window.",
+              "caption": "The architectural timber-tower model.",
+              "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
+              "purpose": "photograph"
+            },
             {
               "src": "/assets/projects/project-caschlatsch/portfolio-voxel-framework.webp",
               "width": 2270,
@@ -1545,20 +1572,20 @@
           "kind": "system",
           "media": [
             {
+              "src": "/assets/projects/project-caschlatsch/portfolio-xr-workshop.webp",
+              "width": 662,
+              "height": 373,
+              "alt": "Participant checks a handheld device while positioning a timber member within a module.",
+              "caption": "XR-guided timber assembly in the collaborative workshop.",
+              "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
+              "purpose": "photograph"
+            },
+            {
               "src": "/assets/projects/project-caschlatsch/portfolio-xr-assembly-sequence.webp",
               "width": 2325,
               "height": 1690,
               "alt": "Original app screenshots and arrows showing module selection, floating and orientation, stacking/assembly mode, model positioning and beam selection.",
               "caption": "The original AR-based beam and module assembly sequence.",
-              "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
-              "purpose": "diagram"
-            },
-            {
-              "src": "/assets/projects/project-caschlatsch/portfolio-xr-data-exchange.webp",
-              "width": 2310,
-              "height": 1240,
-              "alt": "Original CAD-to-Firebase-to-AR diagram with JSON building plans/checklists and OBJ mesh data.",
-              "caption": "The original cloud data-exchange framework for XR and CAD.",
               "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
               "purpose": "diagram"
             },
@@ -1570,14 +1597,22 @@
               "caption": "The original XR interfaces for modular assembly and beam positioning.",
               "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
               "purpose": "diagram"
+            },
+            {
+              "src": "/assets/projects/project-caschlatsch/portfolio-xr-data-exchange.webp",
+              "width": 2310,
+              "height": 1240,
+              "alt": "Original CAD-to-Firebase-to-AR diagram with JSON building plans/checklists and OBJ mesh data.",
+              "caption": "The original cloud data-exchange framework for XR and CAD.",
+              "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
+              "purpose": "diagram"
             }
           ],
-          "title": "Developing XR for multi-module assembly.",
+          "title": "Choose a module, then locate its beam.",
           "paragraphs": [
-            "During production, I improved COMPAS XR so users could select and switch assembly modules from a cloud server, track beam IDs and follow the assembly sequence in real time. The current module, selected beam and sequence step kept the interface tied to the component being assembled.",
-            "The shared workflow began with a COMPAS Timber assembly plan. Building plans and checklists were serialised as JSON, with OBJ files carrying mesh geometry. Firebase connected this CAD data to the AR applications, which retrieved and deserialised it for use beside the physical work.",
-            "The project's assembly and stacking applications supported different workshop tasks. Beam selection, orientation arrows and a floating-beam view helped inspect a component and its cutting features; scaling, three-axis rotation and stacking/assembly modes supported module inspection and positioning.",
-            "I also worked on the Rhino-to-COMPAS data preparation, including converting stacking planes into frames and preparing module building-plan and mesh exports. My multi-module and sequence-interface development sat within this collaborative CAD, cloud and XR production system."
+            "During production, I improved COMPAS XR so users could select and switch modules from a cloud server, track beam IDs and follow the assembly sequence in real time. The original assembly plate follows these tasks through module selection, floating and orientation, module positioning and beam selection.",
+            "The annotated interfaces distinguish assembly and stacking tasks. Orientation arrows and a floating-beam view support component and cutting-feature inspection; scaling, three-axis rotation and stacking/assembly modes support module inspection and positioning.",
+            "Behind these tasks, a COMPAS Timber assembly plan supplies JSON building plans and checklists, with OBJ mesh geometry exchanged through Firebase to the AR applications. I also prepared Rhino-to-COMPAS data, converted stacking planes into frames and prepared module building-plan and mesh exports. My interface contributions sat within this collaborative CAD, cloud and XR system."
           ]
         },
         {
