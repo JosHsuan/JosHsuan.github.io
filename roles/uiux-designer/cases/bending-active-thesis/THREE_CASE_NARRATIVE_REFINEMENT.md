@@ -80,3 +80,42 @@ not just introductory cards. Preserve continuous model ownership, original
 recording/simulation distinctions, source hashes, camera and media timing, and
 shared Pause/focus/forced-colors policies. No static screenshot alone proves
 motion, field performance or a physical engineering result.
+
+## Affected preflight and retained visual checkpoint
+
+Exact `70dc4ad` affected preflight passed 60/60 executions: 20 each in
+Chromium, WebKit and mobile Chromium. This is not the full gate; the upcoming
+483-execution public suite and final release remain pending. The preceding
+`2147d16` failures exposed test assumptions, not demonstrated application fixes:
+caption scroll extents included the existing clipped decorative skin overscan;
+tests now measure actual caption text bounds independently. Reused physical
+background-source identity is checked without assuming one DOM host per chapter.
+
+All 30 retained figure PNGs (10 sources per profile) were actually inspected:
+- Chromium: archive `narrative-70dc4ad/12459527442/files`.
+- WebKit: archive `narrative-70dc4ad/12460310328/files`.
+- Mobile Chromium: archive `narrative-70dc4ad/12459503009/files`.
+
+Within those captures the original plates retain source extent, proportions,
+figure labels and intended technical full-width layout. Captions wrap normally,
+without the hypothesized 23px text overflow. No new source crop or application
+layout blocker was identified. WebKit's stronger background translucency remains
+visible, with the captured caption text still distinguishable.
+
+These are reduced/static reading captures, not nonzero glass-motion or hardware
+performance evidence. A full-figure element capture can include fixed navigation,
+Pause, the focused skip link or the chapter rail crossing the pictured source at
+that scroll position. Desktop tall plates therefore do not prove every original
+label is simultaneously unobscured. Mobile shows complete source plates, but
+only 8/10 HTML captions/credits are fully visible in the current images: the
+Caschlatsch XR data-exchange caption/credit and the Special module-aggregation
+credit have portions behind the fixed bottom rail. This is an explicit capture
+limit, not evidence that native scrolling cannot reveal them. The next full gate
+will retain additional native-centered caption captures, without hiding chrome
+or changing application layout, to close that evidence gap.
+
+Dense original raster lettering remains small/soft, particularly at 390px.
+Complete aspect preservation does not establish that every embedded label is
+legible inline. Native captions and original full-image links remain necessary
+for orientation and detailed reading; no invented sharpening, labels, measured
+performance or physical research outcomes are inferred from these screenshots.

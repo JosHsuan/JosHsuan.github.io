@@ -34,7 +34,8 @@
       "tests/pages/window-integration.spec.mjs": 315.091,
       "tests/pages/xr-research.spec.mjs": 148.981,
       "tests/pages/bending-scroll-camera.spec.mjs": 234.927,
-      "tests/pages/global-window-motion.spec.mjs": 327.119
+      "tests/pages/global-window-motion.spec.mjs": 327.119,
+      "tests/pages/three-case-narrative.spec.mjs": 11.266
     },
     "webkit": {
       "tests/pages/canvas-motion.spec.mjs": 162.572,
@@ -66,7 +67,8 @@
       "tests/pages/window-integration.spec.mjs": 79.171,
       "tests/pages/xr-research.spec.mjs": 147.666,
       "tests/pages/bending-scroll-camera.spec.mjs": 56.632,
-      "tests/pages/global-window-motion.spec.mjs": 183.289
+      "tests/pages/global-window-motion.spec.mjs": 183.289,
+      "tests/pages/three-case-narrative.spec.mjs": 56.551
     },
     "mobile-chromium": {
       "tests/pages/canvas-motion.spec.mjs": 186.831,
@@ -98,7 +100,8 @@
       "tests/pages/window-integration.spec.mjs": 92.897,
       "tests/pages/xr-research.spec.mjs": 124.187,
       "tests/pages/bending-scroll-camera.spec.mjs": 105.495,
-      "tests/pages/global-window-motion.spec.mjs": 195.052
+      "tests/pages/global-window-motion.spec.mjs": 195.052,
+      "tests/pages/three-case-narrative.spec.mjs": 9.59
     }
   },
   "calibrationSources": {
@@ -123,6 +126,27 @@
           "passedSummaryAt": "2026-10-22T18:30:21.3246983Z",
           "testsPassed": 12,
           "measurement": "Single-file elapsed seconds from first logged test start to 12-passed summary; includes intervening setup/teardown and final reporter overhead, excludes earlier build/browser startup. Healthy nonpublishable preflight."
+        },
+        "tests/pages/three-case-narrative.spec.mjs": {
+          "sourceRun": "39855692909",
+          "sourceCommit": "70dc4ad8c72f57d1aa545f89e234aad20ac323a9",
+          "runAttempt": 1,
+          "jobId": "120093200627",
+          "log": "chromium.log",
+          "selectedTestPositions": [
+            14,
+            15,
+            16,
+            17,
+            18,
+            19
+          ],
+          "firstTestStartedAt": "2026-10-22T21:19:02.8561633Z",
+          "followingTestStartedAt": "2026-10-22T21:19:14.1226454Z",
+          "followingTestFile": "tests/pages/project-background-motion.spec.mjs",
+          "testsPassed": 6,
+          "selectedSuitePassed": 20,
+          "measurement": "Sum of each of this file's six logged test-start to next-test-start intervals, including intervening setup/teardown. Stops before the following project-background-motion test; excludes that test, earlier files/build and final reporter/upload time. Healthy nonpublishable preflight; scheduling hint, not runtime guarantee."
         }
       },
       "webkit": {
@@ -144,6 +168,27 @@
           "passedSummaryAt": "2026-10-22T18:28:37.3121191Z",
           "testsPassed": 12,
           "measurement": "Single-file elapsed seconds from first logged test start to 12-passed summary; includes intervening setup/teardown and final reporter overhead, excludes earlier build/browser startup. Healthy nonpublishable preflight."
+        },
+        "tests/pages/three-case-narrative.spec.mjs": {
+          "sourceRun": "39855808399",
+          "sourceCommit": "70dc4ad8c72f57d1aa545f89e234aad20ac323a9",
+          "runAttempt": 1,
+          "jobId": "120093590791",
+          "log": "webkit.log",
+          "selectedTestPositions": [
+            14,
+            15,
+            16,
+            17,
+            18,
+            19
+          ],
+          "firstTestStartedAt": "2026-10-22T21:20:26.1726676Z",
+          "followingTestStartedAt": "2026-10-22T21:21:22.7235944Z",
+          "followingTestFile": "tests/pages/project-background-motion.spec.mjs",
+          "testsPassed": 6,
+          "selectedSuitePassed": 20,
+          "measurement": "Sum of each of this file's six logged test-start to next-test-start intervals, including intervening setup/teardown. Stops before the following project-background-motion test; excludes that test, earlier files/build and final reporter/upload time. Healthy nonpublishable preflight; scheduling hint, not runtime guarantee."
         }
       },
       "mobile-chromium": {
@@ -165,6 +210,27 @@
           "passedSummaryAt": "2026-10-22T18:29:54.6331176Z",
           "testsPassed": 12,
           "measurement": "Single-file elapsed seconds from first logged test start to 12-passed summary; includes intervening setup/teardown and final reporter overhead, excludes earlier build/browser startup. Healthy nonpublishable preflight."
+        },
+        "tests/pages/three-case-narrative.spec.mjs": {
+          "sourceRun": "39855920236",
+          "sourceCommit": "70dc4ad8c72f57d1aa545f89e234aad20ac323a9",
+          "runAttempt": 1,
+          "jobId": "120093983612",
+          "log": "mobile-chromium.log",
+          "selectedTestPositions": [
+            14,
+            15,
+            16,
+            17,
+            18,
+            19
+          ],
+          "firstTestStartedAt": "2026-10-22T21:20:19.0011480Z",
+          "followingTestStartedAt": "2026-10-22T21:20:28.5912229Z",
+          "followingTestFile": "tests/pages/project-background-motion.spec.mjs",
+          "testsPassed": 6,
+          "selectedSuitePassed": 20,
+          "measurement": "Sum of each of this file's six logged test-start to next-test-start intervals, including intervening setup/teardown. Stops before the following project-background-motion test; excludes that test, earlier files/build and final reporter/upload time. Healthy nonpublishable preflight; scheduling hint, not runtime guarantee."
         }
       }
     }

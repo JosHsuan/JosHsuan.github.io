@@ -96,6 +96,20 @@ async function inspectPlates(page,definition,info,{noJS=false}={}){
     await figure.scrollIntoViewIfNeeded();
     const path=info.outputPath(`${project.id}-${chapter}-${name}.png`);
     await figure.screenshot({path});await info.attach(`${chapter}-${name}`,{path,contentType:'image/png'});
+    // The full tall figure can extend behind fixed chrome in its capture.
+    // Also retain its complete caption at a real, unobscured reading position.
+    await caption.evaluate(node=>node.scrollIntoView({block:'center',behavior:'instant'}));
+    const reading=await caption.evaluate(node=>{
+     const rect=element=>{const r=element.getBoundingClientRect();return{left:r.left,right:r.right,top:r.top,bottom:r.bottom};};
+     const chrome=[...document.querySelectorAll('[data-portfolio-masthead],[data-portfolio-navigation],[data-project-chapter-navigation],[data-study-motion-toggle]')].filter(element=>element.checkVisibility({visibilityProperty:true,opacityProperty:true})).map(element=>({tag:element.tagName,box:rect(element)}));
+     return{box:rect(node),viewport:{width:innerWidth,height:innerHeight},y:scrollY,chrome};
+    });
+    receipt.plates.at(-1).captionReading=reading;
+    expect(reading.box.left).toBeGreaterThanOrEqual(0);expect(reading.box.right).toBeLessThanOrEqual(reading.viewport.width);
+    expect(reading.box.top).toBeGreaterThanOrEqual(0);expect(reading.box.bottom).toBeLessThanOrEqual(reading.viewport.height);
+    for(const {box} of reading.chrome)expect(reading.box.left<box.right&&reading.box.right>box.left&&reading.box.top<box.bottom&&reading.box.bottom>box.top,'Centered caption must not overlap fixed chrome').toBe(false);
+    const captionPath=info.outputPath(`${project.id}-${chapter}-${name}-caption.png`);
+    await caption.screenshot({path:captionPath});await info.attach(`${chapter}-${name}-caption`,{path:captionPath,contentType:'image/png'});
    }
   }
  }catch(error){primaryError=error;throw error;}finally{
