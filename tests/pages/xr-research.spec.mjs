@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {createServer} from 'node:http';
 import {fileURLToPath} from 'node:url';
-import {readFile} from 'node:fs/promises';
+import {readFile,writeFile} from 'node:fs/promises';
 import {createPagesPreviewHandler} from '../../scripts/serve-pages.mjs';
 import {WAIT,frames} from './case-helpers.mjs';
 
@@ -334,7 +334,12 @@ test('a genuinely delayed recording preserves its paused native frame through a 
  await observePhoneLifecycle(page);
  let release;const held=new Promise(resolve=>{release=resolve;});let waiting=false;
  await page.route('**/assets/xr/assemble-interface.mp4',async route=>{waiting=true;await held;await route.continue();});
- let continuity,primaryError;
+ let continuity,primaryError,advancementBaseline;const advancement=[];
+ const saveAdvancement=async outcome=>{
+  const path=test.info().outputPath('delayed-recording-advance-diagnostic.json');
+  await writeFile(path,JSON.stringify({outcome,baseline:advancementBaseline,advancement,lifecycle:phoneDiagnostics.get(page)?.entries??[]},null,2));
+  await test.info().attach('delayed-recording-advance-diagnostic',{path,contentType:'application/json'});
+ };
  const nativeFrame=()=>video(page,'adapt').evaluate(async node=>{
   if(node.readyState<2||!node.videoWidth||!node.videoHeight)throw Error('Retained native frame is unavailable');
   const sample=document.createElement('canvas');sample.width=node.videoWidth;sample.height=node.videoHeight;
@@ -384,11 +389,40 @@ test('a genuinely delayed recording preserves its paused native frame through a 
   release();await frames(page,8);expect((await facts(page)).chapter).toBe('adapt');await expect(video(page,'adapt')).toHaveAttribute('src',/adapt-interface\.mp4$/);
   await phoneReady(page,'assemble');expect(await original.evaluate(node=>node===document.querySelector('[data-xr-stage] canvas'))).toBe(true);
   await expect(video(page,'adapt')).not.toHaveAttribute('src');await expect(stage(page).locator('video[src]')).toHaveCount(1);
-  const before=await video(page,'assemble').evaluate(node=>node.currentTime);await expect.poll(()=>video(page,'assemble').evaluate(node=>node.currentTime)).toBeGreaterThan(before);closed(await facts(page));
+  const before=await video(page,'assemble').evaluate(node=>node.currentTime);advancementBaseline=before;
+  await expect.poll(async()=>{
+   // Observe the same native read as the original predicate: no extra roundtrip,
+   // wait, playback request or clock. Keep only bounded diagnostic history.
+   const snapshot=await video(page,'assemble').evaluate(node=>{
+    const currentTime=node.currentTime,state=document.querySelector('[data-xr-stage]')?.__xrStage?.inspect();
+    const range=value=>Array.from({length:Math.min(value.length,4)},(_,index)=>[value.start(index),value.end(index)]);
+    const native=Array.from(document.querySelectorAll('[data-xr-stage-video]')).slice(0,4).map(video=>{
+     const quality=video.getVideoPlaybackQuality?.();
+     return{stage:video.dataset.xrStageVideo,src:video.getAttribute('src'),currentSrc:video.currentSrc,
+      currentTime:video.currentTime,paused:video.paused,ended:video.ended,seeking:video.seeking,
+      readyState:video.readyState,networkState:video.networkState,duration:Number.isFinite(video.duration)?video.duration:String(video.duration),
+      bufferedLength:video.buffered.length,seekableLength:video.seekable.length,buffered:range(video.buffered),seekable:range(video.seekable),error:video.error?{code:video.error.code,message:video.error.message?.slice(0,240)}:null,
+      quality:quality?{totalVideoFrames:quality.totalVideoFrames,droppedVideoFrames:quality.droppedVideoFrames,corruptedVideoFrames:quality.corruptedVideoFrames}:null};
+    });
+    return{currentTime,native,owner:state?{phase:state.phase,chapter:state.chapter,scene:state.scene?.mode,
+     scheduled:state.lifecycle?.scheduled,rendering:state.resource?.mode,resourceChapter:state.resource?.chapter,
+     successfulPaint:state.resource?.successfulPaint,paused:state.resource?.paused,media:state.resource?.media,
+     fallback:state.resource?.fallbackReason,lastRenderFailure:state.resource?.lastRenderFailure}:null};
+   });
+   if(advancement.length===32)advancement.shift();advancement.push(snapshot);
+   return snapshot.currentTime;
+  }).toBeGreaterThan(before);closed(await facts(page));
   const samples=await continuity.evaluate(value=>value.samples);expect(samples.some(sample=>sample.chapter==='assemble')).toBe(true);
   for(const sample of samples){expect(sample).toMatchObject({opacity:1,cssOpacity:1,painted:true,phoneCalls:2});expect(['entry','exit']).not.toContain(sample.mode);}
   await test.info().attach('continuous-pending-reverse-phone',{body:JSON.stringify(samples),contentType:'application/json'});
- }catch(error){primaryError=error;throw error;}
+  await saveAdvancement('passed');
+ }catch(error){
+  primaryError=error;
+  try{
+   await saveAdvancement('failed');
+  }catch{/* Persisted diagnostics must never replace the original assertion. */}
+  throw error;
+ }
  finally{
   try{
    try{if(continuity){try{await continuity.evaluate(value=>value.dispose());}finally{await continuity.dispose();}}}

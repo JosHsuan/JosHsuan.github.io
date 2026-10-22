@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {writeFile} from 'node:fs/promises';
 import {WAIT,scenarioTimeout,loadScene,centerStudy,hitPoint,surface,frames,settle} from './case-helpers.mjs';
 
 // Mobile uses browser-native touch input, so this exercises CSS touch-action,
@@ -55,21 +56,58 @@ test('mouse orbits both axes while native source touch pans and taps compare',as
    await expect(surface(page)).not.toHaveAttribute('data-model-dragging','true');
 
    // A short actual source tap still selects the next painted comparison.
-   await centerStudy(page);const tap=await hitPoint(page);
+   await centerStudy(page);
+   // Install observation before choosing the fresh real source point. This
+   // records browser event time, not protocol acknowledgment wall time.
    const tapReceipt=await surface(page).evaluateHandle(el=>{
-    const receipt={};document.addEventListener('pointerup',()=>{receipt.index=Number(el.dataset.sourceIndex);},{capture:true,once:true});return receipt;
+    const events=[];
+    const observe=event=>{
+     if(event.pointerType!=='touch'||events.length>=8)return;
+     const story=window.__story.inspect(),scene=window.__thesis.inspect();
+     events.push({type:event.type,timeStamp:event.timeStamp,x:event.clientX,y:event.clientY,
+      pointerId:event.pointerId,isPrimary:event.isPrimary,index:Number(el.dataset.sourceIndex),
+      target:event.target.tagName,protected:!!event.target.closest?.('button,a,select,input,summary,[data-protect],[data-feedback-plane]'),
+      hit:window.__thesis.hitTest(event.clientX,event.clientY),ready:scene.ready,
+      representation:scene.representation,selection:story.sourceSelection,engaged:story.modelEngaged});
+    };
+    for(const type of ['pointerdown','pointerup','pointercancel'])document.addEventListener(type,observe,true);
+    return{events,dispose(){for(const type of ['pointerdown','pointerup','pointercancel'])document.removeEventListener(type,observe,true);}};
    });
+   let tap,primaryTapError;
    try{
-    await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{...tap,id:2}]});touchActive=true;
-    await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});touchActive=false;
-    const tapped=await tapReceipt.jsonValue();expect(Number.isInteger(tapped.index)).toBe(true);
-    await expect.poll(()=>page.evaluate(()=>window.__story.inspect().sourceSelection?.index),{timeout:WAIT}).toBe((tapped.index+1)%4);
+    tap=await hitPoint(page);
+    // The pinned Playwright public API dispatches native Chromium start/end
+    // together; awaiting start's protocol acknowledgment can turn a tap into
+    // an unintended long hold. No event timestamps or app limits are changed.
+    touchActive=true;await page.touchscreen.tap(tap.x,tap.y);touchActive=false;
+    const events=await tapReceipt.evaluate(value=>value.events);
+    expect(events.map(event=>event.type)).toEqual(['pointerdown','pointerup']);
+    const [down,up]=events;
+    expect(up.pointerId).toBe(down.pointerId);
+    for(const event of events){
+     expect(event.isPrimary).toBe(true);expect(event.protected).toBe(false);expect(event.ready).toBe(true);
+     expect(event.hit).toMatchObject({source:true,chapterId:'form'});
+    }
+    expect(up.timeStamp-down.timeStamp).toBeGreaterThanOrEqual(0);
+    expect(up.timeStamp-down.timeStamp).toBeLessThan(650);
+    expect(Math.hypot(up.x-down.x,up.y-down.y)).toBeLessThanOrEqual(10);
+    expect(Number.isInteger(up.index)).toBe(true);
+    await expect.poll(()=>page.evaluate(()=>window.__story.inspect().sourceSelection?.index),{timeout:WAIT}).toBe((up.index+1)%4);
     expect(await page.evaluate(()=>window.__story.inspect().sourceSelection.chapterId)).toBe('form');
-    await expect.poll(()=>page.evaluate(()=>{const r=window.__thesis.inspect().representation;return {chapterId:r.chapterId,index:r.index,pinned:r.pinned};}),{timeout:WAIT}).toEqual({chapterId:'form',index:(tapped.index+1)%4,pinned:true});
+    await expect.poll(()=>page.evaluate(()=>{const r=window.__thesis.inspect().representation;return {chapterId:r.chapterId,index:r.index,pinned:r.pinned};}),{timeout:WAIT}).toEqual({chapterId:'form',index:(up.index+1)%4,pinned:true});
     expect(await surface(page).evaluate(el=>el.__captureCalls)).toBe(0);
     expect(await page.evaluate(()=>window.__story.inspect().modelEngaged)).toBe(false);
     await surface(page).press('Escape');await settle(page);
-   }finally{await tapReceipt.dispose();}
+   }catch(error){primaryTapError=error;throw error;}
+   finally{
+    try{
+     const events=await tapReceipt.evaluate(value=>value.events);
+     const path=test.info().outputPath('native-source-tap.json');
+     await writeFile(path,JSON.stringify({point:tap,events},null,2));
+     await test.info().attach('native-source-tap',{path,contentType:'application/json'});
+    }catch(error){if(!primaryTapError)throw error;}
+    finally{try{await tapReceipt.evaluate(value=>value.dispose());await tapReceipt.dispose();}catch(error){if(!primaryTapError)throw error;}}
+   }
   }else{
   await start();
   const pressed=await pressSnapshot.jsonValue();
