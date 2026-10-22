@@ -127,3 +127,20 @@ images are unchanged. Shared navigation must be checked independently of a
 selected moving plane; decorative notation remains hidden from accessibility
 APIs and is not promoted to new content. These corrections are source-only
 pending the next retained WebKit images and final cross-profile gate.
+
+
+### Focus contrast follow-up
+
+The exact `cbc` WebKit run `39834336862` passed the four ordinary routes,
+including the Home notation checks, but all eight project routes failed the
+new keyboard-focus contrast check. Its system `HighlightText` / `Highlight`
+pair resolved to white text on RGB(52,132,228), a reported 3.772:1 ratio below
+the existing 4.5:1 small-text requirement. System color names alone therefore
+do not guarantee adequate text contrast in this emulated palette.
+
+The narrow follow-up keeps `Canvas` / `LinkText` on hover and keyboard focus,
+while preserving the existing visible outline with system `Highlight` color.
+No threshold is weakened, no literal replacement color is introduced, and the
+normal-theme focus rule and geometry remain unchanged. The prior highlighted
+fill proposal is superseded by this unfilled-focus treatment. Exact browser
+contrast and retained visual confirmation remain pending.

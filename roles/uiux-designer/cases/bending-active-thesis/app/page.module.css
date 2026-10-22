@@ -447,5 +447,5 @@
    these controls are intentionally outside the moving information planes. */
 @media(forced-colors:active){
   .siteLinks a{background:Canvas;color:LinkText;border-color:CanvasText}
-  .siteLinks a:hover,.siteLinks a:focus-visible{background:Highlight;color:HighlightText;outline-color:Highlight}
+  .siteLinks a:hover,.siteLinks a:focus-visible{background:Canvas;color:LinkText;outline-color:Highlight}
 }
