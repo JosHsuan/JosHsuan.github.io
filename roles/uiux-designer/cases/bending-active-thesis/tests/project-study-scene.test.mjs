@@ -23,13 +23,13 @@ class Target{
  querySelector(){return null;}querySelectorAll(){return[];}closest(selector){return selector.split(',').some(part=>part===this.marker||this.markers?.includes(part))?this:this.parentElement?.closest(selector)??null;}
  setPointerCapture(id){this.captured.add(id);}hasPointerCapture(id){return this.captured.has(id);}releasePointerCapture(id){this.captured.delete(id);}
 }
-function fixture({pending=false,firstDraw=true,reduced=false,externalStage=false,posterPending=false}={}){
+function fixture({pending=false,firstDraw=true,reduced=false,externalStage=false,posterPending=false,camera=false}={}){
  const doc=new Target(),win=new Target(),root=new Target(),host=new Target(),surface=new Target(),timers=new Map(),policy={hidden:false,reduced,saveData:false,paused:false,siteReady:false},waiting=deferred();
  const modelUI=Object.fromEntries(models.map(key=>{const row=Object.fromEntries(['target','state','help','reset'].map(field=>{const node=new Target();node.dataset['projectModel'+field[0].toUpperCase()+field.slice(1)]=key;node.markers=[`[data-project-model-${field}]`];if(field==='target')node.markers.push('[data-project-model-control]');if(['help','reset'].includes(field))node.setAttribute('hidden','');return[field,node];}));return[key,row];})),control=modelUI.context.target;
  let timerId=0,schedules=0,disposed=0,starts=0,fixtureSignal,failResource,now=0;const presentations=[],sizes=[],poster=posterPending?Object.assign(new Target(),{complete:false,naturalWidth:0}):null;
  doc.documentElement=new Target();doc.querySelectorAll=()=>[host];root.dataset.projectActiveChapter='overview';root.querySelectorAll=selector=>selector==='[data-project-chapter]'?keys.map(key=>({dataset:{projectChapter:key}})):Object.values(modelUI).flatMap(row=>Object.values(row).filter(node=>node.markers.includes(selector)));host.querySelector=selector=>selector==='[data-project-model-surface]'?surface:selector==='[data-project-model-poster]'?poster:null;
  Object.assign(win,{innerWidth:1440,innerHeight:1000,performance:{now:()=>now},setTimeout:(fn,delay)=>{timers.set(++timerId,{fn,delay});return timerId;},clearTimeout:id=>timers.delete(id)});
- const model={chapters:models,alt:'Verified source geometry'},handle={resize(w,h){sizes.push([w,h]);},present(value){presentations.push({...value});},inspect:()=>({firstDraw:firstDraw?{completed:true}:null,successfulPaint:firstDraw,view:presentations.at(-1)}),hitTest:()=>true,dispose(){disposed++;}};
+ const model={chapters:models,alt:'Verified source geometry',...(camera?{views:{context:{yaw:.56,pitch:.18,fov:36,zoom:1.04},system:{yaw:.84,pitch:.26,fov:36,zoom:1.04}},cameraPath:[{chapter:'context',progress:0,yawRad:.56,pitchRad:.18,fovDeg:36,zoom:1.04},{chapter:'system',progress:0,yawRad:.84,pitchRad:.26,fovDeg:36,zoom:1.04},{chapter:'system',progress:1,yawRad:.98,pitchRad:.30,fovDeg:36,zoom:1.04}]}:{})},handle={resize(w,h){sizes.push([w,h]);},present(value){presentations.push({...value});},inspect:()=>({firstDraw:firstDraw?{completed:true}:null,successfulPaint:firstDraw,view:presentations.at(-1)}),hitTest:()=>true,dispose(){disposed++;}};
  const publisher=new DOMPresenter().forOwner('test-scene'),scene=createProjectStudyScenePresenter({root,host,model,externalStage,window:win,document:doc,publisher,schedule:()=>schedules++,policy:()=>policy,acquire:options=>{starts++;fixtureSignal=options.signal;failResource=options.onFailure;return pending?waiting.promise:Promise.resolve(handle);}});
  const step=(dt=.016,resumed=false)=>scene.publish({dt,resumed});
  const settle=()=>{let remaining=240;while(step()&&remaining-->0);assert(remaining>0,'Finite work settles on supplied active seconds');};
@@ -95,7 +95,7 @@ test('visible inspection guidance follows current painted hold and policy withou
  assert.equal(f.modelUI.context.state.textContent,'Preparing 3D view.');assert.equal(f.modelUI.context.help.getAttribute('hidden'),'');assert.equal(f.modelUI.context.target.getAttribute('aria-disabled'),'true');
  await flush();f.waiting.resolve(f.handle);await flush();f.policy.siteReady=true;
  const hold={kind:'model',chapter:'context',mode:'hold',settled:true,history:[]};f.scene.publish({dt:0,stage:{...hold,mode:'entry',settled:false}});assert.equal(f.scene.inspect().inspection.available,false);
- f.scene.publish({dt:0,stage:hold});assert.equal(f.scene.inspect().inspection.available,true);assert.equal(f.modelUI.context.state.textContent,'3D view · drag to inspect.');assert.equal(f.modelUI.context.help.getAttribute('hidden'),null);assert.equal(f.modelUI.context.reset.getAttribute('hidden'),'');
+ f.scene.publish({dt:0,stage:hold});assert.equal(f.scene.inspect().inspection.available,true);assert.equal(f.modelUI.context.state.textContent,'3D view follows scrolling.');assert.equal(f.modelUI.context.help.getAttribute('hidden'),null);assert.equal(f.modelUI.context.reset.getAttribute('hidden'),'');
  const before=f.publisher.inspect().writes;for(let i=0;i<20;i++)assert.equal(f.scene.publish({dt:.016,stage:hold}),false);assert.equal(f.publisher.inspect().writes,before,'An unchanged hold never writes state/help every frame');
  f.root.dataset.projectActiveChapter='system';f.scene.publish({dt:0,stage:hold});assert.equal(f.modelUI.context.state.textContent,'Original source view.');assert.equal(f.modelUI.context.help.getAttribute('hidden'),'');assert.equal(f.modelUI.system.state.textContent,'Preparing 3D view.');assert.equal(f.scene.inspect().inspection.available,false,'A ready resource cannot advertise the wrong displayed source');
  f.scene.publish({dt:0,stage:{...hold,chapter:'system'}});assert.equal(f.scene.inspect().inspection.available,true);assert.equal(f.scene.inspect().paintedChapter,'system');
@@ -124,7 +124,7 @@ test('visible reset and Home or Escape return through one owner while focus can 
    f.root.fire('focusout',{target:f.control,relatedTarget:row.reset});assert.equal(f.scene.inspect().camera.value.azimuth,.12,'Focusing its own Return control does not erase or hide the action before click');
    assert.equal(row.reset.getAttribute('hidden'),null);assert.equal(click(row.reset).prevented,1);
   }else assert.equal(f.key(action).prevented,1);
-  f.step();assert.deepEqual(f.scene.inspect().camera.value,{azimuth:0,elevation:0});assert.deepEqual(f.presentations.at(-1),{chapter:'context',azimuth:0,elevation:0});assert.equal(row.state.textContent,'3D view · drag to inspect.');assert.equal(row.reset.getAttribute('hidden'),'');
+  f.step();assert.deepEqual(f.scene.inspect().camera.value,{azimuth:0,elevation:0});assert.deepEqual(f.presentations.at(-1),{chapter:'context',azimuth:0,elevation:0});assert.equal(row.state.textContent,'3D view follows scrolling.');assert.equal(row.reset.getAttribute('hidden'),'');
  }
  f.key('ArrowLeft');f.settle();const foreign=new Target();foreign.marker='[data-project-model-reset]';foreign.dataset.projectModelReset='context';assert.equal(click(foreign).prevented,0);assert.equal(click(f.modelUI.system.reset).prevented,0);assert.equal(f.scene.inspect().camera.value.azimuth,.12);
  f.root.fire('focusout',{target:row.reset,relatedTarget:new Target()});f.step();assert.deepEqual(f.scene.inspect().camera.value,{azimuth:0,elevation:0},'Leaving the inspection controls closes inspection');
@@ -138,7 +138,7 @@ test('actual-hit drag exposes a finite returning state, yields vertical touch re
  f.pointer('pointerdown',{pointerType:'touch'});assert.equal(f.pointer('pointermove',{pointerType:'touch',clientX:602,clientY:407}).prevented,0);assert.equal(f.control.captured.size,0,'Touch movement below eight pixels does not commit');
  assert.equal(f.pointer('pointermove',{pointerType:'touch',clientX:604,clientY:460}).prevented,0);assert.equal(f.scene.inspect().gesture,null);assert.equal(f.scene.inspect().gestures.at(-1).reason,'native-scroll');
  f.pointer('pointerdown',{pointerType:'touch'});assert.equal(f.pointer('pointermove',{pointerType:'touch',clientX:660,clientY:404}).prevented,1);f.settle();assert.equal(row.state.textContent,'Inspecting 3D view.');assert.equal(f.control.captured.size,1);
- f.pointer('pointerup');f.step();assert.equal(row.state.textContent,'Returning to chapter view.');assert.equal(row.reset.getAttribute('hidden'),null);assert.equal(f.control.captured.size,0);f.settle();assert.equal(row.state.textContent,'3D view · drag to inspect.');assert.equal(row.reset.getAttribute('hidden'),'');
+ f.pointer('pointerup');f.step();assert.equal(row.state.textContent,'Returning to current scroll view.');assert.equal(row.reset.getAttribute('hidden'),null);assert.equal(f.control.captured.size,0);f.settle();assert.equal(row.state.textContent,'3D view follows scrolling.');assert.equal(row.reset.getAttribute('hidden'),'');
  f.pointer('pointerdown');f.pointer('pointermove',{clientX:660});f.step();f.select('results');assert.equal(f.scene.inspect().gesture,null);assert.deepEqual(f.scene.inspect().camera.value,{azimuth:0,elevation:0});assert.equal(row.help.getAttribute('hidden'),'');assert.equal(row.reset.getAttribute('hidden'),'');f.scene.dispose();
 });
 
@@ -193,12 +193,13 @@ test('the actual site driver composes source drawing, information and glass with
   MutationObserver:class{constructor(fn){this.fn=fn;observers.push(this);}observe(target){this.target=target;}disconnect(){this.closed=true;}}
  });
  const source={view:{chapter:'context'},resize(){},present(value){this.view={...value};},inspect(){return{firstDraw:{completed:true},successfulPaint:true,view:this.view};},hitTest:()=>true,dispose(){disposed++;}};
- const release=registerProjectStudyStage(doc,{root,host,model:{chapters:models},acquire:async()=>{acquisitions++;return source;}});
+ const release=registerProjectStudyStage(doc,{root,host,model:{chapters:models,views:{context:{yaw:.56,pitch:.18,fov:36,zoom:1.04},system:{yaw:.84,pitch:.26,fov:36,zoom:1.04}}},acquire:async()=>{acquisitions++;return source;}});
  const field={render(){},inspect:()=>({ready:false,failed:false}),dispose(){}},runtime=createBackgroundRuntime({createRenderer:()=>field}),backdrop=new Target();
  const driver=createSiteBackgroundDriver({window:win,document:doc,runtime,canvas:{},backdrop});
  const frame=(seconds=.016)=>{now+=seconds*1000;const callbacks=[...raf.values()];raf.clear();for(const fn of callbacks)fn(now);};
- await flush();for(let i=0;i<150&&raf.size;i++)frame();assert.equal(raf.size,0);assert.equal(acquisitions,1);assert.equal(driver.inspect().projectStudy.scene.motion.mode,'hold');
+ await flush();for(let i=0;i<150&&raf.size;i++)frame();assert.equal(raf.size,1,'Visible idle retains exactly one frame even when shared field is not ready');assert.equal(acquisitions,1);assert.equal(driver.inspect().projectStudy.scene.motion.mode,'hold');
  assert.equal(driver.inspect().projectStudy.chapters.chapter,'context');assert.equal(root.dataset.projectActiveChapter,'context');assert.equal(counter.textContent,'02 / 06');assert(chapterReads>=keys.length);
+ const readsBefore=chapterReads,intentBefore={...source.view.cameraIntent};frame();assert.equal(chapterReads,readsBefore);assert.notEqual(source.view.cameraIntent.yawRad,intentBefore.yawRad);
  assert.equal(driver.inspect().projectStudy.liquidGlass.ticks,driver.inspect().frames);assert.equal(maxPending,1);assert.equal(timers.size,0);
  root.setAttribute('data-study-paused','');for(const observer of observers)if(observer.target===root)observer.fn([{attributeName:'data-study-paused'}]);frame();const activeSeconds=driver.inspect().playback.activeSeconds;
  win.fire('wheel',{deltaY:100,deltaMode:0});win.fire('scroll');frame(10);assert.equal(driver.inspect().playback.activeSeconds,activeSeconds);assert.equal(maxPending,1);
@@ -242,4 +243,62 @@ test('real GLTF parsing retains triangle and point POSITION buffers and validate
  const {bytes}=sourceGLB(),f=rendererFixture({omitSource:true}),model={src:'/assets/projects/test/source.glb',sha256:createHash('sha256').update(bytes).digest('hex'),bytes:bytes.length,webUnits:'meters',upAxis:'Y',vertices:3,triangles:1,meshes:1,bounds:{min:[-1,0,0],max:[1,1,0]},chapters:models};
  globalThis.fetch=async()=>({ok:true,arrayBuffer:async()=>bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength)});
  const scene=await acquireProjectStudyScene({host:f.host,model,signal:new AbortController().signal,createRenderer:()=>f.renderer});assert.throws(()=>scene.resize(1440,1000),/complete original project model did not draw/);assert.equal(scene.inspect().firstDraw,null);scene.dispose();
+});
+
+test('scroll camera changes without holding, retains eligible idle, freezes pause and preserves same-lease prepare pose',async()=>{
+ const f=fixture({externalStage:true,camera:true});await flush();f.policy.siteReady=true;
+ const stage=chapter=>({kind:'model',chapter,mode:'hold',settled:true,pose:{x:0,y:0,opacity:1},history:[]});
+ const read=(chapter,progress,seconds)=>{f.root.dataset.projectActiveChapter=chapter;f.scene.setReading({chapter,progress},seconds);return f.scene.publish({dt:1/60,stage:stage(chapter)});};
+ assert.equal(read('context',0,0),true,'Visible model idle owns demand on the existing driver');
+ const start=f.presentations.at(-1).cameraIntent;
+ read('context',.6,0);const mid=f.presentations.at(-1).cameraIntent;assert(mid.yawRad>start.yawRad);
+ read('context',.6,1);assert.notEqual(f.presentations.at(-1).cameraIntent.yawRad,mid.yawRad,'Idle is independent from native reading progress');
+ f.root.dataset.projectActiveChapter='system';f.scene.setReading({chapter:'system',progress:.3},1);
+ assert.equal(f.scene.prepare('system'),true);const prepared=f.presentations.at(-1).cameraIntent;
+ f.scene.publish({dt:0,stage:stage('system')});assert.deepEqual(f.presentations.at(-1).cameraIntent,prepared,'Preparation cannot prepaint an endpoint and jump back');
+ assert.equal(f.starts,1,'Same source chapter changes retain the original lease');
+ f.policy.paused=true;const frozen=f.presentations.at(-1).cameraIntent;
+ assert.equal(read('system',.8,100),false);assert.deepEqual(f.presentations.at(-1).cameraIntent,frozen);
+ f.policy.paused=false;assert.equal(read('system',.8,1),true);
+ f.policy.hidden=true;assert.equal(read('system',.9,100),false);f.policy.hidden=false;
+ f.doc.activeElement={closest:()=>true};for(let i=0;i<30;i++)read('system',.9,2);assert.equal(read('system',.9,2),false,'Focused reading does not request idle');f.doc.activeElement=null;
+ read('context',0,0);assert.deepEqual(f.presentations.at(-1).cameraIntent,start,'Reverse native reading is deterministic');
+ assert.equal(f.scene.publish({dt:0,stage:{kind:'image',chapter:'making',mode:'hold',settled:true,pose:{opacity:1},history:[]}}),false,'Offscreen model does not request idle frames');
+ f.scene.dispose();
+});
+
+test('authored scroll camera respects initial reduced static policy without acquiring a model or idle frames',async()=>{
+ const f=fixture({camera:true,reduced:true,externalStage:true});await flush();f.policy.siteReady=true;f.root.dataset.projectActiveChapter='context';
+ f.scene.setReading({chapter:'context',progress:.6},10);
+ assert.equal(f.scene.prepare('context'),true);assert.equal(f.scene.publish({dt:1/60,stage:{kind:'model',chapter:'context',mode:'hold',settled:true,pose:{opacity:1},history:[]}}),false);
+ assert.equal(f.starts,0);assert.equal(f.scene.inspect().arrivalStatic,true);f.scene.dispose();
+});
+
+test('same-lease chapter handoff returns inspection finitely rather than snapping',async()=>{
+ const f=fixture({externalStage:true,camera:true});await flush();f.policy.siteReady=true;
+ const stage=chapter=>({kind:'model',chapter,mode:'hold',settled:true,pose:{opacity:1},history:[]});
+ f.root.dataset.projectActiveChapter='context';f.scene.setReading({chapter:'context',progress:.99},0);f.scene.prepare('context');
+ f.scene.publish({dt:0,stage:stage('context')});
+ for(let i=0;i<7;i++)f.key('ArrowLeft');
+ for(let i=0;i<100;i++)f.scene.publish({dt:1/60,stage:stage('context')});
+ const held=f.scene.inspect().camera.value.azimuth;assert(held>.8);
+ f.root.dataset.projectActiveChapter='system';f.scene.setReading({chapter:'system',progress:0},0);f.scene.prepare('system');
+ assert.equal(f.scene.inspect().camera.value.azimuth,held,'prepare preserves current inspection pose');
+ f.scene.publish({dt:0,stage:stage('system')});assert.equal(f.scene.inspect().camera.value.azimuth,held,'publish preserves it too');
+ f.scene.publish({dt:1/60,stage:stage('system')});assert(f.scene.inspect().camera.value.azimuth>0);assert(f.scene.inspect().camera.value.azimuth<held);
+ for(let i=0;i<120;i++)f.scene.publish({dt:1/60,stage:stage('system')});
+ assert.equal(f.scene.inspect().camera.value.azimuth,0);assert.equal(f.starts,1);f.scene.dispose();
+});
+
+test('pause resume recovers on the existing clock even with focused controls, then normal scrolling stays direct',async()=>{
+ const f=fixture({externalStage:true,camera:true});await flush();f.policy.siteReady=true;f.doc.activeElement={closest:()=>true};
+ const stage={kind:'model',chapter:'context',mode:'hold',settled:true,pose:{opacity:1},history:[]};
+ f.root.dataset.projectActiveChapter='context';f.scene.setReading({chapter:'context',progress:0},0);f.scene.publish({dt:0,stage});
+ const original={...f.presentations.at(-1).cameraIntent};f.policy.paused=true;f.scene.publish({dt:0,stage});
+ f.scene.setReading({chapter:'context',progress:.8},0);f.scene.publish({dt:0,stage});assert.deepEqual(f.presentations.at(-1).cameraIntent,original);
+ f.policy.paused=false;assert.equal(f.scene.publish({dt:0,resumed:true,stage}),true,'Policy resume requests finite work despite focus disabling idle');
+ assert.deepEqual(f.presentations.at(-1).cameraIntent,original);assert.equal(f.scene.inspect().camera.recovering,true);
+ f.scene.publish({dt:1/60,stage});assert(f.presentations.at(-1).cameraIntent.yawRad>original.yawRad);
+ for(let i=0;i<30;i++)f.scene.publish({dt:1/60,stage});assert.equal(f.scene.inspect().camera.recovering,false);assert.equal(f.scene.publish({dt:0,stage}),false);
+ f.scene.setReading({chapter:'context',progress:0},0);assert.equal(f.scene.publish({dt:0,stage}),false);assert.deepEqual(f.presentations.at(-1).cameraIntent,original,'Steady native scroll is not filtered');f.scene.dispose();
 });

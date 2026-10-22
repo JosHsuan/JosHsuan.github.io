@@ -18,7 +18,7 @@ export async function acquireProjectStudyScene({host,model,signal,onFailure=()=>
  if(signal.aborted)throw aborted();
  const win=host.ownerDocument.defaultView,manager=new T.LoadingManager();
  let renderer=null,budget=null,scene=null,camera=null,gltf=null,support=null,appearance=null,disposed=false,shaderError=false;
- let size={width:0,height:0},state={chapter:model.chapters[0],azimuth:0,elevation:0},lastKey='',draws=0,firstDraw=null,successfulPaint=false,pose=null;
+ let size={width:0,height:0},state={chapter:model.chapters[0],azimuth:0,elevation:0},lastDraw=null,cameraFits=0,draws=0,firstDraw=null,successfulPaint=false,pose=null;
  let revision=null,vertices=0,triangles=0,meshes=0,drawnMeshes=0,sourceCalls=0,sourcePoints=0;
  const ray=new T.Raycaster(),point=new T.Vector2(),painted=new Set();
  const lost=event=>{event.preventDefault();successfulPaint=false;onFailure('context-lost');};
@@ -30,10 +30,16 @@ export async function acquireProjectStudyScene({host,model,signal,onFailure=()=>
  signal.addEventListener('abort',dispose,{once:true});
  const draw=()=>{
   if(disposed||!renderer||!size.width||!size.height)return;
-  const key=JSON.stringify([size,state]);if(key===lastKey&&successfulPaint)return;
-  if(renderer.getContext().isContextLost())throw Error('Project model context is unavailable');
   const narrow=size.width<800,slot=narrow?{x:.5,y:.42,width:.94,height:.45}:{x:.735,y:.53,width:.51,height:.78},view=model.views?.[state.chapter]??{};
-  pose=fitResearchCamera(support,size.width*slot.width/(size.height*slot.height),{yaw:(view.yaw??.72)+state.azimuth,pitch:Math.max(-.1,Math.min(1.15,(view.pitch??.3)+state.elevation)),fov:view.fov??36,zoom:view.zoom??1});
+  // The presenter owns main + idle + optional inspection composition. Never
+  // add legacy inspection twice; the renderer remains the only camera writer.
+  const intent=state.cameraIntent;
+  if(intent!=null&&(!Number.isFinite(intent.yawRad)||!Number.isFinite(intent.pitchRad)||!Number.isFinite(intent.fovDeg)||!Number.isFinite(intent.zoom)))throw RangeError('Finite composed project camera intent required');
+  const yaw=intent?.yawRad??((view.yaw??.72)+state.azimuth),pitch=Math.max(-.1,Math.min(1.15,intent?.pitchRad??((view.pitch??.3)+state.elevation))),fov=intent?.fovDeg??view.fov??36,zoom=intent?.zoom??view.zoom??1;
+  if(successfulPaint&&lastDraw?.width===size.width&&lastDraw.height===size.height&&lastDraw.yaw===yaw&&lastDraw.pitch===pitch&&lastDraw.fov===fov&&lastDraw.zoom===zoom)return;
+  if(renderer.getContext().isContextLost())throw Error('Project model context is unavailable');
+  cameraFits++;
+  pose=fitResearchCamera(support,size.width*slot.width/(size.height*slot.height),{yaw,pitch,fov,zoom});
   camera.position.fromArray(pose.position);camera.up.fromArray(pose.up);camera.aspect=size.width/size.height;
   camera.fov=T.MathUtils.radToDeg(2*Math.atan(Math.tan(T.MathUtils.degToRad(pose.fov/2))/slot.height));camera.near=pose.near;camera.far=pose.far;
   camera.setViewOffset(size.width,size.height,size.width*(.5-slot.x),size.height*(.5-slot.y),size.width,size.height);camera.lookAt(...pose.target);camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
@@ -43,7 +49,7 @@ export async function acquireProjectStudyScene({host,model,signal,onFailure=()=>
   // draw calls for one onBeforeRender callback. Every source object must still
   // participate; a decorative or empty render can never satisfy this boundary.
   if(shaderError||renderer.getContext().isContextLost()||drawnMeshes!==meshes||sourceCalls<meshes||renderer.info.render.calls<sourceCalls)throw Error('The complete original project model did not draw');
-  successfulPaint=true;lastKey=key;draws++;firstDraw??={completed:true,sourceRevision:revision,meshes:drawnMeshes,sourceCalls,width:size.width,height:size.height};
+  successfulPaint=true;lastDraw={width:size.width,height:size.height,yaw,pitch,fov,zoom};draws++;firstDraw??={completed:true,sourceRevision:revision,meshes:drawnMeshes,sourceCalls,width:size.width,height:size.height};
  };
  try{
   const url=new URL(model.src,win.location.origin);
@@ -96,7 +102,7 @@ export async function acquireProjectStudyScene({host,model,signal,onFailure=()=>
    resize(width,height){if(disposed||!(width>0&&height>0))return;size={width,height};draw();},
    present(next){if(disposed)return;state={...state,...next};draw();},
    hitTest(x,y){if(disposed||!successfulPaint||!renderer)return false;const rect=renderer.domElement.getBoundingClientRect();if(x<rect.left||x>rect.right||y<rect.top||y>rect.bottom)return false;point.set((x-rect.left)/rect.width*2-1,-(y-rect.top)/rect.height*2+1);ray.setFromCamera(point,camera);return ray.intersectObject(gltf.scene,true).length>0;},
-   inspect:()=>({sourceRevision:revision,primitive:model.primitive??'triangles',vertices,triangles,renderables:meshes,sourcePoints,meshes,drawnMeshes,sourceCalls,successfulPaint,firstDraw:firstDraw?{...firstDraw}:null,draws,pose,view:{...state},size:{...size},appearance:appearance?.inspect()??null,pixelBudget:RESEARCH_MODEL_PIXELS,budget:budget?.inspect()??null,canvasCount:disposed?0:1,disposed}),
+   inspect:()=>({sourceRevision:revision,primitive:model.primitive??'triangles',vertices,triangles,renderables:meshes,sourcePoints,meshes,drawnMeshes,sourceCalls,successfulPaint,firstDraw:firstDraw?{...firstDraw}:null,draws,cameraFits,supportPoints:(support?.length??0)/3,pose,view:{...state},size:{...size},appearance:appearance?.inspect()??null,pixelBudget:RESEARCH_MODEL_PIXELS,budget:budget?.inspect()??null,canvasCount:disposed?0:1,disposed}),
    dispose,
   };
  }catch(error){dispose();throw error;}

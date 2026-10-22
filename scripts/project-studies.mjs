@@ -229,6 +229,18 @@ export function assertProjectStudies(record,manifest){
           assert(view.zoom>=1,'Reviewed camera fitting cannot crop the complete original source');
         }
       }
+      assert(Array.isArray(model.cameraPath)&&model.cameraPath.length>=2&&model.cameraPath.length<=32,'Every model has a bounded authored scroll camera path');
+      let previousCameraAnchor=-1;
+      for(const key of model.cameraPath){
+        assert.deepEqual(Object.keys(key).sort(),['chapter','progress','yawRad','pitchRad','fovDeg','zoom'].sort(),'Explicit semantic camera keys and units');
+        const chapterIndex=model.chapters.indexOf(key.chapter);
+        assert(chapterIndex>=0&&Number.isFinite(key.progress)&&key.progress>=0&&key.progress<=1,'Camera keys stay inside the continuous model interval');
+        const anchor=chapterIndex+key.progress;assert(anchor>previousCameraAnchor,'Strictly ordered camera anchors without duplicate chapter boundaries');previousCameraAnchor=anchor;
+        assert([key.yawRad,key.pitchRad,key.fovDeg,key.zoom].every(Number.isFinite),'Finite authored camera intent');
+        assert(Math.abs(key.yawRad)<=Math.PI&&key.pitchRad>=-.1&&key.pitchRad<=1.15&&key.fovDeg>1&&key.fovDeg<175&&key.zoom>=1,'Camera paths preserve complete source framing');
+      }
+      assert.equal(model.cameraPath[0].chapter,model.chapters[0]);assert.equal(model.cameraPath[0].progress,0);
+      assert.equal(model.cameraPath.at(-1).chapter,model.chapters.at(-1));assert.equal(model.cameraPath.at(-1).progress,1);
       for(let i=0;i<3;i++)assert(Number.isFinite(model.bounds.min[i])&&Number.isFinite(model.bounds.max[i])&&model.bounds.max[i]>model.bounds.min[i]);
       assert([project.hero,...project.sections.flatMap(section=>section.media)].some(image=>image.src===model.poster.src),'Model fallback uses this project\'s selected source image');
     }

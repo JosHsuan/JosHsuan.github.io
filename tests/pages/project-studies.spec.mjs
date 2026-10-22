@@ -11,6 +11,7 @@ const stage=page=>page.locator('[data-project-model-stage]');
 // This is the real ordinary-page driver adapter, not a second stage clock.
 const facts=page=>page.evaluate(()=>window.__globalBackground.inspect().driver.projectStudy.scene);
 const dot=studies.find(project=>project.id==='dot-based-3d-printing');
+const inspection=async page=>{const {target,value,settled}= (await facts(page)).camera;return{target,value,settled};};
 function closed(state){
  for(const id of new Set(state.history.map(fact=>fact.id))){const own=state.history.filter(fact=>fact.id===id);expect(own.filter(fact=>fact.phase==='requested')).toHaveLength(1);expect(own.filter(fact=>['ready','failed','cancelled'].includes(fact.phase))).toHaveLength(1);}
  if(state.motion===null){
@@ -45,11 +46,12 @@ function sourceDraw(state,model,viewport){
   for(const light of look.lights.filter(light=>light.type==='DirectionalLight')){expect(light.targetInScene).toBe(true);expect(light.target).toEqual(center);expect(light.castShadow).toBe(false);}
  }
  if(id==='hc3dp-caustics')expect(look.materials[0]).toMatchObject({type:'MeshPhysicalMaterial',ior:1.5700000524520874,metalness:.31024929881095886,roughness:.14681440591812134,transmission:1,opacity:.1052631139755249,transparent:false,side:2,thickness:0});
- const view=model.views?.[resource.view.chapter];
+ const intent=resource.view.cameraIntent;
+ const view=intent?{yaw:intent.yawRad,pitch:intent.pitchRad,fov:intent.fovDeg}:model.views?.[resource.view.chapter];
  if(view){
   const direction=resource.pose.position.map((value,index)=>value-resource.pose.target[index]);
-  expect(Math.atan2(direction[0],direction[2])).toBeCloseTo(view.yaw+resource.view.azimuth,10);
-  expect(Math.atan2(direction[1],Math.hypot(direction[0],direction[2]))).toBeCloseTo(Math.max(-.1,Math.min(1.15,view.pitch+resource.view.elevation)),10);
+  expect(Math.atan2(direction[0],direction[2])).toBeCloseTo(view.yaw+(intent?0:resource.view.azimuth),10);
+  expect(Math.atan2(direction[1],Math.hypot(direction[0],direction[2]))).toBeCloseTo(Math.max(-.1,Math.min(1.15,view.pitch+(intent?0:resource.view.elevation))),10);
   expect(resource.pose.fov).toBe(view.fov);
  }
 }
@@ -327,16 +329,16 @@ test('the original Dot source supports native drag and keyboard inspection, retu
  await semanticChapter(chapter,false);await expect(state).toHaveAttribute('data-project-model-availability','ready');await expect(help).toBeVisible();await expect(reset).toBeHidden();
  await control.evaluate(node=>node.focus({preventScroll:true}));await control.press('ArrowLeft');
  await expect.poll(async()=>(await facts(page)).camera.value.azimuth,{timeout:WAIT}).toBeGreaterThan(.01);
- await control.press('Home');await expect.poll(async()=>(await facts(page)).camera).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});
+ await control.press('Home');await expect.poll(()=>inspection(page)).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});
  await control.press('ArrowLeft');await expect.poll(async()=>(await facts(page)).camera.value.azimuth,{timeout:WAIT}).toBeGreaterThan(.01);
  await expect(state).toHaveAttribute('data-project-model-availability','inspecting');await expect(reset).toBeVisible();
  await page.keyboard.press('Tab');await expect(reset).toBeFocused();
  expect((await facts(page)).camera.target.azimuth).toBeCloseTo(.12,8);expect((await facts(page)).camera.value.azimuth).toBeGreaterThan(.01);
- await reset.press('Enter');await expect.poll(async()=>(await facts(page)).camera,{timeout:WAIT}).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});
+ await reset.press('Enter');await expect.poll(()=>inspection(page),{timeout:WAIT}).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});
  await expect.poll(async()=>(await facts(page)).resource.view).toEqual({chapter,azimuth:0,elevation:0});await expect(state).toHaveAttribute('data-project-model-availability','ready');await expect(reset).toBeHidden();
  await modelChapter(page,dot);await control.evaluate(node=>node.focus({preventScroll:true}));await control.press('ArrowLeft');
  await expect.poll(async()=>(await facts(page)).camera.value.azimuth,{timeout:WAIT}).toBeGreaterThan(.01);await control.press('Escape');
- await expect.poll(async()=>(await facts(page)).camera).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});
+ await expect.poll(()=>inspection(page)).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});
  const source=page.locator(`[data-project-source-caption="${chapter}"] a`).first(),sourceKeys=await page.evaluateHandle(()=>{
   const events=[],read=event=>{if(event.target.closest('[data-project-source-caption]'))events.push({key:event.key,trusted:event.isTrusted,prevented:event.defaultPrevented});};
   addEventListener('keydown',read);return{events,dispose:()=>removeEventListener('keydown',read)};
@@ -363,7 +365,7 @@ test('the original Dot source supports native drag and keyboard inspection, retu
  await page.mouse.move(point.x+dx,point.y+12,{steps:6});
  await expect.poll(async()=>Math.abs((await facts(page)).camera.value.azimuth),{timeout:WAIT}).toBeGreaterThan(.01);
  expect((await facts(page)).gesture.locked).toBe(true);await page.mouse.up();
- await expect.poll(async()=>(await facts(page)).camera,{timeout:WAIT}).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});closedGestures(await facts(page));
+ await expect.poll(()=>inspection(page),{timeout:WAIT}).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});closedGestures(await facts(page));
  if(isMobile){
   // The configured mobile project is Chromium/Pixel 7. CDP drives its native
   // touch pipeline, including touch-action and pointer cancellation; DOM
@@ -376,7 +378,7 @@ test('the original Dot source supports native drag and keyboard inspection, retu
    for(let step=1;step<=6;step++){await touch('touchMove',point.x+dx*step/6,point.y+3*step/6);await frames(page,1);}
    await expect.poll(async()=>Math.abs((await facts(page)).camera.value.azimuth),{timeout:WAIT}).toBeGreaterThan(.01);expect((await facts(page)).gesture.locked).toBe(true);
    expect(await page.evaluate(()=>scrollY)).toBe(before);await touch('touchEnd');
-   await expect.poll(async()=>(await facts(page)).camera,{timeout:WAIT}).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});
+   await expect.poll(()=>inspection(page),{timeout:WAIT}).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});
    expect((await facts(page)).gestures.filter(fact=>fact.id===horizontal)).toEqual([{id:horizontal,status:'requested'},{id:horizontal,status:'released',reason:'released'}]);closedGestures(await facts(page));
    await touch('touchStart');await expect.poll(async()=>!!(await facts(page)).gesture).toBe(true);const vertical=(await facts(page)).gesture.id;
    for(let step=1;step<=7;step++){await touch('touchMove',point.x,point.y-14*step);await frames(page,1);}
@@ -389,7 +391,7 @@ test('the original Dot source supports native drag and keyboard inspection, retu
  await control.evaluate(node=>node.focus({preventScroll:true}));await control.press('ArrowDown');
  await expect.poll(async()=>(await facts(page)).camera.value.elevation,{timeout:WAIT}).toBeGreaterThan(.01);
  const toggle=page.locator('[data-study-motion-toggle]');await toggle.click();await expect(toggle).toHaveAttribute('aria-pressed','true');
- await expect.poll(async()=>(await facts(page)).camera).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});
+ await expect.poll(()=>inspection(page)).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});
  await semanticChapter(chapter,true);await expect(state).toHaveAttribute('data-project-model-availability','paused');await expect(help).toBeHidden();await expect(reset).toBeHidden();
  // Native reading/selection remains live while source motion is paused. The
  // one semantic owner must update rail and counter on forward and reverse.

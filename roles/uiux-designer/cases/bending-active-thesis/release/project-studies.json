@@ -218,7 +218,7 @@
           "credit": "Studio design and digital animation: Chia-Hsuan Chao / National Cheng Kung University.",
           "src": "/assets/projects/mode-s-of-making/film-unit-geometry.webp"
         },
-        "alt": "Study model of the rotary-cut assembly. Drag to inspect the simulated units.",
+        "alt": "Study model of the rotary-cut assembly.",
         "chapters": [
           "context",
           "system"
@@ -236,7 +236,41 @@
             "fov": 36,
             "zoom": 1.04
           }
-        }
+        },
+        "cameraPath": [
+          {
+            "chapter": "context",
+            "progress": 0,
+            "yawRad": 0.56,
+            "pitchRad": 0.18,
+            "fovDeg": 36,
+            "zoom": 1.04
+          },
+          {
+            "chapter": "context",
+            "progress": 0.6,
+            "yawRad": 0.72,
+            "pitchRad": 0.22,
+            "fovDeg": 36,
+            "zoom": 1.04
+          },
+          {
+            "chapter": "system",
+            "progress": 0,
+            "yawRad": 0.84,
+            "pitchRad": 0.26,
+            "fovDeg": 36,
+            "zoom": 1.04
+          },
+          {
+            "chapter": "system",
+            "progress": 1,
+            "yawRad": 0.98,
+            "pitchRad": 0.3,
+            "fovDeg": 36,
+            "zoom": 1.04
+          }
+        ]
       },
       "motionMedia": [
         {
@@ -634,7 +668,33 @@
             "fov": 36,
             "zoom": 1.04
           }
-        }
+        },
+        "cameraPath": [
+          {
+            "chapter": "context",
+            "progress": 0,
+            "yawRad": 0.58,
+            "pitchRad": 0.16,
+            "fovDeg": 36,
+            "zoom": 1.04
+          },
+          {
+            "chapter": "system",
+            "progress": 0,
+            "yawRad": 0.9,
+            "pitchRad": 0.34,
+            "fovDeg": 36,
+            "zoom": 1.04
+          },
+          {
+            "chapter": "system",
+            "progress": 1,
+            "yawRad": 1.08,
+            "pitchRad": 0.38,
+            "fovDeg": 36,
+            "zoom": 1.04
+          }
+        ]
       },
       "motionMedia": [
         {
@@ -849,7 +909,33 @@
             "fov": 36,
             "zoom": 1.04
           }
-        }
+        },
+        "cameraPath": [
+          {
+            "chapter": "system",
+            "progress": 0,
+            "yawRad": 0.5,
+            "pitchRad": 0.16,
+            "fovDeg": 36,
+            "zoom": 1.04
+          },
+          {
+            "chapter": "system",
+            "progress": 0.5,
+            "yawRad": 0.76,
+            "pitchRad": 0.22,
+            "fovDeg": 36,
+            "zoom": 1.04
+          },
+          {
+            "chapter": "system",
+            "progress": 1,
+            "yawRad": 1.02,
+            "pitchRad": 0.28,
+            "fovDeg": 36,
+            "zoom": 1.04
+          }
+        ]
       },
       "motionMedia": [
         {
@@ -1075,7 +1161,33 @@
             "fov": 36,
             "zoom": 1.04
           }
-        }
+        },
+        "cameraPath": [
+          {
+            "chapter": "context",
+            "progress": 0,
+            "yawRad": 0.72,
+            "pitchRad": 0.14,
+            "fovDeg": 36,
+            "zoom": 1.04
+          },
+          {
+            "chapter": "system",
+            "progress": 0,
+            "yawRad": 0.92,
+            "pitchRad": 0.38,
+            "fovDeg": 36,
+            "zoom": 1.04
+          },
+          {
+            "chapter": "system",
+            "progress": 1,
+            "yawRad": 1.08,
+            "pitchRad": 0.42,
+            "fovDeg": 36,
+            "zoom": 1.04
+          }
+        ]
       },
       "motionMedia": [
         {
@@ -1279,7 +1391,7 @@
           "caption": "The assembled prototype beside the robotic arm, documented in the original Group6 record.",
           "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani."
         },
-        "alt": "Original reciprocal stick-assembly data study. Drag to inspect its spatial relationships.",
+        "alt": "Original reciprocal stick-assembly data study.",
         "chapters": [
           "context",
           "system"
@@ -1297,7 +1409,33 @@
             "fov": 36,
             "zoom": 1.04
           }
-        }
+        },
+        "cameraPath": [
+          {
+            "chapter": "context",
+            "progress": 0,
+            "yawRad": 0.6,
+            "pitchRad": 0.16,
+            "fovDeg": 36,
+            "zoom": 1.04
+          },
+          {
+            "chapter": "system",
+            "progress": 0,
+            "yawRad": 0.92,
+            "pitchRad": 0.32,
+            "fovDeg": 36,
+            "zoom": 1.04
+          },
+          {
+            "chapter": "system",
+            "progress": 1,
+            "yawRad": 1.12,
+            "pitchRad": 0.36,
+            "fovDeg": 36,
+            "zoom": 1.04
+          }
+        ]
       },
       "motionMedia": [
         {

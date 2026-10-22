@@ -56,7 +56,7 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
     const dt=previous?(now-previous)/1000:1/60;previous=now;frames++;
     const wasResumed=resumed;
     if(homeDirty){projectChapters?.measure({docY:win.scrollY});home.measure({naturalY,viewportHeight:win.innerHeight,docY:win.scrollY});projectScene?.measure(win.innerWidth,win.innerHeight);projectBackdrop?.measure(win.innerWidth,win.innerHeight);homeDirty=false;}
-    projectChapters?.publish({docY:win.scrollY,viewportHeight:win.innerHeight});
+    const reading=projectChapters?.publish({docY:win.scrollY,viewportHeight:win.innerHeight});
     if(glassDirty){liquid.measure({opaque:opaqueGlass()});glassDirty=false;}
     const impulse=pendingImpulse;pendingImpulse=0;
     advanceChapterPlayback(playback,dt,{chapter:'overview',impulse,reducedMotion:reduced.matches,resumed,paused:!ready()||studyPaused()});
@@ -67,7 +67,7 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
     binding.present(latest,{frameTimeMs:now,paused:!ready()||studyPaused(),hidden:doc.hidden,systemReduced:reduced.matches},size.width,size.height);
     const moving=home?.publish({...homePolicy(),dt,docY:win.scrollY,resumed:wasResumed,seek:wasResumed})??false;
     const glassMoving=liquid?.publish({dt,reduced:reduced.matches||studyPaused()||!ready(),resumed:wasResumed,hidden:doc.hidden,opaque:opaqueGlass(),keyboardFocus})??false;
-    const sceneMoving=projectBackdrop?.publish({dt,resumed:wasResumed})??false;
+    const sceneMoving=projectBackdrop?.publish({dt,resumed:wasResumed,reading,activeSeconds:score.activeSeconds})??false;
     if(moving||glassMoving||sceneMoving||score.needsFrame&&binding.inspect().ready&&!binding.inspect().failed)scheduler.schedule();
     else previous=0;
   }

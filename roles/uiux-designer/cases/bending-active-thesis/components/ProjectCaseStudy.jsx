@@ -28,15 +28,15 @@ function PrimaryVisual({image,chapter,prefix,opening=false,model,motion}){
     <span className={styles.imageFailure} role="status">Image unavailable. The source caption and project text remain available.</span>
    </div>
   </figure>
-  {inspect&&<div className={styles.modelTarget} data-project-model-control data-project-model-target={chapter} tabIndex={0} role="group" aria-label={`${model.alt} When 3D is available, drag horizontally or use arrow keys to inspect. Home or Escape returns to the chapter view.`} aria-describedby={`${prefix}-${chapter}-model-state ${prefix}-${chapter}-model-help`}/>}
+  {inspect&&<div className={styles.modelTarget} data-project-model-control data-project-model-target={chapter} tabIndex={0} role="group" aria-label={`${model.alt} When 3D is available, scroll to follow the camera. With keyboard focus, use arrow keys to inspect. Home or Escape returns to the current scroll view.`} aria-describedby={`${prefix}-${chapter}-model-state ${prefix}-${chapter}-model-help`}/>}
   </div>
   <div className={styles.sourcePanel} data-project-source-caption={chapter} data-information-window="evidence-caption" data-home-scroll-window="project-caption">
    <InformationSkin/>
    {inspect&&<>
     <p className={styles.modelState} id={`${prefix}-${chapter}-model-state`} data-project-model-state={chapter} role="status">Original source view.</p>
     <p className={styles.modelDescription} data-project-model-description>{model.alt}</p>
-    <p className={styles.modelHelp} id={`${prefix}-${chapter}-model-help`} data-project-model-help={chapter} hidden>Drag the model to inspect. With focus, use arrow keys; Home or Esc returns.</p>
-    <button className={styles.sourceAction} type="button" data-project-model-reset={chapter} hidden>Return to chapter view</button>
+    <p className={styles.modelHelp} id={`${prefix}-${chapter}-model-help`} data-project-model-help={chapter} hidden>Scroll to follow the camera. With focus, use arrow keys to inspect; Home or Esc returns to the current scroll view.</p>
+    <button className={styles.sourceAction} type="button" data-project-model-reset={chapter} hidden>Return to scroll view</button>
    </>}
    <p id={`${prefix}-${chapter}-caption`} className={styles.sourceCaption}>{source.caption}</p>
    <p id={`${prefix}-${chapter}-credit`} className={styles.credit}>{source.credit}</p>

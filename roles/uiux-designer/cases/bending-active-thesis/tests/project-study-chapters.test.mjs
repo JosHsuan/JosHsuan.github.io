@@ -60,3 +60,10 @@ test('true departure closes native pause and publication while disposal remains 
  const before=f.dom.inspect(),reads=f.reads;f.toggle.dispatchEvent(new Event('click'));f.presenter.measure();f.presenter.publish({docY:4000,viewportHeight:1000});f.presenter.syncPause();
  assert.deepEqual(f.dom.inspect(),before);assert.equal(f.reads,reads);assert.equal(f.pauseChanges,0);assert.equal(f.presenter.inspect().disposed,true);
 });
+
+test('numerical within-chapter reading changes without semantic publication or layout reads',()=>{
+ const f=fixture();f.measure();f.read(600);const before=f.presenter.inspect().reading,reads=f.reads,writes=f.dom.inspect();
+ f.read(800);const after=f.presenter.inspect().reading;
+ assert.equal(after.chapter,before.chapter);assert(after.progress>before.progress);assert.equal(f.reads,reads);assert.deepEqual(f.dom.inspect(),writes);
+ f.read(600);assert.deepEqual(f.presenter.inspect().reading,before);f.dispose();
+});

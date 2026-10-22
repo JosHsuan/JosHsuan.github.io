@@ -90,7 +90,7 @@ const sources = [
   'runtime/motion/window-path.mjs', 'runtime/motion/window-pose.mjs',
   'runtime/motion/window-scroll.mjs', 'runtime/motion/window-outline.mjs',
   'runtime/motion/window-recipes.mjs', 'runtime/motion/window-motion-api.mjs',
-  'runtime/motion/velocity-skin.mjs',
+  'runtime/motion/velocity-skin.mjs', 'runtime/motion/scroll-camera-score.mjs',
   'runtime/presentation/ModelAnnotationPresenter.mjs',
   'runtime/RuntimeRoot.mjs', 'runtime/core/FeatureRegistry.ts', 'runtime/core/Registrar.ts',
   'app/page.jsx', 'app/layout.jsx', 'app/not-found.jsx', 'app/globals.css', 'app/glass-materials.css', 'app/page.module.css',

@@ -278,8 +278,8 @@ export function createProjectStudyBackdropPresenter({root,window:win,document:do
  return{
   setScene(value){if(disposed)return;scene=value;for(const [key,descriptor]of descriptors)if(descriptor.kind==='model')descriptors.delete(key);changed();},
   measure(width,height){if(!disposed)size={width,height};},
-  publish({dt=0,resumed=false}={}){
-   if(disposed)return false;ticks++;
+  publish({dt=0,resumed=false,reading=null,activeSeconds=0}={}){
+   if(disposed)return false;ticks++;scene?.actor.setReading?.(reading,activeSeconds);
    const p=settings(),chapter=root.dataset.projectActiveChapter??chapters[0]??'overview',target=wanted(chapter,p);
    if(!target)return scene?.actor.publish({dt,resumed,stage:null})??false;
    if(chapter!==lastChapter){direction=Math.sign(chapters.indexOf(chapter)-chapters.indexOf(lastChapter))||direction;lastChapter=chapter;}
