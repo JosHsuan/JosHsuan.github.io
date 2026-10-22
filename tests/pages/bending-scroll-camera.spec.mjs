@@ -9,8 +9,8 @@ const facts=page=>page.evaluate(()=>{
   activeSeconds:s.playback.activeSeconds,idle:s.chapterScene.camera,frames:r.frames,
   paused:r.motionPaused,reduced:r.systemReduced,source:r.representation.id,sourceRevision:r.representation.assetRevision};
 });
-async function nativeReading(page,chapter,fraction,{held=null}={}){
- const goal=await page.evaluate(({chapter,fraction})=>{
+async function nativeReading(page,chapter,fraction,{held=null,targetY=null}={}){
+ const goal=targetY??await page.evaluate(({chapter,fraction})=>{
   const naturalY=el=>{let y=0;for(let n=el;n;n=n.offsetParent)y+=n.offsetTop;return y;};
   const sections=[...document.querySelectorAll('[data-story-chapter]')],i=sections.findIndex(el=>el.dataset.storyChapter===chapter);
   if(i<0)throw Error('Missing chapter '+chapter);
@@ -19,14 +19,14 @@ async function nativeReading(page,chapter,fraction,{held=null}={}){
  },{chapter,fraction});
  try{
   const y=await page.evaluate(()=>scrollY);await page.mouse.wheel(0,goal-y);
-  await page.waitForFunction(goal=>Math.abs(scrollY-goal)<=1,goal,{timeout:WAIT});
+  await page.waitForFunction(({goal,exact})=>exact?scrollY===goal:Math.abs(scrollY-goal)<=1,{goal,exact:targetY!==null},{timeout:WAIT});
   await settle(page);
   await page.waitForFunction(chapter=>{
    const s=window.__story.inspect(),r=window.__thesis.inspect(),a=s.scrollCamera?.orientation,b=r.scrollCameraPainted;
    return s.canvasPlacement.chapter===chapter&&s.canvasPlacement.visible&&!s.canvasAwaitingPaint&&r.ready&&r.sourceVisible&&r.representation.chapterId===chapter&&!s.scrollCamera.needsFrame&&a&&b&&a.azimuthOffsetDeg===b.azimuthOffsetDeg&&a.elevationOffsetDeg===b.elevationOffsetDeg;
   },chapter,{timeout:WAIT});
   const value=await facts(page),expected=held??sampleSourceScrollOrientation(BENDING_SCROLL_ORIENTATION,value.u,{reducedMotion:value.reduced});
-  expect(Math.abs(value.y-goal)).toBeLessThanOrEqual(1);
+  if(targetY!==null)expect(value.y).toBe(goal);else expect(Math.abs(value.y-goal)).toBeLessThanOrEqual(1);
   for(const key of Object.keys(expected))expect(value.orientation[key]).toBeCloseTo(expected[key],10);
   return value;
  }catch(error){
@@ -39,8 +39,9 @@ test('Bending native camera paths preserve independent source idle and accessibl
  test.setTimeout(scenarioTimeout(210000));await loadScene(page);await page.mouse.move(4,400);
  const receipts=[];
  for(const chapter of ['form','system','pattern']){
-  const first=await nativeReading(page,chapter,.22),forward=await nativeReading(page,chapter,.70),reverse=await nativeReading(page,chapter,.22);
-  expect(forward.orientation).not.toEqual(first.orientation);expect(reverse.orientation).toEqual(first.orientation);
+  const first=await nativeReading(page,chapter,.22),forward=await nativeReading(page,chapter,.70),reverse=await nativeReading(page,chapter,.22,{targetY:first.y});
+  expect(forward.orientation).not.toEqual(first.orientation);
+  expect(reverse.y).toBe(first.y);expect(reverse.u).toBe(first.u);expect(reverse.orientation).toEqual(first.orientation);
   expect(first.sourceRevision).toBeTruthy();expect(forward.sourceRevision).toBe(first.sourceRevision);expect(reverse.sourceRevision).toBe(first.sourceRevision);
   receipts.push({chapter,first,forward,reverse});
  }
