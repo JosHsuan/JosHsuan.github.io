@@ -1,0 +1,61 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {FINGERPRINT_BROWSERS,QUALIFICATION_IMAGE} from '../../scripts/ci-image-fingerprint.mjs';
+const read=file=>readFileSync(new URL(`../../${file}`,import.meta.url),'utf8');
+const source=read('.github/workflows/ci.yml');
+const section=(name,end)=>source.split(`\n  ${name}:`)[1].split(`\n  ${end}:`)[0];
+for(const [name,end] of [['framework','pages-build'],['pages-browser','gate']]) {
+ test(`${name} requires the qualified image without install fallback or privilege expansion`,()=>{
+  const job=section(name,end);
+  assert.ok(job.includes(`image: ${QUALIFICATION_IMAGE}`));
+  assert.ok(job.includes(`CI_QUALIFICATION_IMAGE: ${QUALIFICATION_IMAGE}`));
+  assert.match(job,/options: --user pwuser --shm-size=1g/);
+  assert.match(job,/PLAYWRIGHT_BROWSERS_PATH: \/ms-playwright/);
+  assert.match(job,/PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'/);
+  assert.match(job,/persist-credentials: false/);
+  const preflight=read('.github/workflows/preflight.yml').split('  image-qualification:')[1];
+  const guard=preflight.split('      - name: Require nonroot')[1].split('      - uses: actions\/checkout')[0];
+  assert.ok(job.includes(guard),'preserve the actual qualified fail-closed mount guard');
+  assert.match(job,/node-version-file: .node-version/);
+  assert.match(job,/pnpm install --frozen-lockfile/);
+  assert.ok(job.indexOf('uses: actions/setup-node@v4')<job.indexOf('uses: pnpm/action-setup@v4'),'initialize exact Node before pnpm action, as qualified');
+  assert.equal(job.match(/uses: actions\/setup-node@v4/g)?.length,2);
+  assert.match(job,/node scripts\/ci-image-fingerprint.mjs/);
+  assert.match(job,/name: browser-environment-/);
+  assert.match(job,/path: preflight-results\/image-fingerprint.json/);
+  assert.doesNotMatch(job,/install-deps|playwright install|apt-get|sudo|chmod|chown|privileged|SYS_ADMIN|seccomp|ipc=host|continue-on-error/);
+ });
+}
+test('migration preserves build provenance, framework coverage and existing browser policies',()=>{
+ const framework=section('framework','pages-build'),pages=section('pages-browser','gate');
+ assert.match(framework,/- name: root\n            basePath: ''/);
+ assert.match(framework,/- name: subpath\n            basePath: \/portfolio-test/);
+ assert.match(framework,/NEXT_PUBLIC_BASE_PATH: \$\{\{ matrix.basePath \}\}/);
+ assert.match(framework,/pnpm build\n/);assert.match(framework,/pnpm test:e2e\n/);
+ assert.match(framework,/image-bc6ab0d6d44f-framework-/);
+ assert.match(framework,/name: static-export-\$\{\{ matrix.name \}\}/);
+ assert.match(pages,/timeout-minutes: 45/);
+ assert.match(pages,/matrix: \$\{\{ fromJSON\(needs.plan.outputs.matrix\) \}\}/);
+ for(const artifact of ['validation-plan','pages-build-record','static-export-pages','pages-test-inventory']) assert.ok(pages.includes(`name: ${artifact}`));
+ assert.equal(pages.match(/node scripts\/ci-artifact.mjs check-build/g)?.length,2);
+ assert.match(pages,/node scripts\/ci-run-pages.mjs \$\{\{ matrix.browser \}\} \$\{\{ matrix.shard \}\}/);
+ assert.match(pages,/name: pages-receipt-/);
+ assert.match(source,/needs: \[plan, quality, framework, pages-build, pages-browser\]/);
+ for(const [name,end] of [['plan','quality'],['quality','framework'],['pages-build','pages-browser']]) assert.doesNotMatch(section(name,end),/container:/);
+ assert.doesNotMatch(source.split('\n  gate:')[1],/container:/);
+ const frameworkConfig=read('playwright.config.ts'),pagesConfig=read('playwright.pages.config.mjs');
+ assert.match(frameworkConfig,/workers: process.env.CI \? 2 : 4/);
+ assert.match(frameworkConfig,/retries: process.env.CI \? 1 : 0/);
+ for(const browser of ['chromium','firefox','webkit','mobile-chromium']) assert.ok(frameworkConfig.includes(`name: '${browser}'`));
+ assert.match(pagesConfig,/workers:\s*1/);assert.match(pagesConfig,/retries:\s*0/);
+});
+test('runtime fingerprint includes Firefox and both unchanged browser configurations',()=>{
+ assert.deepEqual(FINGERPRINT_BROWSERS,['chromium','firefox','webkit']);
+ assert.equal(Object.isFrozen(FINGERPRINT_BROWSERS),true);
+ const script=read('scripts/ci-image-fingerprint.mjs');
+ assert.match(script,/for\(const name of FINGERPRINT_BROWSERS\)/);
+ assert.match(script,/report.configSha256=await sha256\('playwright.pages.config.mjs'\)/);
+ assert.match(script,/report.frameworkConfigSha256=await sha256\('playwright.config.ts'\)/);
+ assert.match(script,/chromium-headless-shell/);
+});

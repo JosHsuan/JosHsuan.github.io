@@ -6,6 +6,7 @@ import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import path from 'node:path';
 export const QUALIFICATION_IMAGE='mcr.microsoft.com/playwright@sha256:bc6ab0d6d44ff4826e4cb8c1e6d801e185bfc42bb0753f8e2a30efc70db054c7';
+export const FINGERPRINT_BROWSERS=Object.freeze(['chromium','firefox','webkit']);
 export function assertImageRuntime(runtime) {
   if(runtime.image!==QUALIFICATION_IMAGE || runtime.node!=='v24.19.0' || runtime.pnpm!=='11.19.0' || runtime.playwright!=='1.63.0'
     || runtime.platform!=='linux' || runtime.arch!=='x64' || (!Number.isInteger(runtime.uid) || runtime.uid<=0) || runtime.username!=='pwuser'
@@ -56,12 +57,14 @@ async function main() {
   collect('libraries','/sbin/ldconfig',['-p'],false);
   report.browsers=[];
   report.configSha256=await sha256('playwright.pages.config.mjs');
+  report.frameworkConfigSha256=await sha256('playwright.config.ts');
   report.lockSha256=await sha256('pnpm-lock.yaml');
     assertImageRuntime(runtime);
     report.fontFiles = await Promise.all([...new Set(report.fonts.stdout.trim().split('\n').filter(Boolean).map(line=>line.split('\t')[0]))].sort().map(async file=>({file,sha256:await sha256(file)})));
     if(!report.fontFiles.length) throw Error('No installed fonts recorded');
-    const {chromium,webkit}=await import('@playwright/test');
-    for(const [name,browser] of [['chromium',chromium],['webkit',webkit]]) {
+    const browsers=await import('@playwright/test');
+    for(const name of FINGERPRINT_BROWSERS) {
+      const browser=browsers[name];
       const executable=browser.executablePath();
       if(!executable.startsWith('/ms-playwright/')) throw Error('Unexpected browser executable source');
       await access(executable,constants.R_OK|constants.X_OK);

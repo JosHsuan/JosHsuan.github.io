@@ -66,6 +66,9 @@ jobs:
     needs: plan
     if: needs.plan.outputs.framework == 'true'
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright@sha256:bc6ab0d6d44ff4826e4cb8c1e6d801e185bfc42bb0753f8e2a30efc70db054c7
+      options: --user pwuser --shm-size=1g
     strategy:
       fail-fast: false
       matrix:
@@ -75,22 +78,47 @@ jobs:
           - name: subpath
             basePath: /portfolio-test
     env:
+      CI_QUALIFICATION_IMAGE: mcr.microsoft.com/playwright@sha256:bc6ab0d6d44ff4826e4cb8c1e6d801e185bfc42bb0753f8e2a30efc70db054c7
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
       NEXT_PUBLIC_BASE_PATH: ${{ matrix.basePath }}
     steps:
+      - name: Require nonroot identity and writable runner mounts
+        shell: bash
+        run: |
+          set -euo pipefail
+          id
+          test "$(id -u)" -ne 0
+          test "$(id -un)" = pwuser
+          for directory in "$GITHUB_WORKSPACE" "$HOME" "$RUNNER_TEMP" "$RUNNER_TOOL_CACHE"; do
+            printf 'Checking writable directory: %s\n' "$directory"
+            test -d "$directory"
+            test -w "$directory"
+          done
+          printf 'Checking writable environment file: %s\n' "$GITHUB_ENV"
+          test -w "$GITHUB_ENV"
+          printf 'Checking writable path file: %s\n' "$GITHUB_PATH"
+          test -w "$GITHUB_PATH"
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Verify pinned browser environment
+        run: node scripts/ci-image-fingerprint.mjs
       - uses: actions/cache@v4
         with:
           path: .next/cache
-          key: ${{ runner.os }}-framework-${{ matrix.name }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-framework-${{ matrix.name }}-${{ hashFiles('pnpm-lock.yaml') }}-
+          key: ${{ runner.os }}-image-bc6ab0d6d44f-framework-${{ matrix.name }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-image-bc6ab0d6d44f-framework-${{ matrix.name }}-${{ hashFiles('pnpm-lock.yaml') }}-
       - run: pnpm build
-      - run: pnpm exec playwright install --with-deps chromium firefox webkit
       - run: pnpm test:e2e
       - uses: actions/upload-artifact@v4
         if: always()
@@ -104,6 +132,13 @@ jobs:
           name: static-export-${{ matrix.name }}
           path: out/
           include-hidden-files: true
+          retention-days: 14
+      - name: Retain browser environment evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-environment-framework-${{ matrix.name }}
+          path: preflight-results/image-fingerprint.json
           retention-days: 14
 
   pages-build:
@@ -152,20 +187,50 @@ jobs:
     needs: [plan, pages-build]
     if: needs.plan.outputs.pages == 'true'
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright@sha256:bc6ab0d6d44ff4826e4cb8c1e6d801e185bfc42bb0753f8e2a30efc70db054c7
+      options: --user pwuser --shm-size=1g
     # Software-GPU shards can reach their final case after 28 minutes. Let
     # existing per-scenario deadlines and artifact verification finish.
     timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CI_QUALIFICATION_IMAGE: mcr.microsoft.com/playwright@sha256:bc6ab0d6d44ff4826e4cb8c1e6d801e185bfc42bb0753f8e2a30efc70db054c7
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
     steps:
+      - name: Require nonroot identity and writable runner mounts
+        shell: bash
+        run: |
+          set -euo pipefail
+          id
+          test "$(id -u)" -ne 0
+          test "$(id -un)" = pwuser
+          for directory in "$GITHUB_WORKSPACE" "$HOME" "$RUNNER_TEMP" "$RUNNER_TOOL_CACHE"; do
+            printf 'Checking writable directory: %s\n' "$directory"
+            test -d "$directory"
+            test -w "$directory"
+          done
+          printf 'Checking writable environment file: %s\n' "$GITHUB_ENV"
+          test -w "$GITHUB_ENV"
+          printf 'Checking writable path file: %s\n' "$GITHUB_PATH"
+          test -w "$GITHUB_PATH"
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Verify pinned browser environment
+        run: node scripts/ci-image-fingerprint.mjs
       - uses: actions/download-artifact@v4
         with:
           name: validation-plan
@@ -181,12 +246,6 @@ jobs:
           name: pages-test-inventory
       - name: Verify exact shared output before browser checks
         run: node scripts/ci-artifact.mjs check-build
-      - name: Install OS browser dependencies (bounded)
-        timeout-minutes: 8
-        run: pnpm exec playwright install-deps ${{ matrix.engine }}
-      - name: Install pinned browser binary (bounded)
-        timeout-minutes: 3
-        run: pnpm exec playwright install ${{ matrix.engine }}
       - run: node scripts/ci-run-pages.mjs ${{ matrix.browser }} ${{ matrix.shard }}
       - uses: actions/upload-artifact@v4
         if: always()
@@ -202,6 +261,13 @@ jobs:
         with:
           name: public-case-review-${{ matrix.browser }}-${{ strategy.job-index }}
           path: pages-test-results/
+          retention-days: 14
+      - name: Retain browser environment evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-environment-pages-${{ matrix.browser }}-${{ strategy.job-index }}
+          path: preflight-results/image-fingerprint.json
           retention-days: 14
 
   gate:
