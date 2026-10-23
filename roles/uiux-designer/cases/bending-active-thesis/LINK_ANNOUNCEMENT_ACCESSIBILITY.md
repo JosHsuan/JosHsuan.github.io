@@ -89,3 +89,33 @@ readability. The bounded test correction uses the existing chapter navigation's
 real keyboard activation, separate unchanged-budget interaction scenarios, and
 an actually visible native comparison action. No production focus behavior,
 threshold, runtime, source or style changes are justified by these results.
+
+### Corrected navigation and remaining Chromium service latency
+
+At `3f1de78dbe83f10db5ff17001573bd44b91c17bb`, WebKit
+[39895301436](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39895301436)
+and mobile [39895411058](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39895411058)
+passed all four scenarios. They actually activated Make through native keyboard
+navigation, opened the inline comparison, focused its unobscured original-source
+link, opened the 1191×1684 original, returned and closed back to the trigger.
+The comparison image and action captures close the earlier offscreen-action
+capture gap. A tall mobile element capture still overlaps fixed chrome at its
+header; it is not proof that the whole comparison is simultaneously unobscured.
+
+Chromium [39895218477](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39895218477)
+passed three scenarios but exhausted the same 60-second Bending budget before
+chapter activation. Only the first Tab reached Pause. Captured ordinary calls
+were themselves slow: entry evaluation 8.18 seconds, control count 12.14 seconds,
+and first Tab 6.10 seconds. No focus-cycle or missing source-response evidence
+was found; a specific CPU/GPU/renderer cause remains unproven. Do not call this a
+performance repair or infer it from the passing other engines.
+
+The next bounded semantics scenario remains normal Full mode, explicitly uses
+the visitor's real Pause control after source readiness, proves its frozen clock,
+and exercises native reading/inspection before a genuine Resume where feasible.
+It does not emulate Reduced, inject a clock freeze or enlarge the timeout.
+Existing Full model/camera/source/Pause contracts remain unchanged. Existing
+comparison-specific public-release/window-integration baselines use Reduced;
+they must not be misrepresented as unpaused Full coverage. The successful
+unpaused WebKit/mobile runs above remain separately scoped historical evidence.
+Actual paused-Full acceptance is still pending.

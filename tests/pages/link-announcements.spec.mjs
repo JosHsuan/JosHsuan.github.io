@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 import {readFile,writeFile} from 'node:fs/promises';
-import {WAIT} from './case-helpers.mjs';
+import {WAIT,frames} from './case-helpers.mjs';
 
 const release='../../roles/uiux-designer/cases/bending-active-thesis/release/';
 const projects=JSON.parse(await readFile(new URL(release+'project-studies.json',import.meta.url),'utf8')).projects;
@@ -100,11 +100,16 @@ test('original generic and XR image actions open and return natively',async({pag
   }
  }catch(error){primaryError=error;throw error;}finally{try{await persist(info,'native-link-behaviour',receipt);}catch(error){if(!primaryError)throw error;}}
 });
-test('Bending chapter navigation reaches an inline comparison and its native original action',async({page,context},info)=>{
+test('Full Bending native Pause reading reaches an inline comparison and its original action',async({page,context},info)=>{
  const receipt={navigation:[],triggerTabs:[],originalTabs:[]};let primaryError;
  try{
-  await open(page,'/projects/bending-active/');
-  receipt.entry=await page.evaluate(()=>({hash:location.hash,y:scrollY,activeId:document.activeElement?.id,phase:window.__site?.inspect().phase}));
+  receipt.policy='Full source, native Pause-controlled reading; not Reduced. Prior unpaused Chromium service latency remains unresolved.';
+  expect((await page.goto('/projects/bending-active/')).status()).toBe(200);await page.evaluate(()=>document.fonts.ready);
+  const state=()=>page.evaluate(()=>{const scene=window.__thesis?.inspect(),story=window.__story?.inspect();return{hash:location.hash,y:scrollY,activeId:document.activeElement?.id,phase:window.__site?.inspect().phase,ready:scene?.ready,detail:scene?.detail,systemReduced:scene?.systemReduced,mediaReduced:matchMedia('(prefers-reduced-motion: reduce)').matches,paused:scene?.motionPaused,seconds:story?.playback.activeSeconds,source:scene?.source};});
+  await expect.poll(async()=>{receipt.entry=await state();return receipt.entry;},{timeout:WAIT}).toMatchObject({phase:'entered',ready:true,detail:'full',systemReduced:false,mediaReduced:false,paused:false});
+  const motion=page.locator('[data-bending-motion-toggle]');await motion.click();await expect(motion).toHaveAttribute('aria-pressed','true');
+  receipt.paused=await state();expect(receipt.paused.paused).toBe(true);expect(receipt.paused.seconds).toBeGreaterThan(receipt.entry.seconds);expect(receipt.paused.source).toEqual(receipt.entry.source);expect(receipt.paused.systemReduced).toBe(false);
+  await frames(page,5);receipt.frozen=await state();expect(receipt.frozen.seconds).toBe(receipt.paused.seconds);expect(receipt.frozen.source).toEqual(receipt.paused.source);expect(receipt.frozen.y).toBe(receipt.paused.y);expect(receipt.frozen.paused).toBe(true);
   const chapter=page.locator('[data-story-navigation] a[href="#make"]');await tabTo(page,chapter,receipt.navigation);await page.keyboard.press('Enter');
   await expect.poll(()=>page.evaluate(()=>({hash:location.hash,focused:document.activeElement===document.getElementById('make')}))).toEqual({hash:'#make',focused:true});
   receipt.chapter=await page.evaluate(()=>({hash:location.hash,y:scrollY,activeId:document.activeElement?.id}));
@@ -125,8 +130,15 @@ test('Bending chapter navigation reaches an inline comparison and its native ori
   receipt.original=await popup(page,original,()=>page.keyboard.press('Enter'),dimensions);
   const png=info.outputPath('bending-inline-source-comparison.png');await comparison.screenshot({path:png});await info.attach('bending-inline-source-comparison',{path:png,contentType:'image/png'});
   const dynamicOriginalName=await original.getAttribute('aria-label');
-  const close=comparison.getByRole('button',{name:'Close source comparison'});await page.keyboard.press('Shift+Tab');await expect(close).toBeFocused();await page.keyboard.press('Enter');await expect(comparison).toHaveCount(0);await expect(trigger).toBeFocused();
+  const close=comparison.getByRole('button',{name:'Close source comparison'});await page.keyboard.press('Shift+Tab');await expect(close).toBeFocused();
+  receipt.close=await close.evaluate(node=>{const r=node.getBoundingClientRect(),hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return{top:r.top,bottom:r.bottom,left:r.left,right:r.right,width:innerWidth,height:innerHeight,hit:hit===node||node.contains(hit)};});
+  expect(receipt.close.top).toBeGreaterThanOrEqual(0);expect(receipt.close.bottom).toBeLessThanOrEqual(receipt.close.height);expect(receipt.close.left).toBeGreaterThanOrEqual(0);expect(receipt.close.right).toBeLessThanOrEqual(receipt.close.width);expect(receipt.close.hit).toBe(true);
+  await page.keyboard.press('Enter');await expect(comparison).toHaveCount(0);await expect(trigger).toBeFocused();
   receipt.bending={mode:'inline comparison, not a dialog',before:comparisonBefore,returned:await facts(page,trigger),dynamicOriginalName};
+  receipt.beforeResume=await state();expect(receipt.beforeResume.seconds).toBe(receipt.paused.seconds);expect(receipt.beforeResume.paused).toBe(true);expect(receipt.beforeResume.source).toEqual(receipt.paused.source);
+  await motion.click();await expect(motion).toHaveAttribute('aria-pressed','false');
+  await expect.poll(async()=>{receipt.resumed=await state();return receipt.resumed.seconds;},{timeout:WAIT}).toBeGreaterThan(receipt.paused.seconds);
+  expect(receipt.resumed).toMatchObject({y:receipt.beforeResume.y,paused:false,systemReduced:false,detail:'full'});expect(receipt.resumed.source).toEqual(receipt.paused.source);
  }catch(error){primaryError=error;throw error;}finally{try{await persist(info,'bending-link-behaviour',receipt);}catch(error){if(!primaryError)throw error;}}
 });
 test.describe('native link announcements without application JavaScript',()=>{
