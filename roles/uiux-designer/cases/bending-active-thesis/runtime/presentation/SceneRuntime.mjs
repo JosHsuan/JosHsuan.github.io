@@ -225,7 +225,7 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
           renderSuspended:input.get().hidden||input.get().canvasPlacement?.visible===false,
           diagramSource:d?{revision:d.diagramMeta.revision,bytes:d.diagramMeta.bytes,representations:d.diagramMeta.representations.map(record=>({id:record.id,vertices:record.vertices,triangles:record.triangles,vertexColors:record.vertexColors}))}:null,
           renderBudget: d?.renderBudget ?? null,
-          renderPressure: runtime.pressure.inspect(), rendererBudget:runtime.budget?.inspect() ?? null,
+          renderPressure: runtime.pressure.inspect(), renderPressureDecisions:runtime.pressure.inspectDecisions(), renderProfile:{...runtime.profile}, rendererBudget:runtime.budget?.inspect() ?? null,
           renderer: {calls: gl.info.render.calls, triangles: gl.info.render.triangles, programs: gl.info.programs?.length ?? 0, shadowEnabled: gl.shadowMap.enabled, dpr: gl.getPixelRatio()}, memory: {...gl.info.memory}};
       },
       setOverrides: (values = {}) => {overrides.current = {...values}; if (!input.get().hidden) invalidate();},

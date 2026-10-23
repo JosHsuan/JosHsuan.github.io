@@ -100,16 +100,33 @@ test('original generic and XR image actions open and return natively',async({pag
   }
  }catch(error){primaryError=error;throw error;}finally{try{await persist(info,'native-link-behaviour',receipt);}catch(error){if(!primaryError)throw error;}}
 });
-test('Full Bending native Pause reading reaches an inline comparison and its original action',async({page,context},info)=>{
- const receipt={navigation:[],triggerTabs:[],originalTabs:[]};let primaryError;
+test('Full Bending native Pause reading reaches an inline comparison and its original action',async({page,context,isMobile},info)=>{
+ const receipt={navigation:[],triggerTabs:[],originalTabs:[],phase:'entry'};let primaryError;
  try{
   receipt.policy='Full source, native Pause-controlled reading; not Reduced. Prior unpaused Chromium service latency remains unresolved.';
   expect((await page.goto('/projects/bending-active/')).status()).toBe(200);await page.evaluate(()=>document.fonts.ready);
-  const state=()=>page.evaluate(()=>{const scene=window.__thesis?.inspect(),story=window.__story?.inspect();return{hash:location.hash,y:scrollY,activeId:document.activeElement?.id,phase:window.__site?.inspect().phase,ready:scene?.ready,detail:scene?.detail,systemReduced:scene?.systemReduced,mediaReduced:matchMedia('(prefers-reduced-motion: reduce)').matches,paused:scene?.motionPaused,seconds:story?.playback.activeSeconds,source:scene?.source};});
+  const state=()=>page.evaluate(()=>{const scene=window.__thesis?.inspect(),story=window.__story?.inspect();return{hash:location.hash,y:scrollY,activeId:document.activeElement?.id,phase:window.__site?.inspect().phase,ready:scene?.ready,detail:scene?.detail,systemReduced:scene?.systemReduced,mediaReduced:matchMedia('(prefers-reduced-motion: reduce)').matches,paused:scene?.motionPaused,seconds:story?.playback.activeSeconds,source:scene?.source,renderProfile:scene?.renderProfile,renderPressure:scene?.renderPressure,renderPressureDecisions:scene?.renderPressureDecisions,renderBudget:scene?.renderBudget,rendererBudget:scene?.rendererBudget,representation:scene?.representation,pose:scene?.pose,bounds:scene?.bounds,stageLayout:scene?.stageLayout,sourceVisible:scene?.sourceVisible,compositor:scene?.compositor?{requestedSamples:scene.compositor.requestedSamples,width:scene.compositor.width,height:scene.compositor.height}:null};});
   await expect.poll(async()=>{receipt.entry=await state();return receipt.entry;},{timeout:WAIT}).toMatchObject({phase:'entered',ready:true,detail:'full',systemReduced:false,mediaReduced:false,paused:false});
+  const pressureFacts=snapshot=>{
+   const expected=isMobile?{id:'conservative-touch',pixelBudget:520000,maxSamples:0,shadowMapSize:512}:{id:'standard',pixelBudget:1600000,maxSamples:2,shadowMapSize:1024};
+   expect(snapshot.renderProfile).toEqual(expected);expect(snapshot.renderBudget.pixelBudget).toBe(expected.pixelBudget);expect(snapshot.compositor.requestedSamples).toBe(expected.maxSamples);
+   const {stage,scale,decisions}=snapshot.renderPressure,history=snapshot.renderPressureDecisions;
+   expect(Number.isInteger(stage)&&stage>=0&&stage<=3).toBe(true);expect(scale).toBe([1,.8,.65,.5][stage]);expect(history).toHaveLength(decisions);expect(history).toHaveLength(stage);
+   for(const [index,row] of history.entries()){
+    expect(row.stage).toBe(index+1);expect(row.scale).toBe([1,.8,.65,.5][row.stage]);expect(Number.isFinite(row.timestampMs)).toBe(true);
+    if(index)expect(row.timestampMs).toBeGreaterThan(history[index-1].timestampMs);
+    expect(['sustained-slow-delivery',...(isMobile?[]:['sustained-severe-delivery'])]).toContain(row.reason);
+   }
+  };
+  pressureFacts(receipt.entry);receipt.phase='native-pause';
   const motion=page.locator('[data-bending-motion-toggle]');await motion.click();await expect(motion).toHaveAttribute('aria-pressed','true');
   receipt.paused=await state();expect(receipt.paused.paused).toBe(true);expect(receipt.paused.seconds).toBeGreaterThan(receipt.entry.seconds);expect(receipt.paused.source).toEqual(receipt.entry.source);expect(receipt.paused.systemReduced).toBe(false);
   await frames(page,5);receipt.frozen=await state();expect(receipt.frozen.seconds).toBe(receipt.paused.seconds);expect(receipt.frozen.source).toEqual(receipt.paused.source);expect(receipt.frozen.y).toBe(receipt.paused.y);expect(receipt.frozen.paused).toBe(true);
+  pressureFacts(receipt.paused);pressureFacts(receipt.frozen);expect(receipt.frozen.renderPressureDecisions).toEqual(receipt.paused.renderPressureDecisions);
+  receipt.phase='paused-overview-capture';
+  receipt.overviewCapture={scope:'Native paused Overview; unpaired page-field phase. Not deterministic System material equivalence or performance evidence.',stage:receipt.frozen.renderPressure.stage,stage2Observed:receipt.frozen.renderPressure.stage===2};
+  const overviewPng=info.outputPath('bending-paused-overview-device.png');await page.screenshot({path:overviewPng,scale:'device'});await info.attach('bending-paused-overview-device',{path:overviewPng,contentType:'image/png'});
+  receipt.phase='native-chapter-and-source';
   const chapter=page.locator('[data-story-navigation] a[href="#make"]');await tabTo(page,chapter,receipt.navigation);await page.keyboard.press('Enter');
   await expect.poll(()=>page.evaluate(()=>({hash:location.hash,focused:document.activeElement===document.getElementById('make')}))).toEqual({hash:'#make',focused:true});
   receipt.chapter=await page.evaluate(()=>({hash:location.hash,y:scrollY,activeId:document.activeElement?.id}));
@@ -135,10 +152,10 @@ test('Full Bending native Pause reading reaches an inline comparison and its ori
   expect(receipt.close.top).toBeGreaterThanOrEqual(0);expect(receipt.close.bottom).toBeLessThanOrEqual(receipt.close.height);expect(receipt.close.left).toBeGreaterThanOrEqual(0);expect(receipt.close.right).toBeLessThanOrEqual(receipt.close.width);expect(receipt.close.hit).toBe(true);
   await page.keyboard.press('Enter');await expect(comparison).toHaveCount(0);await expect(trigger).toBeFocused();
   receipt.bending={mode:'inline comparison, not a dialog',before:comparisonBefore,returned:await facts(page,trigger),dynamicOriginalName};
-  receipt.beforeResume=await state();expect(receipt.beforeResume.seconds).toBe(receipt.paused.seconds);expect(receipt.beforeResume.paused).toBe(true);expect(receipt.beforeResume.source).toEqual(receipt.paused.source);
+  receipt.phase='native-resume';receipt.beforeResume=await state();expect(receipt.beforeResume.seconds).toBe(receipt.paused.seconds);expect(receipt.beforeResume.paused).toBe(true);expect(receipt.beforeResume.source).toEqual(receipt.paused.source);
   await motion.click();await expect(motion).toHaveAttribute('aria-pressed','false');
   await expect.poll(async()=>{receipt.resumed=await state();return receipt.resumed.seconds;},{timeout:WAIT}).toBeGreaterThan(receipt.paused.seconds);
-  expect(receipt.resumed).toMatchObject({y:receipt.beforeResume.y,paused:false,systemReduced:false,detail:'full'});expect(receipt.resumed.source).toEqual(receipt.paused.source);
+  expect(receipt.resumed).toMatchObject({y:receipt.beforeResume.y,paused:false,systemReduced:false,detail:'full'});expect(receipt.resumed.source).toEqual(receipt.paused.source);pressureFacts(receipt.resumed);receipt.phase='completed';
  }catch(error){primaryError=error;throw error;}finally{try{await persist(info,'bending-link-behaviour',receipt);}catch(error){if(!primaryError)throw error;}}
 });
 test.describe('native link announcements without application JavaScript',()=>{
