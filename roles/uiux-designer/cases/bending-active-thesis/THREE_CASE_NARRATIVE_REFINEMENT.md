@@ -134,3 +134,24 @@ portfolio navigation links only inside `forced-colors: active`, making system
 palette changes immediate. It does not change normal-theme transitions, geometry,
 fonts, source materials, test waits or contrast tolerances. Exact rendering and
 full-gate validation remain pending; no root-cause or release success is inferred.
+
+## Published checkpoint: 3321572
+
+Full CI 39875079270 passed 483 public and 24 framework executions; deployment
+39879409411 was verified live at 01:01:42 UTC on 23 October 2026 across 12 routes,
+52 runtime resources, 133 source assets and ten promoted plates. Earlier pending
+statements above are historical checkpoints, superseded by this release result.
+
+Actual review covered 30 original-figure captures and 30 native-centered caption
+captures across Chromium, WebKit and mobile Chromium. Final 332 spot checks
+reconfirmed three desktop plates and their captions plus the two formerly rail-
+occluded mobile captions: complete wording and credits are visible without
+chrome obstruction after native centering. This closes the caption capture gap,
+not the general limitations of tiny raster text or fixed chrome crossing tall
+full-figure captures. Static screenshots are not motion/FPS evidence.
+
+The forced-navigation correction switches system colors without transition; its
+three-profile palette acceptance passed. The earlier failing RGBA was not
+retained, so interpolation remains a plausible explanation, not proven cause.
+The next candidate adds discoverable native full-image links to generic/XR
+secondary captions; it is not part of published 332 and awaits exact acceptance.

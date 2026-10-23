@@ -1,19 +1,21 @@
 # Site-wide refinement coverage
 
-Updated 22 October 2026. Refinements are planned and accepted across the whole
+Updated 23 October 2026. Refinements are planned and accepted across the whole
 site; a case delivery is one rollout slice, not completion of the website.
 Preserve source evidence, continuous ambient presentation, the single Director,
 native scrolling and the empty reusable framework.
 
 ## Evidence boundary
 
-The accepted live baseline is `86a6ce5`. Its full browser gate passed all
-465 public executions and 24 framework executions; the integration owner verified
-[deployment 39850068975](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39850068975)
-and live delivery across 12 portfolio routes, 52 resources and 133 source assets.
-This includes the generic, XR and Bending scroll-camera adapters and the shared
-whole-plane reading-surface rollout. Historical `146e8938` camera evidence and
-its 429-test gate remain milestones, not the current release.
+The accepted live baseline is `3321572`. Its full browser gate
+[39875079270](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39875079270)
+passed 483 public executions and 24 framework executions;
+[deployment 39879409411](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39879409411)
+was verified live at 01:01:42 UTC on 23 October across 12 portfolio routes,
+52 runtime resources, 133 source assets and the ten promoted narrative plates.
+This includes the three-case source-backed narrative refinement and forced-color
+navigation's immediate system-palette policy. Global glass `86a6ce5` and camera
+`146e8938` remain accepted historical milestones, not the current release.
 
 **Global typography and explicit eligible whole-plane surfaces are published.**
 This is not completion of every case's narrative, every possible scroll position,
@@ -56,10 +58,10 @@ reduced/save-data/forced-colors/print policies preserve reading and controls.
 | `/projects/xr-bending-active/` | T | Shared eligible planes + route presenter | Live at 146e8938: Method-only authored scroll camera; optional inspection returns to current scroll view | Original model and all source points preserved; phone recordings/workspace unchanged | Model Pause/Resume, 2D canvas-only idle and exact prepared-source support accepted in CI/retained captures; earlier numerical camera anomaly has no proven root cause, diagnostics retained. Shared eligible planes now published at 86a6ce5. See [XR direction](XR_SCROLL_CAMERA_DIRECTION.md) | Editorial/evidence planes; model, phone and workspace excluded |
 | `/projects/mode-s-of-making/` | T | Shared eligible planes (former pilot) | Revised causal sequence accepted; model interval and three clips preserved | Native recordings/simulation distinguished; mobile external white rails corrected | Preserve accepted causal story and source evidence; the shared effect is a bounded planar approximation, not Lusion equivalence | Editorial/caption/foreground evidence planes; independent source stage excluded |
 | `/projects/entrance-installation-art/` | T | Shared eligible planes | Existing model interval preserved | Three native source-focus guides accepted, including mobile/no-JS | Fine source lettering still uses full-image links | Editorial/caption/evidence planes plus one outer diagram-guide owner |
-| `/projects/dot-based-3d-printing/` | T | Shared eligible planes | Existing narrative, not yet accepted as a new narrative revision | Reviewed smaller delivery MP4; original retained; native timing/loop checks passed | Narrative/readability revision remains | Editorial/caption/foreground evidence planes; independent source stage excluded |
+| `/projects/dot-based-3d-printing/` | T | Shared eligible planes | Published 332: path-to-bead evidence and distinct form studies; model/camera unchanged | Reviewed smaller delivery MP4; original retained; native timing/loop checks passed | Published narrative; dense source detail still needs original-image access | Editorial/caption/foreground evidence planes; independent source stage excluded |
 | `/projects/hc3dp-caustics/` | T | Shared eligible planes | Accepted HC slice: observed light first, visible computational plates, explicit physical limits; original camera interval unchanged | Three complete plates become foreground evidence; path clip remains explicitly simulation | HC desktop/mobile/no-JS and exact CI/live accepted; generic authored camera now live; shared eligible planes now published at 86a6ce5 | Editorial/caption/foreground evidence planes; independent source stage excluded |
-| `/projects/special-assemblies/` | T | Shared eligible planes | Existing presentation; proposed module → neighbor → planner → simulation → physical evidence | Source identity must not be misrepresented as chronology | Evidence-backed narrative slice remains | Editorial/caption/foreground evidence planes; independent source stage excluded |
-| `/projects/project-caschlatsch/` | T | Shared eligible planes | Existing presentation; proposed user-task-first XR sequence and shorter semantic steps | Existing reviewed original-portfolio figures | Evidence-backed narrative slice remains | Editorial/caption/foreground evidence planes; independent source stage excluded |
+| `/projects/special-assemblies/` | T | Shared eligible planes | Published 332 source-backed narrative; source/model/media contracts unchanged | Source identity must not be misrepresented as chronology | Ten-plate batch accepted across three profiles; static evidence does not establish all embedded lettering is readable inline | Editorial/caption/foreground evidence planes; independent source stage excluded |
+| `/projects/project-caschlatsch/` | T | Shared eligible planes | Published 332 source-backed narrative; source/model/media contracts unchanged | Existing reviewed original-portfolio figures | Ten-plate batch accepted across three profiles; static evidence does not establish all embedded lettering is readable inline | Editorial/caption/foreground evidence planes; independent source stage excluded |
 | `/404.html` | T | Native fallback page | Clear recovery/navigation, no case choreography | Not applicable | Preserve semantic recovery and focus; do not force decorative case motion | Excluded: native recovery remains unchanged |
 
 ## Next shared rollout and release gates
@@ -137,3 +139,13 @@ FPS or site-wide completion. XR now also uses its accepted separate 2D canvas
 idle layer and exact prepared source support; Bending retains genuine 3D chapter
 idle, its source-family timing and eight-active-second comparison policy. Both
 are live at 146e8938, not interchangeable idle implementations.
+
+## Next source-access slice (candidate, not published)
+
+Generic case and XR secondary evidence captions gain visible native full-image
+links with new-tab notice and source-specific accessible names. Existing image
+anchors, primary-source actions, Entrance guides and Bending inspection remain
+unchanged. Reuse the existing 44px link styles; no new modal, animation owner or
+source derivatives. Actual keyboard opening/return, mobile focus visibility,
+forced colors and no-JS acceptance are pending. Add local scroll clearance only
+if a genuine focused-control occlusion is reproduced.
