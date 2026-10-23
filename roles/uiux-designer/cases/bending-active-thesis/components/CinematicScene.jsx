@@ -17,7 +17,8 @@ function World({input,onReady,onFailure,runtime}){
   return <primitive object={world.root} dispose={null}/>;
 }
 function createSceneResources(){
-  const runtime={pressure:createRenderPressure(),budget:null,profile:resolveRenderProfile({coarsePointer:matchMedia('(pointer:coarse)').matches,userAgent:navigator.userAgent,platform:navigator.platform,maxTouchPoints:navigator.maxTouchPoints})};
+  const profile=resolveRenderProfile({coarsePointer:matchMedia('(pointer:coarse)').matches,userAgent:navigator.userAgent,platform:navigator.platform,maxTouchPoints:navigator.maxTouchPoints});
+  const runtime={pressure:createRenderPressure({severeDelivery:profile.id==='standard'}),budget:null,profile};
   const createRenderer=defaults=>{
     const renderer=new T.WebGLRenderer({...defaults,antialias:false,alpha:true,powerPreference:'default'});
     runtime.budget=createRendererBudget(renderer,()=>({deviceDpr:devicePixelRatio||1,densityScale:runtime.pressure.inspect().scale,pixelBudget:runtime.profile.pixelBudget}));
