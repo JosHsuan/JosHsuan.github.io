@@ -69,3 +69,23 @@ The alternate model `load-timeout` race did not occur. This proof does not cover
 late parsing/disposal, GPU memory, physical SaveData networks or field speed.
 The exploratory test remains on its reserved branch, not the production release.
 No loading UI, deadline, preload policy or model changes were warranted.
+
+## First targeted feedback — not release acceptance
+
+Exact `0564ff93676c664e02fc405daf3d4e2d2892bb08` passed WebKit 13/13
+([39893409198](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39893409198)).
+Chromium [39893310589](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39893310589)
+and mobile [39893496298](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39893496298)
+each passed 12/13; the new combined interaction scenario exhausted its 60-second
+budget during native Tab traversal toward Bending's Make trigger. The captured
+mobile focus/scroll sequence progressed through Form and System without evidence
+of a focus cycle. The preceding original-image keyboard/touch roundtrips passed.
+This is not evidence that the new markup broke a destination or created a trap.
+
+All route declaration and no-JS checks passed. The WebKit comparison's source
+loaded and inline open/close assertions passed, but its viewport screenshot did
+not show the comparison itself. That capture cannot certify comparison-content
+readability. The bounded test correction uses the existing chapter navigation's
+real keyboard activation, separate unchanged-budget interaction scenarios, and
+an actually visible native comparison action. No production focus behavior,
+threshold, runtime, source or style changes are justified by these results.

@@ -6,7 +6,7 @@ export const ALL_BROWSER_TESTS = readdirSync(new URL('../tests/pages/', import.m
 const baseline = ['public-release'];
 const features = {
   model: ['global-window-motion', 'bending-scroll-camera', 'model-inspection', 'model-drag', 'canvas-motion', 'source-artwork', 'runtime-lifecycle', 'mobile-stability'],
-  evidence: ['source-artwork', 'motion-feedback'],
+  evidence: ['source-artwork', 'motion-feedback', 'link-announcements'],
   diagram: ['global-window-motion', 'source-artwork', 'library-reveal', 'model-inspection', 'canvas-motion'],
   reading: ['global-window-motion', 'bending-scroll-camera', 'motion-feedback', 'canvas-motion', 'source-artwork', 'model-inspection'],
 };

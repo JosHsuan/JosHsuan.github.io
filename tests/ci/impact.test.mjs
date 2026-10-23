@@ -131,3 +131,18 @@ test('native model, diagram and reading changes retain whole-plane integration c
   assert.equal(plan.framework,false);
  }
 });
+
+// Native source announcements and the conditional inline comparison share the
+// existing evidence owner; retain its earlier interaction coverage as well.
+test('scoped evidence changes retain source interaction and native announcement coverage',()=>{
+  for(const file of ['components/EvidenceInspector.jsx','components/evidence-inspector.module.css','runtime/features/EvidenceManager.mjs']){
+    const plan=classifyChanges([CASE_ROOT+file]);
+    assert.equal(plan.framework,false);assert.equal(plan.fullCase,false);
+    assert.deepEqual(plan.browserTests,['link-announcements','motion-feedback','public-release','source-artwork'].map(name=>`tests/pages/${name}.spec.mjs`).sort());
+    assert.deepEqual(plan.browserMatrix,[
+      {browser:'chromium',engine:'chromium',shard:'1/1'},
+      {browser:'webkit',engine:'webkit',shard:'1/1'},
+      {browser:'mobile-chromium',engine:'chromium',shard:'1/1'},
+    ]);
+  }
+});
