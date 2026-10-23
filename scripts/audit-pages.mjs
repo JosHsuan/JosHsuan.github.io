@@ -5,6 +5,7 @@ import {fileURLToPath} from 'node:url';
 import assert from 'node:assert/strict';
 import {assertProjectStudies,assertProjectImage,assertProjectModel,assertProjectAssetRecord,PROJECT_SLUGS} from './project-studies.mjs';
 import {projectMotionMedia,assertProjectVideo} from './project-motion-media.mjs';
+import {assertShareMetadataHtml,assertNotFoundMetadataHtml,assertNoNativeBodySource} from './share-metadata.mjs';
 
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 const TYPE_FONT='/assets/fonts/roboto-mono-variable.woff2',TYPE_NOTICE='licenses/roboto-mono-OFL.txt';
@@ -194,6 +195,26 @@ export async function auditPages() {
   const suppliedIntroduction=records.introduction;
   assert.equal(suppliedIntroduction.statement,INTRO_STATEMENT,'Exact owner-supplied introduction first sentence');
   assert.equal(suppliedIntroduction.description,INTRO_DESCRIPTION,'Exact owner-supplied introduction second sentence');
+  // Audit actual exported native heads, independently of the page metadata helper.
+  const shareRoutes=[
+    {route:'/',title:records.introduction.metadataTitle,description:records.introduction.metadataDescription},
+    {route:'/about/',title:'About — JosHsuan Chao',description:'Computational designer and developer bridging design technology, digital fabrication and spatial interaction.'},
+    {route:'/projects/',title:'Projects — JosHsuan Chao',description:'Selected work in computational design, digital fabrication and spatial interaction, spanning material research, robotic assembly and XR workflows.'},
+    {route:'/contact/',title:'Contact — JosHsuan Chao',description:'Contact JosHsuan Chao by email and find public work and profiles.'},
+    ...records['project-studies'].projects.map(project=>({route:`/projects/${project.slug}/`,title:project.metadataTitle,description:project.metadataDescription,image:project.hero})),
+    {route:'/projects/xr-bending-active/',title:records['xr-study'].metadataTitle,description:records['xr-study'].metadataDescription,image:records['xr-study'].hero},
+    {route:'/projects/bending-active/',title:'Bending-Active — JosHsuan Chao',description:'A research story about geometry, openings and the behaviour of a metal sheet.',image:{src:'/assets/cinematic/model-poster.webp',width:1440,height:1000,alt:'The approved Bending-Active metal-panel model, shown in its original exhibition scene.'}},
+  ];
+  assert.equal(shareRoutes.length,12);assert.equal(shareRoutes.filter(route=>route.image).length,8);
+  for(const expectedHead of shareRoutes){
+    assertShareMetadataHtml(await readFile(path.join(out,expectedHead.route.slice(1),'index.html'),'utf8'),expectedHead);
+    if(expectedHead.image){
+      // Existing manifest byte/hash audit above binds these same originals;
+      // inspect real WebP signatures and dimensions, not a filename MIME guess.
+      assertProjectImage(await readFile(path.join(out,expectedHead.image.src.slice(1))),expectedHead.image);
+    }
+  }
+  assertNotFoundMetadataHtml(await readFile(path.join(out,'404.html'),'utf8'));
   const html = await readFile(path.join(out, 'index.html'), 'utf8');
   const auditBackground=(page,route)=>{
     assert.equal((page.match(/data-global-background(?:=|[ >])/g)||[]).length,1,`${route}: one shared backdrop`);
@@ -267,7 +288,7 @@ export async function auditPages() {
   const study=records['xr-study'],workspace=records['xr-workspace'];
   assertXRWorkspaceRecord(workspace,manifest);
   assert(xr.includes('data-xr-opening="true"')&&!xr.includes('data-xr-opening-visual')&&!xr.includes('data-xr-hero'),'XR opens with its native introduction and no removed opening photograph');
-  assert(!xr.includes(study.hero.src),'The former XR opening photograph is absent from the case document');
+  assertNoNativeBodySource(xr,study.hero.src);
   const picture=[...xr.matchAll(/<picture\b[^>]*>[\s\S]*?<\/picture>/g)].map(match=>match[0]).find(tag=>tag.includes('data-xr-workspace-visual'));
   assert(picture,'Context has its own full-workspace responsive picture');
   const workspaceImage=tagWith(picture,'img','data-xr-workspace-visual');

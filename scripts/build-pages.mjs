@@ -93,7 +93,7 @@ const sources = [
   'runtime/motion/velocity-skin.mjs', 'runtime/motion/scroll-camera-score.mjs',
   'runtime/presentation/ModelAnnotationPresenter.mjs',
   'runtime/RuntimeRoot.mjs', 'runtime/core/FeatureRegistry.ts', 'runtime/core/Registrar.ts',
-  'app/page.jsx', 'app/layout.jsx', 'app/not-found.jsx', 'app/globals.css', 'app/glass-materials.css', 'app/page.module.css',
+  'app/page.jsx', 'app/share-metadata.mjs', 'app/layout.jsx', 'app/not-found.jsx', 'app/globals.css', 'app/glass-materials.css', 'app/page.module.css',
   'app/portfolio.module.css', 'app/about/page.jsx', 'app/projects/page.jsx', 'app/contact/page.jsx',
   'app/projects/bending-active/page.jsx', 'app/projects/xr-bending-active/page.jsx',
   'components/BendingProject.jsx', 'components/PortfolioHome.jsx', 'components/PortfolioNavigation.jsx',
