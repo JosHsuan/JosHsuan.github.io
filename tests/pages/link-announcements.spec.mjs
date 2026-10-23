@@ -135,6 +135,26 @@ test('Full Bending native Pause reading reaches an inline comparison and its ori
   const original=comparison.locator('a[target="_blank"]');await expect(original).toHaveAccessibleName(/Open original source.*new tab/i);await expect(original).toHaveAttribute('href',await trigger.getAttribute('href'));
   const sourceImage=comparison.locator('img');await expect(sourceImage).toHaveAttribute('src',comparisonBefore.href);await expect.poll(()=>sourceImage.evaluate(node=>node.complete&&node.naturalWidth>0)).toBe(true);
   const dimensions=await sourceImage.evaluate(node=>[node.naturalWidth,node.naturalHeight]);
+  // Observe the first native focus entry before any comparison screenshot or
+  // popup can reposition the document. Do not focus or scroll this button in JS.
+  receipt.phase='first-close-focus';
+  const firstClose=comparison.getByRole('button',{name:'Close source comparison'});
+  await page.keyboard.press('Tab');
+  receipt.firstClose=await firstClose.evaluate(node=>{
+   const box=r=>({left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height}),r=node.getBoundingClientRect(),style=getComputedStyle(node);
+   const outlineWidth=parseFloat(style.outlineWidth),outlineOffset=parseFloat(style.outlineOffset),outset=Math.max(0,outlineWidth+outlineOffset),hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
+   const transforms=[];for(let element=node;element;element=element.parentElement){const value=getComputedStyle(element).transform;if(value!=='none'){const m=new DOMMatrixReadOnly(value);transforms.push({tag:element.tagName,value,translationOnly:m.m11===1&&m.m22===1&&m.m33===1&&m.m44===1&&m.m12===0&&m.m13===0&&m.m14===0&&m.m21===0&&m.m23===0&&m.m24===0&&m.m31===0&&m.m32===0&&m.m34===0});}}
+   const chrome=['[data-page-masthead]','[data-story-navigation]','[data-reading-tools]'].map(selector=>{const nodes=[...document.querySelectorAll(selector)],el=nodes[0];return{selector,count:nodes.length,visible:el?.checkVisibility({visibilityProperty:true,opacityProperty:true})??false,rect:el?box(el.getBoundingClientRect()):null};});
+   return{focused:document.activeElement===node,focusVisible:node.matches(':focus-visible'),y:scrollY,rect:box(r),outlineWidth,outlineOffset,outlineStyle:style.outlineStyle,outlineColor:style.outlineColor,outlineRect:{left:r.left-outset,right:r.right+outset,top:r.top-outset,bottom:r.bottom+outset},viewport:{width:innerWidth,height:innerHeight},hit:hit===node||node.contains(hit),transforms,chrome};
+  });
+  const firstClosePng=info.outputPath('bending-first-close-focus.png');await page.screenshot({path:firstClosePng,scale:'device'});await info.attach('bending-first-close-focus',{path:firstClosePng,contentType:'image/png'});
+  const first=receipt.firstClose,outline=first.outlineRect;
+  expect(first.focused).toBe(true);expect(first.focusVisible).toBe(true);expect(first.hit).toBe(true);
+  expect(Number.isFinite(first.outlineWidth)&&Number.isFinite(first.outlineOffset)).toBe(true);expect(first.outlineWidth).toBeGreaterThan(0);expect(first.outlineStyle).not.toMatch(/^(none|hidden)$/);
+  for(const transform of first.transforms)expect(transform.translationOnly,'Outline CSS pixels require no scaled or perspective ancestor: '+transform.value).toBe(true);
+  expect(outline.left).toBeGreaterThanOrEqual(0);expect(outline.top).toBeGreaterThanOrEqual(0);expect(outline.right).toBeLessThanOrEqual(first.viewport.width);expect(outline.bottom).toBeLessThanOrEqual(first.viewport.height);
+  for(const item of first.chrome){expect(item.count,item.selector+' authoritative chrome owner').toBe(1);if(item.visible){const c=item.rect;expect(Math.max(0,Math.min(outline.right,c.right)-Math.max(outline.left,c.left))*Math.max(0,Math.min(outline.bottom,c.bottom)-Math.max(outline.top,c.top))).toBe(0);}}
+  receipt.phase='native-original-action';
   await tabTo(page,original,receipt.originalTabs);
   receipt.action=await original.evaluate(node=>{
    const box=r=>({left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height}),r=node.getBoundingClientRect(),hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
