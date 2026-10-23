@@ -1,5 +1,6 @@
 import {test,expect} from '@playwright/test';
 import {readFileSync} from 'node:fs';
+import {writeFile} from 'node:fs/promises';
 import {PerspectiveCamera,Vector3,Matrix4} from 'three';
 import {viewportStageSourceViewport} from '../../roles/uiux-designer/cases/bending-active-thesis/components/source-scene-score.mjs';
 import {modelInformationSummary,modelAnnotationLabel} from '../../roles/uiux-designer/cases/bending-active-thesis/components/model-information.mjs';
@@ -31,8 +32,10 @@ async function expectSourceInformation(page,chapter) {
   const current=el.querySelector('[data-model-caption-current]');return current.getBoundingClientRect().height<=el.getBoundingClientRect().height+.1;
  })).toBe(true);
 }
-async function fit(page){
- const {pose,representation,width,height,display,renderSuspended,canvasPlacement}=await page.evaluate(()=>{const canvas=document.querySelector('[data-cinematic-stage] canvas'),r=canvas.getBoundingClientRect();return {...window.__thesis.inspect(),width:canvas.clientWidth,height:canvas.clientHeight,display:{left:r.left,top:r.top,width:r.width,height:r.height}};});
+async function fit(page,receipt){
+ const observed=await page.evaluate(()=>{const canvas=document.querySelector('[data-cinematic-stage] canvas'),r=canvas.getBoundingClientRect();return {...window.__thesis.inspect(),width:canvas.clientWidth,height:canvas.clientHeight,display:{left:r.left,top:r.top,width:r.width,height:r.height}};});
+ const {pose,representation,width,height,display,renderSuspended,canvasPlacement}=observed;
+ if(receipt)Object.assign(receipt,{pose,representation,width,height,display,renderSuspended,canvasPlacement,renderProfile:observed.renderProfile,renderPressure:observed.renderPressure,renderPressureDecisions:observed.renderPressureDecisions,renderBudget:observed.renderBudget,compositor:observed.compositor?{requestedSamples:observed.compositor.requestedSamples,width:observed.compositor.width,height:observed.compositor.height}:null});
  expect(renderSuspended).toBe(false);expect(canvasPlacement.visible).toBe(true);expect(width).toBeGreaterThan(0);expect(height).toBeGreaterThan(0);
  expect(display.width/display.height).toBeCloseTo(width/height,5);expect(pose.aspect).toBeCloseTo(width/height,5);
  expect(pose).toMatchObject({compositionSpace:'viewport-stage',viewport:viewportStageSourceViewport(width/height,width)});
@@ -50,6 +53,7 @@ async function fit(page){
  // point is still projected. Assert the six extrema once instead
  // of generating thousands of identical Playwright assertion/trace events.
  for(const v of item.framingSupport.points){p.fromArray(v).project(camera);const x=(p.x+1)/2,y=(1-p.y)/2;const gaps=[(x-viewport.left)/viewport.width,(viewport.left+viewport.width-x)/viewport.width,(y-viewport.top)/viewport.height,(viewport.top+viewport.height-y)/viewport.height];for(let i=0;i<4;i++)margin[i]=Math.min(margin[i],gaps[i]);near=Math.min(near,p.z);far=Math.max(far,p.z);extent.left=Math.min(extent.left,x);extent.right=Math.max(extent.right,x);extent.top=Math.min(extent.top,y);extent.bottom=Math.max(extent.bottom,y);}
+ if(receipt)receipt.projection={supportPoints:item.framingSupport.points.length,margin,near,far,extent};
  for(const gap of margin)expect(gap).toBeGreaterThanOrEqual(.0299);expect(near).toBeGreaterThan(-1);expect(far).toBeLessThan(1);
  return {left:display.left+extent.left*display.width,right:display.left+extent.right*display.width,top:display.top+extent.top*display.height,bottom:display.top+extent.bottom*display.height};
 }
@@ -226,15 +230,30 @@ test('tablet source fits beside the reading copy and clear of fixed navigation',
   }
  }
 });
-test('three source surfaces share one WebGL Canvas and preserve every fitted original representation',async({page})=>{
- test.setTimeout(scenarioTimeout(180000));const models=[],errors=[];page.on('request',r=>{if(/\.glb(?:\?|$)/.test(r.url()))models.push(r.url());});page.on('pageerror',e=>errors.push(e.message));await loadScene(page);const canvas=await page.locator('[data-cinematic-stage] canvas').elementHandle();
+test('three source surfaces share one WebGL Canvas and preserve every fitted original representation',async({page},info)=>{
+ test.setTimeout(scenarioTimeout(180000));const receipt={scope:'Full source representation inspection using existing DOM document positioning and keyboard hold; not a wheel journey or forced density fixture.',phase:'loading',sources:[]};let primaryError;
+ try{const models=[],errors=[];page.on('request',r=>{if(/\.glb(?:\?|$)/.test(r.url()))models.push(r.url());});page.on('pageerror',e=>errors.push(e.message));await loadScene(page);const canvas=await page.locator('[data-cinematic-stage] canvas').elementHandle();
  await expect(page.locator('[data-model-study]')).toHaveCount(3);await expect(page.locator('[data-model-study] input,[data-model-study] select,[data-model-study] [role="tab"],[data-model-study] [role="slider"],[data-model-side-label] input,[data-model-side-label] select,[data-model-side-label] [role="tab"],[data-model-side-label] [role="slider"]')).toHaveCount(0);
  expect(await page.evaluate(()=>window.__thesis.inspect().source)).toMatchObject({vertices:172789,triangles:227521,sourceObjects:51});
  const layout=()=>page.evaluate(()=>({document:document.documentElement.scrollHeight})),before=await layout();
+ receipt.phase='source-representations';
  for(const id of ['form','system','pattern']){await centerStudy(page,id);const count=id==='pattern'?3:4;const seen=new Set();
   expect(await layout(),'Changing the source family must preserve native document layout.').toEqual(before);
-  for(let n=0;n<count;n++){await surface(page,id).press('Enter');await holdView(page,id);const r=await page.evaluate(()=>window.__thesis.inspect().representation);seen.add(r.id);await fit(page);await expectSourceInformation(page,id);expect(await layout(),'Source representation captions must preserve native document layout.').toEqual(before);}expect(seen.size).toBe(count);}
- await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);await expect(page.locator('canvas[data-ascii-field]')).toHaveCount(1);await expect(page.locator('canvas')).toHaveCount(2);expect(await page.evaluate(el=>document.querySelector('[data-cinematic-stage] canvas')===el,canvas)).toBe(true);expect(models.filter(x=>x.includes('source-layers.glb'))).toHaveLength(1);expect(models.filter(x=>x.includes('source-diagrams.glb'))).toHaveLength(1);expect(errors).toEqual([]);await expectIdle(page);
+  for(let n=0;n<count;n++){
+   await surface(page,id).press('Enter');await holdView(page,id);const r=await page.evaluate(()=>window.__thesis.inspect().representation);seen.add(r.id);
+   const row={chapter:id,index:n,sourceId:r.id};receipt.sources.push(row);await fit(page,row);await expectSourceInformation(page,id);expect(await layout(),'Source representation captions must preserve native document layout.').toEqual(before);
+   expect(row.representation.sourceGeometryUnmodified).toBe(true);expect(row.representation.id).toBe(r.id);
+   row.floorObserved=row.renderPressure.stage===3;
+   if(id==='system'){
+    if(r.id==='bending'){
+     const point=await hitPoint(page,id);row.hit=await page.evaluate(point=>window.__thesis.hitTest(point.x,point.y),point);row.hitPoint=point;
+     expect(row.hit).toMatchObject({source:true,chapterId:'system',representationId:'bending',index:r.index});
+    }
+    const png=info.outputPath(`system-source-${r.id}-device.png`);await page.screenshot({path:png,scale:'device'});await info.attach(`system-source-${r.id}-device`,{path:png,contentType:'image/png'});row.png=`system-source-${r.id}-device.png`;
+   }
+  }expect(seen.size).toBe(count);}
+ await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);await expect(page.locator('canvas[data-ascii-field]')).toHaveCount(1);await expect(page.locator('canvas')).toHaveCount(2);expect(await page.evaluate(el=>document.querySelector('[data-cinematic-stage] canvas')===el,canvas)).toBe(true);expect(models.filter(x=>x.includes('source-layers.glb'))).toHaveLength(1);expect(models.filter(x=>x.includes('source-diagrams.glb'))).toHaveLength(1);expect(errors).toEqual([]);await expectIdle(page);receipt.phase='completed';
+ }catch(error){primaryError=error;throw error;}finally{try{const path=info.outputPath('source-representation-pressure.json');await writeFile(path,JSON.stringify(receipt,null,2));await info.attach('source-representation-pressure',{path,contentType:'application/json'});}catch(error){if(!primaryError)throw error;}}
 });
 test('actual object hover and click compare sources; empty space is not an invisible button',async({page,isMobile})=>{
  test.setTimeout(scenarioTimeout(120000));await loadScene(page);await centerStudy(page);const p=await hitPoint(page),before=await page.evaluate(()=>window.__thesis.inspect().representation.id);
