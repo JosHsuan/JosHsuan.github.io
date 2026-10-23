@@ -151,9 +151,10 @@ owner, source derivative or speculative scroll-clearance change was added.
 Actual keyboard opening/return, mobile native activation, forced colors and
 no-JS reading passed three-profile targeted and full-artifact acceptance.
 
-The next candidate only clarifies accessible names/descriptions of other native
-new-tab links and Bending's conditional inline-comparison triggers. It does not
-change their visible labels, destinations or behavior. See the
+The next combined candidate clarifies accessible names/descriptions of other native
+new-tab links and Bending's conditional inline-comparison triggers, preserving their
+visible labels, destinations and activation behavior. It also includes the separately
+qualified STANDARD-only adaptive delivery response described below. See the
 [bounded audit and acceptance plan](LINK_ANNOUNCEMENT_ACCESSIBILITY.md).
 
 A separate HC slow-acquisition probe closed as healthy existing behavior: three
@@ -162,3 +163,22 @@ released inert reading and retained accessible original-source links. Reduced
 motion and emulated SaveData requested no model. This nonpublishing probe did
 not justify a production change, asset recompression or a new loading UI; it did
 not test late parsing, GPU reclamation or physical-network performance.
+
+
+## Pending combined announcement / adaptive delivery candidate
+
+Main/live remain `ce12d682`; no publication is recorded for this candidate.
+`155a0a4` passed 12/12 targeted announcement scenarios and `a15c09b` passed
+27/27 targeted representation scenarios. The full 504-public + 24-framework
+gate and exact-artifact release acceptance remain pending.
+
+The Bending candidate retains the initial STANDARD 1,600,000-pixel cap, original
+source geometry/materials/camera/idle, source access and the existing scheduler.
+A bounded severe-delivery observation can advance one existing density step;
+TOUCH keeps its legacy policy. Density does not recover merely on Pause, hidden
+state or resize: those clear observations, not the pressure instance's stage.
+See [policy and actual-stage visual evidence](ADAPTIVE_DELIVERY_QUALIFICATION.md).
+The observed Chromium System floor preserves recognizable complete source framing
+and readable native content, but fine joints/highlights/opening slits are not
+certified for detailed examination. This is an accepted rescue tradeoff for full
+validation, not visual equivalence, hardware/FPS acceptance or a deployment GO.

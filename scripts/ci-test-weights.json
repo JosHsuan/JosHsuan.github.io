@@ -36,7 +36,8 @@
       "tests/pages/bending-scroll-camera.spec.mjs": 234.927,
       "tests/pages/global-window-motion.spec.mjs": 327.119,
       "tests/pages/three-case-narrative.spec.mjs": 11.266,
-      "tests/pages/source-access.spec.mjs": 22.744
+      "tests/pages/source-access.spec.mjs": 22.744,
+      "tests/pages/link-announcements.spec.mjs": 79.258
     },
     "webkit": {
       "tests/pages/canvas-motion.spec.mjs": 162.572,
@@ -70,7 +71,8 @@
       "tests/pages/bending-scroll-camera.spec.mjs": 56.632,
       "tests/pages/global-window-motion.spec.mjs": 183.289,
       "tests/pages/three-case-narrative.spec.mjs": 56.551,
-      "tests/pages/source-access.spec.mjs": 68.977
+      "tests/pages/source-access.spec.mjs": 68.977,
+      "tests/pages/link-announcements.spec.mjs": 57.869
     },
     "mobile-chromium": {
       "tests/pages/canvas-motion.spec.mjs": 186.831,
@@ -104,7 +106,8 @@
       "tests/pages/bending-scroll-camera.spec.mjs": 105.495,
       "tests/pages/global-window-motion.spec.mjs": 195.052,
       "tests/pages/three-case-narrative.spec.mjs": 9.59,
-      "tests/pages/source-access.spec.mjs": 21.712
+      "tests/pages/source-access.spec.mjs": 21.712,
+      "tests/pages/link-announcements.spec.mjs": 40.572
     }
   },
   "calibrationSources": {
@@ -276,6 +279,18 @@
           "passedSummaryAt": "2026-10-23T01:30:09.1402679Z",
           "testsPassed": 3,
           "measurement": "Single-file elapsed seconds from first logged test start to three-passed summary; includes intervening setup/teardown and final reporter overhead, excludes build/browser startup and upload. Healthy nonpublishable preflight; scheduling hint, not runtime guarantee."
+        },
+        "tests/pages/link-announcements.spec.mjs": {
+          "sourceRun": "39904000169",
+          "sourceCommit": "155a0a478c31a7514777a810198385e0656922a2",
+          "runAttempt": 1,
+          "artifactId": "12479353808",
+          "artifactDigest": "sha256:7d52aca7aaa99fb94ce9331cac6d1af92ceb74b1926ee1247758d92e664820d2",
+          "log": "chromium/job.log",
+          "firstTestStartedAt": "2026-10-23T05:09:00.4561288Z",
+          "passedSummaryAt": "2026-10-23T05:10:19.7142747Z",
+          "testsPassed": 4,
+          "measurement": "Single-file elapsed seconds from first logged test start to 4-passed summary; includes intervening setup/teardown and final reporter overhead, excludes earlier build/browser startup and upload. Healthy nonpublishable preflight; scheduling hint, not runtime guarantee."
         }
       },
       "webkit": {
@@ -330,6 +345,18 @@
           "passedSummaryAt": "2026-10-23T01:31:59.2792719Z",
           "testsPassed": 3,
           "measurement": "Single-file elapsed seconds from first logged test start to three-passed summary; includes intervening setup/teardown and final reporter overhead, excludes build/browser startup and upload. Healthy nonpublishable preflight; scheduling hint, not runtime guarantee."
+        },
+        "tests/pages/link-announcements.spec.mjs": {
+          "sourceRun": "39904058632",
+          "sourceCommit": "155a0a478c31a7514777a810198385e0656922a2",
+          "runAttempt": 1,
+          "artifactId": "12480445816",
+          "artifactDigest": "sha256:ee883f8b4d522bd8c210d89079bff8bdb2d753fb2486cba28bf77e76a1b0af1d",
+          "log": "webkit/job.log",
+          "firstTestStartedAt": "2026-10-23T05:09:24.2933598Z",
+          "passedSummaryAt": "2026-10-23T05:10:22.1623249Z",
+          "testsPassed": 4,
+          "measurement": "Single-file elapsed seconds from first logged test start to 4-passed summary; includes intervening setup/teardown and final reporter overhead, excludes earlier build/browser startup and upload. Healthy nonpublishable preflight; scheduling hint, not runtime guarantee."
         }
       },
       "mobile-chromium": {
@@ -384,6 +411,18 @@
           "passedSummaryAt": "2026-10-23T01:32:15.9699695Z",
           "testsPassed": 3,
           "measurement": "Single-file elapsed seconds from first logged test start to three-passed summary; includes intervening setup/teardown and final reporter overhead, excludes build/browser startup and upload. Healthy nonpublishable preflight; scheduling hint, not runtime guarantee."
+        },
+        "tests/pages/link-announcements.spec.mjs": {
+          "sourceRun": "39904124994",
+          "sourceCommit": "155a0a478c31a7514777a810198385e0656922a2",
+          "runAttempt": 1,
+          "artifactId": "12480390536",
+          "artifactDigest": "sha256:9cdb818cb2ec51faf0b41a0405c572b0557f1eaebb47b53abbd6ed2615e4b66c",
+          "log": "mobile/job.log",
+          "firstTestStartedAt": "2026-10-23T05:10:25.6121551Z",
+          "passedSummaryAt": "2026-10-23T05:11:06.1843728Z",
+          "testsPassed": 4,
+          "measurement": "Single-file elapsed seconds from first logged test start to 4-passed summary; includes intervening setup/teardown and final reporter overhead, excludes earlier build/browser startup and upload. Healthy nonpublishable preflight; scheduling hint, not runtime guarantee."
         }
       }
     }

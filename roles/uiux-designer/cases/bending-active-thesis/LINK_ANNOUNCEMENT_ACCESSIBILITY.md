@@ -32,7 +32,7 @@ assertions remain required, not inferred from markup alone.
 
 ## Minimal candidate contract
 
-Only accessible names/descriptions in six existing JSX components change.
+The link-announcement slice changes only accessible names/descriptions in six existing JSX components.
 Visible labels, arrows, source text, layout, CSS, destinations, original assets,
 camera and runtime behavior remain unchanged. Native-link names include their
 visible wording and an explicit new-tab notice. Image links retain source context.
@@ -118,4 +118,28 @@ Existing Full model/camera/source/Pause contracts remain unchanged. Existing
 comparison-specific public-release/window-integration baselines use Reduced;
 they must not be misrepresented as unpaused Full coverage. The successful
 unpaused WebKit/mobile runs above remain separately scoped historical evidence.
-Actual paused-Full acceptance is still pending.
+This was the pending checkpoint before the combined adaptive qualification below.
+
+
+## Combined qualification checkpoint — not published
+
+Candidate `155a0a4` passed 12/12 affected announcement scenarios across Chromium,
+WebKit and mobile Chromium, using the original 60-second budgets and actual Full
+readiness, native Pause, navigation and source comparison. Candidate `a15c09b`
+then passed 27/27 affected source-representation scenarios across those profiles.
+These are targeted qualifications, not the pending full 504-public + 24-framework
+gate. Main and the live website remain `ce12d682`.
+
+The candidate now also contains a separately reviewed, STANDARD-only severe
+frame-delivery response. The six JSX changes remain accessible-name/description
+changes; this combined candidate must no longer be described as runtime-identical
+to live. See [adaptive delivery qualification](ADAPTIVE_DELIVERY_QUALIFICATION.md)
+for its exact policy, persistent density behavior and observed quality limits.
+The owner accepted this rescue-quality tradeoff for full validation, not deployment.
+
+The three actual Overview captures and all twelve System representation captures
+were visually reviewed at their achieved stages, not presumed equivalent density.
+The actual original-source action is readable and visibly focused in all three
+profiles. Tall comparison captures still overlap fixed chrome: mobile Close/header
+is not pixel-certified by those captures. Native interaction/name assertions are
+separate evidence; screenshots alone do not certify assistive-technology behavior.
