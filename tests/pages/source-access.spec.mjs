@@ -43,11 +43,14 @@ function readable(value){
  for(const chrome of value.chrome)expect(Math.min(box.right,chrome.right)>Math.max(box.left,chrome.left)&&Math.min(box.bottom,chrome.bottom)>Math.max(box.top,chrome.top),'Source action must not intersect visible fixed chrome').toBe(false);
  expect(value.hit,'Native source action is not occluded').toBe(true);
 }
-async function wheelTo(page,link){
+async function wheelTo(page,link,receipt){
  const target=await link.evaluate(node=>Math.round(Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,scrollY+node.getBoundingClientRect().top-innerHeight*.45))));
  const before=await page.evaluate(()=>scrollY);
  await page.mouse.move(page.viewportSize().width-3,page.viewportSize().height*.5);await page.mouse.wheel(0,target-before);
- await page.waitForFunction(y=>Math.abs(scrollY-y)<=1,target,{timeout:WAIT});
+ Object.assign(receipt,{target,before,after:before});
+ // Host-side observation also works with application JavaScript disabled;
+ // the page's requestAnimationFrame polling is not a no-JS readiness signal.
+ await expect.poll(async()=>{receipt.after=await page.evaluate(()=>scrollY);return Math.abs(receipt.after-target);},{timeout:WAIT}).toBeLessThanOrEqual(1);
 }
 function forcedContrast(node){
  const rgba=value=>{const a=value.match(/^rgba?\(([^)]+)\)$/)?.[1].split(/[,\s/]+/).filter(Boolean).map(Number);if(!a||a.length<3||a.some(n=>!Number.isFinite(n)))throw Error('Unsupported paint '+value);return[...a.slice(0,3),a[3]??1];};
@@ -84,7 +87,7 @@ async function layout(page,info,noJS){
     expect(record).toMatchObject({href:source.src,target:'_blank',rel:'noopener noreferrer',text:'Open full image (new tab)',aria:`Open full image (new tab): ${source.alt}`,caption:source.caption,credit:source.credit,count:1,image:{src:source.src,width:source.width,height:source.height,alt:source.alt,href:source.src,target:'_blank'}});
     expect(record.width).toBeGreaterThanOrEqual(44);expect(record.height).toBeGreaterThanOrEqual(44);expect(record.display).not.toBe('none');expect(record.visibility).toBe('visible');
    }
-   const link=links.first();await wheelTo(page,link);const visible=await link.evaluate(visibility);receipts.at(-1).visible=visible;readable(visible);
+   const link=links.first();receipts.at(-1).wheel={};await wheelTo(page,link,receipts.at(-1).wheel);const visible=await link.evaluate(visibility);receipts.at(-1).visible=visible;readable(visible);
    const image=link.locator('xpath=ancestor::figure[1]').locator('img');await expect.poll(()=>image.evaluate(node=>node.complete&&node.naturalWidth>0)).toBe(true);
    expect(await image.evaluate(node=>[node.naturalWidth,node.naturalHeight])).toEqual([route.sources[0].width,route.sources[0].height]);
    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth)).toBe(true);
