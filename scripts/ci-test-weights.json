@@ -5,14 +5,14 @@
   "measurement": "Seconds between sequential logged test starts; retrospective scheduling hints, not guarantees.",
   "profiles": {
     "chromium": {
-      "tests/pages/canvas-motion.spec.mjs": 276.458,
+      "tests/pages/canvas-motion.spec.mjs": 572.506,
       "tests/pages/entrance-diagram.spec.mjs": 2.433,
       "tests/pages/entry-readiness.spec.mjs": 22.835,
       "tests/pages/glass-material.spec.mjs": 16.249,
       "tests/pages/global-background.spec.mjs": 49.784,
       "tests/pages/hc3dp-narrative.spec.mjs": 2.236,
       "tests/pages/homepage.spec.mjs": 90.067,
-      "tests/pages/library-reveal.spec.mjs": 132.569,
+      "tests/pages/library-reveal.spec.mjs": 268.875,
       "tests/pages/liquid-glass.spec.mjs": 43.839,
       "tests/pages/mobile-stability.spec.mjs": 41.497,
       "tests/pages/model-drag.spec.mjs": 120.45,
@@ -35,7 +35,8 @@
       "tests/pages/xr-research.spec.mjs": 148.981,
       "tests/pages/bending-scroll-camera.spec.mjs": 234.927,
       "tests/pages/global-window-motion.spec.mjs": 327.119,
-      "tests/pages/three-case-narrative.spec.mjs": 11.266
+      "tests/pages/three-case-narrative.spec.mjs": 11.266,
+      "tests/pages/source-access.spec.mjs": 22.744
     },
     "webkit": {
       "tests/pages/canvas-motion.spec.mjs": 162.572,
@@ -68,7 +69,8 @@
       "tests/pages/xr-research.spec.mjs": 147.666,
       "tests/pages/bending-scroll-camera.spec.mjs": 56.632,
       "tests/pages/global-window-motion.spec.mjs": 183.289,
-      "tests/pages/three-case-narrative.spec.mjs": 56.551
+      "tests/pages/three-case-narrative.spec.mjs": 56.551,
+      "tests/pages/source-access.spec.mjs": 68.977
     },
     "mobile-chromium": {
       "tests/pages/canvas-motion.spec.mjs": 186.831,
@@ -101,7 +103,8 @@
       "tests/pages/xr-research.spec.mjs": 124.187,
       "tests/pages/bending-scroll-camera.spec.mjs": 105.495,
       "tests/pages/global-window-motion.spec.mjs": 195.052,
-      "tests/pages/three-case-narrative.spec.mjs": 9.59
+      "tests/pages/three-case-narrative.spec.mjs": 9.59,
+      "tests/pages/source-access.spec.mjs": 21.712
     }
   },
   "calibrationSources": {
@@ -147,6 +150,132 @@
           "testsPassed": 6,
           "selectedSuitePassed": 20,
           "measurement": "Sum of each of this file's six logged test-start to next-test-start intervals, including intervening setup/teardown. Stops before the following project-background-motion test; excludes that test, earlier files/build and final reporter/upload time. Healthy nonpublishable preflight; scheduling hint, not runtime guarantee."
+        },
+        "tests/pages/canvas-motion.spec.mjs": {
+          "measurement": "Median of three sums of passed zero-retry reporter test durations from healthy complete Chromium shards; excludes setup/some teardown. Two overall runs failed in unrelated other shards, one full run passed. Scheduling hint, not a benchmark or guarantee.",
+          "medianSeconds": 572.506,
+          "samples": [
+            {
+              "sourceRun": "39862051603",
+              "sourceCommit": "d1cff51c36e46a05d8921eebd9f4389d45687f73",
+              "runAttempt": 1,
+              "artifactId": "12463823317",
+              "receipt": "ci-receipt-chromium-3-4.json",
+              "zipSHA256": "45a222057c609f50cf3b0d8002e54c547a145c6b6148936eac0035aaf1789083",
+              "testsPassed": 6,
+              "allShardTestsPassed": 31,
+              "seconds": 513.272,
+              "testIds": [
+                "4ede0f2457e104edfed3-e0b2070344456b09fbc2",
+                "4ede0f2457e104edfed3-40bf8a542254162eb9f1",
+                "4ede0f2457e104edfed3-bfef37cef491c164ed5f",
+                "4ede0f2457e104edfed3-961339f419a133d1a39f",
+                "4ede0f2457e104edfed3-be3bd21fb90f9436c9f5",
+                "4ede0f2457e104edfed3-5b5809286b7b81052a8f"
+              ]
+            },
+            {
+              "sourceRun": "39867624649",
+              "sourceCommit": "4e5fe1544a3669719c211c0fdd25d6a7531dbbac",
+              "runAttempt": 1,
+              "artifactId": "12466127411",
+              "receipt": "ci-receipt-chromium-3-4.json",
+              "zipSHA256": "48afbcee408d3208764a616a2bb65bb1a94223c916ad5585ac82cd09487c5535",
+              "testsPassed": 6,
+              "allShardTestsPassed": 31,
+              "seconds": 572.506,
+              "testIds": [
+                "4ede0f2457e104edfed3-e0b2070344456b09fbc2",
+                "4ede0f2457e104edfed3-40bf8a542254162eb9f1",
+                "4ede0f2457e104edfed3-bfef37cef491c164ed5f",
+                "4ede0f2457e104edfed3-961339f419a133d1a39f",
+                "4ede0f2457e104edfed3-be3bd21fb90f9436c9f5",
+                "4ede0f2457e104edfed3-5b5809286b7b81052a8f"
+              ]
+            },
+            {
+              "sourceRun": "39875079270",
+              "sourceCommit": "33215722b196f4184028e0ad6ae18934fabc6e7a",
+              "runAttempt": 1,
+              "artifactId": "12469806172",
+              "receipt": "ci-receipt-chromium-3-4.json",
+              "zipSHA256": "74bd33607f40aa334450c75ff0068fb3c2474f92c22f0f4bef4a6d3d52529279",
+              "testsPassed": 6,
+              "allShardTestsPassed": 31,
+              "seconds": 578.791,
+              "testIds": [
+                "4ede0f2457e104edfed3-e0b2070344456b09fbc2",
+                "4ede0f2457e104edfed3-40bf8a542254162eb9f1",
+                "4ede0f2457e104edfed3-bfef37cef491c164ed5f",
+                "4ede0f2457e104edfed3-961339f419a133d1a39f",
+                "4ede0f2457e104edfed3-be3bd21fb90f9436c9f5",
+                "4ede0f2457e104edfed3-5b5809286b7b81052a8f"
+              ]
+            }
+          ]
+        },
+        "tests/pages/library-reveal.spec.mjs": {
+          "measurement": "Median of three sums of passed zero-retry reporter test durations from healthy complete Chromium shards; excludes setup/some teardown. Two overall runs failed in unrelated other shards, one full run passed. Scheduling hint, not a benchmark or guarantee.",
+          "medianSeconds": 268.875,
+          "samples": [
+            {
+              "sourceRun": "39862051603",
+              "sourceCommit": "d1cff51c36e46a05d8921eebd9f4389d45687f73",
+              "runAttempt": 1,
+              "artifactId": "12463823317",
+              "receipt": "ci-receipt-chromium-3-4.json",
+              "zipSHA256": "45a222057c609f50cf3b0d8002e54c547a145c6b6148936eac0035aaf1789083",
+              "testsPassed": 2,
+              "allShardTestsPassed": 31,
+              "seconds": 268.875,
+              "testIds": [
+                "ec2f8129df239e1cf27c-ad57e8078081cc222beb",
+                "ec2f8129df239e1cf27c-d0c7949dda7e9aad508a"
+              ]
+            },
+            {
+              "sourceRun": "39867624649",
+              "sourceCommit": "4e5fe1544a3669719c211c0fdd25d6a7531dbbac",
+              "runAttempt": 1,
+              "artifactId": "12466127411",
+              "receipt": "ci-receipt-chromium-3-4.json",
+              "zipSHA256": "48afbcee408d3208764a616a2bb65bb1a94223c916ad5585ac82cd09487c5535",
+              "testsPassed": 2,
+              "allShardTestsPassed": 31,
+              "seconds": 262.568,
+              "testIds": [
+                "ec2f8129df239e1cf27c-ad57e8078081cc222beb",
+                "ec2f8129df239e1cf27c-d0c7949dda7e9aad508a"
+              ]
+            },
+            {
+              "sourceRun": "39875079270",
+              "sourceCommit": "33215722b196f4184028e0ad6ae18934fabc6e7a",
+              "runAttempt": 1,
+              "artifactId": "12469806172",
+              "receipt": "ci-receipt-chromium-3-4.json",
+              "zipSHA256": "74bd33607f40aa334450c75ff0068fb3c2474f92c22f0f4bef4a6d3d52529279",
+              "testsPassed": 2,
+              "allShardTestsPassed": 31,
+              "seconds": 281.765,
+              "testIds": [
+                "ec2f8129df239e1cf27c-ad57e8078081cc222beb",
+                "ec2f8129df239e1cf27c-d0c7949dda7e9aad508a"
+              ]
+            }
+          ]
+        },
+        "tests/pages/source-access.spec.mjs": {
+          "sourceRun": "39884166988",
+          "sourceCommit": "954cc37d47fb2c6525303c5c9604ec07f37069eb",
+          "runAttempt": 1,
+          "jobId": "120188333038",
+          "artifactId": "12471582341",
+          "log": "chromium.log",
+          "firstTestStartedAt": "2026-10-23T01:29:46.3961580Z",
+          "passedSummaryAt": "2026-10-23T01:30:09.1402679Z",
+          "testsPassed": 3,
+          "measurement": "Single-file elapsed seconds from first logged test start to three-passed summary; includes intervening setup/teardown and final reporter overhead, excludes build/browser startup and upload. Healthy nonpublishable preflight; scheduling hint, not runtime guarantee."
         }
       },
       "webkit": {
@@ -189,6 +318,18 @@
           "testsPassed": 6,
           "selectedSuitePassed": 20,
           "measurement": "Sum of each of this file's six logged test-start to next-test-start intervals, including intervening setup/teardown. Stops before the following project-background-motion test; excludes that test, earlier files/build and final reporter/upload time. Healthy nonpublishable preflight; scheduling hint, not runtime guarantee."
+        },
+        "tests/pages/source-access.spec.mjs": {
+          "sourceRun": "39884250539",
+          "sourceCommit": "954cc37d47fb2c6525303c5c9604ec07f37069eb",
+          "runAttempt": 1,
+          "jobId": "120188601212",
+          "artifactId": "12471354940",
+          "log": "webkit.log",
+          "firstTestStartedAt": "2026-10-23T01:30:50.3027618Z",
+          "passedSummaryAt": "2026-10-23T01:31:59.2792719Z",
+          "testsPassed": 3,
+          "measurement": "Single-file elapsed seconds from first logged test start to three-passed summary; includes intervening setup/teardown and final reporter overhead, excludes build/browser startup and upload. Healthy nonpublishable preflight; scheduling hint, not runtime guarantee."
         }
       },
       "mobile-chromium": {
@@ -231,6 +372,18 @@
           "testsPassed": 6,
           "selectedSuitePassed": 20,
           "measurement": "Sum of each of this file's six logged test-start to next-test-start intervals, including intervening setup/teardown. Stops before the following project-background-motion test; excludes that test, earlier files/build and final reporter/upload time. Healthy nonpublishable preflight; scheduling hint, not runtime guarantee."
+        },
+        "tests/pages/source-access.spec.mjs": {
+          "sourceRun": "39884339114",
+          "sourceCommit": "954cc37d47fb2c6525303c5c9604ec07f37069eb",
+          "runAttempt": 1,
+          "jobId": "120188896546",
+          "artifactId": "12471529202",
+          "log": "mobile.log",
+          "firstTestStartedAt": "2026-10-23T01:31:54.2577985Z",
+          "passedSummaryAt": "2026-10-23T01:32:15.9699695Z",
+          "testsPassed": 3,
+          "measurement": "Single-file elapsed seconds from first logged test start to three-passed summary; includes intervening setup/teardown and final reporter overhead, excludes build/browser startup and upload. Healthy nonpublishable preflight; scheduling hint, not runtime guarantee."
         }
       }
     }
