@@ -7,16 +7,22 @@ native scrolling and the empty reusable framework.
 
 ## Evidence boundary
 
-The accepted live baseline is `ce12d682`. Its full browser gate
-[39885026043](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39885026043)
-passed 492 public executions and 24 framework executions;
-[deployment 39888023592](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39888023592)
-was verified live at 02:19:25 UTC on 23 October across 12 portfolio routes,
-52 runtime resources, 133 source assets, ten promoted narrative plates and
-31 native full-image caption actions across seven project routes.
-This includes the three-case source-backed narrative refinement and forced-color
-navigation's immediate system-palette policy from `3321572`. Global glass
-`86a6ce5` and camera `146e8938` remain accepted historical milestones.
+The accepted live baseline is `bb602416962b558bb746ba71b89b393934f53279`.
+Its full gate [39921974262](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39921974262)
+passed 504 public and 24 framework executions with zero retries;
+[deployment 39926319125](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39926319125)
+was verified live at 08:45:10.354 UTC on 23 October. The 201 durable byte checks
+cover release identity, 12 routes, 52 runtime resources, 133 source assets and
+robots/sitemap/404 documents; an actual unknown URL returned 404. Twelve explicit
+sharing heads, eight unchanged project previews and four text-only summaries are
+accepted, without certifying external-platform crops or ranking. All twelve
+native bodies equal `9394233`; 31 source actions and ten promoted plates remain.
+
+Historical source access `ce12d682`, narrative/forced-color `3321572`, global glass
+`86a6ce5` and camera `146e8938` remain accepted milestones. Announcement and
+adaptive rescue `9394233` passed full 504 + 24 in run 39911110440 and deployment
+39916408072, with live verification at 07:27:49.881 UTC. These are published
+milestones, not unfinished candidates.
 
 **Global typography and explicit eligible whole-plane surfaces are published.**
 This is not completion of every case's narrative, every possible scroll position,
@@ -141,7 +147,7 @@ idle layer and exact prepared source support; Bending retains genuine 3D chapter
 idle, its source-family timing and eight-active-second comparison policy. Both
 are live at 146e8938, not interchangeable idle implementations.
 
-## Published source access and next bounded accessibility audit
+## Published source access and accessibility
 
 At `ce12d682`, generic case and XR secondary evidence captions have 31 visible
 native full-image links with new-tab notice and source-specific accessible names.
@@ -151,7 +157,7 @@ owner, source derivative or speculative scroll-clearance change was added.
 Actual keyboard opening/return, mobile native activation, forced colors and
 no-JS reading passed three-profile targeted and full-artifact acceptance.
 
-The next combined candidate clarifies accessible names/descriptions of other native
+The published `9394233` refinement clarifies accessible names/descriptions of other native
 new-tab links and Bending's conditional inline-comparison triggers, preserving their
 visible labels, destinations and activation behavior. It also includes the separately
 qualified STANDARD-only adaptive delivery response described below. See the
@@ -165,14 +171,14 @@ not justify a production change, asset recompression or a new loading UI; it did
 not test late parsing, GPU reclamation or physical-network performance.
 
 
-## Pending combined announcement / adaptive delivery candidate
+## Published announcement / adaptive delivery qualification
 
-Main/live remain `ce12d682`; no publication is recorded for this candidate.
 `155a0a4` passed 12/12 targeted announcement scenarios and `a15c09b` passed
-27/27 targeted representation scenarios. The full 504-public + 24-framework
-gate and exact-artifact release acceptance remain pending.
+27/27 targeted representation scenarios before the successful `9394233` full
+gate and live publication recorded above. The current metadata-only `bb602416`
+release preserves those accepted native bodies and adaptive runtime.
 
-The Bending candidate retains the initial STANDARD 1,600,000-pixel cap, original
+The published Bending refinement retains the initial STANDARD 1,600,000-pixel cap, original
 source geometry/materials/camera/idle, source access and the existing scheduler.
 A bounded severe-delivery observation can advance one existing density step;
 TOUCH keeps its legacy policy. Density does not recover merely on Pause, hidden
@@ -180,5 +186,22 @@ state or resize: those clear observations, not the pressure instance's stage.
 See [policy and actual-stage visual evidence](ADAPTIVE_DELIVERY_QUALIFICATION.md).
 The observed Chromium System floor preserves recognizable complete source framing
 and readable native content, but fine joints/highlights/opening slits are not
-certified for detailed examination. This is an accepted rescue tradeoff for full
-validation, not visual equivalence, hardware/FPS acceptance or a deployment GO.
+certified for detailed examination. This is an accepted, published rescue tradeoff, not visual equivalence or
+hardware/FPS acceptance. Density persists until the pressure instance is recreated.
+
+
+## Next bounded creative slice — source reading, not a redesign
+
+One Special Assemblies planning-workflow guide is proposed over the unchanged
+1536×1903 original Fig. 6-04/6-05 plate. Its three source-backed node groups are
+Generate assembly, Plan trajectories and Replan failed index. The diagram shows
+software/data relationships, not proof of collision-free physical execution.
+The intent is an in-place enhancement of the existing evidence figure, retaining
+its complete raster, labels, caption, credit and native full-image action; no
+second figure, source derivative, model or video change is proposed.
+
+Original regions and wording were inspected; implementation and native rendered
+acceptance are pending. Existing Entrance native-radio/finite-emphasis behavior
+is a precedent, not authorization to add decorative motion to every plate.
+Keyboard/no-JS/reduced/Pause/mobile reading and existing source/access contracts
+must remain intact. Dense original lettering still needs the full-image link.

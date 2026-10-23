@@ -9,6 +9,7 @@ const hash=value=>createHash('sha256').update(value).digest('hex');
 // These twelve exact block substitutions are the entire approved markup delta.
 // Exact occurrence checks avoid stripping unrelated ARIA or matching the two
 // generic image-link names ambiguously. No git/generated baseline at test time.
+// Exact guide markup is independently reversed to bb602416 in special-planning-guide.test.mjs.
 const cases={
   "PortfolioHome.jsx": {
     "baseline": "336f22d87de1e70daa7886a8f591d9ba25e91ffaa4226eb5ecc072dea85ea9b0",
@@ -20,7 +21,7 @@ const cases={
     ]
   },
   "ProjectCaseStudy.jsx": {
-    "baseline": "baf719e6c92e079819e5499901c863225b162902dbfe12187996e5ff27af227b",
+    "baseline": "144627c77c78cf9560e1cf4592db89ef3f5acbc8cbe2b561f56d8e2f9d60bf8c",
     "replacements": [
       [
         " return <a className={styles.sourceLink} href={image.src} target=\"_blank\" rel=\"noreferrer\">View full image <span aria-hidden=\"true\">↗</span></a>;\n",
@@ -31,8 +32,8 @@ const cases={
         "    <a className={styles.sourceLink} data-project-motion-source href={motion.src} target=\"_blank\" rel=\"noreferrer\" aria-label={`${motion.kind==='recording'?'View recording':'View animation'} (new tab): ${motion.alt}`}>{motion.kind==='recording'?'View recording':'View animation'} <span aria-hidden=\"true\">↗</span></a>\n"
       ],
       [
-        "  <a className={styles.evidenceImage} data-information-window=\"evidence-image\" data-information-motion-surface=\"plane\" data-home-scroll-window=\"project-evidence\" href={image.src} target=\"_blank\" rel=\"noreferrer\" aria-label={`View full image: ${image.alt}`}><InformationSkin/><img data-project-evidence-image src={image.src} width={image.width} height={image.height} alt={image.alt} loading=\"lazy\" decoding=\"async\"/></a>\n",
-        "  <a className={styles.evidenceImage} data-information-window=\"evidence-image\" data-information-motion-surface=\"plane\" data-home-scroll-window=\"project-evidence\" href={image.src} target=\"_blank\" rel=\"noreferrer\" aria-label={`View full image (new tab): ${image.alt}`}><InformationSkin/><img data-project-evidence-image src={image.src} width={image.width} height={image.height} alt={image.alt} loading=\"lazy\" decoding=\"async\"/></a>\n"
+        "  <a className={styles.evidenceImage} data-information-window=\"evidence-image\" data-information-motion-surface=\"plane\" data-home-scroll-window=\"project-evidence\" href={image.src} target=\"_blank\" rel=\"noreferrer\" aria-label={`View full image: ${image.alt}`}><InformationSkin/>{guide?<span className={styles.planningPlate}><img data-project-evidence-image src={image.src} width={image.width} height={image.height} alt={image.alt} loading=\"lazy\" decoding=\"async\"/>\n   <svg className={styles.planningOverlay} viewBox={`0 0 ${image.width} ${image.height}`} aria-hidden=\"true\" focusable=\"false\">\n    {guide.steps.map((step,index)=><g key={step.label} data-planning-region={index}>{['halo','outline'].map(layer=><rect key={layer} data-planning-stroke={layer} x={step.bounds[0]} y={step.bounds[1]} width={step.bounds[2]} height={step.bounds[3]} pathLength=\"1\" vectorEffect=\"non-scaling-stroke\"/>)}</g>)}\n   </svg>\n  </span>:<img data-project-evidence-image src={image.src} width={image.width} height={image.height} alt={image.alt} loading=\"lazy\" decoding=\"async\"/>}</a>\n",
+        "  <a className={styles.evidenceImage} data-information-window=\"evidence-image\" data-information-motion-surface=\"plane\" data-home-scroll-window=\"project-evidence\" href={image.src} target=\"_blank\" rel=\"noreferrer\" aria-label={`View full image (new tab): ${image.alt}`}><InformationSkin/>{guide?<span className={styles.planningPlate}><img data-project-evidence-image src={image.src} width={image.width} height={image.height} alt={image.alt} loading=\"lazy\" decoding=\"async\"/>\n   <svg className={styles.planningOverlay} viewBox={`0 0 ${image.width} ${image.height}`} aria-hidden=\"true\" focusable=\"false\">\n    {guide.steps.map((step,index)=><g key={step.label} data-planning-region={index}>{['halo','outline'].map(layer=><rect key={layer} data-planning-stroke={layer} x={step.bounds[0]} y={step.bounds[1]} width={step.bounds[2]} height={step.bounds[3]} pathLength=\"1\" vectorEffect=\"non-scaling-stroke\"/>)}</g>)}\n   </svg>\n  </span>:<img data-project-evidence-image src={image.src} width={image.width} height={image.height} alt={image.alt} loading=\"lazy\" decoding=\"async\"/>}</a>\n"
       ]
     ]
   },

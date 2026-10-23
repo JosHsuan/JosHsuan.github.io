@@ -30,8 +30,8 @@ async function inspectPlates(page,definition,info,{noJS=false}={}){
    await image.scrollIntoViewIfNeeded();
    await expect.poll(()=>image.evaluate(node=>node.complete&&node.naturalWidth>0)).toBe(true);
    await expect(image).toBeVisible();await expect(image).toHaveAttribute('alt',source.alt);
-   const anchor=image.locator('..'),figure=image.locator('xpath=ancestor::figure[1]'),caption=figure.locator('figcaption');
-   await expect(anchor).toHaveAttribute('href',src);
+   const anchor=image.locator('xpath=ancestor::a[1]'),figure=image.locator('xpath=ancestor::figure[1]'),caption=figure.locator('figcaption');
+   await expect(anchor).toHaveCount(1);await expect(anchor).toHaveAttribute('href',src);
    await expect(anchor).toHaveAttribute('aria-label',`View full image (new tab): ${source.alt}`);
    await expect(caption.locator('p')).toHaveText(source.caption);
    await expect(caption.locator(':scope > span:not([data-information-skin])')).toHaveText(source.credit);

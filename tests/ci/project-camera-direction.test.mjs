@@ -52,9 +52,10 @@ const protectedCaseHashes={
  "entrance-installation-art": "fae4716ed78f692062f483dcecfbb2085c02d8dcbfe536bf89a02c22a6110e66",
  "dot-based-3d-printing": "4d6f8b85a87c315a1e015c726e43c4a9cf10f07d5d006024d0e5a0110c9a9575",
  "hc3dp-caustics": "7f8858c96d92da4a40ceb4263cfb7738bec11ef300c1fdac6af533246bd84aa2",
- "special-assemblies": "fe13ac6b75d9baddd1c674b3c77c3ae7be98c48f50f3d9fbc63452576abaeb56",
+ "special-assemblies": "1305fec93603ffc606381704177344545ac59512f7f0dd3248cef6d94458b923",
  "project-caschlatsch": "e5dc8f6f3f6a4cf957146b75569b9c1e2c7ff22e3ff8179103e85a34e988a77a"
 };
+// Special guide delta has independent full-data reversal in special-planning-guide.test.mjs.
 // Three narrative digests advanced only after independently pinned source contracts
 // in three-case-narrative.test.mjs passed; the other three digests stay unchanged.
 test('approved case snapshots remain fixed apart from separately tested camera paths',async()=>{

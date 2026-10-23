@@ -154,3 +154,29 @@
 @media(max-width:360px){.page:global([data-project-study=mode-s-of-making]){--study-mobile-reading-inset:1.25rem}}
 
 .evidenceImage{position:relative;isolation:isolate}
+
+/* One source-bound reading guide; the original image/caption remain authoritative. */
+.planningGuide{padding:clamp(1rem,3vw,2rem);margin-bottom:1rem;border:1px solid var(--glass-border);border-radius:20px;background:var(--glass-background);color:var(--glass-foreground)}
+.planningGuide h3{margin:0 0 1rem;font:400 var(--type-size-subheading)/var(--type-leading-subheading) var(--ocr)}
+.planningNote{margin:0;max-width:68ch;font:400 var(--type-size-caption)/var(--type-leading-caption) var(--ocr);color:var(--glass-muted)}
+.planningChoices{display:flex;flex-wrap:wrap;gap:.5rem;min-width:0;border:0;padding:0;margin:1.25rem 0}
+.planningChoices legend{font:400 var(--type-size-label)/var(--type-leading-label) var(--ocr);margin-bottom:.5rem}
+.planningChoices label{display:flex;align-items:center;gap:.5rem;min-height:44px;max-width:100%;padding:.5rem .75rem;border:1px solid var(--glass-border);border-radius:12px;font:400 var(--type-size-control)/var(--type-leading-control) var(--ocr);cursor:pointer;box-sizing:border-box}
+.planningChoices input{accent-color:var(--accent);flex-shrink:0;margin:0}
+.planningChoices label:has(input:checked){border-color:var(--accent);background:var(--glass-control-hover)}
+.planningChoices label:focus-within{outline:2px solid var(--paper);outline-offset:3px}
+.planningDescriptions{display:grid}
+.planningDescriptions p{grid-area:1/1;min-width:0;margin:0;max-width:60ch;font:400 var(--type-size-body)/var(--type-leading-body) var(--ocr);overflow-wrap:anywhere;visibility:hidden}
+.planningPlate{display:block;position:relative;line-height:0}
+.planningOverlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.planningOverlay g{opacity:0}
+.planningOverlay rect{fill:none;stroke:#ad3e16;stroke-width:2;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 220ms ease-out}
+.planningOverlay [data-planning-stroke=halo]{stroke:white;stroke-width:5}
+.evidence:has(.planningChoices input[value=all]:checked) [data-planning-description=all]{visibility:visible}
+.evidence:has(.planningChoices input[value="0"]:checked) [data-planning-region="0"],.evidence:has(.planningChoices input[value="1"]:checked) [data-planning-region="1"],.evidence:has(.planningChoices input[value="2"]:checked) [data-planning-region="2"]{opacity:1}
+.evidence:has(.planningChoices input[value="0"]:checked) [data-planning-region="0"] rect,.evidence:has(.planningChoices input[value="1"]:checked) [data-planning-region="1"] rect,.evidence:has(.planningChoices input[value="2"]:checked) [data-planning-region="2"] rect{stroke-dashoffset:0}
+.evidence:has(.planningChoices input[value="0"]:checked) [data-planning-description="0"],.evidence:has(.planningChoices input[value="1"]:checked) [data-planning-description="1"],.evidence:has(.planningChoices input[value="2"]:checked) [data-planning-description="2"]{visibility:visible}
+:global([data-study-paused]) .planningOverlay rect{transition:none}
+@media(prefers-reduced-motion:reduce){.planningOverlay rect{transition:none}}
+@media(forced-colors:active){.planningGuide{background:Canvas;color:CanvasText;border-color:CanvasText}.planningNote{color:CanvasText}.planningChoices label{background:Canvas;color:CanvasText;border-color:CanvasText}.planningChoices label:has(input:checked){background:Canvas;color:CanvasText;border-color:Highlight}.planningChoices label:focus-within{outline-color:Highlight}.planningOverlay rect{stroke:CanvasText}.planningOverlay [data-planning-stroke=halo]{stroke:Canvas}}
+@media print{.planningChoices,.planningOverlay{display:none}.planningDescriptions{display:block}.planningDescriptions p{visibility:visible;margin:1em 0}}

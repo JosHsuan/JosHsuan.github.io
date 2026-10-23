@@ -11,17 +11,18 @@ const hash=value=>createHash('sha256').update(value).digest('hex');
 // Four JSX pins include the separately reviewed name/hidden-description delta;
 // link-announcements.test.mjs independently reverses its twelve exact substitutions
 // to the deployed ce12 six-file baseline. Asset/data/CSS pins remain unchanged.
+// Special guide additions are reversed exactly in special-planning-guide.test.mjs.
 const baseline={
-  "release/manifest.json": "6bc10dfa18a7aafc828d9b39f1b046faddb7c8b514e9260a7d9adca0d46179e1",
+  "release/manifest.json": "a9809c01b88c5fb015a06ed58b1d904721e967c499d4e120238496ca6528524e",
   "release/project-assets.json": "83f51a9847419f66f9ddde151b135fd3c2c58d4744d01631579497aad2916244",
   "release/xr-assets.json": "33692e7a4a4be11e19e1cce804c5d5421f417aca6c0e6d7b51a60561692b45ad",
-  "release/project-studies.json": "c222cdcec3fd5ff5f040f1db5a7c30f52a9871c6dc92b76dbb288e068e17341c",
+  "release/project-studies.json": "a5648233801958adeb56e960e7060b62ebea05aacf474d6a57ad389eed3aac22",
   "release/xr-study.json": "3605cb7ed9abefc0721091d7883fdc765d0f0471af1b7d4db49f326228a68001",
   "release/xr-workspace.json": "41c48db687e71332240a002e0892141a7eac887c94740ef4c175cc4ccc4e1211",
   "release/story.json": "250c0853d8d5f9d993bc89b8a563eef5717300c1772a8c5da04647d165c740da",
-  "components/ProjectCaseStudy.jsx": "4e3194e06bcf487df47ad6f625c8f8d8798dd1bf6e3c9ac0d2052da273f85175",
+  "components/ProjectCaseStudy.jsx": "71ce20e40dad1ae6dab1a3711b6116d4af97f6ab9dc82ffc61849e4c1cac9b77",
   "components/XRProject.jsx": "946f16f178bc4d2ddc13c12066cb9670f0d63fbb7df8bb3a47ff3397cc0b1fae",
-  "components/ProjectCaseStudy.module.css": "2d2bab984ea7c78fefa0909d900224c9f626539fe995573e8ed99aa12a25a432",
+  "components/ProjectCaseStudy.module.css": "7480197398c45eaedabc5d2d92d4c9f6330a77893d7712a9c2f985261c784482",
   "components/XRProject.module.css": "49e7c3d770d87c3d4d7eea5cec6c01421b5e998fcc82bff5a33e0c6b829f9cc5",
   "components/BendingProject.jsx": "585b055ff08bb0c8451d1780b6cf1268088b2ec46ded4661a2da46bca7b97970",
   "components/EntranceDiagramFocus.jsx": "e774fd4d6b6cb072834d4f8e3a269f0319d5aceaa360200a822f0ae6d085c146",

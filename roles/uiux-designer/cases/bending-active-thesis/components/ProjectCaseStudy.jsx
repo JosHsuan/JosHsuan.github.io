@@ -54,9 +54,26 @@ function PrimaryVisual({image,chapter,prefix,opening=false,model,motion}){
   </div>
  </div>;
 }
-function EvidenceFigure({image}){
- return <figure className={styles.evidence} data-study-evidence-layout={projectStudyEvidenceLayout(image)} data-study-evidence-role={image.purpose==='diagram'?'technical-plate':'photograph'}>
-  <a className={styles.evidenceImage} data-information-window="evidence-image" data-information-motion-surface="plane" data-home-scroll-window="project-evidence" href={image.src} target="_blank" rel="noreferrer" aria-label={`View full image (new tab): ${image.alt}`}><InformationSkin/><img data-project-evidence-image src={image.src} width={image.width} height={image.height} alt={image.alt} loading="lazy" decoding="async"/></a>
+function EvidenceFigure({image,guide,guideId}){
+ return <figure className={styles.evidence} data-special-planning-guide={guide?guideId:undefined} data-study-evidence-layout={projectStudyEvidenceLayout(image)} data-study-evidence-role={image.purpose==='diagram'?'technical-plate':'photograph'}>
+  <a className={styles.evidenceImage} data-information-window="evidence-image" data-information-motion-surface="plane" data-home-scroll-window="project-evidence" href={image.src} target="_blank" rel="noreferrer" aria-label={`View full image (new tab): ${image.alt}`}><InformationSkin/>{guide?<span className={styles.planningPlate}><img data-project-evidence-image src={image.src} width={image.width} height={image.height} alt={image.alt} loading="lazy" decoding="async"/>
+   <svg className={styles.planningOverlay} viewBox={`0 0 ${image.width} ${image.height}`} aria-hidden="true" focusable="false">
+    {guide.steps.map((step,index)=><g key={step.label} data-planning-region={index}>{['halo','outline'].map(layer=><rect key={layer} data-planning-stroke={layer} x={step.bounds[0]} y={step.bounds[1]} width={step.bounds[2]} height={step.bounds[3]} pathLength="1" vectorEffect="non-scaling-stroke"/>)}</g>)}
+   </svg>
+  </span>:<img data-project-evidence-image src={image.src} width={image.width} height={image.height} alt={image.alt} loading="lazy" decoding="async"/>}</a>
+  {guide&&<div className={styles.planningGuide}>
+   <h3>{guide.title}</h3>
+   <p className={styles.planningNote}>Reading guide to the original planning diagram; outlines identify source nodes, not simulated robot motion.</p>
+   <fieldset className={styles.planningChoices}>
+    <legend>Choose a relationship to follow</legend>
+    <label><input type="radio" name={guideId} value="all" defaultChecked/><span>Complete plate</span></label>
+    {guide.steps.map((step,index)=><label key={step.label}><input type="radio" name={guideId} value={String(index)}/><span>{step.label}</span></label>)}
+   </fieldset>
+   <div className={styles.planningDescriptions}>
+    <p data-planning-description="all">Explore any of the three source relationships, or return to the complete plate. These choices are a reading guide, not an execution sequence.</p>
+    {guide.steps.map((step,index)=><p key={step.label} data-planning-description={index}>{step.description}</p>)}
+   </div>
+  </div>}
   <figcaption data-information-window="evidence-caption" data-information-motion-surface="plane" data-home-scroll-window="project-caption"><InformationSkin/><p>{image.caption}</p><span>{image.credit}</span><a className={styles.sourceLink} data-evidence-source-link href={image.src} target="_blank" rel="noopener noreferrer" aria-label={`Open full image (new tab): ${image.alt}`}>Open full image (new tab)</a></figcaption>
  </figure>;
 }
@@ -100,7 +117,7 @@ export default function ProjectCaseStudy({project}){
       </Panel>
      </div>
      {project.id==='entrance-installation-art'&&section.diagramFocus&&<div className={styles.evidenceBand}><EntranceDiagramFocus guide={section.diagramFocus} image={section.media.find(image=>image.src===section.diagramFocus.source)} id={`${prefix}-${section.id}-guide`}/></div>}
-     {evidence.length>0&&<div className={styles.evidenceBand}>{evidence.map(image=><EvidenceFigure key={image.src} image={image}/>)}</div>}
+     {evidence.length>0&&<div className={styles.evidenceBand}>{evidence.map(image=><EvidenceFigure key={image.src} image={image} guide={project.id==='special-assemblies'&&section.id==='system'&&section.diagramFocus?.source===image.src?section.diagramFocus:undefined} guideId={`${prefix}-${section.id}-guide`}/>)}</div>}
     </section>;})}
     <footer id={`${prefix}-credits`} tabIndex={-1} className={`${styles.chapter} ${styles.creditsChapter}`} data-project-chapter="credits" aria-labelledby={`${prefix}-credits-heading`} {...layoutAttributes(projectStudyLayout(project,'credits'))}>
      <div className={styles.chapterInner}><Panel>

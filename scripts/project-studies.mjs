@@ -160,14 +160,23 @@ export function assertProjectStudies(record,manifest){
       assert(section.paragraphs.length>0);section.paragraphs.forEach(paragraph=>text(paragraph,'paragraph'));
       assert(section.media.length>0,'Every chapter has actual source evidence');
       if(section.diagramFocus!==undefined){
-        assert.equal(project.id,'entrance-installation-art','Diagram focus is the bounded Entrance pilot only');
-        assert(['context','system','making'].includes(section.id),'Only reviewed Entrance explanatory chapters');
-        const guide=section.diagramFocus,source=section.media[0];
+        const special=project.id==='special-assemblies';
+        assert(project.id==='entrance-installation-art'||special,'Only reviewed Entrance and Special reading guides');
+        assert(special?section.id==='system':['context','system','making'].includes(section.id),'Only reviewed explanatory chapters');
+        const guide=section.diagramFocus;
+        const sourcePath='/assets/projects/special-assemblies/planning-workflow.webp';
+        const source=special?section.media.find(image=>image.src===sourcePath):section.media[0];
+        if(special){
+          assert.equal(section.media.filter(image=>image.src===sourcePath).length,1,'Exactly one original planning plate');
+          assert.notEqual(section.media[0].src,sourcePath,'Planning guide preserves the existing model primary');
+          assert.equal(source.purpose,'diagram','Planning guide retains its original technical plate');
+        }
         assert(guide&&typeof guide==='object'&&!Array.isArray(guide));
         assert.deepEqual(Object.keys(guide).sort(),['source','steps','title'],'No hidden diagram sources or unsupported transforms');
         text(guide.title,'diagram focus title');
-        assert.equal(guide.source,source.src,'Focus uses the complete pinned primary raster, not a reconstructed drawing');
+        assert.equal(guide.source,source.src,'Focus uses the complete reviewed raster, not a reconstructed drawing');
         assert(Array.isArray(guide.steps)&&guide.steps.length>=2&&guide.steps.length<=5,'Two to five source-authored focus groups');
+        if(special)assert.equal(guide.steps.length,3,'Exactly three reviewed planning steps');
         assert.equal(new Set(guide.steps.map(step=>step.label)).size,guide.steps.length,'Distinct explanatory controls');
         for(const step of guide.steps){
           assert.deepEqual(Object.keys(step).sort(),['bounds','description','label']);

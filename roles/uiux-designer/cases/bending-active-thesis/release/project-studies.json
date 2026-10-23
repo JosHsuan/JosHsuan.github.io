@@ -1301,7 +1301,43 @@
               "credit": "Group6 project: Chia-Hsuan Chao / Kevin Seav / Megi Sinani. Project diagram.",
               "purpose": "diagram"
             }
-          ]
+          ],
+          "diagramFocus": {
+            "title": "Follow the planning data",
+            "source": "/assets/projects/special-assemblies/planning-workflow.webp",
+            "steps": [
+              {
+                "label": "Generate assembly",
+                "bounds": [
+                  132,
+                  1180,
+                  238,
+                  102
+                ],
+                "description": "The diagram connects generate Assembly() to assembly.part and assembly.attributes."
+              },
+              {
+                "label": "Plan trajectories",
+                "bounds": [
+                  590,
+                  1204,
+                  162,
+                  78
+                ],
+                "description": "plan_motion branches into pick, place, exit and insert trajectories, with approach and safe frames recorded in the diagram."
+              },
+              {
+                "label": "Replan failed index",
+                "bounds": [
+                  828,
+                  1204,
+                  474,
+                  78
+                ],
+                "description": "The fail_index connection identifies the replanning branch, replan_motion_by_index. This is a software/data relationship, not evidence of collision-free physical execution."
+              }
+            ]
+          }
         },
         {
           "id": "making",

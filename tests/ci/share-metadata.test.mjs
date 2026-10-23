@@ -121,10 +121,11 @@ const pages=[
     ]
   }
 ];
+// The single Special guide/data digest delta is independently pinned in special-planning-guide.test.mjs.
 const pins={
-  "release/manifest.json": "6bc10dfa18a7aafc828d9b39f1b046faddb7c8b514e9260a7d9adca0d46179e1",
+  "release/manifest.json": "a9809c01b88c5fb015a06ed58b1d904721e967c499d4e120238496ca6528524e",
   "release/introduction.json": "ab0fa9933275c22bad9f24fb79c27f7307d469ba570d9cd4a78f6f9fd3a6751b",
-  "release/project-studies.json": "c222cdcec3fd5ff5f040f1db5a7c30f52a9871c6dc92b76dbb288e068e17341c",
+  "release/project-studies.json": "a5648233801958adeb56e960e7060b62ebea05aacf474d6a57ad389eed3aac22",
   "release/xr-study.json": "3605cb7ed9abefc0721091d7883fdc765d0f0471af1b7d4db49f326228a68001",
   "app/layout.jsx": "d810313efd7e235b6c511264150f9c45705e5d322c9eae6b55d317684e37ca82",
   "app/not-found.jsx": "457c40aea33af217eead30592c9f9441e0ad6f00cc80b01dfe80e0f2d4ac0479"
