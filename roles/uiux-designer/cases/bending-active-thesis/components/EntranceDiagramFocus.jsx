@@ -24,6 +24,6 @@ export default function EntranceDiagramFocus({guide,image,id}){
    {guide.steps.map((step,index)=><p key={step.label} data-focus-description={index}>{step.description}</p>)}
   </div>
   <p className={styles.note}>{image.caption}</p><p className={styles.note}>{image.credit}</p>
-  <a className={styles.source} href={image.src} target="_blank" rel="noreferrer">Open complete source image <span aria-hidden="true">↗</span></a>
+  <a className={styles.source} href={image.src} target="_blank" rel="noreferrer" aria-label={`Open complete source image (new tab): ${image.alt}`}>Open complete source image <span aria-hidden="true">↗</span></a>
  </figure>;
 }

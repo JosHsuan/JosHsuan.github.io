@@ -1,0 +1,121 @@
+import {test,expect} from '@playwright/test';
+import {readFile,writeFile} from 'node:fs/promises';
+import {WAIT} from './case-helpers.mjs';
+
+const release='../../roles/uiux-designer/cases/bending-active-thesis/release/';
+const projects=JSON.parse(await readFile(new URL(release+'project-studies.json',import.meta.url),'utf8')).projects;
+const xr=JSON.parse(await readFile(new URL(release+'xr-study.json',import.meta.url),'utf8'));
+const story=JSON.parse(await readFile(new URL(release+'story.json',import.meta.url),'utf8')).cinematic;
+const contact=JSON.parse(await readFile(new URL(release+'contact.json',import.meta.url),'utf8'));
+const routes=['/','/about/','/projects/','/contact/',...projects.map(project=>`/projects/${project.slug}/`),'/projects/xr-bending-active/','/projects/bending-active/'];
+async function persist(info,name,receipt){const path=info.outputPath(name+'.json');await writeFile(path,JSON.stringify(receipt,null,2));await info.attach(name,{path,contentType:'application/json'});}
+async function open(page,path,noJS=false){
+ expect((await page.goto(path)).status()).toBe(200);await page.evaluate(()=>document.fonts.ready);
+ if(!noJS)await expect.poll(()=>page.evaluate(()=>window.__site?.inspect().phase),{timeout:WAIT}).toMatch(/^(entered|failed)$/);
+}
+async function declarations(page){
+ return page.locator('a[target="_blank"]').evaluateAll(nodes=>nodes.map(node=>{
+  const walker=document.createTreeWalker(node,NodeFilter.SHOW_TEXT),parts=[];
+  while(walker.nextNode()){const text=walker.currentNode;if(!text.parentElement.closest('[aria-hidden="true"]'))parts.push(text.textContent);}
+  const ids=(node.getAttribute('aria-describedby')??'').split(/\s+/).filter(Boolean),descriptors=ids.map(id=>{const matches=[...document.querySelectorAll('[id]')].filter(element=>element.id===id),element=matches[0];return{id,count:matches.length,text:element?.textContent??null,hidden:element?.hidden??false,display:element?getComputedStyle(element).display:null,rects:element?.getClientRects().length??null};});
+  return{href:node.getAttribute('href'),rel:node.rel,label:node.getAttribute('aria-label'),description:descriptors.map(item=>item.text).join(' ')||null,descriptors,
+   visibleText:parts.join(' ').replace(/[↗↘]/g,'').replace(/\s+/g,' ').trim(),alt:node.querySelector('img')?.alt??null,
+   inspect:node.hasAttribute('data-inspect-figure'),caption:node.hasAttribute('data-evidence-source-link'),
+   visible:node.checkVisibility({visibilityProperty:true,opacityProperty:true})};
+ }));
+}
+async function audit(page,noJS,receipt){
+ await page.emulateMedia({reducedMotion:'reduce'});
+ for(const path of routes){
+  await open(page,path,noJS);const rows=await declarations(page);receipt.push({path,noJS,rows});
+  if(!['/about/','/projects/'].includes(path))expect(rows.length).toBeGreaterThan(0);
+  for(const [index,row] of rows.entries()){
+   const link=page.locator('a[target="_blank"]').nth(index);expect(row.rel.split(/\s+/)).toContain('noreferrer');expect(row.label).toBeTruthy();
+   if(row.visibleText)expect(row.label).toContain(row.visibleText);
+   if(row.alt&&!row.inspect)expect(row.label).toContain(row.alt);
+   if(row.inspect){
+    expect(row.label).toContain('Inspect evidence');expect(row.descriptors).toHaveLength(1);expect(row.descriptors[0]).toMatchObject({count:1,hidden:true,display:'none',rects:0});expect(row.description).toBe('Opens an inline source comparison when available; otherwise opens the original in a new tab.');expect(row.description).not.toMatch(/dialog/i);
+   }else expect(row.label+' '+(row.description??'')).toMatch(/new tab/i);
+   if(row.visible){await expect(link).toHaveAccessibleName(row.label);if(row.description)await expect(link).toHaveAccessibleDescription(row.description);}
+  }
+  if(path==='/'||path==='/contact/')for(const profile of contact.socialLinks){
+   const row=rows.find(row=>row.href===profile.href);expect(row,profile.label+' native public profile declaration').toBeTruthy();expect(row.label).toContain(profile.label);
+  }
+  // Naming must survive the actual browser forced palette. This is not a new
+  // contrast or external-destination-availability claim.
+  await page.emulateMedia({forcedColors:'active'});expect(await page.evaluate(()=>matchMedia('(forced-colors: active)').matches)).toBe(true);
+  const forced=await declarations(page);expect(forced.map(({label,description,href})=>({label,description,href}))).toEqual(rows.map(({label,description,href})=>({label,description,href})));
+  const representative=forced.findIndex(row=>row.visible);if(representative>=0){await expect(page.locator('a[target="_blank"]').nth(representative)).toHaveAccessibleName(forced[representative].label);if(forced[representative].description)await expect(page.locator('a[target="_blank"]').nth(representative)).toHaveAccessibleDescription(forced[representative].description);}
+  await page.emulateMedia({forcedColors:'none'});
+ }
+ const inventory=receipt.flatMap(route=>route.rows);expect(inventory).toHaveLength(129);expect(inventory.filter(row=>row.inspect)).toHaveLength(4);expect(inventory.filter(row=>row.caption)).toHaveLength(31);
+}
+async function tabTo(page,target){
+ const bound=await page.locator('a[href],button,input,select,textarea,[tabindex],summary').count();let reached=false;
+ for(let index=0;index<bound+2;index++){await page.keyboard.press('Tab');if(await target.evaluate(node=>document.activeElement===node)){reached=true;break;}}
+ expect(reached,'Native Tab traversal reaches the announced action').toBe(true);await expect(target).toBeFocused();
+}
+async function facts(page,target){return{url:page.url(),...await target.evaluate(node=>({y:scrollY,focused:document.activeElement===node,href:node.getAttribute('href'),sourceChapter:node.closest('[data-project-chapter],[data-xr-chapter],[data-story-chapter]')?.id??null,semanticChapter:document.querySelector('[data-project-active-chapter]')?.getAttribute('data-project-active-chapter')??document.querySelector('[data-xr-active-chapter]')?.getAttribute('data-xr-active-chapter')??null}))};}
+async function popup(page,target,activate,dimensions){
+ if(await page.locator('[data-project-active-chapter],[data-xr-active-chapter]').count())await page.waitForFunction(()=>{
+  const xr=document.querySelector('[data-xr-study]'),nodes=[...document.querySelectorAll(xr?'[data-xr-chapter]':'[data-project-chapter]')],line=scrollY+innerHeight*(xr ? .42 : .5);
+  const top=node=>{if(!xr)return node.getBoundingClientRect().top+scrollY;let y=0;for(let el=node;el;el=el.offsetParent)y+=el.offsetTop;return y;};
+  let current=nodes[0];for(const node of nodes)if(top(node)<=line)current=node;
+  return current?.getAttribute(xr?'data-xr-chapter':'data-project-chapter')===document.querySelector(xr?'[data-xr-active-chapter]':'[data-project-active-chapter]')?.getAttribute(xr?'data-xr-active-chapter':'data-project-active-chapter');
+ },null,{timeout:WAIT});
+ const before=await facts(page,target);let child,primaryError,result;
+ try{
+  [child]=await Promise.all([page.waitForEvent('popup'),activate()]);await child.waitForLoadState('domcontentloaded');expect(new URL(child.url()).pathname).toBe(before.href);
+  const image=child.locator('img');await expect(image).toHaveCount(1);await expect.poll(()=>image.evaluate(node=>node.complete&&node.naturalWidth>0)).toBe(true);
+  result=await image.evaluate(node=>({src:node.currentSrc,width:node.naturalWidth,height:node.naturalHeight}));if(dimensions)expect([result.width,result.height]).toEqual(dimensions);
+ }catch(error){primaryError=error;throw error;}
+ finally{try{if(child)await child.close();await page.bringToFront();}catch(error){if(!primaryError)throw error;}}
+ expect(await facts(page,target)).toEqual(before);return{before,source:result};
+}
+async function nativeImage(page,route,src,dimensions,isMobile,receipt){
+ await open(page,route);const target=page.locator(`a[target="_blank"][href="${src}"]`).filter({has:page.locator('img')}).first();await tabTo(page,target);
+ receipt.keyboard=await popup(page,target,()=>page.keyboard.press('Enter'),dimensions);
+ if(isMobile){
+  // Native focus scroll has positioned the actual image anchor. Use a genuine
+  // uncovered point, never a fabricated DOM click or hidden chrome.
+  const point=await target.evaluate(node=>{
+   const r=node.getBoundingClientRect();for(const fraction of [.5,.35,.65,.2,.8]){
+    const x=Math.max(1,Math.min(innerWidth-1,r.left+r.width*.5)),y=r.top+r.height*fraction;
+    if(y<0||y>=innerHeight)continue;const hit=document.elementFromPoint(x,y);if(hit&&(hit===node||node.contains(hit)))return{x,y};
+   }throw Error('No uncovered native image action point');
+  });
+  receipt.touch=await popup(page,target,()=>page.touchscreen.tap(point.x,point.y),dimensions);
+ }
+}
+
+test('all twelve routes announce existing native destinations without changing visible labels in reduced and forced palettes',async({page},info)=>{
+ const receipt=[];let primaryError;try{await audit(page,false,receipt);}catch(error){primaryError=error;throw error;}finally{try{await persist(info,'native-link-announcements',receipt);}catch(error){if(!primaryError)throw error;}}
+});
+test('original generic and XR image actions open natively while Bending Inspect remains an inline comparison',async({page,isMobile,context},info)=>{
+ const receipt={native:[]};let primaryError;
+ try{
+  const dot=projects.find(project=>project.id==='dot-based-3d-printing'),source=dot.sections.find(section=>section.id==='system').media.find(image=>image.src.endsWith('/path-strategies.webp'));
+  for(const item of [{route:`/projects/${dot.slug}/`,image:source},{route:'/projects/xr-bending-active/',image:xr.media.adaptiveMethod}]){
+   const row={route:item.route};receipt.native.push(row);await nativeImage(page,item.route,item.image.src,[item.image.width,item.image.height],isMobile,row);
+  }
+  await open(page,'/projects/bending-active/');const trigger=page.locator('#make [data-inspect-figure]');await tabTo(page,trigger);
+  const comparisonBefore=await facts(page,trigger),count=context.pages().length;await page.keyboard.press('Enter');const comparison=page.locator('[data-source-comparison]');await expect(comparison).toBeVisible();await expect(comparison).not.toHaveAttribute('role','dialog');expect(context.pages()).toHaveLength(count);
+  const original=comparison.locator('a[target="_blank"]');await expect(original).toHaveAccessibleName(/Open original source.*new tab/i);await expect(original).toHaveAttribute('href',await trigger.getAttribute('href'));
+  const sourceImage=comparison.locator('img');await expect(sourceImage).toHaveAttribute('src',comparisonBefore.href);await expect.poll(()=>sourceImage.evaluate(node=>node.complete&&node.naturalWidth>0)).toBe(true);
+  const png=info.outputPath('bending-inline-source-comparison.png');await page.screenshot({path:png});await info.attach('bending-inline-source-comparison',{path:png,contentType:'image/png'});
+  const dynamicOriginalName=await original.getAttribute('aria-label');
+  const close=comparison.getByRole('button',{name:'Close source comparison'});await tabTo(page,close);await page.keyboard.press('Enter');await expect(comparison).toHaveCount(0);await expect(trigger).toBeFocused();
+  receipt.bending={mode:'inline comparison, not a dialog',before:comparisonBefore,returned:await facts(page,trigger),dynamicOriginalName};
+ }catch(error){primaryError=error;throw error;}finally{try{await persist(info,'native-link-behaviour',receipt);}catch(error){if(!primaryError)throw error;}}
+});
+test.describe('native link announcements without application JavaScript',()=>{
+ test.use({javaScriptEnabled:false});
+ test('all twelve routes retain declarations and Bending Inspect opens its original image without JavaScript',async({page},info)=>{
+  const receipt={routes:[]};let primaryError;
+  try{
+   await audit(page,true,receipt.routes);const trigger=page.locator('#make [data-inspect-figure]');await tabTo(page,trigger);
+   await expect(trigger).toHaveAttribute('href',story.media.connection.source);receipt.bending=await popup(page,trigger,()=>page.keyboard.press('Enter'));
+   await expect(page.locator('[data-source-comparison]')).toHaveCount(0);
+  }catch(error){primaryError=error;throw error;}finally{try{await persist(info,'native-link-no-js',receipt);}catch(error){if(!primaryError)throw error;}}
+ });
+});

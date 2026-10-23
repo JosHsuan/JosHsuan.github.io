@@ -12,7 +12,7 @@ function Panel({children,opening=false}){
  return <div className={`${styles.panel} ${opening?styles.openingPanel:''}`} data-information-window="editorial" data-information-motion-surface="plane" data-home-scroll-window="project-narrative"><InformationSkin/>{children}</div>;
 }
 function SourceLink({image}){
- return <a className={styles.sourceLink} href={image.src} target="_blank" rel="noreferrer">View full image <span aria-hidden="true">↗</span></a>;
+ return <a className={styles.sourceLink} href={image.src} target="_blank" rel="noreferrer" aria-label={`View full image (new tab): ${image.alt}`}>View full image <span aria-hidden="true">↗</span></a>;
 }
 function layoutAttributes(layout){
  return{'data-study-composition':layout.composition,'data-study-layout':layout.layout,'data-study-source-shape':layout.sourceShape,'data-study-source-role':layout.sourceRole,'data-study-reading-density':layout.readingDensity};
@@ -41,7 +41,7 @@ function PrimaryVisual({image,chapter,prefix,opening=false,model,motion}){
    <p id={`${prefix}-${chapter}-caption`} className={styles.sourceCaption}>{source.caption}</p>
    <p id={`${prefix}-${chapter}-credit`} className={styles.credit}>{source.credit}</p>
    <div className={styles.sourceLinks}>{motion?<>
-    <a className={styles.sourceLink} data-project-motion-source href={motion.src} target="_blank" rel="noreferrer">{motion.kind==='recording'?'View recording':'View animation'} <span aria-hidden="true">↗</span></a>
+    <a className={styles.sourceLink} data-project-motion-source href={motion.src} target="_blank" rel="noreferrer" aria-label={`${motion.kind==='recording'?'View recording':'View animation'} (new tab): ${motion.alt}`}>{motion.kind==='recording'?'View recording':'View animation'} <span aria-hidden="true">↗</span></a>
     <SourceLink image={poster}/>
    </>:<SourceLink image={image}/>}</div>
    {motion&&<>
@@ -56,7 +56,7 @@ function PrimaryVisual({image,chapter,prefix,opening=false,model,motion}){
 }
 function EvidenceFigure({image}){
  return <figure className={styles.evidence} data-study-evidence-layout={projectStudyEvidenceLayout(image)} data-study-evidence-role={image.purpose==='diagram'?'technical-plate':'photograph'}>
-  <a className={styles.evidenceImage} data-information-window="evidence-image" data-information-motion-surface="plane" data-home-scroll-window="project-evidence" href={image.src} target="_blank" rel="noreferrer" aria-label={`View full image: ${image.alt}`}><InformationSkin/><img data-project-evidence-image src={image.src} width={image.width} height={image.height} alt={image.alt} loading="lazy" decoding="async"/></a>
+  <a className={styles.evidenceImage} data-information-window="evidence-image" data-information-motion-surface="plane" data-home-scroll-window="project-evidence" href={image.src} target="_blank" rel="noreferrer" aria-label={`View full image (new tab): ${image.alt}`}><InformationSkin/><img data-project-evidence-image src={image.src} width={image.width} height={image.height} alt={image.alt} loading="lazy" decoding="async"/></a>
   <figcaption data-information-window="evidence-caption" data-information-motion-surface="plane" data-home-scroll-window="project-caption"><InformationSkin/><p>{image.caption}</p><span>{image.credit}</span><a className={styles.sourceLink} data-evidence-source-link href={image.src} target="_blank" rel="noopener noreferrer" aria-label={`Open full image (new tab): ${image.alt}`}>Open full image (new tab)</a></figcaption>
  </figure>;
 }

@@ -7,15 +7,16 @@ native scrolling and the empty reusable framework.
 
 ## Evidence boundary
 
-The accepted live baseline is `3321572`. Its full browser gate
-[39875079270](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39875079270)
-passed 483 public executions and 24 framework executions;
-[deployment 39879409411](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39879409411)
-was verified live at 01:01:42 UTC on 23 October across 12 portfolio routes,
-52 runtime resources, 133 source assets and the ten promoted narrative plates.
+The accepted live baseline is `ce12d682`. Its full browser gate
+[39885026043](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39885026043)
+passed 492 public executions and 24 framework executions;
+[deployment 39888023592](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39888023592)
+was verified live at 02:19:25 UTC on 23 October across 12 portfolio routes,
+52 runtime resources, 133 source assets, ten promoted narrative plates and
+31 native full-image caption actions across seven project routes.
 This includes the three-case source-backed narrative refinement and forced-color
-navigation's immediate system-palette policy. Global glass `86a6ce5` and camera
-`146e8938` remain accepted historical milestones, not the current release.
+navigation's immediate system-palette policy from `3321572`. Global glass
+`86a6ce5` and camera `146e8938` remain accepted historical milestones.
 
 **Global typography and explicit eligible whole-plane surfaces are published.**
 This is not completion of every case's narrative, every possible scroll position,
@@ -140,12 +141,24 @@ idle layer and exact prepared source support; Bending retains genuine 3D chapter
 idle, its source-family timing and eight-active-second comparison policy. Both
 are live at 146e8938, not interchangeable idle implementations.
 
-## Next source-access slice (candidate, not published)
+## Published source access and next bounded accessibility audit
 
-Generic case and XR secondary evidence captions gain visible native full-image
-links with new-tab notice and source-specific accessible names. Existing image
-anchors, primary-source actions, Entrance guides and Bending inspection remain
-unchanged. Reuse the existing 44px link styles; no new modal, animation owner or
-source derivatives. Actual keyboard opening/return, mobile focus visibility,
-forced colors and no-JS acceptance are pending. Add local scroll clearance only
-if a genuine focused-control occlusion is reproduced.
+At `ce12d682`, generic case and XR secondary evidence captions have 31 visible
+native full-image links with new-tab notice and source-specific accessible names.
+Existing image anchors, primary-source actions, Entrance guides and Bending
+inspection remain intact. Existing 44px styles were reused; no modal, animation
+owner, source derivative or speculative scroll-clearance change was added.
+Actual keyboard opening/return, mobile native activation, forced colors and
+no-JS reading passed three-profile targeted and full-artifact acceptance.
+
+The next candidate only clarifies accessible names/descriptions of other native
+new-tab links and Bending's conditional inline-comparison triggers. It does not
+change their visible labels, destinations or behavior. See the
+[bounded audit and acceptance plan](LINK_ANNOUNCEMENT_ACCESSIBILITY.md).
+
+A separate HC slow-acquisition probe closed as healthy existing behavior: three
+profiles reached the existing readiness deadline, cancelled the held transport,
+released inert reading and retained accessible original-source links. Reduced
+motion and emulated SaveData requested no model. This nonpublishing probe did
+not justify a production change, asset recompression or a new loading UI; it did
+not test late parsing, GPU reclamation or physical-network performance.

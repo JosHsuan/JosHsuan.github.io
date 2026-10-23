@@ -17,7 +17,7 @@ function Heading({number,label,title,id,kind='system'}) {
 function EvidenceFigure({item,label,eager=false}) {
   return <figure className={styles.figure} data-xr-evidence={item.src}>
     <div className={styles.figureIndex}>{label}</div>
-    <a className={styles.mediaFrame} data-information-window="evidence-image" data-information-motion-surface="plane" href={item.src} target="_blank" rel="noreferrer" aria-label={`View full image: ${item.alt}`}>
+    <a className={styles.mediaFrame} data-information-window="evidence-image" data-information-motion-surface="plane" href={item.src} target="_blank" rel="noreferrer" aria-label={`View full image (new tab): ${item.alt}`}>
       <InformationSkin/><span className={styles.mediaPlane}><img src={item.src} width={item.width} height={item.height} alt={item.alt} loading={eager?'eager':'lazy'} decoding="async" data-site-critical={eager?'':undefined}/></span>
     </a>
     <figcaption data-information-window="evidence-caption" data-information-motion-surface="plane"><InformationSkin/><p>{item.caption}</p><span>{item.credit}</span><a className={styles.recordingLink} data-evidence-source-link href={item.src} target="_blank" rel="noopener noreferrer" aria-label={`Open full image (new tab): ${item.alt}`}>Open full image (new tab)</a></figcaption>
@@ -38,7 +38,7 @@ function PhoneChapter({stage,index}) {
       <Panel className={styles.narrative}>
         <Heading number={String(index+1).padStart(2,'0')} label={`${stage.id.toUpperCase()} / RECORDED APP INTERFACE`} title={stage.title} id={`xr-${stage.id}-heading`}/>
         <p>{stage.description}</p><p className={styles.caption}>{stage.caption}</p>
-        <a className={styles.recordingLink} href={stage.src} target="_blank" rel="noreferrer">Open full recording <span aria-hidden="true">↗</span></a>
+        <a className={styles.recordingLink} href={stage.src} target="_blank" rel="noreferrer" aria-label="Open full recording (new tab)">Open full recording <span aria-hidden="true">↗</span></a>
         <p className={styles.recordingNote}>Original interface recording, presented on an iPhone display model. The website does not connect to tracking hardware.</p>
         <p className={styles.credit}>{stage.credit}</p>
       </Panel>
@@ -103,7 +103,7 @@ export default function XRProject() {
           <Heading number="05" label="CREDITS" title="A collaborative foundation." id="xr-credits-heading"/>
           <dl className={styles.credits}>{study.credits.map(item=><div key={item.role}><dt>{item.role}</dt><dd>{item.names}</dd></div>)}</dl><p className={styles.sourceNote}>{study.sourceNote}</p>
           <p className={styles.caption}>{study.limitations[1]} {study.limitations[3]}</p>
-          <div className={styles.recordingSource}><a className={styles.recordingLink} href={study.media.motion.src} target="_blank" rel="noreferrer">Original presentation excerpt <span aria-hidden="true">↗</span></a><p>{study.media.motion.caption}</p><p className={styles.credit}>{study.media.motion.credit}</p></div>
+          <div className={styles.recordingSource}><a className={styles.recordingLink} href={study.media.motion.src} target="_blank" rel="noreferrer" aria-label="Original presentation excerpt (new tab)">Original presentation excerpt <span aria-hidden="true">↗</span></a><p>{study.media.motion.caption}</p><p className={styles.credit}>{study.media.motion.credit}</p></div>
           <a className={styles.nextProject} href="/projects/bending-active/"><span>RELATED STUDY</span><strong data-display-type>Bending-Active Metal Panel Deformation</strong><span aria-hidden="true">↗</span></a>
         </Panel></footer>
       </article>

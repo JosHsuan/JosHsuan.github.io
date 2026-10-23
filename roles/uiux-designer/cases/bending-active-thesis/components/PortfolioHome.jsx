@@ -107,7 +107,7 @@ function Contact({standalone=false,scrolling=true}){
     <div className={scrolling?styles.scrollCopy:undefined} data-information-window={scrolling?'home-contact':undefined} data-information-motion-surface={scrolling?'plane':undefined} data-home-scroll-window={scrolling?'contact':undefined}>{scrolling&&<InformationSkin/>}<p className={styles.eyebrow}>03 / CONTACT</p><Heading id="contact-title" className={styles.sectionTitle}>Let’s connect.</Heading><p className={styles.prose}>Have a question about the work or an idea to share? I’d be happy to hear from you.</p></div>
     <div className={scrolling?`${styles.contactChannels} ${styles.scrollCopy}`:styles.contactChannels} data-information-window={scrolling?'home-contact-channels':undefined} data-information-motion-surface={scrolling?'plane':undefined} data-home-scroll-window={scrolling?'contact-channels':undefined}>{scrolling&&<InformationSkin/>}
       <a href={`mailto:${contact.email}`} className={styles.contactLink} data-contact-email><span><span className={styles.invitationLabel}>EMAIL</span><span className={styles.contactHandle}>{contact.email}</span></span><Arrow diagonal/></a>
-      <nav className={styles.socialLinks} aria-label="Public profiles" data-contact-social-links>{contact.socialLinks.map(link=><a key={link.id} href={link.href} target="_blank" rel="noreferrer">{link.label}<Arrow diagonal/></a>)}</nav>
+      <nav className={styles.socialLinks} aria-label="Public profiles" data-contact-social-links>{contact.socialLinks.map(link=><a key={link.id} href={link.href} target="_blank" rel="noreferrer" aria-label={`${link.label} (new tab)`}>{link.label}<Arrow diagonal/></a>)}</nav>
     </div>
   </section>;
 }

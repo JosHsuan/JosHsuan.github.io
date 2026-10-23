@@ -22,6 +22,6 @@ export default function EvidenceInspector({items}) {
     <InformationSkin/>
     <header><span>{item.figure} / SOURCE PAGE</span><button type="button" ref={closeButton} onClick={close}>Close source comparison</button></header>
     <img src={item.source} alt={`Original source page for ${item.figure}`} loading="eager"/>
-    <a href={item.source} target="_blank" rel="noreferrer">Open original source ↗</a>
+    <a href={item.source} target="_blank" rel="noreferrer" aria-label={`Open original source ↗ (new tab): ${item.figure}`}>Open original source ↗</a>
   </section>,host);
 }
