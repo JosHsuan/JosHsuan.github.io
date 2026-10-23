@@ -14,13 +14,17 @@ async function tabTo(page,target){
  for(let i=0;i<count+2;i++){await page.keyboard.press('Tab');if(await target.evaluate(node=>node===document.activeElement))return;}
  throw Error('Native Tab did not reach planning control');
 }
-async function visibleControl(control){
+async function visibleControl(control,receipt,beforeAssert){
  const value=await control.evaluate(node=>{
   const el=node.closest('label')??node,r=el.getBoundingClientRect(),hit=document.elementFromPoint((r.left+r.right)/2,(r.top+r.bottom)/2);
   const rect=r=>({left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height});
   const chrome=['[data-page-masthead]','[data-project-chapter-navigation]','[data-study-motion-toggle]'].map(selector=>{const nodes=[...document.querySelectorAll(selector)],el=nodes[0];return{selector,count:nodes.length,visible:el?.checkVisibility({visibilityProperty:true,opacityProperty:true})??false,rect:el?rect(el.getBoundingClientRect()):null};});
-  return{rect:rect(r),viewport:{width:innerWidth,height:innerHeight},hit:hit===el||el.contains(hit),focused:document.activeElement===node,focusVisible:node.matches(':focus-visible'),chrome};
+  const describe=element=>element?{tag:element.tagName,className:typeof element.className==='string'?element.className.slice(0,240):'',id:element.id.slice(0,120)}:null;
+  const hitAncestors=[];for(let ancestor=hit;ancestor&&hitAncestors.length<5;ancestor=ancestor.parentElement)hitAncestors.push(describe(ancestor));
+  return{rect:rect(r),inputRect:rect(node.getBoundingClientRect()),viewport:{width:innerWidth,height:innerHeight},hit:hit===el||el.contains(hit),actualHit:describe(hit),hitAncestors,y:scrollY,controlValue:node.value??null,activeElement:describe(document.activeElement),focused:document.activeElement===node,focusVisible:node.matches(':focus-visible'),chrome};
  });
+ (receipt.controlObservations??=[]).push(value);
+ if(beforeAssert)await beforeAssert(value);
  const {rect:r,viewport:v}=value;expect(r.left).toBeGreaterThanOrEqual(0);expect(r.right).toBeLessThanOrEqual(v.width);expect(r.top).toBeGreaterThanOrEqual(0);expect(r.bottom).toBeLessThanOrEqual(v.height);expect(r.height).toBeGreaterThanOrEqual(44);expect(value.hit).toBe(true);
  for(const item of value.chrome){expect(item.count,item.selector).toBe(1);if(item.visible){const c=item.rect;expect(Math.max(0,Math.min(r.right,c.right)-Math.max(r.left,c.left))*Math.max(0,Math.min(r.bottom,c.bottom)-Math.max(r.top,c.top))).toBe(0);}}
  return value;
@@ -45,11 +49,11 @@ async function inspect(page,receipt){
 }
 async function capture(page,info,name){const path=info.outputPath(name+'.png');await page.screenshot({path,scale:'device'});await info.attach(name,{path,contentType:'image/png'});}
 async function choices(page,guide,radios,receipt,info){
- await tabTo(page,radios.first());receipt.initialFocus=await visibleControl(radios.first());expect(receipt.initialFocus.focused).toBe(true);expect(receipt.initialFocus.focusVisible).toBe(true);
+ await tabTo(page,radios.first());receipt.initialFocus=await visibleControl(radios.first(),receipt,async value=>{receipt.initialFocus=value;await capture(page,info,'special-planning-first-focus');});expect(receipt.initialFocus.focused).toBe(true);expect(receipt.initialFocus.focusVisible).toBe(true);
  receipt.choices=[];
  for(let index=0;index<3;index++){
   await page.keyboard.press('ArrowRight');await expect(radios.nth(index+1)).toBeChecked();await expect(guide.locator(`[data-planning-description="${index}"]`)).toBeVisible();await expect(guide.locator(`[data-planning-description="${index}"]`)).toHaveText(section.diagramFocus.steps[index].description);await expect(guide.locator(`[data-planning-region="${index}"]`)).toHaveCSS('opacity','1');
-  receipt.choices.push(await visibleControl(radios.nth(index+1)));
+  receipt.choices.push(await visibleControl(radios.nth(index+1),receipt));
   if(index===2){
    const feedback=()=>guide.evaluate(node=>{
     const box=el=>{const r=el.getBoundingClientRect();return{top:r.top,bottom:r.bottom,left:r.left,right:r.right,intersectsViewport:r.bottom>0&&r.top<innerHeight&&r.right>0&&r.left<innerWidth,fullyInViewport:r.top>=0&&r.bottom<=innerHeight&&r.left>=0&&r.right<=innerWidth};};
@@ -88,7 +92,7 @@ test('Special planning areas preserve the complete source with native keyboard, 
   await capture(page,info,'special-planning-forced');expect(receipt.forced.opacity.every(value=>value===1)).toBe(true);expect(contrast(receipt.forced.color,receipt.forced.background)).toBeGreaterThanOrEqual(4.5);expect(contrast(receipt.forced.outline,receipt.forced.halo)).toBeGreaterThanOrEqual(3);await page.emulateMedia({forcedColors:'none'});
   await page.setViewportSize({width:320,height:844});await radios.nth(3).check();await radios.nth(3).scrollIntoViewIfNeeded();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);for(const label of await guide.locator('label').all())expect((await label.boundingBox()).height).toBeGreaterThanOrEqual(44);
-  receipt.compact=await visibleControl(radios.nth(3));await capture(page,info,'special-planning-controls-320');
+  receipt.compact=await visibleControl(radios.nth(3),receipt);await capture(page,info,'special-planning-controls-320');
   await guide.locator('[data-planning-region="2"] [data-planning-stroke=outline]').scrollIntoViewIfNeeded();await capture(page,info,'special-planning-plate-320');const full=info.outputPath('special-planning-complete-figure-320.png');await guide.screenshot({path:full,scale:'device'});await info.attach('special-planning-complete-figure-320',{path:full,contentType:'image/png'});await expect(image).toHaveAttribute('src',source.src);
  }catch(error){primary=error;throw error;}finally{try{await persist(info,receipt);}catch(error){if(!primary)throw error;}}
 });
@@ -99,7 +103,7 @@ test.describe('Special planning without JavaScript',()=>{
   try{
    await page.goto(route);await page.evaluate(()=>document.fonts.ready);const {guide,radios,action}=await inspect(page,receipt);await choices(page,guide,radios,receipt,info);
    if(isMobile){const label=radios.nth(3).locator('..');await label.scrollIntoViewIfNeeded();const b=await label.boundingBox();await page.touchscreen.tap(b.x+b.width/2,b.y+b.height/2);await expect(radios.nth(3)).toBeChecked();}
-   await tabTo(page,action);receipt.action=await visibleControl(action);const before={url:page.url(),y:await page.evaluate(()=>scrollY)};let popup,failed;
+   await tabTo(page,action);receipt.action=await visibleControl(action,receipt);const before={url:page.url(),y:await page.evaluate(()=>scrollY)};let popup,failed;
    try{[popup]=await Promise.all([page.waitForEvent('popup'),page.keyboard.press('Enter')]);await popup.waitForLoadState('domcontentloaded');expect(new URL(popup.url()).pathname).toBe(source.src);const img=popup.locator('img');await expect.poll(()=>img.evaluate(node=>node.complete&&node.naturalWidth>0)).toBe(true);expect(await img.evaluate(node=>[node.naturalWidth,node.naturalHeight])).toEqual([1536,1903]);}
    catch(error){failed=error;throw error;}finally{try{if(popup)await popup.close();await page.bringToFront();}catch(error){if(!failed)throw error;}}
    expect(page.url()).toBe(before.url);expect(await page.evaluate(()=>scrollY)).toBe(before.y);await expect(action).toBeFocused();receipt.returned=before;await capture(page,info,'special-planning-nojs-source-action');
