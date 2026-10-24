@@ -7,7 +7,7 @@ export function acquireHomeResearchScene(options){
  if(options.signal.aborted)return Promise.reject(new DOMException('Preview aborted','AbortError'));
  const touch=options.host.ownerDocument.defaultView.matchMedia?.('(pointer: coarse)').matches===true;
  return acquireProjectModelScene({...options,presentation:{
-  id:'home-research',canvasAttribute:'data-home-research-canvas',
+  id:'home-research',transparent:true,visibleEditorialSet:false,canvasAttribute:'data-home-research-canvas',
   pixelBudget:touch?HOME_RESEARCH_TOUCH_PIXEL_BUDGET:HOME_RESEARCH_PIXEL_BUDGET,
   prepare:prepareHomeResearchScore,sample:sampleHomeResearchScore,
  }});

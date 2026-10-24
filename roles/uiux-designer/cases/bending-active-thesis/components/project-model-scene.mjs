@@ -22,6 +22,20 @@ export function commitProjectModelDraw({renderer,scene,camera,host,shaderFailure
  return{calls:renderer.info.render.calls};
 }
 
+/** Home removes only the authored exhibition scenery, not source meshes or
+ * its area-light rig. The original static-card set is untouched by default. */
+export function applyProjectModelPresentationSet(group,presentation){
+ let visibleEditorialMeshes=0,editorialAreaLights=0;
+ group.traverse(node=>{
+  if(node.isMesh&&node.userData.sourceGeometry===false){
+   if(presentation?.visibleEditorialSet===false)node.visible=false;
+   if(node.visible)visibleEditorialMeshes++;
+  }
+  if(node.isRectAreaLight&&node.visible)editorialAreaLights++;
+ });
+ return{transparent:presentation?.transparent===true,visibleEditorialMeshes,editorialAreaLights,contactFloorShadow:presentation?.visibleEditorialSet!==false};
+}
+
 /** Pure draw gate; last committed state changes only after a successful render.
  * Desired progress may advance while suspended without dirtying GPU state. */
 export function projectModelDrawDecision({lastSize,width,height,animated=false,lastProgress,progress,suspended=false}){
@@ -37,7 +51,7 @@ export function acquireProjectModelScene({host,signal,onFailure=()=>{},presentat
  const manager=new T.LoadingManager();let renderer=null,budget=null,scene=null,camera=null,gltf=null,hdr=null,environment=null,exhibition=null;
  let disposed=false,frames=0,meta=null,supportPoints=null,lastSize=null,firstDraw=null,shaderFailure=null;const adapters=[],bases=[];
  const pixelBudget=presentation?.pixelBudget??PROJECT_MODEL_PIXEL_BUDGET;
- let prepared=null,preparations=0,progress=0,suspended=false,lastRecipe=null;
+ let prepared=null,preparations=0,progress=0,suspended=false,lastRecipe=null,presentationSet=null;
  const dispose=()=>{
   if(disposed)return;disposed=true;supportPoints=null;signal.removeEventListener('abort',abort);
   manager.abort();
@@ -85,15 +99,15 @@ export function acquireProjectModelScene({host,signal,onFailure=()=>{},presentat
   });
   if(roles.size!==3)throw Error('Missing project source geometry');
   supportPoints=collectProjectModelSupport(gltf.scene);if(supportPoints.length!==meta.vertices*3)throw Error('Project source support differs');
-  renderer=new T.WebGLRenderer({antialias:false,alpha:false,powerPreference:'default'});
-  renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1;renderer.outputColorSpace=T.SRGBColorSpace;renderer.setClearColor('#090d0d',1);
+  renderer=new T.WebGLRenderer({antialias:false,alpha:presentation?.transparent===true,powerPreference:'default'});
+  renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1;renderer.outputColorSpace=T.SRGBColorSpace;renderer.setClearColor('#090d0d',presentation?.transparent===true?0:1);
   renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFShadowMap;renderer.shadowMap.autoUpdate=false;
   renderer.debug.onShaderError=()=>{shaderFailure=Error('Project shader unavailable');};
   renderer.domElement.setAttribute('aria-hidden','true');renderer.domElement.setAttribute(presentation?.canvasAttribute??'data-project-model-canvas','');
   Object.assign(renderer.domElement.style,{position:'absolute',inset:'0',width:'100%',height:'100%',display:'block',pointerEvents:'none'});
   renderer.domElement.addEventListener('webglcontextlost',lost);
   budget=createRendererBudget(renderer,()=>({deviceDpr:host.ownerDocument.defaultView.devicePixelRatio||1,pixelBudget}));
-  scene=new T.Scene();camera=new T.PerspectiveCamera();scene.background=new T.Color('#090d0d');scene.fog=new T.FogExp2('#091217',.03);
+  scene=new T.Scene();camera=new T.PerspectiveCamera();scene.background=presentation?.transparent===true?null:new T.Color('#090d0d');scene.fog=new T.FogExp2('#091217',.03);
   const generator=new T.PMREMGenerator(renderer);try{environment=generator.fromEquirectangular(hdr);}finally{generator.dispose();hdr.dispose();hdr=null;}
   scene.environment=environment.texture;scene.add(gltf.scene);exhibition=createExhibitionStage({bounds:meta.bounds});scene.add(exhibition.group);
   const lights={};for(const id of ['key','fill','rim']){lights[id]=new T.DirectionalLight();scene.add(lights[id],lights[id].target);}
@@ -110,7 +124,7 @@ export function acquireProjectModelScene({host,signal,onFailure=()=>{},presentat
     for(const id of ['key','fill','rim']){const light=lights[id],spec=direction[id];light.position.fromArray(spec.position.map((value,i)=>value+stage.center[i]));light.target.position.fromArray(stage.lightTarget);light.color.fromArray(spec.color);light.intensity=spec.intensity;}
     lights.hemisphere.color.fromArray(direction.hemisphere.sky);lights.hemisphere.groundColor.fromArray(direction.hemisphere.ground);lights.hemisphere.intensity=direction.hemisphere.intensity;
     const shadow=lights.key.shadow;shadow.camera.left=shadow.camera.bottom=-stage.shadowHalfExtent;shadow.camera.right=shadow.camera.top=stage.shadowHalfExtent;shadow.camera.near=.05;shadow.camera.far=Math.max(20,stage.radius*10);shadow.camera.updateProjectionMatrix();shadow.bias=direction.stage.shadow.bias;shadow.normalBias=direction.stage.shadow.normalBias;
-    exhibition.update({direction,camera,reducedMotion:false,lightSweep:0,backdrop:chapterScene.backdrop});scene.environmentIntensity=direction.environmentIntensity;scene.fog.color.fromArray(direction.haze.color);scene.fog.density=direction.haze.density;
+    exhibition.update({direction,camera,reducedMotion:false,lightSweep:0,backdrop:chapterScene.backdrop});if(presentation)presentationSet=applyProjectModelPresentationSet(exhibition.group,presentation);scene.environmentIntensity=direction.environmentIntensity;scene.fog.color.fromArray(direction.haze.color);scene.fog.density=direction.haze.density;
     if(!presentation||resized)renderer.shadowMap.needsUpdate=true;
     const draw=commitProjectModelDraw({renderer,scene,camera,host,shaderFailure:()=>shaderFailure});
     lastSize={width,height};lastRecipe=recipe;frames++;
@@ -127,7 +141,7 @@ export function acquireProjectModelScene({host,signal,onFailure=()=>{},presentat
    },
    suspend(){suspended=true;},
    resume(){suspended=false;},
-   inspect:()=>({frames,firstDraw:firstDraw?{...firstDraw}:null,sourceRevision:meta.revision,vertices:meta.vertices,triangles:meta.triangles,canvasCount:disposed?0:1,pixelBudget,budget:budget.inspect(),calls:renderer.info.render.calls,materials:adapters.map(value=>value.inspect()),toneMapping:'ACESFilmic',exposure:1,output:'srgb',compositor:false,disposed,...(presentation?{presentation:presentation.id,progress:lastRecipe?.progress??null,beat:lastRecipe?.beat??null,pose:lastRecipe?.pose?structuredClone(lastRecipe.pose):null,sourceGeometryUnmodified:true,preparations,suspended}: {})}),
+   inspect:()=>({frames,firstDraw:firstDraw?{...firstDraw}:null,sourceRevision:meta.revision,vertices:meta.vertices,triangles:meta.triangles,canvasCount:disposed?0:1,pixelBudget,budget:budget.inspect(),calls:renderer.info.render.calls,materials:adapters.map(value=>value.inspect()),toneMapping:'ACESFilmic',exposure:1,output:'srgb',compositor:false,disposed,...(presentation?{presentation:presentation.id,presentationSet:presentationSet?{...presentationSet,sourceMeshes:roles.size}:null,progress:lastRecipe?.progress??null,beat:lastRecipe?.beat??null,pose:lastRecipe?.pose?structuredClone(lastRecipe.pose):null,sourceGeometryUnmodified:true,preparations,suspended}: {})}),
    dispose,
   };
  };

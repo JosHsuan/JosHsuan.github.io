@@ -6,7 +6,7 @@ import * as T from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {collectProjectModelSupport} from '../components/project-model-recipe.mjs';
 import {prepareHomeResearchScore,sampleHomeResearchScore,HOME_RESEARCH_PIXEL_BUDGET,HOME_RESEARCH_TOUCH_PIXEL_BUDGET} from '../runtime/site/home-research-score.mjs';
-import {projectModelDrawDecision} from '../components/project-model-scene.mjs';
+import {projectModelDrawDecision,applyProjectModelPresentationSet} from '../components/project-model-scene.mjs';
 import {resolveRenderBudget} from '../components/render-budget.mjs';
 const meta=JSON.parse(await readFile(new URL('../release/public/assets/source-layers.json',import.meta.url),'utf8'));
 const bytes=await readFile(new URL('../release/public/assets/source-layers.glb',import.meta.url));
@@ -23,14 +23,18 @@ test('Home camera samples original complete geometry at desktop/mobile ratios wi
    const result=sampleHomeResearchScore(prepared,progress),{pose}=result;
    assert.equal(result.sourceRevision,meta.revision);assert.equal(result.sourceGeometryUnmodified,true);assert.equal(pose.supportVertices,172789);
    assert.equal(result.material.finish,'satin');assert.deepEqual(result.direction,prepared.recipe.direction);
+   const projected={min:[Infinity,Infinity],max:[-Infinity,-Infinity]};
+   assert.equal(pose.fitSupportVertices,444);
    const camera=new T.PerspectiveCamera(pose.fov,pose.aspect,pose.near,pose.far);
    camera.position.fromArray(pose.position);camera.up.fromArray(pose.up);camera.lookAt(...pose.target);camera.updateMatrixWorld(true);
    for(let i=0;i<support.length;i+=3){
     point.fromArray(support,i).applyMatrix4(camera.matrixWorldInverse);
     assert(-point.z>pose.near&&-point.z<pose.far);
     point.applyMatrix4(camera.projectionMatrix);
-    assert(Math.abs(point.x)<=pose.fill+1e-6&&Math.abs(point.y)<=pose.fill+1e-6,'actual source stays within conservative fit');
+    assert(Math.abs(point.x)<=pose.fill+1e-6&&Math.abs(point.y)<=pose.fill+1e-6,'actual source stays within convex support fit');
+    for(const [axis,value] of [point.x,point.y].entries()){projected.min[axis]=Math.min(projected.min[axis],value);projected.max[axis]=Math.max(projected.max[axis],value);}
    }
+   assert(Math.abs(Math.max(...projected.max.map((value,i)=>(value-projected.min[i])/2))-pose.fill)<1e-6,'real silhouette fills target rather than empty box corners');
   }
  }
  assert.equal(sourceHash(),before);assert.equal(JSON.stringify(meta),metadata);
@@ -79,4 +83,13 @@ test('draw gate deduplicates committed poses, retains suspended intent and prepa
  submit(.7,{width:700,suspended:true});assert.equal(preparations,1);
  submit(.7,{width:700});assert.equal(draws,5);assert.equal(preparations,2);
  assert.deepEqual(projectModelDrawDecision({lastSize:{width:400,height:400},width:400,height:400,lastProgress:0,progress:1}),{resized:false,draw:false,prepare:false},'static card ignores presentation progress');
+});
+
+test('transparent Home scenery policy hides only non-source meshes and retains actual area lights',()=>{
+ const group=new T.Group(),source=new T.Mesh(),scenery=new T.Mesh(),light=new T.RectAreaLight();
+ source.userData.sourceGeometry=true;scenery.userData.sourceGeometry=false;group.add(source,scenery,light);
+ const original={geometry:source.geometry,material:source.material,matrix:source.matrix.clone()};
+ assert.deepEqual(applyProjectModelPresentationSet(group,null),{transparent:false,visibleEditorialMeshes:1,editorialAreaLights:1,contactFloorShadow:true});
+ assert.deepEqual(applyProjectModelPresentationSet(group,{transparent:true,visibleEditorialSet:false}),{transparent:true,visibleEditorialMeshes:0,editorialAreaLights:1,contactFloorShadow:false});
+ assert.equal(source.visible,true);assert.equal(light.visible,true);assert.equal(source.geometry,original.geometry);assert.equal(source.material,original.material);assert(source.matrix.equals(original.matrix));
 });

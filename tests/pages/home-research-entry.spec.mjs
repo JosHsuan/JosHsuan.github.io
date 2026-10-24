@@ -9,7 +9,7 @@ async function cleanupPreserving(action,primary){try{await action();}catch(error
 async function receipt(info,name,value){const path=info.outputPath(name+'.json');await writeFile(path,JSON.stringify(value,null,2));await info.attach(name,{path,contentType:'application/json'});}
 
 test('Home native research camera reverses while independent idle adds no 3D work and Pause retains native reading',async({page,isMobile},info)=>{
- let primary;const rows=[],requests=[];page.on('request',r=>{if(/\.(glb|hdr)(?:\?|$)/.test(r.url()))requests.push(r.url());});await page.goto('/');await entered(page);
+ let primary;const rows=[],requests=[];page.on('request',r=>{if(/\.(glb|hdr)(?:\?|$)/.test(r.url()))requests.push(r.url());});await page.goto('/');await entered(page);await expect(page.locator('[data-home-research-poster]')).toHaveCSS('opacity','0');
  const capture=async name=>{await expect.poll(async()=>{const s=await read(page);return Math.abs(s.presenter.progress-s.nativeProgress)<1e-9&&(!s.presenter.enabled||Math.abs(s.hero.resource.progress-s.presenter.progress)<1e-9);},{timeout:WAIT}).toBe(true);const before=await read(page),path=info.outputPath(name+'.png');await page.screenshot({path});const after=await read(page);rows.push({phase:name,before,after});expect(after.hero.resource.pose).toEqual(before.hero.resource.pose);await info.attach(name,{path,contentType:'image/png'});};
  await capture('home-initial');
  const range=await page.locator('[data-home-research-story]').evaluate(root=>{
@@ -39,7 +39,7 @@ test('Home native research camera reverses while independent idle adds no 3D wor
   await pause.click();await expect(pause).toHaveAttribute('aria-pressed','false');const resumed=await current(page);rows.push({phase:'resumed',...resumed});
   expect(resumed.hero.resource.pose.position).not.toEqual(held.hero.resource.pose.position);
   expect(resumed.hero.resource.pixelBudget).toBe(isMobile?393216:786432);
-  expect(resumed.hero.resource.vertices).toBe(172789);expect(resumed.hero.resource.triangles).toBe(227521);
+  expect(resumed.hero.resource.vertices).toBe(172789);expect(resumed.hero.resource.triangles).toBe(227521);expect(resumed.hero.resource.presentationSet).toEqual({transparent:true,visibleEditorialMeshes:0,editorialAreaLights:2,contactFloorShadow:false,sourceMeshes:3});
   await expect(page.locator('[data-project-grid] canvas,[data-project-model-preview]')).toHaveCount(0);
   await expect(page.locator('[data-project-card]')).toHaveCount(8);
   for(const suffix of ['/assets/source-layers.glb','/assets/studio-small.hdr'])expect(requests.filter(url=>url.endsWith(suffix))).toHaveLength(1);
@@ -48,19 +48,54 @@ test('Home native research camera reverses while independent idle adds no 3D wor
  }catch(error){primary=error;throw error;}finally{await cleanupPreserving(()=>receipt(info,'home-research-native',{range,requests,rows}),primary);}
 });
 
+async function captureEntry(page,info,rows,name,loaderSelector,imageSelector){
+ const loader=page.locator(loaderSelector),image=page.locator(imageSelector);
+ await expect(loader).toBeVisible();await expect(image).toBeVisible();
+ await expect.poll(()=>image.evaluate(node=>node.complete&&node.naturalWidth>0),{timeout:WAIT}).toBe(true);
+ const paint=await image.evaluate(node=>{const r=node.getBoundingClientRect(),ancestors=[];let opacity=1;for(let n=node;n;n=n.parentElement){const c=getComputedStyle(n);opacity*=Number(c.opacity);ancestors.push({tag:n.tagName,display:c.display,visibility:c.visibility});}return{src:node.getAttribute('src'),currentSrc:node.currentSrc,naturalWidth:node.naturalWidth,naturalHeight:node.naturalHeight,opacity,ancestors,left:r.left,top:r.top,right:r.right,bottom:r.bottom,viewport:{width:innerWidth,height:innerHeight}};});
+ rows.push({phase:name+'-loader-paint',paint});expect(paint.src).toBe('/assets/cinematic/model-poster.webp');expect(paint.opacity).toBeGreaterThan(0);expect(paint.ancestors.every(a=>a.display!=='none'&&a.visibility!=='hidden')).toBe(true);expect(paint.right).toBeGreaterThan(0);expect(paint.bottom).toBeGreaterThan(0);expect(paint.left).toBeLessThan(paint.viewport.width);expect(paint.top).toBeLessThan(paint.viewport.height);
+ const path=info.outputPath('home-entry-'+name+'.png');await page.screenshot({path});await info.attach('home-entry-'+name,{path,contentType:'image/png'});
+}
+
 test('Home native project entry disposes its own source and destination readiness remains independent through history',async({page,isMobile},info)=>{
  test.setTimeout(scenarioTimeout(120000));
- let primary;const rows=[];try{await page.goto('/');await entered(page);
+ let primary,activation,activationError,releaseDocument,releaseModel,documentHeld=false,modelHeld=false;
+ const documentGate=new Promise(resolve=>{releaseDocument=resolve;}),modelGate=new Promise(resolve=>{releaseModel=resolve;});
+ const rows=[];try{await page.goto('/');await entered(page);
+ let firstDocument=true,firstModel=true;
+ await page.route('**/projects/bending-active/',async route=>{if(firstDocument&&route.request().isNavigationRequest()){firstDocument=false;documentHeld=true;await documentGate;}await route.continue();});
+ await page.route('**/assets/source-layers.glb',async route=>{if(firstModel){firstModel=false;modelHeld=true;await modelGate;}await route.continue();});
  await page.evaluate(()=>addEventListener('pagehide',event=>{sessionStorage.setItem('test-home-research-departure',JSON.stringify({persisted:event.persisted,hero:window.__homeResearch.inspect()}));},{once:true}));
  const before=await read(page);rows.push({phase:'home',...before});
  const entry=page.locator('[data-home-research-link]');
- if(isMobile)await entry.tap();
+ if(isMobile)activation=entry.tap();
  else{
-  await page.locator('[data-home-research-entry] h2').click();await page.keyboard.press('Tab');await expect(entry).toBeFocused();
+  await page.locator('[data-home-research-entry] h2').click();
+  // A non-focusable heading click does not establish the same sequential
+  // starting point in every engine. Traverse real controls, never set focus.
+  const traversal=[];rows.push({phase:'native-entry-tab-order',traversal});
+  for(let step=0;step<4;step++){
+   await page.keyboard.press('Tab');
+   const focus=await page.evaluate(()=>{const node=document.activeElement;return{tag:node?.tagName??null,id:node?.id??null,href:node?.getAttribute('href')??null,name:node?.textContent?.trim().slice(0,160)??'',pause:node?.hasAttribute('data-home-research-pause')??false,entry:node?.hasAttribute('data-home-research-link')??false,y:scrollY};});
+   traversal.push(focus);if(focus.entry)break;
+  }
+  await expect(entry).toBeFocused();
   const focus=await entry.evaluate(node=>{const r=node.getBoundingClientRect(),s=getComputedStyle(node);return{visible:node.matches(':focus-visible'),outline:parseFloat(s.outlineWidth),top:r.top,bottom:r.bottom,height:innerHeight,name:node.textContent.trim()};});
   expect(focus.visible).toBe(true);expect(focus.outline).toBeGreaterThan(0);expect(focus.top).toBeGreaterThanOrEqual(0);expect(focus.bottom).toBeLessThanOrEqual(focus.height);expect(focus.name).toContain('Explore Bending-Active');rows.push({phase:'native-keyboard-entry',focus});
-  await page.keyboard.press('Enter');
+  activation=page.keyboard.press('Enter');
  }
+ activation.catch(error=>{activationError=error;});
+ await expect.poll(()=>{if(activationError)throw activationError;return documentHeld;},{timeout:WAIT}).toBe(true);
+ const outgoing=await page.evaluate(()=>({site:window.__site.inspect(),ticket:JSON.parse(sessionStorage.getItem('portfolio-navigation-handoff-v1')),url:location.href}));rows.push({phase:'outgoing-held-original-document',...outgoing});
+ expect(outgoing.site.presentation).toBe('bending-active');expect(outgoing.ticket.presentation).toBe('bending-active');expect(outgoing.ticket.url).toBe(new URL('/projects/bending-active/',outgoing.url).href);expect(outgoing.ticket.id).toBe(outgoing.site.id);
+ await captureEntry(page,info,rows,'outgoing','[data-site-loader]','[data-site-research-handoff]');
+ releaseDocument();
+ await expect.poll(()=>modelHeld,{timeout:WAIT}).toBe(true);
+ await expect.poll(()=>page.evaluate(()=>window.__story?.inspect().entry.phase),{timeout:WAIT}).toBe('preparing');
+ const arrival=await page.evaluate(()=>({site:window.__site.inspect(),entry:window.__story.inspect().entry,sceneReady:window.__thesis?.inspect().ready===true,marker:document.documentElement.getAttribute('data-site-project-entry')}));rows.push({phase:'arrival-held-original-model',...arrival});
+ expect(arrival.marker).toBe('bending-active');expect(arrival.site.phase).toBe('requested');expect(arrival.sceneReady).toBe(false);
+ await captureEntry(page,info,rows,'arrival','[data-entry-loader]','[data-entry-loader] img');
+ releaseModel();await activation;
  await expect(page).toHaveURL(/\/projects\/bending-active\/$/);
  await expect.poll(()=>page.evaluate(()=>window.__story?.inspect().entry.phase),{timeout:WAIT}).toBe('entered');
  const destination=await page.evaluate(()=>({departure:JSON.parse(sessionStorage.getItem('test-home-research-departure')),site:window.__site.inspect(),scene:window.__thesis.inspect(),heroCanvases:document.querySelectorAll('[data-home-research-canvas]').length}));rows.push({phase:'destination',...destination});
@@ -75,7 +110,14 @@ test('Home native project entry disposes its own source and destination readines
  await page.goForward();await expect.poll(()=>page.evaluate(()=>window.__story?.inspect().entry.phase),{timeout:WAIT}).toBe('entered');
  await expect(page.locator('[data-home-research-canvas]')).toHaveCount(0);
  rows.push({phase:'forward',url:page.url(),site:await page.evaluate(()=>window.__site.inspect())});
- }catch(error){primary=error;throw error;}finally{await cleanupPreserving(()=>receipt(info,'home-native-project-history',rows),primary);}
+ }catch(error){primary=error;throw error;}finally{
+  releaseDocument();releaseModel();
+  let cleanupError=primary;
+  for(const cleanup of [()=>receipt(info,'home-native-project-history',rows),()=>page.unrouteAll({behavior:'wait'}),()=>activation]){
+   try{await cleanup();}catch(error){cleanupError??=error;}
+  }
+  if(!primary&&cleanupError)throw cleanupError;
+ }
 });
 
 for(const policy of ['reduced','save-data','forced-colors','no-js'])test(`Home ${policy} keeps original poster and eight native destinations without model acquisition`,async({browser,baseURL,viewport,isMobile,deviceScaleFactor},info)=>{
@@ -85,13 +127,18 @@ for(const policy of ['reduced','save-data','forced-colors','no-js'])test(`Home $
   const page=await context.newPage(),requests=[];page.on('request',r=>{if(/\.(glb|hdr)(?:\?|$)/.test(r.url()))requests.push(r.url());});
   await page.goto('/');if(policy!=='no-js')await entered(page);
   const poster=page.locator('[data-home-research-poster]');await expect(poster).toHaveAttribute('src','/assets/cinematic/model-poster.webp');
-  await expect.poll(()=>poster.evaluate(node=>node.complete&&node.naturalWidth>0),{timeout:WAIT}).toBe(true);
+  await expect.poll(()=>poster.evaluate(node=>node.complete&&node.naturalWidth>0),{timeout:WAIT}).toBe(true);await expect(poster).toHaveCSS('opacity','1');
   await expect(page.locator('[data-home-research-canvas],[data-project-model-preview]')).toHaveCount(0);
   await expect(page.locator('[data-project-card]')).toHaveCount(8);
   await expect(page.locator('[data-home-research-link]')).toHaveAttribute('href','/projects/bending-active/');
   if(policy!=='no-js'){const state=await read(page);expect(state.hero.acquisitions).toBe(0);expect(state.hero.arrivalStatic).toBe(true);}
   expect(requests).toEqual([]);const sizes=[];
-  for(const width of policy==='reduced'&&isMobile?[390,320]:[viewport.width]){await page.setViewportSize({width,height:viewport.height});const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);expect(overflow).toBe(false);sizes.push({width,overflow});const path=info.outputPath(`home-${policy}-${width}.png`);await page.screenshot({path});await info.attach(`home-${policy}-${width}`,{path,contentType:'image/png'});}
+  for(const width of policy==='reduced'&&isMobile?[390,320]:[viewport.width]){await page.setViewportSize({width,height:viewport.height});await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));await expect.poll(()=>page.evaluate(()=>scrollY),{timeout:WAIT}).toBe(0);const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);expect(overflow).toBe(false);sizes.push({width,overflow});const path=info.outputPath(`home-${policy}-${width}.png`);await page.screenshot({path});await info.attach(`home-${policy}-${width}`,{path,contentType:'image/png'});
+   await poster.evaluate(node=>node.scrollIntoView({block:'center',behavior:'instant'}));
+   const bounds=await poster.evaluate(node=>{const r=node.getBoundingClientRect(),css=getComputedStyle(node);return{left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:innerWidth,height:innerHeight,opacity:css.opacity,fit:css.objectFit,naturalWidth:node.naturalWidth,naturalHeight:node.naturalHeight,y:scrollY};});
+   expect(bounds.left).toBeGreaterThanOrEqual(0);expect(bounds.top).toBeGreaterThanOrEqual(0);expect(bounds.right).toBeLessThanOrEqual(bounds.width);expect(bounds.bottom).toBeLessThanOrEqual(bounds.height);expect(bounds.opacity).toBe('1');expect(bounds.fit).toBe('contain');sizes.at(-1).poster=bounds;
+   const fallbackPath=info.outputPath(`home-${policy}-${width}-poster.png`);await page.screenshot({path:fallbackPath});await info.attach(`home-${policy}-${width}-poster`,{path:fallbackPath,contentType:'image/png'});
+  }
   await receipt(info,'home-static-policy',{policy,requests,sizes});
  }catch(error){primary=error;throw error;}finally{await cleanupPreserving(()=>context.close(),primary);}
 });
@@ -105,7 +152,7 @@ test('Home failed acquisition latches its genuine poster without late source upg
   await expect(page.locator('[data-home-research-canvas]')).toHaveCount(0);
   await page.unrouteAll({behavior:'wait'});await page.mouse.wheel(0,150);await frames(page,8);const after=await read(page);
   expect(after.hero.acquisitions).toBe(failed.hero.acquisitions);expect(after.hero.resource).toBeNull();expect(after.hero.arrivalStatic).toBe(true);
-  await expect(page.locator('[data-home-research-poster]')).toBeVisible();await expect(page.locator('[data-home-research-link]')).toHaveAttribute('href','/projects/bending-active/');
+  await expect(page.locator('[data-home-research-poster]')).toBeVisible();await expect(page.locator('[data-home-research-poster]')).toHaveCSS('opacity','1');await expect(page.locator('[data-home-research-link]')).toHaveAttribute('href','/projects/bending-active/');
   await receipt(info,'home-failed-poster',{failed,after});
  }catch(error){primary=error;throw error;}finally{await cleanupPreserving(()=>page.unrouteAll({behavior:'wait'}),primary);}
 });

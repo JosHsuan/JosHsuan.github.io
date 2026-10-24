@@ -40,13 +40,7 @@ function Introduction(){
         <div className={styles.scrollCopy} data-information-window="home-introduction" data-information-motion-surface="plane" data-home-scroll-window="introduction"><InformationSkin/>
           <p className={styles.eyebrow}>{introduction.discipline}</p>
           <h1 id="home-title" className={styles.homeTitle}><span>{introduction.greeting}{' '}</span><span>{introduction.name}<span className={styles.period}>.</span></span></h1>
-          <p className={styles.statement} data-introduction-statement>{introduction.statement}</p>
-          <p className={styles.description} data-introduction-description>{introduction.description}</p>
         </div>
-        <a href="#projects" className={`${styles.projectInvitation} ${styles.scrollCopy}`} data-home-project-link data-information-window="home-invitation" data-information-motion-surface="plane" data-home-scroll-window="invitation"><InformationSkin/>
-          <span className={styles.invitationCopy}><span className={styles.invitationLabel}>SELECTED WORK / {String(projects.length).padStart(2,'0')}</span><span className={styles.invitationTitle} data-display-type>Between physical and digital.</span><span className={styles.invitationAction}>Explore the projects</span></span>
-          <span className={styles.invitationArrow}><Arrow/></span>
-        </a>
       </div>
       <div className={styles.researchVisual} data-home-research-visual>
         <HomeResearchStage poster={projects[0].image} className={styles.researchStage}/>
@@ -58,6 +52,16 @@ function Introduction(){
         <p>Geometric representation, metal-panel openings and physical assembly.</p>
         <a href="/projects/bending-active/" className={styles.researchLink} data-home-research-link><span>Explore Bending-Active</span><Arrow diagonal/></a>
         <p className={styles.researchNote}>An original digital model of the research assembly. Scroll to examine its form, then enter the project.</p>
+      </div>
+      <div className={styles.researchProse}>
+        <div className={styles.scrollCopy} data-information-window="home-research-prose" data-information-motion-surface="plane" data-home-scroll-window="research-prose"><InformationSkin/>
+          <p className={styles.statement} data-introduction-statement>{introduction.statement}</p>
+          <p className={styles.description} data-introduction-description>{introduction.description}</p>
+        </div>
+        <a href="#projects" className={`${styles.projectInvitation} ${styles.scrollCopy}`} data-home-project-link data-information-window="home-invitation" data-information-motion-surface="plane" data-home-scroll-window="invitation"><InformationSkin/>
+          <span className={styles.invitationCopy}><span className={styles.invitationLabel}>SELECTED WORK / {String(projects.length).padStart(2,'0')}</span><span className={styles.invitationTitle} data-display-type>Between physical and digital.</span><span className={styles.invitationAction}>Explore the projects</span></span>
+          <span className={styles.invitationArrow}><Arrow/></span>
+        </a>
       </div>
     </div>
   </section>;

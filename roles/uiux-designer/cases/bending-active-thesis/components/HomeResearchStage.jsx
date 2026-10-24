@@ -7,7 +7,7 @@ import {registerHomeResearchStage} from '../runtime/site/HomeResearchStageRegist
 
 const lease=createExclusivePreviewLease();
 export default function HomeResearchStage({poster,className=''}){
- const host=useRef(null),controls=useRef(null),[state,setState]=useState({phase:'poster',reason:'initial',paused:false});
+ const host=useRef(null),controls=useRef(null),[state,setState]=useState({phase:'poster',reason:'initial',paused:false,painted:false});
  useEffect(()=>{
   const node=host.current,root=node.closest('[data-home-research-story]');
   if(!root)return;
@@ -20,7 +20,7 @@ export default function HomeResearchStage({poster,className=''}){
   if(arrivalStatic)staticReady(staticReason);
   lifecycle=createPreviewLifecycle({lease,retainWhenInactive:true,onState:snapshot=>{
    if(disposed)return;
-   setState({phase:snapshot.phase,reason:snapshot.reason,paused});
+   setState({phase:snapshot.phase,reason:snapshot.reason,paused,painted:snapshot.phase==='ready'&&snapshot.resource?.firstDraw?.completed===true});
    if(snapshot.phase==='ready'&&snapshot.resource?.firstDraw?.completed)readiness.report({mode:'model'});
    else if(snapshot.phase==='failed'){arrivalStatic=true;staticReason=snapshot.reason;staticReady(snapshot.reason);}
    publish();
@@ -63,7 +63,9 @@ export default function HomeResearchStage({poster,className=''}){
  },[]);
  return <div className={className} data-home-research-stage data-preview-phase={state.phase} data-preview-reason={state.reason}>
   <div ref={host} data-home-research-host data-site-preview-required style={{position:'absolute',inset:0,overflow:'hidden',pointerEvents:'none'}}>
-   <img src={poster.src} width={poster.width} height={poster.height} alt={poster.alt??''} loading="eager" decoding="async" data-site-critical data-home-research-poster style={{display:'block',width:'100%',height:'100%',objectFit:'contain'}}/>
+   {/* Keep native image semantics and decoded fallback pixels; only a genuine
+       ready first draw hides its paint beneath the transparent source canvas. */}
+   <img src={poster.src} width={poster.width} height={poster.height} alt={poster.alt??''} loading="eager" decoding="async" data-site-critical data-home-research-poster style={{display:'block',width:'100%',height:'100%',objectFit:'contain',opacity:state.painted?0:1}}/>
   </div>
   {state.phase==='ready'&&<button type="button" data-home-research-pause aria-pressed={state.paused} onClick={()=>controls.current?.()}>{state.paused?'Resume specimen motion':'Pause specimen motion'}</button>}
  </div>;
