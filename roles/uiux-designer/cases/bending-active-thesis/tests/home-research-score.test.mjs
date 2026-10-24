@@ -6,7 +6,7 @@ import * as T from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {collectProjectModelSupport} from '../components/project-model-recipe.mjs';
 import {prepareHomeResearchScore,sampleHomeResearchScore,HOME_RESEARCH_PIXEL_BUDGET,HOME_RESEARCH_TOUCH_PIXEL_BUDGET} from '../runtime/site/home-research-score.mjs';
-import {projectModelDrawDecision,applyProjectModelPresentationSet} from '../components/project-model-scene.mjs';
+import {projectModelDrawDecision,applyProjectModelPresentationSet,inspectProjectModelSurface} from '../components/project-model-scene.mjs';
 import {resolveRenderBudget} from '../components/render-budget.mjs';
 const meta=JSON.parse(await readFile(new URL('../release/public/assets/source-layers.json',import.meta.url),'utf8'));
 const bytes=await readFile(new URL('../release/public/assets/source-layers.glb',import.meta.url));
@@ -92,4 +92,22 @@ test('transparent Home scenery policy hides only non-source meshes and retains a
  assert.deepEqual(applyProjectModelPresentationSet(group,null),{transparent:false,visibleEditorialMeshes:1,editorialAreaLights:1,contactFloorShadow:true});
  assert.deepEqual(applyProjectModelPresentationSet(group,{transparent:true,visibleEditorialSet:false}),{transparent:true,visibleEditorialMeshes:0,editorialAreaLights:1,contactFloorShadow:false});
  assert.equal(source.visible,true);assert.equal(light.visible,true);assert.equal(source.geometry,original.geometry);assert.equal(source.material,original.material);assert(source.matrix.equals(original.matrix));
+});
+
+test('one exposure draw can bypass same-pose dedup without refitting or bypassing suspension',()=>{
+ const same={lastSize:{width:900,height:800},width:900,height:800,animated:true,lastProgress:0,progress:0};
+ assert.deepEqual(projectModelDrawDecision(same),{resized:false,draw:false,prepare:false});
+ assert.deepEqual(projectModelDrawDecision({...same,force:true}),{resized:false,draw:true,prepare:false});
+ assert.deepEqual(projectModelDrawDecision({...same,force:true,suspended:true}),{resized:false,draw:false,prepare:false});
+ assert.deepEqual(projectModelDrawDecision({...same,force:true,animated:false}),{resized:false,draw:false,prepare:false});
+});
+
+test('exposure surface evidence distinguishes DOM connection, hidden ancestors and viewport without GPU readback',()=>{
+ const doc={hidden:false,querySelectorAll:()=>[{hidden:true,css:{display:'none'}}],documentElement:{getAttribute:()=> 'entered'},defaultView:{innerWidth:900,innerHeight:800,getComputedStyle:node=>node.css}};
+ const css={display:'block',visibility:'visible',opacity:'1'},host={ownerDocument:doc,isConnected:true,tagName:'DIV',css,parentElement:null};
+ const canvas={isConnected:true,width:900,height:800,tagName:'CANVAS',css,parentElement:host,getBoundingClientRect:()=>({left:0,top:0,right:900,bottom:800,width:900,height:800})};
+ let surface=inspectProjectModelSurface(host,canvas);assert.equal(surface.connected,true);assert.equal(surface.visible,true);assert.equal(surface.intersectsViewport,true);assert.equal(surface.ancestors.length,2);
+ host.css={...css,opacity:'0'};surface=inspectProjectModelSurface(host,canvas);assert.equal(surface.visible,false);assert.equal(surface.opacity,0);
+ host.css={...css,visibility:'hidden'};assert.equal(inspectProjectModelSurface(host,canvas).visible,false);
+ host.css=css;canvas.isConnected=false;assert.equal(inspectProjectModelSurface(host,canvas).connected,false);
 });

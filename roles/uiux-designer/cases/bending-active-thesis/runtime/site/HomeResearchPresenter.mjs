@@ -1,8 +1,12 @@
 const clamp=value=>Math.max(0,Math.min(1,value));
+/** A lifecycle boundary, not a timer or a proxy for successful GPU pixels. */
+export function canCommitHomeResearchExposure({stage,generation,disposed=false,arrivalStatic=false,paused=false,hidden=false,connected=false,hasResource=false,entryState,loaderHidden=false,loaderDisplay}){
+ return !disposed&&!arrivalStatic&&!paused&&!hidden&&connected&&hasResource&&stage?.active===true&&stage.phase==='ready'&&stage.id===generation&&Number.isInteger(generation)&&generation>0&&entryState==='entered'&&loaderHidden===true&&loaderDisplay==='none';
+}
 /** Native document progress borrows SiteBackgroundDriver's demand clock. No
  * listeners, timers, frame loop, source ownership or navigation interception. */
-export function createHomeResearchPresenter({root,host,present,inspect:inspectStage,subscribe,publisher,schedule=()=>{}}){
- let disposed=false,layout={top:0,height:0,viewportHeight:1},progress=0,presentedProgress=null,enabled=false,publications=0,visible=false,visibility=null,lastPresentation='';
+export function createHomeResearchPresenter({root,host,present,expose,inspect:inspectStage,subscribe,publisher,schedule=()=>{}}){
+ let disposed=false,layout={top:0,height:0,viewportHeight:1},progress=0,presentedProgress=null,enabled=false,publications=0,visible=false,visibility=null,lastPresentation='',exposedGeneration=null,exposureCommits=0;
  let policy={ready:false,reduced:false,suspended:false,saveData:false,forcedColors:false};
  const release=subscribe?.(schedule)??(()=>{});
  return{
@@ -37,6 +41,12 @@ export function createHomeResearchPresenter({root,host,present,inspect:inspectSt
    // actual scroll position; it does not replay missed frames or steal focus.
    if(canPrepare&&!paused&&visible){
     const width=host.offsetWidth,height=host.offsetHeight,key=`${stage.id}:${progress}:${width}:${height}`;
+    // Preparation may have drawn this exact pose behind the entry cover. The
+    // first actual entered exposure gets one explicit commit, not an idle loop.
+    if(enabled&&stage.entryState==='entered'&&stage.id!==exposedGeneration){
+     const result=expose?.({generation:stage.id,progress,width,height});
+     if(result?.completed===true){exposedGeneration=stage.id;exposureCommits++;lastPresentation=key;presentedProgress=progress;publications++;}
+    }
     if(key!==lastPresentation){
      const result=present({progress,width,height});
      if(result!==false){lastPresentation=key;presentedProgress=progress;publications++;}
@@ -46,7 +56,7 @@ export function createHomeResearchPresenter({root,host,present,inspect:inspectSt
    }
    return false;
   },
-  inspect:()=>({layout:{...layout},progress,presentedProgress,enabled,visible,visibility:visibility?{...visibility}:null,policy:{...policy},publications,stage:inspectStage(),disposed}),
+  inspect:()=>({layout:{...layout},progress,presentedProgress,enabled,visible,visibility:visibility?{...visibility}:null,policy:{...policy},publications,exposedGeneration,exposureCommits,stage:inspectStage(),disposed}),
   dispose(){if(disposed)return;disposed=true;release();publisher.attribute(root,'data-home-research-motion','static');},
  };
 }

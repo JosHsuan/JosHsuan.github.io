@@ -38,9 +38,26 @@ export function applyProjectModelPresentationSet(group,presentation){
 
 /** Pure draw gate; last committed state changes only after a successful render.
  * Desired progress may advance while suspended without dirtying GPU state. */
-export function projectModelDrawDecision({lastSize,width,height,animated=false,lastProgress,progress,suspended=false}){
+export function projectModelDrawDecision({lastSize,width,height,animated=false,lastProgress,progress,suspended=false,force=false}){
  const resized=lastSize?.width!==width||lastSize?.height!==height;
- return{resized,draw:!suspended&&(resized||(animated&&lastProgress!==progress)),prepare:!suspended&&animated&&resized};
+ return{resized,draw:!suspended&&(resized||(animated&&(force||lastProgress!==progress))),prepare:!suspended&&animated&&resized};
+}
+
+/** Bounded ordinary DOM evidence, not a GPU readback or compositor receipt. */
+export function inspectProjectModelSurface(host,canvas){
+ const doc=host.ownerDocument,win=doc.defaultView,rect=canvas.getBoundingClientRect();
+ const ancestors=[];let opacity=1,visible=true,node=canvas;
+ for(let count=0;node&&count<12;count++,node=node.parentElement){
+  const style=win.getComputedStyle(node),ownOpacity=Number(style.opacity);
+  opacity*=ownOpacity;visible&&=style.display!=='none'&&style.visibility!=='hidden'&&style.visibility!=='collapse';
+  ancestors.push({tag:node.tagName,display:style.display,visibility:style.visibility,opacity:ownOpacity});
+ }
+ const connected=host.isConnected&&canvas.isConnected,truncated=!!node;
+ const loaders=[...doc.querySelectorAll('[data-site-loader]')],loader=loaders[0];
+ const cover={count:loaders.length,hidden:loader?.hidden===true,display:loader?win.getComputedStyle(loader).display:null};
+ return{connected,cover,siteEntryState:doc.documentElement.getAttribute('data-site-entry-state'),hidden:doc.hidden,opacity,visible:visible&&!truncated&&opacity>0,ancestors,truncated,
+  rect:{left:rect.left,top:rect.top,right:rect.right,bottom:rect.bottom,width:rect.width,height:rect.height},backing:{width:canvas.width,height:canvas.height},
+  intersectsViewport:rect.width>0&&rect.height>0&&rect.right>0&&rect.bottom>0&&rect.left<win.innerWidth&&rect.top<win.innerHeight};
 }
 
 /** Prepared on page opening while the site loader still covers the document.
@@ -51,7 +68,7 @@ export function acquireProjectModelScene({host,signal,onFailure=()=>{},presentat
  const manager=new T.LoadingManager();let renderer=null,budget=null,scene=null,camera=null,gltf=null,hdr=null,environment=null,exhibition=null;
  let disposed=false,frames=0,meta=null,supportPoints=null,lastSize=null,firstDraw=null,shaderFailure=null;const adapters=[],bases=[];
  const pixelBudget=presentation?.pixelBudget??PROJECT_MODEL_PIXEL_BUDGET;
- let prepared=null,preparations=0,progress=0,suspended=false,lastRecipe=null,presentationSet=null;
+ let prepared=null,preparations=0,progress=0,suspended=false,lastRecipe=null,presentationSet=null,preparationSurface=null,visibleCommit=null;
  const dispose=()=>{
   if(disposed)return;disposed=true;supportPoints=null;signal.removeEventListener('abort',abort);
   manager.abort();
@@ -112,9 +129,9 @@ export function acquireProjectModelScene({host,signal,onFailure=()=>{},presentat
   scene.environment=environment.texture;scene.add(gltf.scene);exhibition=createExhibitionStage({bounds:meta.bounds});scene.add(exhibition.group);
   const lights={};for(const id of ['key','fill','rim']){lights[id]=new T.DirectionalLight();scene.add(lights[id],lights[id].target);}
   lights.hemisphere=new T.HemisphereLight();scene.add(lights.hemisphere);lights.key.castShadow=true;lights.key.shadow.mapSize.set(512,512);
-  const draw=(width,height)=>{
+  const draw=(width,height,force=false)=>{
     if(disposed||signal.aborted)throw Error('Project preview disposed');
-    const decision=projectModelDrawDecision({lastSize,width,height,animated:!!presentation,lastProgress:lastRecipe?.progress,progress,suspended});
+    const decision=projectModelDrawDecision({lastSize,width,height,animated:!!presentation,lastProgress:lastRecipe?.progress,progress,suspended,force});
     if(!decision.draw)return;
     const {resized}=decision;
     if(decision.prepare){prepared=presentation.prepare(meta,width,height,supportPoints);preparations++;}
@@ -126,9 +143,11 @@ export function acquireProjectModelScene({host,signal,onFailure=()=>{},presentat
     const shadow=lights.key.shadow;shadow.camera.left=shadow.camera.bottom=-stage.shadowHalfExtent;shadow.camera.right=shadow.camera.top=stage.shadowHalfExtent;shadow.camera.near=.05;shadow.camera.far=Math.max(20,stage.radius*10);shadow.camera.updateProjectionMatrix();shadow.bias=direction.stage.shadow.bias;shadow.normalBias=direction.stage.shadow.normalBias;
     exhibition.update({direction,camera,reducedMotion:false,lightSweep:0,backdrop:chapterScene.backdrop});if(presentation)presentationSet=applyProjectModelPresentationSet(exhibition.group,presentation);scene.environmentIntensity=direction.environmentIntensity;scene.fog.color.fromArray(direction.haze.color);scene.fog.density=direction.haze.density;
     if(!presentation||resized)renderer.shadowMap.needsUpdate=true;
+    const connectedAtDraw=renderer.domElement.isConnected===true;
     const draw=commitProjectModelDraw({renderer,scene,camera,host,shaderFailure:()=>shaderFailure});
     lastSize={width,height};lastRecipe=recipe;frames++;
     firstDraw??=Object.freeze({completed:true,width,height,calls:draw.calls,sourceRevision:meta.revision,environmentReady:!!scene.environment});
+    if(presentation&&!preparationSurface)preparationSurface={connectedAtDraw,...inspectProjectModelSurface(host,renderer.domElement)};
   };
   return{
    resize:draw,
@@ -139,9 +158,23 @@ export function acquireProjectModelScene({host,signal,onFailure=()=>{},presentat
     const width=value.width??lastSize?.width,height=value.height??lastSize?.height;
     if(width&&height)draw(width,height);
    },
+   expose(value){
+    if(!presentation||disposed||signal.aborted||suspended||host.ownerDocument.hidden)return false;
+    if(!Number.isInteger(value?.generation)||value.generation<1)throw RangeError('Exposure requires a live generation');
+    const surface=inspectProjectModelSurface(host,renderer.domElement);
+    if(!surface.connected||surface.hidden||surface.siteEntryState!=='entered'||surface.cover.count!==1||!surface.cover.hidden||surface.cover.display!=='none'||!surface.visible||!surface.intersectsViewport)return false;
+    if(visibleCommit)return visibleCommit.generation===value.generation?structuredClone(visibleCommit):false;
+    if(!Number.isFinite(value.progress))throw RangeError('Finite presentation progress required');
+    const width=value.width??lastSize?.width,height=value.height??lastSize?.height;
+    if(![width,height].every(size=>Number.isFinite(size)&&size>0))return false;
+    progress=Math.max(0,Math.min(1,value.progress));
+    draw(width,height,true);
+    visibleCommit={completed:true,generation:value.generation,frame:frames,progress,sourceRevision:meta.revision,surface:inspectProjectModelSurface(host,renderer.domElement)};
+    return structuredClone(visibleCommit);
+   },
    suspend(){suspended=true;},
    resume(){suspended=false;},
-   inspect:()=>({frames,firstDraw:firstDraw?{...firstDraw}:null,sourceRevision:meta.revision,vertices:meta.vertices,triangles:meta.triangles,canvasCount:disposed?0:1,pixelBudget,budget:budget.inspect(),calls:renderer.info.render.calls,materials:adapters.map(value=>value.inspect()),toneMapping:'ACESFilmic',exposure:1,output:'srgb',compositor:false,disposed,...(presentation?{presentation:presentation.id,presentationSet:presentationSet?{...presentationSet,sourceMeshes:roles.size}:null,progress:lastRecipe?.progress??null,beat:lastRecipe?.beat??null,pose:lastRecipe?.pose?structuredClone(lastRecipe.pose):null,sourceGeometryUnmodified:true,preparations,suspended}: {})}),
+   inspect:()=>({frames,firstDraw:firstDraw?{...firstDraw}:null,sourceRevision:meta.revision,vertices:meta.vertices,triangles:meta.triangles,canvasCount:disposed?0:1,pixelBudget,budget:budget.inspect(),calls:renderer.info.render.calls,materials:adapters.map(value=>value.inspect()),toneMapping:'ACESFilmic',exposure:1,output:'srgb',compositor:false,disposed,...(presentation?{presentation:presentation.id,preparationSurface:preparationSurface?structuredClone(preparationSurface):null,visibleCommit:visibleCommit?structuredClone(visibleCommit):null,presentationSet:presentationSet?{...presentationSet,sourceMeshes:roles.size}:null,progress:lastRecipe?.progress??null,beat:lastRecipe?.beat??null,pose:lastRecipe?.pose?structuredClone(lastRecipe.pose):null,sourceGeometryUnmodified:true,preparations,suspended}: {})}),
    dispose,
   };
  };

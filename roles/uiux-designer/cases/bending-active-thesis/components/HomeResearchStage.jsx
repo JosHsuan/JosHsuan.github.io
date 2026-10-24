@@ -3,6 +3,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {createPreviewLifecycle,createExclusivePreviewLease,observePreviewEligibility} from '../runtime/site/PreviewLifecycle.mjs';
 import {registerPagePreviewReadiness} from '../runtime/site/PagePreviewReadiness.mjs';
+import {canCommitHomeResearchExposure} from '../runtime/site/HomeResearchPresenter.mjs';
 import {registerHomeResearchStage} from '../runtime/site/HomeResearchStageRegistry.mjs';
 
 const lease=createExclusivePreviewLease();
@@ -12,7 +13,7 @@ export default function HomeResearchStage({poster,className=''}){
   const node=host.current,root=node.closest('[data-home-research-story]');
   if(!root)return;
   const listeners=new Set(),forced=window.matchMedia('(forced-colors: active)');
-  let readiness=null,lifecycle=null,resource=null,arrivalStatic=false,staticReason='',disposed=false,paused=false;
+  let readiness=null,lifecycle=null,resource=null,arrivalStatic=false,staticReason='',disposed=false,paused=false,exposure=null;
   const publish=()=>{for(const listener of [...listeners])if(listeners.has(listener))listener();};
   const staticReady=reason=>readiness?.report({mode:'static',reason});
   const settleStatic=reason=>{arrivalStatic=true;staticReason=reason;lifecycle?.stop(reason);staticReady(reason);publish();};
@@ -38,11 +39,28 @@ export default function HomeResearchStage({poster,className=''}){
     acquired.present({progress,width,height});
    },dispose(){if(resource===acquired)resource=null;acquired.dispose();}};
   }});
-  const inspect=()=>({...lifecycle.inspect(),paused,arrivalStatic,staticReason});
+  const inspect=()=>({...lifecycle.inspect(),paused,arrivalStatic,staticReason,entryState:document.documentElement.getAttribute('data-site-entry-state'),exposure});
   const descriptor={root,host:node,inspect,subscribe(listener){listeners.add(listener);return()=>listeners.delete(listener);},present(input){
    const current=lifecycle.inspect();
    if(disposed||arrivalStatic||paused||!current.active||current.phase!=='ready'||!resource)return false;
    try{return resource.present(input);}catch(error){lifecycle.fail(error?.message||'home-render-unavailable');return false;}
+  },expose(input){
+   const current=lifecycle.inspect(),entryState=document.documentElement.getAttribute('data-site-entry-state');
+   const loader=document.querySelector('[data-site-loader]');
+   const loaderDisplay=loader?window.getComputedStyle(loader).display:null;
+   if(!canCommitHomeResearchExposure({stage:current,generation:input.generation,disposed,arrivalStatic,paused,hidden:document.hidden,connected:node.isConnected,hasResource:!!resource,entryState,loaderHidden:loader?.hidden,loaderDisplay}))return false;
+   if(exposure?.generation===current.id)return exposure;
+   // A single discrete exposure observation, never a per-frame layout read.
+   const visibility=[];for(let element=node; element&&visibility.length<5; element=element.parentElement){
+    const style=window.getComputedStyle(element),rect=element.getBoundingClientRect();
+    visibility.push({tag:element.tagName,display:style.display,visibility:style.visibility,opacity:style.opacity,transform:style.transform,rect:{x:rect.x,y:rect.y,width:rect.width,height:rect.height}});
+   }
+   try{
+    const result=resource.expose(input);
+    if(result?.completed!==true)return false;
+    exposure=Object.freeze({generation:current.id,entryState,completed:true,loaderHidden:loader.hidden,loaderDisplay:'none',visibility,resource:result});
+    return exposure;
+   }catch(error){lifecycle.fail(error?.message||'home-exposure-unavailable');return false;}
   }};
   const release=registerHomeResearchStage(document,descriptor);
   if(arrivalStatic)lifecycle.stop(staticReason);
