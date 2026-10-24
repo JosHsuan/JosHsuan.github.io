@@ -3,6 +3,8 @@ import {DOMPresenter} from '../presentation/DOMPresenter.ts';
 import {createFrameScheduler} from '../../components/runtime-scheduler.mjs';
 import {createChapterPlayback,advanceChapterPlayback,sampleChapterPlayback} from '../../components/chapter-playback.mjs';
 import {sampleChapterScene} from '../../components/chapter-scene-score.mjs';
+import {observeHomeResearchStage} from '../site/HomeResearchStageRegistry.mjs';
+import {createHomeResearchPresenter} from '../site/HomeResearchPresenter.mjs';
 import {createHomeScrollPresenter} from '../site/HomeScrollPresenter.mjs';
 import {createLiquidGlassPresenter} from '../presentation/LiquidGlassPresenter.mjs';
 import {observeProjectStudyStage} from '../site/ProjectStudyStageRegistry.mjs';
@@ -33,6 +35,7 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
   const studyPaused=()=>!!studyRoot?.hasAttribute('data-study-paused');
   const forced=home?win.matchMedia('(forced-colors: active)'):null,connection=home?win.navigator?.connection:null;
   const naturalY=element=>{let top=0;for(let node=element;node;node=node.offsetParent)top+=node.offsetTop;return top;};
+  let homeResearch=null,releaseHomeResearch=()=>{};
   let homeDirty=!!home,glassDirty=!!liquid,keyboardFocus=true,projectScene=null,projectBackdrop=null,projectChapters=null,releaseStage=()=>{};
   let previous=0,resumed=true,pendingImpulse=0,touchY=null,disposed=false,frames=0;
   let pointer={x:0,y:0,active:false},size={width:win.innerWidth,height:win.innerHeight};
@@ -57,7 +60,7 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
     if(disposed||scheduler.suspended)return;
     const dt=previous?(now-previous)/1000:1/60;previous=now;frames++;
     const wasResumed=resumed;
-    if(homeDirty){projectChapters?.measure({docY:win.scrollY});home.measure({naturalY,viewportHeight:win.innerHeight,docY:win.scrollY});projectScene?.measure(win.innerWidth,win.innerHeight);projectBackdrop?.measure(win.innerWidth,win.innerHeight);homeDirty=false;}
+    if(homeDirty){homeResearch?.measure({naturalY,viewportHeight:win.innerHeight});projectChapters?.measure({docY:win.scrollY});home.measure({naturalY,viewportHeight:win.innerHeight,docY:win.scrollY});projectScene?.measure(win.innerWidth,win.innerHeight);projectBackdrop?.measure(win.innerWidth,win.innerHeight);homeDirty=false;}
     const reading=projectChapters?.publish({docY:win.scrollY,viewportHeight:win.innerHeight});
     if(glassDirty){liquid.measure({opaque:opaqueGlass()});glassDirty=false;}
     const impulse=pendingImpulse;pendingImpulse=0;
@@ -67,6 +70,7 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
     const uv=[pointer.x/win.innerWidth,1-pointer.y/win.innerHeight];
     latest=sampleChapterScene(score,{reducedMotion:reduced.matches,aspect:size.width/size.height,pointer:{uv,active:fine.matches&&pointer.active&&!reduced.matches&&uv.every(value=>value>=0&&value<=1),strength:.35}});
     binding.present(latest,{frameTimeMs:now,paused:!ready()||studyPaused(),hidden:doc.hidden,systemReduced:reduced.matches},size.width,size.height);
+    homeResearch?.publish({...homePolicy(),docY:win.scrollY});
     const moving=home?.publish({...homePolicy(),dt,docY:win.scrollY,resumed:wasResumed,seek:wasResumed})??false;
     const glassMoving=liquid?.publish({dt,reduced:reduced.matches||studyPaused()||!ready(),resumed:wasResumed,hidden:doc.hidden,opaque:opaqueGlass(),keyboardFocus})??false;
     const sceneMoving=projectBackdrop?.publish({dt,resumed:wasResumed,reading,activeSeconds:score.activeSeconds})??false;
@@ -78,7 +82,7 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
     const before=scheduler.suspended;scheduler.suspend(reason,value);
     if(before===scheduler.suspended)return;
     previous=0;resumed=true;pendingImpulse=0;touchY=null;pointer={x:0,y:0,active:false};
-    if(scheduler.suspended){advanceChapterPlayback(playback,0,{hidden:true});home?.publish({...homePolicy(),dt:0,docY:win.scrollY,seek:true});liquid?.reset();liquid?.publish({hidden:true,opaque:opaqueGlass()});projectBackdrop?.suspend(reason);}
+    if(scheduler.suspended){advanceChapterPlayback(playback,0,{hidden:true});home?.publish({...homePolicy(),dt:0,docY:win.scrollY,seek:true});homeResearch?.publish({...homePolicy(),docY:win.scrollY});liquid?.reset();liquid?.publish({hidden:true,opaque:opaqueGlass()});projectBackdrop?.suspend(reason);}
     else{projectBackdrop?.resume();if(projectChapters){homeDirty=!!home;glassDirty=!!liquid;}measure();scheduler.schedule();}
   };
   const visibility=()=>suspend('visibility',doc.hidden);
@@ -143,10 +147,15 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
     if(descriptor&&descriptor.root===studyRoot){projectScene=createProjectStudyScenePresenter({...descriptor,externalStage:true,window:win,document:doc,publisher:dom.forOwner('project-study-scene'),schedule:()=>scheduler.schedule(),policy:projectPolicy});projectBackdrop?.setScene({actor:projectScene,host:descriptor.host,model:descriptor.model});}
     homeDirty=!!home;scheduler.schedule();
   });
+  if(homeRoot?.getAttribute('data-portfolio-section')==='home')releaseHomeResearch=observeHomeResearchStage(doc,descriptor=>{
+    if(disposed)return;homeResearch?.dispose();homeResearch=null;
+    if(descriptor)homeResearch=createHomeResearchPresenter({...descriptor,publisher:dom.forOwner('home-research'),schedule:()=>scheduler.schedule()});
+    homeDirty=!!home;scheduler.schedule();
+  });
   measure();scheduler.schedule();
-  function dispose(){if(disposed)return;disposed=true;releaseStage();projectBackdrop?.dispose();projectScene?.dispose();projectScene=null;projectChapters?.dispose();scheduler.dispose();home?.dispose();liquid?.dispose();scope.dispose();events.dispose();binding.dispose();}
+  function dispose(){if(disposed)return;disposed=true;releaseHomeResearch();homeResearch?.dispose();releaseStage();projectBackdrop?.dispose();projectScene?.dispose();projectScene=null;projectChapters?.dispose();scheduler.dispose();home?.dispose();liquid?.dispose();scope.dispose();events.dispose();binding.dispose();}
   return {
-    inspect:()=>({owner:'site',frames,playback:sampleChapterPlayback(playback),chapterScene:latest,size:{...size},lifecycle:scheduler.inspect(),events:events.inspect(),pageField:binding.inspect(),homeScrolling:home?.inspect()??null,projectStudy:studyRoot?{paused:studyPaused(),chapters:projectChapters?.inspect()??null,liquidGlass:liquid?.inspect(),scene:projectScene?.inspect()??null,backdrop:projectBackdrop?.inspect()??null,media:projectBackdrop?.inspect().media??[]}:null,domPublication:publisher.inspect(),disposed}),
+    inspect:()=>({owner:'site',frames,playback:sampleChapterPlayback(playback),chapterScene:latest,size:{...size},lifecycle:scheduler.inspect(),events:events.inspect(),pageField:binding.inspect(),homeScrolling:home?.inspect()??null,homeResearch:homeResearch?.inspect()??null,projectStudy:studyRoot?{paused:studyPaused(),chapters:projectChapters?.inspect()??null,liquidGlass:liquid?.inspect(),scene:projectScene?.inspect()??null,backdrop:projectBackdrop?.inspect()??null,media:projectBackdrop?.inspect().media??[]}:null,domPublication:publisher.inspect(),disposed}),
     dispose,
   };
 }

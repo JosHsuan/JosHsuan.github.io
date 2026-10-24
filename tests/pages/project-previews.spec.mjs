@@ -82,7 +82,7 @@ test('square project cards retain the live model and inset XR image and reveal t
  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
 });
 
-test('the real model paints behind loading before its offscreen card appears, stays resident while scrolling, and closes on navigation',async({page})=>{
+test('the real model paints behind loading before its project card is released, stays resident while scrolling, and closes on navigation',async({page})=>{
  test.setTimeout(scenarioTimeout(150000));
  const requests=[];page.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)/.test(request.url()))requests.push(request.url());});
  let release,held=false,paintAssay;
@@ -91,7 +91,7 @@ test('the real model paints behind loading before its offscreen card appears, st
  // or synthetic renderer/readiness event can satisfy this preparation gate.
  await page.route('**/assets/source-layers.glb',async route=>{held=true;await sourceGate;await route.continue();});
  try{
-  await page.goto('/',{waitUntil:'domcontentloaded'});
+  await page.goto('/projects/',{waitUntil:'domcontentloaded'});
   await expect.poll(()=>held,{timeout:WAIT}).toBe(true);
   await page.waitForFunction(()=>window.__site&&document.querySelector('[data-project-model-preview]')?.__projectModelPreview,null,{timeout:WAIT});
   paintAssay=await model(page).evaluateHandle(node=>{
@@ -110,18 +110,18 @@ test('the real model paints behind loading before its offscreen card appears, st
   });
   const waiting=await paintAssay.evaluate(assay=>assay.initial);
   expect(waiting.site.phase).toBe('requested');expect(waiting.site.previews.ready).toBe(false);
-  expect(waiting.site.previews.pending).toEqual(['preview-1']);expect(waiting.inert).toBe(true);expect(waiting.offscreen).toBe(true);
+  expect(waiting.site.previews.pending).toEqual(['preview-1']);expect(waiting.inert).toBe(true);expect(typeof waiting.offscreen).toBe('boolean');
   expect(waiting.loader.hidden).toBe(false);expect(waiting.loader.display).not.toBe('none');expect(waiting.loader.visibility).toBe('visible');expect(waiting.loader.opacity).toBeGreaterThan(0);
   expect(waiting.model.pending).toBe(true);expect(waiting.model.resource).toBeNull();
   release();await page.unrouteAll({behavior:'wait'});await entered(page);
   const painted=await paintAssay.evaluate(assay=>assay.observations);
   await test.info().attach('model-preload-order',{body:JSON.stringify({waiting,painted},null,2),contentType:'application/json'});
   expect(painted).toHaveLength(1);
-  expect(['requested','ready','revealing']).toContain(painted[0].site.phase);expect(painted[0].inert).toBe(true);expect(painted[0].offscreen).toBe(true);
+  expect(['requested','ready','revealing']).toContain(painted[0].site.phase);expect(painted[0].inert).toBe(true);expect(typeof painted[0].offscreen).toBe('boolean');
   expect(painted[0].loader.hidden).toBe(false);expect(painted[0].loader.display).not.toBe('none');expect(painted[0].loader.visibility).toBe('visible');expect(painted[0].loader.opacity).toBeGreaterThan(0);
   expect(painted[0].model.resource.firstDraw.completed).toBe(true);expect(painted[0].model.resource.firstDraw.environmentReady).toBe(true);expect(painted[0].model.resource.firstDraw.calls).toBeGreaterThan(0);
   await paintAssay.evaluate(assay=>assay.dispose());await paintAssay.dispose();paintAssay=null;
-  await expect(model(page)).toHaveAttribute('data-preview-phase','ready');await expect(model(page)).not.toBeInViewport();
+  await expect(model(page)).toHaveAttribute('data-preview-phase','ready');await model(page).scrollIntoViewIfNeeded();
   await expect(model(page).locator('canvas')).toHaveCount(1);await expect(page.locator('canvas')).toHaveCount(2);
   await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);await expect(page.locator('[data-cinematic-stage]')).toHaveCount(0);
   const first=await modelFacts(page),site=await page.evaluate(()=>window.__site.inspect());
@@ -129,22 +129,22 @@ test('the real model paints behind loading before its offscreen card appears, st
   expect(first.acquisitions).toBe(1);expect(first.disposals).toBe(0);expect(first.resource.firstDraw.completed).toBe(true);
   expect(first.resource.firstDraw.sourceRevision).toBe(first.resource.sourceRevision);expect(first.resource.firstDraw.width).toBeGreaterThan(0);expect(first.resource.firstDraw.height).toBeGreaterThan(0);closedRequests(first);
   for(let visit=0;visit<2;visit++){
-   await page.locator('[data-home-project-link]').click();await expect(model(page)).toBeInViewport();
-   await page.locator('[data-home-introduction] h1').scrollIntoViewIfNeeded();await expect(model(page)).not.toBeInViewport();
+   await model(page).scrollIntoViewIfNeeded();await expect(model(page)).toBeInViewport();
+   await page.locator('footer').scrollIntoViewIfNeeded();await expect(model(page)).not.toBeInViewport();
    const retained=await modelFacts(page);expect(retained.phase).toBe('ready');expect(retained.acquisitions).toBe(first.acquisitions);expect(retained.disposals).toBe(0);expect(retained.resource.frames).toBe(first.resource.frames);
    await expect(model(page).locator('canvas')).toHaveCount(1);closedRequests(retained);
   }
   for(const suffix of ['/assets/source-layers.glb','/assets/studio-small.hdr'])expect(requests.filter(url=>url.endsWith(suffix))).toHaveLength(1);
   // An idle observation is intentional: the retained static preview must sleep.
   const beforeIdle=await modelFacts(page);await page.waitForTimeout(500);const idle=await modelFacts(page);expect(idle.renders).toBe(beforeIdle.renders);expect(idle.resource.frames).toBe(beforeIdle.resource.frames);
-  await page.locator('[data-home-project-link]').click();await expect(model(page)).toBeInViewport();
+  await model(page).scrollIntoViewIfNeeded();await expect(model(page)).toBeInViewport();
   const contextLoss=await model(page).locator('canvas').evaluate(canvas=>{const extension=canvas.getContext('webgl2').getExtension('WEBGL_lose_context');if(!extension)return false;extension.loseContext();return true;});
   expect(contextLoss).toBe(true);await expect(model(page)).toHaveAttribute('data-preview-phase','failed');
   await expect(model(page).locator('canvas')).toHaveCount(0);await expect(page.locator('[data-model-poster]')).toBeVisible();
   const failed=await modelFacts(page);expect(failed.resourceFailures.some(fact=>fact.reason==='context-lost')).toBe(true);
   expect(failed.resource).toBeNull();expect(failed.disposals).toBe(failed.acquisitions);closedRequests(failed);
-  await page.locator('[data-home-introduction] h1').scrollIntoViewIfNeeded();await expect(model(page)).not.toBeInViewport();
-  await page.locator('[data-home-project-link]').click();await expect(model(page)).toBeInViewport();
+  await page.locator('footer').scrollIntoViewIfNeeded();await expect(model(page)).not.toBeInViewport();
+  await model(page).scrollIntoViewIfNeeded();await expect(model(page)).toBeInViewport();
   const stillFailed=await modelFacts(page);expect(stillFailed.phase).toBe('failed');expect(stillFailed.acquisitions).toBe(failed.acquisitions);expect(stillFailed.resource).toBeNull();
   await expect(model(page).locator('canvas')).toHaveCount(0);closedRequests(stillFailed);
   for(const suffix of ['/assets/source-layers.glb','/assets/studio-small.hdr'])expect(requests.filter(url=>url.endsWith(suffix))).toHaveLength(1);

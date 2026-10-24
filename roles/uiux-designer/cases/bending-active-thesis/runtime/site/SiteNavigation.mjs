@@ -39,8 +39,9 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
   attr(element,'data-site-reveal',null);
  };
  const snapshot=()=>({id:active?.id??null,phase:active?.phase??'idle',kind:active?.kind??null,url:active?.url??win.location.href,disposed,
-  reason:active?.reason??'',delegated:sceneRoute,handedOff,readiness:documentResult,previews:previewResource?.inspect?.()??null,history:[...history],events:events.inspect()});
+  reason:active?.reason??'',presentation:element?.getAttribute('data-site-project-entry')??null,delegated:sceneRoute,handedOff,readiness:documentResult,previews:previewResource?.inspect?.()??null,history:[...history],events:events.inspect()});
  const notify=()=>onChange(snapshot());
+ const presentation=value=>{attr(element,'data-site-project-entry',value);attr(doc.documentElement,'data-site-project-entry',value);};
  const paint=phase=>{
   attr(doc.documentElement,'data-site-entry-state',phase);
   attr(element,'data-site-phase',phase);
@@ -54,7 +55,7 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
   remember(fact);paint(phase);
   if(terminal.has(phase)){
    // Hide first: cancelling a fill-both effect must not flash its base style.
-   clearDeadlines();releaseReveal();restoreContent();
+   clearDeadlines();releaseReveal();restoreContent();presentation(null);
    storageWrite(SITE_TERMINAL_KEY,fact);
    const handoff=storageRead(SITE_HANDOFF_KEY);if(handoff?.id===active.id)storageRemove(SITE_HANDOFF_KEY);
   }
@@ -75,7 +76,7 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
   }
  };
  const request=(kind,url,{id,previous=[]}={})=>{
-  cancel('superseded');clearDeadlines();releaseReveal();restoreContent();handedOff=false;
+  cancel('superseded');clearDeadlines();releaseReveal();restoreContent();presentation(null);handedOff=false;
   active={id:id??`site-${now()}-${++serial}`,phase:'idle',kind,url,reason:''};
   if(previous.length){for(const fact of previous.slice(-24))remember(fact);active.phase='requested';paint('requested');notify();}
   else record('requested');
@@ -193,6 +194,8 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
   // A valid terminal receipt prevents a duplicate cancellation. Unknown corrupt
   // data has no provable request to close and cannot fabricate lifecycle facts.
   if(!adopted)request('arrival',url.href);
+  // A bounded visual hint never transfers readiness or a rendering resource.
+  if(adopted&&sceneRoute&&handoff.presentation==='bending-active')presentation('bending-active');
   const current=active.id;
   if(disposed||terminal.has(active.phase))return;
   if(!sceneRoute){
@@ -226,10 +229,11 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
    else reveal({immediate:restored});
   });
  };
- const navigate=url=>{
+ const navigate=(url,visual=null)=>{
   request('navigation',url);
+  if(visual){presentation(visual);notify();}
   resource?.release();resource=null;
-  const tracked=storageWrite(SITE_HANDOFF_KEY,{id:active.id,url,startedAt:now(),history:history.filter(fact=>fact.id===active.id)});
+  const tracked=storageWrite(SITE_HANDOFF_KEY,{id:active.id,url,startedAt:now(),...(visual?{presentation:visual}:{}),history:history.filter(fact=>fact.id===active.id)});
   active.tracked=tracked;
   // This deadline only releases the outgoing document if navigation never
   // commits. It neither drives frames nor overrides the scene entry clock.
@@ -243,14 +247,15 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
   const current=new URL(win.location.href);
   const fragmentOnly=destination.pathname===current.pathname&&destination.search===current.search&&destination.href.includes('#');
   if(destination.origin!==current.origin||!/^https?:$/.test(destination.protocol)||fragmentOnly)return;
-  navigate(destination.href);
+  const visual=anchor.hasAttribute('data-home-research-link')&&current.pathname==='/'&&destination.pathname===BENDING_ROUTE?'bending-active':null;
+  navigate(destination.href,visual);
   const id=active.id;
   // Later bubble listeners may still cancel the native activation.
   Promise.resolve().then(()=>{if(event.defaultPrevented&&active?.id===id){cancel('activation-prevented');}});
  };
  const dispose=()=>{
   if(disposed)return;if(!handedOff)cancel('disconnected');disposed=true;clearDeadlines();resource?.release();resource=null;previewResource=null;releaseScene?.();releaseScene=null;
-  restoreContent();attr(element,'hidden','');releaseReveal();attr(element,'data-site-connected',null);attr(doc.documentElement,'data-site-entry-state',null);events.dispose();
+  restoreContent();presentation(null);attr(element,'hidden','');releaseReveal();attr(element,'data-site-connected',null);attr(doc.documentElement,'data-site-entry-state',null);events.dispose();
  };
  return{
   start(){

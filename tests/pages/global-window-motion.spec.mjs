@@ -233,15 +233,11 @@ for(const [key,route] of routes)(recorded.has(key)?filmed:test)(`${key}: native 
     expect(await page.evaluate(()=>scrollY)).toBe(focusY);
     receipt.forcedColors.decorative=[];
     if(key==='home')for(const selector of ['[data-portfolio-notation]','[data-portfolio-signature]']){
-     const label=page.locator(selector);await expect(label).toHaveCount(1);await expect(label).toHaveAttribute('aria-hidden','true');
-     const compact=await page.evaluate(()=>matchMedia('(max-width:640px)').matches);
-     if(compact){
-      expect(await label.evaluate(node=>getComputedStyle(node).display)).toBe('none');
-      receipt.forcedColors.decorative.push({selector,compactHidden:true});
-     }else{
-      await expect(label).toBeVisible();await expect(label).toBeInViewport();
-      receipt.forcedColors.decorative.push({selector,...await label.evaluate(forcedPalette,{allowDecorativeHidden:true})});
-     }
+     // These are now genuine research-caption text, not hidden decoration.
+     const label=page.locator(selector);await expect(label).toHaveCount(1);
+     await expect(label).not.toHaveAttribute('aria-hidden','true');
+     await label.scrollIntoViewIfNeeded();await expect(label).toBeVisible();await expect(label).toBeInViewport();
+     receipt.forcedColors.decorative.push({selector,...await label.evaluate(forcedPalette)});
     }
     const forcedPng=info.outputPath(`global-plane-${key}-forced-colors.png`);
     await page.screenshot({path:forcedPng});await info.attach('global-plane-forced-colors',{path:forcedPng,contentType:'image/png'});

@@ -106,6 +106,8 @@ const sources = [
   'runtime/site/ProjectStudyChapterPresenter.mjs',
   'runtime/site/ProjectStudyBackdropPresenter.mjs', 'runtime/site/ProjectStudyBackdropMotion.mjs',
   ...PROJECT_SLUGS.map(slug=>`app/projects/${slug}/page.jsx`),
+  'components/HomeResearchStage.jsx', 'runtime/site/HomeResearchStageRegistry.mjs', 'runtime/site/HomeResearchPresenter.mjs',
+  'runtime/site/home-research-scene.mjs', 'runtime/site/home-research-score.mjs',
   'components/ProjectModelPreview.jsx', 'components/project-model-scene.mjs', 'components/project-model-recipe.mjs', 'components/project-grid-layout.mjs',
   'components/GlobalBackground.jsx', 'runtime/background/BackgroundRuntime.mjs', 'runtime/background/SiteBackgroundDriver.mjs',
   'components/XRModelStudy.jsx', 'components/XRPhoneStudy.jsx', 'components/research-media.module.css',

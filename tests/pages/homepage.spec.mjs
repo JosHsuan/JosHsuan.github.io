@@ -44,7 +44,7 @@ test('all portfolio categories and selected projects have direct readable no-Jav
  }finally{await context.close();}
 });
 
-test('Home keeps its introduction model-free and enters with its live project card already prepared',async({page,isMobile},info)=>{
+test('Home prepares one original research hero and retains eight static native project cards',async({page,isMobile},info)=>{
  const modelRequests=[],errors=[];
  page.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)/.test(request.url()))modelRequests.push(request.url());});
  page.on('pageerror',error=>errors.push(error.message));
@@ -54,12 +54,13 @@ test('Home keeps its introduction model-free and enters with its live project ca
  await expect(page.locator('[data-introduction-description]')).toHaveText('My work bridges the physical and digital through computational tools, interactive interfaces, and workflows that translate design and engineering information into fabrication-ready, machine-readable data.');
  expect(await page.locator('main>section').evaluateAll(sections=>sections.map(section=>section.id))).toEqual(['about','projects','contact']);
  await expect(page.locator('[data-cinematic-stage],[data-story-chapter]')).toHaveCount(0);
- await expect(page.locator('canvas[data-project-model-canvas]')).toHaveCount(1);
+ await expect(page.locator('canvas[data-home-research-canvas]')).toHaveCount(1);
+ await expect(page.locator('[data-project-grid] canvas,[data-project-model-preview]')).toHaveCount(0);
  await expect(page.locator('canvas')).toHaveCount(2);
  await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);
- await expect(page.locator('[data-global-background] img,[data-home-introduction] canvas')).toHaveCount(0);
+ await expect(page.locator('[data-global-background] img')).toHaveCount(0);
  expect(modelRequests.sort()).toEqual([new URL('/assets/source-layers.glb',page.url()).href,new URL('/assets/studio-small.hdr',page.url()).href].sort());
- const prepared=await page.locator('[data-project-model-preview]').evaluate(node=>node.__projectModelPreview.inspect());
+ const prepared=await page.locator('[data-home-research-host]').evaluate(node=>node.__homeResearch.inspect());
  expect(prepared.phase).toBe('ready');expect(prepared.resource.firstDraw.completed).toBe(true);expect(prepared.acquisitions).toBe(1);
  expect((await page.evaluate(()=>window.__site.inspect())).readiness.previews).toEqual([{mode:'model',reason:''}]);
  const first=await page.evaluate(()=>scrollY);await page.mouse.wheel(0,130);
@@ -104,7 +105,7 @@ test('Home keeps its introduction model-free and enters with its live project ca
 test('Home native scrolling uses the shared material clock, settles, returns and respects Reduced Motion',async({page})=>{
  await page.goto('/');await entered(page);
  const introduction=page.locator('[data-home-scroll-window="introduction"]');
- const canvas=await page.locator('canvas[data-project-model-canvas]').elementHandle();
+ const canvas=await page.locator('canvas[data-home-research-canvas]').elementHandle();
  await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.enabled)).toBe(true);
  const observation=await introduction.evaluateHandle(node=>{
   const samples=[];
@@ -127,8 +128,8 @@ test('Home native scrolling uses the shared material clock, settles, returns and
   await expect(introduction).toBeInViewport();
   await page.locator('[data-home-project-link]').focus();
   await expect(page.locator('[data-home-project-link]')).toHaveCSS('transform','none');
-  expect(await canvas.evaluate(node=>node.isConnected&&node===document.querySelector('canvas[data-project-model-canvas]'))).toBe(true);
-  expect(await page.locator('[data-project-model-preview]').evaluate(node=>node.__projectModelPreview.inspect().acquisitions)).toBe(1);
+  expect(await canvas.evaluate(node=>node.isConnected&&node===document.querySelector('canvas[data-home-research-canvas]'))).toBe(true);
+  expect(await page.locator('[data-home-research-host]').evaluate(node=>node.__homeResearch.inspect().acquisitions)).toBe(1);
   await page.emulateMedia({reducedMotion:'reduce'});
   await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.policy.reduced)).toBe(true);
   await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.informationWindows.settled)).toBe(true);
@@ -316,6 +317,6 @@ test('Bending page retains one original scene gate and publishes its terminal in
   await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered'&&window.__thesis?.inspect().ready,null,{timeout:WAIT});
   const state=await entered(page);expect(state.delegated).toBe(true);
   await expect(page.locator('[data-entry-loader]')).toBeHidden();await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);
-  await page.locator('[data-home-link]').click();await entered(page);await expect(page.locator('canvas')).toHaveCount(2);await expect(page.locator('canvas[data-project-model-canvas]')).toHaveCount(1);await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);
+  await page.locator('[data-home-link]').click();await entered(page);await expect(page.locator('canvas')).toHaveCount(2);await expect(page.locator('canvas[data-home-research-canvas]')).toHaveCount(1);await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);
  }finally{release();await page.unrouteAll({behavior:'wait'});}
 });

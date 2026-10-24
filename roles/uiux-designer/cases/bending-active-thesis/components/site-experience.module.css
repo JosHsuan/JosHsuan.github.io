@@ -18,3 +18,11 @@
 @media(prefers-reduced-motion:reduce){.loader [data-site-activity],.loader[data-site-phase=revealing],.loader[data-site-phase=revealing]>[data-site-loader-content]{animation:none;transform:none}}
 @media(forced-colors:active){.backdrop{background:Canvas}}
 @media print{.loader{display:none}}
+/* Same original specimen, separate document/readiness owner. This finite
+   recession does not delay or replace native link navigation. */
+.researchHandoff{display:none!important}
+.loader[data-site-project-entry=bending-active] .researchHandoff{display:block!important;object-fit:contain;object-position:right center;opacity:.9;width:68%;height:85%;position:absolute;right:0;top:8%;transform:scale(.96)}
+.loader[data-site-project-entry=bending-active] [data-site-loader-content]{justify-items:start;place-content:center start;padding-left:6vw}
+@media(max-width:900px){.loader[data-site-project-entry=bending-active] .researchHandoff{width:100%;height:65%;top:30%;opacity:.55}.loader[data-site-project-entry=bending-active] [data-site-loader-content]{place-content:start center;justify-items:center;padding:12svh 1.5rem 2rem}}
+@media(prefers-reduced-motion:reduce){.loader[data-site-project-entry=bending-active] .researchHandoff{transform:none}}
+@media(forced-colors:active){.loader[data-site-project-entry=bending-active] .researchHandoff{display:none!important}}

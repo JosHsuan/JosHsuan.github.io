@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element -- Approved documentary preview pixels use native images with exact public asset identity. */
 import PortfolioNavigation from './PortfolioNavigation';
 import ProjectModelPreview from './ProjectModelPreview';
+import HomeResearchStage from './HomeResearchStage';
 import InformationSkin from './InformationSkin';
 import {projectGridRows} from './project-grid-layout.mjs';
 import introduction from '../release/introduction.json';
@@ -33,9 +34,9 @@ const approaches=[
 function Arrow({diagonal=false}){return <span aria-hidden="true">{diagonal?'↗':'↘'}</span>;}
 
 function Introduction(){
-  return <section id="about" tabIndex={-1} className={styles.introduction} data-home-introduction aria-labelledby="home-title">
-    <div className={styles.introductionInner}>
-      <div className={styles.introductionCopy}>
+  return <section id="about" tabIndex={-1} className={`${styles.introduction} ${styles.researchStory}`} data-home-introduction data-home-research-story aria-labelledby="home-title">
+    <div className={`${styles.introductionInner} ${styles.researchLayout}`}>
+      <div className={styles.introductionCopy} data-home-research-origin>
         <div className={styles.scrollCopy} data-information-window="home-introduction" data-information-motion-surface="plane" data-home-scroll-window="introduction"><InformationSkin/>
           <p className={styles.eyebrow}>{introduction.discipline}</p>
           <h1 id="home-title" className={styles.homeTitle}><span>{introduction.greeting}{' '}</span><span>{introduction.name}<span className={styles.period}>.</span></span></h1>
@@ -47,8 +48,17 @@ function Introduction(){
           <span className={styles.invitationArrow}><Arrow/></span>
         </a>
       </div>
-      <div className={styles.notation} data-portfolio-notation aria-hidden="true"><span>FORM</span><span>SYSTEM</span><span>MAKE</span></div>
-      <span className={styles.signature} data-portfolio-signature aria-hidden="true">DESIGN INFORMATION INTO FABRICATION</span>
+      <div className={styles.researchVisual} data-home-research-visual>
+        <HomeResearchStage poster={projects[0].image} className={styles.researchStage}/>
+        <p className={styles.researchCaption}><span data-portfolio-signature>ORIGINAL RESEARCH GEOMETRY</span><span data-portfolio-notation>FORM / SYSTEM / MAKE</span></p>
+      </div>
+      <div className={styles.researchEntry} data-home-research-entry>
+        <p className={styles.eyebrow}>FEATURED RESEARCH / BENDING-ACTIVE</p>
+        <h2>{review.title}</h2>
+        <p>Geometric representation, metal-panel openings and physical assembly.</p>
+        <a href="/projects/bending-active/" className={styles.researchLink} data-home-research-link><span>Explore Bending-Active</span><Arrow diagonal/></a>
+        <p className={styles.researchNote}>An original digital model of the research assembly. Scroll to examine its form, then enter the project.</p>
+      </div>
     </div>
   </section>;
 }
@@ -85,7 +95,7 @@ function Projects({standalone=false,scrolling=true}){
       {projects.map(project=><li key={project.id} className={project.id==='xr-bending-active'?`${styles.projectCard} ${styles.xrProjectCard}`:styles.projectCard} data-project-tile={project.id} data-information-window={scrolling?'home-project-card':undefined} data-information-motion-surface={scrolling&&project.id!=='bending-active'?'plane':undefined} data-home-scroll-window={scrolling?project.id:undefined}>
         {scrolling&&<InformationSkin/>}
         <div className={styles.projectImage}>
-          {project.id==='bending-active'
+          {project.id==='bending-active'&&standalone
             ?<ProjectModelPreview poster={project.image}/>
             :<img src={project.image.src} width={project.image.width} height={project.image.height} alt={project.image.alt} loading="eager" decoding="async" data-site-critical data-project-card-image/>}
         </div>

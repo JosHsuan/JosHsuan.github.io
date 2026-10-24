@@ -22,13 +22,22 @@ export function commitProjectModelDraw({renderer,scene,camera,host,shaderFailure
  return{calls:renderer.info.render.calls};
 }
 
+/** Pure draw gate; last committed state changes only after a successful render.
+ * Desired progress may advance while suspended without dirtying GPU state. */
+export function projectModelDrawDecision({lastSize,width,height,animated=false,lastProgress,progress,suspended=false}){
+ const resized=lastSize?.width!==width||lastSize?.height!==height;
+ return{resized,draw:!suspended&&(resized||(animated&&lastProgress!==progress)),prepare:!suspended&&animated&&resized};
+}
+
 /** Prepared on page opening while the site loader still covers the document.
  * No Fiber, scene runtime, DOM
  * annotations, source diagrams, compositor, RAF or autonomous animation. */
-export function acquireProjectModelScene({host,signal,onFailure=()=>{}}){
+export function acquireProjectModelScene({host,signal,onFailure=()=>{},presentation=null}){
  if(signal.aborted)return Promise.reject(new DOMException('Preview aborted','AbortError'));
  const manager=new T.LoadingManager();let renderer=null,budget=null,scene=null,camera=null,gltf=null,hdr=null,environment=null,exhibition=null;
  let disposed=false,frames=0,meta=null,supportPoints=null,lastSize=null,firstDraw=null,shaderFailure=null;const adapters=[],bases=[];
+ const pixelBudget=presentation?.pixelBudget??PROJECT_MODEL_PIXEL_BUDGET;
+ let prepared=null,preparations=0,progress=0,suspended=false,lastRecipe=null;
  const dispose=()=>{
   if(disposed)return;disposed=true;supportPoints=null;signal.removeEventListener('abort',abort);
   manager.abort();
@@ -80,32 +89,45 @@ export function acquireProjectModelScene({host,signal,onFailure=()=>{}}){
   renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1;renderer.outputColorSpace=T.SRGBColorSpace;renderer.setClearColor('#090d0d',1);
   renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFShadowMap;renderer.shadowMap.autoUpdate=false;
   renderer.debug.onShaderError=()=>{shaderFailure=Error('Project shader unavailable');};
-  renderer.domElement.setAttribute('aria-hidden','true');renderer.domElement.setAttribute('data-project-model-canvas','');
+  renderer.domElement.setAttribute('aria-hidden','true');renderer.domElement.setAttribute(presentation?.canvasAttribute??'data-project-model-canvas','');
   Object.assign(renderer.domElement.style,{position:'absolute',inset:'0',width:'100%',height:'100%',display:'block',pointerEvents:'none'});
   renderer.domElement.addEventListener('webglcontextlost',lost);
-  budget=createRendererBudget(renderer,()=>({deviceDpr:host.ownerDocument.defaultView.devicePixelRatio||1,pixelBudget:PROJECT_MODEL_PIXEL_BUDGET}));
+  budget=createRendererBudget(renderer,()=>({deviceDpr:host.ownerDocument.defaultView.devicePixelRatio||1,pixelBudget}));
   scene=new T.Scene();camera=new T.PerspectiveCamera();scene.background=new T.Color('#090d0d');scene.fog=new T.FogExp2('#091217',.03);
   const generator=new T.PMREMGenerator(renderer);try{environment=generator.fromEquirectangular(hdr);}finally{generator.dispose();hdr.dispose();hdr=null;}
   scene.environment=environment.texture;scene.add(gltf.scene);exhibition=createExhibitionStage({bounds:meta.bounds});scene.add(exhibition.group);
   const lights={};for(const id of ['key','fill','rim']){lights[id]=new T.DirectionalLight();scene.add(lights[id],lights[id].target);}
   lights.hemisphere=new T.HemisphereLight();scene.add(lights.hemisphere);lights.key.castShadow=true;lights.key.shadow.mapSize.set(512,512);
-  return{
-   resize(width,height){
+  const draw=(width,height)=>{
     if(disposed||signal.aborted)throw Error('Project preview disposed');
-    if(lastSize?.width===width&&lastSize?.height===height)return;
-    const recipe=sampleProjectModelRecipe(meta,width,height,supportPoints),{pose,direction,stage,chapterScene}=recipe;
+    const decision=projectModelDrawDecision({lastSize,width,height,animated:!!presentation,lastProgress:lastRecipe?.progress,progress,suspended});
+    if(!decision.draw)return;
+    const {resized}=decision;
+    if(decision.prepare){prepared=presentation.prepare(meta,width,height,supportPoints);preparations++;}
+    const recipe=presentation?presentation.sample(prepared,progress):sampleProjectModelRecipe(meta,width,height,supportPoints),{pose,direction,stage,chapterScene}=recipe;
     adapters.forEach(adapter=>adapter.update(recipe.material));bases.forEach(({node,color})=>node.material.color.copy(color).multiplyScalar(recipe.baseMultiplier));
     budget.sync(width,height);camera.position.fromArray(pose.position);camera.up.fromArray(pose.up);camera.aspect=width/height;camera.fov=pose.fov;camera.near=pose.near;camera.far=pose.far;camera.lookAt(...pose.target);camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
     for(const id of ['key','fill','rim']){const light=lights[id],spec=direction[id];light.position.fromArray(spec.position.map((value,i)=>value+stage.center[i]));light.target.position.fromArray(stage.lightTarget);light.color.fromArray(spec.color);light.intensity=spec.intensity;}
     lights.hemisphere.color.fromArray(direction.hemisphere.sky);lights.hemisphere.groundColor.fromArray(direction.hemisphere.ground);lights.hemisphere.intensity=direction.hemisphere.intensity;
     const shadow=lights.key.shadow;shadow.camera.left=shadow.camera.bottom=-stage.shadowHalfExtent;shadow.camera.right=shadow.camera.top=stage.shadowHalfExtent;shadow.camera.near=.05;shadow.camera.far=Math.max(20,stage.radius*10);shadow.camera.updateProjectionMatrix();shadow.bias=direction.stage.shadow.bias;shadow.normalBias=direction.stage.shadow.normalBias;
     exhibition.update({direction,camera,reducedMotion:false,lightSweep:0,backdrop:chapterScene.backdrop});scene.environmentIntensity=direction.environmentIntensity;scene.fog.color.fromArray(direction.haze.color);scene.fog.density=direction.haze.density;
-    renderer.shadowMap.needsUpdate=true;
+    if(!presentation||resized)renderer.shadowMap.needsUpdate=true;
     const draw=commitProjectModelDraw({renderer,scene,camera,host,shaderFailure:()=>shaderFailure});
-    lastSize={width,height};frames++;
+    lastSize={width,height};lastRecipe=recipe;frames++;
     firstDraw??=Object.freeze({completed:true,width,height,calls:draw.calls,sourceRevision:meta.revision,environmentReady:!!scene.environment});
+  };
+  return{
+   resize:draw,
+   present(value){
+    if(!presentation)return;
+    if(!Number.isFinite(value?.progress))throw RangeError('Finite presentation progress required');
+    progress=Math.max(0,Math.min(1,value.progress));
+    const width=value.width??lastSize?.width,height=value.height??lastSize?.height;
+    if(width&&height)draw(width,height);
    },
-   inspect:()=>({frames,firstDraw:firstDraw?{...firstDraw}:null,sourceRevision:meta.revision,vertices:meta.vertices,triangles:meta.triangles,canvasCount:disposed?0:1,pixelBudget:PROJECT_MODEL_PIXEL_BUDGET,budget:budget.inspect(),calls:renderer.info.render.calls,materials:adapters.map(value=>value.inspect()),toneMapping:'ACESFilmic',exposure:1,output:'srgb',compositor:false,disposed}),
+   suspend(){suspended=true;},
+   resume(){suspended=false;},
+   inspect:()=>({frames,firstDraw:firstDraw?{...firstDraw}:null,sourceRevision:meta.revision,vertices:meta.vertices,triangles:meta.triangles,canvasCount:disposed?0:1,pixelBudget,budget:budget.inspect(),calls:renderer.info.render.calls,materials:adapters.map(value=>value.inspect()),toneMapping:'ACESFilmic',exposure:1,output:'srgb',compositor:false,disposed,...(presentation?{presentation:presentation.id,progress:lastRecipe?.progress??null,beat:lastRecipe?.beat??null,pose:lastRecipe?.pose?structuredClone(lastRecipe.pose):null,sourceGeometryUnmodified:true,preparations,suspended}: {})}),
    dispose,
   };
  };

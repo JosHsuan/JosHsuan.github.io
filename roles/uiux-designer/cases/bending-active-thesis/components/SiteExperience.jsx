@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable @next/next/no-img-element -- The original pinned poster carries visual identity across native documents, never scene readiness. */
 import {useEffect,useRef,useState} from 'react';
 import {createSiteNavigation} from '../runtime/site/SiteNavigation.mjs';
 import entry from './entry-loader.module.css';
@@ -16,7 +17,7 @@ export default function SiteExperience(){
  },[]);
  const ready=status.phase==='ready'||status.phase==='revealing'||status.phase==='entered';
  return <><div ref={element} className={`${entry.loader} ${styles.loader}`} data-site-loader data-site-phase="requested" aria-label="Preparing this page">
-  <div className={`${entry.backdrop} ${styles.backdrop}`} aria-hidden="true"/>
+  <div className={`${entry.backdrop} ${styles.backdrop}`} aria-hidden="true">{status.presentation==='bending-active'&&<img className={styles.researchHandoff} src="/assets/cinematic/model-poster.webp" width="1440" height="1000" alt="" decoding="async" data-site-research-handoff/>}</div>
   <div className={entry.content} data-site-loader-content>
    <section className={entry.panel} aria-labelledby="site-entry-title" aria-describedby="site-entry-description">
     <p className={entry.eyebrow}>Portfolio</p>

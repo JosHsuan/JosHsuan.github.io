@@ -618,3 +618,28 @@ test('entry document promise composes with the existing Director gate; stale and
  release=manager.connect({element:new Element(),content:new Element(),document,onChange(){},documentReady:new Promise(()=>{})});stale.resolve({ready:true});await flush();assert.equal(manager.inspect().prerequisites.document,false);
  for(let i=0;i<31;i++)manager.advance(1);assert.equal(manager.inspect().prerequisites.document,true);manager.advance(0);manager.advance(.72);assert.equal(manager.inspect().phase,'entered');assert.equal(manager.inspect().reason,'document-timeout');
 });
+
+test('Home specimen presentation hint follows only its native Bending ticket and never transfers destination readiness',async t=>{
+ const f=environment(),manager=connect(t,f);await flush();f.loader.dispatchEvent(new Event('animationend'));
+ const marked={hasAttribute:name=>name==='data-home-research-link'};
+ const event=f.click('https://example.test/projects/bending-active/',{},marked);
+ assert.equal(event.defaultPrevented,false);assert.equal(manager.inspect().presentation,'bending-active');
+ const ticket=JSON.parse(f.storage.get(SITE_HANDOFF_KEY));assert.equal(ticket.presentation,'bending-active');
+ f.page('pagehide',true);
+ let publish;const destination=environment({url:ticket.url,storage:f.storage});
+ const next=connect(t,destination,{subscribeScene:callback=>{publish=callback;return()=>{};}});await flush();
+ assert.equal(next.inspect().presentation,'bending-active');assert.equal(next.inspect().phase,'requested');assert.equal(next.inspect().previews,null);
+ publish({id:'actual-case',phase:'preparing'});assert.equal(next.inspect().phase,'requested');
+ publish({id:'actual-case',phase:'entered'});assert.equal(next.inspect().phase,'entered');assert.equal(next.inspect().presentation,null);
+ f.page('pageshow',true);await flush();assert.equal(manager.inspect().presentation,null);
+});
+
+test('specimen presentation cannot leak through modified, cancelled, superseded or unrelated native links',async t=>{
+ const f=environment(),manager=connect(t,f);await flush();f.loader.dispatchEvent(new Event('animationend'));
+ const marked={hasAttribute:name=>name==='data-home-research-link'};
+ f.click('https://example.test/projects/bending-active/',{ctrlKey:true},marked);assert.equal(manager.inspect().presentation,null);
+ f.click('https://example.test/about/',{},marked);assert.equal(manager.inspect().presentation,null);
+ const event=f.click('https://example.test/projects/bending-active/',{},marked);event.preventDefault();await flush();assert.equal(manager.inspect().presentation,null);
+ f.click('https://example.test/projects/bending-active/',{},marked);assert.equal(manager.inspect().presentation,'bending-active');
+ f.click('https://example.test/contact/');assert.equal(manager.inspect().presentation,null);assert.equal(JSON.parse(f.storage.get(SITE_HANDOFF_KEY)).presentation,undefined);
+});

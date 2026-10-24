@@ -1,3 +1,4 @@
+import {originalHomeSource} from './home-research-contract.mjs';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
@@ -90,7 +91,7 @@ const cases={
   }
 };
 function verify(source,contract){
- let original=source;
+ let original=contract===cases['PortfolioHome.jsx']?originalHomeSource(source):source;
  for(const [before,after]of contract.replacements){
   assert.equal(original.split(after).length,2,'Each exact approved replacement occurs once');
   original=original.replace(after,before);

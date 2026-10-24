@@ -172,3 +172,47 @@
 }
 /* Wrap groups instead of shrinking native text below the 14px UI role. */
 @media(max-width:640px){.navigation{flex-wrap:wrap;row-gap:.5rem}.navigationLinks a{min-width:44px;padding-inline:.5rem}.identity{padding-inline:.75rem}}
+
+/* Home research specimen: one source owner, native document reading. The
+   desktop hold is compositional, never a scroll trap or a second canvas. */
+.researchStory{min-height:0}
+.researchLayout{min-height:175svh;grid-template-columns:minmax(0,5fr) minmax(0,7fr);grid-template-rows:auto auto;column-gap:3vw;row-gap:16svh;align-content:space-between;padding-top:18svh;padding-bottom:10svh}
+.researchLayout .introductionCopy{grid-column:1;grid-row:1;max-width:35rem;position:relative;z-index:2}
+.researchLayout .projectInvitation{margin-top:2.5rem;max-width:29rem}
+.researchVisual{grid-column:2;grid-row:1/3;position:sticky;top:14svh;align-self:start;height:min(74svh,850px);min-height:360px;isolation:isolate}
+.researchVisual::before{content:"";position:absolute;inset:4% -6%;z-index:-1;background:radial-gradient(ellipse at 60% 45%,#6b8e8040,transparent 65%);pointer-events:none}
+.researchStage{position:relative;width:100%;height:calc(100% - 3rem)}
+.researchStage :global([data-home-research-host]){position:relative;width:100%;height:100%;overflow:hidden;border-radius:1px}
+.researchStage :global([data-home-research-poster]){width:100%;height:100%;object-fit:contain;display:block}
+.researchStage :global([data-home-research-pause]){position:absolute;bottom:1rem;right:1rem;z-index:3;min-height:44px;padding:.65rem .85rem;border:1px solid var(--portfolio-line);border-radius:2rem;background:#111b18;color:var(--paper);font:inherit;font-size:.68rem;cursor:pointer}
+.researchStage :global([data-home-research-pause]):focus-visible,.researchLink:focus-visible{outline:2px solid currentColor;outline-offset:5px}
+.researchCaption{display:flex;justify-content:space-between;gap:1rem;margin:1rem 0 0;color:var(--portfolio-muted);font-size:.6rem;letter-spacing:.07em;line-height:1.5}
+.researchEntry{grid-column:1;grid-row:2;align-self:end;position:relative;z-index:2;max-width:34rem;padding-top:2rem;border-top:1px solid var(--portfolio-line)}
+.researchEntry h2{font-family:var(--display);font-size:clamp(1.7rem,3.4vw,3.5rem);font-weight:400;line-height:1.15;letter-spacing:-.035em;margin:1rem 0 1.5rem}
+.researchEntry>p:not(.eyebrow){max-width:29rem;line-height:1.75;font-size:.83rem}
+.researchLink{display:flex;align-items:center;justify-content:space-between;gap:2rem;min-height:58px;padding:.85rem 0;margin-top:1.5rem;border-bottom:1px solid var(--portfolio-line);color:inherit;text-decoration:none;font-size:.85rem}
+.researchLink>span:last-child{font-size:1.6rem;transition:transform .3s ease}
+.researchLink:hover>span:last-child{transform:translate(3px,-3px)}
+.researchEntry .researchNote{font-size:.63rem;color:var(--portfolio-muted);margin-top:1.5rem}
+@media(max-width:900px){
+ .researchLayout{display:flex;flex-direction:column;gap:2.5rem;min-height:0;padding-top:10rem;padding-bottom:4rem}
+ .researchLayout .introductionCopy{max-width:40rem}
+ .researchVisual{position:relative;top:auto;height:auto;min-height:0;width:100%;max-width:900px;align-self:center}
+ .researchStage{height:auto;aspect-ratio:1.44}
+ .researchCaption{font-size:.55rem}
+ .researchEntry{max-width:40rem;width:100%;align-self:start;margin-top:1rem}
+ .researchEntry h2{font-size:2rem}
+}
+@media(max-width:640px){.researchLayout{padding-inline:1.5rem;gap:2rem}.researchStage :global([data-home-research-pause]){bottom:.5rem;right:.5rem;font-size:.6rem}.researchCaption{flex-wrap:wrap;gap:.35rem}.researchEntry h2{font-size:1.7rem}}
+@media(prefers-reduced-motion:reduce){.researchLink>span:last-child{transition:none}.researchVisual{position:relative;top:auto}}
+@media(forced-colors:active){.researchVisual::before{display:none}.researchStage :global([data-home-research-pause]){background:Canvas;color:CanvasText;border-color:CanvasText}.researchCaption,.researchEntry .researchNote{color:CanvasText}}
+@media print{.researchLayout{min-height:0;display:block;padding-top:2rem}.researchVisual{position:relative;top:auto;height:auto;min-height:0}.researchStage{height:auto;aspect-ratio:1.44}.researchEntry{margin-top:2rem}.researchStage :global([data-home-research-pause]){display:none}}
+/* Presentation-only idle: the source camera is scroll-authored, not a second
+   animated 3D writer. Visibility, Pause, focus and policy stop this CSS sway. */
+.researchStory:global([data-home-research-motion=active]) .researchStage :global([data-home-research-host]){animation:research-specimen-breath 14s ease-in-out infinite}
+.researchStory:focus-within .researchStage :global([data-home-research-host]){animation-play-state:paused}
+@keyframes research-specimen-breath{0%,100%{transform:translateY(0) rotate(-.06deg)}50%{transform:translateY(-1.5px) rotate(.06deg)}}
+@media(prefers-reduced-motion:reduce),(forced-colors:active){.researchStory .researchStage :global([data-home-research-host]){animation:none!important}}
+
+:global(html[data-site-project-entry=bending-active]) .main[data-portfolio-section=home]{transform:scale(.985);filter:brightness(.72);transition:transform .45s ease,filter .45s ease}
+@media(prefers-reduced-motion:reduce){:global(html[data-site-project-entry=bending-active]) .main[data-portfolio-section=home]{transform:none;filter:none;transition:none}}

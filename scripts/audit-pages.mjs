@@ -228,7 +228,10 @@ export async function auditPages() {
   assert(html.includes('data-home-project-link') && html.includes('href="#projects"'), 'Native introduction-to-project-index link');
   assert(!html.includes('data-cinematic-stage'), 'Home does not mount the case stage');
   const introduction=html.match(/<section id="about"[\s\S]*?<\/section>/)?.[0];
-  assert(introduction&&!/model-poster|<canvas|data-project-model-preview/.test(introduction), 'Home introduction stays model-free');
+  assert(introduction&&introduction.includes('data-home-research-story')&&introduction.includes('data-home-research-stage')&&introduction.includes('data-home-research-poster')&&!introduction.includes('data-project-model-preview'), 'Home introduction has one original research specimen and a native poster');
+  assert.equal((html.match(/data-home-research-stage/g)||[]).length,1,'Home owns exactly one research stage');
+  assert(!html.includes('data-project-model-preview'),'Home project grid cannot acquire a second model preview');
+  assert(introduction.includes('data-home-research-link')&&introduction.includes('href="/projects/bending-active/"'),'Research specimen has a native case entry');
   assert.equal((html.match(/data-project-card=/g)||[]).length,2+PROJECT_SLUGS.length,'The two existing and six newly selected evidence-backed projects');
   assert.equal((html.match(/data-site-preview-required(?:=|[ >])/g)||[]).length,1,'Home declares its live card before component effects');
   assert(html.includes('data-project-grid-cells="9"'),'Five projects occupy the existing minimum nine-cell index');
