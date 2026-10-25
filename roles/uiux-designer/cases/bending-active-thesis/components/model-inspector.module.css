@@ -84,3 +84,16 @@
  .sideLabel:global([data-model-label-placement=native]) .annotationSizer{display:grid;visibility:hidden;pointer-events:none;user-select:none}
  .positionSizer>span,.annotationSizer>span{grid-area:1/1}
 }
+
+/* The fixed desktop card uses the same intrinsic all-source envelopes as the
+   native card, so a representation change cannot resize its reading tracks. */
+@media(min-width:781px){
+ .titleSlot{display:grid;grid-template-columns:minmax(0,1fr);margin:14px 0 8px}
+ .titleSlot h3{grid-area:1/1;min-width:0;margin:0}
+ .titleSizer{display:grid;grid-area:1/1;min-width:0;min-height:2.4em;visibility:hidden;pointer-events:none;user-select:none;font-family:var(--display);font-size:clamp(14px,1.25vw,20px);line-height:var(--type-leading-subheading);font-weight:500;letter-spacing:var(--type-tracking-subheading);overflow-wrap:anywhere}
+ .titleSizer>span{grid-area:1/1;min-width:0}
+ .positionSlot,.annotationSlot{display:grid;grid-template-columns:minmax(0,1fr);min-width:0}
+ .positionSlot>.position,.annotationSlot>span{grid-area:1/1;min-width:0}
+ .positionSizer,.annotationSizer{display:grid;visibility:hidden;pointer-events:none;user-select:none}
+ .positionSizer>span,.annotationSizer>span{grid-area:1/1;min-width:0}
+}

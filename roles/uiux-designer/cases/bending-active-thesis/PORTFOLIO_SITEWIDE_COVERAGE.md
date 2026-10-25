@@ -60,9 +60,12 @@ budget failure blocks publication, with no further observer loop.
 The separately authorized full run then completed 548/549: original Bending
 passed, but a distinct WebKit Reduced idle assertion observed one new
 ResizeObserver-triggered layout paint. The required gate correctly rejected it.
-Target/box provenance is being captured in the existing default-off diagnostic
-ring without changing invalidations or the strict idle guard. Fresh exact full
-acceptance and same-artifact deployment remain pending.
+The single target/box diagnostic reproduced a genuine model-label height change
+when Reduced selected different source text; no equal-box suppression is justified.
+A bounded desktop intrinsic-variant reserve is approved, preserving text, compact
+typography, mobile rules, real resize handling and the strict idle guard. Actual
+geometry qualification, fresh exact full acceptance and same-artifact deployment
+remain pending.
 
 Depth-map photo trials (workshop and tower) and the Dot camera-detail trial were
 rejected after actual source/visual review and remain unpublished. Estimated photo
