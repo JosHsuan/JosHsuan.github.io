@@ -1,4 +1,4 @@
-.page{position:relative;color:var(--paper);padding-bottom:8rem;--editorial-gutter:clamp(1.5rem,6vw,7rem)}
+.page{position:relative;z-index:2;color:var(--paper);padding-bottom:8rem;--editorial-gutter:clamp(1.5rem,6vw,7rem)}
 .page h1{font-size:var(--type-size-title);line-height:var(--type-leading-display);letter-spacing:var(--type-tracking-display)}
 .page h2{font-size:var(--type-size-heading);line-height:var(--type-leading-heading);letter-spacing:var(--type-tracking-display)}
 .page p{font-size:var(--type-size-body);line-height:var(--type-leading-body);letter-spacing:var(--type-tracking-body);max-width:var(--type-measure-body);margin:0 0 var(--type-space-paragraph)}
