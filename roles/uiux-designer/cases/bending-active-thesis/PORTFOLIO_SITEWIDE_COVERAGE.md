@@ -11,6 +11,8 @@ Current verified live is `64eebc4a1a3922a443f93d3e9d6f530807d815b8`: [full valid
 
 Next is [Dot's bounded shared hybrid slice](DOT_HYBRID_SCENES.md): native Overview/Results/Credits, unchanged Context evidence, original System point source/camera and Making recording. Its two 1024px Results photographs receive a route/role-scoped source-width ceiling; no asset or color changes. Prototype art and subsequent affected/full qualification remain pending. This is not whole-site completion.
 
+Dot's first C/mobile prototype at `575d712` passed 4/4 with independently reviewed native photographs and complete source/ownership receipts. The affected `03779f4` batch remained failed at 186/189 because the old native-Home test still demanded a fixed Overview backdrop; WebKit's separately passing Back test also captured only prepared model data before visible chapter ownership. Both evidence gaps are retained, not retrospectively passed. The precise fixture migration and stronger same-poll visible-System Back prerequisite at `39e2b3b` then passed all 69 corrected cases across three profiles, with original native input, production deadlines and legacy budgets intact. Independent receipts confirm actual semantic System plus settled scene/backdrop model opacity one, original point source and genuine fresh-history policy. This is not an application performance fix. One required full 573-public-identity plus 24-framework qualification remains pending; current live is still 64e.
+
 ### Retained preceding delivery and diagnostic history
 
 The preceding verified live baseline was `ad83dbb35b743cba6ca31c8026cd2246e14322f5`.
