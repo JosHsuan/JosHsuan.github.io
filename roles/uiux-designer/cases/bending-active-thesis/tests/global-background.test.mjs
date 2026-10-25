@@ -106,6 +106,24 @@ function studyEnvironment(){
   layoutReceipt(){for(const observer of env.observers)if(observer.target===root&&observer.options?.childList)observer.fn([{type:'childList'}]);}};
 }
 
+test('editorial scenes retain one native image owner and chapter clock without fixed-source transport',()=>{
+ const env=studyEnvironment(),root=env.homeRoot,figure=env.homeWindow,image=new Target();
+ root.setAttribute('data-study-presentation','editorial-scenes');
+ Object.assign(image,{complete:false,naturalWidth:0,getAttribute:()=>'/assets/original-photo.webp',closest:()=>figure});
+ const query=root.querySelectorAll.bind(root);root.querySelectorAll=selector=>selector==='[data-editorial-image]'?[image]:query(selector);
+ const surface=canvas();surface.getContext=()=>null;
+ const runtime=createBackgroundRuntime({createRenderer:fieldFactory}),driver=createSiteBackgroundDriver({window:env.win,document:env.doc,runtime,canvas:surface,backdrop:{style:{getPropertyValue(){return'';},setProperty(){}}}});
+ assert.equal(driver.inspect().projectStudy.backdrop,null);assert.equal(driver.inspect().projectStudy.scene,null);
+ assert.deepEqual(driver.inspect().projectStudy.nativeImages,[{source:'/assets/original-photo.webp',state:'loading'}]);
+ const requests=env.frameStats.requested;image.complete=true;image.naturalWidth=1191;image.fire('load');
+ assert.equal(figure.getAttribute('data-editorial-image-state'),'ready');assert.equal(env.frameStats.requested,requests);
+ image.naturalWidth=0;image.fire('error');assert.equal(figure.getAttribute('data-editorial-image-state'),'failed');
+ env.siteReady();env.frame(100);env.win.scrollY=2000;env.win.fire('scroll');env.frame(116);
+ assert.equal(root.dataset.projectActiveChapter,'system');assert.equal(runtime.inspect().acquisitions,1);
+ driver.dispose();image.naturalWidth=1191;image.fire('load');
+ assert.equal(figure.getAttribute('data-editorial-image-state'),'failed');assert.equal(driver.inspect().events.nativeListeners,0);assert.equal(runtime.inspect().releases,1);
+});
+
 test('the native study chapter owner shares one frame through rapid reading, reduced motion and pause without repeated geometry scans',()=>{
  const env=studyEnvironment(),surface=canvas();surface.getContext=()=>null;
  const runtime=createBackgroundRuntime({createRenderer:fieldFactory}),driver=createSiteBackgroundDriver({window:env.win,document:env.doc,runtime,canvas:surface,backdrop:{style:{getPropertyValue(){return'';},setProperty(){}}}});

@@ -99,6 +99,7 @@ const sources = [
   'components/BendingProject.jsx', 'components/PortfolioHome.jsx', 'components/PortfolioNavigation.jsx',
   'components/ProjectStudyChrome.jsx', 'release/xr-workspace.json',
   'components/ProjectCaseStudy.jsx', 'components/ProjectCaseStudy.module.css', 'components/project-study-media.mjs', 'components/project-study-layout.mjs',
+  'components/EditorialProjectStudy.jsx', 'components/EditorialProjectStudy.module.css', 'components/project-editorial-layout.mjs',
   'components/ProjectCaseStudyControls.jsx', 'components/EntranceDiagramFocus.jsx', 'components/EntranceDiagramFocus.module.css', 'release/project-studies.json',
   'components/ProjectCaseStudyStage.jsx', 'components/project-study-scene.mjs',
   'components/project-study-appearance.mjs',

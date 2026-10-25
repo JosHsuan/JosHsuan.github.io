@@ -4,6 +4,8 @@ import ProjectCaseStudyControls from './ProjectCaseStudyControls';
 import ProjectCaseStudyStage from './ProjectCaseStudyStage';
 import InformationSkin from './InformationSkin';
 import EntranceDiagramFocus from './EntranceDiagramFocus';
+import EditorialProjectStudy from './EditorialProjectStudy';
+import {editorialProjectLayout} from './project-editorial-layout.mjs';
 import {projectStudyEvidence} from './project-study-media.mjs';
 import {projectStudyLayout,projectStudyEvidenceLayout} from './project-study-layout.mjs';
 import styles from './ProjectCaseStudy.module.css';
@@ -64,6 +66,8 @@ function EvidenceFigure({image}){
 /** Native documentary case pages and optional verified source models share the
  * selected application's material, entry and ordinary-page clock. */
 export default function ProjectCaseStudy({project}){
+ const editorial=editorialProjectLayout(project);
+ if(editorial)return <EditorialProjectStudy project={project} layout={editorial}/>;
  const prefix=project.id,evidenceByChapter=projectStudyEvidence(project),chapters=[{id:'overview',label:'Overview'},...project.sections.map(section=>({id:section.id,label:section.label})),{id:'credits',label:'Credits'}];
  return <>
   <ProjectStudyChrome chapters={chapters} prefix={prefix} navigationLabel={`${project.shortTitle} project sections`} railClassName={styles.chapterRail}/>
