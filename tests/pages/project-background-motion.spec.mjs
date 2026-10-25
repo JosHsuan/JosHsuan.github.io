@@ -59,7 +59,9 @@ async function attachNativeMediaFailure(page,media,phase,initialTime=null){
     })),
    };
   },{id:media.id,phase,initialTime});
-  await test.info().attach('native-media-failure',{body:JSON.stringify(facts,null,2),contentType:'application/json'});
+  const info=test.info(),path=info.outputPath(`native-media-failure-${media.id}-${phase}-${info.attachments.length}.json`);
+  await writeFile(path,JSON.stringify(facts,null,2));
+  await info.attach('native-media-failure',{path,contentType:'application/json'});
  }catch{/* Diagnostic failure or teardown must never replace the original assertion. */}
 }
 async function playing(page,media){
@@ -119,7 +121,7 @@ async function nativeVideo(page,media){
  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
  return video;
  }catch(error){primary=error;throw error;}finally{
-  try{await test.info().attach('native-media-advancement',{body:JSON.stringify(evidence,null,2),contentType:'application/json'});}catch(error){if(!primary)throw error;}
+  try{const info=test.info(),path=info.outputPath(`native-media-advancement-${media.id}-${info.attachments.length}.json`);await writeFile(path,JSON.stringify(evidence,null,2));await info.attach('native-media-advancement',{path,contentType:'application/json'});}catch(error){if(!primary)throw error;}
  }
 }
 
@@ -238,7 +240,9 @@ test('Mode/s physical recordings and simulation retain separate native times thr
  expect(samples.some(sample=>sample.trusted&&sample.type==='playing'&&sample.playing.includes(film.id))).toBe(true);
  expect(samples.some(sample=>sample.trusted&&sample.type==='playing'&&sample.playing.includes(prototype.id))).toBe(true);
  for(const sample of samples)expect(sample.playing.length,'Only one actual native video plays at a time').toBeLessThanOrEqual(1);
- await test.info().attach('Mode-native-media-forward-reverse-pause',{body:JSON.stringify({filmTime,filmPaused,prototypeTime,samples}),contentType:'application/json'});
+ const modeReceiptPath=test.info().outputPath('Mode-native-media-forward-reverse-pause.json');
+ await writeFile(modeReceiptPath,JSON.stringify({filmTime,filmPaused,prototypeTime,samples},null,2));
+ await test.info().attach('Mode-native-media-forward-reverse-pause',{path:modeReceiptPath,contentType:'application/json'});
  closed((await backdrop(page)).stage.history);
 });
 

@@ -94,6 +94,15 @@ hidden state, owner exit, ended media and disposal retain cancellation semantics
 Source/unit and portable reviews passed; actual focused WebKit and media-regression
 qualification remain pending. Fallback does not satisfy the original positive
 native-time advancement assertion, and no release eligibility is inferred.
+The focused `229f7c4` WebKit file passed all 14 original scenarios. Its retained
+HC/Special owner snapshots show cancellation of the new watcher while inactive;
+however, successful body-only Mode/s advancement attachments were not physical
+artifact files. Therefore the passing guard does not establish whether recovery
+was exercised, nor its measured efficacy. A filesystem-only outputPath/writeFile
+retention correction now preserves the existing JSON on pass and failure, without
+changing runtime, inputs, waits or assertions. A pinned browser-free line-reporter
+contract verified physical files for both outcomes. The separately approved
+three-profile, four-file media regression remains pending before any fresh full gate.
 
 The preceding verified live baseline was `d3eabb897e787287eefdb632d119718bffc35f61`.
 Its [full validation 40169507337](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/40169507337)
