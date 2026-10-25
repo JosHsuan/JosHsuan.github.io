@@ -34,6 +34,7 @@ async function audit(page,noJS,receipt){
   if(path==='/projects/hc3dp-caustics/')expect(rows).toHaveLength(16);
   if(path==='/projects/dot-based-3d-printing/')expect(rows).toHaveLength(14);
   if(path==='/projects/entrance-installation-art/')expect(rows).toHaveLength(16);
+  if(path==='/projects/mode-s-of-making/')expect(rows).toHaveLength(17);
   if(!['/about/','/projects/'].includes(path))expect(rows.length).toBeGreaterThan(0);
   for(const [index,row] of rows.entries()){
    const link=page.locator('a[target="_blank"]').nth(index);expect(row.rel.split(/\s+/)).toContain('noreferrer');expect(row.label).toBeTruthy();
@@ -54,7 +55,7 @@ async function audit(page,noJS,receipt){
   const representative=forced.findIndex(row=>row.visible);if(representative>=0){await expect(page.locator('a[target="_blank"]').nth(representative)).toHaveAccessibleName(forced[representative].label);if(forced[representative].description)await expect(page.locator('a[target="_blank"]').nth(representative)).toHaveAccessibleDescription(forced[representative].description);}
   await page.emulateMedia({forcedColors:'none'});
  }
- const inventory=receipt.flatMap(route=>route.rows);expect(inventory).toHaveLength(139);expect(inventory.filter(row=>row.inspect)).toHaveLength(4);expect(inventory.filter(row=>row.caption)).toHaveLength(31);
+ const inventory=receipt.flatMap(route=>route.rows);expect(inventory).toHaveLength(140);expect(inventory.filter(row=>row.inspect)).toHaveLength(4);expect(inventory.filter(row=>row.caption)).toHaveLength(31);
 }
 async function tabTo(page,target,receipt=[]){
  const bound=await page.locator('a[href],button,input,select,textarea,[tabindex],summary').count();let reached=false;

@@ -70,7 +70,8 @@ const templates={
   // Exact Dot policy/CSS deltas are independently reversed in dot-hybrid-scenes.test.mjs.
   "roles/uiux-designer/cases/bending-active-thesis/components/EditorialProjectStudy.module.css": "fd89ea83120fba43a85c4e49d7707f99dcef519c8add49388a79b7e6a4159b52",
   // Exact HC-only addition is independently reversed in hc3dp-hybrid.test.mjs.
-  "roles/uiux-designer/cases/bending-active-thesis/components/project-editorial-layout.mjs": "fc911953c502dd2835a17e2964dd45627c44217414ca676d7757daecffa15f94"
+  // Mode-only policy delta is independently reversed to published1ca in modes-hybrid-scenes.test.mjs.
+  "roles/uiux-designer/cases/bending-active-thesis/components/project-editorial-layout.mjs": "02ab9974af7b3e8e2cf6f6afd389f9d27c9d0013463fdce48ee374cbc09bfd03"
 };
 function original(path,source){
  for(const [before,after]of reversals[path].blocks){assert.equal(source.split(after).length,2,'Unique exact approved context');source=source.replace(after,before);}

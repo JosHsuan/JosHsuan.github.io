@@ -15,10 +15,12 @@ test('Mode/s preserves its causal chapter order and contains the complete mobile
   await page.locator('h1').scrollIntoViewIfNeeded();
   await expect.poll(()=>page.evaluate(()=>{
    const chapter=document.querySelector('[data-project-chapter="overview"]');
-   const panel=chapter.querySelector('[data-home-scroll-window="project-narrative"]'),frame=chapter.querySelector('[data-project-media-frame]'),img=frame.querySelector('img');
-   const p=panel.getBoundingClientRect(),f=frame.getBoundingClientRect();
-   return {inside:f.left>=p.left+.5&&f.right<=p.right-.5,fit:getComputedStyle(img).objectFit,loaded:img.complete&&img.naturalWidth>0,overflow:document.documentElement.scrollWidth>document.documentElement.clientWidth};
-  })).toEqual({inside:true,fit:'contain',loaded:true,overflow:false});
+   // Native sourceColumn replaces the former glass-panel/frame containment.
+   // Equal column edges are valid; source and viewport containment stay strict.
+   const figure=chapter.querySelector('[data-editorial-source="/assets/projects/mode-s-of-making/film-assembly-hero.webp"]'),column=figure.parentElement,img=figure.querySelector('[data-editorial-image]');
+   const c=column.getBoundingClientRect(),f=figure.getBoundingClientRect(),i=img.getBoundingClientRect();
+   return {inside:f.left>=c.left&&f.right<=c.right&&i.left>=c.left&&i.right<=c.right,viewport:i.left>=0&&i.right<=innerWidth,source:new URL(img.currentSrc||img.src).pathname,fit:getComputedStyle(img).objectFit,loaded:img.complete&&img.naturalWidth===1920&&img.naturalHeight===1080,overflow:document.documentElement.scrollWidth>document.documentElement.clientWidth};
+  })).toEqual({inside:true,viewport:true,source:'/assets/projects/mode-s-of-making/film-assembly-hero.webp',fit:'contain',loaded:true,overflow:false});
   if(width===390){const path=test.info().outputPath('modes-mobile-source-column.png');await page.screenshot({path});await test.info().attach('modes-mobile-source-column',{path,contentType:'image/png'});}
  }
 });
