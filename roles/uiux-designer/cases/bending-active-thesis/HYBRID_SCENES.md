@@ -1,5 +1,23 @@
 # Hybrid chapter-owned source scenes
 
+## Published checkpoint — 25 October 2026
+
+Special Assemblies and the desktop intrinsic model-label reserve are published
+at `ad83dbb35b743cba6ca31c8026cd2246e14322f5`. Full run `40187905020`
+passed 549 public identities exactly once (183 per profile, zero retries) and
+24 framework checks. Pages `40190332876` deployed the same validated artifact;
+all 264 live files, including 137 approved originals, matched its bytes/hashes,
+with release identity before/after and a genuine 404/noindex response verified.
+The exact prior Authored curvature colors → Opening label transition was observed
+in the successful WebKit full run with stable intrinsic tracks and outer card.
+Earlier failed gates and unresolved service latency below remain part of the
+record; publication is not a latency-fix or whole-site completion claim.
+
+HC3DP is the next separately qualified opt-in, documented in
+[HC3DP_HYBRID_SCENES.md](HC3DP_HYBRID_SCENES.md). It reuses this composition,
+not the Special nonloop simulation contract. The following scope and checkpoints
+preserve the original Special development record.
+
 ## Scope and compatibility
 
 This is a bounded Special Assemblies candidate based on published `d3eabb8`, not a site-wide completion claim. The Caschlatsch still-only layout is reused through the same native figure and glass reading primitives. Original source data, bytes, credits, compact type, native links, and the existing clock remain authoritative.

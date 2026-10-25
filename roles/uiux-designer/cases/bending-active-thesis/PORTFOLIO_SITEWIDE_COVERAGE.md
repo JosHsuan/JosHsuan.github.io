@@ -7,7 +7,23 @@ native scrolling and the empty reusable framework.
 
 ## Current delivery and bounded next slice
 
-The current verified live baseline is `d3eabb897e787287eefdb632d119718bffc35f61`.
+The current verified live baseline is `ad83dbb35b743cba6ca31c8026cd2246e14322f5`.
+[Full validation 40187905020](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/40187905020)
+passed all 549 public identities exactly once (183 per profile, zero retries) and
+24 framework checks. [Pages 40190332876](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/40190332876)
+published that same validated artifact. Retained live verification matched all
+264 exported files and all 137 approved source assets, release identity before
+and after transfer, and the genuine 404/noindex response.
+
+Special's native opening/Results and retained model/simulation are delivered.
+The desktop intrinsic model-label reserve also passed the original strict idle
+guard and the previously failing Authored curvature colors → Opening transition
+with unchanged outer/slot dimensions. This is not a fix claim for the unresolved
+host service/input delays recorded below, nor completion of the whole-site rollout.
+The next bounded slice is [HC3DP hybrid](HC3DP_HYBRID_SCENES.md), reusing the same
+components with its original heavy model and looping path simulation intact.
+
+The preceding verified live baseline was `d3eabb897e787287eefdb632d119718bffc35f61`.
 Its [full validation 40169507337](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/40169507337)
 passed 540 public executions exactly once and 24 framework executions; the same
 artifact was published by [Pages 40171565991](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/40171565991).
@@ -24,7 +40,7 @@ responsive native Bending entry bridge (531 public + 24 framework checks;
 match, but live geometry and raster retain different camera/material appearance:
 this is not a seamless shared-GPU morph.
 
-The next bounded candidate is the [Special hybrid exemplar](HYBRID_SCENES.md):
+The now-delivered [Special hybrid exemplar](HYBRID_SCENES.md) was qualified through the following retained history:
 native opening/Results photographs reuse Cas primitives while Context/System
 retain their actual model and Making retains its original nonloop simulation.
 Three-engine scoped art review is accepted. The first 177-test affected batch

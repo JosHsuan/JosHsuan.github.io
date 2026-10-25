@@ -21,6 +21,20 @@ export function editorialProjectLayout(project) {
 
 /** Reviewed mixed ownership: documentary stills leave the leased model/video intact. */
 export function hybridProjectLayout(project) {
+ if (project.id === 'hc3dp-caustics') {
+  const results = project.sections.find(section => section.id === 'results');
+  const names = ['hero.webp', 'overinflation.webp'];
+  const motion = project.motionMedia?.[0];
+  if (!project.model || project.model.chapters.join(',') !== 'context,system' ||
+      project.motionMedia?.length !== 1 || motion.chapter !== 'making' ||
+      motion.loop !== true || motion.kind !== 'simulation' || motion.durationSeconds !== 2.17 ||
+      !motion.src.endsWith('/hc3dp-caustics/fabrication-path-motion.mp4') ||
+      !project.hero.src.endsWith('/hc3dp-caustics/caustic-observation.webp') ||
+      results?.media.length !== 2 || results.media.some((image,index) => !image.src.endsWith(`/hc3dp-caustics/${names[index]}`))) {
+   throw new Error('Hybrid scenes require the reviewed HC3DP source roles.');
+  }
+  return {nativeChapters:['overview','results','credits'],results:{section:results,scene:results.media[0],evidence:[results.media[1]]}};
+ }
  if (project.id !== 'special-assemblies') return null;
  const results = project.sections.find(section => section.id === 'results');
  const names = ['front-prototype.webp', 'assembly-detail.webp'];
