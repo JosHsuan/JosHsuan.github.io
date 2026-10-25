@@ -37,7 +37,8 @@
       "tests/pages/global-window-motion.spec.mjs": 327.119,
       "tests/pages/three-case-narrative.spec.mjs": 11.266,
       "tests/pages/source-access.spec.mjs": 22.744,
-      "tests/pages/link-announcements.spec.mjs": 79.258
+      "tests/pages/link-announcements.spec.mjs": 79.258,
+      "tests/pages/home-research-entry.spec.mjs": 97.052
     },
     "webkit": {
       "tests/pages/canvas-motion.spec.mjs": 162.572,
@@ -72,7 +73,8 @@
       "tests/pages/global-window-motion.spec.mjs": 183.289,
       "tests/pages/three-case-narrative.spec.mjs": 56.551,
       "tests/pages/source-access.spec.mjs": 68.977,
-      "tests/pages/link-announcements.spec.mjs": 57.869
+      "tests/pages/link-announcements.spec.mjs": 57.869,
+      "tests/pages/home-research-entry.spec.mjs": 70.425
     },
     "mobile-chromium": {
       "tests/pages/canvas-motion.spec.mjs": 186.831,
@@ -107,7 +109,8 @@
       "tests/pages/global-window-motion.spec.mjs": 195.052,
       "tests/pages/three-case-narrative.spec.mjs": 9.59,
       "tests/pages/source-access.spec.mjs": 21.712,
-      "tests/pages/link-announcements.spec.mjs": 40.572
+      "tests/pages/link-announcements.spec.mjs": 40.572,
+      "tests/pages/home-research-entry.spec.mjs": 58.7
     }
   },
   "calibrationSources": {
@@ -291,6 +294,18 @@
           "passedSummaryAt": "2026-10-23T05:10:19.7142747Z",
           "testsPassed": 4,
           "measurement": "Single-file elapsed seconds from first logged test start to 4-passed summary; includes intervening setup/teardown and final reporter overhead, excludes earlier build/browser startup and upload. Healthy nonpublishable preflight; scheduling hint, not runtime guarantee."
+        },
+        "tests/pages/home-research-entry.spec.mjs": {
+          "sourceRun": "40146276805",
+          "sourceCommit": "d11633d27d7e7a2c7ee6edfd9625620d84fe85a1",
+          "jobId": "121028195352",
+          "artifactId": "12580252898",
+          "artifactDigest": "sha256:6e0d365d0d2742ef0be385dc5172887d13158c639d6a3ee516f93c35399227b7",
+          "log": "121028195352.log",
+          "firstTestStartedAt": "2026-10-25T00:21:29.6697380Z",
+          "passedSummaryAt": "2026-10-25T00:23:06.7216488Z",
+          "testsPassed": 7,
+          "measurement": "Single-file elapsed seconds from first logged test start to 7-passed summary; includes native video capture, intervening setup/teardown and final reporter overhead, excludes earlier build/browser startup and artifact upload. Healthy nonpublishable preflight; historical scheduling hint, not a performance benchmark or runtime guarantee."
         }
       },
       "webkit": {
@@ -357,6 +372,18 @@
           "passedSummaryAt": "2026-10-23T05:10:22.1623249Z",
           "testsPassed": 4,
           "measurement": "Single-file elapsed seconds from first logged test start to 4-passed summary; includes intervening setup/teardown and final reporter overhead, excludes earlier build/browser startup and upload. Healthy nonpublishable preflight; scheduling hint, not runtime guarantee."
+        },
+        "tests/pages/home-research-entry.spec.mjs": {
+          "sourceRun": "40146335670",
+          "sourceCommit": "d11633d27d7e7a2c7ee6edfd9625620d84fe85a1",
+          "jobId": "121028368387",
+          "artifactId": "12580907225",
+          "artifactDigest": "sha256:c1c7c7aaf4af289c5b69cf1d7ea0a7f7a6d67ff16522fcaff40f8575bcd96307",
+          "log": "121028368387.log",
+          "firstTestStartedAt": "2026-10-25T00:22:22.7409109Z",
+          "passedSummaryAt": "2026-10-25T00:23:33.1656164Z",
+          "testsPassed": 7,
+          "measurement": "Single-file elapsed seconds from first logged test start to 7-passed summary; includes native video capture, intervening setup/teardown and final reporter overhead, excludes earlier build/browser startup and artifact upload. Healthy nonpublishable preflight; historical scheduling hint, not a performance benchmark or runtime guarantee."
         }
       },
       "mobile-chromium": {
@@ -423,6 +450,18 @@
           "passedSummaryAt": "2026-10-23T05:11:06.1843728Z",
           "testsPassed": 4,
           "measurement": "Single-file elapsed seconds from first logged test start to 4-passed summary; includes intervening setup/teardown and final reporter overhead, excludes earlier build/browser startup and upload. Healthy nonpublishable preflight; scheduling hint, not runtime guarantee."
+        },
+        "tests/pages/home-research-entry.spec.mjs": {
+          "sourceRun": "40146386294",
+          "sourceCommit": "d11633d27d7e7a2c7ee6edfd9625620d84fe85a1",
+          "jobId": "121028518221",
+          "artifactId": "12580692708",
+          "artifactDigest": "sha256:bea890fc6809d8905c8048f05cb76656ab7029d9e5a3c9dbef2f02f474c4a110",
+          "log": "121028518221.log",
+          "firstTestStartedAt": "2026-10-25T00:23:13.7419465Z",
+          "passedSummaryAt": "2026-10-25T00:24:12.4424143Z",
+          "testsPassed": 7,
+          "measurement": "Single-file elapsed seconds from first logged test start to 7-passed summary; includes native video capture, intervening setup/teardown and final reporter overhead, excludes earlier build/browser startup and artifact upload. Healthy nonpublishable preflight; historical scheduling hint, not a performance benchmark or runtime guarantee."
         }
       }
     }
