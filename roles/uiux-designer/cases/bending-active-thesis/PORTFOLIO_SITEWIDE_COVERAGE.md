@@ -103,6 +103,16 @@ retention correction now preserves the existing JSON on pass and failure, withou
 changing runtime, inputs, waits or assertions. A pinned browser-free line-reporter
 contract verified physical files for both outcomes. The separately approved
 three-profile, four-file media regression remains pending before any fresh full gate.
+That exact `78ebf26` regression subsequently passed 120/120 cases (40 per
+profile). All 57 unique physical advancement receipts retain genuine native-time
+delta above .03 seconds, original source and rate 1, and no failed owner. Across
+903 retained recovery-bearing observations the retry allowance remained unused
+and histories empty: this proves compatible normal playback/cancellation, not
+browser recovery efficacy or a reproduced-and-repaired stall. Deterministic
+recovery and retry-limit coverage remains unit evidence. The original positive
+advancement guard still rejects fallback. One separately authorized required
+561-public-plus-24-framework gate is next; no additional forced-stall standalone
+run or publication is inferred, and live remains `ad83`.
 
 The preceding verified live baseline was `d3eabb897e787287eefdb632d119718bffc35f61`.
 Its [full validation 40169507337](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/40169507337)
