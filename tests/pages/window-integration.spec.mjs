@@ -62,7 +62,9 @@ test('slow delivered foreground frames finish the Canvas and matching scene with
 test('information windows share one fluid surface while native reading, focus and Reduced remain intact',async({page})=>{
  test.setTimeout(scenarioTimeout(120000));const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.clock.install();await loadScene(page);
  await centerStudy(page,'system');
- expect(await page.evaluate(()=>window.__story.inspect().informationWindows.recipe)).toBe('ink');
+ // Seed prior RO entries in this diagnostic epoch; first prior remains unknown.
+ // Existing expectIdle clears the ring, not this baseline. Earlier failures have no retained idle receipt.
+ expect(await page.evaluate(()=>{window.__story.setWakeDiagnostics(true);return window.__story.inspect().informationWindows.recipe;})).toBe('ink');
  const registered=page.locator('[data-information-window][data-information-ready]');
  expect(await registered.count()).toBeGreaterThanOrEqual(13);
  expect(await page.locator('[data-cinematic-stage] [data-information-window]').count()).toBe(0);

@@ -16,13 +16,35 @@ import {createInformationWindowPresenter} from '../presentation/InformationWindo
 import {createLibraryDiagramPresenter} from '../presentation/LibraryDiagramPresenter.mjs';
 import {createLiquidGlassPresenter} from '../presentation/LiquidGlassPresenter.mjs';
 
-/** Opt-in diagnostic receipts only; never owns scheduling or a clock. */
+/** Opt-in evidence only: no observer, layout measurement, clock or scheduling. */
+const LIMIT=32, RESIZE_LIMIT=8;
+const semanticTarget=target=>({
+ tag:typeof target?.tagName==='string'?target.tagName.slice(0,32):null,
+ id:target?.getAttribute?.('id')?.slice(0,120)??null,
+ chapter:target?.getAttribute?.('data-story-chapter')?.slice(0,80)??null,
+ chapterId:target?.closest?.('[data-story-chapter]')?.getAttribute?.('id')?.slice(0,120)??null,
+ information:target?.getAttribute?.('data-information-window')?.slice(0,80)??null,
+ glass:target?.getAttribute?.('data-liquid-glass')?.slice(0,80)??null,
+ stage:target?.hasAttribute?.('data-cinematic-stage')??false,
+});
+const contentRect=rect=>Object.fromEntries(['x','y','width','height'].map(key=>[key,Number.isFinite(rect?.[key])?rect[key]:null]));
 export function createDirectorWakeDiagnostics(readFacts){
- let enabled=false,events=[];
+ let enabled=false,events=[],resizeBaseline=new WeakMap(),nextTargetId=1;
+ const append=event=>{events.push(event);if(events.length>LIMIT)events.shift();};
  return{
   get enabled(){return enabled;},
-  setEnabled(value){enabled=!!value;events=[];},
-  record(reason){if(!enabled||reason==='continuation')return;events.push({reason,...readFacts()});if(events.length>32)events.shift();},
+  setEnabled(value){const next=!!value;if(!next||!enabled){resizeBaseline=new WeakMap();nextTargetId=1;}enabled=next;events=[];},
+  record(reason){if(!enabled||reason==='continuation')return;append({reason,...readFacts()});},
+  recordResize(entries){
+   if(!enabled)return;
+   const targets=[];
+   for(const entry of entries.slice(0,RESIZE_LIMIT)){
+    const target=entry.target,current=contentRect(entry.contentRect),previous=resizeBaseline.get(target),prior=previous?.rect??null,targetId=previous?.id??nextTargetId++;
+    targets.push({targetId,target:semanticTarget(target),baseline:prior?'previous-observed-in-enabled-epoch':'unknown-before-first-enabled-observation',prior,current});
+    resizeBaseline.set(target,{id:targetId,rect:current});
+   }
+   append({reason:'resize-observer',...readFacts(),resize:{targets,total:entries.length,truncated:entries.length>RESIZE_LIMIT,box:'contentRect',initialDelivery:'unknown; observer entry does not identify initial versus changed delivery'}});
+  },
   inspect(){return{enabled,events:events.map(event=>structuredClone(event))};},
  };
 }
@@ -345,7 +367,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
     const resume=()=>{visibility();suspension('freeze',false);};
     const resizeWindow=()=>layout.invalidate('viewport',true);
     input.events.on(scope,'layoutInvalidated',request=>layout.invalidate(request.reason,request.resumed));
-    const resize=new ResizeObserver(()=>layout.invalidate('element-size'));sections.forEach(el=>resize.observe(el));
+    const resize=new ResizeObserver(entries=>{wakeDiagnostics.recordResize(entries);layout.invalidate('element-size');});sections.forEach(el=>resize.observe(el));
     if(home)resize.observe(home);
     if(stage.current)resize.observe(stage.current);
     const listen=(target,type,handler,options)=>input.events.listen(scope,target,type,event=>{

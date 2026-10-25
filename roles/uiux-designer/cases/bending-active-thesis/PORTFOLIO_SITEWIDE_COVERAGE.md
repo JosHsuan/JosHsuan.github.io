@@ -57,8 +57,12 @@ automation. The observer series is closed; source-level investigation of legitim
 invalidation does not authorize a rendering change. One fresh required full
 qualification is separately authorized on unchanged 1033085 code; repeated
 budget failure blocks publication, with no further observer loop.
-Fresh exact full acceptance
-and same-artifact deployment remain pending.
+The separately authorized full run then completed 548/549: original Bending
+passed, but a distinct WebKit Reduced idle assertion observed one new
+ResizeObserver-triggered layout paint. The required gate correctly rejected it.
+Target/box provenance is being captured in the existing default-off diagnostic
+ring without changing invalidations or the strict idle guard. Fresh exact full
+acceptance and same-artifact deployment remain pending.
 
 Depth-map photo trials (workshop and tower) and the Dot camera-detail trial were
 rejected after actual source/visual review and remain unpublished. Estimated photo
