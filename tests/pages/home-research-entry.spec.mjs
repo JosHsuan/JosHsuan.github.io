@@ -1,6 +1,8 @@
 import {test,expect} from '@playwright/test';
 import {writeFile} from 'node:fs/promises';
 import {WAIT,frames,scenarioTimeout} from './case-helpers.mjs';
+// Only the cross-document journey records native video; other cases remain still-only.
+const historyTest=test.extend({video:'on'});
 const read=page=>page.evaluate(()=>({y:scrollY,idle:(()=>{const host=document.querySelector('[data-home-research-host]');if(!host)return null;const css=getComputedStyle(host);return{transform:css.transform,name:css.animationName,playState:css.animationPlayState,animations:host.getAnimations().slice(0,2).map(a=>({currentTime:a.currentTime,playState:a.playState}))};})(),nativeProgress:(()=>{const root=document.querySelector('[data-home-research-story]');if(!root)return null;let top=0;for(let n=root;n;n=n.offsetParent)top+=n.offsetTop;return Math.max(0,Math.min(1,(scrollY-top)/Math.max(1,root.offsetHeight-innerHeight)));})(),site:window.__site?.inspect(),hero:window.__homeResearch?.inspect(),presenter:window.__globalBackground?.inspect().driver.homeResearch}));
 async function entered(page){await expect.poll(async()=>(await read(page)).site?.phase,{timeout:WAIT}).toBe('entered');await expect(page.locator('[data-site-loader]')).toBeHidden();}
 async function exposed(page){
@@ -89,12 +91,16 @@ async function captureEntry(page,info,rows,name,loaderSelector,imageSelector){
  const path=info.outputPath('home-entry-'+name+'.png');await page.screenshot({path});await info.attach('home-entry-'+name,{path,contentType:'image/png'});
 }
 
-test('Home native project entry disposes its own source and destination readiness remains independent through history',async({page,isMobile},info)=>{
+historyTest('Home native project entry disposes its own source and destination readiness remains independent through history',async({page,context,isMobile},info)=>{
  test.setTimeout(scenarioTimeout(120000));
  let primary,activation,activationError,releaseDocument,releaseModel,documentHeld=false,modelHeld=false;
  const documentGate=new Promise(resolve=>{releaseDocument=resolve;}),modelGate=new Promise(resolve=>{releaseModel=resolve;});
- const rows=[],outgoingFacts=[],navigationRequests=[];try{await page.goto('/');await entered(page);await exposed(page);
- await page.exposeBinding('__testHomeOutgoing',(_source,fact)=>{if(outgoingFacts.length<16)outgoingFacts.push(fact);});
+ const rows=[],outgoingFacts=[],navigationRequests=[],videoTimeline=[];
+ const hostStartedAt=performance.now(),video=page.video();
+ const mark=phase=>{if(videoTimeline.length<24)videoTimeline.push({phase,hostElapsedMs:performance.now()-hostStartedAt,hostEpochMs:Date.now()});};
+ mark('case-start-video-handle-obtained');
+ try{expect(video).not.toBeNull();await page.goto('/');await entered(page);await exposed(page);
+ await page.exposeBinding('__testHomeOutgoing',(_source,fact)=>{if(outgoingFacts.length<16)outgoingFacts.push({...fact,hostReceivedElapsedMs:performance.now()-hostStartedAt,hostReceivedEpochMs:Date.now()});});
  await page.evaluate(observeOutgoingEntry);
  page.on('request',request=>{if(request.isNavigationRequest()&&request.frame()===page.mainFrame()&&navigationRequests.length<8)navigationRequests.push(request.url());});
  let firstDocument=true,firstModel=true;
@@ -102,6 +108,7 @@ test('Home native project entry disposes its own source and destination readines
  await page.route('**/assets/source-layers.glb',async route=>{if(firstModel){firstModel=false;modelHeld=true;await modelGate;}await route.continue();});
  await page.evaluate(()=>addEventListener('pagehide',event=>{sessionStorage.setItem('test-home-research-departure',JSON.stringify({persisted:event.persisted,hero:window.__homeResearch.inspect()}));},{once:true}));
  const before=await read(page);rows.push({phase:'home',...before});
+ mark('home-ready-before-native-activation');
  const entry=page.locator('[data-home-research-link]');let activationPoint;
  if(isMobile){await entry.scrollIntoViewIfNeeded();const r=await entry.boundingBox();activationPoint={x:r.x+r.width/2,y:r.y+r.height/2};activation=entry.tap();}
  else{
@@ -120,26 +127,33 @@ test('Home native project entry disposes its own source and destination readines
   const r=await entry.boundingBox();activationPoint={x:r.x+r.width/2,y:r.y+r.height/2};
   activation=page.keyboard.press('Enter');
  }
+ mark('native-activation-issued');
  activation.catch(error=>{activationError=error;});
  await expect.poll(()=>{if(activationError)throw activationError;return documentHeld;},{timeout:WAIT}).toBe(true);
+ mark('document-request-held');
  await expect.poll(()=>outgoingFacts.some(f=>f.site.presentation==='bending-active'&&f.paint?.complete&&f.paint.naturalWidth>0&&f.paint.visible&&f.paint.opacity>0),{timeout:WAIT}).toBe(true);
  const outgoing=outgoingFacts.findLast(f=>f.site.presentation==='bending-active'&&f.paint?.complete&&f.paint.naturalWidth>0&&f.paint.visible&&f.paint.opacity>0);rows.push({phase:'outgoing-held-original-document',...outgoing});
  expect(outgoing.site.presentation).toBe('bending-active');expect(outgoing.ticket.presentation).toBe('bending-active');expect(outgoing.ticket.url).toBe(new URL('/projects/bending-active/',outgoing.url).href);expect(outgoing.ticket.id).toBe(outgoing.site.id);expectOutgoingPaint(outgoing);
+ mark('loaded-outgoing-paint-observed');
  const previousClicks=outgoing.clicks;
  if(isMobile)await page.touchscreen.tap(activationPoint.x,activationPoint.y);else await page.mouse.click(activationPoint.x,activationPoint.y);
  await expect.poll(()=>outgoingFacts.some(f=>f.reason==='click'&&f.clicks>previousClicks),{timeout:WAIT}).toBe(true);
  const repeated=outgoingFacts.findLast(f=>f.reason==='click'&&f.clicks>previousClicks);rows.push({phase:'native-repeat-during-outgoing-loading',activationPoint,...repeated});
  expect(repeated.event.trusted).toBe(true);expect(repeated.site.id).toBe(outgoing.site.id);expect(repeated.ticket.id).toBe(outgoing.ticket.id);expect(repeated.inert).toBe(true);expect(repeated.hero).toEqual(outgoing.hero);expect(navigationRequests).toEqual([outgoing.ticket.url]);
- // Pinned Playwright 1.63 viewport screenshot uses non-stalling existing-context
- // preparation and no navigation precheck. Do not replace this with a locator,
- // fullPage capture or fresh frame evaluate while the document remains held.
- const outgoingPath=info.outputPath('home-entry-outgoing.png');await page.screenshot({path:outgoingPath,fullPage:false});await info.attach('home-entry-outgoing',{path:outgoingPath,contentType:'image/png'});
- releaseDocument();
+ // Native recordVideo starts with the context. Pinned 1.63 page.video() only
+ // returns its artifact handle; saveAs delegates to that artifact after close.
+ // No screenshot, frame query or capture command runs against the pending
+ // document. Host receipts delimit a search interval, not exact video PTS:
+ // recorder start, delivery latency and dropped/duplicated frames may differ.
+ mark('repeat-observed-before-document-release');
+ releaseDocument();mark('document-gate-released');
  await expect.poll(()=>modelHeld,{timeout:WAIT}).toBe(true);
+ mark('destination-model-request-held');
  await expect.poll(()=>page.evaluate(()=>window.__story?.inspect().entry.phase),{timeout:WAIT}).toBe('preparing');
  const arrival=await page.evaluate(()=>({site:window.__site.inspect(),entry:window.__story.inspect().entry,sceneReady:window.__thesis?.inspect().ready===true,marker:document.documentElement.getAttribute('data-site-project-entry')}));rows.push({phase:'arrival-held-original-model',...arrival});
  expect(arrival.marker).toBe('bending-active');expect(arrival.site.phase).toBe('requested');expect(arrival.sceneReady).toBe(false);
  await captureEntry(page,info,rows,'arrival','[data-entry-loader]','[data-entry-loader] img');
+ mark('committed-arrival-png-completed');
  releaseModel();await activation;
  await expect(page).toHaveURL(/\/projects\/bending-active\/$/);
  await expect.poll(()=>page.evaluate(()=>window.__story?.inspect().entry.phase),{timeout:WAIT}).toBe('entered');
@@ -159,7 +173,8 @@ test('Home native project entry disposes its own source and destination readines
  }catch(error){primary=error;throw error;}finally{
   releaseDocument();releaseModel();
   let cleanupError=primary;
-  for(const cleanup of [()=>receipt(info,'home-native-project-history',[...rows,{phase:'bounded-outgoing-observer',facts:outgoingFacts,navigationRequests}]),()=>page.unrouteAll({behavior:'wait'}),()=>activation]){
+  mark('cleanup-gates-released');
+  for(const cleanup of [()=>receipt(info,'home-native-project-history',[...rows,{phase:'bounded-outgoing-observer',facts:outgoingFacts,navigationRequests},{phase:'native-video-search-window',file:'home-native-entry.webm',recording:{mode:'on',size:'Playwright default fits viewport within 800x800; verify encoded dimensions with ffprobe after collection',use:'continuity observation only; not original-resolution typography or fine-detail acceptance'},timeline:videoTimeline,note:'Host elapsed time starts after recorder creation, not at video PTS zero. Observer page time and host receipt time have distinct origins; use visual inspection to locate outgoing frames, not exact timestamp subtraction.'}]),()=>page.unrouteAll({behavior:'wait'}),()=>activation,()=>context.close(),async()=>{if(video){const path=info.outputPath('home-native-entry.webm');await video.saveAs(path);await info.attach('home-native-entry',{path,contentType:'video/webm'});}}]){
    try{await cleanup();}catch(error){cleanupError??=error;}
   }
   if(!primary&&cleanupError)throw cleanupError;
