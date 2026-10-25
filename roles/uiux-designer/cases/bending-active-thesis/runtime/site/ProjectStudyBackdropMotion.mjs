@@ -32,11 +32,11 @@ export function failProjectStudyBackdropMotion(state,key,reason){
  if(state.request?.key!==key||state.request.terminal)return;
  state.request.failure=reason;state.request.terminal='failed';fact(state,'failed',reason);state.transition=null;state.settled=true;
 }
-export function advanceProjectStudyBackdropMotion(state,dt,{key,chapter,direction=1,ready=false,failure='',snap=false,resumed=false}={}){
+export function advanceProjectStudyBackdropMotion(state,dt,{key,chapter,direction=1,ready=false,failure='',absent=false,snap=false,resumed=false}={}){
  if(!key||!chapter||!Number.isFinite(dt)||dt<0)throw RangeError('An actual source identity, chapter and finite active seconds are required');
  if(state.request?.key!==key){
   if(state.request&&!state.request.terminal){state.request.terminal='cancelled';fact(state,'cancelled','superseded');}
-  state.request={id:++state.sequence,key,chapter,direction:Math.sign(direction)||1,terminal:null,failure:''};fact(state,'requested');
+  state.request={id:++state.sequence,key,chapter,direction:Math.sign(direction)||1,terminal:null,failure:'',...(absent?{absent:true}:{})};fact(state,'requested');
  }
  const request=state.request;
   // A source may span several reading chapters. Its identity owns the outer
@@ -49,6 +49,9 @@ export function advanceProjectStudyBackdropMotion(state,dt,{key,chapter,directio
    if(state.pose.opacity>0&&!snap){if(state.transition?.kind!=='exit')begin(state,'exit');return;}
    state.key=request.key;state.chapter=request.chapter;state.pose=outside(-request.direction);state.transition=null;
   }
+  // A native chapter owns its real document source, not a backdrop resource.
+  // Complete the previous exit, then settle absent without decode or entry.
+  if(request.absent){state.pose=outside(request.direction);state.mode='absent';state.transition=null;state.settled=true;finish(state,'native-source');return;}
   if(!ready){state.mode='waiting';state.transition=null;state.settled=false;return;}
   if(snap){state.pose=held();state.transition=null;state.mode='hold';state.settled=true;finish(state,'static');}
   else if(state.pose.opacity!==1||state.pose.x!==0){if(state.transition?.kind!=='entry')begin(state,'entry');}

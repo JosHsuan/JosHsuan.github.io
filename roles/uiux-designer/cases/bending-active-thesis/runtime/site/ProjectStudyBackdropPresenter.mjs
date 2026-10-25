@@ -11,6 +11,7 @@ export function createProjectStudyBackdropPresenter({root,window:win,document:do
  const events=new EventManager(),scope=events.createScope('project-study-backdrop'),motion=createProjectStudyBackdropMotion();
  const chapters=[...root.querySelectorAll('[data-project-chapter]')].map(node=>node.dataset.projectChapter);
  const figures=[...root.querySelectorAll('[data-project-media]')],records=[],descriptors=new Map();
+ const nativeChapters=new Set([...root.querySelectorAll('[data-project-native-source]')].map(node=>node.dataset.projectNativeSource||node.dataset.projectChapter||node.closest?.('[data-project-chapter]')?.dataset.projectChapter).filter(chapter=>chapters.includes(chapter)));
  const listen=(node,type,handler,options)=>events.listen(scope,node,type,handler,options);
  const clock=()=>win.performance?.now?.()??Date.now();
  let disposed=false,suspended=false,scene=null,initial=true,seekPending=false,lastChapter=null,direction=1,ticks=0;
@@ -223,6 +224,13 @@ export function createProjectStudyBackdropPresenter({root,window:win,document:do
   publishMedia(record);
  }
  const wanted=(chapter,p)=>{
+  // Native document sources explicitly release the background owner. They are
+  // not missing media, a last-record fallback, or a synthetic decoded image.
+  if(nativeChapters.has(chapter)){
+   const key=`native:${chapter}`;
+   if(!descriptors.has(key))descriptors.set(key,{key,chapter,kind:'native'});
+   return descriptors.get(key);
+  }
   const modelState=scene?.actor.inspect(),modelUnavailable=modelState?.arrivalStatic&&modelState.posterFailed;
    const modelKey=scene?`model:${scene.model.sha256}`:null;
    if(modelUnavailable)failProjectStudyBackdropMotion(motion,modelKey,modelState.posterFailureReason||modelState.staticReason||'model-poster-unavailable');
@@ -287,12 +295,12 @@ export function createProjectStudyBackdropPresenter({root,window:win,document:do
    const snap=initial||seekPending||p.reduced||p.saveData||p.paused||!p.siteReady;
    // A target may acquire/paint only after the previously displayed subject is
    // completely outside. Its native reading chapter is already immediate.
-   let result=motion.key===target.key?readyTarget(target,p):{ready:false,failure:''};
-   advanceProjectStudyBackdropMotion(motion,dt,{key:target.key,chapter:target.chapter,direction,...result,snap,resumed});
+   let result=target.kind==='native'?{}:motion.key===target.key?readyTarget(target,p):{ready:false,failure:''};
+   advanceProjectStudyBackdropMotion(motion,dt,{key:target.key,chapter:target.chapter,direction,...result,absent:target.kind==='native',snap,resumed});
    if(motion.key===target.key&&motion.mode==='waiting'){
-    result=readyTarget(target,p);advanceProjectStudyBackdropMotion(motion,0,{key:target.key,chapter:target.chapter,direction,...result,snap,resumed});
+    result=readyTarget(target,p);advanceProjectStudyBackdropMotion(motion,0,{key:target.key,chapter:target.chapter,direction,...result,absent:target.kind==='native',snap,resumed});
    }
-   if(motion.mode==='hold'){initial=false;seekPending=false;}
+   if(motion.mode==='hold'||motion.mode==='absent'&&motion.settled){initial=false;seekPending=false;}
    render();
    const actorMoving=scene?.actor.publish({dt,resumed,stage:snapshot()})??false;
    return actorMoving||!!motion.transition;

@@ -26,6 +26,7 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
   const fine=win.matchMedia('(hover: hover) and (pointer: fine)');
   const studyRoot=doc.querySelector?.('[data-project-study]')??null;
   const editorialStudy=studyRoot?.getAttribute('data-study-presentation')==='editorial-scenes';
+  const hybridStudy=studyRoot?.getAttribute('data-study-presentation')==='hybrid-scenes';
   const nativeImages=[];
   // Ordinary editorial routes share this existing clock. XR and Bending keep
   // their independent Directors and must never acquire a second window owner.
@@ -53,7 +54,7 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
   // Documentary scenes keep their actual images in native chapter flow. They
   // never acquire a second fixed copy or the background transition transport.
   // Native loading/error facts need no animation clock or eager decode request.
-  if(editorialStudy)for(const image of studyRoot.querySelectorAll('[data-editorial-image]')){
+  if(editorialStudy||hybridStudy)for(const image of studyRoot.querySelectorAll('[data-editorial-image]')){
     const figure=image.closest('[data-editorial-source]');
     if(!figure)continue;
     const row={source:image.getAttribute('src'),state:'loading'};nativeImages.push(row);
@@ -167,7 +168,7 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
   measure();scheduler.schedule();
   function dispose(){if(disposed)return;disposed=true;releaseHomeResearch();homeResearch?.dispose();releaseStage();projectBackdrop?.dispose();projectScene?.dispose();projectScene=null;projectChapters?.dispose();scheduler.dispose();home?.dispose();liquid?.dispose();scope.dispose();events.dispose();binding.dispose();}
   return {
-    inspect:()=>({owner:'site',frames,playback:sampleChapterPlayback(playback),chapterScene:latest,size:{...size},lifecycle:scheduler.inspect(),events:events.inspect(),pageField:binding.inspect(),homeScrolling:home?.inspect()??null,homeResearch:homeResearch?.inspect()??null,projectStudy:studyRoot?{paused:studyPaused(),chapters:projectChapters?.inspect()??null,liquidGlass:liquid?.inspect(),scene:projectScene?.inspect()??null,backdrop:projectBackdrop?.inspect()??null,media:projectBackdrop?.inspect().media??[],...(editorialStudy?{presentation:'editorial-scenes',nativeImages:nativeImages.map(row=>({...row}))}:{})}:null,domPublication:publisher.inspect(),disposed}),
+    inspect:()=>({owner:'site',frames,playback:sampleChapterPlayback(playback),chapterScene:latest,size:{...size},lifecycle:scheduler.inspect(),events:events.inspect(),pageField:binding.inspect(),homeScrolling:home?.inspect()??null,homeResearch:homeResearch?.inspect()??null,projectStudy:studyRoot?{paused:studyPaused(),chapters:projectChapters?.inspect()??null,liquidGlass:liquid?.inspect(),scene:projectScene?.inspect()??null,backdrop:projectBackdrop?.inspect()??null,media:projectBackdrop?.inspect().media??[],...(editorialStudy||hybridStudy?{presentation:editorialStudy?'editorial-scenes':'hybrid-scenes',nativeImages:nativeImages.map(row=>({...row}))}:{})}:null,domPublication:publisher.inspect(),disposed}),
     dispose,
   };
 }

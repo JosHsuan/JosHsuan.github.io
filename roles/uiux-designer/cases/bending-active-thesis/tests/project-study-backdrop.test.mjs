@@ -17,12 +17,12 @@ class Target{
  getAttribute(key){return this.attributes.get(key)??null;}setAttribute(key,value){this.attributes.set(key,String(value));}removeAttribute(key){this.attributes.delete(key);}
  querySelector(){return null;}querySelectorAll(){return[];}
 }
-function fixture({video=false,reduced=false,saveData=false,rejectPlay=false,pendingImage=null,pendingDecode=null,sharedImage=false,deferPause=false}={}){
+function fixture({video=false,reduced=false,saveData=false,rejectPlay=false,pendingImage=null,pendingDecode=null,sharedImage=false,deferPause=false,nativeChapters=[]}={}){
  const root=new Target(),doc=new Target(),win=new Target(),timers=new Map(),callbacks=new Map(),controls=[];
  const pendingDecodes=new Map(),nativeEvents=[],pendingPlays=[];
  let sequence=0,schedules=0,now=0,plays=0,pauses=0,loads=0,cancels=0,deferNextPlay=false;
  const policy={hidden:false,reduced,saveData,paused:false,siteReady:true},figures=[];
- const sources=['overview','context','system','making','results'];
+ const sources=['overview','context','system','making','results'].filter(chapter=>!nativeChapters.includes(chapter));
  for(const chapter of sources){
   const figure=new Target(),image=new Target();figure.dataset.projectMedia=chapter;image.setAttribute('src',sharedImage&&chapter==='making'?'/context.webp':`/${chapter}.webp`);image.complete=chapter!==pendingImage;image.naturalWidth=image.complete?1600:0;image.decode=()=>chapter===pendingDecode?new Promise(resolve=>pendingDecodes.set(chapter,resolve)):Promise.resolve();figure.image=image;
   figure.querySelector=selector=>selector==='[data-project-media-poster]'||selector==='img'?image:selector==='[data-project-motion-media]'?figure.video??null:null;
@@ -36,7 +36,7 @@ function fixture({video=false,reduced=false,saveData=false,rejectPlay=false,pend
   figures.push(figure);
  }
  root.dataset.projectActiveChapter='overview';
- root.querySelectorAll=selector=>selector==='[data-project-chapter]'?chapters.map(chapter=>({dataset:{projectChapter:chapter}})):selector==='[data-project-media]'?figures:controls.filter(control=>control.getAttribute(selector.slice(1,-1))!==null);
+ root.querySelectorAll=selector=>selector==='[data-project-chapter]'?chapters.map(chapter=>({dataset:{projectChapter:chapter}})):selector==='[data-project-media]'?figures:selector==='[data-project-native-source]'?nativeChapters.map(chapter=>({dataset:{projectNativeSource:chapter,projectChapter:chapter}})):controls.filter(control=>control.getAttribute(selector.slice(1,-1))!==null);
  Object.assign(win,{innerWidth:1440,innerHeight:1000,performance:{now:()=>now},setTimeout:(fn,delay)=>{timers.set(++sequence,{fn,delay});return sequence;},clearTimeout:id=>timers.delete(id)});
  const presenter=createProjectStudyBackdropPresenter({root,window:win,document:doc,publisher:new DOMPresenter().forOwner('test-backdrop'),schedule:()=>schedules++,policy:()=>policy});
  const step=(dt=.016,resumed=false)=>{now+=dt*1000;return presenter.publish({dt,resumed});};
@@ -267,4 +267,68 @@ test('policy-selected posters have bounded readiness without video acquisition; 
   const f=fixture({video:true,pendingImage:'making',[preference]:true});await flush();f.step();f.select('making');assert.equal(f.video.getAttribute('src'),null);assert.equal(f.plays,0);assert.equal(f.timers.size,1);for(const [id,timer]of [...f.timers]){f.timers.delete(id);timer.fn();}f.step();assert.equal(f.presenter.inspect().stage.request.terminal,'failed');assert.equal(f.presenter.inspect().stage.request.failure,'image-timeout');assert.equal(f.presenter.inspect().media.find(row=>row.id).posterReason,'image-timeout');f.presenter.dispose();terminal(f.presenter.inspect().stage.history);
  }
  const f=fixture({video:true,rejectPlay:true,pendingImage:'making'});await flush();f.step();f.select('making');f.step(1);await flush();f.step();assert.equal(f.video.getAttribute('src'),null);assert.equal(f.presenter.inspect().stage.key,'poster:authentic-making');assert.equal(f.timers.size,1);f.figures[3].image.fire('error');f.step();f.settle();const state=f.presenter.inspect();assert.equal(state.stage.request.terminal,'failed');assert.equal(state.stage.request.failure,'image-unavailable');assert.equal(state.stage.history.filter(row=>row.status==='failed'&&row.key==='video:authentic-making').length,1);assert.equal(state.stage.history.filter(row=>row.status==='failed'&&row.key==='poster:authentic-making').length,1);f.figures[3].image.complete=true;f.figures[3].image.naturalWidth=1600;f.figures[3].image.fire('load');await flush();assert.equal(f.presenter.inspect().media.find(row=>row.id).posterReady,false);assert.equal(f.timers.size,0);f.presenter.dispose();terminal(f.presenter.inspect().stage.history);
+});
+
+test('explicit native targets finish the existing exit without synthetic readiness or entry at every frame rate',()=>{
+ for(const hz of [30,60,120]){
+  const state=createProjectStudyBackdropMotion();
+  advanceProjectStudyBackdropMotion(state,0,{key:'video:making',chapter:'making',ready:true,snap:true});
+  advanceProjectStudyBackdropMotion(state,0,{key:'native:results',chapter:'results',absent:true});
+  assert.equal(state.mode,'exit');assert.equal(state.key,'video:making');
+  let frames=0;while(state.transition&&frames++<200)advanceProjectStudyBackdropMotion(state,1/hz,{key:'native:results',chapter:'results',absent:true});
+  assert(frames<200);assert.equal(state.key,'native:results');assert.equal(state.mode,'absent');assert.equal(state.pose.opacity,0);assert.equal(state.settled,true);assert.equal(state.request.terminal,'completed');
+  assert.equal(state.history.at(-1).reason,'native-source');
+  advanceProjectStudyBackdropMotion(state,0,{key:'video:making',chapter:'making',ready:true,direction:-1});assert.equal(state.mode,'entry');
+  advanceProjectStudyBackdropMotion(state,3,{key:'video:making',chapter:'making',ready:true,direction:-1});assert.equal(state.mode,'hold');terminal(state.history);
+ }
+});
+
+test('native retargeting is latest-wins and preserves the current finite exit pose',()=>{
+ const state=createProjectStudyBackdropMotion();advanceProjectStudyBackdropMotion(state,0,{key:'model:original',chapter:'system',ready:true,snap:true});
+ advanceProjectStudyBackdropMotion(state,.15,{key:'native:results',chapter:'results',absent:true});const pose={...state.pose};
+ advanceProjectStudyBackdropMotion(state,0,{key:'native:credits',chapter:'credits',absent:true});assert.deepEqual(state.pose,pose);
+ advanceProjectStudyBackdropMotion(state,4,{key:'native:credits',chapter:'credits',absent:true});assert.equal(state.key,'native:credits');assert.equal(state.mode,'absent');
+ assert.equal(state.history.find(row=>row.key==='native:results'&&row.status==='cancelled').reason,'superseded');terminal(state.history);
+});
+
+test('native overview/results/credits own no backdrop media or readiness and override legacy model chapter overlap',async()=>{
+ const f=fixture({nativeChapters:['overview','results','credits']}),preparations=[],stages=[],host=new Target(),surface=new Target();host.querySelector=()=>surface;
+ const actor={prepare(chapter){preparations.push(chapter);return true;},publish({stage}){stages.push(stage);return false;},inspect:()=>({arrivalStatic:false}),suspend(){},resume(){}};
+ f.presenter.setScene({actor,host,model:{sha256:'original-model',chapters:['overview','context','system']}});await flush();f.step();
+ assert.equal(f.presenter.inspect().stage.kind,'native');assert.equal(f.presenter.inspect().stage.key,'native:overview');assert.equal(f.presenter.inspect().stage.mode,'absent');assert.deepEqual(preparations,[]);assert.equal(f.timers.size,0);
+ assert.deepEqual(f.presenter.inspect().media.map(record=>record.chapter),['context','system','making']);
+ f.select('context');assert.equal(f.presenter.inspect().stage.mode,'entry');f.settle();assert.equal(host.getAttribute('data-project-model-active'),'');assert.equal(preparations.at(-1),'context');
+ const sequence=f.presenter.inspect().stage.sequence;f.select('system');assert.equal(f.presenter.inspect().stage.sequence,sequence);assert.equal(preparations.at(-1),'system');
+ f.select('results');assert.equal(f.presenter.inspect().stage.mode,'exit');f.settle();assert.equal(host.getAttribute('data-project-model-mode'),'absent');assert.equal(host.getAttribute('data-project-model-active'),null);assert.equal(surface.styles.get('opacity'),'0');
+ f.select('credits');assert.equal(f.presenter.inspect().stage.key,'native:credits');assert.equal(f.presenter.inspect().stage.mode,'absent');assert.equal(stages.at(-1).kind,'native');assert.equal(f.timers.size,0);
+ f.select('system');f.settle();assert.equal(host.getAttribute('data-project-model-active'),'');assert.equal(stages.at(-1).key,'model:original-model');f.presenter.dispose();terminal(f.presenter.inspect().stage.history);
+});
+
+test('Making recording exits to native Results/Credits with closed transport and reverses on the retained original video',async()=>{
+ const f=fixture({video:true,nativeChapters:['overview','results','credits']});await flush();f.step();assert.equal(f.presenter.inspect().stage.mode,'absent');assert.equal(f.loads,0);
+ f.select('making');assert.equal(f.presenter.inspect().stage.mode,'waiting');f.frame();await flush();f.step();f.settle();await flush();assert.equal(f.video.paused,false);
+ f.video.currentTime=1.25;const loads=f.loads;f.select('results');assert.equal(f.presenter.inspect().stage.mode,'exit');assert.equal(f.video.paused,true);assert.equal(f.callbacks.size,0);
+ f.settle();const retained=f.presenter.inspect().media.find(record=>record.id);assert.equal(retained.active,false);assert.equal(retained.playing,false);assert.equal(retained.playPending,false);assert.equal(retained.callbackPending,false);assert.equal(retained.deadlinePending,false);assert.equal(retained.sourceAttached,true);assert.equal(retained.currentTime,1.25);
+ f.select('credits');assert.equal(f.presenter.inspect().stage.key,'native:credits');assert.equal(f.presenter.inspect().stage.kind,'native');assert.equal(f.presenter.inspect().stage.mode,'absent');assert.equal(f.loads,loads);
+ const pauses=f.pauses;for(let frame=0;frame<120;frame++)f.step();assert.equal(f.pauses,pauses);assert.equal(f.callbacks.size,0);assert.equal(f.timers.size,0);
+ f.select('making');assert.equal(f.presenter.inspect().stage.mode,'entry');f.settle();await flush();assert.equal(f.video.paused,false);assert.equal(f.video.currentTime,1.25);assert.equal(f.loads,loads);
+ f.presenter.dispose();terminal(f.presenter.inspect().stage.history);
+});
+
+test('native targets cancel pending recording callbacks and never accept a superseded first frame',async()=>{
+ const f=fixture({video:true,nativeChapters:['overview','results','credits']});await flush();f.step();f.select('making');assert.equal(f.callbacks.size,1);
+ const late=[...f.callbacks.values()][0];f.select('results');f.settle();assert.equal(f.callbacks.size,0);assert.equal(f.timers.size,0);assert.equal(f.video.paused,true);
+ late(0,{mediaTime:0,presentedFrames:1});await flush();f.step();assert.equal(f.presenter.inspect().stage.key,'native:results');assert.equal(f.presenter.inspect().stage.mode,'absent');assert.equal(f.presenter.inspect().media.find(record=>record.id).firstFrame,false);
+ f.presenter.dispose();terminal(f.presenter.inspect().stage.history);
+});
+
+test('native absence respects static policies and retained hidden/resume without acquiring a fake source',async()=>{
+ for(const mode of ['reduced','saveData','paused']){
+  const f=fixture({video:true,nativeChapters:['overview','results','credits'],[mode]:true});if(mode==='paused')f.policy.paused=true;
+  await flush();f.step();f.select('results');f.select('credits');assert.equal(f.presenter.inspect().stage.mode,'absent');assert.equal(f.presenter.inspect().stage.key,'native:credits');assert.equal(f.loads,0);assert.equal(f.callbacks.size,0);assert.equal(f.timers.size,0);f.presenter.dispose();terminal(f.presenter.inspect().stage.history);
+ }
+ const f=fixture({video:true,nativeChapters:['overview','results','credits']});await flush();f.step();f.select('making');f.frame();await flush();f.step();f.settle();await flush();
+ f.video.currentTime=2;const loads=f.loads;f.policy.hidden=true;f.presenter.suspend('page');f.root.dataset.projectActiveChapter='credits';assert.equal(f.video.paused,true);assert.equal(f.callbacks.size,0);
+ f.policy.hidden=false;f.presenter.resume();f.step(100,true);assert.equal(f.presenter.inspect().stage.mode,'absent');assert.equal(f.presenter.inspect().stage.key,'native:credits');assert.equal(f.video.currentTime,2);assert.equal(f.loads,loads);assert.equal(f.callbacks.size,0);
+ f.select('making');f.settle();await flush();assert.equal(f.video.currentTime,2);assert.equal(f.loads,loads);f.presenter.dispose();terminal(f.presenter.inspect().stage.history);
 });

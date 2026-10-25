@@ -4,8 +4,8 @@ import ProjectCaseStudyControls from './ProjectCaseStudyControls';
 import ProjectCaseStudyStage from './ProjectCaseStudyStage';
 import InformationSkin from './InformationSkin';
 import EntranceDiagramFocus from './EntranceDiagramFocus';
-import EditorialProjectStudy from './EditorialProjectStudy';
-import {editorialProjectLayout} from './project-editorial-layout.mjs';
+import EditorialProjectStudy,{NativeStudyOpening,NativeStudyChapter} from './EditorialProjectStudy';
+import {editorialProjectLayout,hybridProjectLayout} from './project-editorial-layout.mjs';
 import {projectStudyEvidence} from './project-study-media.mjs';
 import {projectStudyLayout,projectStudyEvidenceLayout} from './project-study-layout.mjs';
 import styles from './ProjectCaseStudy.module.css';
@@ -68,14 +68,15 @@ function EvidenceFigure({image}){
 export default function ProjectCaseStudy({project}){
  const editorial=editorialProjectLayout(project);
  if(editorial)return <EditorialProjectStudy project={project} layout={editorial}/>;
+ const hybrid=hybridProjectLayout(project);
  const prefix=project.id,evidenceByChapter=projectStudyEvidence(project),chapters=[{id:'overview',label:'Overview'},...project.sections.map(section=>({id:section.id,label:section.label})),{id:'credits',label:'Credits'}];
  return <>
   <ProjectStudyChrome chapters={chapters} prefix={prefix} navigationLabel={`${project.shortTitle} project sections`} railClassName={styles.chapterRail}/>
   <ProjectCaseStudyControls projectId={project.id} chapterCount={chapters.length}/>
-  <main id="portfolio-main" tabIndex={-1} className={styles.page} data-project-study={project.id} data-information-motion-profile="velocity-skin" data-portfolio-root data-portfolio-section="project-study">
+  <main id="portfolio-main" tabIndex={-1} className={styles.page} data-project-study={project.id} data-study-presentation={hybrid?'hybrid-scenes':undefined} data-information-motion-profile="velocity-skin" data-portfolio-root data-portfolio-section="project-study">
    {project.model&&<ProjectCaseStudyStage projectId={project.id} model={project.model}/>}
    <article aria-labelledby={`${prefix}-overview-heading`}>
-    <header id={`${prefix}-overview`} tabIndex={-1} className={`${styles.chapter} ${styles.opening}`} data-project-chapter="overview" {...layoutAttributes(projectStudyLayout(project,'overview'))}>
+    {hybrid?<NativeStudyOpening project={project}/>:<header id={`${prefix}-overview`} tabIndex={-1} className={`${styles.chapter} ${styles.opening}`} data-project-chapter="overview" {...layoutAttributes(projectStudyLayout(project,'overview'))}>
      <div className={styles.chapterInner}>
       <Panel opening>
        <a href="/projects/" className={styles.backLink}>← All projects</a>
@@ -91,8 +92,9 @@ export default function ProjectCaseStudy({project}){
       </Panel>
       <PrimaryVisual image={project.hero} chapter="overview" prefix={prefix} opening model={project.model} motion={project.motionMedia?.find(media=>media.chapter==='overview')}/>
      </div>
-    </header>
+    </header>}
     {project.sections.map((section,index)=>{
+     if(hybrid?.results.section===section)return <NativeStudyChapter key={section.id} project={project} section={section} index={index} scene={hybrid.results.scene} evidence={hybrid.results.evidence}/>;
      const motion=project.motionMedia?.find(media=>media.chapter===section.id),evidence=evidenceByChapter.get(section.id);
      return <section key={section.id} id={`${prefix}-${section.id}`} tabIndex={-1} className={styles.chapter} data-project-chapter={section.id} aria-labelledby={`${prefix}-${section.id}-heading`} {...layoutAttributes(projectStudyLayout(project,section.id))}>
      <div className={styles.chapterInner}>
@@ -106,7 +108,7 @@ export default function ProjectCaseStudy({project}){
      {project.id==='entrance-installation-art'&&section.diagramFocus&&<div className={styles.evidenceBand}><EntranceDiagramFocus guide={section.diagramFocus} image={section.media.find(image=>image.src===section.diagramFocus.source)} id={`${prefix}-${section.id}-guide`}/></div>}
      {evidence.length>0&&<div className={styles.evidenceBand}>{evidence.map(image=><EvidenceFigure key={image.src} image={image}/>)}</div>}
     </section>;})}
-    <footer id={`${prefix}-credits`} tabIndex={-1} className={`${styles.chapter} ${styles.creditsChapter}`} data-project-chapter="credits" aria-labelledby={`${prefix}-credits-heading`} {...layoutAttributes(projectStudyLayout(project,'credits'))}>
+    <footer id={`${prefix}-credits`} tabIndex={-1} className={`${styles.chapter} ${styles.creditsChapter}`} data-project-chapter="credits" data-project-native-source={hybrid?'credits':undefined} aria-labelledby={`${prefix}-credits-heading`} {...layoutAttributes(projectStudyLayout(project,'credits'))}>
      <div className={styles.chapterInner}><Panel>
       <StudyLabel kind="make">{String(chapters.length-1).padStart(2,'0')} / CREDITS</StudyLabel>
       <h2 id={`${prefix}-credits-heading`} tabIndex={-1}>Project credits.</h2>

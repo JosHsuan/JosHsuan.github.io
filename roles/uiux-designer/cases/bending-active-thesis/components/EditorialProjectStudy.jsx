@@ -5,16 +5,16 @@ import InformationSkin from './InformationSkin';
 import {editorialProjectLayout} from './project-editorial-layout.mjs';
 import styles from './EditorialProjectStudy.module.css';
 
-function ReadingRail({children}){
+export function ReadingRail({children}){
  return <div className={styles.rail} data-information-window="editorial" data-information-motion-surface="plane" data-home-scroll-window="project-narrative"><InformationSkin/>{children}</div>;
 }
-function SourceAction({image,evidence=false}){
+export function SourceAction({image,evidence=false}){
  return <a className={styles.sourceAction} data-evidence-source-link={evidence?'':undefined} href={image.src} target="_blank" rel="noopener noreferrer" aria-label={`Open full image (new tab): ${image.alt}`}>Open full image (new tab)</a>;
 }
-function SourceReference({image}){
+export function SourceReference({image}){
  return <div className={styles.reference} data-editorial-source-reference={image.src}><p>{image.caption}</p><span>{image.credit}</span><SourceAction image={image}/></div>;
 }
-function SourceFigure({image,evidence=false,eager=false}){
+export function SourceFigure({image,evidence=false,eager=false}){
  const technical=image.purpose==='diagram';
  return <figure className={technical?styles.evidence:styles.scene} data-editorial-source={image.src} data-study-evidence-layout={evidence?'full':undefined} data-study-evidence-role={evidence?(technical?'technical-plate':'photograph'):undefined}>
   <a className={styles.imageLink} href={image.src} target="_blank" rel="noreferrer" aria-label={`View full image (new tab): ${image.alt}`}>
@@ -23,6 +23,28 @@ function SourceFigure({image,evidence=false,eager=false}){
   <span className={styles.imageFailure} role="status">Image unavailable. The source caption, original image link and project text remain available.</span>
   <figcaption data-information-window="evidence-caption" data-information-motion-surface="plane" data-home-scroll-window="project-caption"><InformationSkin/><p>{image.caption}</p><span>{image.credit}</span><SourceAction image={image} evidence={evidence}/></figcaption>
  </figure>;
+}
+/** Native still-source roles for hybrid cases; model/video ownership stays with the caller. */
+export function NativeStudyOpening({project}){
+ const prefix=project.id;
+ return <header id={`${prefix}-overview`} tabIndex={-1} className={`${styles.nativeSurface} ${styles.nativeOpening}`} data-project-chapter="overview" data-project-native-source="overview" data-study-composition="native-still">
+  <div className={styles.chapterHeading}><a className={styles.sourceAction} href="/projects/">← All projects</a><StudyLabel opening>{project.yearLabel} / {project.category}</StudyLabel><h1 id={`${prefix}-overview-heading`} tabIndex={-1}>{project.title}</h1></div>
+  <div className={styles.nativeOpeningRow}>
+   <div className={styles.sourceColumn}><SourceFigure image={project.hero} eager/></div>
+   <ReadingRail>{project.subtitle&&<p>{project.subtitle}</p>}<p>{project.summary}</p><dl className={styles.metadata}><div><dt>Context</dt><dd>{project.context}</dd></div><div><dt>Role</dt><dd>{project.role}</dd></div></dl><a className={styles.sourceAction} href={`#${prefix}-${project.sections[0].id}`}>Follow the study <span aria-hidden="true">↓</span></a></ReadingRail>
+  </div>
+ </header>;
+}
+export function NativeStudyChapter({project,section,index,scene,evidence=[]}){
+ const prefix=project.id;
+ return <section id={`${prefix}-${section.id}`} tabIndex={-1} className={styles.nativeSurface} data-project-chapter={section.id} data-project-native-source={section.id} data-study-composition="native-still" aria-labelledby={`${prefix}-${section.id}-heading`}>
+  <div className={styles.chapterHeading}><StudyLabel kind={section.kind}>{String(index+1).padStart(2,'0')} / {section.label}</StudyLabel><h2 id={`${prefix}-${section.id}-heading`} tabIndex={-1}>{section.title}</h2></div>
+  <div className={styles.nativeSceneRow}>
+   <div className={styles.sourceColumn}><SourceFigure image={scene}/></div>
+   <ReadingRail>{section.paragraphs.map(paragraph=><p key={paragraph}>{paragraph}</p>)}</ReadingRail>
+  </div>
+  {evidence.length>0&&<div className={styles.evidenceSequence}>{evidence.map(image=><SourceFigure key={image.src} image={image} evidence/>)}</div>}
+ </section>;
 }
 /** Native chapter-owned sources: no fixed backdrop registration or additional clock. */
 export default function EditorialProjectStudy({project,layout}){

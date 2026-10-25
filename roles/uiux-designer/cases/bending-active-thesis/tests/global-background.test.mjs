@@ -124,6 +124,22 @@ test('editorial scenes retain one native image owner and chapter clock without f
  assert.equal(figure.getAttribute('data-editorial-image-state'),'failed');assert.equal(driver.inspect().events.nativeListeners,0);assert.equal(runtime.inspect().releases,1);
 });
 
+test('hybrid native images do not disable the existing backdrop owner or add image clocks',()=>{
+ const env=studyEnvironment(),root=env.homeRoot,figure=env.homeWindow,image=new Target();
+ root.setAttribute('data-study-presentation','hybrid-scenes');
+ Object.assign(image,{complete:true,naturalWidth:3120,getAttribute:()=>'/assets/original-hybrid-photo.webp',closest:()=>figure});
+ const query=root.querySelectorAll.bind(root);root.querySelectorAll=selector=>selector==='[data-editorial-image]'?[image]:query(selector);
+ const surface=canvas();surface.getContext=()=>null;
+ const runtime=createBackgroundRuntime({createRenderer:fieldFactory}),driver=createSiteBackgroundDriver({window:env.win,document:env.doc,runtime,canvas:surface,backdrop:{style:{getPropertyValue(){return'';},setProperty(){}}}});
+ assert.ok(driver.inspect().projectStudy.backdrop);
+ assert.equal(driver.inspect().projectStudy.presentation,'hybrid-scenes');
+ assert.deepEqual(driver.inspect().projectStudy.nativeImages,[{source:'/assets/original-hybrid-photo.webp',state:'ready'}]);
+ const requests=env.frameStats.requested;image.fire('error');
+ assert.equal(figure.getAttribute('data-editorial-image-state'),'failed');assert.equal(env.frameStats.requested,requests);
+ driver.dispose();image.fire('load');assert.equal(figure.getAttribute('data-editorial-image-state'),'failed');
+ assert.equal(driver.inspect().events.nativeListeners,0);assert.equal(runtime.inspect().releases,1);
+});
+
 test('the native study chapter owner shares one frame through rapid reading, reduced motion and pause without repeated geometry scans',()=>{
  const env=studyEnvironment(),surface=canvas();surface.getContext=()=>null;
  const runtime=createBackgroundRuntime({createRenderer:fieldFactory}),driver=createSiteBackgroundDriver({window:env.win,document:env.doc,runtime,canvas:surface,backdrop:{style:{getPropertyValue(){return'';},setProperty(){}}}});
