@@ -60,6 +60,8 @@ async function tabTo(page,target,receipt=[]){
 // Full Bending only: retain post-key observations while avoiding repeated strict
 // target acquisition/disposal (pinned Playwright 1.63 Locator._withElement).
 // This is not a production performance fix or a guarantee of the 60s budget.
+// Counters cover observation intervals, not per-Tab causality or same-output identity.
+// Samples use only existing callbacks, bounded by each unchanged traversal limit.
 async function tabToStable(page,target,receipt=[]){
  const bound=await page.locator('a[href],button,input,select,textarea,[tabindex],summary').count();
  let handle,primaryError,reached=false;
@@ -67,8 +69,8 @@ async function tabToStable(page,target,receipt=[]){
   handle=await target.elementHandle();expect(handle).not.toBeNull();
   for(let index=0;index<bound+2;index++){
    await page.keyboard.press('Tab');
-   const observed=await handle.evaluate(node=>{const active=document.activeElement;return{reached:active===node,y:scrollY,tag:active?.tagName,id:active?.id,href:active?.getAttribute('href'),label:active?.getAttribute('aria-label'),text:active?.textContent?.trim().slice(0,160),isConnected:node.isConnected};});
-   receipt.push(observed);expect(observed.isConnected,'Original native Tab target remains attached').toBe(true);
+   const observed=await handle.evaluate(node=>{const active=document.activeElement,scene=window.__thesis?.inspect(),story=window.__story?.inspect();return{reached:active===node,y:scrollY,tag:active?.tagName,id:active?.id,href:active?.getAttribute('href'),label:active?.getAttribute('aria-label'),text:active?.textContent?.trim().slice(0,160),isConnected:node.isConnected,renderCounters:{observedMs:performance.now(),timeOrigin:performance.timeOrigin,frames:scene?.frames,controllerFrame:scene?.controllerFrame,renderedControllerFrame:scene?.renderedControllerFrame,rendererPendingFrames:scene?.rendererPendingFrames,compositorFrames:scene?.compositor?.frames,paused:scene?.motionPaused,activeSeconds:story?.playback.activeSeconds}};});
+   observed.traversalLimit=bound+2;receipt.push(observed);expect(observed.isConnected,'Original native Tab target remains attached').toBe(true);
    if(observed.reached){reached=true;break;}
   }
   expect(reached,'Native Tab traversal reaches the announced action').toBe(true);
@@ -122,12 +124,9 @@ test('original generic and XR image actions open and return natively',async({pag
   }
  }catch(error){primaryError=error;throw error;}finally{try{await persist(info,'native-link-behaviour',receipt);}catch(error){if(!primaryError)throw error;}}
 });
-// Nonpublishable exploratory observer diagnostic; not a release tracing policy.
-// The worker-scoped trace fixture can change browser lifetime/cache/order as well.
-const snapshotDiagnosticTest=test.extend({trace:{mode:'retain-on-failure',screenshots:false,snapshots:false,sources:true}});
-snapshotDiagnosticTest('Full Bending native Pause reading reaches an inline comparison and its original action',async({page,context,isMobile},info)=>{
+test('Full Bending native Pause reading reaches an inline comparison and its original action',async({page,context,isMobile},info)=>{
  const receipt={navigation:[],triggerTabs:[],originalTabs:[],phase:'entry',pauseDiagnostic:{scope:'Passive bounded timestamps. Host and browser clocks are separate; Mutation timestamps are callback observations, not exact mutation instants; DOM commit is not pixel presentation. No extra RAF, timer, rendering hook or input change; pre-click RAF responsiveness and pixel presentation are not measured.',events:[],mutations:[],operations:[]}};let primaryError;
- const timed=async(name,operation)=>{const row={name,startedMs:performance.now()};if(receipt.pauseDiagnostic.operations.length<48)receipt.pauseDiagnostic.operations.push(row);try{const result=await operation();row.completedMs=performance.now();if(name==='existing-state-read')row.browserWork=result.browserWork;return result;}catch(error){row.failedMs=performance.now();row.error=String(error.message).slice(0,240);throw error;}};
+ const timed=async(name,operation)=>{const row={name,startedMs:performance.now()};if(receipt.pauseDiagnostic.operations.length<48)receipt.pauseDiagnostic.operations.push(row);try{const result=await operation();row.completedMs=performance.now();if(name==='existing-state-read'){row.browserWork=result.browserWork;row.renderCounters=result.renderCounters;}return result;}catch(error){row.failedMs=performance.now();row.error=String(error.message).slice(0,240);throw error;}};
  try{
   receipt.policy='Full source, native Pause-controlled reading; not Reduced. Prior unpaused Chromium service latency remains unresolved.';
   // Host receipt delivery is fire-and-forget and bounded; failed page cleanup cannot erase received events.
@@ -145,7 +144,7 @@ snapshotDiagnosticTest('Full Bending native Pause reading reaches an inline comp
   expect((await timed('goto',()=>page.goto('/projects/bending-active/'))).status()).toBe(200);await timed('fonts-ready',()=>page.evaluate(()=>document.fonts.ready));
   // Same existing callback only: these timestamps exclude protocol serialization, queueing and trace snapshots.
   // Returned timing rows survive later poll/failure; an unreturned callback has no inferred browser timings.
-  const state=()=>timed('existing-state-read',()=>page.evaluate(()=>{const enteredMs=performance.now(),scene=window.__thesis?.inspect(),afterThesisMs=performance.now(),story=window.__story?.inspect(),afterStoryMs=performance.now();const result={browserObservedMs:performance.now(),browserTimeOrigin:performance.timeOrigin,pauseDiagnostic:window.__pauseDiagnostic?.read(),hash:location.hash,y:scrollY,activeId:document.activeElement?.id,phase:window.__site?.inspect().phase,ready:scene?.ready,detail:scene?.detail,systemReduced:scene?.systemReduced,mediaReduced:matchMedia('(prefers-reduced-motion: reduce)').matches,paused:scene?.motionPaused,seconds:story?.playback.activeSeconds,source:scene?.source,renderProfile:scene?.renderProfile,renderPressure:scene?.renderPressure,renderPressureDecisions:scene?.renderPressureDecisions,renderBudget:scene?.renderBudget,rendererBudget:scene?.rendererBudget,representation:scene?.representation,pose:scene?.pose,bounds:scene?.bounds,stageLayout:scene?.stageLayout,sourceVisible:scene?.sourceVisible,compositor:scene?.compositor?{requestedSamples:scene.compositor.requestedSamples,width:scene.compositor.width,height:scene.compositor.height}:null};const constructedMs=performance.now();result.browserWork={timeOrigin:performance.timeOrigin,enteredMs,afterThesisMs,afterStoryMs,constructedMs};return result;}));
+  const state=()=>timed('existing-state-read',()=>page.evaluate(()=>{const enteredMs=performance.now(),scene=window.__thesis?.inspect(),afterThesisMs=performance.now(),story=window.__story?.inspect(),afterStoryMs=performance.now();const result={browserObservedMs:performance.now(),browserTimeOrigin:performance.timeOrigin,renderCounters:{observedMs:performance.now(),timeOrigin:performance.timeOrigin,frames:scene?.frames,controllerFrame:scene?.controllerFrame,renderedControllerFrame:scene?.renderedControllerFrame,rendererPendingFrames:scene?.rendererPendingFrames,compositorFrames:scene?.compositor?.frames,paused:scene?.motionPaused,activeSeconds:story?.playback.activeSeconds},pauseDiagnostic:window.__pauseDiagnostic?.read(),hash:location.hash,y:scrollY,activeId:document.activeElement?.id,phase:window.__site?.inspect().phase,ready:scene?.ready,detail:scene?.detail,systemReduced:scene?.systemReduced,mediaReduced:matchMedia('(prefers-reduced-motion: reduce)').matches,paused:scene?.motionPaused,seconds:story?.playback.activeSeconds,source:scene?.source,renderProfile:scene?.renderProfile,renderPressure:scene?.renderPressure,renderPressureDecisions:scene?.renderPressureDecisions,renderBudget:scene?.renderBudget,rendererBudget:scene?.rendererBudget,representation:scene?.representation,pose:scene?.pose,bounds:scene?.bounds,stageLayout:scene?.stageLayout,sourceVisible:scene?.sourceVisible,compositor:scene?.compositor?{requestedSamples:scene.compositor.requestedSamples,width:scene.compositor.width,height:scene.compositor.height}:null};const constructedMs=performance.now();result.browserWork={timeOrigin:performance.timeOrigin,enteredMs,afterThesisMs,afterStoryMs,constructedMs};return result;}));
   await expect.poll(async()=>{receipt.entry=await state();return receipt.entry;},{timeout:WAIT}).toMatchObject({phase:'entered',ready:true,detail:'full',systemReduced:false,mediaReduced:false,paused:false});
   const pressureFacts=snapshot=>{
    const expected=isMobile?{id:'conservative-touch',pixelBudget:520000,maxSamples:0,shadowMapSize:512}:{id:'standard',pixelBudget:1600000,maxSamples:2,shadowMapSize:1024};

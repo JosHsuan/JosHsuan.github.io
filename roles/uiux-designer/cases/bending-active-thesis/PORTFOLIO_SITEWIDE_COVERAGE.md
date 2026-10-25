@@ -45,8 +45,10 @@ validated timing fix and no full rerun is inferred. A bounded same-evaluate
 internal-timestamp diagnostic retained trace/input/guards/budget and measured
 0.3–0.9 ms callbacks despite multi-second host waits; it still failed overall (3/4 passed) and does
 not establish release eligibility. One diagnostic-only case-local trace snapshot
-comparison is separately authorized with an explicit worker/browser/cache confound
-from the worker-scoped fixture; no normal CI evidence change is inferred.
+comparison completed 4/4, but substantial service waits persisted and its worker/
+browser/cache/order confound prevents a snapshot-only causal or reliability claim.
+Snapshot-off promotion was rejected; the formal candidate restores original
+snapshot-enabled tracing. No new full run or application performance fix follows.
 Fresh exact full acceptance
 and same-artifact deployment remain pending.
 
