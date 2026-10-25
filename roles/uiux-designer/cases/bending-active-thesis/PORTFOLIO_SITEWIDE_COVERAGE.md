@@ -7,27 +7,36 @@ native scrolling and the empty reusable framework.
 
 ## Current delivery and bounded next slice
 
-The current verified live baseline is `05b6796826a7f8bd60df01731e8335abec600711`.
-Its [full validation 40156782076](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/40156782076)
-passed 531 public executions exactly once and 24 framework executions; the same
-artifact was published by [Pages 40158961701](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/40158961701).
-Live verification matched all 264 exported files, including 137 original source
-assets, and the true 404 response. The preceding Home research hero and native
-Bending entry are delivered; the canonical responsive poster bridge now matches
-outgoing/arrival source and composition. Live geometry and raster still have
-different camera/material appearance: this is not a seamless shared-GPU morph.
+The current verified live baseline is `d3eabb897e787287eefdb632d119718bffc35f61`.
+Its [full validation 40169507337](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/40169507337)
+passed 540 public executions exactly once and 24 framework executions; the same
+artifact was published by [Pages 40171565991](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/40171565991).
+Independent live verification matched all 263 exported files, including 137
+original source assets, release identity before/after transfer, and the true 404
+response. The [Cas chapter-owned editorial exemplar](EDITORIAL_SCENES.md) is
+therefore delivered: complete native photographs and technical plates beside
+existing glass reading rails, with original source access and corrected no-JS
+decorative ownership. This is a Cas opt-in, not a universal model/video rewrite.
 
-The next candidate is the [Cas chapter-owned editorial exemplar](EDITORIAL_SCENES.md):
-complete native photographs and technical plates beside existing glass reading
-rails, rather than independent fixed sources behind overlapping prose. Its scoped
-three-engine art review and 168 affected executions passed at `b47ff948`; full
-540-execution validation and deployment remain pending. The first full run
-`40167096661` completed with 536 passes and four failures: three exposed a
-no-JavaScript decorative-skin selector collision, now narrowly corrected, and
-one was the unchanged Full Bending native-link scenario exceeding its 60-second
-budget. No assertion or timeout was relaxed; a new exact full gate is required. This policy is explicitly
-opt-in for Cas, not an automatic rewrite of all model/video projects. Original
-assets, all six Cas evidence actions and the global 31 evidence actions remain.
+The preceding `05b6796` release delivered the Home research hero and canonical
+responsive native Bending entry bridge (531 public + 24 framework checks;
+264 live files / 137 originals). Outgoing/arrival poster source and composition
+match, but live geometry and raster retain different camera/material appearance:
+this is not a seamless shared-GPU morph.
+
+The next bounded candidate is the [Special hybrid exemplar](HYBRID_SCENES.md):
+native opening/Results photographs reuse Cas primitives while Context/System
+retain their actual model and Making retains its original nonloop simulation.
+Three-engine scoped art review is accepted. The first 177-test affected batch
+failed four tests (173 passed): three new history fixtures incorrectly dereferenced
+a correctly released null scene, and the unchanged Chromium Bending comparison
+scenario exceeded its original 60-second budget. Corrected hybrid-only qualification
+passed 9/9 and actually completed native Back/Forward. One separately authorized
+Chromium diagnostic passed all four original link scenarios while retaining
+bounded native-event/DOM-observation/host-operation timings; it does not erase the
+failed batch or identify the remaining automation/service delay's hardware cause.
+No application input, original assertion or timeout was relaxed. Fresh exact
+549-public + 24-framework validation and same-artifact deployment remain pending.
 
 Depth-map photo trials (workshop and tower) and the Dot camera-detail trial were
 rejected after actual source/visual review and remain unpublished. Estimated photo
