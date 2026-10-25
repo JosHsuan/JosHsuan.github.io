@@ -21,6 +21,23 @@ export function editorialProjectLayout(project) {
 
 /** Reviewed mixed ownership: documentary stills leave the leased model/video intact. */
 export function hybridProjectLayout(project) {
+ if (project.id === 'mode-s-of-making') {
+  const results = project.sections.find(section => section.id === 'results');
+  const films = [['film-machine-simulation','making','simulation',4.8,120],['film-physical-cutting','fabrication','recording',8.008,240],['prototype-cutting-operation','cutting','recording',8,200]];
+  if (!project.model || project.model.chapters.join(',') !== 'context,system' ||
+      !project.hero.src.endsWith('/mode-s-of-making/film-assembly-hero.webp') || project.hero.width !== 1920 || project.hero.height !== 1080 ||
+      results?.media.length !== 1 || results.media[0].src !== project.hero.src ||
+      project.motionMedia?.length !== 3 || films.some(([id,chapter,kind,duration,frames]) => {
+       const film = project.motionMedia.find(media => media.id === id);
+       return !film || film.chapter !== chapter || film.kind !== kind || film.loop !== true ||
+        film.durationSeconds !== duration || film.frameCount !== frames || film.width !== 1920 || film.height !== 1080 ||
+        !film.src.endsWith(`/mode-s-of-making/${id}.mp4`);
+      })) {
+   throw new Error('Hybrid scenes require the reviewed Mode/s simulation and recording roles.');
+  }
+  // The opening is a simulation still; Results keeps its original assembly-study return.
+  return {nativeChapters:['overview','credits'],results:null};
+ }
  if (project.id === 'entrance-installation-art') {
   const motion = project.motionMedia?.[0];
   const guides = [['context','pattern-development.webp',4],['system','panel-system.webp',5],['making','fabrication-drawings.webp',2]];
