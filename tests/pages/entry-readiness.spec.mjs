@@ -122,7 +122,24 @@ for(const viewport of [{width:320,height:844},{width:844,height:390}])test(`cano
   await page.route('**/_next/**',async route=>{if(route.request().resourceType()==='script')await gate;await route.continue();});
   await page.goto('/projects/bending-active/',{waitUntil:'commit'});
   const frame=page.locator('[data-entry-loader] [data-research-entry-composition]'),image=frame.locator('img');await expect(frame).toBeVisible();
-  await expect.poll(()=>image.evaluate(node=>node.complete&&node.naturalWidth>0),{timeout:WAIT}).toBe(true);await expect(image).toHaveCSS('object-fit','contain');await page.evaluate(()=>document.fonts.ready);
+  await expect.poll(()=>image.evaluate(node=>node.complete&&node.naturalWidth>0),{timeout:WAIT}).toBe(true);await expect(image).toHaveCSS('object-fit','contain');
+  // FontFaceSet.ready also covers the document's pending environment; these
+  // original scripts are deliberately held. Prove the actual declared face
+  // for the rendered text instead of waiting for global document readiness.
+  const fonts=await frame.evaluate(async root=>{
+   const normalize=value=>value.replace(/["']/g,'').trim();
+   const rows=[];
+   for(const element of root.querySelectorAll('[data-research-entry-content] p, [data-research-entry-content] h2, [data-research-entry-content] a')){
+    const style=getComputedStyle(element),text=element.textContent.trim();if(!text)continue;
+    const family=normalize(style.fontFamily.split(',')[0]);
+    const font=`${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+    const loaded=await document.fonts.load(font,text);
+    rows.push({text,family,font,check:document.fonts.check(font,text),faces:loaded.map(face=>({family:normalize(face.family),status:face.status,registered:document.fonts.has(face)}))});
+   }
+   return {documentState:document.readyState,rows};
+  });
+  rows.push({phase:'SSR-declared-fonts',fonts});expect(fonts.rows.length).toBeGreaterThan(0);
+  for(const row of fonts.rows){expect(row.family).toBe('Roboto Mono');expect(row.check).toBe(true);expect(row.faces.length).toBeGreaterThan(0);for(const face of row.faces){expect(face.family).toBe('Roboto Mono');expect(face.status).toBe('loaded');expect(face.registered).toBe(true);}}
   for(const forced of [false,true]){
    await page.emulateMedia({forcedColors:forced?'active':'none'});
    const fact=await frame.evaluate(readEntryComposition);rows.push({phase:forced?'forced-SSR':'normal-SSR',reducedMotion:'no-preference',fact});assertEntryComposition(fact);
