@@ -168,7 +168,7 @@ test('real forward native progress rebinds an invalidated play epoch without iss
   f.video.currentTime=1.202663955;f.video.fire('timeupdate');const progressing=f.presenter.inspect().media.find(item=>item.id);
   assert.equal(progressing.playing,true);assert.equal(progressing.phase,'playing');assert.equal(progressing.transport.progressGeneration,initial.transport.playGeneration);
   assert.deepEqual(progressing.progressReceipt,{type:'timeupdate',sequence:progressing.transport.lastFact.sequence,at:progressing.transport.lastFact.at,fromTime:initial.transport.baseline,currentTime:1.202663955,playGeneration:initial.transport.playGeneration});
-  assert.equal(f.plays,plays);assert.equal(f.callbacks.size,callbacks);assert.equal(f.timers.size,0,'Native transport recovery introduces no polling/deadline work');
+  assert.equal(f.plays,plays);assert.equal(f.callbacks.size,callbacks);assert.equal(f.timers.size,1,'Only the approved eligible native-stall timer exists; no frame/acquisition polling');assert.equal(progressing.deadlinePending,false);assert.equal(progressing.stallRecovery.watching,true);
   f.video.fire('waiting');const waiting=f.presenter.inspect().media.find(item=>item.id);f.pendingPlays[0].resolve();await flush();
   const settled=f.presenter.inspect().media.find(item=>item.id);assert.equal(settled.phase,'buffering');assert.equal(settled.playing,false);assert.equal(settled.transport.waiting,true);assert.deepEqual(settled.progressReceipt,waiting.progressReceipt,'An old operation cannot mint a newer progress receipt');
   f.video.currentTime=.04;f.video.fire('timeupdate');assert.equal(f.presenter.inspect().media.find(item=>item.id).playing,false,'A loop wrap is a baseline change, not forward progress');
@@ -238,7 +238,7 @@ test('media arrival deadline and late decode/callback cannot resurrect a dispose
 test('a real decoded frame received while suspended remains prepared without hidden-time replay or another acquisition',async()=>{
  const f=fixture({video:true});await flush();f.step();f.select('making');f.step(1);assert.equal(f.callbacks.size,1);const loads=f.loads;
  f.policy.hidden=true;f.presenter.suspend('visibility');f.video.fire('loadeddata');assert.equal(f.presenter.inspect().media.find(item=>item.id).firstFrame,false);assert.equal(f.callbacks.size,0);
- f.policy.hidden=false;f.presenter.resume();f.step(100,true);await flush();assert.equal(f.presenter.inspect().media.find(item=>item.id).frame.method,'loadeddata');assert.equal(f.presenter.inspect().stage.mode,'hold');assert.equal(f.loads,loads);assert.equal(f.callbacks.size,1);f.frame();assert.equal(f.presenter.inspect().media.find(item=>item.id).compositorFrame.method,'video-frame');assert.equal(f.callbacks.size,0);assert.equal(f.timers.size,0);f.presenter.dispose();terminal(f.presenter.inspect().stage.history);
+ f.policy.hidden=false;f.presenter.resume();f.step(100,true);await flush();assert.equal(f.presenter.inspect().media.find(item=>item.id).frame.method,'loadeddata');assert.equal(f.presenter.inspect().stage.mode,'hold');assert.equal(f.loads,loads);assert.equal(f.callbacks.size,1);f.frame();assert.equal(f.presenter.inspect().media.find(item=>item.id).compositorFrame.method,'video-frame');assert.equal(f.callbacks.size,0);assert.equal(f.timers.size,1);assert.equal(f.presenter.inspect().media.find(row=>row.id).deadlinePending,false);assert.equal(f.presenter.inspect().media.find(row=>row.id).stallRecovery.watching,true);f.presenter.dispose();terminal(f.presenter.inspect().stage.history);
 });
 
 test('only requested image readiness gets a deadline; a missing load closes as failed and cannot upgrade after a late load',async()=>{
@@ -331,4 +331,80 @@ test('native absence respects static policies and retained hidden/resume without
  f.video.currentTime=2;const loads=f.loads;f.policy.hidden=true;f.presenter.suspend('page');f.root.dataset.projectActiveChapter='credits';assert.equal(f.video.paused,true);assert.equal(f.callbacks.size,0);
  f.policy.hidden=false;f.presenter.resume();f.step(100,true);assert.equal(f.presenter.inspect().stage.mode,'absent');assert.equal(f.presenter.inspect().stage.key,'native:credits');assert.equal(f.video.currentTime,2);assert.equal(f.loads,loads);assert.equal(f.callbacks.size,0);
  f.select('making');f.settle();await flush();assert.equal(f.video.currentTime,2);assert.equal(f.loads,loads);f.presenter.dispose();terminal(f.presenter.inspect().stage.history);
+});
+
+async function heldVideo(){const f=fixture({video:true});await flush();f.step();f.select('making');f.step(1);f.frame();await flush();f.step();f.settle();await flush();return f;}
+const recovery=f=>f.presenter.inspect().media.find(row=>row.id).stallRecovery;
+function deliverWatch(f,seconds=8){f.advanceClock(seconds);const pending=[...f.timers];assert.equal(pending.length,1);f.timers.delete(pending[0][0]);pending[0][1].fn();}
+test('silent held native time gets one same-source pause/play, then truthful latched fallback without a seek',async()=>{
+ const f=await heldVideo();const initial=f.video.currentTime,plays=f.plays,loads=f.loads;let writes=0,time=initial;
+ Object.defineProperty(f.video,'currentTime',{get:()=>time,set:value=>{writes++;time=value;}});
+ try{
+  assert.equal(f.timers.size,1);assert.equal(recovery(f).retryUsed,false);deliverWatch(f,7.9);assert.equal(f.plays,plays);assert.equal(recovery(f).retryUsed,false);
+  deliverWatch(f,.1);await flush();assert.equal(f.plays,plays+1);assert.equal(recovery(f).retryUsed,true);assert.equal(recovery(f).recovering,true);assert.equal(f.video.currentTime,initial);assert.equal(f.loads,loads);assert.equal(writes,0);
+  f.video.fire('playing');await flush();assert.equal(recovery(f).recovering,true,'Playing and fulfilled play are not advancing source time');
+  deliverWatch(f);await flush();const record=f.presenter.inspect().media.find(row=>row.id);assert.equal(record.reason,'playback-stalled');assert.equal(record.failed,true);assert.equal(record.stallRecovery.watching,false);assert.equal(f.timers.size,0);assert.equal(f.callbacks.size,0);assert.equal(writes,0);
+  f.step();f.settle();assert.equal(f.figures[3].getAttribute('data-project-media-mode'),'poster');f.select('results');f.settle();f.select('making');f.settle();assert.equal(f.plays,plays+1,'Fallback cannot upgrade or retry on reentry');
+ }finally{f.presenter.dispose();}
+});
+test('actual forward time proves recovery, but later stalls never receive a second retry',async()=>{
+ const f=await heldVideo();try{
+  deliverWatch(f);await flush();const plays=f.plays;f.video.currentTime=.25;f.video.fire('timeupdate',{isTrusted:true});
+  assert.equal(recovery(f).recovering,false);assert.equal(recovery(f).history.at(-1).status,'recovered');assert.equal(recovery(f).history.at(-1).currentTime,.25);
+  f.select('results');f.settle();assert.equal(f.timers.size,0);f.select('making');f.settle();await flush();assert.equal(recovery(f).retryUsed,true);
+  const afterReentry=f.plays;assert.ok(afterReentry>=plays);deliverWatch(f);assert.equal(f.plays,afterReentry);assert.equal(f.presenter.inspect().media.find(row=>row.id).reason,'playback-stalled');
+ }finally{f.presenter.dispose();}
+});
+test('healthy native progress, genuine loop wrap and seeking do not fabricate a stall or recovered promise',async()=>{
+ const f=await heldVideo();try{
+  f.video.loop=true;f.video.duration=8;f.video.currentTime=7.95;f.video.fire('timeupdate',{isTrusted:true});f.advanceClock(7);f.video.currentTime=.05;f.video.fire('timeupdate',{isTrusted:true});
+  assert.equal(recovery(f).baseline,.05);const plays=f.plays;deliverWatch(f,1);assert.equal(f.plays,plays);assert.equal(recovery(f).retryUsed,false);
+  f.video.seeking=true;f.video.fire('seeking',{isTrusted:true});assert.equal(f.timers.size,0);f.advanceClock(100);f.video.currentTime=3;f.video.seeking=false;f.video.fire('seeked',{isTrusted:true});f.video.fire('timeupdate',{isTrusted:true});assert.equal(recovery(f).retryUsed,false);assert.equal(f.timers.size,1);
+  deliverWatch(f,7);assert.equal(f.plays,plays);f.video.currentTime=3.1;f.video.fire('timeupdate',{isTrusted:true});assert.equal(recovery(f).history.length,0);
+ }finally{f.presenter.dispose();}
+});
+test('ineligible lifecycle states cancel the watcher and stale callbacks cannot spend recovery allowance',async()=>{
+ for(const kind of ['manual','global','hidden','reduced','saveData','exit','ended','dispose']){
+  const f=await heldVideo(),stale=[...f.timers.values()][0].fn,plays=f.plays;
+  if(kind==='manual')f.controls.find(n=>n.getAttribute('data-project-motion-toggle')).fire('click');
+  else if(kind==='global'){f.policy.paused=true;f.step();}
+  else if(kind==='hidden'){f.policy.hidden=true;f.presenter.suspend('hidden');}
+  else if(kind==='reduced'||kind==='saveData'){f.policy[kind]=true;f.step();}
+  else if(kind==='exit'){f.select('results');f.settle();}
+  else if(kind==='ended'){f.video.ended=true;f.video.fire('ended');}
+  else f.presenter.dispose();
+  assert.equal(f.timers.size,0,kind);f.advanceClock(100);stale();assert.equal(f.plays,plays,kind);assert.equal(recovery(f).retryUsed,false,kind);f.presenter.dispose();
+ }
+});
+test('pending recovery is bounded and manual cancellation wins over its stale play fulfillment',async()=>{
+ for(const cancel of [false,true]){
+  const f=await heldVideo();try{
+   f.deferPlay();deliverWatch(f);assert.equal(recovery(f).recovering,true);assert.equal(f.pendingPlays.length,1);
+   if(cancel){f.controls.find(n=>n.getAttribute('data-project-motion-toggle')).fire('click');assert.equal(f.timers.size,0);}
+   else deliverWatch(f);
+   f.pendingPlays[0].resolve();await flush();const record=f.presenter.inspect().media.find(row=>row.id);
+   assert.equal(record.stallRecovery.watching,false);assert.equal(record.playing,false);assert.equal(record.userPaused,cancel);assert.equal(record.failed,!cancel);assert.equal(record.stallRecovery.retryUsed,true);
+  }finally{f.presenter.dispose();}
+ }
+});
+test('pending recovery cancellation on policy, source exit and disposal wins over late native play',async()=>{
+ for(const kind of ['hidden','global','reduced','saveData','exit','ended','dispose']){
+  const f=await heldVideo();f.deferPlay();deliverWatch(f);const stale=[...f.timers.values()][0].fn,plays=f.plays;
+  if(kind==='hidden'){f.policy.hidden=true;f.presenter.suspend('page');}
+  else if(kind==='global'){f.policy.paused=true;f.step();}
+  else if(kind==='reduced'||kind==='saveData'){f.policy[kind]=true;f.step();}
+  else if(kind==='exit'){f.select('results');f.settle();}
+  else if(kind==='ended'){f.video.ended=true;f.video.paused=true;f.video.fire('ended');}
+  else f.presenter.dispose();
+  assert.equal(f.timers.size,0,kind);f.advanceClock(100);stale();f.pendingPlays[0].resolve();await flush();
+  assert.equal(f.plays,plays,kind);assert.equal(recovery(f).watching,false,kind);assert.equal(recovery(f).retryUsed,true,kind);assert.equal(f.presenter.inspect().media.find(row=>row.id).failed,false,kind);f.presenter.dispose();
+ }
+});
+test('only corroborated natural loop movement proves recovery; no render schedule or source rewrite is introduced',async()=>{
+ const f=await heldVideo();try{
+  f.video.loop=true;f.video.duration=8;f.video.currentTime=7.95;f.video.fire('timeupdate',{isTrusted:true});const schedules=f.schedules,loads=f.loads;
+  deliverWatch(f);await flush();assert.equal(f.schedules,schedules);assert.equal(f.loads,loads);assert.equal(recovery(f).recovering,true);
+  f.video.currentTime=.05;f.video.fire('timeupdate',{isTrusted:true});assert.equal(recovery(f).history.at(-1).status,'recovered');assert.equal(recovery(f).history.at(-1).wrap,true);
+  assert.equal(f.schedules,schedules);assert.equal(f.video.getAttribute('src'),'/authentic-making.mp4');
+ }finally{f.presenter.dispose();}
 });

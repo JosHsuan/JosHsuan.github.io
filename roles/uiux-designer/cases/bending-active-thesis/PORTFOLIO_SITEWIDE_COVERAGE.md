@@ -71,6 +71,29 @@ Original model/source lifetime, static/no-JS, failure access and Cas/Special
 history guards remained intact. A separately authorized fresh required
 561-public-plus-24-framework gate is next; these scoped passes do not authorize
 publication or erase either preceding failed batch. Live remains `ad83`.
+The ensuing exact `19d417c` full run `40205540535` executed all 561 public
+identities once: 560 passed, one failed, zero retries; all 24 framework checks
+passed. Actual HC fresh Back/Forward history policy and Projects reverse-motion
+guards passed across their assigned profiles. The sole blocker is the original
+WebKit Mode/s physical-recording native-time advancement guard: the fully buffered,
+playing video retained an unchanged native clock over the original 45-second
+poll. Some initial compositor frames were reported, but do not establish sustained
+playback or override the failed clock guard. The underlying native pipeline cause
+is not established. Required validation correctly rejects publication; no retry,
+asset conversion, artificial seeking or deadline relaxation follows automatically.
+Live remains `ad83` while read-only source/container and lifecycle diagnosis proceeds.
+Read-only probing subsequently found no decoding, container or timestamp anomaly
+in the three original Mode/s videos, so no asset rewrite is proposed. An explicitly
+approved playback-resilience policy now watches only the eligible active native
+video: eight seconds without observed native-clock progress allows one native
+pause/play recovery per acquisition, without seeking, rate changes or source
+replacement. A further eight-second grace requires actual clock progress or
+latches truthful static fallback. These are product-policy thresholds, not timer
+delivery guarantees or a diagnosis of the browser cause. User/policy pause,
+hidden state, owner exit, ended media and disposal retain cancellation semantics.
+Source/unit and portable reviews passed; actual focused WebKit and media-regression
+qualification remain pending. Fallback does not satisfy the original positive
+native-time advancement assertion, and no release eligibility is inferred.
 
 The preceding verified live baseline was `d3eabb897e787287eefdb632d119718bffc35f61`.
 Its [full validation 40169507337](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/40169507337)

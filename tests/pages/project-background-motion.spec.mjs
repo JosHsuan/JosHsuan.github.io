@@ -83,7 +83,10 @@ async function playing(page,media){
   await attachNativeMediaFailure(page,media,'playing');throw error;
  }
 }
+function stoppedRecovery(record){expect(record.stallRecovery).toMatchObject({graceMs:8000,watching:false,recovering:false});}
 async function nativeVideo(page,media){
+ const evidence={id:media.id,source:media.src,scope:'Original native time advancement remains mandatory; recovery/fallback state never substitutes for progress. Callback observations are not media-process or GPU timings.',samples:[],last:null};let primary;
+ try{
  await playing(page,media);
  const video=videoFor(page,media),actual=await video.evaluate(node=>({width:node.videoWidth,height:node.videoHeight,duration:node.duration,source:new URL(node.currentSrc).pathname,rate:node.playbackRate,muted:node.muted,loop:node.loop,fit:getComputedStyle(node).objectFit,filter:getComputedStyle(node).filter,blend:getComputedStyle(node).mixBlendMode}));
  expect(actual).toMatchObject({width:media.width,height:media.height,source:media.src,rate:1,muted:true,loop:media.loop,fit:'contain',filter:'none',blend:'normal'});
@@ -94,17 +97,30 @@ async function nativeVideo(page,media){
  expect(receipt.frame).toMatchObject({width:media.width,height:media.height});
  expect(receipt.callbackPending&&receipt.frame.method==='video-frame').toBe(false);
  expect(receipt.deadlinePending).toBe(false);
- const initial=await video.evaluate(node=>node.currentTime);
+ const initial=await video.evaluate(node=>node.currentTime);evidence.initialTime=initial;evidence.original=actual;evidence.initialOwner=receipt;
  // A source loop may wrap. Either a forward delta or the genuine wrap proves
  // native media time; no test scroll or controller writes currentTime.
  try{
- await expect.poll(()=>video.evaluate((node,before)=>Math.abs(node.currentTime-before),initial),{timeout:WAIT}).toBeGreaterThan(.03);
+ await expect.poll(async()=>{
+  const row=await video.evaluate((node,{before,id})=>{const owner=window.__globalBackground.inspect().driver.projectStudy.backdrop.media.find(item=>item.id===id);return{observedAt:performance.now(),nativeTime:node.currentTime,delta:Math.abs(node.currentTime-before),source:node.currentSrc?new URL(node.currentSrc).pathname:null,rate:node.playbackRate,paused:node.paused,ended:node.ended,readyState:node.readyState,owner:{active:owner.active,failed:owner.failed,phase:owner.phase,reason:owner.reason,stallRecovery:owner.stallRecovery}};},{before:initial,id:media.id});
+  evidence.last=row;if(evidence.samples.length<48)evidence.samples.push(row);
+  // A truthful fallback is still a failure of this original playback contract.
+  return row.owner.failed?0:row.delta;
+ },{timeout:WAIT}).toBeGreaterThan(.03);
+ expect(evidence.last.source).toBe(media.src);expect(evidence.last.rate).toBe(1);expect(evidence.last.owner.failed).toBe(false);
+ const recovery=evidence.last.owner.stallRecovery;
+ expect(recovery.graceMs).toBe(8000);expect(recovery.history.length).toBeLessThanOrEqual(8);
+ expect(recovery.history.filter(row=>row.status==='retry').length).toBeLessThanOrEqual(1);
+ evidence.outcome=recovery.history.some(row=>row.status==='recovered')?'native-advancement-with-recorded-recovery':'native-advancement';
  }catch(error){await attachNativeMediaFailure(page,media,'advancement',initial);throw error;}
  await expect(page.locator(`[data-project-source-caption="${media.chapter}"]`)).toContainText(media.caption);
  await expect(page.locator(`[data-project-source-caption="${media.chapter}"]`)).toContainText(media.credit);
  await expect(page.locator(`[data-project-motion-source][href="${media.src}"]`)).toHaveAttribute('target','_blank');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
  return video;
+ }catch(error){primary=error;throw error;}finally{
+  try{await test.info().attach('native-media-advancement',{body:JSON.stringify(evidence,null,2),contentType:'application/json'});}catch(error){if(!primary)throw error;}
+ }
 }
 
 test('Caschlatsch native chapter sources retain forward/reverse ownership and Credits without fixed copies',async({page},info)=>{
@@ -137,7 +153,7 @@ for(const project of animated)for(const media of project.motionMedia)test(`${pro
   // Seek the real native recording near its finite end; its browser owns the
   // final playback and trusted ended event. No ended event is dispatched here.
   await video.evaluate(node=>{window.__testMotionEnded=null;node.addEventListener('ended',event=>{window.__testMotionEnded={trusted:event.isTrusted,time:node.currentTime,duration:node.duration};},{once:true});node.currentTime=Math.max(0,node.duration-.2);});
-  await expect.poll(()=>mediaFacts(page,media.id),{timeout:WAIT}).toMatchObject({ended:true,playing:false,paused:true,phase:'ended'});
+  await expect.poll(()=>mediaFacts(page,media.id),{timeout:WAIT}).toMatchObject({ended:true,playing:false,paused:true,phase:'ended',stallRecovery:{watching:false,recovering:false}});
   const ended=await video.evaluate(node=>({event:window.__testMotionEnded,time:node.currentTime,duration:node.duration,ended:node.ended,paused:node.paused}));
   expect(ended.event.trusted).toBe(true);expect(ended.ended).toBe(true);expect(ended.paused).toBe(true);expect(ended.time).toBeCloseTo(ended.duration,2);
   await frames(page,5);expect(await video.evaluate(node=>node.currentTime)).toBe(ended.time);
@@ -151,7 +167,7 @@ for(const project of animated)for(const media of project.motionMedia)test(`${pro
   try{
   for(const chapter of ['results','credits']){
    await select(page,chapter);await page.waitForFunction(chapter=>{const s=window.__globalBackground.inspect().driver.projectStudy.backdrop.stage;return s.key===`native:${chapter}`&&s.kind==='native'&&s.chapter===chapter&&s.mode==='absent'&&s.settled&&s.pose.opacity===0&&s.request?.absent===true;},chapter,{timeout:WAIT});
-   const state=await backdrop(page),record=await mediaFacts(page,media.id);nativeRows.push({chapter,state,record});expect(record).toMatchObject({active:false,paused:true,playing:false,playPending:false,callbackPending:false,deadlinePending:false});await expect(page.locator('[data-project-media-active],[data-project-model-active]')).toHaveCount(0);closed(state.stage.history);
+   const state=await backdrop(page),record=await mediaFacts(page,media.id);nativeRows.push({chapter,state,record});expect(record).toMatchObject({active:false,paused:true,playing:false,playPending:false,callbackPending:false,deadlinePending:false});stoppedRecovery(record);await expect(page.locator('[data-project-media-active],[data-project-model-active]')).toHaveCount(0);closed(state.stage.history);
    if(chapter==='results')for(const source of project.sections.find(section=>section.id==='results').media){const figure=page.locator(`[data-project-native-source="results"] [data-editorial-source="${source.src}"]`);await expect(figure).toHaveCount(1);await expect(figure.locator('figcaption > p')).toHaveText(source.caption);await expect(figure.locator('figcaption > a')).toHaveAttribute('href',source.src);}
   }
   const retained=await video.evaluate(node=>({ended:node.ended,time:node.currentTime,duration:node.duration}));nativeRows.push({phase:'native-absent-video',retained});await frames(page,5);expect(await video.evaluate(node=>node.currentTime)).toBe(retained.time);
@@ -174,7 +190,7 @@ for(const project of animated)for(const media of project.motionMedia)test(`${pro
    for(const chapter of ['results','credits']){
     await select(page,chapter);await page.waitForFunction(chapter=>{const s=window.__globalBackground.inspect().driver.projectStudy.backdrop.stage;return s.key===`native:${chapter}`&&s.kind==='native'&&s.chapter===chapter&&s.mode==='absent'&&s.settled&&s.pose.opacity===0&&s.request?.absent===true;},chapter,{timeout:WAIT});
     const state=await backdrop(page),record=await mediaFacts(page,media.id);nativeRows.push({chapter,state,record});
-    expect(record).toMatchObject({active:false,paused:true,playing:false,playPending:false,callbackPending:false,deadlinePending:false});await expect(page.locator('[data-project-media-active],[data-project-model-active]')).toHaveCount(0);closed(state.stage.history);
+    expect(record).toMatchObject({active:false,paused:true,playing:false,playPending:false,callbackPending:false,deadlinePending:false});stoppedRecovery(record);await expect(page.locator('[data-project-media-active],[data-project-model-active]')).toHaveCount(0);closed(state.stage.history);
     if(chapter==='results')for(const source of project.sections.find(section=>section.id==='results').media){const figure=page.locator(`[data-project-native-source="results"] [data-editorial-source="${source.src}"]`);await expect(figure).toHaveCount(1);await expect(figure.locator('figcaption > p')).toHaveText(source.caption);await expect(figure.locator('figcaption > a')).toHaveAttribute('href',source.src);}
    }
    const retained=await video.evaluate(node=>({time:node.currentTime,source:new URL(node.currentSrc).pathname,loop:node.loop,paused:node.paused}));nativeRows.push({phase:'native-absent-video',retained});expect(retained).toMatchObject({source:media.src,loop:true,paused:true});await frames(page,5);expect(await video.evaluate(node=>node.currentTime)).toBe(retained.time);
@@ -206,7 +222,7 @@ test('Mode/s physical recordings and simulation retain separate native times thr
  await expect(page.locator(`[data-project-motion-source][href="${film.src}"]`)).toContainText('View recording');
  await page.locator(`[data-project-motion-toggle="${film.id}"]`).click();
  await expect.poll(()=>filmVideo.evaluate(video=>video.paused),{timeout:WAIT}).toBe(true);
- const filmTime=await filmVideo.evaluate(video=>video.currentTime);
+ const filmPaused=await filmVideo.evaluate(video=>({time:video.currentTime,owner:window.__globalBackground.inspect().driver.projectStudy.backdrop.media.find(item=>item.id===video.dataset.projectMotionId)}));stoppedRecovery(filmPaused.owner);const filmTime=filmPaused.time;
  await select(page,prototype.chapter);const prototypeVideo=await nativeVideo(page,prototype);
  expect(await filmVideo.evaluate(video=>video.currentTime)).toBe(filmTime);
  await expect(page.locator(`[data-project-motion-source][href="${prototype.src}"]`)).toContainText('View recording');
@@ -222,7 +238,7 @@ test('Mode/s physical recordings and simulation retain separate native times thr
  expect(samples.some(sample=>sample.trusted&&sample.type==='playing'&&sample.playing.includes(film.id))).toBe(true);
  expect(samples.some(sample=>sample.trusted&&sample.type==='playing'&&sample.playing.includes(prototype.id))).toBe(true);
  for(const sample of samples)expect(sample.playing.length,'Only one actual native video plays at a time').toBeLessThanOrEqual(1);
- await test.info().attach('Mode-native-media-forward-reverse-pause',{body:JSON.stringify({filmTime,prototypeTime,samples}),contentType:'application/json'});
+ await test.info().attach('Mode-native-media-forward-reverse-pause',{body:JSON.stringify({filmTime,filmPaused,prototypeTime,samples}),contentType:'application/json'});
  closed((await backdrop(page)).stage.history);
 });
 
@@ -254,7 +270,7 @@ test('real history departure retains or disposes native media correctly, and a r
  const checkDeparture=(receipt,retained)=>{
   expect(receipt.trusted).toBe(true);expect(receipt.persisted).toBe(retained);
   const driver=receipt.background.driver,state=driver.projectStudy.backdrop,native=state.media.find(item=>item.id===media.id);
-  expect(native.paused).toBe(true);expect(native.callbackPending).toBe(false);expect(native.deadlinePending).toBe(false);
+  expect(native.paused).toBe(true);expect(native.callbackPending).toBe(false);expect(native.deadlinePending).toBe(false);stoppedRecovery(native);
   if(retained){expect(driver.lifecycle.suspended).toBe(true);expect(state.suspended).toBe(true);expect(native.sourceAttached).toBe(true);expect(receipt.background.activeBindings).toBe(1);}
   else{expect(driver.disposed).toBe(true);expect(state.disposed).toBe(true);expect(state.events.nativeListeners).toBe(0);expect(native.sourceAttached).toBe(false);expect(receipt.background.activeBindings).toBe(0);expect(receipt.videos.every(video=>video.src===null&&video.paused)).toBe(true);}
   closed(state.stage.history);
@@ -275,7 +291,7 @@ test('Reduced Motion and Save Data show pinned source posters without requesting
  test.setTimeout(scenarioTimeout(120000));const media=dot.motionMedia[0],requests=[];
  page.on('request',request=>{if(animated.some(project=>project.motionMedia.some(item=>new URL(request.url()).pathname===item.src)))requests.push(request.url());});
  await page.emulateMedia({reducedMotion:'reduce'});await open(page,dot);await select(page,media.chapter);await hold(page,`poster:${media.id}`);
- expect((await mediaFacts(page,media.id))).toMatchObject({started:false,firstFrame:false,sourceAttached:false});expect(await videoFor(page,media).getAttribute('src')).toBeNull();
+ expect((await mediaFacts(page,media.id))).toMatchObject({started:false,firstFrame:false,sourceAttached:false,stallRecovery:{watching:false,recovering:false}});expect(await videoFor(page,media).getAttribute('src')).toBeNull();
  await expect(page.locator(`[data-project-media="${media.chapter}"]`)).toHaveAttribute('data-project-media-mode','poster');
  await page.goto('/contact/');await enteredPlain(page);await page.emulateMedia({reducedMotion:'no-preference'});
  await page.addInitScript(()=>{
@@ -283,7 +299,7 @@ test('Reduced Motion and Save Data show pinned source posters without requesting
   else Object.defineProperty(navigator,'connection',{configurable:true,value:Object.assign(new EventTarget(),{saveData:true})});
  });
  await open(page,dot);expect(await page.evaluate(()=>navigator.connection.saveData)).toBe(true);await select(page,media.chapter);await hold(page,`poster:${media.id}`);
- expect((await mediaFacts(page,media.id))).toMatchObject({started:false,firstFrame:false,sourceAttached:false});expect(await videoFor(page,media).getAttribute('src')).toBeNull();expect(requests).toEqual([]);closed((await backdrop(page)).stage.history);
+ expect((await mediaFacts(page,media.id))).toMatchObject({started:false,firstFrame:false,sourceAttached:false,stallRecovery:{watching:false,recovering:false}});expect(await videoFor(page,media).getAttribute('src')).toBeNull();expect(requests).toEqual([]);closed((await backdrop(page)).stage.history);
 });
 
 test('native HTTP failure, rejected playback and a real pending-source deadline each latch a truthful poster without late upgrades',async({page})=>{
@@ -297,7 +313,7 @@ test('native HTTP failure, rejected playback and a real pending-source deadline 
  const failed=async reason=>{
   await page.waitForFunction(({id,reason})=>{const item=window.__globalBackground.inspect().driver.projectStudy.backdrop.media.find(item=>item.id===id);return item?.failed&&(!reason||item.reason===reason);},{id:media.id,reason},{timeout:WAIT});
   const state=await hold(page,`poster:${media.id}`),native=state.media.find(item=>item.id===media.id);
-  expect(native.failed).toBe(true);expect(native.sourceAttached).toBe(false);expect(native.callbackPending).toBe(false);expect(native.deadlinePending).toBe(false);
+  expect(native.failed).toBe(true);expect(native.sourceAttached).toBe(false);expect(native.callbackPending).toBe(false);expect(native.deadlinePending).toBe(false);stoppedRecovery(native);
   expect(state.stage.history.filter(item=>item.key===`video:${media.id}`&&item.status==='failed')).toHaveLength(1);closed(state.stage.history);return native;
  };
  let requests=0;page.on('request',request=>{if(new URL(request.url()).pathname===media.src)requests++;});

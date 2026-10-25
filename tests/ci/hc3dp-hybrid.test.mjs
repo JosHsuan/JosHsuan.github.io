@@ -32,7 +32,8 @@ const pins={
   "roles/uiux-designer/cases/bending-active-thesis/components/project-study-media.mjs": "11c752df3c3c9d7890deddde856db3fa77c996c4849e0c9816beb9f9bd959890",
   "roles/uiux-designer/cases/bending-active-thesis/components/ProjectCaseStudyStage.jsx": "697625588e79e3f96913c661d8578ac5b830476a7f4ac7c33363f779fb2f1f5f",
   "roles/uiux-designer/cases/bending-active-thesis/runtime/site/ProjectStudyScenePresenter.mjs": "91746860fb4157d5377f7c929605051ec3b2ff100c177483dc51bcccb8b85873",
-  "roles/uiux-designer/cases/bending-active-thesis/runtime/site/ProjectStudyBackdropPresenter.mjs": "5580460717858a77a3acfece2f2c5db71f41a8fde8b6d054264b8a836c47e16e",
+  // Approved stall-policy delta independently reversed in media-stall-policy.test.mjs.
+  "roles/uiux-designer/cases/bending-active-thesis/runtime/site/ProjectStudyBackdropPresenter.mjs": "c562286ff62ca0e8def0dcbcbf7aaa3a7fa3c0f6ecd8443567daadff065a3837",
   "roles/uiux-designer/cases/bending-active-thesis/runtime/site/ProjectStudyBackdropMotion.mjs": "faf1ba3aa624992ca400984ad90bca23d5be8919c093b69e42a527ac195c849a",
   "roles/uiux-designer/cases/bending-active-thesis/runtime/background/SiteBackgroundDriver.mjs": "fe16573ded1c71e73d27a59d7e969fbefd2076bb10b3d22a27a8bcb75bd74d93"
 };
