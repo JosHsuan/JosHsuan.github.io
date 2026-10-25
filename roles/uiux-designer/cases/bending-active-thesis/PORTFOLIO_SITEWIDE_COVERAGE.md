@@ -42,8 +42,12 @@ stable-handle observation correction preserves native Tab/focus/scroll evidence
 and the original 60-second budget, without changing application behavior or
 claiming to fix unresolved automation/service latency. The single stable-handle qualification also timed out (3/4 passed), so it is not a
 validated timing fix and no full rerun is inferred. A bounded same-evaluate
-internal-timestamp diagnostic retains trace/input/guards/budget to distinguish
-inspector work from external observation/service waits. Fresh exact full acceptance
+internal-timestamp diagnostic retained trace/input/guards/budget and measured
+0.3–0.9 ms callbacks despite multi-second host waits; it still failed overall (3/4 passed) and does
+not establish release eligibility. One diagnostic-only case-local trace snapshot
+comparison is separately authorized with an explicit worker/browser/cache confound
+from the worker-scoped fixture; no normal CI evidence change is inferred.
+Fresh exact full acceptance
 and same-artifact deployment remain pending.
 
 Depth-map photo trials (workshop and tower) and the Dot camera-detail trial were

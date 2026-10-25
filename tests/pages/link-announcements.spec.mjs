@@ -122,7 +122,10 @@ test('original generic and XR image actions open and return natively',async({pag
   }
  }catch(error){primaryError=error;throw error;}finally{try{await persist(info,'native-link-behaviour',receipt);}catch(error){if(!primaryError)throw error;}}
 });
-test('Full Bending native Pause reading reaches an inline comparison and its original action',async({page,context,isMobile},info)=>{
+// Nonpublishable exploratory observer diagnostic; not a release tracing policy.
+// The worker-scoped trace fixture can change browser lifetime/cache/order as well.
+const snapshotDiagnosticTest=test.extend({trace:{mode:'retain-on-failure',screenshots:false,snapshots:false,sources:true}});
+snapshotDiagnosticTest('Full Bending native Pause reading reaches an inline comparison and its original action',async({page,context,isMobile},info)=>{
  const receipt={navigation:[],triggerTabs:[],originalTabs:[],phase:'entry',pauseDiagnostic:{scope:'Passive bounded timestamps. Host and browser clocks are separate; Mutation timestamps are callback observations, not exact mutation instants; DOM commit is not pixel presentation. No extra RAF, timer, rendering hook or input change; pre-click RAF responsiveness and pixel presentation are not measured.',events:[],mutations:[],operations:[]}};let primaryError;
  const timed=async(name,operation)=>{const row={name,startedMs:performance.now()};if(receipt.pauseDiagnostic.operations.length<48)receipt.pauseDiagnostic.operations.push(row);try{const result=await operation();row.completedMs=performance.now();if(name==='existing-state-read')row.browserWork=result.browserWork;return result;}catch(error){row.failedMs=performance.now();row.error=String(error.message).slice(0,240);throw error;}};
  try{
