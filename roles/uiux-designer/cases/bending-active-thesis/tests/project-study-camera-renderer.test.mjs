@@ -107,3 +107,16 @@ test('native context loss detected before or during draw retains the event-path 
   controller.abort();assert.equal(f.report.disposals,1);
  }
 });
+
+test('actual Dot detail retains all original points and fixed appearance with draw dedup and full recovery',async t=>{
+ const previous=globalThis.fetch;t.after(()=>{globalThis.fetch=previous;});
+ const data=JSON.parse(await readFile(new URL('../release/project-studies.json',import.meta.url),'utf8')),model=data.projects.find(project=>project.id==='dot-based-3d-printing').model;
+ const bytes=await readFile(new URL('../release/public'+model.src,import.meta.url)),f=rendererFixture(),controller=new AbortController();t.after(()=>controller.abort());
+ globalThis.fetch=async()=>({ok:true,arrayBuffer:async()=>bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength)});
+ const scene=await acquireProjectStudyScene({host:f.host,model,signal:controller.signal,createRenderer:()=>f.renderer}),intent={yawRad:.76,pitchRad:.22,fovDeg:36,zoom:1.04,detailWeight:0};
+ scene.present({chapter:'system',cameraIntent:intent});scene.resize(1440,1000);const full=scene.inspect(),original=[...f.report.positions];
+ assert.equal(full.detail.selectedCount,78);assert.equal(full.detail.declaredCrop,false);assert.equal(full.sourcePoints,14810);assert.equal(full.drawnMeshes,1);assert.equal(f.report.pointSize,2);assert.equal(f.report.attenuation,false);
+ scene.present({cameraIntent:{...intent,detailWeight:1}});const detail=scene.inspect();assert.equal(detail.detail.declaredCrop,true);assert.notDeepEqual(detail.pose,full.pose);assert.deepEqual(f.report.positions,original);assert.equal(detail.sourcePoints,14810);assert.equal(detail.sourceCalls,1);assert.equal(f.report.pointSize,2);assert.equal(f.report.attenuation,false);
+ for(let i=0;i<100;i++)scene.present({cameraIntent:{...intent,detailWeight:1}});assert.equal(scene.inspect().draws,detail.draws);assert.equal(scene.inspect().cameraFits,detail.cameraFits);
+ scene.present({cameraIntent:intent});assert.deepEqual(scene.inspect().pose,full.pose);assert.equal(scene.inspect().detail.weight,0);controller.abort();assert.equal(scene.inspect().detail.selectedCount,0);assert.equal(f.report.disposals,1);
+});

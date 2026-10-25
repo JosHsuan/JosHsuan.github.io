@@ -4,6 +4,8 @@ import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 // Independent deployed 2477 baseline. Reverse only these reviewed complete
 // context blocks; never strip arbitrary markup, attributes or CSS declarations.
+// The build pin additionally includes the one Dot score allowlist entry whose
+// exact reversal to 05b is independently enforced by dot-source-detail.test.mjs.
 const root=new URL('../../',import.meta.url);
 const read=path=>readFile(new URL(path,root));
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
@@ -65,7 +67,7 @@ const contracts={
     ]
   },
   "scripts/build-pages.mjs": {
-    "baselineSha256": "24f2144ee2392091a739c48a41faa64e52d6cd888890f46fbbd883ce7190eef6",
+    "baselineSha256": "8c02983b0ab5514947a8b0b2e21151096823a6ff8911776e9f9f3436019c588f",
     "replacements": [
       [
         "  'components/LiquidGlassSkin.jsx',\n  'components/EntryLoader.jsx', 'components/entry-loader.module.css',\n  'components/EvidenceInspector.jsx', 'components/evidence-inspector.module.css',\n  'components/cinematic.module.css', 'components/story-input.js', 'components/story-response.mjs',\n",

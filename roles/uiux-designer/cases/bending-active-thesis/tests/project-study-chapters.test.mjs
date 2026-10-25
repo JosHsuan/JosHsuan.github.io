@@ -67,3 +67,29 @@ test('numerical within-chapter reading changes without semantic publication or l
  assert.equal(after.chapter,before.chapter);assert(after.progress>before.progress);assert.equal(f.reads,reads);assert.deepEqual(f.dom.inspect(),writes);
  f.read(600);assert.deepEqual(f.presenter.inspect().reading,before);f.dispose();
 });
+
+
+test('Dot detail uses a cached unobscured native window without changing semantic chapter progress',()=>{
+ const f=fixture();f.root.dataset.projectStudy='dot-based-3d-printing';let apertureReads=0;
+ const aperture={getBoundingClientRect:()=>{apertureReads++;return{bottom:2000};}};
+ f.chapters[1].querySelector=selector=>selector==='[data-dot-detail-passage]'?{querySelector:selector=>selector==='[data-project-source-aperture]'?aperture:null}:null;
+ f.presenter.measure({docY:0,viewportWidth:1440,viewportHeight:1000});
+ const startY=1000.375-500,endY=2000-920-96;f.read((startY+endY)/2);const detail=f.presenter.inspect().reading;
+ assert.equal(detail.chapter,'system');assert.equal(detail.detailProgress,.5);assert.equal(detail.detailActive,true);assert.equal(detail.detailEnabled,true);assert.deepEqual(detail.detailRange,{startY,endY,enabled:true,clearancePx:96});
+ assert.equal(detail.progress,((startY+endY)/2+500-1000.375)/(2400.25-1000.375));
+ f.read(1800);assert.equal(f.presenter.inspect().reading.detailProgress,1);assert.equal(f.presenter.inspect().reading.detailActive,false);assert.equal(apertureReads,1);
+ f.read((startY+endY)/2);assert.deepEqual(f.presenter.inspect().reading,detail);f.read(3000);assert(!Object.hasOwn(f.presenter.inspect().reading,'detailProgress'));
+ f.measure(0);f.presenter.measure({docY:0,viewportWidth:844,viewportHeight:390});f.read(1000,390);assert.equal(f.presenter.inspect().reading.detailEnabled,false);assert.equal(f.presenter.inspect().reading.detailActive,false);f.dispose();
+});
+
+
+test('Dot reading window fails closed at missing, nonfinite, short and height boundaries',()=>{
+ for(const row of [{primary:false,bottom:2000,height:1000,expected:undefined},{primary:true,bottom:null,height:1000,expected:false},{primary:true,bottom:NaN,height:1000,expected:false},{primary:true,bottom:2000,height:600,expected:false},{primary:true,bottom:1816.3749,height:1000,expected:false},{primary:true,bottom:1816.375,height:1000,expected:true},{primary:true,bottom:2000,height:601,expected:true}]){
+  const f=fixture();f.root.dataset.projectStudy='dot-based-3d-printing';
+  f.chapters[1].querySelector=()=>row.primary?{querySelector:()=>row.bottom===null?null:{getBoundingClientRect:()=>({bottom:row.bottom})}}:null;
+  f.presenter.measure({docY:0,viewportWidth:1440,viewportHeight:row.height});f.read(1000,row.height);
+  assert.equal(f.presenter.inspect().reading.detailEnabled,row.expected,JSON.stringify(row));
+  if(row.expected===false){assert.equal(f.presenter.inspect().reading.detailProgress,0);assert.equal(f.presenter.inspect().reading.detailActive,false);}
+  f.dispose();
+ }
+});

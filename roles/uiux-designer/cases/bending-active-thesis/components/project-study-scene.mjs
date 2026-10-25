@@ -2,6 +2,7 @@ import * as T from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';
 import {createRendererBudget} from './renderer-budget.mjs';
+import {DOT_SOURCE_REVISION,createDotDetailCollector,fitDotDetailCamera,inspectDotDetail} from './dot-detail-score.mjs';
 import {fitResearchCamera,RESEARCH_MODEL_PIXELS} from './research-scene-geometry.mjs';
 import {installProjectStudyAppearance} from './project-study-appearance.mjs';
 
@@ -33,12 +34,13 @@ export async function acquireProjectStudyScene({host,model,signal,onFailure=()=>
  let renderer=null,budget=null,scene=null,camera=null,gltf=null,support=null,appearance=null,disposed=false,shaderError=false;
  let size={width:0,height:0},state={chapter:model.chapters[0],azimuth:0,elevation:0},lastDraw=null,cameraFits=0,draws=0,firstDraw=null,successfulPaint=false,pose=null;
  let handheld={xPx:0,yPx:0,rollRad:0,originX:0,originY:0},compositorWrites=0,lastRenderSubmitMs=0,totalRenderSubmitMs=0;
+ let detailSelection=null,detailWeight=0;
  let revision=null,vertices=0,triangles=0,meshes=0,drawnMeshes=0,sourceCalls=0,sourcePoints=0;
  const ray=new T.Raycaster(),point=new T.Vector2(),painted=new Set();
  const lost=event=>{event.preventDefault();successfulPaint=false;onFailure('context-lost');};
  const dispose=()=>{
   if(disposed)return;disposed=true;signal.removeEventListener('abort',dispose);manager.abort();
-  appearance?.dispose();appearance=null;releaseObject(gltf?.scene);gltf=null;support=null;scene?.clear();scene=null;
+  appearance?.dispose();appearance=null;releaseObject(gltf?.scene);gltf=null;support=null;detailSelection=null;scene?.clear();scene=null;
   if(renderer){renderer.domElement.removeEventListener('webglcontextlost',lost);renderer.domElement.remove();budget?.dispose();renderer.dispose();renderer.forceContextLoss();renderer=null;}
  };
  signal.addEventListener('abort',dispose,{once:true});
@@ -50,6 +52,8 @@ export async function acquireProjectStudyScene({host,model,signal,onFailure=()=>
   const intent=state.cameraIntent;
   if(intent!=null&&(!Number.isFinite(intent.yawRad)||!Number.isFinite(intent.pitchRad)||!Number.isFinite(intent.fovDeg)||!Number.isFinite(intent.zoom)))throw RangeError('Finite composed project camera intent required');
   const yaw=intent?.yawRad??((view.yaw??.72)+state.azimuth),pitch=Math.max(-.1,Math.min(1.15,intent?.pitchRad??((view.pitch??.3)+state.elevation))),fov=intent?.fovDeg??view.fov??36,zoom=intent?.zoom??view.zoom??1;
+  const nextDetail=detailSelection?(intent?.detailWeight??0):0;
+  if(!Number.isFinite(nextDetail)||nextDetail<0||nextDetail>1)throw RangeError('Bounded Dot detail weight required');
   // Continuous generic handheld is an honest 2D pan/roll, without parallax.
   // Its canvas owns only this transform; the parent stage still owns entry/exit.
   const micro=state.handheld??ZERO_HANDHELD;
@@ -61,12 +65,12 @@ export async function acquireProjectStudyScene({host,model,signal,onFailure=()=>
    renderer.domElement.style.transformOrigin=`${slot.x*100}% ${slot.y*100}%`;
    renderer.domElement.style.transform=micro.xPx||micro.yPx||micro.rollRad?`translate3d(${micro.xPx}px,${micro.yPx}px,0) rotate(${micro.rollRad}rad)`:'none';
   }
-  if(successfulPaint&&lastDraw?.width===size.width&&lastDraw.height===size.height&&lastDraw.yaw===yaw&&lastDraw.pitch===pitch&&lastDraw.fov===fov&&lastDraw.zoom===zoom)return;
+  if(successfulPaint&&lastDraw?.width===size.width&&lastDraw.height===size.height&&lastDraw.yaw===yaw&&lastDraw.pitch===pitch&&lastDraw.fov===fov&&lastDraw.zoom===zoom&&detailWeight===nextDetail)return;
   // Native context loss may become observable before its queued DOM event.
   // Both paths must retain the same terminal failure classification.
   if(renderer.getContext().isContextLost())throw Error('context-lost');
   cameraFits++;
-  pose=fitResearchCamera(support,size.width*slot.width/(size.height*slot.height),{yaw,pitch,fov,zoom});
+  pose=detailSelection?fitDotDetailCamera(support,detailSelection,size.width*slot.width/(size.height*slot.height),{yaw,pitch,fov,zoom},nextDetail):fitResearchCamera(support,size.width*slot.width/(size.height*slot.height),{yaw,pitch,fov,zoom});
   camera.position.fromArray(pose.position);camera.up.fromArray(pose.up);camera.aspect=size.width/size.height;
   camera.fov=T.MathUtils.radToDeg(2*Math.atan(Math.tan(T.MathUtils.degToRad(pose.fov/2))/slot.height));camera.near=pose.near;camera.far=pose.far;
   camera.setViewOffset(size.width,size.height,size.width*(.5-slot.x),size.height*(.5-slot.y),size.width,size.height);camera.lookAt(...pose.target);camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
@@ -79,7 +83,7 @@ export async function acquireProjectStudyScene({host,model,signal,onFailure=()=>
   // participate; a decorative or empty render can never satisfy this boundary.
   if(renderer.getContext().isContextLost())throw Error('context-lost');
   if(shaderError||drawnMeshes!==meshes||sourceCalls<meshes||renderer.info.render.calls<sourceCalls)throw Error('The complete original project model did not draw');
-  successfulPaint=true;lastDraw={width:size.width,height:size.height,yaw,pitch,fov,zoom};draws++;firstDraw??={completed:true,sourceRevision:revision,meshes:drawnMeshes,sourceCalls,width:size.width,height:size.height};
+  successfulPaint=true;detailWeight=nextDetail;lastDraw={width:size.width,height:size.height,yaw,pitch,fov,zoom};draws++;firstDraw??={completed:true,sourceRevision:revision,meshes:drawnMeshes,sourceCalls,width:size.width,height:size.height};
  };
  try{
   const url=new URL(model.src,win.location.origin);
@@ -114,8 +118,10 @@ export async function acquireProjectStudyScene({host,model,signal,onFailure=()=>
   // must not create a second multi-million-element JavaScript number array or
   // make every drag frame scan every source vertex. The eight exact box corners
   // conservatively contain the complete source for every subsequent camera fit.
+  const detailCollector=revision===DOT_SOURCE_REVISION?createDotDetailCollector():null;let sourceIndex=0;
   gltf.scene.updateWorldMatrix(true,true);const sourceBounds=new T.Box3(),vertex=new T.Vector3();
-  gltf.scene.traverse(node=>{if(!node.isMesh&&!node.isPoints)return;const positions=node.geometry.getAttribute('position');for(let i=0;i<positions.count;i++){vertex.fromBufferAttribute(positions,i).applyMatrix4(node.matrixWorld);sourceBounds.expandByPoint(vertex);}});
+  gltf.scene.traverse(node=>{if(!node.isMesh&&!node.isPoints)return;const positions=node.geometry.getAttribute('position');for(let i=0;i<positions.count;i++){vertex.fromBufferAttribute(positions,i).applyMatrix4(node.matrixWorld);sourceBounds.expandByPoint(vertex);detailCollector?.add(vertex.x,vertex.y,vertex.z,sourceIndex++);}});
+  detailSelection=detailCollector?.finish()??null;
   const extent=sourceBounds.getSize(new T.Vector3()),tolerance=Math.max(extent.length()*1e-7,1e-7);
   for(let i=0;i<3;i++)if(Math.abs(sourceBounds.min.getComponent(i)-model.bounds.min[i])>tolerance||Math.abs(sourceBounds.max.getComponent(i)-model.bounds.max[i])>tolerance)throw Error('Project source bounds differ');
   support=new Float64Array(24);let corner=0;
@@ -132,7 +138,7 @@ export async function acquireProjectStudyScene({host,model,signal,onFailure=()=>
    resize(width,height){if(disposed||!(width>0&&height>0))return;size={width,height};draw();},
    present(next){if(disposed)return;state={...state,...next};draw();},
    hitTest(x,y){if(disposed||!successfulPaint||!renderer)return false;const rect=renderer.domElement.getBoundingClientRect();if(x<rect.left||x>rect.right||y<rect.top||y>rect.bottom)return false;const local=projectStudyCanvasPoint(x,y,rect,size,handheld);if(!local)return false;point.set(local.x/size.width*2-1,-local.y/size.height*2+1);ray.setFromCamera(point,camera);return ray.intersectObject(gltf.scene,true).length>0;},
-   inspect:()=>({sourceRevision:revision,primitive:model.primitive??'triangles',vertices,triangles,renderables:meshes,sourcePoints,meshes,drawnMeshes,sourceCalls,successfulPaint,firstDraw:firstDraw?{...firstDraw}:null,draws,cameraFits,renderSubmit:{lastMs:lastRenderSubmitMs,totalMs:totalRenderSubmitMs,kind:'cpu-submission-only'},compositor:{...handheld,writes:compositorWrites,kind:'2d-pan-roll'},supportPoints:(support?.length??0)/3,pose,view:{...state},size:{...size},appearance:appearance?.inspect()??null,pixelBudget:RESEARCH_MODEL_PIXELS,budget:budget?.inspect()??null,canvasCount:disposed?0:1,disposed}),
+   inspect:()=>({sourceRevision:revision,primitive:model.primitive??'triangles',vertices,triangles,renderables:meshes,sourcePoints,meshes,drawnMeshes,sourceCalls,successfulPaint,firstDraw:firstDraw?{...firstDraw}:null,draws,cameraFits,renderSubmit:{lastMs:lastRenderSubmitMs,totalMs:totalRenderSubmitMs,kind:'cpu-submission-only'},compositor:{...handheld,writes:compositorWrites,kind:'2d-pan-roll'},supportPoints:(support?.length??0)/3,...(revision===DOT_SOURCE_REVISION?{detail:inspectDotDetail(detailSelection,detailWeight)}:{}),pose,view:{...state},size:{...size},appearance:appearance?.inspect()??null,pixelBudget:RESEARCH_MODEL_PIXELS,budget:budget?.inspect()??null,canvasCount:disposed?0:1,disposed}),
    dispose,
   };
  }catch(error){dispose();throw error;}

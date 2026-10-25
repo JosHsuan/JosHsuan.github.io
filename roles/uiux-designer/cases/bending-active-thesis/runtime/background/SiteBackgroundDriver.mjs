@@ -60,7 +60,7 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
     if(disposed||scheduler.suspended)return;
     const dt=previous?(now-previous)/1000:1/60;previous=now;frames++;
     const wasResumed=resumed;
-    if(homeDirty){homeResearch?.measure({naturalY,viewportHeight:win.innerHeight});projectChapters?.measure({docY:win.scrollY});home.measure({naturalY,viewportHeight:win.innerHeight,docY:win.scrollY});projectScene?.measure(win.innerWidth,win.innerHeight);projectBackdrop?.measure(win.innerWidth,win.innerHeight);homeDirty=false;}
+    if(homeDirty){homeResearch?.measure({naturalY,viewportHeight:win.innerHeight});projectChapters?.measure({docY:win.scrollY,viewportWidth:win.innerWidth,viewportHeight:win.innerHeight});home.measure({naturalY,viewportHeight:win.innerHeight,docY:win.scrollY});projectScene?.measure(win.innerWidth,win.innerHeight);projectBackdrop?.measure(win.innerWidth,win.innerHeight);homeDirty=false;}
     const reading=projectChapters?.publish({docY:win.scrollY,viewportHeight:win.innerHeight});
     if(glassDirty){liquid.measure({opaque:opaqueGlass()});glassDirty=false;}
     const impulse=pendingImpulse;pendingImpulse=0;

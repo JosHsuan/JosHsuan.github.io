@@ -10,6 +10,8 @@ const hash=value=>createHash('sha256').update(value).digest('hex');
 // These twelve exact block substitutions are the entire approved markup delta.
 // Exact occurrence checks avoid stripping unrelated ARIA or matching the two
 // generic image-link names ambiguously. No git/generated baseline at test time.
+// ProjectCaseStudy includes only the Dot summary separately reversed to 05b
+// by dot-source-detail.test.mjs; the original twelve ARIA changes remain exact.
 const cases={
   "PortfolioHome.jsx": {
     "baseline": "336f22d87de1e70daa7886a8f591d9ba25e91ffaa4226eb5ecc072dea85ea9b0",
@@ -21,7 +23,7 @@ const cases={
     ]
   },
   "ProjectCaseStudy.jsx": {
-    "baseline": "baf719e6c92e079819e5499901c863225b162902dbfe12187996e5ff27af227b",
+    "baseline": "eced36c5542a8a060b4f999547aa8e61c0a3bb534a9cd2ff9e26316bd53003a9",
     "replacements": [
       [
         " return <a className={styles.sourceLink} href={image.src} target=\"_blank\" rel=\"noreferrer\">View full image <span aria-hidden=\"true\">↗</span></a>;\n",

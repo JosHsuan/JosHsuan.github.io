@@ -17,5 +17,11 @@ export default function ProjectCaseStudyStage({projectId,model}){
   <div className={styles.modelSurface} data-project-model-surface>
    <img className={styles.modelPoster} data-project-model-poster data-site-critical src={model.poster.src} width={model.poster.width} height={model.poster.height} alt="" loading="eager" decoding="async"/>
   </div>
+  {projectId==='dot-based-3d-printing'&&<div className={styles.dotDetailAnnotation} data-dot-detail-annotation data-dot-detail-beat="overview" hidden aria-hidden="true">
+   <span data-dot-detail-label="overview">14,810 recorded path sample positions.</span>
+   <span data-dot-detail-label="detail">Selected point detail · no inferred surface.</span>
+   <span data-dot-detail-label="return">Complete point record.</span>
+   <span data-dot-detail-label="handoff">Next: a separate physical recording.</span>
+  </div>}
  </div>;
 }

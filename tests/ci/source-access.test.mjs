@@ -10,7 +10,8 @@ const hash=value=>createHash('sha256').update(value).digest('hex');
 // generated baseline: future source changes require a separately reviewed pin.
 // Four JSX pins include the separately reviewed name/hidden-description delta;
 // link-announcements.test.mjs independently reverses its twelve exact substitutions
-// to the deployed ce12 six-file baseline. Asset/data/CSS pins remain unchanged.
+// to the deployed ce12 six-file baseline. Dot summary/CSS pins are separately
+// protected by dot-source-detail.test.mjs exact 05b reversal; data/assets unchanged.
 const baseline={
   "release/manifest.json": "6bc10dfa18a7aafc828d9b39f1b046faddb7c8b514e9260a7d9adca0d46179e1",
   "release/project-assets.json": "83f51a9847419f66f9ddde151b135fd3c2c58d4744d01631579497aad2916244",
@@ -19,9 +20,9 @@ const baseline={
   "release/xr-study.json": "3605cb7ed9abefc0721091d7883fdc765d0f0471af1b7d4db49f326228a68001",
   "release/xr-workspace.json": "41c48db687e71332240a002e0892141a7eac887c94740ef4c175cc4ccc4e1211",
   "release/story.json": "250c0853d8d5f9d993bc89b8a563eef5717300c1772a8c5da04647d165c740da",
-  "components/ProjectCaseStudy.jsx": "4e3194e06bcf487df47ad6f625c8f8d8798dd1bf6e3c9ac0d2052da273f85175",
+  "components/ProjectCaseStudy.jsx": "747f1e5322e79cb580d5cda78b693fd084369e69ec2ee115d01151d694ee8abd",
   "components/XRProject.jsx": "946f16f178bc4d2ddc13c12066cb9670f0d63fbb7df8bb3a47ff3397cc0b1fae",
-  "components/ProjectCaseStudy.module.css": "2d2bab984ea7c78fefa0909d900224c9f626539fe995573e8ed99aa12a25a432",
+  "components/ProjectCaseStudy.module.css": "0f28ebe90aae31c3544a5926cf7f908a2b154a033137b0908e2c5c13c058619d",
   "components/XRProject.module.css": "49e7c3d770d87c3d4d7eea5cec6c01421b5e998fcc82bff5a33e0c6b829f9cc5",
   "components/BendingProject.jsx": "585b055ff08bb0c8451d1780b6cf1268088b2ec46ded4661a2da46bca7b97970",
   "components/EntranceDiagramFocus.jsx": "e774fd4d6b6cb072834d4f8e3a269f0319d5aceaa360200a822f0ae6d085c146",

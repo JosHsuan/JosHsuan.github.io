@@ -101,7 +101,7 @@ const sources = [
   'components/ProjectCaseStudy.jsx', 'components/ProjectCaseStudy.module.css', 'components/project-study-media.mjs', 'components/project-study-layout.mjs',
   'components/ProjectCaseStudyControls.jsx', 'components/EntranceDiagramFocus.jsx', 'components/EntranceDiagramFocus.module.css', 'release/project-studies.json',
   'components/ProjectCaseStudyStage.jsx', 'components/project-study-scene.mjs',
-  'components/project-study-appearance.mjs',
+  'components/project-study-appearance.mjs', 'components/dot-detail-score.mjs',
   'runtime/site/ProjectStudyStageRegistry.mjs', 'runtime/site/ProjectStudyScenePresenter.mjs',
   'runtime/site/ProjectStudyChapterPresenter.mjs',
   'runtime/site/ProjectStudyBackdropPresenter.mjs', 'runtime/site/ProjectStudyBackdropMotion.mjs',

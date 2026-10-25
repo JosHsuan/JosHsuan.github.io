@@ -35,6 +35,7 @@ function PrimaryVisual({image,chapter,prefix,opening=false,model,motion}){
    {inspect&&<>
     <p className={styles.modelState} id={`${prefix}-${chapter}-model-state`} data-project-model-state={chapter} role="status">Original source view.</p>
     <p className={styles.modelDescription} data-project-model-description>{model.alt}</p>
+    {prefix==='dot-based-3d-printing'&&chapter==='system'&&<p className={styles.dotDetailSummary} data-dot-detail-summary>14,810 recorded low-speed path sample positions. The close view examines a selected part of this point record, not an inferred surface or a deposition sequence. The next chapter shows a separate physical recording.</p>}
     <p className={styles.modelHelp} id={`${prefix}-${chapter}-model-help`} data-project-model-help={chapter} hidden>Scroll to follow the camera. With focus, use arrow keys to inspect; Home or Esc returns to the current scroll view.</p>
     <button className={styles.sourceAction} type="button" data-project-model-reset={chapter} hidden>Return to scroll view</button>
    </>}
@@ -91,7 +92,7 @@ export default function ProjectCaseStudy({project}){
     {project.sections.map((section,index)=>{
      const motion=project.motionMedia?.find(media=>media.chapter===section.id),evidence=evidenceByChapter.get(section.id);
      return <section key={section.id} id={`${prefix}-${section.id}`} tabIndex={-1} className={styles.chapter} data-project-chapter={section.id} aria-labelledby={`${prefix}-${section.id}-heading`} {...layoutAttributes(projectStudyLayout(project,section.id))}>
-     <div className={styles.chapterInner}>
+     <div className={styles.chapterInner} data-dot-detail-passage={project.id==='dot-based-3d-printing'&&section.id==='system'?'':undefined}>
       {section.media[0]&&<PrimaryVisual image={section.media[0]} chapter={section.id} prefix={prefix} model={project.model} motion={motion}/>}
       <Panel>
        <StudyLabel kind={section.kind}>{String(index+1).padStart(2,'0')} / {section.label}</StudyLabel>

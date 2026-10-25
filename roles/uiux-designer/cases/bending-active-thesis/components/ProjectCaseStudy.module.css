@@ -154,3 +154,17 @@
 @media(max-width:360px){.page:global([data-project-study=mode-s-of-making]){--study-mobile-reading-inset:1.25rem}}
 
 .evidenceImage{position:relative;isolation:isolate}
+
+/* Optional source-reading annotation: outside the transformed source canvas.
+   The existing presenter alone publishes actual painted-model eligibility/beat. */
+.sourcePanel>.dotDetailSummary{font-size:var(--type-size-caption);line-height:var(--type-leading-caption);letter-spacing:var(--type-tracking-caption)}
+.dotDetailAnnotation{position:absolute;left:48%;top:calc(92% + .5rem);width:51%;display:grid;pointer-events:none;text-align:center;color:var(--paper);font-size:var(--type-size-caption);line-height:var(--type-leading-caption);letter-spacing:var(--type-tracking-caption)}
+.dotDetailAnnotation[hidden]{display:none}
+.dotDetailAnnotation>span{grid-area:1/1;visibility:hidden;padding:0 .5rem;overflow-wrap:anywhere}
+.dotDetailAnnotation:global([data-dot-detail-beat=overview])>:global([data-dot-detail-label=overview]),
+.dotDetailAnnotation:global([data-dot-detail-beat=detail])>:global([data-dot-detail-label=detail]),
+.dotDetailAnnotation:global([data-dot-detail-beat=return])>:global([data-dot-detail-label=return]),
+.dotDetailAnnotation:global([data-dot-detail-beat=handoff])>:global([data-dot-detail-label=handoff]){visibility:visible}
+@media(max-width:799px){.dotDetailAnnotation{left:3%;top:calc(65% + .5rem);width:94%}}
+@media(max-height:600px),(prefers-reduced-motion:reduce),(forced-colors:active){.dotDetailAnnotation{display:none}}
+@media print{.dotDetailAnnotation{display:none}}
