@@ -26,6 +26,18 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
  const sceneRoute=path(win.location.pathname)===BENDING_ROUTE;
  const reduced=win.matchMedia?.('(prefers-reduced-motion: reduce)');
  const monotonic=()=>win.performance?.now()??now();
+ // Opt-in observation only: no new clock, scheduler or readiness prerequisite.
+ const diagnosticEvents=win.__SITE_NAVIGATION_DIAGNOSTICS__===true?[]:null;
+ let diagnosticEpoch=0,diagnosticSequence=0,diagnosticDropped=0;
+ const diagnostic=(checkpoint,facts={},epoch=diagnosticEpoch)=>{
+  if(!diagnosticEvents)return;
+  try{
+   diagnosticEvents.push(Object.freeze({epoch,sequence:++diagnosticSequence,at:monotonic(),checkpoint,
+    current:epoch===diagnosticEpoch&&!disposed&&!terminal.has(active?.phase),phase:active?.phase??'idle',hidden:Boolean(doc.hidden),...facts}));
+   if(diagnosticEvents.length>48){diagnosticEvents.shift();diagnosticDropped++;}
+  }catch{/* Observation cannot interrupt native lifecycle handling. */}
+ };
+ const readinessFacts=result=>({ready:Boolean(result.ready),pendingCount:result.pending?.length??0,failureCount:result.failures?.length??0});
  const storageRead=key=>{try{return JSON.parse(win.sessionStorage.getItem(key)||'null');}catch{return null;}};
  const storageWrite=(key,value)=>{try{win.sessionStorage.setItem(key,JSON.stringify(value));return true;}catch{return false;}};
  const storageRemove=key=>{try{win.sessionStorage.removeItem(key);}catch{/* Native navigation still works without storage. */}};
@@ -39,7 +51,7 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
   attr(element,'data-site-reveal',null);
  };
  const snapshot=()=>({id:active?.id??null,phase:active?.phase??'idle',kind:active?.kind??null,url:active?.url??win.location.href,disposed,
-  reason:active?.reason??'',presentation:element?.getAttribute('data-site-project-entry')??null,delegated:sceneRoute,handedOff,readiness:documentResult,previews:previewResource?.inspect?.()??null,history:[...history],events:events.inspect()});
+  reason:active?.reason??'',presentation:element?.getAttribute('data-site-project-entry')??null,delegated:sceneRoute,handedOff,readiness:documentResult,previews:previewResource?.inspect?.()??null,history:[...history],events:events.inspect(),...(diagnosticEvents?{startupDiagnostics:{enabled:true,clock:win.performance?.now?'performance.now':'now',timeOrigin:Number.isFinite(win.performance?.timeOrigin)?win.performance.timeOrigin:null,epoch:diagnosticEpoch,dropped:diagnosticDropped,events:diagnosticEvents.map(event=>({...event}))}}:{})});
  const notify=()=>onChange(snapshot());
  const presentation=value=>{attr(element,'data-site-project-entry',value);attr(doc.documentElement,'data-site-project-entry',value);};
  const paint=phase=>{
@@ -53,6 +65,7 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
   active.phase=phase;active.reason=reason;
   const fact=Object.freeze({id:active.id,phase,kind:active.kind,url:active.url,...(reason?{reason}:{})});
   remember(fact);paint(phase);
+  diagnostic('phase',{phase,reason:reason.slice(0,160)});
   if(terminal.has(phase)){
    // Hide first: cancelling a fill-both effect must not flash its base style.
    clearDeadlines();releaseReveal();restoreContent();presentation(null);
@@ -77,7 +90,9 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
  };
  const request=(kind,url,{id,previous=[]}={})=>{
   cancel('superseded');clearDeadlines();releaseReveal();restoreContent();presentation(null);handedOff=false;
+  if(diagnosticEvents)diagnosticEpoch++;
   active={id:id??`site-${now()}-${++serial}`,phase:'idle',kind,url,reason:''};
+  diagnostic('request',{kind});
   if(previous.length){for(const fact of previous.slice(-24))remember(fact);active.phase='requested';paint('requested');notify();}
   else record('requested');
  };
@@ -89,7 +104,9 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
   previewResource?.fallback?.(reason);return record('failed',reason);
  };
  const startupExpired=()=>{
-  if(startupExpiresAt===null||monotonic()<startupExpiresAt)return false;
+  const at=startupExpiresAt===null?null:monotonic();
+  diagnostic('startup-deadline-check',{checkedAt:at,expiresAt:startupExpiresAt,expired:startupExpiresAt!==null&&at>=startupExpiresAt});
+  if(startupExpiresAt===null||at<startupExpiresAt)return false;
   fail(documentResult?.ready?'presentation-timeout':'readiness-timeout');return true;
  };
  const completeReveal=reason=>{if(revealExpiresAt!==null&&monotonic()>=revealExpiresAt)fail('reveal-timeout');else enter(reason);};
@@ -98,13 +115,15 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
   const id=active.id;
   const content=element.querySelector?.('[data-site-loader-content]');
   revealMode=typeof element.animate==='function'&&typeof content?.animate==='function'&&typeof win.requestAnimationFrame==='function'&&typeof win.cancelAnimationFrame==='function'?'native':'css';
-  const generation=++revealGeneration;
+  const generation=++revealGeneration,epoch=diagnosticEpoch;
+  diagnostic('reveal-selected',{mode:revealMode,immediate,reduced:Boolean(reduced?.matches)},epoch);
   const current=()=>!disposed&&generation===revealGeneration&&active?.id===id&&active.kind==='arrival'&&['requested','ready','revealing'].includes(active.phase);
   let finished=false,effectsStarted=false;
   const accept=({staticReveal=false,reason=''}={})=>{
    if(!current()||active.phase!=='requested'||startupExpired())return;
    if(deadlineTimer!==null)clearTimer(deadlineTimer);deadlineTimer=null;startupExpiresAt=null;
    const readyAt=monotonic();revealExpiresAt=readyAt+revealDeadline;
+   diagnostic('presentation-accepted',{staticReveal,reason:reason.slice(0,160),revealExpiresAt},epoch);
    if(!record('ready')||!current()||active.phase!=='ready')return;
    if(monotonic()>=revealExpiresAt){fail('reveal-timeout');return;}
    if(!record('revealing')||!current()||active.phase!=='revealing')return;
@@ -121,21 +140,22 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
   const begin=()=>{
    if(!current()||active.phase!=='requested'||effectsStarted||startupExpired())return;
    if(reduced?.matches||doc.hidden){completePreparation(doc.hidden?'hidden-static':'reduced-motion');return;}
-   effectsStarted=true;
+   effectsStarted=true;diagnostic('native-effects-begin',{},epoch);
    const preparations=[],completions=[];
    try{
     for(const [target,keyframes] of [[element,[{opacity:1},{opacity:0}]],[content,[{transform:'translateY(0)'},{transform:'translateY(-12px)'}]]]){
      const animation=target.animate(keyframes,revealTiming);
      if(typeof animation?.cancel!=='function')throw Error('Native reveal cannot be released');
-     revealAnimations.push(animation);
+     revealAnimations.push(animation);diagnostic('animation-created',{index:revealAnimations.length},epoch);
      const finished=animation.finished;
      if(typeof finished?.then!=='function')throw Error('Native reveal has no completion signal');
      completions.push(finished);
      const ready=animation.ready;
      if(typeof ready?.then!=='function')throw Error('Native reveal has no play-readiness signal');
      preparations.push(ready);
+     if(diagnosticEvents){const index=preparations.length;try{ready.then(()=>diagnostic('animation-ready-observed',{index,status:'resolved'},epoch),()=>diagnostic('animation-ready-observed',{index,status:'rejected'},epoch));}catch{/* Diagnostic subscription cannot change preparation. */}}
     }
-   }catch{/* The remaining startup budget remains the failure terminal. */}
+   }catch{diagnostic('native-effects-incomplete',{created:revealAnimations.length,preparations:preparations.length,completions:completions.length},epoch);/* The remaining startup budget remains the failure terminal. */}
    // Attach both handlers immediately, including while native play is pending.
    // No completion can enter before both actual play-readiness signals arrive.
    Promise.all(completions).then(()=>{
@@ -146,7 +166,9 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
   };
   // A finite presentation opportunity is not a paint acknowledgement. Native
   // ready promises, within the same startup budget, acknowledge pending play.
+  diagnostic('raf-scheduled',{},epoch);
   revealFrame=win.requestAnimationFrame(()=>{
+   diagnostic('raf-delivered',{},epoch);
    if(!current()||active.phase!=='requested')return;revealFrame=null;if(startupExpired())return;
    begin();
   });
@@ -196,10 +218,11 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
   if(!adopted)request('arrival',url.href);
   // A bounded visual hint never transfers readiness or a rendering resource.
   if(adopted&&sceneRoute&&handoff.presentation==='bending-active')presentation('bending-active');
-  const current=active.id;
+  const current=active.id,epoch=diagnosticEpoch;
+  diagnostic('arrival',{restored,startedAt},epoch);
   if(disposed||terminal.has(active.phase))return;
   if(!sceneRoute){
-   guardContent();startupExpiresAt=startedAt+deadline;
+   guardContent();startupExpiresAt=startedAt+deadline;diagnostic('startup-budget',{startedAt,expiresAt:startupExpiresAt},epoch);
    if(startupExpired())return;
    const armStartup=()=>{deadlineTimer=setTimer(()=>{
     if(disposed||current!==active?.id||active.phase!=='requested')return;
@@ -211,17 +234,19 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
    armStartup();
   }
   const documentResource=acquireReadiness(doc,{setTimeout:setTimer,clearTimeout:clearTimer,deadline:sceneRoute?deadline:Math.ceil(Math.max(0,startupExpiresAt-monotonic()))});
+  if(diagnosticEvents)documentResource.promise.then(result=>diagnostic('document-promise-observed',readinessFacts(result),epoch),()=>diagnostic('document-promise-observed',{status:'rejected'},epoch));
   if(sceneRoute)resource=documentResource;
   else{
    // Marked card preparation starts independently of loader entry. Actual first
    // draw or an explicit static fallback must settle before reveal can start.
-   const previews=acquirePreviews(doc);previewResource=previews;
+   const previews=diagnosticEvents?acquirePreviews(doc,{onReport:report=>diagnostic('preview-report',report,epoch)}):acquirePreviews(doc);previewResource=previews;
    resource={promise:Promise.all([documentResource.promise,previews.promise]).then(([document,preview])=>Object.freeze({
     ready:document.ready&&preview.ready,failures:Object.freeze([...document.failures,...preview.failures]),
     pending:Object.freeze([...document.pending,...preview.pending]),previews:preview.previews,
    })),release(){documentResource.release();previews.release();}};
   }
   resource.promise.then(result=>{
+   if(diagnosticEvents)diagnostic('combined-result-observed',readinessFacts(result),epoch);
    if(disposed||current!==active?.id||terminal.has(active.phase))return;
    documentResult=result;notify();
    if(sceneRoute){for(const fact of pendingScene??[])applyScene(fact);pendingScene=null;}

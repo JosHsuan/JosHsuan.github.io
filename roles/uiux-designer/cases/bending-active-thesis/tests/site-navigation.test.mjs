@@ -699,3 +699,77 @@ test('synchronous outgoing-request disposal cannot acquire a fresh guard or navi
  assert.equal(event.defaultPrevented,false);assert.equal(manager.inspect().disposed,true);assert.equal(manager.inspect().phase,'cancelled');
  assert.equal(f.content.hasAttribute('inert'),false);assert.equal(f.content.hasAttribute('aria-busy'),false);assert.equal(f.timers.size,0);assert.equal(f.storage.has(SITE_HANDOFF_KEY),false);
 });
+
+const diagnosticEvents=manager=>manager.inspect().startupDiagnostics.events;
+test('startup diagnostics are strict opt-in and preserve the default inspect and native scheduling shape',async t=>{
+ for(const enabled of [undefined,false,'true']){
+  const f=environment(),native=nativeReveal(f);f.win.__SITE_NAVIGATION_DIAGNOSTICS__=enabled;
+  const manager=connect(t,f);await flush();assert.equal('startupDiagnostics' in manager.inspect(),false);
+  assert.equal(native.frames.size,1);assert.equal(f.timers.size,1);
+  native.frame();await flush();native.owned.forEach(item=>item.finish());await flush();
+  assert.deepEqual(phases(manager),['requested','ready','revealing','entered']);assert.equal(f.timers.size,0);
+ }
+});
+
+test('diagnostics separate synchronous preview report from late combined observation before any native RAF',async t=>{
+ const node=new Element(),f=environment({previews:[node]}),native=nativeReveal(f);f.win.__SITE_NAVIGATION_DIAGNOSTICS__=true;
+ const manager=connect(t,f),registration=registerPagePreviewReadiness(f.doc,node);await flush();f.elapse(15000);
+ registration.report({mode:'model'});
+ let events=diagnosticEvents(manager);assert.equal(events.at(-1).checkpoint,'preview-report');assert.equal(events.at(-1).at,15000);
+ assert.equal(events.at(-1).provenance,'report-notification');assert.equal(events.some(event=>event.checkpoint==='combined-result-observed'),false);
+ await flush();events=diagnosticEvents(manager);
+ assert.equal(events.some(event=>event.checkpoint==='document-promise-observed'),true);
+ assert.equal(events.some(event=>event.checkpoint==='combined-result-observed'&&event.ready),true);
+ assert.equal(events.some(event=>event.checkpoint==='raf-scheduled'),false);
+ assert.equal(events.at(-1).phase,'failed');assert.equal(events.at(-1).reason,'presentation-timeout');
+ assert.equal(native.calls.length,0);assert.equal(f.timers.size,0);
+});
+
+test('diagnostics distinguish withheld RAF from delivered RAF with pending or rejected native play',async t=>{
+ for(const branch of ['raf','pending','rejected']){
+  const f=environment(),native=nativeReveal(f,{manualReady:true});f.win.__SITE_NAVIGATION_DIAGNOSTICS__=true;
+  const manager=connect(t,f);await flush();
+  if(branch!=='raf'){native.frame();if(branch==='rejected')native.owned[0].rejectReady();await flush();}
+  f.advance(15000);await flush();const events=diagnosticEvents(manager);
+  assert.equal(events.some(event=>event.checkpoint==='raf-scheduled'),true);
+  assert.equal(events.some(event=>event.checkpoint==='raf-delivered'),branch!=='raf');
+  assert.equal(events.some(event=>event.checkpoint==='animation-ready-observed'&&event.status==='resolved'),false);
+  if(branch==='rejected')assert.equal(events.some(event=>event.checkpoint==='animation-ready-observed'&&event.status==='rejected'),true);
+  assert.equal(manager.inspect().reason,'presentation-timeout');assert.equal(f.timers.size,0);
+ }
+});
+
+test('diagnostics preserve actual two-animation acceptance and retain terminal evidence as copied bounded records',async t=>{
+ const f=environment(),native=nativeReveal(f,{manualReady:true});f.win.__SITE_NAVIGATION_DIAGNOSTICS__=true;
+ const manager=connect(t,f);await flush();native.frame();native.owned[0].accept();await flush();
+ assert.equal(manager.inspect().phase,'requested');native.owned[1].accept();await flush();
+ assert.equal(manager.inspect().phase,'revealing');native.owned.forEach(item=>item.finish());await flush();
+ assert.equal(manager.inspect().phase,'entered');assert.equal(diagnosticEvents(manager).filter(event=>event.checkpoint==='animation-ready-observed'&&event.status==='resolved').length,2);
+ const copy=manager.inspect().startupDiagnostics;copy.events[0].checkpoint='mutated';copy.events.length=0;
+ assert.notEqual(diagnosticEvents(manager)[0].checkpoint,'mutated');
+ for(let i=0;i<30;i++)f.click(`https://example.test/next-${i}/`);
+ const bounded=manager.inspect().startupDiagnostics;assert.equal(bounded.events.length,48);assert.ok(bounded.dropped>0);assert.ok(bounded.epoch>1);
+ assert.ok(bounded.events.every(event=>Number.isFinite(event.at)&&Number.isInteger(event.epoch)));
+ manager.dispose();assert.equal(manager.inspect().disposed,true);assert.ok(diagnosticEvents(manager).length>0);
+});
+
+test('diagnostics label stale promise deliveries without changing the superseding request or adding a reveal',async t=>{
+ const readiness=deferred(),f=environment(),native=nativeReveal(f);f.win.__SITE_NAVIGATION_DIAGNOSTICS__=true;
+ const manager=connect(t,f,{acquireReadiness:()=>({promise:readiness.promise,release(){}})});f.click('https://example.test/other/');
+ readiness.resolve({ready:true,failures:[],pending:[]});await flush();
+ const events=diagnosticEvents(manager),late=events.filter(event=>event.checkpoint==='document-promise-observed'||event.checkpoint==='combined-result-observed');
+ assert.equal(late.length,2);assert.ok(late.every(event=>event.epoch===1&&!event.current));
+ assert.equal(manager.inspect().kind,'navigation');assert.equal(manager.inspect().phase,'requested');assert.equal(native.calls.length,0);assert.equal(native.frames.size,0);
+});
+
+test('diagnostic epochs distinguish persisted restoration from a fresh manager without changing static restore entry',async t=>{
+ const f=environment(),native=nativeReveal(f);f.win.__SITE_NAVIGATION_DIAGNOSTICS__=true;
+ const manager=connect(t,f);await presented(native);native.owned.forEach(item=>item.finish());await flush();
+ const first=manager.inspect().startupDiagnostics.epoch;f.page('pagehide',true);f.page('pageshow',true);await flush();
+ assert.equal(manager.inspect().phase,'entered');assert.equal(manager.inspect().startupDiagnostics.epoch,first+1);
+ assert.equal(diagnosticEvents(manager).filter(event=>event.checkpoint==='arrival').at(-1).restored,true);
+ assert.equal(diagnosticEvents(manager).filter(event=>event.checkpoint==='presentation-accepted').at(-1).staticReveal,true);
+ assert.equal(native.calls.length,2,'restoration adds no animation owner');assert.equal(f.timers.size,0);
+ const fresh=environment();fresh.win.__SITE_NAVIGATION_DIAGNOSTICS__=true;const next=connect(t,fresh);await flush();
+ assert.equal(next.inspect().startupDiagnostics.epoch,1);assert.equal(diagnosticEvents(next).find(event=>event.checkpoint==='arrival').restored,false);
+});

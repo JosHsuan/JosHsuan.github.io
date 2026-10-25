@@ -142,8 +142,22 @@ for(const [key,route] of routes)(recorded.has(key)?filmed:test)(`${key}: native 
   const chosen=selection.chosen,panel=page.locator(plane).nth(chosen.index);
   await nativeY(page,chosen.start);await neutral(page);
   await expect(panel).toBeInViewport();
-  observation=await panel.evaluateHandle(node=>{
-   const state={phase:'initial',samples:[],counts:{}};
+  observation=await panel.evaluateHandle((node,{observeNativeScroll,top})=>{
+   const state={phase:'initial',samples:[],counts:{},...(observeNativeScroll?{nativeScroll:[],nativeScrollCounts:{},nativeScrollScope:'Native event delivery timestamps/displacement and observed presenter state; not internal velocitySkin speed/dt or a performance benchmark.'}:{})};
+   const scroll=event=>{
+    if(!observeNativeScroll||state.nativeScroll.length>=48||(state.nativeScrollCounts[state.phase]??0)>=16)return;
+    const driver=window.__globalBackground?.inspect().driver,windows=driver?.homeScrolling?.informationWindows;
+    const matches=windows?.items.filter(item=>item.kind===node.dataset.informationWindow&&item.top===top)??[];
+    const previous=state.nativeScroll.findLast(row=>row.phase===state.phase),y=scrollY;
+    const eventElapsedMs=previous?event.timeStamp-previous.eventTimeStamp:null;
+    state.nativeScrollCounts[state.phase]=(state.nativeScrollCounts[state.phase]??0)+1;
+    state.nativeScroll.push({phase:state.phase,trusted:event.isTrusted,eventTimeStamp:event.timeStamp,browserObservedMs:performance.now(),y,viewportHeight:innerHeight,
+     deltaY:previous?y-previous.y:null,eventElapsedMs,deliverySpeedViewportPerSecond:eventElapsedMs>0?(y-previous.y)/innerHeight/(eventElapsedMs/1000):null,
+     driverFrames:driver?.frames,windowTicks:windows?.ticks,windowMoving:windows?.moving,windowSettled:windows?.settled,matchingItems:matches.length,
+     presenter:matches.slice(0,1).map(item=>({kind:item.kind,top:item.top,skinStrength:item.skinStrength,settled:item.settled,rx:item.rx,ry:item.ry,rz:item.rz,skew:item.skew})),
+     published:{moving:node.dataset.informationMoving,rx:node.style.getPropertyValue('--information-rx'),ry:node.style.getPropertyValue('--information-ry')}});
+   };
+   if(observeNativeScroll)addEventListener('scroll',scroll,{passive:true});
    const observer=new MutationObserver(()=>{
     if(state.samples.length>=120||(state.counts[state.phase]??0)>=32)return;
     const css=getComputedStyle(node),matrix=new DOMMatrix(css.transform==='none'?undefined:css.transform),box=node.getBoundingClientRect();
@@ -153,13 +167,15 @@ for(const [key,route] of routes)(recorded.has(key)?filmed:test)(`${key}: native 
     state.samples.push({phase:state.phase,y:scrollY,rx,ry,rz:parseFloat(node.style.getPropertyValue('--information-rz'))||0,skew:parseFloat(node.style.getPropertyValue('--information-skew'))||0,matrix:Array.from(matrix.toFloat64Array()),identity:matrix.isIdentity,depth:Math.abs(matrix.m13)+Math.abs(matrix.m23),visible:box.bottom>0&&box.top<innerHeight,opacity:css.opacity,clip:css.clipPath});
    });
    observer.observe(node,{attributes:true,attributeFilter:['style','data-information-moving']});
-   return{state,dispose(){observer.disconnect();}};
-  });
+   return{state,dispose(){observer.disconnect();if(observeNativeScroll)removeEventListener('scroll',scroll);}};
+  },{observeNativeScroll:key==='projects',top:chosen.top});
   const travel=async(phase,from,to)=>{
    await observation.evaluate((value,phase)=>{value.state.phase=phase;},phase);
    // A genuine desktop Bending gesture, not four tiny serial protocol steps
    // that can fall below the .08 viewport/s deadzone on slow source frames.
-   const steps=desktopBending?1:4;
+   // Projects also uses one native measured excursion, not four serial24px
+   // commands. Endpoints and all actual direction/rest/policy guards stay exact.
+   const steps=desktopBending||key==='projects'?1:4;
    for(let step=1;step<=steps;step++)await nativeY(page,Math.round(from+(to-from)*step/steps),nativeDiagnostics);
    await expect.poll(()=>observation.evaluate((value,phase)=>value.state.samples.some(s=>s.phase===phase&&s.visible&&s.depth>1e-8&&s.rx!==0&&s.ry!==0),phase),{timeout:WAIT}).toBe(true);
    await neutral(page);

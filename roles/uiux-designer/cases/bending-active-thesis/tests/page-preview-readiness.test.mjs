@@ -76,3 +76,22 @@ test('a throwing fallback owner cannot fabricate success or prevent another pend
  const readiness=acquirePagePreviewReadiness(document);readiness.fallback('readiness-timeout');assert.equal(readiness.inspect().ready,false);
  assert.deepEqual(readiness.inspect().previews,[{mode:'pending',reason:'readiness-timeout'},{mode:'static',reason:'readiness-timeout'}]);readiness.release();assert.equal((await readiness.promise).ready,false);
 });
+
+test('optional report diagnostics observe actual synchronous reports and distinguish preexisting terminals',async()=>{
+ const first={},second={},doc=documentWith(first,second),a=registerPagePreviewReadiness(doc,first),b=registerPagePreviewReadiness(doc,second),reports=[];
+ a.report({mode:'model'});
+ const readiness=acquirePagePreviewReadiness(doc,{onReport:report=>reports.push(report)});
+ assert.deepEqual(reports,[{participant:1,mode:'model',reason:'',provenance:'preexisting-at-acquire'}]);
+ b.report({mode:'static',reason:'reduced-motion'});
+ assert.equal(reports.length,2,'report callback runs before report returns, not a promise observer');
+ assert.deepEqual(reports[1],{participant:2,mode:'static',reason:'reduced-motion',provenance:'report-notification'});
+ assert.equal(Object.isFrozen(reports[1]),true);assert.equal((await readiness.promise).ready,true);
+ b.report({mode:'model'});assert.equal(reports.length,2);
+});
+
+test('report diagnostics bound reasons and cannot throw into readiness',async()=>{
+ const node={},doc=documentWith(node),registration=registerPagePreviewReadiness(doc,node);let seen;
+ const readiness=acquirePagePreviewReadiness(doc,{onReport:report=>{seen=report;throw Error('Diagnostic failure');}});
+ assert.equal(registration.report({mode:'static',reason:'x'.repeat(300)}),true);
+ assert.equal(seen.reason.length,160);assert.equal((await readiness.promise).ready,true);
+});

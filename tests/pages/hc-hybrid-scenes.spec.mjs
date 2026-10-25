@@ -95,15 +95,23 @@ async function enteredBack(page,receipt){
   handle=await page.waitForFunction(()=>{const site=window.__site?.inspect();return site&&['entered','failed'].includes(site.phase)?{site,browserObservedMs:performance.now(),timeOrigin:performance.timeOrigin}:false;},null,{timeout:WAIT});
   const terminal=await handle.jsonValue();receipt.rows.push({phase:'back-entry-terminal',...terminal});
   expect(terminal.site.phase,'Back must enter successfully; retained terminal includes reason/readiness/history').toBe('entered');
+  // Failed entry stays the primary failure above; its already-retained ring is
+  // evidence, not an alternate successful terminal or a new timing threshold.
+  const diagnostic=terminal.site.startupDiagnostics;
+  expect(diagnostic).toMatchObject({enabled:true,clock:'performance.now',timeOrigin:terminal.timeOrigin});
+  expect(Number.isFinite(diagnostic.timeOrigin)).toBe(true);expect(Number.isInteger(diagnostic.epoch)).toBe(true);
+  expect(Number.isInteger(diagnostic.dropped)&&diagnostic.dropped>=0).toBe(true);
+  expect(diagnostic.events.length).toBeGreaterThan(0);expect(diagnostic.events.length).toBeLessThanOrEqual(48);
+  for(const event of diagnostic.events){expect(Number.isFinite(event.at)&&event.at>=0).toBe(true);expect(Number.isInteger(event.epoch)).toBe(true);expect(Number.isInteger(event.sequence)).toBe(true);expect(typeof event.checkpoint).toBe('string');}
   await expect(page.locator('[data-site-loader]')).toBeHidden();
  }catch(error){primary=error;throw error;}finally{try{await handle?.dispose();}catch(error){if(!primary)throw error;}}
 }
-function ownerFacts(){const background=window.__globalBackground.inspect();return{background,documentId:performance.timeOrigin,y:scrollY,nativeCount:document.querySelectorAll('[data-editorial-image]').length,inert:document.querySelector('main').inert};}
+function ownerFacts(){const background=window.__globalBackground.inspect();return{background,site:window.__site.inspect(),documentId:performance.timeOrigin,y:scrollY,nativeCount:document.querySelectorAll('[data-editorial-image]').length,inert:document.querySelector('main').inert};}
 test('HC3DP hybrid document history closes native listeners and restores one original model lifetime',async({page},info)=>{
  test.setTimeout(scenarioTimeout(180000));
  const receipt={scope:'Actual heavy-source document history; retained BFCache is asserted only if observed. New-case orchestration budget 180s local/360s CI, not a user-latency SLO; original acquisition15s/WAIT45s unchanged.',rows:[]};let primary;
  try{
-  await page.addInitScript(()=>addEventListener('pageshow',event=>{window.__hybridPageShow={trusted:event.isTrusted,persisted:event.persisted};}));
+  await page.addInitScript(()=>{window.__SITE_NAVIGATION_DIAGNOSTICS__=true;addEventListener('pageshow',event=>{window.__hybridPageShow={trusted:event.isTrusted,persisted:event.persisted};});});
   await page.goto(`/projects/${project.slug}/`);await entered(page);await chapter(page,'system');await stage(page,'system','model');await page.waitForFunction(()=>{const resource=window.__globalBackground.inspect().driver.projectStudy.scene?.resource;return resource?.successfulPaint&&resource.view.chapter==='system';},null,{timeout:WAIT});
   const before=await page.evaluate(ownerFacts);receipt.rows.push({phase:'before',...before});expect(before.nativeCount).toBe(3);modelGuard({project:before.background.driver.projectStudy},'system');
   await page.evaluate(()=>addEventListener('pagehide',event=>sessionStorage.setItem('hc-hybrid-departure',JSON.stringify({trusted:event.isTrusted,persisted:event.persisted,documentId:performance.timeOrigin,background:window.__globalBackground.inspect(),canvasCount:document.querySelectorAll('[data-project-study-canvas]').length})),{once:true}));

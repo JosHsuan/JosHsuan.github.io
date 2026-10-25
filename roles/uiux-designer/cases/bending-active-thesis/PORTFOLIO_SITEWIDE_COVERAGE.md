@@ -31,6 +31,23 @@ not reproduce or explain that earlier failure. No application, production
 terminal evidence remains enabled for the separately authorized required full
 561-browser-plus-24-framework qualification; this is pending, not a latency fix
 or deployment approval. No additional standalone diagnostic rerun is planned.
+The ensuing full `62db8b5` run `40198487652` executed all 561 public identities
+exactly once: 559 passed and two failed, with zero retries; 24 framework checks
+passed. Mobile HC Back now retained `presentation-timeout`, combined readiness
+and model preview ready, and a requested→failed history without accepted reveal.
+This locates the original startup/presentation bound, but does not distinguish
+late first-paint readiness from delayed presentation RAF or native play readiness.
+The separate WebKit Projects test reached each reverse scroll target but retained
+no nonzero reverse information-plane sample. Neither failure is waived. The gate
+rejects publication and live remains `ad83`; bounded diagnostics
+are now source-reviewed without changing production deadlines or motion thresholds.
+The HC history test opts into a default-off, bounded same-clock milestone ring;
+actual preview reports are distinguished from promise callback observations,
+not treated as GPU presentation timestamps. The Projects fixture uses one native
+measured excursion instead of four serial small wheels, retaining all direction,
+rest and policy guards and capped passive delivery observations. One mobile HC
+and one WebKit global-window qualification are pending; neither is a runtime
+performance fix or authorization for another full run before their evidence.
 
 The preceding verified live baseline was `d3eabb897e787287eefdb632d119718bffc35f61`.
 Its [full validation 40169507337](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/40169507337)

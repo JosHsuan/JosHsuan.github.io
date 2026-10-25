@@ -34,19 +34,26 @@ export function registerPagePreviewReadiness(document,element,{onFallback}={}){
  };
 }
 
-export function acquirePagePreviewReadiness(document){
+export function acquirePagePreviewReadiness(document,{onReport}={}){
  const registry=registryFor(document);
  // Discovery happens synchronously, before any awaited font/image readiness.
  // Missing component effects remain pending rather than becoming fake success.
  const participants=[...new Set(document.querySelectorAll('[data-site-preview-required]'))].map(element=>entryFor(registry,element));
+ const observed=typeof onReport==='function'?new Set():null;let acquiring=true;
  let resolve,settled=false;
  const promise=new Promise(done=>{resolve=done;});
  const inspect=()=>Object.freeze({ready:participants.every(entry=>entry.result),failures:Object.freeze([]),
   pending:Object.freeze(participants.flatMap((entry,index)=>entry.result?[]:[`preview-${index+1}`])),
   previews:Object.freeze(participants.map(entry=>entry.result??Object.freeze({mode:'pending',reason:entry.fallbackReason??''})))});
  const finish=result=>{if(settled)return;settled=true;registry.listeners.delete(check);resolve(result);};
- const check=()=>{const result=inspect();if(result.ready)finish(result);};
- registry.listeners.add(check);check();
+ const check=()=>{
+  if(observed)for(const [index,entry] of participants.entries()){
+   if(!entry.result||observed.has(entry))continue;observed.add(entry);
+   try{onReport(Object.freeze({participant:index+1,mode:entry.result.mode,reason:entry.result.reason.slice(0,160),provenance:acquiring?'preexisting-at-acquire':'report-notification'}));}catch{/* Diagnostics cannot change readiness. */}
+  }
+  const result=inspect();if(result.ready)finish(result);
+ };
+ registry.listeners.add(check);check();acquiring=false;
  return{promise,inspect,fallback(reason){
   if(typeof reason!=='string'||!reason)throw TypeError('A fallback needs its terminal reason');
   for(const entry of participants){
