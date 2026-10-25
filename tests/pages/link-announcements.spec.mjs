@@ -1,6 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {readFile,writeFile} from 'node:fs/promises';
 import {WAIT,frames} from './case-helpers.mjs';
+import {createJourneyPhaseBudget} from './journey-phase-budget.mjs';
 
 const release='../../roles/uiux-designer/cases/bending-active-thesis/release/';
 const projects=JSON.parse(await readFile(new URL(release+'project-studies.json',import.meta.url),'utf8')).projects;
@@ -62,16 +63,16 @@ async function tabTo(page,target,receipt=[]){
 }
 // Full Bending only: retain post-key observations while avoiding repeated strict
 // target acquisition/disposal (pinned Playwright 1.63 Locator._withElement).
-// This is not a production performance fix or a guarantee of the 60s budget.
+// This is not a production performance fix or a guarantee of any journey budget.
 // Counters cover observation intervals, not per-Tab causality or same-output identity.
 // Samples use only existing callbacks, bounded by each unchanged traversal limit.
-async function tabToStable(page,target,receipt=[]){
+async function tabToStable(page,target,receipt=[],checkpoint=()=>{}){
  const bound=await page.locator('a[href],button,input,select,textarea,[tabindex],summary').count();
  let handle,primaryError,reached=false;
  try{
   handle=await target.elementHandle();expect(handle).not.toBeNull();
   for(let index=0;index<bound+2;index++){
-   await page.keyboard.press('Tab');
+   checkpoint();await page.keyboard.press('Tab');
    const observed=await handle.evaluate(node=>{const active=document.activeElement,scene=window.__thesis?.inspect(),story=window.__story?.inspect();return{reached:active===node,y:scrollY,tag:active?.tagName,id:active?.id,href:active?.getAttribute('href'),label:active?.getAttribute('aria-label'),text:active?.textContent?.trim().slice(0,160),isConnected:node.isConnected,renderCounters:{observedMs:performance.now(),timeOrigin:performance.timeOrigin,frames:scene?.frames,controllerFrame:scene?.controllerFrame,renderedControllerFrame:scene?.renderedControllerFrame,rendererPendingFrames:scene?.rendererPendingFrames,compositorFrames:scene?.compositor?.frames,paused:scene?.motionPaused,activeSeconds:story?.playback.activeSeconds}};});
    observed.traversalLimit=bound+2;receipt.push(observed);expect(observed.isConnected,'Original native Tab target remains attached').toBe(true);
    if(observed.reached){reached=true;break;}
@@ -128,9 +129,13 @@ test('original generic and XR image actions open and return natively',async({pag
  }catch(error){primaryError=error;throw error;}finally{try{await persist(info,'native-link-behaviour',receipt);}catch(error){if(!primaryError)throw error;}}
 });
 test('Full Bending native Pause reading reaches an inline comparison and its original action',async({page,context,isMobile},info)=>{
+ // Explicit harness policy, not a product latency SLO or a retry: same page and all original guards.
+ test.setTimeout(135000);
+ const phases=createJourneyPhaseBudget(),checkpoint=()=>phases.check();
  const receipt={navigation:[],triggerTabs:[],originalTabs:[],phase:'entry',pauseDiagnostic:{scope:'Passive bounded timestamps. Host and browser clocks are separate; Mutation timestamps are callback observations, not exact mutation instants; DOM commit is not pixel presentation. No extra RAF, timer, rendering hook or input change; pre-click RAF responsiveness and pixel presentation are not measured.',events:[],mutations:[],operations:[]}};let primaryError;
  const timed=async(name,operation)=>{const row={name,startedMs:performance.now()};if(receipt.pauseDiagnostic.operations.length<48)receipt.pauseDiagnostic.operations.push(row);try{const result=await operation();row.completedMs=performance.now();if(name==='existing-state-read'){row.browserWork=result.browserWork;row.renderCounters=result.renderCounters;}return result;}catch(error){row.failedMs=performance.now();row.error=String(error.message).slice(0,240);throw error;}};
  try{
+  phases.start('entry-pause-capture');
   receipt.policy='Full source, native Pause-controlled reading; not Reduced. Prior unpaused Chromium service latency remains unresolved.';
   // Host receipt delivery is fire-and-forget and bounded; failed page cleanup cannot erase received events.
   await page.exposeBinding('__recordPauseDiagnostic',(_source,kind,row)=>{const rows=receipt.pauseDiagnostic[kind],limit=kind==='events'?12:kind==='mutations'?8:0;if(rows&&rows.length<limit)rows.push({...row,hostReceivedMs:performance.now()});});
@@ -144,7 +149,7 @@ test('Full Bending native Pause reading reaches an inline comparison and its ori
    const dispose=()=>{observer.disconnect();for(const type of ['pointerdown','pointerup','click'])document.removeEventListener(type,native,true);window.removeEventListener('pagehide',dispose);};
    window.__pauseDiagnostic={read:()=>({events:[...events],mutations:[...mutations]}),dispose};window.addEventListener('pagehide',dispose,{once:true});
   });
-  expect((await timed('goto',()=>page.goto('/projects/bending-active/'))).status()).toBe(200);await timed('fonts-ready',()=>page.evaluate(()=>document.fonts.ready));
+  checkpoint();expect((await timed('goto',()=>page.goto('/projects/bending-active/'))).status()).toBe(200);await timed('fonts-ready',()=>page.evaluate(()=>document.fonts.ready));
   // Same existing callback only: these timestamps exclude protocol serialization, queueing and trace snapshots.
   // Returned timing rows survive later poll/failure; an unreturned callback has no inferred browser timings.
   const state=()=>timed('existing-state-read',()=>page.evaluate(()=>{const enteredMs=performance.now(),scene=window.__thesis?.inspect(),afterThesisMs=performance.now(),story=window.__story?.inspect(),afterStoryMs=performance.now();const result={browserObservedMs:performance.now(),browserTimeOrigin:performance.timeOrigin,renderCounters:{observedMs:performance.now(),timeOrigin:performance.timeOrigin,frames:scene?.frames,controllerFrame:scene?.controllerFrame,renderedControllerFrame:scene?.renderedControllerFrame,rendererPendingFrames:scene?.rendererPendingFrames,compositorFrames:scene?.compositor?.frames,paused:scene?.motionPaused,activeSeconds:story?.playback.activeSeconds},pauseDiagnostic:window.__pauseDiagnostic?.read(),hash:location.hash,y:scrollY,activeId:document.activeElement?.id,phase:window.__site?.inspect().phase,ready:scene?.ready,detail:scene?.detail,systemReduced:scene?.systemReduced,mediaReduced:matchMedia('(prefers-reduced-motion: reduce)').matches,paused:scene?.motionPaused,seconds:story?.playback.activeSeconds,source:scene?.source,renderProfile:scene?.renderProfile,renderPressure:scene?.renderPressure,renderPressureDecisions:scene?.renderPressureDecisions,renderBudget:scene?.renderBudget,rendererBudget:scene?.rendererBudget,representation:scene?.representation,pose:scene?.pose,bounds:scene?.bounds,stageLayout:scene?.stageLayout,sourceVisible:scene?.sourceVisible,compositor:scene?.compositor?{requestedSamples:scene.compositor.requestedSamples,width:scene.compositor.width,height:scene.compositor.height}:null};const constructedMs=performance.now();result.browserWork={timeOrigin:performance.timeOrigin,enteredMs,afterThesisMs,afterStoryMs,constructedMs};return result;}));
@@ -161,23 +166,24 @@ test('Full Bending native Pause reading reaches an inline comparison and its ori
    }
   };
   pressureFacts(receipt.entry);receipt.phase='native-pause';
-  const motion=page.locator('[data-bending-motion-toggle]');await timed('native-pause-click',()=>motion.click());await expect(motion).toHaveAttribute('aria-pressed','true');
+  const motion=page.locator('[data-bending-motion-toggle]');checkpoint();await timed('native-pause-click',()=>motion.click());await expect(motion).toHaveAttribute('aria-pressed','true');
   receipt.paused=await state();expect(receipt.paused.paused).toBe(true);expect(receipt.paused.seconds).toBeGreaterThan(receipt.entry.seconds);expect(receipt.paused.source).toEqual(receipt.entry.source);expect(receipt.paused.systemReduced).toBe(false);
   await timed('existing-five-raf',()=>frames(page,5));receipt.frozen=await state();expect(receipt.frozen.seconds).toBe(receipt.paused.seconds);expect(receipt.frozen.source).toEqual(receipt.paused.source);expect(receipt.frozen.y).toBe(receipt.paused.y);expect(receipt.frozen.paused).toBe(true);
   pressureFacts(receipt.paused);pressureFacts(receipt.frozen);expect(receipt.frozen.renderPressureDecisions).toEqual(receipt.paused.renderPressureDecisions);
   receipt.phase='paused-overview-capture';
   receipt.overviewCapture={scope:'Native paused Overview; unpaired page-field phase. Not deterministic System material equivalence or performance evidence.',stage:receipt.frozen.renderPressure.stage,stage2Observed:receipt.frozen.renderPressure.stage===2};
   const overviewPng=info.outputPath('bending-paused-overview-device.png');await page.screenshot({path:overviewPng,scale:'device'});await info.attach('bending-paused-overview-device',{path:overviewPng,contentType:'image/png'});
+  phases.finish();phases.start('native-reading-resume');
   receipt.phase='native-chapter-and-source';
-  const chapter=page.locator('[data-story-navigation] a[href="#make"]');await tabToStable(page,chapter,receipt.navigation);await page.keyboard.press('Enter');
+  const chapter=page.locator('[data-story-navigation] a[href="#make"]');await tabToStable(page,chapter,receipt.navigation,checkpoint);checkpoint();await page.keyboard.press('Enter');
   await expect.poll(()=>page.evaluate(()=>({hash:location.hash,focused:document.activeElement===document.getElementById('make')}))).toEqual({hash:'#make',focused:true});
   receipt.chapter=await page.evaluate(()=>({hash:location.hash,y:scrollY,activeId:document.activeElement?.id}));
-  const trigger=page.locator('#make [data-inspect-figure]');await tabToStable(page,trigger,receipt.triggerTabs);
-  const comparisonBefore=await facts(page,trigger),count=context.pages().length;await page.keyboard.press('Enter');const comparison=page.locator('[data-source-comparison]');await expect(comparison).toBeVisible();await expect(comparison).not.toHaveAttribute('role','dialog');expect(context.pages()).toHaveLength(count);
+  const trigger=page.locator('#make [data-inspect-figure]');await tabToStable(page,trigger,receipt.triggerTabs,checkpoint);
+  const comparisonBefore=await facts(page,trigger),count=context.pages().length;checkpoint();await page.keyboard.press('Enter');const comparison=page.locator('[data-source-comparison]');await expect(comparison).toBeVisible();await expect(comparison).not.toHaveAttribute('role','dialog');expect(context.pages()).toHaveLength(count);
   const original=comparison.locator('a[target="_blank"]');await expect(original).toHaveAccessibleName(/Open original source.*new tab/i);await expect(original).toHaveAttribute('href',await trigger.getAttribute('href'));
   const sourceImage=comparison.locator('img');await expect(sourceImage).toHaveAttribute('src',comparisonBefore.href);await expect.poll(()=>sourceImage.evaluate(node=>node.complete&&node.naturalWidth>0)).toBe(true);
   const dimensions=await sourceImage.evaluate(node=>[node.naturalWidth,node.naturalHeight]);
-  await tabToStable(page,original,receipt.originalTabs);
+  await tabToStable(page,original,receipt.originalTabs,checkpoint);
   receipt.action=await original.evaluate(node=>{
    const box=r=>({left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height}),r=node.getBoundingClientRect(),hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
    const chrome=['[data-page-masthead]','[data-story-navigation]','[data-reading-tools]'].map(selector=>{const nodes=[...document.querySelectorAll(selector)],el=nodes[0];return{selector,count:nodes.length,visible:el?.checkVisibility({visibilityProperty:true,opacityProperty:true})??false,rect:el?box(el.getBoundingClientRect()):null};});
@@ -186,19 +192,20 @@ test('Full Bending native Pause reading reaches an inline comparison and its ori
   const {rect,viewport,chrome}=receipt.action;expect(chrome.length).toBeGreaterThan(0);expect(rect.left).toBeGreaterThanOrEqual(0);expect(rect.top).toBeGreaterThanOrEqual(0);expect(rect.right).toBeLessThanOrEqual(viewport.width);expect(rect.bottom).toBeLessThanOrEqual(viewport.height);expect(receipt.action.hit).toBe(true);
   for(const item of chrome){expect(item.count,item.selector+' authoritative chrome owner').toBe(1);if(item.visible){const c=item.rect;expect(Math.max(0,Math.min(rect.right,c.right)-Math.max(rect.left,c.left))*Math.max(0,Math.min(rect.bottom,c.bottom)-Math.max(rect.top,c.top))).toBe(0);}}
   const actionPng=info.outputPath('bending-original-action-visible.png');await page.screenshot({path:actionPng});await info.attach('bending-original-action-visible',{path:actionPng,contentType:'image/png'});
-  receipt.original=await popup(page,original,()=>page.keyboard.press('Enter'),dimensions);
+  receipt.original=await popup(page,original,async()=>{checkpoint();await page.keyboard.press('Enter');},dimensions);
   const png=info.outputPath('bending-inline-source-comparison.png');await comparison.screenshot({path:png});await info.attach('bending-inline-source-comparison',{path:png,contentType:'image/png'});
   const dynamicOriginalName=await original.getAttribute('aria-label');
-  const close=comparison.getByRole('button',{name:'Close source comparison'});await page.keyboard.press('Shift+Tab');await expect(close).toBeFocused();
+  const close=comparison.getByRole('button',{name:'Close source comparison'});checkpoint();await page.keyboard.press('Shift+Tab');await expect(close).toBeFocused();
   receipt.close=await close.evaluate(node=>{const r=node.getBoundingClientRect(),hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return{top:r.top,bottom:r.bottom,left:r.left,right:r.right,width:innerWidth,height:innerHeight,hit:hit===node||node.contains(hit)};});
   expect(receipt.close.top).toBeGreaterThanOrEqual(0);expect(receipt.close.bottom).toBeLessThanOrEqual(receipt.close.height);expect(receipt.close.left).toBeGreaterThanOrEqual(0);expect(receipt.close.right).toBeLessThanOrEqual(receipt.close.width);expect(receipt.close.hit).toBe(true);
-  await page.keyboard.press('Enter');await expect(comparison).toHaveCount(0);await expect(trigger).toBeFocused();
+  checkpoint();await page.keyboard.press('Enter');await expect(comparison).toHaveCount(0);await expect(trigger).toBeFocused();
   receipt.bending={mode:'inline comparison, not a dialog',before:comparisonBefore,returned:await facts(page,trigger),dynamicOriginalName};
   receipt.phase='native-resume';receipt.beforeResume=await state();expect(receipt.beforeResume.seconds).toBe(receipt.paused.seconds);expect(receipt.beforeResume.paused).toBe(true);expect(receipt.beforeResume.source).toEqual(receipt.paused.source);
-  await timed('native-resume-click',()=>motion.click());await expect(motion).toHaveAttribute('aria-pressed','false');
+  checkpoint();await timed('native-resume-click',()=>motion.click());await expect(motion).toHaveAttribute('aria-pressed','false');
   await expect.poll(async()=>{receipt.resumed=await state();return receipt.resumed.seconds;},{timeout:WAIT}).toBeGreaterThan(receipt.paused.seconds);
-  expect(receipt.resumed).toMatchObject({y:receipt.beforeResume.y,paused:false,systemReduced:false,detail:'full'});expect(receipt.resumed.source).toEqual(receipt.paused.source);pressureFacts(receipt.resumed);receipt.phase='completed';
- }catch(error){primaryError=error;throw error;}finally{
+  expect(receipt.resumed).toMatchObject({y:receipt.beforeResume.y,paused:false,systemReduced:false,detail:'full'});expect(receipt.resumed.source).toEqual(receipt.paused.source);pressureFacts(receipt.resumed);phases.finish();receipt.phase='completed';
+ }catch(error){primaryError=error;phases.fail(error);throw error;}finally{
+  receipt.journeyBudget=phases.snapshot();
   let cleanupError;
   try{if(!page.isClosed())await page.evaluate(()=>window.__pauseDiagnostic?.dispose());}catch(error){cleanupError=error;receipt.pauseDiagnostic.cleanupError=String(error.message).slice(0,240);}
   try{await persist(info,'bending-link-behaviour',receipt);}catch(error){cleanupError??=error;}
