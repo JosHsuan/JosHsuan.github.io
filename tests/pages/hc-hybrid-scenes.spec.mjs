@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
-import {WAIT,frames} from './case-helpers.mjs';
+import {WAIT,frames,scenarioTimeout} from './case-helpers.mjs';
 const release=new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/',import.meta.url);
 const project=JSON.parse(await readFile(new URL('project-studies.json',release),'utf8')).projects.find(p=>p.id==='hc3dp-caustics');
 const plates=['layer-system.webp','path-logic.webp','frame-arrangement.webp'].map(name=>project.sections.flatMap(s=>s.media).find(image=>image.src.endsWith('/'+name)));
@@ -42,7 +42,10 @@ async function limits(page,info,receipt){
  }
 }
 test('HC3DP native photographs and scientific limits remain readable with native Pause',async({page},info)=>{
- const receipt=newReceipt('Native wheel photo composition, including mobile wheel input, not touch. Original sources and scientific limits; separate caption reading when a full image cannot fit. Plates receive source/DOM identity checks, not new pixel captures. This case makes no model lease claim. Original acquisition deadline and default 60-second case budget remain.');let primary;requests(page,receipt);
+ // Approved orchestration budget for source/reading captures, not an acceptable user-latency threshold.
+ // scenarioTimeout retains the existing CI x2 convention; production acquisition and WAIT are unchanged.
+ test.setTimeout(scenarioTimeout(90000));
+ const receipt=newReceipt('Native wheel photo composition, including mobile wheel input, not touch. Original sources and scientific limits; separate caption reading when a full image cannot fit. Plates receive source/DOM identity checks, not new pixel captures. This case makes no model lease claim. Orchestration budget: 90 seconds locally / 180 seconds under existing CI x2; not a user-latency acceptance threshold. Production acquisition remains 15 seconds and WAIT remains 45 seconds.');let primary;requests(page,receipt);
  try{
   for(const image of [project.hero,...project.sections.find(s=>s.id==='results').media,...plates]){const a=assets.find(a=>a.path===image.src.slice(1)),bytes=await readFile(new URL(`public${image.src}`,release));expect(bytes.length).toBe(a.bytes);expect(createHash('sha256').update(bytes).digest('hex')).toBe(a.sha256);receipt.sources.push({src:image.src,bytes:bytes.length,sha256:a.sha256});}
   await page.goto(`/projects/${project.slug}/`);await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});await page.evaluate(()=>document.fonts.ready);await expect(page.locator('[data-study-presentation="hybrid-scenes"]')).toHaveCount(1);
@@ -68,7 +71,10 @@ test('HC3DP native photographs and scientific limits remain readable with native
 });
 
 test('HC3DP heavy model and looping simulation retain one lease through native absence and reverse',async({page},info)=>{
- const receipt=newReceipt('Native wheel lifecycle journey, including mobile wheel input, not touch or a performance benchmark. Context/System original model, separate 2.17-second looping simulation, native Results/Credits absence, then same-document same-lease System reverse. No photo/caption detours. Original 15-second acquisition deadline and default 60-second case budget remain.');let primary;requests(page,receipt);
+ // Matches the established >40 MB project-studies scenario budget, not the source-acquisition deadline.
+ // Longer orchestration preserves observed service-delay evidence; it does not certify responsiveness.
+ test.setTimeout(scenarioTimeout(180000));
+ const receipt=newReceipt('Native wheel lifecycle journey, including mobile wheel input, not touch or a performance benchmark. Context/System original model, separate 2.17-second looping simulation, native Results/Credits absence, then same-document same-lease System reverse. No photo/caption detours. Orchestration budget: 180 seconds locally / 360 seconds under existing CI x2, following the established >40 MB model scenario. Production acquisition remains 15 seconds and WAIT remains 45 seconds. This is not a user-latency acceptance threshold or a claim that observed service delays are resolved.');let primary;requests(page,receipt);
  try{
   const modelBytes=await readFile(new URL(`public${project.model.src}`,release));expect(modelBytes.length).toBe(50438508);expect(createHash('sha256').update(modelBytes).digest('hex')).toBe('0dd22b441c422f2a9c2406d79288284ee7fc56f1f3028ae453015b3add40bb4a');receipt.modelSource={src:project.model.src,bytes:modelBytes.length,sha256:project.model.sha256};
   await page.goto(`/projects/${project.slug}/`);await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});await page.evaluate(()=>document.fonts.ready);await expect(page.locator('[data-study-presentation="hybrid-scenes"]')).toHaveCount(1);
