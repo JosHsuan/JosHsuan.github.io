@@ -33,12 +33,14 @@ test('HC3DP hybrid native photographs preserve the heavy source model and separa
   await page.goto(`/projects/${project.slug}/`);await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});await page.evaluate(()=>document.fonts.ready);await expect(page.locator('[data-study-presentation="hybrid-scenes"]')).toHaveCount(1);
   const initial={name:'initial-opening-before-any-wheel',url:page.url(),state:await facts(page)};receipt.rows.push(initial);await page.screenshot({path:info.outputPath('initial-opening.png'),scale:'device'});expect(new URL(initial.url).hash).toBe('');expect(initial.state.y).toBe(0);
   await source(page,info,receipt,project.hero,'overview');
-  // Documentary plate identity is checked without claiming offscreen pixel readability.
+  // These original diagram images retain the published pair/photograph layout metadata
+  // (their release records have no purpose field); this is not a new plate classification.
+  // Documentary source identity is checked without claiming offscreen pixel readability.
   await expect(page.locator('[data-evidence-source-link]')).toHaveCount(4);
   for(const image of plates){
    const img=page.locator(`[data-project-evidence-image][src="${image.src}"]`),figure=img.locator('xpath=ancestor::figure[1]');
    await expect(img).toHaveCount(1);await expect(img).toHaveAttribute('alt',image.alt);await expect(img).toHaveAttribute('width',String(image.width));await expect(img).toHaveAttribute('height',String(image.height));
-   await expect(figure).toHaveAttribute('data-study-evidence-layout','full');await expect(figure).toHaveAttribute('data-study-evidence-role','technical-plate');
+   await expect(figure).toHaveAttribute('data-study-evidence-layout','pair');await expect(figure).toHaveAttribute('data-study-evidence-role','photograph');
    await expect(img.locator('xpath=ancestor::a[1]')).toHaveAttribute('href',image.src);await expect(img.locator('xpath=ancestor::a[1]')).toHaveAttribute('target','_blank');
    await expect(figure.locator('figcaption > p')).toHaveText(image.caption);await expect(figure.locator('figcaption > span:not([data-information-skin])')).toHaveText(image.credit);await expect(figure.locator('[data-evidence-source-link]')).toHaveAttribute('href',image.src);
   }
