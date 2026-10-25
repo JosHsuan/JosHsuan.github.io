@@ -4,8 +4,8 @@ test('HC3DP presents observed light, readable path evidence and explicit simulat
  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/projects/hc3dp-caustics/');
  await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});
  await page.evaluate(()=>document.fonts.ready);
- await expect(page.locator('[data-project-chapter="overview"] [data-project-media-poster]')).toHaveAttribute('src','/assets/projects/hc3dp-caustics/caustic-observation.webp');
- await expect(page.locator('[data-project-source-caption="overview"]')).toContainText('not a measured optical-performance result');
+ await expect(page.locator('[data-project-native-source="overview"] [data-editorial-source="/assets/projects/hc3dp-caustics/caustic-observation.webp"] [data-editorial-image]')).toHaveAttribute('src','/assets/projects/hc3dp-caustics/caustic-observation.webp');
+ await expect(page.locator('[data-project-native-source="overview"] [data-editorial-source="/assets/projects/hc3dp-caustics/caustic-observation.webp"] figcaption > p')).toContainText('not a measured optical-performance result');
  await expect(page.locator('[data-project-chapter="making"]')).toContainText('not a recording of physical fabrication or a simulation of the resulting light pattern');
  await expect(page.locator('[data-project-chapter="results"]')).toContainText('do not establish a quantified relation');
  const evidence=page.locator('[data-project-evidence-image]');

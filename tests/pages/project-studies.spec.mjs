@@ -99,14 +99,14 @@ async function fullCanvas(page){
 }
 async function decodeSource(chapter,image){
  const identity=await chapter.evaluate(node=>({project:node.closest('[data-project-study]').dataset.projectStudy,chapter:node.dataset.projectChapter}));
- if(identity.project==='project-caschlatsch'||identity.project==='special-assemblies'&&['overview','results'].includes(identity.chapter)){
+ if(identity.project==='project-caschlatsch'||['special-assemblies','hc3dp-caustics'].includes(identity.project)&&['overview','results'].includes(identity.chapter)){
   const root=chapter.locator('xpath=ancestor::main[@data-project-study]'),canonical=root.locator(`[data-editorial-source="${image.src}"]`);await expect(canonical).toHaveCount(1);
   const owner=await canonical.evaluate(node=>node.closest('[data-project-chapter]').dataset.projectChapter);
   if(owner!==identity.chapter&&identity.chapter!=='overview'){
    const reference=chapter.locator(`[data-editorial-source-reference="${image.src}"]`);await expect(reference).toHaveCount(1);await expect(reference).toContainText(image.caption);await expect(reference).toContainText(image.credit);await expect(reference.locator('a')).toHaveAttribute('href',image.src);await expect(reference.locator('a')).toHaveAttribute('target','_blank');
   }
   if(identity.chapter==='overview')expect(owner).toBe(identity.project==='project-caschlatsch'?'system':'overview');
-  if(identity.project==='special-assemblies')expect(owner).toBe(identity.chapter);
+  if(['special-assemblies','hc3dp-caustics'].includes(identity.project))expect(owner).toBe(identity.chapter);
   const original=canonical.locator('[data-editorial-image]');await expect(original).toHaveCount(1);await original.scrollIntoViewIfNeeded();
   expect(await original.evaluate(async node=>{await node.decode();return{src:node.getAttribute('src'),width:node.naturalWidth,height:node.naturalHeight,fit:getComputedStyle(node).objectFit,alt:node.alt};})).toEqual({src:image.src,width:image.width,height:image.height,fit:'contain',alt:image.alt});
   await expect(canonical.locator('figcaption > p')).toHaveText(image.caption);await expect(canonical.locator('figcaption > span:not([data-information-skin])')).toHaveText(image.credit);await expect(canonical.locator('figcaption > a')).toHaveAttribute('href',image.src);await expect(original.locator('xpath=ancestor::a[1]')).toHaveAttribute('href',image.src);await expect(original.locator('xpath=ancestor::a[1]')).toHaveAttribute('target','_blank');return;
@@ -317,7 +317,7 @@ for(const project of studies)test(`${project.shortTitle} preserves every source 
    await expect(page.locator('[data-site-loader]')).toBeHidden();
    await expect(page.locator('[data-project-chapter]')).toHaveCount(project.sections.length+2);await expect(page.locator('canvas')).toHaveCount(1);await expect(page.locator('[data-project-study-canvas]')).toHaveCount(0);
    await decodeSource(page.locator('[data-project-chapter="overview"]'),project.hero);
-   const fullSource=['project-caschlatsch','special-assemblies'].includes(project.id)?page.locator(`[data-editorial-source="${project.hero.src}"] figcaption > a`):page.locator(`[data-project-chapter="overview"] a[href="${project.hero.src}"]`);
+   const fullSource=['project-caschlatsch','special-assemblies','hc3dp-caustics'].includes(project.id)?page.locator(`[data-editorial-source="${project.hero.src}"] figcaption > a`):page.locator(`[data-project-chapter="overview"] a[href="${project.hero.src}"]`);
    await readNative(fullSource);
    const [sourcePage]=await Promise.all([context.waitForEvent('page'),fullSource.click()]);
    await sourcePage.waitForURL(new URL(project.hero.src,page.url()).href);await sourcePage.waitForLoadState('domcontentloaded');expect(new URL(sourcePage.url()).pathname).toBe(project.hero.src);
@@ -330,7 +330,7 @@ for(const project of studies)test(`${project.shortTitle} preserves every source 
     // A native chapter link enters the source-first section; its heading can
     // follow a complete image/caption instead of sharing the initial viewport.
     await expect(chapter).toBeInViewport();
-    if(project.id==='project-caschlatsch'||project.id==='special-assemblies'&&section.id==='results'){const native=chapter.locator('[data-editorial-image]').first();await native.scrollIntoViewIfNeeded();await expect(native).toBeInViewport();}else await expect(chapter.locator('[data-project-media] img')).toBeInViewport();
+    if(project.id==='project-caschlatsch'||['special-assemblies','hc3dp-caustics'].includes(project.id)&&section.id==='results'){const native=chapter.locator('[data-editorial-image]').first();await native.scrollIntoViewIfNeeded();await expect(native).toBeInViewport();}else await expect(chapter.locator('[data-project-media] img')).toBeInViewport();
     await expect(heading).toHaveText(section.title);await readNative(heading);
     for(const paragraph of section.paragraphs)await readNative(chapter.getByText(paragraph,{exact:true}));
     for(const image of section.media)await decodeSource(chapter,image);

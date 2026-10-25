@@ -1,0 +1,62 @@
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {readFile} from 'node:fs/promises';
+import test from 'node:test';
+import {hybridProjectLayout,editorialProjectLayout} from '../../roles/uiux-designer/cases/bending-active-thesis/components/project-editorial-layout.mjs';
+import {projectStudyEvidenceLayout} from '../../roles/uiux-designer/cases/bending-active-thesis/components/project-study-layout.mjs';
+const root=new URL('../../',import.meta.url),casePath='roles/uiux-designer/cases/bending-active-thesis/';
+const read=path=>readFile(new URL(path,root),'utf8'),hash=value=>createHash('sha256').update(value).digest('hex');
+// Immutable published ad83 capture, not a runtime git baseline. Only the exact
+// reviewed HC policy context reverses; shared JSX/CSS/runtime and all data stay pinned.
+const policyPath="roles/uiux-designer/cases/bending-active-thesis/components/project-editorial-layout.mjs",baselineHash="5cb0fe884ec60bb87c2a385b980574278abe48ea1e9f9c95772c2a81ec1abeb5";
+const before="export function hybridProjectLayout(project) {\n if (project.id !== 'special-assemblies') return null;";
+const after="export function hybridProjectLayout(project) {\n if (project.id === 'hc3dp-caustics') {\n  const results = project.sections.find(section => section.id === 'results');\n  const names = ['hero.webp', 'overinflation.webp'];\n  const motion = project.motionMedia?.[0];\n  if (!project.model || project.model.chapters.join(',') !== 'context,system' ||\n      project.motionMedia?.length !== 1 || motion.chapter !== 'making' ||\n      motion.loop !== true || motion.kind !== 'simulation' || motion.durationSeconds !== 2.17 ||\n      !motion.src.endsWith('/hc3dp-caustics/fabrication-path-motion.mp4') ||\n      !project.hero.src.endsWith('/hc3dp-caustics/caustic-observation.webp') ||\n      results?.media.length !== 2 || results.media.some((image,index) => !image.src.endsWith(`/hc3dp-caustics/${names[index]}`))) {\n   throw new Error('Hybrid scenes require the reviewed HC3DP source roles.');\n  }\n  return {nativeChapters:['overview','results','credits'],results:{section:results,scene:results.media[0],evidence:[results.media[1]]}};\n }\n if (project.id !== 'special-assemblies') return null;";
+const pins={
+  "roles/uiux-designer/cases/bending-active-thesis/runtime/site/ProjectStudyStageRegistry.mjs": "838177ca52ab2675e08581828a1ea29c797fea76af7edca37a09e861e72b799b",
+  "roles/uiux-designer/cases/bending-active-thesis/runtime/site/PreviewLifecycle.mjs": "04096986c9a88f71bb4d9b77f1d27ce4c759cb69036d16896056cf34031f09d4",
+  "roles/uiux-designer/cases/bending-active-thesis/release/introduction.json": "ab0fa9933275c22bad9f24fb79c27f7307d469ba570d9cd4a78f6f9fd3a6751b",
+  "roles/uiux-designer/cases/bending-active-thesis/release/xr-assets.json": "33692e7a4a4be11e19e1cce804c5d5421f417aca6c0e6d7b51a60561692b45ad",
+  "roles/uiux-designer/cases/bending-active-thesis/release/project-assets.json": "83f51a9847419f66f9ddde151b135fd3c2c58d4744d01631579497aad2916244",
+  "roles/uiux-designer/cases/bending-active-thesis/release/contact.json": "c68b4bc45a3ecc13eeee55bae43f3cab75f2085a095a5084e1494f90c5695882",
+  "roles/uiux-designer/cases/bending-active-thesis/release/manifest.json": "6bc10dfa18a7aafc828d9b39f1b046faddb7c8b514e9260a7d9adca0d46179e1",
+  "roles/uiux-designer/cases/bending-active-thesis/release/xr-study.json": "3605cb7ed9abefc0721091d7883fdc765d0f0471af1b7d4db49f326228a68001",
+  "roles/uiux-designer/cases/bending-active-thesis/release/story.json": "250c0853d8d5f9d993bc89b8a563eef5717300c1772a8c5da04647d165c740da",
+  "roles/uiux-designer/cases/bending-active-thesis/release/xr-workspace.json": "41c48db687e71332240a002e0892141a7eac887c94740ef4c175cc4ccc4e1211",
+  "roles/uiux-designer/cases/bending-active-thesis/release/dot-web-delivery.json": "f43d76d380dc5d1fbb55d67f6c02c2f4b142535e011662feeb176f931535ad0e",
+  "roles/uiux-designer/cases/bending-active-thesis/release/project-studies.json": "c222cdcec3fd5ff5f040f1db5a7c30f52a9871c6dc92b76dbb288e068e17341c",
+  "roles/uiux-designer/cases/bending-active-thesis/components/ProjectCaseStudy.jsx": "2966ef228518551f98814073b42e20dc695b626ce264541dd2ba1bfab8355558",
+  "roles/uiux-designer/cases/bending-active-thesis/components/EditorialProjectStudy.jsx": "ba1bed68dc665013c2a076d6bf3b30c07830a3e6c0e480c0b4fe82131d98e0b6",
+  "roles/uiux-designer/cases/bending-active-thesis/components/EditorialProjectStudy.module.css": "5ec5cc86a04c026116c76aad4cdb2d9a9d42265b50092d28dc6c2f800bd199c3",
+  "roles/uiux-designer/cases/bending-active-thesis/components/project-study-scene.mjs": "f04ca2d77f48a2bc3c366fee0d4a4a0959ce718db7b4f4263a050823193b659e",
+  "roles/uiux-designer/cases/bending-active-thesis/components/project-study-layout.mjs": "1eeb0aaf68cb6bdd6f844b3025405005fd5891ed4bff87edff836bf3e5567682",
+  "roles/uiux-designer/cases/bending-active-thesis/components/project-study-media.mjs": "11c752df3c3c9d7890deddde856db3fa77c996c4849e0c9816beb9f9bd959890",
+  "roles/uiux-designer/cases/bending-active-thesis/components/ProjectCaseStudyStage.jsx": "697625588e79e3f96913c661d8578ac5b830476a7f4ac7c33363f779fb2f1f5f",
+  "roles/uiux-designer/cases/bending-active-thesis/runtime/site/ProjectStudyScenePresenter.mjs": "91746860fb4157d5377f7c929605051ec3b2ff100c177483dc51bcccb8b85873",
+  "roles/uiux-designer/cases/bending-active-thesis/runtime/site/ProjectStudyBackdropPresenter.mjs": "5580460717858a77a3acfece2f2c5db71f41a8fde8b6d054264b8a836c47e16e",
+  "roles/uiux-designer/cases/bending-active-thesis/runtime/site/ProjectStudyBackdropMotion.mjs": "faf1ba3aa624992ca400984ad90bca23d5be8919c093b69e42a527ac195c849a",
+  "roles/uiux-designer/cases/bending-active-thesis/runtime/background/SiteBackgroundDriver.mjs": "fe16573ded1c71e73d27a59d7e969fbefd2076bb10b3d22a27a8bcb75bd74d93"
+};
+function verify(source){assert.equal(source.split(after).length,2,'Unique exact HC policy context');assert.equal(hash(source.replace(after,before)),baselineHash,'Every other policy byte remains ad83');}
+test('HC opt-in is exactly one reviewed branch over published ad83 policy',async()=>{verify(await read(policyPath));});
+test('HC policy reversal rejects missing, duplicated, changed and unrelated policy bytes',async()=>{
+ const source=await read(policyPath);
+ for(const changed of [source.replace(after,''),source.replace(after,after+after),source+'\n',source.replace('motion.loop !== true','motion.loop !== false'),source.replace('durationSeconds !== 2.17','durationSeconds !== 7.56'),source.replace("project.id !== 'special-assemblies'","project.id !== 'other'")])assert.throws(()=>verify(changed));
+});
+test('HC extension preserves release data, all 137 source assets, shared composition, model/material/camera and lifecycle owners',async()=>{
+ for(const [path,pin]of Object.entries(pins))assert.equal(hash(await readFile(new URL(path,root))),pin,path);
+ const manifest=JSON.parse(await read(casePath+'release/manifest.json'));assert.equal(manifest.assets.length,137);
+ for(const asset of manifest.assets){const bytes=await readFile(new URL(casePath+'release/public/'+asset.path,root));assert.equal(bytes.length,asset.bytes,asset.path);assert.equal(hash(bytes),asset.sha256,asset.path);}
+});
+test('HC alone adds original native roles while Special nonloop and Cas still-only partitions remain distinct',async()=>{
+ const data=JSON.parse(await read(casePath+'release/project-studies.json')),snapshot=JSON.stringify(data),hc=data.projects.find(p=>p.id==='hc3dp-caustics'),result=hc.sections.find(s=>s.id==='results'),layout=hybridProjectLayout(hc);
+ assert.deepEqual(layout.nativeChapters,['overview','results','credits']);assert.equal(layout.results.section,result);assert.equal(layout.results.scene,result.media[0]);assert.equal(layout.results.evidence.length,1);assert.equal(layout.results.evidence[0],result.media[1]);
+ assert.equal(hc.hero.src,'/assets/projects/hc3dp-caustics/caustic-observation.webp');assert.deepEqual(result.media.map(i=>i.src),['/assets/projects/hc3dp-caustics/hero.webp','/assets/projects/hc3dp-caustics/overinflation.webp']);
+ assert.equal(hc.model.sha256,'0dd22b441c422f2a9c2406d79288284ee7fc56f1f3028ae453015b3add40bb4a');assert.equal(hc.model.bytes,50438508);assert.equal(hc.model.vertices,1894748);assert.equal(hc.model.triangles,2360266);assert.equal(hc.model.meshes,1);assert.deepEqual(hc.model.chapters,['context','system']);
+ assert.equal(hc.motionMedia.length,1);const movie=hc.motionMedia[0];assert.equal(movie.src,'/assets/projects/hc3dp-caustics/fabrication-path-motion.mp4');assert.equal(movie.chapter,'making');assert.equal(movie.kind,'simulation');assert.equal(movie.loop,true);assert.equal(movie.durationSeconds,2.17);assert.equal(movie.frameCount,31);assert.equal(movie.width,2308);assert.equal(movie.height,2500);
+ for(const name of ['layer-system.webp','path-logic.webp','frame-arrangement.webp']){const image=hc.sections.flatMap(s=>s.media).find(i=>i.src.endsWith('/'+name));assert.equal(image.purpose,undefined);assert.equal(projectStudyEvidenceLayout(image),'pair');}
+ for(const p of data.projects){if(p.id==='hc3dp-caustics')continue;if(p.id==='special-assemblies'){assert.deepEqual(hybridProjectLayout(p).nativeChapters,['overview','results','credits']);assert.equal(p.motionMedia[0].loop,false);assert.equal(p.motionMedia[0].durationSeconds,7.56);}else assert.equal(hybridProjectLayout(p),null);assert.equal(!!editorialProjectLayout(p),p.id==='project-caschlatsch');}
+ const mutations=[p=>p.model=null,p=>p.model.chapters.reverse(),p=>p.motionMedia=[],p=>p.motionMedia.push(structuredClone(p.motionMedia[0])),p=>p.motionMedia[0].chapter='results',p=>p.motionMedia[0].loop=false,p=>p.motionMedia[0].kind='recording',p=>p.motionMedia[0].durationSeconds=7.56,p=>p.motionMedia[0].src='/wrong.mp4',p=>p.hero.src='/wrong.webp',p=>p.sections.find(s=>s.id==='results').media.reverse(),p=>p.sections=p.sections.filter(s=>s.id!=='results')];
+ for(const mutate of mutations){const bad=structuredClone(hc);mutate(bad);assert.throws(()=>hybridProjectLayout(bad));}
+ assert.equal(JSON.stringify(data),snapshot,'No source objects are mutated');
+ // Source contracts do not certify pixels, complete model/movie journeys or latency.
+});

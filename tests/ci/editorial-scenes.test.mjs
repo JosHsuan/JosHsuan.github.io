@@ -66,7 +66,8 @@ const pins={
 const templates={
   "roles/uiux-designer/cases/bending-active-thesis/components/EditorialProjectStudy.jsx": "ba1bed68dc665013c2a076d6bf3b30c07830a3e6c0e480c0b4fe82131d98e0b6",
   "roles/uiux-designer/cases/bending-active-thesis/components/EditorialProjectStudy.module.css": "5ec5cc86a04c026116c76aad4cdb2d9a9d42265b50092d28dc6c2f800bd199c3",
-  "roles/uiux-designer/cases/bending-active-thesis/components/project-editorial-layout.mjs": "5cb0fe884ec60bb87c2a385b980574278abe48ea1e9f9c95772c2a81ec1abeb5"
+  // Exact HC-only addition is independently reversed in hc3dp-hybrid.test.mjs.
+  "roles/uiux-designer/cases/bending-active-thesis/components/project-editorial-layout.mjs": "ab89ce3830523008fe66e1662c02f110cd0b2c7d8dd443efdccbbc7169d9a13b"
 };
 function original(path,source){
  for(const [before,after]of reversals[path].blocks){assert.equal(source.split(after).length,2,'Unique exact approved context');source=source.replace(after,before);}

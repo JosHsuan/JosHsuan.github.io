@@ -165,6 +165,27 @@ for(const project of animated)for(const media of project.motionMedia)test(`${pro
   }
 
  }
+ if(project.id==='hc3dp-caustics'){
+  // The original HC simulation loops; native Results/Credits close its demand,
+  // then reverse resumes that same element without Special's finite-ended/replay path.
+  expect(media.loop).toBe(true);
+  const sameVideo=await video.elementHandle(),nativeRows=[];let nativeError;
+  try{
+   for(const chapter of ['results','credits']){
+    await select(page,chapter);await page.waitForFunction(chapter=>{const s=window.__globalBackground.inspect().driver.projectStudy.backdrop.stage;return s.key===`native:${chapter}`&&s.kind==='native'&&s.chapter===chapter&&s.mode==='absent'&&s.settled&&s.pose.opacity===0&&s.request?.absent===true;},chapter,{timeout:WAIT});
+    const state=await backdrop(page),record=await mediaFacts(page,media.id);nativeRows.push({chapter,state,record});
+    expect(record).toMatchObject({active:false,paused:true,playing:false,playPending:false,callbackPending:false,deadlinePending:false});await expect(page.locator('[data-project-media-active],[data-project-model-active]')).toHaveCount(0);closed(state.stage.history);
+    if(chapter==='results')for(const source of project.sections.find(section=>section.id==='results').media){const figure=page.locator(`[data-project-native-source="results"] [data-editorial-source="${source.src}"]`);await expect(figure).toHaveCount(1);await expect(figure.locator('figcaption > p')).toHaveText(source.caption);await expect(figure.locator('figcaption > a')).toHaveAttribute('href',source.src);}
+   }
+   const retained=await video.evaluate(node=>({time:node.currentTime,source:new URL(node.currentSrc).pathname,loop:node.loop,paused:node.paused}));nativeRows.push({phase:'native-absent-video',retained});expect(retained).toMatchObject({source:media.src,loop:true,paused:true});await frames(page,5);expect(await video.evaluate(node=>node.currentTime)).toBe(retained.time);
+   await select(page,media.chapter);await hold(page,`video:${media.id}`);expect(await sameVideo.evaluate((node,id)=>node.isConnected&&node===document.querySelector(`[data-project-motion-id="${id}"]`),media.id)).toBe(true);
+   await nativeVideo(page,media);nativeRows.push({phase:'reverse-advancing',state:await backdrop(page),record:await mediaFacts(page,media.id)});
+  }catch(error){nativeError=error;throw error;}finally{
+   let cleanupError;try{await sameVideo.dispose();}catch(error){cleanupError=error;}
+   try{const path=test.info().outputPath('HC-native-ending-and-reverse.json');await writeFile(path,JSON.stringify({scope:'Original looping simulation; same-element reverse, no forced seek or ended/replay substitution.',nativeRows},null,2));await test.info().attach('HC-native-ending-and-reverse',{path,contentType:'application/json'});}catch(error){cleanupError??=error;}
+   if(!nativeError&&cleanupError)throw cleanupError;
+  }
+ }
  closed((await backdrop(page)).stage.history);
 });
 

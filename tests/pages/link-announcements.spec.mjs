@@ -30,6 +30,7 @@ async function audit(page,noJS,receipt){
   await open(page,path,noJS);const rows=await declarations(page);receipt.push({path,noJS,rows});
   if(path==='/projects/project-caschlatsch/')expect(rows).toHaveLength(21);
   if(path==='/projects/special-assemblies/')expect(rows).toHaveLength(16);
+  if(path==='/projects/hc3dp-caustics/')expect(rows).toHaveLength(16);
   if(!['/about/','/projects/'].includes(path))expect(rows.length).toBeGreaterThan(0);
   for(const [index,row] of rows.entries()){
    const link=page.locator('a[target="_blank"]').nth(index);expect(row.rel.split(/\s+/)).toContain('noreferrer');expect(row.label).toBeTruthy();
@@ -50,7 +51,7 @@ async function audit(page,noJS,receipt){
   const representative=forced.findIndex(row=>row.visible);if(representative>=0){await expect(page.locator('a[target="_blank"]').nth(representative)).toHaveAccessibleName(forced[representative].label);if(forced[representative].description)await expect(page.locator('a[target="_blank"]').nth(representative)).toHaveAccessibleDescription(forced[representative].description);}
   await page.emulateMedia({forcedColors:'none'});
  }
- const inventory=receipt.flatMap(route=>route.rows);expect(inventory).toHaveLength(134);expect(inventory.filter(row=>row.inspect)).toHaveLength(4);expect(inventory.filter(row=>row.caption)).toHaveLength(31);
+ const inventory=receipt.flatMap(route=>route.rows);expect(inventory).toHaveLength(136);expect(inventory.filter(row=>row.inspect)).toHaveLength(4);expect(inventory.filter(row=>row.caption)).toHaveLength(31);
 }
 async function tabTo(page,target,receipt=[]){
  const bound=await page.locator('a[href],button,input,select,textarea,[tabindex],summary').count();let reached=false;
