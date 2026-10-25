@@ -1,13 +1,45 @@
 # Site-wide refinement coverage
 
-Updated 23 October 2026. Refinements are planned and accepted across the whole
+Updated 25 October 2026. Refinements are planned and accepted across the whole
 site; a case delivery is one rollout slice, not completion of the website.
 Preserve source evidence, continuous ambient presentation, the single Director,
 native scrolling and the empty reusable framework.
 
-## Evidence boundary
+## Current delivery and bounded next slice
 
-The accepted live baseline is `ce12d682`. Its full browser gate
+The current verified live baseline is `05b6796826a7f8bd60df01731e8335abec600711`.
+Its [full validation 40156782076](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/40156782076)
+passed 531 public executions exactly once and 24 framework executions; the same
+artifact was published by [Pages 40158961701](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/40158961701).
+Live verification matched all 264 exported files, including 137 original source
+assets, and the true 404 response. The preceding Home research hero and native
+Bending entry are delivered; the canonical responsive poster bridge now matches
+outgoing/arrival source and composition. Live geometry and raster still have
+different camera/material appearance: this is not a seamless shared-GPU morph.
+
+The next candidate is the [Cas chapter-owned editorial exemplar](EDITORIAL_SCENES.md):
+complete native photographs and technical plates beside existing glass reading
+rails, rather than independent fixed sources behind overlapping prose. Its scoped
+three-engine art review and 168 affected executions passed at `b47ff948`; full
+540-execution validation and deployment remain pending. This policy is explicitly
+opt-in for Cas, not an automatic rewrite of all model/video projects. Original
+assets, all six Cas evidence actions and the global 31 evidence actions remain.
+
+Depth-map photo trials (workshop and tower) and the Dot camera-detail trial were
+rejected after actual source/visual review and remain unpublished. Estimated photo
+depth did not establish worthwhile distortion-free motion; Dot detail retained
+source points but did not meet composition/readability acceptance. These are not
+completed site-wide features. The rejected Special planning guide is not resumed.
+
+The reusable direction is chapter-owned source composition, intentional focal
+hierarchy and enter → one action → readable hold → handoff. Each source chooses
+its appropriate photo/model/diagram/recording adapter; compact typography, source
+colors/credits, native access and glass velocity feedback stay shared. No added
+fees or unverified physical-device performance claims are part of this rollout.
+
+## Historical evidence boundary
+
+The earlier accepted live baseline was `ce12d682`. Its full browser gate
 [39885026043](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39885026043)
 passed 492 public executions and 24 framework executions;
 [deployment 39888023592](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/39888023592)

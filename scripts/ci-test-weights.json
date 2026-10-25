@@ -19,7 +19,7 @@
       "tests/pages/model-inspection.spec.mjs": 894.153,
       "tests/pages/modes-narrative.spec.mjs": 0.832,
       "tests/pages/motion-feedback.spec.mjs": 350.38,
-      "tests/pages/project-background-motion.spec.mjs": 159.003,
+      "tests/pages/project-background-motion.spec.mjs": 132.913,
       "tests/pages/project-previews.spec.mjs": 66.293,
       "tests/pages/project-studies.spec.mjs": 312.64,
       "tests/pages/public-release.spec.mjs": 129.494,
@@ -38,7 +38,8 @@
       "tests/pages/three-case-narrative.spec.mjs": 11.266,
       "tests/pages/source-access.spec.mjs": 22.744,
       "tests/pages/link-announcements.spec.mjs": 79.258,
-      "tests/pages/home-research-entry.spec.mjs": 97.052
+      "tests/pages/home-research-entry.spec.mjs": 97.052,
+      "tests/pages/editorial-scenes.spec.mjs": 31.704
     },
     "webkit": {
       "tests/pages/canvas-motion.spec.mjs": 162.572,
@@ -55,7 +56,7 @@
       "tests/pages/model-inspection.spec.mjs": 213.581,
       "tests/pages/modes-narrative.spec.mjs": 2.93,
       "tests/pages/motion-feedback.spec.mjs": 99.969,
-      "tests/pages/project-background-motion.spec.mjs": 195.617,
+      "tests/pages/project-background-motion.spec.mjs": 148.527,
       "tests/pages/project-previews.spec.mjs": 60.55,
       "tests/pages/project-studies.spec.mjs": 418.599,
       "tests/pages/scroll-camera.spec.mjs": 145.644,
@@ -74,7 +75,8 @@
       "tests/pages/three-case-narrative.spec.mjs": 56.551,
       "tests/pages/source-access.spec.mjs": 68.977,
       "tests/pages/link-announcements.spec.mjs": 57.869,
-      "tests/pages/home-research-entry.spec.mjs": 70.425
+      "tests/pages/home-research-entry.spec.mjs": 70.425,
+      "tests/pages/editorial-scenes.spec.mjs": 49.893
     },
     "mobile-chromium": {
       "tests/pages/canvas-motion.spec.mjs": 186.831,
@@ -91,7 +93,7 @@
       "tests/pages/model-inspection.spec.mjs": 369.798,
       "tests/pages/modes-narrative.spec.mjs": 1.106,
       "tests/pages/motion-feedback.spec.mjs": 115.514,
-      "tests/pages/project-background-motion.spec.mjs": 139.122,
+      "tests/pages/project-background-motion.spec.mjs": 129.409,
       "tests/pages/project-previews.spec.mjs": 53.164,
       "tests/pages/project-studies.spec.mjs": 280.589,
       "tests/pages/scroll-camera.spec.mjs": 166.372,
@@ -110,7 +112,8 @@
       "tests/pages/three-case-narrative.spec.mjs": 9.59,
       "tests/pages/source-access.spec.mjs": 21.712,
       "tests/pages/link-announcements.spec.mjs": 40.572,
-      "tests/pages/home-research-entry.spec.mjs": 58.7
+      "tests/pages/home-research-entry.spec.mjs": 58.7,
+      "tests/pages/editorial-scenes.spec.mjs": 31.961
     }
   },
   "calibrationSources": {
@@ -306,6 +309,55 @@
           "passedSummaryAt": "2026-10-25T00:23:06.7216488Z",
           "testsPassed": 7,
           "measurement": "Single-file elapsed seconds from first logged test start to 7-passed summary; includes native video capture, intervening setup/teardown and final reporter overhead, excludes earlier build/browser startup and artifact upload. Healthy nonpublishable preflight; historical scheduling hint, not a performance benchmark or runtime guarantee."
+        },
+        "tests/pages/editorial-scenes.spec.mjs": {
+          "sourceRun": "40165961962",
+          "sourceCommit": "b47ff948e6d8e2e412e2f01777dcb49456d95038",
+          "jobId": "121086949092",
+          "artifactId": "12588213372",
+          "artifactDigest": "sha256:f823f44b7d71c01981d57933ae3e41d7fc9a3ef4ca6320ec1c5b62fa815a88c6",
+          "log": "job-121086949092.log",
+          "testsPassed": 3,
+          "selectedSuitePassed": 56,
+          "segments": [
+            {
+              "firstTestPosition": 1,
+              "lastTestPosition": 3,
+              "startedAt": "2026-10-25T05:34:54.4585421Z",
+              "endedAt": "2026-10-25T05:35:26.1620987Z",
+              "boundary": "tests/pages/link-announcements.spec.mjs"
+            }
+          ],
+          "measurement": "Sum of matching file-test start to next-test-start intervals; final test uses passed-summary boundary. Includes intervening setup/teardown and, for a suite-final test, reporter overhead; excludes interleaved other-file tests, earlier build/browser startup and artifact upload. Healthy nonpublishable preflight, not a performance benchmark or speed guarantee."
+        },
+        "tests/pages/project-background-motion.spec.mjs": {
+          "sourceRun": "40165961962",
+          "sourceCommit": "b47ff948e6d8e2e412e2f01777dcb49456d95038",
+          "jobId": "121086949092",
+          "artifactId": "12588213372",
+          "artifactDigest": "sha256:f823f44b7d71c01981d57933ae3e41d7fc9a3ef4ca6320ec1c5b62fa815a88c6",
+          "log": "job-121086949092.log",
+          "testsPassed": 14,
+          "selectedSuitePassed": 56,
+          "segments": [
+            {
+              "firstTestPosition": 8,
+              "lastTestPosition": 20,
+              "startedAt": "2026-10-25T05:36:36.2068292Z",
+              "endedAt": "2026-10-25T05:38:38.9305775Z",
+              "boundary": "tests/pages/project-studies.spec.mjs"
+            },
+            {
+              "firstTestPosition": 56,
+              "lastTestPosition": 56,
+              "startedAt": "2026-10-25T05:43:04.8200017Z",
+              "endedAt": "2026-10-25T05:43:15.0090773Z",
+              "boundary": "passed-summary"
+            }
+          ],
+          "measurement": "Sum of matching file-test start to next-test-start intervals; final test uses passed-summary boundary. Includes intervening setup/teardown and, for a suite-final test, reporter overhead; excludes interleaved other-file tests, earlier build/browser startup and artifact upload. Healthy nonpublishable preflight, not a performance benchmark or speed guarantee.",
+          "recalibrationReason": "Cas case now checks native chapter source ownership instead of fixed-duration exit/entry passages; only this changed file is remeasured.",
+          "previousWeightSeconds": 159.003
         }
       },
       "webkit": {
@@ -384,6 +436,55 @@
           "passedSummaryAt": "2026-10-25T00:23:33.1656164Z",
           "testsPassed": 7,
           "measurement": "Single-file elapsed seconds from first logged test start to 7-passed summary; includes native video capture, intervening setup/teardown and final reporter overhead, excludes earlier build/browser startup and artifact upload. Healthy nonpublishable preflight; historical scheduling hint, not a performance benchmark or runtime guarantee."
+        },
+        "tests/pages/editorial-scenes.spec.mjs": {
+          "sourceRun": "40166024128",
+          "sourceCommit": "b47ff948e6d8e2e412e2f01777dcb49456d95038",
+          "jobId": "121087134320",
+          "artifactId": "12588862196",
+          "artifactDigest": "sha256:b791868e119ec5cd8c75c9c8aeecd35a3819860f77825e196661dbb00b40db1a",
+          "log": "job-121087134320.log",
+          "testsPassed": 3,
+          "selectedSuitePassed": 56,
+          "segments": [
+            {
+              "firstTestPosition": 1,
+              "lastTestPosition": 3,
+              "startedAt": "2026-10-25T05:35:43.4772431Z",
+              "endedAt": "2026-10-25T05:36:33.3699310Z",
+              "boundary": "tests/pages/link-announcements.spec.mjs"
+            }
+          ],
+          "measurement": "Sum of matching file-test start to next-test-start intervals; final test uses passed-summary boundary. Includes intervening setup/teardown and, for a suite-final test, reporter overhead; excludes interleaved other-file tests, earlier build/browser startup and artifact upload. Healthy nonpublishable preflight, not a performance benchmark or speed guarantee."
+        },
+        "tests/pages/project-background-motion.spec.mjs": {
+          "sourceRun": "40166024128",
+          "sourceCommit": "b47ff948e6d8e2e412e2f01777dcb49456d95038",
+          "jobId": "121087134320",
+          "artifactId": "12588862196",
+          "artifactDigest": "sha256:b791868e119ec5cd8c75c9c8aeecd35a3819860f77825e196661dbb00b40db1a",
+          "log": "job-121087134320.log",
+          "testsPassed": 14,
+          "selectedSuitePassed": 56,
+          "segments": [
+            {
+              "firstTestPosition": 8,
+              "lastTestPosition": 20,
+              "startedAt": "2026-10-25T05:37:11.9897626Z",
+              "endedAt": "2026-10-25T05:39:30.2447153Z",
+              "boundary": "tests/pages/project-studies.spec.mjs"
+            },
+            {
+              "firstTestPosition": 56,
+              "lastTestPosition": 56,
+              "startedAt": "2026-10-25T05:45:39.3871991Z",
+              "endedAt": "2026-10-25T05:45:49.6591616Z",
+              "boundary": "passed-summary"
+            }
+          ],
+          "measurement": "Sum of matching file-test start to next-test-start intervals; final test uses passed-summary boundary. Includes intervening setup/teardown and, for a suite-final test, reporter overhead; excludes interleaved other-file tests, earlier build/browser startup and artifact upload. Healthy nonpublishable preflight, not a performance benchmark or speed guarantee.",
+          "recalibrationReason": "Cas case now checks native chapter source ownership instead of fixed-duration exit/entry passages; only this changed file is remeasured.",
+          "previousWeightSeconds": 195.617
         }
       },
       "mobile-chromium": {
@@ -462,6 +563,55 @@
           "passedSummaryAt": "2026-10-25T00:24:12.4424143Z",
           "testsPassed": 7,
           "measurement": "Single-file elapsed seconds from first logged test start to 7-passed summary; includes native video capture, intervening setup/teardown and final reporter overhead, excludes earlier build/browser startup and artifact upload. Healthy nonpublishable preflight; historical scheduling hint, not a performance benchmark or runtime guarantee."
+        },
+        "tests/pages/editorial-scenes.spec.mjs": {
+          "sourceRun": "40166066745",
+          "sourceCommit": "b47ff948e6d8e2e412e2f01777dcb49456d95038",
+          "jobId": "121087254670",
+          "artifactId": "12588223607",
+          "artifactDigest": "sha256:848dc2abe4cebd4f3da936255a4be19924490ce8d81a71bfdf8666b455bf624b",
+          "log": "job-121087254670.log",
+          "testsPassed": 3,
+          "selectedSuitePassed": 56,
+          "segments": [
+            {
+              "firstTestPosition": 1,
+              "lastTestPosition": 3,
+              "startedAt": "2026-10-25T05:36:35.0043076Z",
+              "endedAt": "2026-10-25T05:37:06.9656943Z",
+              "boundary": "tests/pages/link-announcements.spec.mjs"
+            }
+          ],
+          "measurement": "Sum of matching file-test start to next-test-start intervals; final test uses passed-summary boundary. Includes intervening setup/teardown and, for a suite-final test, reporter overhead; excludes interleaved other-file tests, earlier build/browser startup and artifact upload. Healthy nonpublishable preflight, not a performance benchmark or speed guarantee."
+        },
+        "tests/pages/project-background-motion.spec.mjs": {
+          "sourceRun": "40166066745",
+          "sourceCommit": "b47ff948e6d8e2e412e2f01777dcb49456d95038",
+          "jobId": "121087254670",
+          "artifactId": "12588223607",
+          "artifactDigest": "sha256:848dc2abe4cebd4f3da936255a4be19924490ce8d81a71bfdf8666b455bf624b",
+          "log": "job-121087254670.log",
+          "testsPassed": 14,
+          "selectedSuitePassed": 56,
+          "segments": [
+            {
+              "firstTestPosition": 8,
+              "lastTestPosition": 20,
+              "startedAt": "2026-10-25T05:37:49.1060994Z",
+              "endedAt": "2026-10-25T05:39:48.2121789Z",
+              "boundary": "tests/pages/project-studies.spec.mjs"
+            },
+            {
+              "firstTestPosition": 56,
+              "lastTestPosition": 56,
+              "startedAt": "2026-10-25T05:45:05.6269429Z",
+              "endedAt": "2026-10-25T05:45:15.9299860Z",
+              "boundary": "passed-summary"
+            }
+          ],
+          "measurement": "Sum of matching file-test start to next-test-start intervals; final test uses passed-summary boundary. Includes intervening setup/teardown and, for a suite-final test, reporter overhead; excludes interleaved other-file tests, earlier build/browser startup and artifact upload. Healthy nonpublishable preflight, not a performance benchmark or speed guarantee.",
+          "recalibrationReason": "Cas case now checks native chapter source ownership instead of fixed-duration exit/entry passages; only this changed file is remeasured.",
+          "previousWeightSeconds": 139.122
         }
       }
     }

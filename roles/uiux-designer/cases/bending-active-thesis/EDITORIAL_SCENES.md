@@ -55,10 +55,24 @@ Evidence directories:
 
 ## Remaining acceptance and limits
 
-WebKit, complete static/no-JavaScript/reduced-motion/forced-colors and failure-policy coverage, native keyboard/focus/navigation behavior, existing source-access contracts, full required CI and release verification remain pending. These prototype PNGs do not establish hardware performance, dynamic glass quality, or every scroll position.
+The subsequent `b47ff94` affected batch passed **168/168 checks** across Chromium, WebKit and mobile Chromium, including the selected typography, source-access, static/policy and failure contracts. This is an affected batch, not the full required CI or release verification; those gates remain pending. The retained PNGs do not establish hardware performance, dynamic glass quality, or every scroll position.
 
 A tall portrait or technical plate can extend beyond one viewport and is read with native scrolling; it is not reduced to fit merely for a screenshot. Dense embedded technical labels remain too small for complete mobile inline reading: the original-image entry is the detailed-reading route. A screenshot aligned to a source may show a nonfocused heading passing behind fixed chrome; that alone neither proves a navigation defect nor substitutes for a real anchor/focus test.
 
-Before rollout, typography acceptance must explicitly select the new semantic overview/rail prose and source captions; legacy CSS-class-based selectors must not silently omit them. This is a coverage requirement, not permission to relax the established role sizes, measures or line spacing.
+The affected typography acceptance now explicitly selects native Overview/rail prose and all ten figure-caption paragraphs. Prose guards retain exact 16px/1.5/60ch requirements; caption measure guards cover the resolved 68ch cap and caption containers retain the 20/13 leading and zero tracking checks. The CSS caption-size token is 13px; the shared caption guards should not be described as a new independent exact-13px assertion when they actually check measure/leading/tracking. No established threshold was relaxed.
 
 The chapter/source/reading grammar can be reused elsewhere only after an explicit source-role policy and case-specific acceptance. Model/video cases require separate lifecycle and framing review; this still-image exemplar does not authorize an automatic global renderer switch.
+
+## b47 affected-batch visual checkpoint
+
+The first actual WebKit composition review inspected four original PNGs: Context portrait with adjacent glass rail, System model photograph, framework plate, and XR caption/reading position. Source colors and white technical backgrounds remained clear, the decorative field stayed behind native content, and the established image/reading rhythm matched the previously accepted Chromium/mobile scope. **WebKit receives the same scoped art-direction GO**, not full-gate or publication approval.
+
+Failure-state review inspected one original PNG in each of Chromium, WebKit and mobile Chromium. The original-image action remained visible and readable; original caption/credit content and continuing narrative were retained, with no fake substitute for the failed tower photograph. The later System image is identified by its own chapter rather than presented as a replacement. The captures have a specific limitation: the failure-status sentence is partly above the viewport or behind fixed navigation; the mobile caption's upper lines also pass behind navigation at the action-centered capture position. These PNGs therefore do **not** prove the entire status/caption simultaneously visible. They support source-entry and continuing-reading availability, without diagnosing a native-focus defect from arbitrary screenshot framing.
+
+Verified artifact directories for this checkpoint:
+
+- Chromium: `/workspace/shared/ci-evidence-archive/editorial-scenes-b47ff94/12588213372/pages-test-results/`
+- WebKit: `/workspace/shared/ci-evidence-archive/editorial-scenes-b47ff94/12588862196/pages-test-results/`
+- Mobile Chromium: `/workspace/shared/ci-evidence-archive/editorial-scenes-b47ff94/12588223607/pages-test-results/`
+
+No UI or source asset was changed for this checkpoint. Full CI, exact-artifact publication and live verification remain pending.
