@@ -42,7 +42,8 @@
       "tests/pages/editorial-scenes.spec.mjs": 31.704,
       "tests/pages/hybrid-scenes.spec.mjs": 41.193,
       "tests/pages/hc-hybrid-scenes.spec.mjs": 170.109,
-      "tests/pages/dot-hybrid-scenes.spec.mjs": 43.595
+      "tests/pages/dot-hybrid-scenes.spec.mjs": 43.595,
+      "tests/pages/entrance-hybrid-scenes.spec.mjs": 39.383
     },
     "webkit": {
       "tests/pages/canvas-motion.spec.mjs": 162.572,
@@ -82,7 +83,8 @@
       "tests/pages/editorial-scenes.spec.mjs": 49.893,
       "tests/pages/hybrid-scenes.spec.mjs": 72.043,
       "tests/pages/hc-hybrid-scenes.spec.mjs": 106.643,
-      "tests/pages/dot-hybrid-scenes.spec.mjs": 76.202
+      "tests/pages/dot-hybrid-scenes.spec.mjs": 76.202,
+      "tests/pages/entrance-hybrid-scenes.spec.mjs": 59.86
     },
     "mobile-chromium": {
       "tests/pages/canvas-motion.spec.mjs": 186.831,
@@ -122,7 +124,8 @@
       "tests/pages/editorial-scenes.spec.mjs": 31.961,
       "tests/pages/hybrid-scenes.spec.mjs": 29.499,
       "tests/pages/hc-hybrid-scenes.spec.mjs": 84.755,
-      "tests/pages/dot-hybrid-scenes.spec.mjs": 37.016
+      "tests/pages/dot-hybrid-scenes.spec.mjs": 37.016,
+      "tests/pages/entrance-hybrid-scenes.spec.mjs": 50.08
     }
   },
   "calibrationSources": {
@@ -409,6 +412,21 @@
           "testsPassed": 4,
           "selectedSuitePassed": 23,
           "measurement": "Elapsed span of contiguous Dot tests 1\u20134, from first logged test start to the next other-file test start. Includes intervening setup/teardown; excludes next-file work, final reporter overhead, earlier build/browser startup and artifact upload. Healthy corrected exact-source nonpublishable qualification; historical scheduling hint, not a benchmark, precise test-duration sum or speed guarantee."
+        },
+        "tests/pages/entrance-hybrid-scenes.spec.mjs": {
+          "sourceRun": "40227714239",
+          "sourceCommit": "e1349f96487f6db309969d350a8717f689ac4ae6",
+          "runAttempt": 1,
+          "artifactId": "12612261906",
+          "artifactDigest": "sha256:64fb5e26a66b6953c2ada16ee6f3332f2b5d5de477f6f22da13bc55dad2cb259",
+          "artifactRetention": "Complete compressed artifact stream hashed against upstream; 81 selected JSON/original PNG members retained with independently rechecked hashes. No complete local ZIP is retained; unselected members remain in the expiring upstream artifact.",
+          "log": "entrance-hybrid-e1349f9/chromium-job.log",
+          "firstTestStartedAt": "2026-10-25T19:49:07.5321668Z",
+          "endedAt": "2026-10-25T19:49:46.9148967Z",
+          "boundary": "tests/pages/link-announcements.spec.mjs (test 7/46 start)",
+          "testsPassed": 4,
+          "selectedSuitePassed": 46,
+          "measurement": "Elapsed span of contiguous Entrance hybrid tests 3\u20136, from their first logged test start to the next other-file test start. Includes intervening setup/teardown; excludes preceding diagram tests, following-file work, final reporter overhead, earlier build/browser startup and artifact upload. Healthy exact-source nonpublishable qualification; historical scheduling hint, not a benchmark, precise test-duration sum or speed guarantee."
         }
       },
       "webkit": {
@@ -578,6 +596,21 @@
           "testsPassed": 4,
           "selectedSuitePassed": 23,
           "measurement": "Elapsed span of contiguous Dot tests 1\u20134, from first logged test start to the next other-file test start. Includes intervening setup/teardown; excludes next-file work, final reporter overhead, earlier build/browser startup and artifact upload. Healthy corrected exact-source nonpublishable qualification; historical scheduling hint, not a benchmark, precise test-duration sum or speed guarantee."
+        },
+        "tests/pages/entrance-hybrid-scenes.spec.mjs": {
+          "sourceRun": "40227782080",
+          "sourceCommit": "e1349f96487f6db309969d350a8717f689ac4ae6",
+          "runAttempt": 1,
+          "artifactId": "12611832378",
+          "artifactDigest": "sha256:2351a023cf636027ac5db1855e24d1d15ab9cc526ffa824608ff1652f49ee19c",
+          "artifactRetention": "Complete local artifact ZIP retained and independently rehashed against upstream; selected JSON/original PNG members extracted for review.",
+          "log": "entrance-hybrid-e1349f9/webkit-job.log",
+          "firstTestStartedAt": "2026-10-25T19:50:23.2122321Z",
+          "endedAt": "2026-10-25T19:51:23.0722949Z",
+          "boundary": "tests/pages/link-announcements.spec.mjs (test 7/46 start)",
+          "testsPassed": 4,
+          "selectedSuitePassed": 46,
+          "measurement": "Elapsed span of contiguous Entrance hybrid tests 3\u20136, from their first logged test start to the next other-file test start. Includes intervening setup/teardown; excludes preceding diagram tests, following-file work, final reporter overhead, earlier build/browser startup and artifact upload. Healthy exact-source nonpublishable qualification; historical scheduling hint, not a benchmark, precise test-duration sum or speed guarantee."
         }
       },
       "mobile-chromium": {
@@ -747,6 +780,21 @@
           "testsPassed": 4,
           "selectedSuitePassed": 23,
           "measurement": "Elapsed span of contiguous Dot tests 1\u20134, from first logged test start to the next other-file test start. Includes intervening setup/teardown; excludes next-file work, final reporter overhead, earlier build/browser startup and artifact upload. Healthy corrected exact-source nonpublishable qualification; historical scheduling hint, not a benchmark, precise test-duration sum or speed guarantee."
+        },
+        "tests/pages/entrance-hybrid-scenes.spec.mjs": {
+          "sourceRun": "40227847302",
+          "sourceCommit": "e1349f96487f6db309969d350a8717f689ac4ae6",
+          "runAttempt": 1,
+          "artifactId": "12612172579",
+          "artifactDigest": "sha256:64593fa8cdb4487f547e799c5db0b6301ed843506097f74ca9ed0ed8a28a7e52",
+          "artifactRetention": "Complete local artifact ZIP retained and independently rehashed against upstream; selected JSON/original PNG members extracted for review.",
+          "log": "entrance-hybrid-e1349f9/mobile-job.log",
+          "firstTestStartedAt": "2026-10-25T19:50:54.8324436Z",
+          "endedAt": "2026-10-25T19:51:44.9121388Z",
+          "boundary": "tests/pages/link-announcements.spec.mjs (test 7/46 start)",
+          "testsPassed": 4,
+          "selectedSuitePassed": 46,
+          "measurement": "Elapsed span of contiguous Entrance hybrid tests 3\u20136, from their first logged test start to the next other-file test start. Includes intervening setup/teardown; excludes preceding diagram tests, following-file work, final reporter overhead, earlier build/browser startup and artifact upload. Healthy exact-source nonpublishable qualification; historical scheduling hint, not a benchmark, precise test-duration sum or speed guarantee."
         }
       }
     }
