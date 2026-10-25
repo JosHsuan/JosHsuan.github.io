@@ -21,6 +21,20 @@ export function editorialProjectLayout(project) {
 
 /** Reviewed mixed ownership: documentary stills leave the leased model/video intact. */
 export function hybridProjectLayout(project) {
+ if (project.id === 'entrance-installation-art') {
+  const motion = project.motionMedia?.[0];
+  const guides = [['context','pattern-development.webp',4],['system','panel-system.webp',5],['making','fabrication-drawings.webp',2]];
+  if (!project.model || project.model.chapters.join(',') !== 'context,system' ||
+      !project.hero.src.endsWith('/entrance-installation-art/hero.webp') || project.hero.width !== 2400 || project.hero.height !== 3200 ||
+      project.motionMedia?.length !== 1 || motion.chapter !== 'results' || motion.kind !== 'recording' || motion.loop !== true ||
+      motion.durationSeconds !== 22.066666666666666 || motion.frameCount !== 662 || motion.width !== 540 || motion.height !== 960 ||
+      !motion.src.endsWith('/entrance-installation-art/installation-lighting-motion.mp4') ||
+      guides.some(([id,name,count]) => { const guide = project.sections.find(section => section.id === id)?.diagramFocus; return !guide?.source.endsWith(`/entrance-installation-art/${name}`) || guide.steps.length !== count; })) {
+   throw new Error('Hybrid scenes require the reviewed Entrance source roles.');
+  }
+  // Results retains its real night recording; the existing source guide flow is unchanged.
+  return {nativeChapters:['overview','credits'],results:null};
+ }
  if (project.id === 'dot-based-3d-printing') {
   const results = project.sections.find(section => section.id === 'results');
   const names = ['prototype-family.webp', 'translucent-prototypes.webp'];
