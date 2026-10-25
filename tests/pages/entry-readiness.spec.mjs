@@ -116,7 +116,7 @@ test('a native hash navigation relinquishes its chapter anchor before later layo
 
 for(const viewport of [{width:320,height:844},{width:844,height:390}])test(`canonical SSR entry remains readable at ${viewport.width}x${viewport.height} before hydration`,async({browser,baseURL},info)=>{
  let primary,release;const gate=new Promise(resolve=>{release=resolve;}),rows=[],requests=[];
- const context=await browser.newContext({baseURL,viewport,reducedMotion:'reduce'});let nojs;
+ const context=await browser.newContext({baseURL,viewport,reducedMotion:'no-preference'});let nojs;
  try{
   const page=await context.newPage();page.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)/.test(request.url()))requests.push(request.url());});
   await page.route('**/_next/**',async route=>{if(route.request().resourceType()==='script')await gate;await route.continue();});
@@ -125,7 +125,7 @@ for(const viewport of [{width:320,height:844},{width:844,height:390}])test(`cano
   await expect.poll(()=>image.evaluate(node=>node.complete&&node.naturalWidth>0),{timeout:WAIT}).toBe(true);await expect(image).toHaveCSS('object-fit','contain');await page.evaluate(()=>document.fonts.ready);
   for(const forced of [false,true]){
    await page.emulateMedia({forcedColors:forced?'active':'none'});
-   const fact=await frame.evaluate(readEntryComposition);rows.push({phase:forced?'forced-SSR':'normal-SSR',fact});assertEntryComposition(fact);
+   const fact=await frame.evaluate(readEntryComposition);rows.push({phase:forced?'forced-SSR':'normal-SSR',reducedMotion:'no-preference',fact});assertEntryComposition(fact);
    expect(await page.evaluate(()=>window.__story===undefined)).toBe(true);
    await expect(page.locator('[data-entry-return]')).toHaveAttribute('href','/#projects');
    const path=info.outputPath(`direct-SSR-${forced?'forced':'normal'}.png`);await page.screenshot({path,scale:'device'});await info.attach(`direct-SSR-${forced?'forced':'normal'}`,{path,contentType:'image/png'});
@@ -144,6 +144,16 @@ for(const viewport of [{width:320,height:844},{width:844,height:390}])test(`cano
    const fact=await frame.evaluate(readEntryComposition);rows.push({phase:'SSR-responsive-breakpoint',width,height,fact});assertEntryComposition(fact);
    if(width!==780){const path=info.outputPath(`direct-SSR-boundary-${width}x${height}.png`);await page.screenshot({path,scale:'device'});await info.attach(`direct-SSR-boundary-${width}x${height}`,{path,contentType:'image/png'});}
   }
+  // The unchanged pre-hydration fail-open animation is intentionally shortened
+  // by Reduced motion. Measure visible SSR first, then verify that policy before
+  // releasing the original scripts; do not freeze the normal 30-second fallback.
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await expect(page.locator('[data-entry-loader]')).toBeHidden();
+  const policy=await page.evaluate(()=>({reduced:matchMedia('(prefers-reduced-motion: reduce)').matches,storyAbsent:window.__story===undefined,context:document.querySelector('[data-entry-loader]').getAttribute('data-entry-context'),loaderVisibility:getComputedStyle(document.querySelector('[data-entry-loader]')).visibility,bodyInert:document.querySelector('[data-project-content]').hasAttribute('inert')}));
+  rows.push({phase:'reduced-unhydrated-fail-open',policy});
+  expect(policy.reduced).toBe(true);expect(policy.storyAbsent).toBe(true);expect(policy.context).toBeNull();expect(policy.loaderVisibility).toBe('hidden');expect(policy.bodyInert).toBe(false);
+  await expect(page.locator('[data-project-content]')).toBeVisible();
+  await expect(page.locator('[data-home-link]')).toHaveAttribute('href','/#about');await expect(page.locator('[data-home-link]')).toBeVisible();
   release();await page.unrouteAll({behavior:'wait'});
   await expect.poll(()=>page.evaluate(()=>window.__story?.inspect().entry.phase),{timeout:WAIT}).toBe('entered');
   await expect(page.locator('[data-entry-loader]')).toBeHidden();await expect(page.locator('[data-project-content]')).not.toHaveAttribute('inert','');await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(0);expect(requests).toEqual([]);
