@@ -87,6 +87,17 @@ test('HC3DP heavy model and looping simulation retain one lease through native a
 });
 
 async function entered(page){await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});await expect(page.locator('[data-site-loader]')).toBeHidden();}
+// Capture the first observed Back terminal in the existing readiness poll. A failed
+// terminal is diagnostic evidence, never an alternative successful-entry contract.
+async function enteredBack(page,receipt){
+ let handle,primary;
+ try{
+  handle=await page.waitForFunction(()=>{const site=window.__site?.inspect();return site&&['entered','failed'].includes(site.phase)?{site,browserObservedMs:performance.now(),timeOrigin:performance.timeOrigin}:false;},null,{timeout:WAIT});
+  const terminal=await handle.jsonValue();receipt.rows.push({phase:'back-entry-terminal',...terminal});
+  expect(terminal.site.phase,'Back must enter successfully; retained terminal includes reason/readiness/history').toBe('entered');
+  await expect(page.locator('[data-site-loader]')).toBeHidden();
+ }catch(error){primary=error;throw error;}finally{try{await handle?.dispose();}catch(error){if(!primary)throw error;}}
+}
 function ownerFacts(){const background=window.__globalBackground.inspect();return{background,documentId:performance.timeOrigin,y:scrollY,nativeCount:document.querySelectorAll('[data-editorial-image]').length,inert:document.querySelector('main').inert};}
 test('HC3DP hybrid document history closes native listeners and restores one original model lifetime',async({page},info)=>{
  test.setTimeout(scenarioTimeout(180000));
@@ -100,7 +111,7 @@ test('HC3DP hybrid document history closes native listeners and restores one ori
   const departure=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('hc-hybrid-departure')));receipt.rows.push({phase:'departure',...departure});expect(departure.trusted).toBe(true);
   if(departure.persisted){expect(departure.background.driver.lifecycle.suspended).toBe(true);expect(departure.background.activeBindings).toBe(1);expect(departure.canvasCount).toBe(1);const retained=departure.background.driver.projectStudy.scene;expect(retained.resource.successfulPaint).toBe(true);expect(retained.resource.sourceRevision).toBe(project.model.sha256);expect(retained.acquisitions).toBe(1);expect(retained.disposals).toBe(0);}
   else{expect(departure.background.driver.disposed).toBe(true);expect(departure.background.driver.events.nativeListeners).toBe(0);expect(departure.background.activeBindings).toBe(0);expect(departure.background.driver.pageField.disposed).toBe(true);expect(departure.background.driver.projectStudy.scene).toBeNull();expect(departure.canvasCount).toBe(0);}
-  await page.goBack();await entered(page);await page.waitForFunction(()=>{const resource=window.__globalBackground.inspect().driver.projectStudy.scene?.resource;return resource?.successfulPaint&&resource.view.chapter==='system';},null,{timeout:WAIT});
+  await page.goBack();await enteredBack(page,receipt);await page.waitForFunction(()=>{const resource=window.__globalBackground.inspect().driver.projectStudy.scene?.resource;return resource?.successfulPaint&&resource.view.chapter==='system';},null,{timeout:WAIT});
   const restored=await page.evaluate(ownerFacts),show=await page.evaluate(()=>window.__hybridPageShow);receipt.rows.push({phase:'back',show,...restored});await page.screenshot({path:info.outputPath('hc-hybrid-native-back.png'),scale:'device'});
   expect(show.trusted).toBe(true);if(show.persisted){expect(departure.persisted).toBe(true);expect(restored.documentId).toBe(departure.documentId);}else{expect(restored.documentId).not.toBe(before.documentId);}
   expect(restored.background.activeBindings).toBe(1);expect(restored.background.driver.lifecycle.suspended).toBe(false);expect(restored.background.driver.projectStudy.presentation).toBe('hybrid-scenes');expect(restored.nativeCount).toBe(3);expect(restored.inert).toBe(false);expect(restored.background.driver.projectStudy.scene.acquisitions).toBe(1);expect(restored.background.driver.projectStudy.scene.resource.sourceRevision).toBe(project.model.sha256);modelGuard({project:restored.background.driver.projectStudy},'system');
