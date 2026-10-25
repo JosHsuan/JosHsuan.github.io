@@ -22,6 +22,15 @@ with unchanged outer/slot dimensions. This is not a fix claim for the unresolved
 host service/input delays recorded below, nor completion of the whole-site rollout.
 The next bounded slice is [HC3DP hybrid](HC3DP_HYBRID_SCENES.md), reusing the same
 components with its original heavy model and looping path simulation intact.
+Its proper affected batch at `78f4d88` passed 176/177: mobile fresh Back reached
+a failed site entry despite an eventually ready model. The actual failure reason
+was not retained. A first-observed terminal diagnostic at `f505c076` passed the
+four mobile HC cases with normal successful Back readiness and Forward, but did
+not reproduce or explain that earlier failure. No application, production
+15-second deadline, legacy budget or successful-entry guard changed. The first
+terminal evidence remains enabled for the separately authorized required full
+561-browser-plus-24-framework qualification; this is pending, not a latency fix
+or deployment approval. No additional standalone diagnostic rerun is planned.
 
 The preceding verified live baseline was `d3eabb897e787287eefdb632d119718bffc35f61`.
 Its [full validation 40169507337](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/40169507337)
