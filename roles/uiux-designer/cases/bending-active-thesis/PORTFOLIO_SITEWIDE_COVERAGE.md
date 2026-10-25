@@ -48,7 +48,15 @@ not establish release eligibility. One diagnostic-only case-local trace snapshot
 comparison completed 4/4, but substantial service waits persisted and its worker/
 browser/cache/order confound prevents a snapshot-only causal or reliability claim.
 Snapshot-off promotion was rejected; the formal candidate restores original
-snapshot-enabled tracing. No new full run or application performance fix follows.
+snapshot-enabled tracing. No full run or application performance-fix claim follows automatically from that experiment. A final counters-only
+formal-trace diagnostic passed 4/4: idle submits stayed unchanged, but paused
+Y=0 navigation intervals produced additional renders. Complete visual equality
+and unnecessary render cost were not measured. One native click also showed a
+1,055.3 ms timestamp-to-listener interval, so delay is not universally external
+automation. The observer series is closed; source-level investigation of legitimate
+invalidation does not authorize a rendering change. One fresh required full
+qualification is separately authorized on unchanged 1033085 code; repeated
+budget failure blocks publication, with no further observer loop.
 Fresh exact full acceptance
 and same-artifact deployment remain pending.
 
