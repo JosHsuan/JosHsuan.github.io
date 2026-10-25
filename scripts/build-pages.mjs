@@ -123,6 +123,7 @@ const sources = [
   'components/InformationSkin.jsx',
   'components/LiquidGlassSkin.jsx',
   'components/EntryLoader.jsx', 'components/entry-loader.module.css',
+  'components/ResearchEntryComposition.jsx', 'components/research-entry-composition.module.css',
   'components/EvidenceInspector.jsx', 'components/evidence-inspector.module.css',
   'components/cinematic.module.css', 'components/story-input.js', 'components/story-response.mjs',
   'components/render-budget.mjs', 'components/runtime-scheduler.mjs', 'components/dom-publisher.mjs', 'components/scene-visibility.mjs',

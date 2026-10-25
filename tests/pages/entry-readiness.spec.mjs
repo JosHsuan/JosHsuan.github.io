@@ -1,3 +1,5 @@
+import {readEntryComposition,assertEntryComposition} from './research-entry-composition-helpers.mjs';
+import {writeFile} from 'node:fs/promises';
 import {test,expect} from '@playwright/test';
 import {WAIT,frames,scenarioTimeout,settle} from './case-helpers.mjs';
 
@@ -20,6 +22,9 @@ test('entry waits for actual scene paint and releases a deep-linked library only
   await expect(loader.locator('[data-ready="false"][aria-hidden="true"]')).toBeVisible();
   await expect(loader.locator('[aria-valuenow]')).toHaveCount(0);
   await expect(loader).not.toContainText(/\d+\s*%/);
+  await expect.poll(()=>loader.locator('[data-research-entry-backdrop] img').evaluate(node=>node.complete&&node.naturalWidth>0),{timeout:WAIT}).toBe(true);
+  const composition=await loader.locator('[data-research-entry-composition]').evaluate(readEntryComposition);
+  const receiptPath=testInfo.outputPath('direct-entry-composition.json');await writeFile(receiptPath,JSON.stringify(composition,null,2));await testInfo.attach('direct-entry-composition',{path:receiptPath,contentType:'application/json'});assertEntryComposition(composition);
   await loader.screenshot({path:testInfo.outputPath('entry-preparing.png')});
   release();
   await page.waitForFunction(()=>window.__story.inspect().entry.phase==='entered',null,{timeout:WAIT});await settle(page);
@@ -107,4 +112,47 @@ test('a native hash navigation relinquishes its chapter anchor before later layo
  expect(after.y).toBeGreaterThan(before.y-50);expect(after.y).toBeLessThan(before.y+50);
  expect(after.top).toBeLessThan(-150);expect(after.top).toBeGreaterThan(-250);
  }finally{release();}
+});
+
+for(const viewport of [{width:320,height:844},{width:844,height:390}])test(`canonical SSR entry remains readable at ${viewport.width}x${viewport.height} before hydration`,async({browser,baseURL},info)=>{
+ let primary,release;const gate=new Promise(resolve=>{release=resolve;}),rows=[],requests=[];
+ const context=await browser.newContext({baseURL,viewport,reducedMotion:'reduce'});let nojs;
+ try{
+  const page=await context.newPage();page.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)/.test(request.url()))requests.push(request.url());});
+  await page.route('**/_next/**',async route=>{if(route.request().resourceType()==='script')await gate;await route.continue();});
+  await page.goto('/projects/bending-active/',{waitUntil:'commit'});
+  const frame=page.locator('[data-entry-loader] [data-research-entry-composition]'),image=frame.locator('img');await expect(frame).toBeVisible();
+  await expect.poll(()=>image.evaluate(node=>node.complete&&node.naturalWidth>0),{timeout:WAIT}).toBe(true);await expect(image).toHaveCSS('object-fit','contain');await page.evaluate(()=>document.fonts.ready);
+  for(const forced of [false,true]){
+   await page.emulateMedia({forcedColors:forced?'active':'none'});
+   const fact=await frame.evaluate(readEntryComposition);rows.push({phase:forced?'forced-SSR':'normal-SSR',fact});assertEntryComposition(fact);
+   expect(await page.evaluate(()=>window.__story===undefined)).toBe(true);
+   await expect(page.locator('[data-entry-return]')).toHaveAttribute('href','/#projects');
+   const path=info.outputPath(`direct-SSR-${forced?'forced':'normal'}.png`);await page.screenshot({path,scale:'device'});await info.attach(`direct-SSR-${forced?'forced':'normal'}`,{path,contentType:'image/png'});
+   if(!forced&&fact.shortLandscape){
+    await frame.locator('[data-research-entry-backdrop]').evaluate(node=>node.scrollIntoView({block:'center',behavior:'instant'}));
+    rows.push({phase:'short-landscape-native-source-reading',fact:await frame.evaluate(readEntryComposition)});
+    const sourcePath=info.outputPath('direct-SSR-native-source.png');await page.screenshot({path:sourcePath,scale:'device'});await info.attach('direct-SSR-native-source',{path:sourcePath,contentType:'image/png'});
+    await page.locator('[data-entry-return]').evaluate(node=>node.scrollIntoView({block:'center',behavior:'instant'}));
+   }
+  }
+  await page.emulateMedia({forcedColors:'none'});
+  if(viewport.width===320)for(const [width,height] of [[780,1000],[781,1000],[900,1000],[900,900]]){
+   await page.setViewportSize({width,height});
+   const expected=`/assets/cinematic/model-poster${width<=780?'-mobile':''}.webp`;
+   await expect.poll(()=>image.evaluate((node,path)=>node.complete&&node.naturalWidth>0&&new URL(node.currentSrc).pathname===path,expected),{timeout:WAIT}).toBe(true);
+   const fact=await frame.evaluate(readEntryComposition);rows.push({phase:'SSR-responsive-breakpoint',width,height,fact});assertEntryComposition(fact);
+   if(width!==780){const path=info.outputPath(`direct-SSR-boundary-${width}x${height}.png`);await page.screenshot({path,scale:'device'});await info.attach(`direct-SSR-boundary-${width}x${height}`,{path,contentType:'image/png'});}
+  }
+  release();await page.unrouteAll({behavior:'wait'});
+  await expect.poll(()=>page.evaluate(()=>window.__story?.inspect().entry.phase),{timeout:WAIT}).toBe('entered');
+  await expect(page.locator('[data-entry-loader]')).toBeHidden();await expect(page.locator('[data-project-content]')).not.toHaveAttribute('inert','');await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(0);expect(requests).toEqual([]);
+  nojs=await browser.newContext({baseURL,viewport,javaScriptEnabled:false});const native=await nojs.newPage();await native.goto('/projects/bending-active/');
+  await expect(native.locator('[data-entry-loader]')).toBeHidden();await expect(native.locator('[data-project-content]')).not.toHaveAttribute('inert','');await expect(native.locator('[data-project-content]')).toBeVisible();
+  const home=native.locator('[data-home-link]');await expect(home).toHaveAttribute('href','/#about');await expect(home).toBeVisible();rows.push({phase:'no-js-native-body',url:native.url(),loaderHidden:true});
+ }catch(error){primary=error;throw error;}finally{
+  release();let cleanupError=primary;
+  for(const cleanup of [async()=>{const path=info.outputPath('direct-SSR-composition.json');await writeFile(path,JSON.stringify({viewport,requests,rows},null,2));await info.attach('direct-SSR-composition',{path,contentType:'application/json'});},()=>context.close(),()=>nojs?.close()])try{await cleanup();}catch(error){cleanupError??=error;}
+  if(!primary&&cleanupError)throw cleanupError;
+ }
 });

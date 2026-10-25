@@ -2,6 +2,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {useExperienceInput} from '../runtime/ExperienceProvider';
 import styles from './entry-loader.module.css';
+import ResearchEntryComposition from './ResearchEntryComposition';
 import {acquireSiteReadiness} from '../runtime/site/SiteReadiness.mjs';
 import {publishSceneEntry} from '../runtime/site/site-entry-bridge.mjs';
 
@@ -16,11 +17,8 @@ export default function EntryLoader({returnHref='/#projects'}){
  }),[input]);
  const ready=status.progress===100;
  return <><div ref={element} className={styles.loader} data-entry-loader data-phase="preparing" aria-label="Preparing Bending-Active">
-  <div className={styles.backdrop} aria-hidden="true"><picture>
-   <source media="(max-width:780px)" srcSet="/assets/cinematic/model-poster-mobile.webp"/>
-   <img src="/assets/cinematic/model-poster.webp" alt="" decoding="async"/>
-  </picture></div>
-  <div className={styles.content}>
+  <ResearchEntryComposition>
+  <div className={styles.content} data-research-entry-content>
    <section className={styles.panel} aria-labelledby="entry-title" aria-describedby="entry-description">
     <p className={styles.eyebrow}>Thesis study</p>
     <h2 id="entry-title" className={styles.title}>Bending-Active</h2>
@@ -32,5 +30,5 @@ export default function EntryLoader({returnHref='/#projects'}){
    </section>
    <p className={styles.identity}>JosHsuan Chao <a href={returnHref} data-entry-return>Back to projects</a></p>
   </div>
- </div><noscript><style>{'[data-entry-loader]{display:none!important}'}</style></noscript></>;
+ </ResearchEntryComposition></div><noscript><style>{'[data-entry-loader]{display:none!important}'}</style></noscript></>;
 }

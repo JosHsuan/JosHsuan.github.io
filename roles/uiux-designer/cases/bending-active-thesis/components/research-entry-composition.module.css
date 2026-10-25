@@ -1,0 +1,24 @@
+/* A source-specific example of the shared entry grammar: readable information,
+   a complete original image, then destination-owned readiness. No scene morph. */
+.frame{position:relative;isolation:isolate;min-height:max(100svh,32rem);background:#0b1112}
+.backdrop{position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none;background:#0b1112}
+.backdrop picture,.backdrop img{display:block;width:100%;height:100%}
+.backdrop img{object-fit:contain;object-position:center;opacity:.9;transform:none}
+.backdrop::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,#0b111250,#0b11120a 45%,#0b1112b8)}
+.frame>[data-research-entry-content]{min-height:inherit;grid-template-columns:min(22.5rem,40vw);grid-template-rows:minmax(15rem,auto) 5.5rem;align-content:center;justify-content:start;justify-items:start;padding:2rem 6vw;gap:1.5rem}
+.frame>[data-research-entry-content]>section{min-height:15rem}
+.frame>[data-research-entry-content]>p{align-self:end;min-height:5.5rem;text-align:center;width:min(22.5rem,100%)}
+@media(max-width:780px){
+ .frame{min-height:max(100svh,44rem)}
+ .frame>[data-research-entry-content]{grid-template-columns:min(22.5rem,100%);align-content:start;justify-content:center;justify-items:center;padding:clamp(24px,5svh,64px) 1.5rem 2rem}
+ .backdrop img{opacity:.55}
+}
+/* Short windows use honest native scrolling instead of hiding the source
+   behind the status card or reducing the established reading sizes. */
+@media(max-height:600px) and (orientation:landscape){
+ .frame{display:flex;flex-direction:column;min-height:100svh}
+ .frame>[data-research-entry-content]{order:0;min-height:0;grid-template-columns:min(22.5rem,100%);justify-content:center;justify-items:center;padding:1.5rem}
+ .backdrop{order:1;position:relative;inset:auto;z-index:0;flex:none;height:max(24rem,100svh)}
+}
+@media(prefers-reduced-transparency:reduce){.backdrop img{opacity:0}}
+@media(forced-colors:active){.frame,.backdrop{background:Canvas}.backdrop{display:none}}

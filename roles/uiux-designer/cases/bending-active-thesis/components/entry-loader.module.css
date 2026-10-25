@@ -28,9 +28,3 @@
 .eyebrow{font-size:var(--type-size-label);line-height:var(--type-leading-label);letter-spacing:var(--type-tracking-label)}
 .subtitle,.preparation p{line-height:var(--type-leading-body);letter-spacing:var(--type-tracking-body)}
 .identity{line-height:var(--type-leading-caption);letter-spacing:var(--type-tracking-caption)}
-/* An adopted Home research link keeps the same original specimen composition.
-   The case still owns every preparation and reveal decision. */
-:global(html[data-site-project-entry=bending-active]) .loader[data-entry-loader] .backdrop picture{position:absolute;width:68%;height:85%;right:0;top:8%}
-:global(html[data-site-project-entry=bending-active]) .loader[data-entry-loader] .backdrop img{object-fit:contain;object-position:right center;opacity:.9}
-:global(html[data-site-project-entry=bending-active]) .loader[data-entry-loader] .content{justify-items:start;place-content:center start;padding-left:6vw}
-@media(max-width:900px){:global(html[data-site-project-entry=bending-active]) .loader[data-entry-loader] .backdrop picture{width:100%;height:65%;top:30%}:global(html[data-site-project-entry=bending-active]) .loader[data-entry-loader] .backdrop img{opacity:.55}:global(html[data-site-project-entry=bending-active]) .loader[data-entry-loader] .content{place-content:start center;justify-items:center;padding:12svh 1.5rem 2rem}}

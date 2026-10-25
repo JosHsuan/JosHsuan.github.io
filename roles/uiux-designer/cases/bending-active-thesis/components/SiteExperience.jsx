@@ -1,9 +1,9 @@
 'use client';
-/* eslint-disable @next/next/no-img-element -- The original pinned poster carries visual identity across native documents, never scene readiness. */
 import {useEffect,useRef,useState} from 'react';
 import {createSiteNavigation} from '../runtime/site/SiteNavigation.mjs';
 import entry from './entry-loader.module.css';
 import styles from './site-experience.module.css';
+import ResearchEntryComposition from './ResearchEntryComposition';
 
 /** Mounted once by the published layout. Generic pages import no case runtime. */
 export default function SiteExperience(){
@@ -16,9 +16,7 @@ export default function SiteExperience(){
   return()=>{manager.dispose();if(window.__site===inspect)delete window.__site;};
  },[]);
  const ready=status.phase==='ready'||status.phase==='revealing'||status.phase==='entered';
- return <><div ref={element} className={`${entry.loader} ${styles.loader}`} data-site-loader data-site-phase="requested" aria-label="Preparing this page">
-  <div className={`${entry.backdrop} ${styles.backdrop}`} aria-hidden="true">{status.presentation==='bending-active'&&<img className={styles.researchHandoff} src="/assets/cinematic/model-poster.webp" width="1440" height="1000" alt="" decoding="async" data-site-research-handoff/>}</div>
-  <div className={entry.content} data-site-loader-content>
+ const content=<div className={entry.content} data-site-loader-content data-research-entry-content>
    <section className={entry.panel} aria-labelledby="site-entry-title" aria-describedby="site-entry-description">
     <p className={entry.eyebrow}>Portfolio</p>
     <h2 id="site-entry-title" className={entry.title}>JosHsuan Chao</h2>
@@ -29,6 +27,8 @@ export default function SiteExperience(){
     </div>
    </section>
    <p className={entry.identity}><a href="/">Return to home</a></p>
-  </div>
+  </div>;
+ return <><div ref={element} className={`${entry.loader} ${styles.loader}`} data-site-loader data-site-phase="requested" aria-label="Preparing this page">
+  {status.presentation==='bending-active'?<ResearchEntryComposition outgoing>{content}</ResearchEntryComposition>:<><div className={`${entry.backdrop} ${styles.backdrop}`} aria-hidden="true"/>{content}</>}
  </div><p className={styles.status} role="status" aria-live="polite">{status.phase==='failed'?'This page is available. Some preparation steps could not finish.':''}</p><noscript><style>{'[data-site-loader]{display:none!important}'}</style></noscript></>;
 }

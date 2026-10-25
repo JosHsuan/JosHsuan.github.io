@@ -1,3 +1,4 @@
+import {readEntryComposition,assertEntryComposition,expectMatchingEntry} from './research-entry-composition-helpers.mjs';
 import {test,expect} from '@playwright/test';
 import {writeFile} from 'node:fs/promises';
 import {WAIT,frames,scenarioTimeout} from './case-helpers.mjs';
@@ -60,14 +61,15 @@ test('Home native research camera reverses while independent idle adds no 3D wor
 // Install before native activation. While a document request is pending, normal
 // Playwright frame/locator operations can wait for that same request to commit.
 // Event-time facts are pushed to the host instead; no timer, RAF or state write.
-function observeOutgoingEntry(){
+function observeOutgoingEntry(readComposition){
  const loader=document.querySelector('[data-site-loader]');let sent=0,clicks=0,last='';
  const sample=(reason,event=null)=>{
   if(sent>=16)return;const site=window.__site?.inspect();if(site?.kind!=='navigation')return;
   const image=loader.querySelector('[data-site-research-handoff]'),hero=window.__homeResearch?.inspect();
   let paint=null;
   if(image){const r=image.getBoundingClientRect();let opacity=1,visible=true;for(let n=image;n;n=n.parentElement){const c=getComputedStyle(n);opacity*=Number(c.opacity);visible&&=c.display!=='none'&&c.visibility!=='hidden';}paint={src:image.getAttribute('src'),currentSrc:image.currentSrc,complete:image.complete,naturalWidth:image.naturalWidth,naturalHeight:image.naturalHeight,opacity,visible,left:r.left,top:r.top,right:r.right,bottom:r.bottom};}
-  const fact={reason,clicks,time:performance.now(),url:location.href,site:{id:site.id,phase:site.phase,kind:site.kind,url:site.url,presentation:site.presentation},ticket:JSON.parse(sessionStorage.getItem('portfolio-navigation-handoff-v1')),inert:document.querySelector('[data-portfolio-root]').inert,hero:{acquisitions:hero.acquisitions,disposals:hero.disposals,canvasCount:document.querySelectorAll('[data-home-research-canvas]').length},viewport:{width:innerWidth,height:innerHeight},paint,event:event?{trusted:event.isTrusted,x:event.clientX,y:event.clientY,tag:event.target?.tagName,href:event.target?.closest?.('a')?.getAttribute('href')??null}:null};
+  const composition=image?readComposition(image.closest('[data-research-entry-composition]')):null;
+  const fact={composition,reason,clicks,time:performance.now(),url:location.href,site:{id:site.id,phase:site.phase,kind:site.kind,url:site.url,presentation:site.presentation},ticket:JSON.parse(sessionStorage.getItem('portfolio-navigation-handoff-v1')),inert:document.querySelector('[data-portfolio-root]').inert,hero:{acquisitions:hero.acquisitions,disposals:hero.disposals,canvasCount:document.querySelectorAll('[data-home-research-canvas]').length},viewport:{width:innerWidth,height:innerHeight},paint,event:event?{trusted:event.isTrusted,x:event.clientX,y:event.clientY,tag:event.target?.tagName,href:event.target?.closest?.('a')?.getAttribute('href')??null}:null};
   const key=JSON.stringify([fact.site,paint?.complete,paint?.naturalWidth,paint?.opacity,fact.inert]);if(reason!=='click'&&key===last)return;last=key;sent++;
   window.__testHomeOutgoing(fact).catch(()=>{});
  };
@@ -101,7 +103,7 @@ historyTest('Home native project entry disposes its own source and destination r
  mark('case-start-video-handle-obtained');
  try{expect(video).not.toBeNull();await page.goto('/');await entered(page);await exposed(page);
  await page.exposeBinding('__testHomeOutgoing',(_source,fact)=>{if(outgoingFacts.length<16)outgoingFacts.push({...fact,hostReceivedElapsedMs:performance.now()-hostStartedAt,hostReceivedEpochMs:Date.now()});});
- await page.evaluate(observeOutgoingEntry);
+ await page.evaluate(`(${observeOutgoingEntry.toString()})(${readEntryComposition.toString()})`);
  page.on('request',request=>{if(request.isNavigationRequest()&&request.frame()===page.mainFrame()&&navigationRequests.length<8)navigationRequests.push(request.url());});
  let firstDocument=true,firstModel=true;
  await page.route('**/projects/bending-active/',async route=>{if(firstDocument&&route.request().isNavigationRequest()){firstDocument=false;documentHeld=true;await documentGate;}await route.continue();});
@@ -133,7 +135,7 @@ historyTest('Home native project entry disposes its own source and destination r
  mark('document-request-held');
  await expect.poll(()=>outgoingFacts.some(f=>f.site.presentation==='bending-active'&&f.paint?.complete&&f.paint.naturalWidth>0&&f.paint.visible&&f.paint.opacity>0),{timeout:WAIT}).toBe(true);
  const outgoing=outgoingFacts.findLast(f=>f.site.presentation==='bending-active'&&f.paint?.complete&&f.paint.naturalWidth>0&&f.paint.visible&&f.paint.opacity>0);rows.push({phase:'outgoing-held-original-document',...outgoing});
- expect(outgoing.site.presentation).toBe('bending-active');expect(outgoing.ticket.presentation).toBe('bending-active');expect(outgoing.ticket.url).toBe(new URL('/projects/bending-active/',outgoing.url).href);expect(outgoing.ticket.id).toBe(outgoing.site.id);expectOutgoingPaint(outgoing);
+ expect(outgoing.site.presentation).toBe('bending-active');expect(outgoing.ticket.presentation).toBe('bending-active');expect(outgoing.ticket.url).toBe(new URL('/projects/bending-active/',outgoing.url).href);expect(outgoing.ticket.id).toBe(outgoing.site.id);expectOutgoingPaint(outgoing);assertEntryComposition(outgoing.composition);
  mark('loaded-outgoing-paint-observed');
  const previousClicks=outgoing.clicks;
  if(isMobile)await page.touchscreen.tap(activationPoint.x,activationPoint.y);else await page.mouse.click(activationPoint.x,activationPoint.y);
@@ -153,6 +155,7 @@ historyTest('Home native project entry disposes its own source and destination r
  const arrival=await page.evaluate(()=>({site:window.__site.inspect(),entry:window.__story.inspect().entry,sceneReady:window.__thesis?.inspect().ready===true,marker:document.documentElement.getAttribute('data-site-project-entry')}));rows.push({phase:'arrival-held-original-model',...arrival});
  expect(arrival.marker).toBe('bending-active');expect(arrival.site.phase).toBe('requested');expect(arrival.sceneReady).toBe(false);
  await captureEntry(page,info,rows,'arrival','[data-entry-loader]','[data-entry-loader] img');
+ const arrivalComposition=await page.locator('[data-entry-loader] [data-research-entry-composition]').evaluate(readEntryComposition);rows.push({phase:'arrival-composition',composition:arrivalComposition});assertEntryComposition(arrivalComposition);expectMatchingEntry(outgoing.composition,arrivalComposition);
  mark('committed-arrival-png-completed');
  releaseModel();await activation;
  await expect(page).toHaveURL(/\/projects\/bending-active\/$/);
