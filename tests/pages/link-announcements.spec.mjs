@@ -57,6 +57,26 @@ async function tabTo(page,target,receipt=[]){
  for(let index=0;index<bound+2;index++){await page.keyboard.press('Tab');const observed=await target.evaluate(node=>{const active=document.activeElement;return{reached:active===node,y:scrollY,tag:active?.tagName,id:active?.id,href:active?.getAttribute('href'),label:active?.getAttribute('aria-label'),text:active?.textContent?.trim().slice(0,160)};});receipt.push(observed);if(observed.reached){reached=true;break;}}
  expect(reached,'Native Tab traversal reaches the announced action').toBe(true);await expect(target).toBeFocused();
 }
+// Full Bending only: retain post-key observations while avoiding repeated strict
+// target acquisition/disposal (pinned Playwright 1.63 Locator._withElement).
+// This is not a production performance fix or a guarantee of the 60s budget.
+async function tabToStable(page,target,receipt=[]){
+ const bound=await page.locator('a[href],button,input,select,textarea,[tabindex],summary').count();
+ let handle,primaryError,reached=false;
+ try{
+  handle=await target.elementHandle();expect(handle).not.toBeNull();
+  for(let index=0;index<bound+2;index++){
+   await page.keyboard.press('Tab');
+   const observed=await handle.evaluate(node=>{const active=document.activeElement;return{reached:active===node,y:scrollY,tag:active?.tagName,id:active?.id,href:active?.getAttribute('href'),label:active?.getAttribute('aria-label'),text:active?.textContent?.trim().slice(0,160),isConnected:node.isConnected};});
+   receipt.push(observed);expect(observed.isConnected,'Original native Tab target remains attached').toBe(true);
+   if(observed.reached){reached=true;break;}
+  }
+  expect(reached,'Native Tab traversal reaches the announced action').toBe(true);
+  expect(await target.evaluate((node,original)=>node===original&&node.isConnected,handle),'Fresh strict locator still resolves the original Tab target').toBe(true);
+  await expect(target).toBeFocused();
+ }catch(error){primaryError=error;throw error;}
+ finally{try{if(handle)await handle.dispose();}catch(error){if(!primaryError)throw error;}}
+}
 async function facts(page,target){return{url:page.url(),...await target.evaluate(node=>({y:scrollY,focused:document.activeElement===node,href:node.getAttribute('href'),sourceChapter:node.closest('[data-project-chapter],[data-xr-chapter],[data-story-chapter]')?.id??null,semanticChapter:document.querySelector('[data-project-active-chapter]')?.getAttribute('data-project-active-chapter')??document.querySelector('[data-xr-active-chapter]')?.getAttribute('data-xr-active-chapter')??null}))};}
 async function popup(page,target,activate,dimensions){
  if(await page.locator('[data-project-active-chapter],[data-xr-active-chapter]').count())await page.waitForFunction(()=>{
@@ -142,15 +162,15 @@ test('Full Bending native Pause reading reaches an inline comparison and its ori
   receipt.overviewCapture={scope:'Native paused Overview; unpaired page-field phase. Not deterministic System material equivalence or performance evidence.',stage:receipt.frozen.renderPressure.stage,stage2Observed:receipt.frozen.renderPressure.stage===2};
   const overviewPng=info.outputPath('bending-paused-overview-device.png');await page.screenshot({path:overviewPng,scale:'device'});await info.attach('bending-paused-overview-device',{path:overviewPng,contentType:'image/png'});
   receipt.phase='native-chapter-and-source';
-  const chapter=page.locator('[data-story-navigation] a[href="#make"]');await tabTo(page,chapter,receipt.navigation);await page.keyboard.press('Enter');
+  const chapter=page.locator('[data-story-navigation] a[href="#make"]');await tabToStable(page,chapter,receipt.navigation);await page.keyboard.press('Enter');
   await expect.poll(()=>page.evaluate(()=>({hash:location.hash,focused:document.activeElement===document.getElementById('make')}))).toEqual({hash:'#make',focused:true});
   receipt.chapter=await page.evaluate(()=>({hash:location.hash,y:scrollY,activeId:document.activeElement?.id}));
-  const trigger=page.locator('#make [data-inspect-figure]');await tabTo(page,trigger,receipt.triggerTabs);
+  const trigger=page.locator('#make [data-inspect-figure]');await tabToStable(page,trigger,receipt.triggerTabs);
   const comparisonBefore=await facts(page,trigger),count=context.pages().length;await page.keyboard.press('Enter');const comparison=page.locator('[data-source-comparison]');await expect(comparison).toBeVisible();await expect(comparison).not.toHaveAttribute('role','dialog');expect(context.pages()).toHaveLength(count);
   const original=comparison.locator('a[target="_blank"]');await expect(original).toHaveAccessibleName(/Open original source.*new tab/i);await expect(original).toHaveAttribute('href',await trigger.getAttribute('href'));
   const sourceImage=comparison.locator('img');await expect(sourceImage).toHaveAttribute('src',comparisonBefore.href);await expect.poll(()=>sourceImage.evaluate(node=>node.complete&&node.naturalWidth>0)).toBe(true);
   const dimensions=await sourceImage.evaluate(node=>[node.naturalWidth,node.naturalHeight]);
-  await tabTo(page,original,receipt.originalTabs);
+  await tabToStable(page,original,receipt.originalTabs);
   receipt.action=await original.evaluate(node=>{
    const box=r=>({left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height}),r=node.getBoundingClientRect(),hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
    const chrome=['[data-page-masthead]','[data-story-navigation]','[data-reading-tools]'].map(selector=>{const nodes=[...document.querySelectorAll(selector)],el=nodes[0];return{selector,count:nodes.length,visible:el?.checkVisibility({visibilityProperty:true,opacityProperty:true})??false,rect:el?box(el.getBoundingClientRect()):null};});

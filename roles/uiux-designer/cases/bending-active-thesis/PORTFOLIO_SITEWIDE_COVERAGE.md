@@ -35,8 +35,13 @@ passed 9/9 and actually completed native Back/Forward. One separately authorized
 Chromium diagnostic passed all four original link scenarios while retaining
 bounded native-event/DOM-observation/host-operation timings; it does not erase the
 failed batch or identify the remaining automation/service delay's hardware cause.
-No application input, original assertion or timeout was relaxed. Fresh exact
-549-public + 24-framework validation and same-artifact deployment remain pending.
+No application input, original assertion or timeout was relaxed. The first full hybrid run `40177499626` then executed all 549 browser identities
+once: 548 passed and the same Chromium Bending scenario timed out; 24 framework
+checks passed. The required gate correctly failed. A source-supported, case-local
+stable-handle observation correction preserves native Tab/focus/scroll evidence
+and the original 60-second budget, without changing application behavior or
+claiming to fix unresolved automation/service latency. Corrected qualification,
+a fresh exact full gate and same-artifact deployment remain pending.
 
 Depth-map photo trials (workshop and tower) and the Dot camera-detail trial were
 rejected after actual source/visual review and remain unpublished. Estimated photo
