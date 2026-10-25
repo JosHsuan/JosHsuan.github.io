@@ -92,7 +92,10 @@ const cases={
     ]
   }
 };
+// Exact optional Results dispatcher is independently anchored in entrance-hybrid-scenes.test.mjs.
+const entranceBefore="     </div>\n    </header>}\n    {project.sections.map((section,index)=>{\n     if(hybrid?.results.section===section)return <NativeStudyChapter key={section.id} project={project} section={section} index={index} scene={hybrid.results.scene} evidence={hybrid.results.evidence}/>;\n     const motion=project.motionMedia?.find(media=>media.chapter===section.id),evidence=evidenceByChapter.get(section.id);\n     return <section key={section.id} id={`${prefix}-${section.id}`} tabIndex={-1} className={styles.chapter} data-project-chapter={section.id} aria-labelledby={`${prefix}-${section.id}-heading`} {...layoutAttributes(projectStudyLayout(project,section.id))}>\n     <div className={styles.chapterInner}>\n",entranceAfter="     </div>\n    </header>}\n    {project.sections.map((section,index)=>{\n     if(hybrid?.results?.section===section)return <NativeStudyChapter key={section.id} project={project} section={section} index={index} scene={hybrid.results.scene} evidence={hybrid.results.evidence}/>;\n     const motion=project.motionMedia?.find(media=>media.chapter===section.id),evidence=evidenceByChapter.get(section.id);\n     return <section key={section.id} id={`${prefix}-${section.id}`} tabIndex={-1} className={styles.chapter} data-project-chapter={section.id} aria-labelledby={`${prefix}-${section.id}-heading`} {...layoutAttributes(projectStudyLayout(project,section.id))}>\n     <div className={styles.chapterInner}>\n";
 function verify(source,contract){
+ if(contract===cases['ProjectCaseStudy.jsx']){assert.equal(source.split(entranceAfter).length,2);source=source.replace(entranceAfter,entranceBefore);}
  let original=contract===cases['PortfolioHome.jsx']?originalHomeSource(source):source;
  for(const [before,after]of contract.replacements){
   assert.equal(original.split(after).length,2,'Each exact approved replacement occurs once');

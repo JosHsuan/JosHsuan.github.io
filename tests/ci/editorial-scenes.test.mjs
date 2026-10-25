@@ -12,6 +12,8 @@ const reversals={
   "roles/uiux-designer/cases/bending-active-thesis/components/ProjectCaseStudy.jsx": {
     "sha256": "1e8c9d59ca48c9bbaa7c272be569a6c28ec879063e444ed4cf0df48e7dda1913",
     "blocks": [
+      // Entrance exact833 reversal independently proved in entrance-hybrid-scenes.test.mjs.
+      ["     </div>\n    </header>}\n    {project.sections.map((section,index)=>{\n     if(hybrid?.results.section===section)return <NativeStudyChapter key={section.id} project={project} section={section} index={index} scene={hybrid.results.scene} evidence={hybrid.results.evidence}/>;\n     const motion=project.motionMedia?.find(media=>media.chapter===section.id),evidence=evidenceByChapter.get(section.id);\n     return <section key={section.id} id={`${prefix}-${section.id}`} tabIndex={-1} className={styles.chapter} data-project-chapter={section.id} aria-labelledby={`${prefix}-${section.id}-heading`} {...layoutAttributes(projectStudyLayout(project,section.id))}>\n     <div className={styles.chapterInner}>\n", "     </div>\n    </header>}\n    {project.sections.map((section,index)=>{\n     if(hybrid?.results?.section===section)return <NativeStudyChapter key={section.id} project={project} section={section} index={index} scene={hybrid.results.scene} evidence={hybrid.results.evidence}/>;\n     const motion=project.motionMedia?.find(media=>media.chapter===section.id),evidence=evidenceByChapter.get(section.id);\n     return <section key={section.id} id={`${prefix}-${section.id}`} tabIndex={-1} className={styles.chapter} data-project-chapter={section.id} aria-labelledby={`${prefix}-${section.id}-heading`} {...layoutAttributes(projectStudyLayout(project,section.id))}>\n     <div className={styles.chapterInner}>\n"],
       [
         "import InformationSkin from './InformationSkin';\nimport EntranceDiagramFocus from './EntranceDiagramFocus';\nimport {projectStudyEvidence} from './project-study-media.mjs';\nimport {projectStudyLayout,projectStudyEvidenceLayout} from './project-study-layout.mjs';\n",
         "import InformationSkin from './InformationSkin';\nimport EntranceDiagramFocus from './EntranceDiagramFocus';\nimport EditorialProjectStudy,{NativeStudyOpening,NativeStudyChapter} from './EditorialProjectStudy';\nimport {editorialProjectLayout,hybridProjectLayout} from './project-editorial-layout.mjs';\nimport {projectStudyEvidence} from './project-study-media.mjs';\nimport {projectStudyLayout,projectStudyEvidenceLayout} from './project-study-layout.mjs';\n"
@@ -68,7 +70,7 @@ const templates={
   // Exact Dot policy/CSS deltas are independently reversed in dot-hybrid-scenes.test.mjs.
   "roles/uiux-designer/cases/bending-active-thesis/components/EditorialProjectStudy.module.css": "fd89ea83120fba43a85c4e49d7707f99dcef519c8add49388a79b7e6a4159b52",
   // Exact HC-only addition is independently reversed in hc3dp-hybrid.test.mjs.
-  "roles/uiux-designer/cases/bending-active-thesis/components/project-editorial-layout.mjs": "1200f7b3e85e741e2c5e8dcab9a97ef8e3171206e7cefd9ef09ddecd6198691d"
+  "roles/uiux-designer/cases/bending-active-thesis/components/project-editorial-layout.mjs": "fc911953c502dd2835a17e2964dd45627c44217414ca676d7757daecffa15f94"
 };
 function original(path,source){
  for(const [before,after]of reversals[path].blocks){assert.equal(source.split(after).length,2,'Unique exact approved context');source=source.replace(after,before);}
