@@ -62,3 +62,57 @@ test('Cas editorial scenes retain native chapter-owned original sources and read
   expect(receipt.requests).toEqual([]);
  }catch(error){primary=error;throw error;}finally{try{const path=info.outputPath('editorial-scenes.json');await writeFile(path,JSON.stringify(receipt,null,2));await info.attach('editorial-scenes',{path,contentType:'application/json'});}catch(error){if(!primary)throw error;}}
 });
+
+async function editorialEntered(page){
+ await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});
+ await expect(page.locator('[data-site-loader]')).toBeHidden();
+}
+function nativeOwnerFacts(){
+ const background=window.__globalBackground.inspect();
+ return {background,documentId:performance.timeOrigin,y:scrollY,sourceCount:document.querySelectorAll('[data-editorial-image]').length,inert:document.querySelector('main').inert};
+}
+test('Cas native document history releases or suspends the editorial owner and restores one readable lifetime',async({page},info)=>{
+ const receipt={scope:'Real document navigation; BFCache retention is asserted only when actually observed.',rows:[]};let primary;
+ try{
+  await page.addInitScript(()=>addEventListener('pageshow',event=>{window.__editorialPageShow={trusted:event.isTrusted,persisted:event.persisted};}));
+  await page.goto(`/projects/${project.slug}/`);await editorialEntered(page);
+  await page.locator('[data-project-chapter-link="system"]').click();
+  await expect(page).toHaveURL(new RegExp(`#${project.id}-system$`));
+  const before=await page.evaluate(nativeOwnerFacts);receipt.rows.push({phase:'before',...before});
+  expect(before.sourceCount).toBe(10);expect(before.background.activeBindings).toBe(1);expect(before.background.driver.projectStudy.backdrop).toBeNull();
+  await page.evaluate(()=>addEventListener('pagehide',event=>sessionStorage.setItem('editorial-departure',JSON.stringify({trusted:event.isTrusted,persisted:event.persisted,documentId:performance.timeOrigin,background:window.__globalBackground.inspect()})),{once:true}));
+  await page.locator('[data-portfolio-navigation] a[href="/contact/"]').click();await editorialEntered(page);
+  const departure=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('editorial-departure')));receipt.rows.push({phase:'departure',...departure});
+  expect(departure.trusted).toBe(true);
+  if(departure.persisted){expect(departure.background.driver.lifecycle.suspended).toBe(true);expect(departure.background.activeBindings).toBe(1);}
+  else{expect(departure.background.driver.disposed).toBe(true);expect(departure.background.driver.events.nativeListeners).toBe(0);expect(departure.background.activeBindings).toBe(0);}
+  await page.goBack();await editorialEntered(page);
+  const restored=await page.evaluate(nativeOwnerFacts),show=await page.evaluate(()=>window.__editorialPageShow);receipt.rows.push({phase:'back',show,...restored});
+  expect(show.trusted).toBe(true);if(show.persisted){expect(departure.persisted).toBe(true);expect(restored.documentId).toBe(departure.documentId);}
+  expect(restored.background.activeBindings).toBe(1);expect(restored.background.driver.lifecycle.suspended).toBe(false);expect(restored.background.driver.projectStudy.presentation).toBe('editorial-scenes');expect(restored.background.driver.projectStudy.scene).toBeNull();expect(restored.sourceCount).toBe(10);expect(restored.inert).toBe(false);
+  await page.goForward();await editorialEntered(page);await expect(page).toHaveURL(/\/contact\/$/);
+  receipt.rows.push({phase:'forward',url:page.url()});
+ }catch(error){primary=error;throw error;}finally{try{await writeFile(info.outputPath('editorial-native-history.json'),JSON.stringify(receipt,null,2));}catch(error){if(!primary)throw error;}}
+});
+
+test('Cas failed native photograph retains its original source action and readable chapter without a fixed fallback owner',async({page},info)=>{
+ const source=project.sections.find(section=>section.id==='context').media[0],receipt={source:source.src,requests:[]};let primary;
+ page.on('request',request=>{if(/\.(?:glb|hdr)(?:\?|$)/.test(request.url()))receipt.requests.push(request.url());});
+ try{
+  await page.route('**'+source.src,request=>request.abort());
+  await page.goto(`/projects/${project.slug}/`);await page.waitForFunction(()=>['entered','failed'].includes(window.__site?.inspect().phase),null,{timeout:WAIT});
+  await expect(page.locator('[data-site-loader]')).toBeHidden();
+  const figure=page.locator(`[data-editorial-source="${source.src}"]`);await expect(figure).toHaveAttribute('data-editorial-image-state','failed');
+  await wheelTo(page,figure.locator('[role="status"]'));await expect(figure.locator('[role="status"]')).toBeVisible();
+  await expect(figure.locator('figcaption > p')).toHaveText(source.caption);await expect(figure.locator('figcaption > span:not([data-information-skin])')).toHaveText(source.credit);
+  const action=figure.locator('figcaption a');await wheelTo(page,action);await expect(action).toHaveAttribute('href',source.src);await expect(action).toHaveAttribute('target','_blank');
+  receipt.reading=await figure.evaluate(geometry);await page.screenshot({path:info.outputPath('editorial-native-image-failure.png'),scale:'device'});
+  const actionRect=receipt.reading.caption.action;expect(actionRect.left).toBeGreaterThanOrEqual(0);expect(actionRect.right).toBeLessThanOrEqual(receipt.reading.viewport.width);expect(actionRect.top).toBeGreaterThanOrEqual(0);expect(actionRect.bottom).toBeLessThanOrEqual(receipt.reading.viewport.height);
+  for(const owner of receipt.reading.chrome){expect(owner.count).toBe(1);for(const box of owner.boxes)expect(overlap(actionRect,box)).toBe(0);}
+  expect(await action.evaluate(node=>{const r=node.getBoundingClientRect(),hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return hit===node||node.contains(hit);})).toBe(true);
+  expect(receipt.reading.caption.action.height).toBeGreaterThanOrEqual(44);expect(receipt.reading.ownership.backdrop).toBeNull();expect(receipt.reading.ownership.scene).toBeNull();expect(receipt.reading.ownership.nativeImages.find(row=>row.source===source.src).state).toBe('failed');
+  const state=await page.evaluate(()=>window.__site.inspect());receipt.entry=state;
+  expect(state.history.filter(row=>row.id===state.id&&['entered','failed','cancelled'].includes(row.phase))).toHaveLength(1);
+  await page.locator('[data-project-chapter-link="credits"]').click();await expect(page.locator('[data-project-chapter="credits"]')).toBeInViewport();expect(await page.locator('main').evaluate(node=>node.inert)).toBe(false);expect(receipt.requests).toEqual([]);
+ }catch(error){primary=error;throw error;}finally{try{await writeFile(info.outputPath('editorial-native-image-failure.json'),JSON.stringify(receipt,null,2));}catch(error){if(!primary)throw error;}}
+});

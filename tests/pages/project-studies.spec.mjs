@@ -99,6 +99,17 @@ async function fullCanvas(page){
 }
 async function decodeSource(chapter,image){
  const identity=await chapter.evaluate(node=>({project:node.closest('[data-project-study]').dataset.projectStudy,chapter:node.dataset.projectChapter}));
+ if(identity.project==='project-caschlatsch'){
+  const root=chapter.locator('xpath=ancestor::main[@data-project-study]'),canonical=root.locator(`[data-editorial-source="${image.src}"]`);await expect(canonical).toHaveCount(1);
+  const owner=await canonical.evaluate(node=>node.closest('[data-project-chapter]').dataset.projectChapter);
+  if(owner!==identity.chapter&&identity.chapter!=='overview'){
+   const reference=chapter.locator(`[data-editorial-source-reference="${image.src}"]`);await expect(reference).toHaveCount(1);await expect(reference).toContainText(image.caption);await expect(reference).toContainText(image.credit);await expect(reference.locator('a')).toHaveAttribute('href',image.src);await expect(reference.locator('a')).toHaveAttribute('target','_blank');
+  }
+  if(identity.chapter==='overview')expect(owner).toBe('system');
+  const original=canonical.locator('[data-editorial-image]');await expect(original).toHaveCount(1);await original.scrollIntoViewIfNeeded();
+  expect(await original.evaluate(async node=>{await node.decode();return{src:node.getAttribute('src'),width:node.naturalWidth,height:node.naturalHeight,fit:getComputedStyle(node).objectFit,alt:node.alt};})).toEqual({src:image.src,width:image.width,height:image.height,fit:'contain',alt:image.alt});
+  await expect(canonical.locator('figcaption > p')).toHaveText(image.caption);await expect(canonical.locator('figcaption > span:not([data-information-skin])')).toHaveText(image.credit);await expect(canonical.locator('figcaption > a')).toHaveAttribute('href',image.src);await expect(original.locator('xpath=ancestor::a[1]')).toHaveAttribute('href',image.src);await expect(original.locator('xpath=ancestor::a[1]')).toHaveAttribute('target','_blank');return;
+ }
  const project=studies.find(item=>item.id===identity.project),motion=project.motionMedia?.find(item=>item.chapter===identity.chapter&&item.poster.src===image.src);
  const element=chapter.locator(`img[src="${image.src}"]`).first();
  if(await element.count()===0){
@@ -305,7 +316,7 @@ for(const project of studies)test(`${project.shortTitle} preserves every source 
    await expect(page.locator('[data-site-loader]')).toBeHidden();
    await expect(page.locator('[data-project-chapter]')).toHaveCount(project.sections.length+2);await expect(page.locator('canvas')).toHaveCount(1);await expect(page.locator('[data-project-study-canvas]')).toHaveCount(0);
    await decodeSource(page.locator('[data-project-chapter="overview"]'),project.hero);
-   const fullSource=page.locator(`[data-project-chapter="overview"] a[href="${project.hero.src}"]`);
+   const fullSource=project.id==='project-caschlatsch'?page.locator(`[data-editorial-source="${project.hero.src}"] figcaption > a`):page.locator(`[data-project-chapter="overview"] a[href="${project.hero.src}"]`);
    await readNative(fullSource);
    const [sourcePage]=await Promise.all([context.waitForEvent('page'),fullSource.click()]);
    await sourcePage.waitForURL(new URL(project.hero.src,page.url()).href);await sourcePage.waitForLoadState('domcontentloaded');expect(new URL(sourcePage.url()).pathname).toBe(project.hero.src);
@@ -317,7 +328,8 @@ for(const project of studies)test(`${project.shortTitle} preserves every source 
     await expect(chapter).toHaveAttribute('id',`${project.id}-${section.id}`);await expect(chapter).toHaveAttribute('aria-labelledby',`${project.id}-${section.id}-heading`);
     // A native chapter link enters the source-first section; its heading can
     // follow a complete image/caption instead of sharing the initial viewport.
-    await expect(chapter).toBeInViewport();await expect(chapter.locator('[data-project-media] img')).toBeInViewport();
+    await expect(chapter).toBeInViewport();
+    if(project.id==='project-caschlatsch'){const native=chapter.locator('[data-editorial-image]').first();await native.scrollIntoViewIfNeeded();await expect(native).toBeInViewport();}else await expect(chapter.locator('[data-project-media] img')).toBeInViewport();
     await expect(heading).toHaveText(section.title);await readNative(heading);
     for(const paragraph of section.paragraphs)await readNative(chapter.getByText(paragraph,{exact:true}));
     for(const image of section.media)await decodeSource(chapter,image);

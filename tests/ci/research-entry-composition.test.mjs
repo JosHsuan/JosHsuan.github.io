@@ -7,6 +7,7 @@ import {createHash} from 'node:crypto';
 const root=new URL('../../',import.meta.url);
 const read=path=>readFile(new URL(path,root));
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
+// Editorial allowlist is independently reversed by editorial-scenes.test.mjs.
 const contracts={
   "roles/uiux-designer/cases/bending-active-thesis/components/EntryLoader.jsx": {
     "baselineSha256": "e20d6b44bd6f4df4741e487a7ec010ccf3024e5b40b2c385ee97aba034cf3124",
@@ -65,7 +66,7 @@ const contracts={
     ]
   },
   "scripts/build-pages.mjs": {
-    "baselineSha256": "24f2144ee2392091a739c48a41faa64e52d6cd888890f46fbbd883ce7190eef6",
+    "baselineSha256": "3e50c10dbab389f2f0bbadc85693b53c82699858d7ed76395dd26064339e5200",
     "replacements": [
       [
         "  'components/LiquidGlassSkin.jsx',\n  'components/EntryLoader.jsx', 'components/entry-loader.module.css',\n  'components/EvidenceInspector.jsx', 'components/evidence-inspector.module.css',\n  'components/cinematic.module.css', 'components/story-input.js', 'components/story-response.mjs',\n",

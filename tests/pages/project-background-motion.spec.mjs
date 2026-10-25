@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-import {readFile} from 'node:fs/promises';
+import {readFile,writeFile} from 'node:fs/promises';
 import {WAIT,frames,scenarioTimeout} from './case-helpers.mjs';
 
 const projects=JSON.parse(await readFile(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/project-studies.json',import.meta.url),'utf8')).projects;
@@ -41,40 +41,6 @@ async function hold(page,key){
   return stage?.key===key&&stage.mode==='hold'&&stage.settled&&!stage.transition&&stage.pose.opacity===1&&stage.pose.x===0;
  },key,{timeout:WAIT});
  return backdrop(page);
-}
-// Semantic chapters can intentionally reuse one image source. The backdrop
-// owns one physical figure per source key, not one painted copy per chapter.
-async function heldImageOwnership(page,project,chapter){
- const expected=chapter==='overview'?project.hero:project.sections.find(section=>section.id===chapter).media[0];
- const receipt=await page.evaluate(()=>{
-  const root=document.querySelector('[data-project-study]');
-  const stage=window.__globalBackground.inspect().driver.projectStudy.backdrop.stage;
-  const active=[...document.querySelectorAll('[data-project-media][data-project-media-active]')];
-  const owners=active.slice(0,2).map(figure=>{
-   const images=[...figure.querySelectorAll('[data-project-media-poster]')],image=images[0];
-   const css=getComputedStyle(figure),imageCSS=image?getComputedStyle(image):null,box=image?.getBoundingClientRect();
-   return {chapter:figure.dataset.projectMedia,imageCount:images.length,src:image?.getAttribute('src'),currentSrc:image?.currentSrc,
-    complete:image?.complete,naturalWidth:image?.naturalWidth,naturalHeight:image?.naturalHeight,
-    opacity:css.opacity,display:css.display,visibility:css.visibility,imageOpacity:imageCSS?.opacity,imageDisplay:imageCSS?.display,imageVisibility:imageCSS?.visibility,
-    box:box?{x:box.x,y:box.y,width:box.width,height:box.height}:null};
-  });
-  return {semanticChapter:root.dataset.projectActiveChapter,presentedSource:root.dataset.projectPresentedSource,
-   stage:{key:stage.key,chapter:stage.chapter,mode:stage.mode,settled:stage.settled,pose:stage.pose,sequence:stage.sequence},
-   activeCount:active.length,owners,viewport:{width:innerWidth,height:innerHeight}};
- });
- expect(receipt.semanticChapter).toBe(chapter);expect(receipt.presentedSource).toBe(imageKey(project,chapter));
- expect(receipt.stage).toMatchObject({key:imageKey(project,chapter),mode:'hold',settled:true,pose:{x:0,y:0,opacity:1}});
- expect(receipt.activeCount).toBe(1);const owner=receipt.owners[0];
- expect(owner.chapter).toBe(receipt.stage.chapter);expect(owner.imageCount).toBe(1);
- expect(owner.src).toBe(expected.src);expect(new URL(owner.currentSrc).pathname).toBe(expected.src);
- expect(owner.complete).toBe(true);expect(owner.naturalWidth).toBe(expected.width);expect(owner.naturalHeight).toBe(expected.height);
- expect(owner.opacity).toBe('1');expect(owner.imageOpacity).toBe('1');
- expect(owner.display).not.toBe('none');expect(owner.imageDisplay).not.toBe('none');
- expect(owner.visibility).toBe('visible');expect(owner.imageVisibility).toBe('visible');
- expect(owner.box.width).toBeGreaterThan(0);expect(owner.box.height).toBeGreaterThan(0);
- expect(owner.box.x).toBeLessThan(receipt.viewport.width);expect(owner.box.x+owner.box.width).toBeGreaterThan(0);
- expect(owner.box.y).toBeLessThan(receipt.viewport.height);expect(owner.box.y+owner.box.height).toBeGreaterThan(0);
- return receipt;
 }
 // Failure-only evidence; never retries, seeks, resumes or polls the source.
 async function attachNativeMediaFailure(page,media,phase,initialTime=null){
@@ -141,73 +107,23 @@ async function nativeVideo(page,media){
  return video;
 }
 
-/** A read-only observer records delivered application state and actual CSS
- * writes. It never selects a chapter, advances a controller or fakes readiness. */
-function tracePassage(page,key){
- return page.evaluate(({key,timeout})=>new Promise((resolve,reject)=>{
-  const samples=[];let raf=null,last=null;
-  const timer=setTimeout(()=>{if(raf!==null)cancelAnimationFrame(raf);reject(Error('Native source passage did not hold: '+JSON.stringify(last)));},timeout);
-  const read=()=>{
-   const state=window.__globalBackground?.inspect().driver.projectStudy?.backdrop.stage;
-   if(state){
-    const figure=document.querySelector('[data-project-media-active]'),style=figure?getComputedStyle(figure):null,matrix=style&&style.transform!=='none'?new DOMMatrixReadOnly(style.transform):null;
-    last={at:performance.now(),key:state.key,mode:state.mode,pose:{...state.pose},transition:state.transition?structuredClone(state.transition):null,painted:style?{x:(matrix?.m41??0)/innerWidth,y:(matrix?.m42??0)/innerHeight,opacity:Number(style.opacity)}:null};
-    samples.push(last);
-    if(state.key===key&&state.mode==='hold'&&state.settled&&!state.transition){clearTimeout(timer);resolve({samples,completedAt:performance.now(),stage:state});return;}
-   }
-   raf=requestAnimationFrame(read);
-  };raf=requestAnimationFrame(read);
- }),{key,timeout:WAIT});
-}
-function actualPassage(trace,direction){
- const exit=trace.samples.find(sample=>sample.mode==='exit'&&sample.pose.opacity>0&&sample.pose.opacity<1);
- const entry=trace.samples.find(sample=>sample.mode==='entry'&&sample.pose.opacity>0&&sample.pose.opacity<1);
- expect(exit,'A real departing source is observed between its endpoint poses').toBeTruthy();
- expect(entry,'A real prepared source is observed between its endpoint poses').toBeTruthy();
- expect(exit.transition.duration).toBe(.95);expect(entry.transition.duration).toBe(1.1);
- expect(Math.sign(exit.pose.x)).toBe(-direction);expect(Math.sign(entry.pose.x)).toBe(direction);
- for(const sample of [exit,entry]){
-  expect(sample.transition.elapsed).toBeGreaterThan(0);expect(sample.transition.elapsed).toBeLessThan(sample.transition.duration);
-  expect(sample.painted).toBeTruthy();expect(sample.painted.x).toBeCloseTo(sample.pose.x,4);expect(sample.painted.y).toBeCloseTo(sample.pose.y,4);expect(sample.painted.opacity).toBeCloseTo(sample.pose.opacity,5);
- }
- // Native foreground elapsed time must include the unconsumed exit and the
- // actual entry. Waiting for decode can lengthen this bound, never shorten it.
- expect((trace.completedAt-exit.at)/1000).toBeGreaterThanOrEqual(.95-exit.transition.elapsed+1.1-.1);
- closed(trace.stage.history);
-}
-
-test('Caschlatsch portfolio photographs and plates use actual finite forward/reverse passages, latest wins, and Credits retains the source',async({page})=>{
- test.setTimeout(scenarioTimeout(120000));
- await open(page,caschlatsch);await hold(page,imageKey(caschlatsch,'overview'));
- const forward=tracePassage(page,imageKey(caschlatsch,'context'));await select(page,'context');actualPassage(await forward,1);
- const reverse=tracePassage(page,imageKey(caschlatsch,'overview'));await select(page,'overview');actualPassage(await reverse,-1);
- await select(page,'system');const system=await hold(page,imageKey(caschlatsch,'system'));
- // These chapters use distinct original photographs while their complete
- // technical plates remain foreground evidence. Reused photographs share a
- // physical source owner; changing source still requires a finite passage.
- const xrKey=imageKey(caschlatsch,'xr-guidance');expect(xrKey).not.toBe(system.stage.key);
- const toXR=tracePassage(page,xrKey);await select(page,'xr-guidance');const xrPassage=await toXR;actualPassage(xrPassage,1);
- const xrOwnership=await heldImageOwnership(page,caschlatsch,'xr-guidance');
- expect(xrPassage.stage.sequence).toBeGreaterThan(system.stage.sequence);
- const toSystem=tracePassage(page,imageKey(caschlatsch,'system'));await select(page,'system');const systemPassage=await toSystem;actualPassage(systemPassage,-1);
- const systemOwnership=await heldImageOwnership(page,caschlatsch,'system');
- expect(systemPassage.stage.sequence).toBeGreaterThan(xrPassage.stage.sequence);
- await test.info().attach('Caschlatsch-original-portfolio-source-passages',{body:JSON.stringify({systemKey:system.stage.key,xrKey,xrPassage,systemPassage,ownership:[xrOwnership,systemOwnership]}),contentType:'application/json'});
- await select(page,'context');
- await page.waitForFunction(()=>{const stage=window.__globalBackground.inspect().driver.projectStudy.backdrop.stage;return stage.mode==='exit'&&stage.pose.opacity>0&&stage.pose.opacity<1;},null,{timeout:WAIT});
- const superseded=(await backdrop(page)).stage.request.id;
- // Pointer actionability can legitimately wait for the optical rail to settle,
- // completing the passage before the next click. Native keyboard activation
- // creates the intended rapid interruption without bypassing application state.
- await selectWithKeyboard(page,'system');await selectWithKeyboard(page,'results');
- const final=await hold(page,imageKey(caschlatsch,'results'));
- expect(final.stage.history.filter(item=>item.id===superseded&&item.status==='cancelled')).toHaveLength(1);
- closed(final.stage.history);
- const retained={key:final.stage.key,sequence:final.stage.sequence,history:final.stage.history};
- await select(page,'credits');await frames(page,3);
- const credits=await backdrop(page);expect(credits.stage.key).toBe(retained.key);expect(credits.stage.mode).toBe('hold');expect(credits.stage.sequence).toBe(retained.sequence);expect(credits.stage.history).toEqual(retained.history);
- await expect(page.locator('[data-project-chapter="credits"]')).toBeInViewport();
- await expect(page.locator('[data-project-model-stage]')).toHaveCount(0);
+test('Caschlatsch native chapter sources retain forward/reverse ownership and Credits without fixed copies',async({page},info)=>{
+ test.setTimeout(scenarioTimeout(120000));const rows=[];let primary;
+ try{
+  expect((await page.goto(route(caschlatsch))).status()).toBe(200);await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});await expect(page.locator('[data-site-loader]')).toBeHidden();
+  const root=page.locator('[data-study-presentation="editorial-scenes"]');await expect(root).toHaveCount(1);
+  const sources={context:'portfolio-tower-on-site.webp',system:'portfolio-timber-model.webp','xr-guidance':'portfolio-xr-workshop.webp',making:'portfolio-robotic-assembly.webp',results:'portfolio-timber-interior.webp'};
+  for(const chapter of ['context','overview','system','xr-guidance','system','making','results','credits']){
+   await select(page,chapter);const section=root.locator(`[data-project-chapter="${chapter}"]`);await expect(section).toBeInViewport();await expect(page).toHaveURL(new RegExp(`#${caschlatsch.id}-${chapter}$`));
+   const state=await page.evaluate(()=>{const root=document.querySelector('[data-project-study]'),project=window.__globalBackground.inspect().driver.projectStudy;return {y:scrollY,chapter:root.dataset.projectActiveChapter,presentation:project.presentation,scene:project.scene,backdrop:project.backdrop,nativeImages:project.nativeImages,sources:[...root.querySelectorAll('[data-editorial-source]')].map(node=>({src:node.dataset.editorialSource,chapter:node.closest('[data-project-chapter]').dataset.projectChapter}))};});rows.push(state);
+   expect(state.chapter).toBe(chapter);expect(state.presentation).toBe('editorial-scenes');expect(state.scene).toBeNull();expect(state.backdrop).toBeNull();expect(state.sources).toHaveLength(10);expect(new Set(state.sources.map(row=>row.src)).size).toBe(10);await expect(root.locator('[data-project-media],[data-project-model-stage],canvas')).toHaveCount(0);
+   if(sources[chapter]){
+    const source=caschlatsch.sections.find(s=>s.id===chapter).media.find(image=>image.src.endsWith('/'+sources[chapter])),figure=section.locator(`[data-editorial-source="${source.src}"]`),image=figure.locator('[data-editorial-image]');await expect(figure).toHaveCount(1);await image.scrollIntoViewIfNeeded();await expect(image).toBeInViewport();
+    expect(await image.evaluate(async node=>{await node.decode();return {src:new URL(node.currentSrc).pathname,width:node.naturalWidth,height:node.naturalHeight,fit:getComputedStyle(node).objectFit,alt:node.alt};})).toEqual({src:source.src,width:source.width,height:source.height,fit:'contain',alt:source.alt});await expect(figure.locator('figcaption > p')).toHaveText(source.caption);await expect(figure.locator('figcaption > span:not([data-information-skin])')).toHaveText(source.credit);await expect(figure.locator('figcaption > a')).toHaveAttribute('href',source.src);
+   }else{await expect(section.locator('[data-editorial-image]')).toHaveCount(0);}
+  }
+  for(const credit of caschlatsch.credits)await expect(root.locator('[data-project-chapter="credits"]')).toContainText(credit.names);
+ }catch(error){primary=error;throw error;}finally{try{const path=info.outputPath('Caschlatsch-native-source-ownership.json');await writeFile(path,JSON.stringify({scope:'Native chapter anchors and real DOM image reading; no obsolete fixed-image transition or latest-wins clock.',rows},null,2));await info.attach('Caschlatsch-native-source-ownership',{path,contentType:'application/json'});}catch(error){if(!primary)throw error;}}
 });
 
 for(const project of animated)for(const media of project.motionMedia)test(`${project.shortTitle} (${media.id}) decodes the pinned native recording with original dimensions, timing and advancing media time`,async({page})=>{
