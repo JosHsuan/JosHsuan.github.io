@@ -40,8 +40,11 @@ once: 548 passed and the same Chromium Bending scenario timed out; 24 framework
 checks passed. The required gate correctly failed. A source-supported, case-local
 stable-handle observation correction preserves native Tab/focus/scroll evidence
 and the original 60-second budget, without changing application behavior or
-claiming to fix unresolved automation/service latency. Corrected qualification,
-a fresh exact full gate and same-artifact deployment remain pending.
+claiming to fix unresolved automation/service latency. The single stable-handle qualification also timed out (3/4 passed), so it is not a
+validated timing fix and no full rerun is inferred. A bounded same-evaluate
+internal-timestamp diagnostic retains trace/input/guards/budget to distinguish
+inspector work from external observation/service waits. Fresh exact full acceptance
+and same-artifact deployment remain pending.
 
 Depth-map photo trials (workshop and tower) and the Dot camera-detail trial were
 rejected after actual source/visual review and remain unpublished. Estimated photo
