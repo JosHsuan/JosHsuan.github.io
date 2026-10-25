@@ -61,6 +61,16 @@ existing BFCache and delegated Bending behavior; it does not pretend native
 animation completed or repair the underlying pending-play behavior. Focused
 source/unit review passed; actual multi-engine history/policy qualification and
 a fresh full gate remain mandatory before publication.
+The exact `bbd145a` four-file qualification subsequently passed 87/87
+(29 per Chromium, WebKit and mobile Chromium). Independently verified native
+navigation entries show ordinary initial navigation retaining native animation
+acknowledgements, while genuine fresh Back and Forward use `history-static`
+only after actual prerequisites. All observed departures were non-BFCache;
+no retained-BFCache execution or underlying native-play repair is claimed.
+Original model/source lifetime, static/no-JS, failure access and Cas/Special
+history guards remained intact. A separately authorized fresh required
+561-public-plus-24-framework gate is next; these scoped passes do not authorize
+publication or erase either preceding failed batch. Live remains `ad83`.
 
 The preceding verified live baseline was `d3eabb897e787287eefdb632d119718bffc35f61`.
 Its [full validation 40169507337](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/40169507337)
