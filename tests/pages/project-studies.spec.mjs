@@ -397,7 +397,7 @@ test('the original Dot source supports native drag and keyboard inspection, retu
     // chapter command, rather than racing it or relaxing viewport geometry.
     await page.waitForFunction(()=>{
      const study=window.__globalBackground?.inspect().driver.projectStudy,scene=study?.scene,source=study?.backdrop.stage;
-     return scrollY===0&&study?.chapters.chapter==='overview'&&document.querySelector('[data-project-study]')?.dataset.projectActiveChapter==='overview'&&scene?.chapter==='overview'&&scene.motion.mode==='absent'&&scene.motion.settled&&!scene.motion.transition&&source?.chapter==='overview'&&source.mode==='hold'&&source.settled&&!source.transition;
+     return scrollY===0&&study?.chapters.chapter==='overview'&&document.querySelector('[data-project-study]')?.dataset.projectActiveChapter==='overview'&&scene?.chapter==='overview'&&scene.motion.mode==='absent'&&scene.motion.settled&&!scene.motion.transition&&source?.chapter==='overview'&&source.kind==='native'&&source.key==='native:overview'&&source.mode==='absent'&&source.pose.opacity===0&&source.request?.absent===true&&source.settled&&!source.transition;
     },null,{timeout:WAIT});
     await semanticChapter('overview',false);
    }
