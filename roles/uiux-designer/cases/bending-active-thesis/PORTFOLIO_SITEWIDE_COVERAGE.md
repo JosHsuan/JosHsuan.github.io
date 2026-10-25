@@ -63,9 +63,11 @@ ResizeObserver-triggered layout paint. The required gate correctly rejected it.
 The single target/box diagnostic reproduced a genuine model-label height change
 when Reduced selected different source text; no equal-box suppression is justified.
 A bounded desktop intrinsic-variant reserve is approved, preserving text, compact
-typography, mobile rules, real resize handling and the strict idle guard. Actual
-geometry qualification, fresh exact full acceptance and same-artifact deployment
-remain pending.
+typography, mobile rules, real resize handling and the strict idle guard. Corrected WebKit qualification passed 4/4 with original strict idle guards;
+actual Origami-to-Opening tracks/card stayed stable and its native screenshot
+received scoped readability acceptance. All-variant source contracts do not
+constitute all-variant pixels. Fresh exact full acceptance and same-artifact
+deployment remain pending.
 
 Depth-map photo trials (workshop and tower) and the Dot camera-detail trial were
 rejected after actual source/visual review and remain unpublished. Estimated photo
