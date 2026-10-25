@@ -42,6 +42,11 @@ async function hold(page,key){
  },key,{timeout:WAIT});
  return backdrop(page);
 }
+// Dot's documentary opening and closing sources are native DOM, not fixed image owners.
+async function dotNative(page,chapter){
+ await page.waitForFunction(chapter=>{const s=window.__globalBackground.inspect().driver.projectStudy.backdrop.stage;return s.key===`native:${chapter}`&&s.kind==='native'&&s.chapter===chapter&&s.mode==='absent'&&s.settled&&s.pose.opacity===0&&s.request?.absent===true;},chapter,{timeout:WAIT});
+ const state=await backdrop(page);await expect(page.locator('[data-project-media-active],[data-project-model-active]')).toHaveCount(0);closed(state.stage.history);return state;
+}
 // Failure-only evidence; never retries, seeks, resumes or polls the source.
 async function attachNativeMediaFailure(page,media,phase,initialTime=null){
  try{
@@ -246,21 +251,34 @@ test('Mode/s physical recordings and simulation retain separate native times thr
  closed((await backdrop(page)).stage.history);
 });
 
-test('Dot exchanges photographs, the original model and video through one transaction while pause preserves native reading and media time',async({page})=>{
- test.setTimeout(scenarioTimeout(120000));const media=dot.motionMedia[0];
- await open(page,dot);await hold(page,imageKey(dot,'overview'));await select(page,'context');await hold(page,imageKey(dot,'context'));
+test('Dot exchanges photographs, the original model and video through one transaction while pause preserves native reading and media time',async({page},info)=>{
+ test.setTimeout(scenarioTimeout(120000));const media=dot.motionMedia[0],nativeRows=[];let primary,sameVideo;
+ try{
+ await open(page,dot);nativeRows.push({chapter:'overview',state:await dotNative(page,'overview')});await select(page,'context');await hold(page,imageKey(dot,'context'));
  await select(page,'system');await hold(page,`model:${dot.model.sha256}`);
  const model=await page.evaluate(()=>window.__globalBackground.inspect().driver.projectStudy.scene);
  expect(model.externalStage).toBe(true);expect(model.resource.successfulPaint).toBe(true);expect(model.resource.sourceRevision).toBe(dot.model.sha256);expect(model.resource.view.chapter).toBe('system');
  await expect(page.locator('[data-project-model-stage]')).toHaveAttribute('data-project-model-active','');await expect(page.locator('[data-project-media-active]')).toHaveCount(0);
- await select(page,media.chapter);const video=await nativeVideo(page,media);await expect(page.locator('[data-project-model-stage]')).not.toHaveAttribute('data-project-model-active','');
- await select(page,'results');await hold(page,imageKey(dot,'results'));expect((await mediaFacts(page,media.id)).paused).toBe(true);
- await select(page,media.chapter);await nativeVideo(page,media);
+ await select(page,media.chapter);const video=await nativeVideo(page,media);sameVideo=await video.elementHandle();await expect(page.locator('[data-project-model-stage]')).not.toHaveAttribute('data-project-model-active','');
+ let stoppedTime;
+ for(const chapter of ['results','credits']){
+  await select(page,chapter);const state=await dotNative(page,chapter),record=state.media.find(item=>item.id===media.id);nativeRows.push({chapter,state,record});
+  expect(record).toMatchObject({source:media.src,active:false,paused:true,playing:false,playPending:false,callbackPending:false,deadlinePending:false});stoppedRecovery(record);
+  if(chapter==='results')stoppedTime=record.currentTime;else expect(record.currentTime).toBe(stoppedTime);
+  if(chapter==='results')for(const source of dot.sections.find(section=>section.id==='results').media){const figure=page.locator(`[data-project-native-source="results"] [data-editorial-source="${source.src}"]`);await expect(figure).toHaveCount(1);await expect(figure.locator('figcaption > p')).toHaveText(source.caption);await expect(figure.locator('figcaption > a')).toHaveAttribute('href',source.src);}
+ }
+ expect(await video.evaluate(node=>node.currentTime)).toBe(stoppedTime);
+ await select(page,media.chapter);await nativeVideo(page,media);expect(await sameVideo.evaluate((node,id)=>node.isConnected&&node===document.querySelector(`[data-project-motion-id="${id}"]`),media.id)).toBe(true);
  const toggle=page.locator('[data-study-motion-toggle]');await toggle.click();await expect(toggle).toHaveAttribute('aria-pressed','true');
  await expect.poll(()=>video.evaluate(node=>node.paused),{timeout:WAIT}).toBe(true);const paused=await video.evaluate(node=>node.currentTime);await frames(page,5);expect(await video.evaluate(node=>node.currentTime)).toBe(paused);
- const before=await page.evaluate(()=>scrollY);await select(page,'results');await hold(page,imageKey(dot,'results'));expect(await page.evaluate(()=>scrollY)).not.toBe(before);expect(await video.evaluate(node=>node.currentTime)).toBe(paused);
+ const before=await page.evaluate(()=>scrollY);await select(page,'results');const pausedNative=await dotNative(page,'results');nativeRows.push({phase:'manual-pause-native-results',state:pausedNative});stoppedRecovery(pausedNative.media.find(item=>item.id===media.id));expect(await page.evaluate(()=>scrollY)).not.toBe(before);expect(await video.evaluate(node=>node.currentTime)).toBe(paused);
  await toggle.click();await expect(toggle).toHaveAttribute('aria-pressed','false');await select(page,media.chapter);await playing(page,media);
  closed((await backdrop(page)).stage.history);
+ }catch(error){primary=error;throw error;}finally{
+  let cleanupError;try{await sameVideo?.dispose();}catch(error){cleanupError=error;}
+  try{const path=info.outputPath('Dot-native-absence-reverse-pause.json');await writeFile(path,JSON.stringify({scope:'Original looping recording and same native element; native Results/Credits absence, no finite-ended/replay substitution.',nativeRows},null,2));await info.attach('Dot-native-absence-reverse-pause',{path,contentType:'application/json'});}catch(error){cleanupError??=error;}
+  if(!primary&&cleanupError)throw cleanupError;
+ }
 });
 
 test('real history departure retains or disposes native media correctly, and a real reload clears the departed source and callbacks',async({page})=>{
@@ -323,7 +341,7 @@ test('native HTTP failure, rejected playback and a real pending-source deadline 
  let requests=0;page.on('request',request=>{if(new URL(request.url()).pathname===media.src)requests++;});
  await page.route(pattern,request=>request.fulfill({status:404,contentType:'text/plain',body:'Unavailable native motion source'}));
  await open(page,dot);await select(page,media.chapter);const unavailable=await failed();expect(['media-error','play-rejected']).toContain(unavailable.reason);expect(requests).toBeGreaterThan(0);const attempts=requests;
- await page.unroute(pattern);await select(page,'results');await hold(page,imageKey(dot,'results'));await select(page,media.chapter);await hold(page,`poster:${media.id}`);expect(requests).toBe(attempts);expect((await mediaFacts(page,media.id)).failed).toBe(true);
+ await page.unroute(pattern);await select(page,'results');await dotNative(page,'results');await select(page,media.chapter);await hold(page,`poster:${media.id}`);expect(requests).toBe(attempts);expect((await mediaFacts(page,media.id)).failed).toBe(true);
  await page.goto('/contact/');await enteredPlain(page);await page.evaluate(()=>sessionStorage.setItem('test-motion-reject-play','1'));
  await open(page,dot);await select(page,media.chapter);await failed('play-rejected');await page.evaluate(()=>sessionStorage.removeItem('test-motion-reject-play'));await frames(page,4);expect((await mediaFacts(page,media.id)).sourceAttached).toBe(false);
  await page.goto('/contact/');await enteredPlain(page);

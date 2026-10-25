@@ -88,3 +88,75 @@ test('Dot original point model and separate fabrication recording retain one lea
   await chapter(page,'system');await stage(page,'system','model');await page.waitForFunction(()=>{const r=window.__globalBackground.inspect().driver.projectStudy.scene?.resource;return r?.successfulPaint&&r.view.chapter==='system';},null,{timeout:WAIT});const reverse={name:'reverse-system',state:await facts(page)};receipt.rows.push(reverse);await page.screenshot({path:info.outputPath('reverse-system.png'),scale:'device'});modelGuard(reverse.state,'system');expect(receipt.requests.filter(url=>new URL(url).pathname===project.model.src)).toHaveLength(1);
  }catch(error){primary=error;throw error;}finally{await retain(info,receipt,'dot-source-lifecycle',primary);}
 });
+
+async function entered(page){await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});await expect(page.locator('[data-site-loader]')).toBeHidden();}
+// Capture the first observed history terminal in the existing readiness poll. A failed
+// terminal is diagnostic evidence, never an alternative successful-entry contract.
+async function enteredHistory(page,receipt,direction){
+ let handle,primary;
+ try{
+  handle=await page.waitForFunction(()=>{const site=window.__site?.inspect();return site&&['entered','failed'].includes(site.phase)?{site,browserObservedMs:performance.now(),timeOrigin:performance.timeOrigin,navigation:performance.getEntriesByType('navigation').map(entry=>({entryType:entry.entryType,type:entry.type})),show:window.__hybridPageShow}:false;},null,{timeout:WAIT});
+  const terminal=await handle.jsonValue();receipt.rows.push({phase:`${direction}-entry-terminal`,...terminal});
+  expect(terminal.site.phase,`${direction} must enter successfully; retained terminal includes reason/readiness/history`).toBe('entered');
+  // Failed entry stays the primary failure above; its already-retained ring is
+  // evidence, not an alternate successful terminal or a new timing threshold.
+  const diagnostic=terminal.site.startupDiagnostics;
+  expect(diagnostic).toMatchObject({enabled:true,clock:'performance.now',timeOrigin:terminal.timeOrigin});
+  expect(Number.isFinite(diagnostic.timeOrigin)).toBe(true);expect(Number.isInteger(diagnostic.epoch)).toBe(true);
+  expect(Number.isInteger(diagnostic.dropped)&&diagnostic.dropped>=0).toBe(true);
+  expect(diagnostic.events.length).toBeGreaterThan(0);expect(diagnostic.events.length).toBeLessThanOrEqual(48);
+  for(const event of diagnostic.events){expect(Number.isFinite(event.at)&&event.at>=0).toBe(true);expect(Number.isInteger(event.epoch)).toBe(true);expect(Number.isInteger(event.sequence)).toBe(true);expect(typeof event.checkpoint).toBe('string');}
+  expect(terminal.show.trusted).toBe(true);expect(typeof terminal.show.persisted).toBe('boolean');
+  if(!terminal.show.persisted){
+   expect(terminal.navigation).toEqual([{entryType:'navigation',type:'back_forward'}]);
+   expect(terminal.site.reason).toBe('history-static');
+   const current=diagnostic.events.filter(event=>event.epoch===diagnostic.epoch);
+   expect(current.some(event=>event.checkpoint==='arrival'&&event.restored===false&&event.freshHistory===true)).toBe(true);
+   expect(current.filter(event=>['raf-scheduled','raf-delivered','native-effects-begin','animation-created','animation-ready-observed'].includes(event.checkpoint))).toEqual([]);
+  }
+  // Persisted BFCache uses its existing restoration policy, not fresh-history inference.
+  await expect(page.locator('[data-site-loader]')).toBeHidden();
+ }catch(error){primary=error;throw error;}finally{try{await handle?.dispose();}catch(error){if(!primary)throw error;}}
+}
+function ownerFacts(){const background=window.__globalBackground.inspect();return{background,site:window.__site.inspect(),navigation:performance.getEntriesByType('navigation').map(entry=>({entryType:entry.entryType,type:entry.type})),documentId:performance.timeOrigin,y:scrollY,nativeCount:document.querySelectorAll('[data-editorial-image]').length,inert:document.querySelector('main').inert};}
+test('Dot hybrid document history closes native listeners and restores one original model lifetime',async({page},info)=>{
+ test.setTimeout(scenarioTimeout(120000));
+ const receipt={scope:'Actual original-point-source document history; retained BFCache is asserted only if observed. New-case orchestration budget 120s local/240s CI, not a user-latency SLO; original acquisition15s/WAIT45s unchanged.',rows:[]};let primary;
+ try{
+  await page.addInitScript(()=>{window.__SITE_NAVIGATION_DIAGNOSTICS__=true;addEventListener('pageshow',event=>{window.__hybridPageShow={trusted:event.isTrusted,persisted:event.persisted};});});
+  await page.goto(`/projects/${project.slug}/`);await entered(page);await chapter(page,'system');await stage(page,'system','model');await page.waitForFunction(()=>{const resource=window.__globalBackground.inspect().driver.projectStudy.scene?.resource;return resource?.successfulPaint&&resource.view.chapter==='system';},null,{timeout:WAIT});
+  const before=await page.evaluate(ownerFacts);receipt.rows.push({phase:'before',...before});expect(before.navigation).toEqual([{entryType:'navigation',type:'navigate'}]);expect(before.site.reason).not.toBe('history-static');expect(before.nativeCount).toBe(3);modelGuard({project:before.background.driver.projectStudy},'system');
+  await page.evaluate(()=>addEventListener('pagehide',event=>sessionStorage.setItem('dot-hybrid-departure',JSON.stringify({trusted:event.isTrusted,persisted:event.persisted,documentId:performance.timeOrigin,background:window.__globalBackground.inspect(),canvasCount:document.querySelectorAll('[data-project-study-canvas]').length})),{once:true}));
+  await page.locator('[data-portfolio-navigation] a[href="/contact/"]').click();await entered(page);
+  const departure=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('dot-hybrid-departure')));receipt.rows.push({phase:'departure',...departure});expect(departure.trusted).toBe(true);
+  if(departure.persisted){expect(departure.background.driver.lifecycle.suspended).toBe(true);expect(departure.background.activeBindings).toBe(1);expect(departure.canvasCount).toBe(1);const retained=departure.background.driver.projectStudy.scene;expect(retained.resource.successfulPaint).toBe(true);expect(retained.resource.sourceRevision).toBe(project.model.sha256);expect(retained.acquisitions).toBe(1);expect(retained.disposals).toBe(0);}
+  else{expect(departure.background.driver.disposed).toBe(true);expect(departure.background.driver.events.nativeListeners).toBe(0);expect(departure.background.activeBindings).toBe(0);expect(departure.background.driver.pageField.disposed).toBe(true);expect(departure.background.driver.projectStudy.scene).toBeNull();expect(departure.canvasCount).toBe(0);}
+  await page.goBack();await enteredHistory(page,receipt,'back');await page.waitForFunction(()=>{const resource=window.__globalBackground.inspect().driver.projectStudy.scene?.resource;return resource?.successfulPaint&&resource.view.chapter==='system';},null,{timeout:WAIT});
+  const restored=await page.evaluate(ownerFacts),show=await page.evaluate(()=>window.__hybridPageShow);receipt.rows.push({phase:'back',show,...restored});await page.screenshot({path:info.outputPath('dot-hybrid-native-back.png'),scale:'device'});
+  expect(show.trusted).toBe(true);if(show.persisted){expect(departure.persisted).toBe(true);expect(restored.documentId).toBe(departure.documentId);}else{expect(restored.documentId).not.toBe(before.documentId);}
+  expect(restored.background.activeBindings).toBe(1);expect(restored.background.driver.lifecycle.suspended).toBe(false);expect(restored.background.driver.projectStudy.presentation).toBe('hybrid-scenes');expect(restored.nativeCount).toBe(3);expect(restored.inert).toBe(false);expect(restored.background.driver.projectStudy.scene.acquisitions).toBe(1);expect(restored.background.driver.projectStudy.scene.resource.sourceRevision).toBe(project.model.sha256);modelGuard({project:restored.background.driver.projectStudy},'system');
+  await page.goForward();await enteredHistory(page,receipt,'forward');await expect(page).toHaveURL(/\/contact\/$/);receipt.rows.push({phase:'forward',url:page.url()});
+ }catch(error){primary=error;throw error;}finally{try{await writeFile(info.outputPath('dot-hybrid-native-history.json'),JSON.stringify(receipt,null,2));}catch(error){if(!primary)throw error;}}
+});
+
+test('Dot failed native opening preserves original access without impersonating its point model or recording',async({page},info)=>{
+ test.setTimeout(scenarioTimeout(90000));
+ const image=project.hero,receipt={scope:'Native critical-photo failure and source access; 90s local/180s CI orchestration, not performance acceptance. Original model acquisition15s/WAIT45s unchanged.',source:image.src,requests:[]};let primary;
+ page.on('request',request=>{if(/\.(?:glb|mp4)(?:\?|$)/.test(request.url()))receipt.requests.push(request.url());});
+ try{
+  await page.route('**'+image.src,route=>route.abort());await page.goto(`/projects/${project.slug}/`);
+  await page.waitForFunction(()=>['entered','failed'].includes(window.__site?.inspect().phase),null,{timeout:WAIT});await expect(page.locator('[data-site-loader]')).toBeHidden();
+  const figure=page.locator(`[data-project-native-source="overview"] [data-editorial-source="${image.src}"]`);await expect(figure).toHaveAttribute('data-editorial-image-state','failed');
+  const status=figure.locator('[role="status"]');await wheel(page,await status.evaluate(n=>Math.max(0,n.getBoundingClientRect().top+scrollY-160)));await expect(status).toBeVisible();
+  await expect(figure.locator('figcaption > p')).toHaveText(image.caption);await expect(figure.locator('figcaption > span:not([data-information-skin])')).toHaveText(image.credit);
+  const action=figure.locator('figcaption > a');await wheel(page,await action.evaluate(n=>Math.max(0,n.getBoundingClientRect().top+scrollY-180)));await expect.poll(()=>page.locator('[data-information-moving="true"]').count(),{timeout:WAIT}).toBe(0);
+  receipt.reading=await figure.evaluate(boxes);receipt.state=await facts(page);receipt.entry=await page.evaluate(()=>window.__site.inspect());await page.screenshot({path:info.outputPath('dot-hybrid-native-image-failure.png'),scale:'device'});
+  await expect(action).toHaveAttribute('href',image.src);await expect(action).toHaveAttribute('target','_blank');const r=receipt.reading.caption.action;
+  expect(r.height).toBeGreaterThanOrEqual(44);expect(r.left).toBeGreaterThanOrEqual(0);expect(r.right).toBeLessThanOrEqual(receipt.reading.viewport.width);expect(r.top).toBeGreaterThanOrEqual(0);expect(r.bottom).toBeLessThanOrEqual(receipt.reading.viewport.height);
+  for(const owner of receipt.reading.chrome){expect(owner.count).toBe(1);for(const box of owner.boxes)expect(overlap(r,box)).toBe(0);}
+  expect(await action.evaluate(n=>{const r=n.getBoundingClientRect(),h=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return h===n||n.contains(h);})).toBe(true);
+  expect(receipt.state.project.nativeImages.find(row=>row.source===image.src).state).toBe('failed');expect(receipt.entry.history.filter(row=>row.id===receipt.entry.id&&['entered','failed','cancelled'].includes(row.phase))).toHaveLength(1);
+  await page.locator('[data-project-chapter-link="credits"]').click();await expect(page.locator('[data-project-chapter="credits"]')).toBeInViewport();const final=await stage(page,'credits','native');receipt.credits=final;nativeGuard(final,'credits');expect(await page.locator('main').evaluate(n=>n.inert)).toBe(false);
+  expect(receipt.requests.filter(url=>new URL(url).pathname===project.model.src).length).toBeLessThanOrEqual(1);expect(receipt.requests.filter(url=>new URL(url).pathname===media.src)).toEqual([]);
+ }catch(error){primary=error;throw error;}finally{try{await writeFile(info.outputPath('dot-hybrid-native-image-failure.json'),JSON.stringify(receipt,null,2));}catch(error){if(!primary)throw error;}}
+});
