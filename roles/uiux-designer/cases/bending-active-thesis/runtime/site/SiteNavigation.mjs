@@ -231,6 +231,10 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
  };
  const navigate=(url,visual=null)=>{
   request('navigation',url);
+  if(disposed||active?.kind!=='navigation'||active.phase!=='requested')return;
+  // Native navigation still owns activation. While its outgoing cover is up,
+  // protect the same content targets as arrival; every terminal restores them.
+  guardContent();
   if(visual){presentation(visual);notify();}
   resource?.release();resource=null;
   const tracked=storageWrite(SITE_HANDOFF_KEY,{id:active.id,url,startedAt:now(),...(visual?{presentation:visual}:{}),history:history.filter(fact=>fact.id===active.id)});

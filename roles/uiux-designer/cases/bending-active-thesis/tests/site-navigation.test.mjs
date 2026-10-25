@@ -643,3 +643,59 @@ test('specimen presentation cannot leak through modified, cancelled, superseded 
  f.click('https://example.test/projects/bending-active/',{},marked);assert.equal(manager.inspect().presentation,'bending-active');
  f.click('https://example.test/contact/');assert.equal(manager.inspect().presentation,null);assert.equal(JSON.parse(f.storage.get(SITE_HANDOFF_KEY)).presentation,undefined);
 });
+
+
+test('eligible native departure guards content immediately without preventing its default activation',async t=>{
+ const f=environment();f.content.setAttribute('aria-busy','false');f.navigation.setAttribute('inert','preserved');
+ const manager=connect(t,f);await flush();f.loader.dispatchEvent(new Event('animationend'));
+ assert.equal(f.content.hasAttribute('inert'),false);assert.equal(f.content.getAttribute('aria-busy'),'false');
+ const event=f.click('https://example.test/projects/bending-active/');
+ assert.equal(event.defaultPrevented,false);assert.equal(manager.inspect().kind,'navigation');assert.equal(manager.inspect().phase,'requested');assert.equal(f.loader.hasAttribute('hidden'),false);
+ for(const node of [f.content,f.navigation]){assert.equal(node.getAttribute('inert'),'');assert.equal(node.getAttribute('aria-busy'),'true');}
+ event.preventDefault();await flush();assert.equal(manager.inspect().reason,'activation-prevented');
+ assert.equal(f.content.hasAttribute('inert'),false);assert.equal(f.content.getAttribute('aria-busy'),'false');assert.equal(f.navigation.getAttribute('inert'),'preserved');assert.equal(f.navigation.hasAttribute('aria-busy'),false);
+});
+
+test('outgoing content guard restores on timeout, history interruption, disposal and page handoff',async t=>{
+ for(const action of ['timeout','history','dispose','pagehide','bfcache']){
+  const f=environment(),manager=connect(t,f);await flush();f.loader.dispatchEvent(new Event('animationend'));
+  f.click('https://example.test/about/');assert.equal(f.content.hasAttribute('inert'),true);const id=manager.inspect().id;
+  if(action==='timeout')f.advance(15000);
+  else if(action==='history')f.win.dispatchEvent(new Event('popstate'));
+  else if(action==='dispose')manager.dispose();
+  else f.page('pagehide',action==='bfcache');
+  assert.equal(f.content.hasAttribute('inert'),false,action);assert.equal(f.content.hasAttribute('aria-busy'),false,action);assert.equal(f.navigation.hasAttribute('inert'),false,action);assert.equal(f.timers.size,0,action);
+  if(action==='bfcache'){
+   const ticket=f.storage.get(SITE_HANDOFF_KEY);assert.ok(ticket);f.page('pageshow',true);await flush();assert.equal(manager.inspect().phase,'entered');assert.equal(f.content.hasAttribute('inert'),false);assert.notEqual(manager.inspect().id,id);
+  }
+ }
+});
+
+test('modified, external, download, fragment and already-prevented activations never acquire outgoing content guard',async t=>{
+ const f=environment();f.doc.addEventListener('click',event=>{if(event.cancelBeforeSite)event.preventDefault();});
+ const manager=connect(t,f);await flush();f.loader.dispatchEvent(new Event('animationend'));const initial=manager.inspect().id;
+ const cases=[
+  ['https://example.test/about/',{ctrlKey:true},{}],['https://example.test/about/',{metaKey:true},{}],['https://example.test/about/',{shiftKey:true},{}],['https://example.test/about/',{altKey:true},{}],['https://example.test/about/',{button:1},{}],
+  ['https://example.test/about/',{cancelBeforeSite:true},{}],['https://example.test/about/',{},{target:'_blank'}],['https://example.test/about/',{},{rel:'external'}],['https://example.test/about/',{},{hasAttribute:name=>name==='download'}],
+  ['https://outside.test/work/',{},{}],['https://example.test/#projects',{},{}],
+ ];
+ for(const [href,event,anchor] of cases){f.click(href,event,anchor);assert.equal(manager.inspect().id,initial);assert.equal(manager.inspect().phase,'entered');assert.equal(f.content.hasAttribute('inert'),false);assert.equal(f.content.hasAttribute('aria-busy'),false);}
+});
+
+test('a superseding outgoing request keeps its own guard and ignores a stale cancelled activation',async t=>{
+ const f=environment(),manager=connect(t,f);await flush();f.loader.dispatchEvent(new Event('animationend'));
+ const first=f.click('https://example.test/about/'),firstId=manager.inspect().id;
+ f.click('https://example.test/contact/');const secondId=manager.inspect().id;first.preventDefault();await flush();
+ assert.notEqual(firstId,secondId);assert.equal(manager.inspect().phase,'requested');assert.equal(f.content.hasAttribute('inert'),true);assert.equal(f.content.getAttribute('aria-busy'),'true');
+ assert.equal(manager.inspect().history.filter(fact=>fact.id===firstId&&fact.phase==='cancelled').length,1);
+ f.advance(15000);assert.equal(manager.inspect().phase,'failed');assert.equal(f.content.hasAttribute('inert'),false);assert.equal(f.content.hasAttribute('aria-busy'),false);
+});
+
+
+test('synchronous outgoing-request disposal cannot acquire a fresh guard or navigation timer after cleanup',async t=>{
+ const f=environment(),manager=connect(t,f);await flush();f.loader.dispatchEvent(new Event('animationend'));
+ manager.onReadiness(fact=>{if(fact.kind==='navigation'&&fact.phase==='requested')manager.dispose();});
+ const event=f.click('https://example.test/about/');await flush();
+ assert.equal(event.defaultPrevented,false);assert.equal(manager.inspect().disposed,true);assert.equal(manager.inspect().phase,'cancelled');
+ assert.equal(f.content.hasAttribute('inert'),false);assert.equal(f.content.hasAttribute('aria-busy'),false);assert.equal(f.timers.size,0);assert.equal(f.storage.has(SITE_HANDOFF_KEY),false);
+});
