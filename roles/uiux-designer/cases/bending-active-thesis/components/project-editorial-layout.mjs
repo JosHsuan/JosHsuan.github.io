@@ -21,6 +21,21 @@ export function editorialProjectLayout(project) {
 
 /** Reviewed mixed ownership: documentary stills leave the leased model/video intact. */
 export function hybridProjectLayout(project) {
+ if (project.id === 'dot-based-3d-printing') {
+  const results = project.sections.find(section => section.id === 'results');
+  const names = ['prototype-family.webp', 'translucent-prototypes.webp'];
+  const motion = project.motionMedia?.[0];
+  if (!project.model || project.model.chapters.join(',') !== 'system' ||
+      project.model.primitive !== 'points' || project.model.vertices !== 14810 || project.model.triangles !== 0 ||
+      project.motionMedia?.length !== 1 || motion.chapter !== 'making' ||
+      motion.loop !== true || motion.kind !== 'recording' || motion.durationSeconds !== 4.4 ||
+      !motion.src.endsWith('/dot-based-3d-printing/printing-process-motion-web.mp4') ||
+      !project.hero.src.endsWith('/dot-based-3d-printing/hero.webp') ||
+      results?.media.length !== 2 || results.media.some((image,index) => !image.src.endsWith(`/dot-based-3d-printing/${names[index]}`))) {
+   throw new Error('Hybrid scenes require the reviewed Dot source roles.');
+  }
+  return {nativeChapters:['overview','results','credits'],results:{section:results,scene:results.media[0],evidence:[results.media[1]]}};
+ }
  if (project.id === 'hc3dp-caustics') {
   const results = project.sections.find(section => section.id === 'results');
   const names = ['hero.webp', 'overinflation.webp'];

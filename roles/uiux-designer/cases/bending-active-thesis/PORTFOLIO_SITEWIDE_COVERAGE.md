@@ -7,7 +7,13 @@ native scrolling and the empty reusable framework.
 
 ## Current delivery and bounded next slice
 
-The current verified live baseline is `ad83dbb35b743cba6ca31c8026cd2246e14322f5`.
+Current verified live is `64eebc4a1a3922a443f93d3e9d6f530807d815b8`: [full validation 40212896998](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/40212896998) passed 561/561 public identities, 187 per profile, zero retries, plus 24 framework checks. [Pages 40215753271](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/40215753271) published the same accepted export; independent live reconciliation matched all 264 files, all 137 source assets, release before/after and genuine 404/noindex. HC native photographs, retained original model/looping simulation and the genuine fresh-history static-reading policy are delivered. Ordinary media compatibility is verified; no policy-triggering retry was observed, so native browser recovery efficacy remains unproven.
+
+Next is [Dot's bounded shared hybrid slice](DOT_HYBRID_SCENES.md): native Overview/Results/Credits, unchanged Context evidence, original System point source/camera and Making recording. Its two 1024px Results photographs receive a route/role-scoped source-width ceiling; no asset or color changes. Prototype art and subsequent affected/full qualification remain pending. This is not whole-site completion.
+
+### Retained preceding delivery and diagnostic history
+
+The preceding verified live baseline was `ad83dbb35b743cba6ca31c8026cd2246e14322f5`.
 [Full validation 40187905020](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/40187905020)
 passed all 549 public identities exactly once (183 per profile, zero retries) and
 24 framework checks. [Pages 40190332876](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/40190332876)
@@ -20,7 +26,7 @@ The desktop intrinsic model-label reserve also passed the original strict idle
 guard and the previously failing Authored curvature colors → Opening transition
 with unchanged outer/slot dimensions. This is not a fix claim for the unresolved
 host service/input delays recorded below, nor completion of the whole-site rollout.
-The next bounded slice is [HC3DP hybrid](HC3DP_HYBRID_SCENES.md), reusing the same
+The then-next bounded slice was [HC3DP hybrid](HC3DP_HYBRID_SCENES.md), reusing the same
 components with its original heavy model and looping path simulation intact.
 Its proper affected batch at `78f4d88` passed 176/177: mobile fresh Back reached
 a failed site entry despite an eventually ready model. The actual failure reason

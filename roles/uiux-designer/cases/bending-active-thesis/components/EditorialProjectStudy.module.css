@@ -69,3 +69,5 @@
 @media(max-width:360px){.nativeSurface{padding-left:1.25rem;padding-right:1.25rem}}
 @media(forced-colors:active){.nativeSurface{color:CanvasText}}
 @media print{.nativeSurface{color:#111;padding:1rem 0}.nativeOpeningRow,.nativeSceneRow{display:block}.nativeSurface .rail{width:100%}}
+/* Dot's two original Results photographs are 1024px wide; retain their source-scale ceiling. */
+:global([data-project-study="dot-based-3d-printing"]) .nativeSurface[data-project-native-source="results"] .scene{max-width:1024px}
