@@ -103,11 +103,24 @@ test('original generic and XR image actions open and return natively',async({pag
  }catch(error){primaryError=error;throw error;}finally{try{await persist(info,'native-link-behaviour',receipt);}catch(error){if(!primaryError)throw error;}}
 });
 test('Full Bending native Pause reading reaches an inline comparison and its original action',async({page,context,isMobile},info)=>{
- const receipt={navigation:[],triggerTabs:[],originalTabs:[],phase:'entry'};let primaryError;
+ const receipt={navigation:[],triggerTabs:[],originalTabs:[],phase:'entry',pauseDiagnostic:{scope:'Passive bounded timestamps. Host and browser clocks are separate; Mutation timestamps are callback observations, not exact mutation instants; DOM commit is not pixel presentation. No extra RAF, timer, rendering hook or input change; pre-click RAF responsiveness and pixel presentation are not measured.',events:[],mutations:[],operations:[]}};let primaryError;
+ const timed=async(name,operation)=>{const row={name,startedMs:performance.now()};if(receipt.pauseDiagnostic.operations.length<48)receipt.pauseDiagnostic.operations.push(row);try{const result=await operation();row.completedMs=performance.now();return result;}catch(error){row.failedMs=performance.now();row.error=String(error.message).slice(0,240);throw error;}};
  try{
   receipt.policy='Full source, native Pause-controlled reading; not Reduced. Prior unpaused Chromium service latency remains unresolved.';
-  expect((await page.goto('/projects/bending-active/')).status()).toBe(200);await page.evaluate(()=>document.fonts.ready);
-  const state=()=>page.evaluate(()=>{const scene=window.__thesis?.inspect(),story=window.__story?.inspect();return{hash:location.hash,y:scrollY,activeId:document.activeElement?.id,phase:window.__site?.inspect().phase,ready:scene?.ready,detail:scene?.detail,systemReduced:scene?.systemReduced,mediaReduced:matchMedia('(prefers-reduced-motion: reduce)').matches,paused:scene?.motionPaused,seconds:story?.playback.activeSeconds,source:scene?.source,renderProfile:scene?.renderProfile,renderPressure:scene?.renderPressure,renderPressureDecisions:scene?.renderPressureDecisions,renderBudget:scene?.renderBudget,rendererBudget:scene?.rendererBudget,representation:scene?.representation,pose:scene?.pose,bounds:scene?.bounds,stageLayout:scene?.stageLayout,sourceVisible:scene?.sourceVisible,compositor:scene?.compositor?{requestedSamples:scene.compositor.requestedSamples,width:scene.compositor.width,height:scene.compositor.height}:null};});
+  // Host receipt delivery is fire-and-forget and bounded; failed page cleanup cannot erase received events.
+  await page.exposeBinding('__recordPauseDiagnostic',(_source,kind,row)=>{const rows=receipt.pauseDiagnostic[kind],limit=kind==='events'?12:kind==='mutations'?8:0;if(rows&&rows.length<limit)rows.push({...row,hostReceivedMs:performance.now()});});
+  await page.addInitScript(()=>{
+   let armed=false;
+   const events=[],mutations=[],read=()=>({nowMs:performance.now(),timeOrigin:performance.timeOrigin,ariaPressed:document.querySelector('[data-bending-motion-toggle]')?.getAttribute('aria-pressed')??null,rootStatic:document.documentElement.hasAttribute('data-cinematic-static')}),send=(kind,row)=>{window.__recordPauseDiagnostic(kind,row).catch(()=>{});};
+   const native=event=>{if(!event.target?.closest?.('[data-bending-motion-toggle]')||events.length>=12)return;armed=true;const row={...read(),type:event.type,trusted:event.isTrusted,eventTimeStamp:event.timeStamp,pointerType:event.pointerType??null};events.push(row);send('events',row);};
+   for(const type of ['pointerdown','pointerup','click'])document.addEventListener(type,native,{capture:true,passive:true});
+   const observer=new MutationObserver(records=>{if(!armed)return;for(const record of records){if(mutations.length>=8)break;if(!(record.target===document.documentElement&&record.attributeName==='data-cinematic-static')&&!record.target.matches?.('[data-bending-motion-toggle]'))continue;const row={...read(),attribute:record.attributeName,oldValue:record.oldValue,value:record.target.getAttribute(record.attributeName)};mutations.push(row);send('mutations',row);}});
+   observer.observe(document,{subtree:true,attributes:true,attributeOldValue:true,attributeFilter:['aria-pressed','data-cinematic-static']});
+   const dispose=()=>{observer.disconnect();for(const type of ['pointerdown','pointerup','click'])document.removeEventListener(type,native,true);window.removeEventListener('pagehide',dispose);};
+   window.__pauseDiagnostic={read:()=>({events:[...events],mutations:[...mutations]}),dispose};window.addEventListener('pagehide',dispose,{once:true});
+  });
+  expect((await timed('goto',()=>page.goto('/projects/bending-active/'))).status()).toBe(200);await timed('fonts-ready',()=>page.evaluate(()=>document.fonts.ready));
+  const state=()=>timed('existing-state-read',()=>page.evaluate(()=>{const scene=window.__thesis?.inspect(),story=window.__story?.inspect();return{browserObservedMs:performance.now(),browserTimeOrigin:performance.timeOrigin,pauseDiagnostic:window.__pauseDiagnostic?.read(),hash:location.hash,y:scrollY,activeId:document.activeElement?.id,phase:window.__site?.inspect().phase,ready:scene?.ready,detail:scene?.detail,systemReduced:scene?.systemReduced,mediaReduced:matchMedia('(prefers-reduced-motion: reduce)').matches,paused:scene?.motionPaused,seconds:story?.playback.activeSeconds,source:scene?.source,renderProfile:scene?.renderProfile,renderPressure:scene?.renderPressure,renderPressureDecisions:scene?.renderPressureDecisions,renderBudget:scene?.renderBudget,rendererBudget:scene?.rendererBudget,representation:scene?.representation,pose:scene?.pose,bounds:scene?.bounds,stageLayout:scene?.stageLayout,sourceVisible:scene?.sourceVisible,compositor:scene?.compositor?{requestedSamples:scene.compositor.requestedSamples,width:scene.compositor.width,height:scene.compositor.height}:null};}));
   await expect.poll(async()=>{receipt.entry=await state();return receipt.entry;},{timeout:WAIT}).toMatchObject({phase:'entered',ready:true,detail:'full',systemReduced:false,mediaReduced:false,paused:false});
   const pressureFacts=snapshot=>{
    const expected=isMobile?{id:'conservative-touch',pixelBudget:520000,maxSamples:0,shadowMapSize:512}:{id:'standard',pixelBudget:1600000,maxSamples:2,shadowMapSize:1024};
@@ -121,9 +134,9 @@ test('Full Bending native Pause reading reaches an inline comparison and its ori
    }
   };
   pressureFacts(receipt.entry);receipt.phase='native-pause';
-  const motion=page.locator('[data-bending-motion-toggle]');await motion.click();await expect(motion).toHaveAttribute('aria-pressed','true');
+  const motion=page.locator('[data-bending-motion-toggle]');await timed('native-pause-click',()=>motion.click());await expect(motion).toHaveAttribute('aria-pressed','true');
   receipt.paused=await state();expect(receipt.paused.paused).toBe(true);expect(receipt.paused.seconds).toBeGreaterThan(receipt.entry.seconds);expect(receipt.paused.source).toEqual(receipt.entry.source);expect(receipt.paused.systemReduced).toBe(false);
-  await frames(page,5);receipt.frozen=await state();expect(receipt.frozen.seconds).toBe(receipt.paused.seconds);expect(receipt.frozen.source).toEqual(receipt.paused.source);expect(receipt.frozen.y).toBe(receipt.paused.y);expect(receipt.frozen.paused).toBe(true);
+  await timed('existing-five-raf',()=>frames(page,5));receipt.frozen=await state();expect(receipt.frozen.seconds).toBe(receipt.paused.seconds);expect(receipt.frozen.source).toEqual(receipt.paused.source);expect(receipt.frozen.y).toBe(receipt.paused.y);expect(receipt.frozen.paused).toBe(true);
   pressureFacts(receipt.paused);pressureFacts(receipt.frozen);expect(receipt.frozen.renderPressureDecisions).toEqual(receipt.paused.renderPressureDecisions);
   receipt.phase='paused-overview-capture';
   receipt.overviewCapture={scope:'Native paused Overview; unpaired page-field phase. Not deterministic System material equivalence or performance evidence.',stage:receipt.frozen.renderPressure.stage,stage2Observed:receipt.frozen.renderPressure.stage===2};
@@ -155,10 +168,15 @@ test('Full Bending native Pause reading reaches an inline comparison and its ori
   await page.keyboard.press('Enter');await expect(comparison).toHaveCount(0);await expect(trigger).toBeFocused();
   receipt.bending={mode:'inline comparison, not a dialog',before:comparisonBefore,returned:await facts(page,trigger),dynamicOriginalName};
   receipt.phase='native-resume';receipt.beforeResume=await state();expect(receipt.beforeResume.seconds).toBe(receipt.paused.seconds);expect(receipt.beforeResume.paused).toBe(true);expect(receipt.beforeResume.source).toEqual(receipt.paused.source);
-  await motion.click();await expect(motion).toHaveAttribute('aria-pressed','false');
+  await timed('native-resume-click',()=>motion.click());await expect(motion).toHaveAttribute('aria-pressed','false');
   await expect.poll(async()=>{receipt.resumed=await state();return receipt.resumed.seconds;},{timeout:WAIT}).toBeGreaterThan(receipt.paused.seconds);
   expect(receipt.resumed).toMatchObject({y:receipt.beforeResume.y,paused:false,systemReduced:false,detail:'full'});expect(receipt.resumed.source).toEqual(receipt.paused.source);pressureFacts(receipt.resumed);receipt.phase='completed';
- }catch(error){primaryError=error;throw error;}finally{try{await persist(info,'bending-link-behaviour',receipt);}catch(error){if(!primaryError)throw error;}}
+ }catch(error){primaryError=error;throw error;}finally{
+  let cleanupError;
+  try{if(!page.isClosed())await page.evaluate(()=>window.__pauseDiagnostic?.dispose());}catch(error){cleanupError=error;receipt.pauseDiagnostic.cleanupError=String(error.message).slice(0,240);}
+  try{await persist(info,'bending-link-behaviour',receipt);}catch(error){cleanupError??=error;}
+  if(!primaryError&&cleanupError)throw cleanupError;
+ }
 });
 test.describe('native link announcements without application JavaScript',()=>{
  test.use({javaScriptEnabled:false});
