@@ -116,7 +116,7 @@ test('a native hash navigation relinquishes its chapter anchor before later layo
 
 for(const viewport of [{width:320,height:844},{width:844,height:390}])test(`canonical SSR entry remains readable at ${viewport.width}x${viewport.height} with failed scripts`,async({browser,baseURL},info)=>{
  let primary;const rows=[],requests=[],abortedScripts=[],failedScripts=[];
- const context=await browser.newContext({baseURL,viewport,reducedMotion:'no-preference'});let nojs;
+ const context=await browser.newContext({baseURL,viewport,reducedMotion:'no-preference'});let nojs,healthy;
  try{
   const page=await context.newPage();page.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)/.test(request.url()))requests.push(request.url());});
   page.on('requestfailed',request=>{if(request.resourceType()==='script')failedScripts.push({url:request.url(),error:request.failure()?.errorText});});
@@ -165,7 +165,7 @@ for(const viewport of [{width:320,height:844},{width:844,height:390}])test(`cano
   }
   // The unchanged pre-hydration fail-open animation is intentionally shortened
   // by Reduced motion. Measure visible SSR first, then verify that policy before
-  // a fresh native reload; do not freeze the normal 30-second fallback.
+  // an independent healthy entry; do not freeze the normal 30-second fallback.
   await page.emulateMedia({reducedMotion:'reduce'});
   await expect(page.locator('[data-entry-loader]')).toBeHidden();
   const policy=await page.evaluate(()=>({reduced:matchMedia('(prefers-reduced-motion: reduce)').matches,storyAbsent:window.__story===undefined,context:document.querySelector('[data-entry-loader]').getAttribute('data-entry-context'),loaderVisibility:getComputedStyle(document.querySelector('[data-entry-loader]')).visibility,bodyInert:document.querySelector('[data-project-content]').hasAttribute('inert')}));
@@ -173,17 +173,23 @@ for(const viewport of [{width:320,height:844},{width:844,height:390}])test(`cano
   expect(policy.reduced).toBe(true);expect(policy.storyAbsent).toBe(true);expect(policy.context).toBeNull();expect(policy.loaderVisibility).toBe('hidden');expect(policy.bodyInert).toBe(false);
   await expect(page.locator('[data-project-content]')).toBeVisible();
   await expect(page.locator('[data-home-link]')).toHaveAttribute('href','/#about');await expect(page.locator('[data-home-link]')).toBeVisible();
-  await page.unrouteAll({behavior:'wait'});
-  await page.reload({waitUntil:'load'});
-  await expect.poll(()=>page.evaluate(()=>window.__story?.inspect().entry.phase),{timeout:WAIT}).toBe('entered');
-  await expect(page.locator('[data-entry-loader]')).toBeHidden();await expect(page.locator('[data-project-content]')).not.toHaveAttribute('inert','');await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(0);expect(requests).toEqual([]);
-  rows.push({phase:'fresh-reduced-reload-entered',url:page.url(),coverage:'Original scripts load on a new document; not same-document delayed hydration.'});
+  const healthyViewport=page.viewportSize();
+  await context.close();
+  // Independent healthy entry, not recovery of a context whose scripts failed.
+  healthy=await browser.newContext({baseURL,viewport:healthyViewport,reducedMotion:'reduce'});
+  const healthyPage=await healthy.newPage(),healthyRequests=[];
+  healthyPage.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)/.test(request.url()))healthyRequests.push(request.url());});
+  rows.push({phase:'independent-clean-reduced-entry',viewport:healthyViewport,requests:healthyRequests,coverage:'New clean context with original scripts; not failed-context recovery or delayed hydration.'});
+  await healthyPage.goto('/projects/bending-active/',{waitUntil:'load'});
+  await expect.poll(()=>healthyPage.evaluate(()=>window.__story?.inspect().entry.phase),{timeout:WAIT}).toBe('entered');
+  await expect(healthyPage.locator('[data-entry-loader]')).toBeHidden();await expect(healthyPage.locator('[data-project-content]')).not.toHaveAttribute('inert','');await expect(healthyPage.locator('[data-cinematic-stage] canvas')).toHaveCount(0);expect(healthyRequests).toEqual([]);expect(requests).toEqual([]);
+  rows.push({phase:'independent-clean-reduced-entered',url:healthyPage.url()});
   nojs=await browser.newContext({baseURL,viewport,javaScriptEnabled:false});const native=await nojs.newPage();await native.goto('/projects/bending-active/');
   await expect(native.locator('[data-entry-loader]')).toBeHidden();await expect(native.locator('[data-project-content]')).not.toHaveAttribute('inert','');await expect(native.locator('[data-project-content]')).toBeVisible();
   const home=native.locator('[data-home-link]');await expect(home).toHaveAttribute('href','/#about');await expect(home).toBeVisible();rows.push({phase:'no-js-native-body',url:native.url(),loaderHidden:true});
  }catch(error){primary=error;throw error;}finally{
   let cleanupError=primary;
-  for(const cleanup of [async()=>{const path=info.outputPath('direct-SSR-composition.json');await writeFile(path,JSON.stringify({viewport,coverage:"Failed-script SSR pixels followed by fresh Reduced reload; no same-document delayed-hydration visual claim.",abortedScripts,failedScripts,requests,rows},null,2));await info.attach('direct-SSR-composition',{path,contentType:'application/json'});},()=>context.close(),()=>nojs?.close()])try{await cleanup();}catch(error){cleanupError??=error;}
+  for(const cleanup of [async()=>{const path=info.outputPath('direct-SSR-composition.json');await writeFile(path,JSON.stringify({viewport,coverage:"Failed-script SSR pixels plus independent clean-context Reduced entry; no failed-context recovery or same-document delayed-hydration visual claim.",abortedScripts,failedScripts,requests,rows},null,2));await info.attach('direct-SSR-composition',{path,contentType:'application/json'});},()=>context.close(),()=>healthy?.close(),()=>nojs?.close()])try{await cleanup();}catch(error){cleanupError??=error;}
   if(!primary&&cleanupError)throw cleanupError;
  }
 });
