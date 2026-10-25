@@ -21,7 +21,11 @@ The next candidate is the [Cas chapter-owned editorial exemplar](EDITORIAL_SCENE
 complete native photographs and technical plates beside existing glass reading
 rails, rather than independent fixed sources behind overlapping prose. Its scoped
 three-engine art review and 168 affected executions passed at `b47ff948`; full
-540-execution validation and deployment remain pending. This policy is explicitly
+540-execution validation and deployment remain pending. The first full run
+`40167096661` completed with 536 passes and four failures: three exposed a
+no-JavaScript decorative-skin selector collision, now narrowly corrected, and
+one was the unchanged Full Bending native-link scenario exceeding its 60-second
+budget. No assertion or timeout was relaxed; a new exact full gate is required. This policy is explicitly
 opt-in for Cas, not an automatic rewrite of all model/video projects. Original
 assets, all six Cas evidence actions and the global 31 evidence actions remain.
 

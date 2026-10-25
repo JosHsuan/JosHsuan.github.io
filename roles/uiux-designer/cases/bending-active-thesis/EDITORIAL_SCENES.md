@@ -76,3 +76,24 @@ Verified artifact directories for this checkpoint:
 - Mobile Chromium: `/workspace/shared/ci-evidence-archive/editorial-scenes-b47ff94/12588223607/pages-test-results/`
 
 No UI or source asset was changed for this checkpoint. Full CI, exact-artifact publication and live verification remain pending.
+
+## First full-gate findings and narrow correction
+
+Full run `40167096661` at `0020d440` completed all 540 public executions:
+536 passed and four failed, with no retries. Three failures were the unchanged
+Cas no-JavaScript plate guard, one in each engine. Actual Chromium trace showed
+the empty decorative skin span incorrectly displayed by the new caption-credit
+`>span` rule; its unclipped pseudo-element painted without the runtime's ready
+ownership. The correction excludes `[data-information-skin]` from the two
+caption-credit selectors. Shared hidden/ready rules, text metrics, original
+sources and the existing browser assertions are unchanged. A portable regression
+now explicitly protects this selector boundary.
+
+The fourth failure was the existing Full Bending Pause/native-link case in
+Chromium: readiness used about 28.2 seconds and the real Pause action 21.47 seconds,
+leaving about 8.2 seconds for native tab progression before the total 60-second
+case expired. Pause demonstrably froze the scene; six native Tab steps completed,
+but the final Make/Inspect path was not reached. This is a failed execution, not
+proof of a Cas regression or a diagnosed GPU/CPU cause. Its production source,
+assertions and time budget remain unchanged. The corrected candidate requires a
+new exact full gate; the failed run cannot authorize publication.

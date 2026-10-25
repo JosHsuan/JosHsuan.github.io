@@ -56,7 +56,7 @@ const pins={
 // Reviewed new templates are frozen, not treated as proof of rendered accessibility.
 const templates={
   "roles/uiux-designer/cases/bending-active-thesis/components/EditorialProjectStudy.jsx": "7cb2c16657c4155c404f2edfbc37b63cfe5dd6e480bbf478d54432f08441d0de",
-  "roles/uiux-designer/cases/bending-active-thesis/components/EditorialProjectStudy.module.css": "28bae7fc0a540d5f87aa2c3a8f190b15afd9a8dde2b61d512397ded947677057",
+  "roles/uiux-designer/cases/bending-active-thesis/components/EditorialProjectStudy.module.css": "cd924dedbd9e1496bd2d7bdabfc971edb39a36ead7355c2bba1b10c5b3a74989",
   "roles/uiux-designer/cases/bending-active-thesis/components/project-editorial-layout.mjs": "a5a50acb441b1bad14b1dd0d08226855b5f258936ef98721516b0a1d415b2955"
 };
 function original(path,source){
@@ -106,6 +106,13 @@ test('native editorial templates retain secure source actions, captions, complet
  assert(source.includes('width={image.width} height={image.height} alt={image.alt}'));assert(source.includes('href={image.src} target="_blank"'));
  assert(!/data-project-media|<canvas|onClick=|requestAnimationFrame|setInterval|setTimeout/.test(source));
  assert(css.includes('position:relative;z-index:2;'));assert(css.includes('height:auto;object-fit:contain'));assert(css.includes('min-height:44px'));assert(css.includes('@media(forced-colors:active)'));
+ // Credit typography must not activate the decorative skin before its presenter is ready.
+ const creditSelectors='.scene figcaption>span:not(:global([data-information-skin])),.evidence figcaption>span:not(:global([data-information-skin])),.reference>span';
+ assert(css.includes(`${creditSelectors}{display:block;`));
+ assert(!/\.(?:scene|evidence) figcaption>span(?=[,{])/.test(css),'Unqualified credit selectors must not override the no-JavaScript skin suppression');
+ const globals=await read(casePath+'app/globals.css');
+ assert(globals.includes('[data-information-skin]{display:none;'));
+ assert(globals.includes('html [data-information-window][data-information-ready]>[data-information-skin]{'));
  const driver=await read(casePath+'runtime/background/SiteBackgroundDriver.mjs');
  assert(driver.includes("getAttribute('data-study-presentation')==='editorial-scenes'"));assert(driver.includes('if(studyRoot&&!editorialStudy)projectBackdrop='));assert(driver.includes('if(studyRoot&&!editorialStudy)releaseStage='));assert(driver.includes("listen(image,'load',publish)"));assert(driver.includes("listen(image,'error'"));
 });

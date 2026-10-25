@@ -25,7 +25,7 @@
 .rail>*:not(:global([data-information-skin])){position:relative;z-index:1}
 .scene figcaption,.evidence figcaption{position:relative;isolation:isolate;margin-top:1rem;padding:1rem 1.25rem;border-radius:12px;font-size:var(--type-size-caption);line-height:var(--type-leading-caption);letter-spacing:var(--type-tracking-caption)}
 .scene figcaption>p,.evidence figcaption>p,.reference>p{font-size:var(--type-size-caption);line-height:var(--type-leading-caption);letter-spacing:var(--type-tracking-caption);max-width:var(--type-measure-caption);margin:0 0 .5rem}
-.scene figcaption>span,.evidence figcaption>span,.reference>span{display:block;font-size:var(--type-size-caption);line-height:var(--type-leading-caption);letter-spacing:var(--type-tracking-caption)}
+.scene figcaption>span:not(:global([data-information-skin])),.evidence figcaption>span:not(:global([data-information-skin])),.reference>span{display:block;font-size:var(--type-size-caption);line-height:var(--type-leading-caption);letter-spacing:var(--type-tracking-caption)}
 .sourceAction{display:inline-flex;align-items:center;gap:.5rem;min-height:44px;max-width:100%;box-sizing:border-box;padding:.5rem 0;color:inherit;font-size:var(--type-size-control);line-height:var(--type-leading-control);letter-spacing:var(--type-tracking-control);text-underline-offset:.25em;overflow-wrap:anywhere;scroll-margin-block:8rem}
 .reference{margin-top:1.5rem;padding-top:1rem;border-top:1px solid rgba(232,240,227,.18);max-width:68ch;font-size:var(--type-size-caption)}
 .opening .reference{max-width:68ch}
