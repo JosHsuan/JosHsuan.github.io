@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "diagnosticOnly": true,
+  "interpretation": "Illustrative estimated relative inverse depth, not measured geometry or reconstructed hidden surfaces.",
+  "source": {
+    "url": "/assets/projects/project-caschlatsch/portfolio-xr-workshop.webp",
+    "width": 662,
+    "height": 373,
+    "sha256": "8af6a5b6d80a6f0205fe3a203c1cd6550307e2d3a6999f307162aafb74b3e4a0",
+    "unchanged": true
+  },
+  "depth": {
+    "url": "/photo-depth/depth.bin",
+    "width": 662,
+    "height": 373,
+    "format": "uint8-row-major-top-left",
+    "nearValue": 1,
+    "farValue": 0,
+    "bytes": 246926,
+    "sha256": "7e24bbf52b8c1c82acaab1a73118cf27dbda0375f5a02a2d2bb48deed8e600f0",
+    "normalization": "(bilinear(raw)-rawMin)/(rawMax-rawMin)",
+    "rawMin": 0,
+    "rawMax": 8.427041053771973,
+    "maxAbsoluteQuantizationError": 0.00196077719915147,
+    "maxDisplacementErrorAt6SourcePixels": 0.01176466319490882,
+    "rawShape": [
+      294,
+      518
+    ]
+  },
+  "model": {
+    "id": "depth-anything/Depth-Anything-V2-Small-hf",
+    "revision": "5426e4f0f36572d16453bbda7a8389317b1bef99",
+    "weightSHA256": "3152477ce0d8d6978d76b995120de97cb5b928701fd0f817769f59e249a16b70",
+    "license": "Apache-2.0",
+    "licenseURL": "https://github.com/DepthAnything/Depth-Anything-V2/blob/main/LICENSE",
+    "sourceURL": "https://huggingface.co/depth-anything/Depth-Anything-V2-Small-hf/tree/5426e4f0f36572d16453bbda7a8389317b1bef99",
+    "device": "cpu",
+    "threads": 4,
+    "requestedSize": 518,
+    "inputTensorShape": [
+      1,
+      3,
+      294,
+      518
+    ],
+    "useSafetensors": true,
+    "trustRemoteCode": false,
+    "licenseFile": "LICENSE-depth-anything.txt",
+    "licenseFileSHA256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+    "licenseRetrievedUTC": "2026-10-25"
+  },
+  "derivation": {
+    "numericOnly": true,
+    "originalRGBEdited": false,
+    "sourceScriptSHA256": "96a34b1a3fb034f4cf5b2386e725630249787bbb4834da4116788a2062d4b669",
+    "bilinearScriptSHA256": "e4f345642c1708353531ec806dd05a76fbca680fa029a7b482da69cf7badc43b",
+    "rawNumericSHA256": "408c608b2706cf72002da63d0f7c8c3e00ef1f70b587d3cebd80975de1c8fd0a",
+    "bilinearNumericSHA256": "331f68141444f290e36fecc45a1efacb9e5930f6c9684776bf0bd9a69bb5d54e",
+    "bicubicTrialRetained": "/workspace/shared/depth-photo-tools/workshop-trial/receipt.json",
+    "bicubicRejectedReason": "Interpolation overshoot below zero; renderer uses bounded bilinear data instead.",
+    "quantizationScriptSHA256": "c6c8d9d67a2c1107d41436e3f065af77d4a8591e54310b1d8337511381e1ebff",
+    "scriptsDirectory": "/workspace/shared/depth-photo-tools"
+  },
+  "displacement": {
+    "maxSourcePixelsX": 6,
+    "maxSourcePixelsY": 3,
+    "edgeTaperSourcePixels": 24,
+    "algorithm": "Single-photo inverse UV displacement by sampled relative depth; no occlusion filling or new RGB raster."
+  }
+}
