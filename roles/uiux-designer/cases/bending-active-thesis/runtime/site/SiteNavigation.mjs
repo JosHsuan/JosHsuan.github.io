@@ -110,7 +110,7 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
   fail(documentResult?.ready?'presentation-timeout':'readiness-timeout');return true;
  };
  const completeReveal=reason=>{if(revealExpiresAt!==null&&monotonic()>=revealExpiresAt)fail('reveal-timeout');else enter(reason);};
- const reveal=({immediate=false}={})=>{
+ const reveal=({immediate=false,staticReason=''}={})=>{
   if(!active||active.kind!=='arrival'||active.phase!=='requested'||startupExpired())return;
   const id=active.id;
   const content=element.querySelector?.('[data-site-loader-content]');
@@ -134,7 +134,7 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
    if(finished)completeReveal();
   };
   completePreparation=reason=>accept({staticReveal:true,reason});
-  if(immediate||reduced?.matches||doc.hidden){accept({staticReveal:true,reason:doc.hidden?'hidden-static':''});return;}
+  if(immediate||reduced?.matches||doc.hidden){accept({staticReveal:true,reason:doc.hidden?'hidden-static':staticReason});return;}
   if(revealMode!=='native'){accept();return;}
   attr(element,'data-site-reveal','native');
   const begin=()=>{
@@ -196,6 +196,14 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
  };
  const arrival=({restored=false}={})=>{
   const startedAt=monotonic();
+  // A freshly reconstructed history document resumes reading rather than
+  // replaying its decorative intro. This is native navigation provenance, not
+  // a substitute acknowledgement for pending animation or source readiness.
+  let freshHistory=false;
+  if(!restored&&!sceneRoute)try{
+   const entries=win.performance?.getEntriesByType?.('navigation');
+   freshHistory=Array.isArray(entries)&&entries.length===1&&entries[0]?.entryType==='navigation'&&entries[0]?.type==='back_forward';
+  }catch{/* Unsupported/malformed timing retains the ordinary native reveal. */}
   resource?.release();resource=null;previewResource=null;documentResult=null;pendingScene=null;sceneId=null;
   const handoff=storageRead(SITE_HANDOFF_KEY),url=new URL(win.location.href);
   const receipt=storageRead(SITE_TERMINAL_KEY);
@@ -219,7 +227,7 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
   // A bounded visual hint never transfers readiness or a rendering resource.
   if(adopted&&sceneRoute&&handoff.presentation==='bending-active')presentation('bending-active');
   const current=active.id,epoch=diagnosticEpoch;
-  diagnostic('arrival',{restored,startedAt},epoch);
+  diagnostic('arrival',{restored,freshHistory,startedAt},epoch);
   if(disposed||terminal.has(active.phase))return;
   if(!sceneRoute){
    guardContent();startupExpiresAt=startedAt+deadline;diagnostic('startup-budget',{startedAt,expiresAt:startupExpiresAt},epoch);
@@ -251,7 +259,7 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
    documentResult=result;notify();
    if(sceneRoute){for(const fact of pendingScene??[])applyScene(fact);pendingScene=null;}
    else if(!result.ready)fail(result.failures.join(','));
-   else reveal({immediate:restored});
+   else reveal({immediate:restored||freshHistory,staticReason:freshHistory?'history-static':''});
   });
  };
  const navigate=(url,visual=null)=>{

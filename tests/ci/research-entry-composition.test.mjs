@@ -76,8 +76,8 @@ const contracts={
   }
 };
 const pins={
-  // Exact default-off diagnostic extension is reversed against62db in site-navigation-diagnostics.test.mjs.
-  "roles/uiux-designer/cases/bending-active-thesis/runtime/site/SiteNavigation.mjs": "14fbfa247f20b12e7087d6e80c2258f7ab682c1afb4094741f1b501fa70963a1",
+  // Exact diagnostics and history-static policy reverse through b440 to62db in site-navigation-diagnostics.test.mjs.
+  "roles/uiux-designer/cases/bending-active-thesis/runtime/site/SiteNavigation.mjs": "c48735fcd5cf54a91518a869722c37be0d85fdcebfbc8873f8c09f5aeec9fc74",
   "roles/uiux-designer/cases/bending-active-thesis/runtime/features/EntryManager.mjs": "a3a4487237a69cff607702ca6617c342fc374049efdd505229b9b83fe71dea26",
   "roles/uiux-designer/cases/bending-active-thesis/runtime/motion/entry-motion.mjs": "fed0d7fb055f52a88cd0961c54cafec27f83bf2882c29a221c01628a9dcb4adf",
   "roles/uiux-designer/cases/bending-active-thesis/components/PortfolioHome.jsx": "ce2526fad8571a505319a5edc1ff37ce3f76b5f4f3ed999ff8e12a58ea3ebcab",

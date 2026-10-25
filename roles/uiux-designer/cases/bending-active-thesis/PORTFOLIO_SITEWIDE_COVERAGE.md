@@ -48,6 +48,19 @@ measured excursion instead of four serial small wheels, retaining all direction,
 rest and policy guards and capped passive delivery observations. One mobile HC
 and one WebKit global-window qualification are pending; neither is a runtime
 performance fix or authorization for another full run before their evidence.
+The bounded `b440318` checks then passed 12/12 WebKit motion cases but only
+3/4 mobile HC cases. The actual HC ring places resource readiness and the reveal
+RAF before 0.8 seconds; both native animations were created, but neither play
+acknowledgement arrived before the original startup deadline. This narrows that
+run to pending native play, not late model readiness or delayed presentation RAF,
+and still does not identify a browser/hardware cause. An explicitly approved
+history presentation policy now restores reading statically for genuine fresh
+`back_forward` navigation after real prerequisites, with `history-static` reason.
+It preserves the 15-second readiness bound, ordinary entry acknowledgement,
+existing BFCache and delegated Bending behavior; it does not pretend native
+animation completed or repair the underlying pending-play behavior. Focused
+source/unit review passed; actual multi-engine history/policy qualification and
+a fresh full gate remain mandatory before publication.
 
 The preceding verified live baseline was `d3eabb897e787287eefdb632d119718bffc35f61`.
 Its [full validation 40169507337](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/40169507337)

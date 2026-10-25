@@ -773,3 +773,55 @@ test('diagnostic epochs distinguish persisted restoration from a fresh manager w
  const fresh=environment();fresh.win.__SITE_NAVIGATION_DIAGNOSTICS__=true;const next=connect(t,fresh);await flush();
  assert.equal(next.inspect().startupDiagnostics.epoch,1);assert.equal(diagnosticEvents(next).find(event=>event.checkpoint==='arrival').restored,false);
 });
+
+function navigationTiming(f,type){f.win.performance={now:f.now,getEntriesByType:kind=>{assert.equal(kind,'navigation');return[{entryType:'navigation',type}];}};}
+test('fresh native Back/Forward waits for real preview readiness then enters history-static without decorative animation',async t=>{
+ for(const mode of ['model','static']){
+  const node=new Element(),f=environment({previews:[node]}),native=nativeReveal(f);navigationTiming(f,'back_forward');f.win.__SITE_NAVIGATION_DIAGNOSTICS__=true;
+  const manager=connect(t,f);await flush();assert.equal(manager.inspect().phase,'requested');assert.equal(f.content.hasAttribute('inert'),true);assert.equal(native.requested.length,0);
+  registerPagePreviewReadiness(f.doc,node).report({mode,reason:mode==='static'?'reduced-motion':''});await flush();
+  assert.deepEqual(phases(manager),['requested','ready','revealing','entered']);assert.equal(manager.inspect().reason,'history-static');
+  assert.equal(manager.inspect().readiness.previews[0].mode,mode);assert.equal(f.content.hasAttribute('inert'),false);assert.equal(native.calls.length,0);assert.equal(native.requested.length,0);assert.equal(f.timers.size,0);
+  assert.equal(diagnosticEvents(manager).find(row=>row.checkpoint==='arrival').freshHistory,true);
+ }
+});
+test('fresh history cannot bypass document readiness or late startup expiry',async t=>{
+ for(const late of [false,true]){
+  const ready=deferred(),f=environment(),native=nativeReveal(f);navigationTiming(f,'back_forward');
+  const manager=connect(t,f,{acquireReadiness:()=>({promise:ready.promise,release(){}})});await flush();assert.equal(manager.inspect().phase,'requested');
+  if(late)f.elapse(15000);ready.resolve({ready:true,pending:[],failures:[]});await flush();
+  assert.equal(manager.inspect().phase,late?'failed':'entered');assert.equal(manager.inspect().reason,late?'presentation-timeout':'history-static');
+  assert.equal(native.calls.length,0);assert.equal(native.requested.length,0);assert.equal(f.timers.size,0);
+ }
+});
+test('fresh history preserves resource failure, hidden/reduced policy and cancellation closure',async t=>{
+ for(const policy of ['hidden','reduced','failed','cancelled']){
+  const ready=deferred(),f=environment(),native=nativeReveal(f);navigationTiming(f,'back_forward');if(policy==='hidden')f.doc.hidden=true;if(policy==='reduced')f.media.matches=true;
+  const manager=connect(t,f,{acquireReadiness:()=>({promise:ready.promise,release(){}})});await flush();
+  if(policy==='cancelled')f.page('pagehide',true);
+  ready.resolve({ready:policy!=='failed',pending:[],failures:policy==='failed'?['fonts-unavailable']:[]});await flush();
+  assert.equal(manager.inspect().phase,policy==='failed'?'failed':policy==='cancelled'?'cancelled':'entered');
+  assert.equal(manager.inspect().reason,policy==='hidden'?'hidden-static':policy==='failed'?'fonts-unavailable':policy==='cancelled'?'page-hidden':'history-static');
+  assert.equal(native.calls.length,0);assert.equal(native.requested.length,0);assert.equal(f.timers.size,0);
+ }
+});
+test('unsupported, malformed and ordinary navigation timing retain native play acknowledgements',async t=>{
+ const throwingRecord={entryType:'navigation',get type(){throw Error('Malformed timing');}};
+ const values=[[throwingRecord],undefined,[],[{entryType:'navigation',type:'navigate'}],[{entryType:'navigation',type:'reload'}],[{entryType:'resource',type:'back_forward'}],[{type:'back_forward'}],[null],[{entryType:'navigation',type:'back_forward'},{entryType:'navigation',type:'back_forward'}],{0:{entryType:'navigation',type:'back_forward'},length:1},'throw'];
+ for(const value of values){
+  const f=environment(),native=nativeReveal(f,{manualReady:true});f.win.performance={now:f.now,getEntriesByType(){if(value==='throw')throw Error('Unavailable');return value;}};
+  const manager=connect(t,f);await flush();assert.equal(manager.inspect().phase,'requested');assert.equal(native.frames.size,1);native.frame();await flush();assert.equal(manager.inspect().phase,'requested');
+  native.owned.forEach(item=>item.accept());await flush();assert.equal(manager.inspect().phase,'revealing');native.owned.forEach(item=>item.finish());await flush();assert.equal(manager.inspect().phase,'entered');assert.equal(manager.inspect().reason,'');
+ }
+});
+test('fresh history unfinished preview still expires at the original deadline',async t=>{
+ const f=environment({previews:[new Element()]}),native=nativeReveal(f);navigationTiming(f,'back_forward');const manager=connect(t,f);await flush();
+ f.advance(14999);assert.equal(manager.inspect().phase,'requested');f.advance(1);await flush();
+ assert.equal(manager.inspect().phase,'failed');assert.equal(manager.inspect().reason,'readiness-timeout');assert.equal(native.requested.length,0);assert.equal(f.timers.size,0);
+});
+test('delegated Bending arrival does not inspect or adopt ordinary history presentation policy',async t=>{
+ const f=environment({url:'https://example.test/projects/bending-active/'});f.win.performance={now:f.now,getEntriesByType(){assert.fail('Delegated scene owns its entry');}};
+ let emit;const manager=connect(t,f,{subscribeScene:callback=>{emit=callback;return()=>{};}});await flush();
+ for(const phase of ['ready','revealing','entered'])emit({id:'scene-history',phase});
+ assert.equal(manager.inspect().phase,'entered');assert.notEqual(manager.inspect().reason,'history-static');
+});

@@ -64,8 +64,44 @@ const contracts=[
     ]
   }
 ];
-function verify(source,contract){
+// Separately approved product policy: exact b440 history-static extension.
+// Reverse this layer first, preserving all original62db diagnostic proofs below.
+const historyPolicy={
+  "baselineSHA256": "14fbfa247f20b12e7087d6e80c2258f7ab682c1afb4094741f1b501fa70963a1",
+  "blocks": [
+    {
+      "before": "  fail(documentResult?.ready?'presentation-timeout':'readiness-timeout');return true;\n };\n const completeReveal=reason=>{if(revealExpiresAt!==null&&monotonic()>=revealExpiresAt)fail('reveal-timeout');else enter(reason);};\n const reveal=({immediate=false}={})=>{\n  if(!active||active.kind!=='arrival'||active.phase!=='requested'||startupExpired())return;\n  const id=active.id;\n  const content=element.querySelector?.('[data-site-loader-content]');\n",
+      "after": "  fail(documentResult?.ready?'presentation-timeout':'readiness-timeout');return true;\n };\n const completeReveal=reason=>{if(revealExpiresAt!==null&&monotonic()>=revealExpiresAt)fail('reveal-timeout');else enter(reason);};\n const reveal=({immediate=false,staticReason=''}={})=>{\n  if(!active||active.kind!=='arrival'||active.phase!=='requested'||startupExpired())return;\n  const id=active.id;\n  const content=element.querySelector?.('[data-site-loader-content]');\n"
+    },
+    {
+      "before": "   if(finished)completeReveal();\n  };\n  completePreparation=reason=>accept({staticReveal:true,reason});\n  if(immediate||reduced?.matches||doc.hidden){accept({staticReveal:true,reason:doc.hidden?'hidden-static':''});return;}\n  if(revealMode!=='native'){accept();return;}\n  attr(element,'data-site-reveal','native');\n  const begin=()=>{\n",
+      "after": "   if(finished)completeReveal();\n  };\n  completePreparation=reason=>accept({staticReveal:true,reason});\n  if(immediate||reduced?.matches||doc.hidden){accept({staticReveal:true,reason:doc.hidden?'hidden-static':staticReason});return;}\n  if(revealMode!=='native'){accept();return;}\n  attr(element,'data-site-reveal','native');\n  const begin=()=>{\n"
+    },
+    {
+      "before": " };\n const arrival=({restored=false}={})=>{\n  const startedAt=monotonic();\n  resource?.release();resource=null;previewResource=null;documentResult=null;pendingScene=null;sceneId=null;\n  const handoff=storageRead(SITE_HANDOFF_KEY),url=new URL(win.location.href);\n  const receipt=storageRead(SITE_TERMINAL_KEY);\n",
+      "after": " };\n const arrival=({restored=false}={})=>{\n  const startedAt=monotonic();\n  // A freshly reconstructed history document resumes reading rather than\n  // replaying its decorative intro. This is native navigation provenance, not\n  // a substitute acknowledgement for pending animation or source readiness.\n  let freshHistory=false;\n  if(!restored&&!sceneRoute)try{\n   const entries=win.performance?.getEntriesByType?.('navigation');\n   freshHistory=Array.isArray(entries)&&entries.length===1&&entries[0]?.entryType==='navigation'&&entries[0]?.type==='back_forward';\n  }catch{/* Unsupported/malformed timing retains the ordinary native reveal. */}\n  resource?.release();resource=null;previewResource=null;documentResult=null;pendingScene=null;sceneId=null;\n  const handoff=storageRead(SITE_HANDOFF_KEY),url=new URL(win.location.href);\n  const receipt=storageRead(SITE_TERMINAL_KEY);\n"
+    },
+    {
+      "before": "  // A bounded visual hint never transfers readiness or a rendering resource.\n  if(adopted&&sceneRoute&&handoff.presentation==='bending-active')presentation('bending-active');\n  const current=active.id,epoch=diagnosticEpoch;\n  diagnostic('arrival',{restored,startedAt},epoch);\n  if(disposed||terminal.has(active.phase))return;\n  if(!sceneRoute){\n   guardContent();startupExpiresAt=startedAt+deadline;diagnostic('startup-budget',{startedAt,expiresAt:startupExpiresAt},epoch);\n",
+      "after": "  // A bounded visual hint never transfers readiness or a rendering resource.\n  if(adopted&&sceneRoute&&handoff.presentation==='bending-active')presentation('bending-active');\n  const current=active.id,epoch=diagnosticEpoch;\n  diagnostic('arrival',{restored,freshHistory,startedAt},epoch);\n  if(disposed||terminal.has(active.phase))return;\n  if(!sceneRoute){\n   guardContent();startupExpiresAt=startedAt+deadline;diagnostic('startup-budget',{startedAt,expiresAt:startupExpiresAt},epoch);\n"
+    },
+    {
+      "before": "   documentResult=result;notify();\n   if(sceneRoute){for(const fact of pendingScene??[])applyScene(fact);pendingScene=null;}\n   else if(!result.ready)fail(result.failures.join(','));\n   else reveal({immediate:restored});\n  });\n };\n const navigate=(url,visual=null)=>{\n",
+      "after": "   documentResult=result;notify();\n   if(sceneRoute){for(const fact of pendingScene??[])applyScene(fact);pendingScene=null;}\n   else if(!result.ready)fail(result.failures.join(','));\n   else reveal({immediate:restored||freshHistory,staticReason:freshHistory?'history-static':''});\n  });\n };\n const navigate=(url,visual=null)=>{\n"
+    }
+  ]
+};
+function reverseHistory(source){
  let restored=source;
+ for(const {before,after} of [...historyPolicy.blocks].reverse()){
+  assert.equal(restored.split(after).length,2,'Exactly one approved history-policy context');
+  restored=restored.replace(after,before);
+ }
+ assert.equal(hash(restored),historyPolicy.baselineSHA256,'All non-policy bytes stay exact b440');
+ return restored;
+}
+function verify(source,contract){
+ let restored=contract.path.endsWith('/SiteNavigation.mjs')?reverseHistory(source):source;
  for(const {before,after} of [...contract.blocks].reverse()){
   assert.equal(restored.split(after).length,2,'Exactly one reviewed diagnostic context');
   restored=restored.replace(after,before);
@@ -91,4 +127,10 @@ test('reviewed diagnostics remain opt-in bounded observations, not readiness or 
  assert.ok(preview.includes('Diagnostics cannot change readiness.'));
  // Behavioral off/on phase, timer, RAF, stale-epoch and exception parity is
  // separately exercised by the original71 plus8 focused owner unit tests.
+});
+
+test('fresh native history policy rejects provenance, deadline, reason or unrelated source drift',async()=>{
+ const source=await readFile(new URL(contracts[0].path,root),'utf8');
+ assert.ok(reverseHistory(source));
+ for(const changed of [source.replace("entries[0]?.type==='back_forward'","entries[0]?.type==='reload'"),source.replace('!restored&&!sceneRoute','!restored'),source.replace("staticReason:freshHistory?'history-static':''","staticReason:''"),source.replace('startedAt+deadline','startedAt+deadline+1000'),source+'\n'])assert.throws(()=>reverseHistory(changed));
 });
