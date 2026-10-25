@@ -1,3 +1,4 @@
+// Exact hybrid additions are independently reversed to d3 in hybrid-scenes.test.mjs.
 import {originalHomeSource} from './home-research-contract.mjs';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
@@ -22,7 +23,7 @@ const cases={
     ]
   },
   "ProjectCaseStudy.jsx": {
-    "baseline": "fddfab79fb3fe4193655af2a1757446799ec15f6200a4840d7bc71f49bde5278",
+    "baseline": "aec8b103ece6e77c20b0ec60e1f8652e6c5d0b5358a4067b77311e26c8db4692",
     "replacements": [
       [
         " return <a className={styles.sourceLink} href={image.src} target=\"_blank\" rel=\"noreferrer\">View full image <span aria-hidden=\"true\">↗</span></a>;\n",

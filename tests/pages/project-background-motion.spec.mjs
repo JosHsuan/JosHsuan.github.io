@@ -144,6 +144,26 @@ for(const project of animated)for(const media of project.motionMedia)test(`${pro
   await expect(page.locator(`[data-project-media="${media.chapter}"]`)).toHaveAttribute('data-project-media-mode','video');
   const replay=page.locator(`[data-project-motion-replay="${media.id}"]`);await expect(replay).toBeVisible();await replay.click();await playing(page,media);
   expect(await video.evaluate(node=>node.currentTime)).toBeLessThan(ended.duration-.2);expect((await mediaFacts(page,media.id)).ended).toBe(false);
+  if(project.id==='special-assemblies'){
+  // The documentary ending now belongs to native flow, not a retained fixed image.
+  // Keep the real non-loop ended/replay contract above; close media demand during absence.
+  const sameVideo=await video.elementHandle(),nativeRows=[];let nativeError;
+  try{
+  for(const chapter of ['results','credits']){
+   await select(page,chapter);await page.waitForFunction(chapter=>{const s=window.__globalBackground.inspect().driver.projectStudy.backdrop.stage;return s.key===`native:${chapter}`&&s.kind==='native'&&s.chapter===chapter&&s.mode==='absent'&&s.settled&&s.pose.opacity===0&&s.request?.absent===true;},chapter,{timeout:WAIT});
+   const state=await backdrop(page),record=await mediaFacts(page,media.id);nativeRows.push({chapter,state,record});expect(record).toMatchObject({active:false,paused:true,playing:false,playPending:false,callbackPending:false,deadlinePending:false});await expect(page.locator('[data-project-media-active],[data-project-model-active]')).toHaveCount(0);closed(state.stage.history);
+   if(chapter==='results')for(const source of project.sections.find(section=>section.id==='results').media){const figure=page.locator(`[data-project-native-source="results"] [data-editorial-source="${source.src}"]`);await expect(figure).toHaveCount(1);await expect(figure.locator('figcaption > p')).toHaveText(source.caption);await expect(figure.locator('figcaption > a')).toHaveAttribute('href',source.src);}
+  }
+  const retained=await video.evaluate(node=>({ended:node.ended,time:node.currentTime,duration:node.duration}));nativeRows.push({phase:'native-absent-video',retained});await frames(page,5);expect(await video.evaluate(node=>node.currentTime)).toBe(retained.time);
+  await select(page,media.chapter);await hold(page,`video:${media.id}`);expect(await sameVideo.evaluate(node=>node===document.querySelector('[data-project-motion-id="robot-assembly-motion"]'))).toBe(true);
+  const returned=await video.evaluate(node=>({ended:node.ended,time:node.currentTime,duration:node.duration,paused:node.paused})),owner=await mediaFacts(page,media.id);nativeRows.push({phase:'reverse-return',retained,returned,owner});
+  expect(owner.ended).toBe(returned.ended);
+  if(retained.ended){expect(returned.ended).toBe(true);expect(returned.time).toBe(retained.time);}
+  if(returned.ended){expect(returned.paused).toBe(true);expect(returned.time).toBeGreaterThanOrEqual(retained.time);expect(returned.time).toBeCloseTo(returned.duration,2);await frames(page,5);expect(await video.evaluate(node=>node.currentTime)).toBe(returned.time);await expect(replay).toBeVisible();await replay.click();await playing(page,media);}
+  await nativeVideo(page,media);nativeRows.push({phase:'reverse-advancing',state:await backdrop(page)});
+  }catch(error){nativeError=error;throw error;}finally{try{const path=test.info().outputPath('Special-native-ending-and-reverse.json');await writeFile(path,JSON.stringify({nativeRows},null,2));await test.info().attach('Special-native-ending-and-reverse',{path,contentType:'application/json'});}catch(error){if(!nativeError)throw error;}}
+  }
+
  }
  closed((await backdrop(page)).stage.history);
 });

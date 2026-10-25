@@ -41,3 +41,45 @@ test('Special hybrid native photographs coexist with the original model and sepa
   await chapter(page,'system');await stage(page,'system','model');await page.waitForFunction(()=>window.__globalBackground.inspect().driver.projectStudy.scene.resource?.view.chapter==='system',null,{timeout:WAIT});const reverse={name:'reverse-system',state:await facts(page)};receipt.rows.push(reverse);await page.screenshot({path:info.outputPath('reverse-system.png'),scale:'device'});modelGuard(reverse.state,'system');expect(receipt.requests.filter(url=>new URL(url).pathname===project.model.src)).toHaveLength(1);
  }catch(error){primary=error;throw error;}finally{try{const path=info.outputPath('hybrid-scenes.json');await writeFile(path,JSON.stringify(receipt,null,2));await info.attach('hybrid-scenes',{path,contentType:'application/json'});}catch(error){if(!primary)throw error;}}
 });
+
+async function entered(page){await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});await expect(page.locator('[data-site-loader]')).toBeHidden();}
+function ownerFacts(){const background=window.__globalBackground.inspect();return{background,documentId:performance.timeOrigin,y:scrollY,nativeCount:document.querySelectorAll('[data-editorial-image]').length,inert:document.querySelector('main').inert};}
+test('Special hybrid document history closes native listeners and restores one original model lifetime',async({page},info)=>{
+ const receipt={scope:'Actual document history; retained BFCache is asserted only if observed.',rows:[]};let primary;
+ try{
+  await page.addInitScript(()=>addEventListener('pageshow',event=>{window.__hybridPageShow={trusted:event.isTrusted,persisted:event.persisted};}));
+  await page.goto(`/projects/${project.slug}/`);await entered(page);await chapter(page,'system');await stage(page,'system','model');await page.waitForFunction(()=>window.__globalBackground.inspect().driver.projectStudy.scene.resource?.view.chapter==='system',null,{timeout:WAIT});
+  const before=await page.evaluate(ownerFacts);receipt.rows.push({phase:'before',...before});expect(before.nativeCount).toBe(3);modelGuard({project:before.background.driver.projectStudy},'system');
+  await page.evaluate(()=>addEventListener('pagehide',event=>sessionStorage.setItem('hybrid-departure',JSON.stringify({trusted:event.isTrusted,persisted:event.persisted,documentId:performance.timeOrigin,background:window.__globalBackground.inspect()})),{once:true}));
+  await page.locator('[data-portfolio-navigation] a[href="/contact/"]').click();await entered(page);
+  const departure=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('hybrid-departure')));receipt.rows.push({phase:'departure',...departure});expect(departure.trusted).toBe(true);
+  if(departure.persisted){expect(departure.background.driver.lifecycle.suspended).toBe(true);expect(departure.background.activeBindings).toBe(1);}
+  else{expect(departure.background.driver.disposed).toBe(true);expect(departure.background.driver.events.nativeListeners).toBe(0);expect(departure.background.activeBindings).toBe(0);expect(departure.background.driver.projectStudy.scene.resource).toBeNull();expect(departure.background.driver.projectStudy.scene.disposals).toBe(1);}
+  await page.goBack();await entered(page);await page.waitForFunction(()=>window.__globalBackground.inspect().driver.projectStudy.scene.resource?.successfulPaint,null,{timeout:WAIT});
+  const restored=await page.evaluate(ownerFacts),show=await page.evaluate(()=>window.__hybridPageShow);receipt.rows.push({phase:'back',show,...restored});await page.screenshot({path:info.outputPath('hybrid-native-back.png'),scale:'device'});
+  expect(show.trusted).toBe(true);if(show.persisted){expect(departure.persisted).toBe(true);expect(restored.documentId).toBe(departure.documentId);}
+  expect(restored.background.activeBindings).toBe(1);expect(restored.background.driver.lifecycle.suspended).toBe(false);expect(restored.background.driver.projectStudy.presentation).toBe('hybrid-scenes');expect(restored.nativeCount).toBe(3);expect(restored.inert).toBe(false);expect(restored.background.driver.projectStudy.scene.acquisitions).toBe(1);expect(restored.background.driver.projectStudy.scene.resource.sourceRevision).toBe(project.model.sha256);
+  await page.goForward();await entered(page);await expect(page).toHaveURL(/\/contact\/$/);receipt.rows.push({phase:'forward',url:page.url()});
+ }catch(error){primary=error;throw error;}finally{try{await writeFile(info.outputPath('hybrid-native-history.json'),JSON.stringify(receipt,null,2));}catch(error){if(!primary)throw error;}}
+});
+
+test('Special failed native opening preserves original access without impersonating its model or simulation',async({page},info)=>{
+ const image=project.hero,receipt={source:image.src,requests:[]};let primary;
+ page.on('request',request=>{if(/\.(?:glb|mp4)(?:\?|$)/.test(request.url()))receipt.requests.push(request.url());});
+ try{
+  await page.route('**'+image.src,route=>route.abort());await page.goto(`/projects/${project.slug}/`);
+  await page.waitForFunction(()=>['entered','failed'].includes(window.__site?.inspect().phase),null,{timeout:WAIT});await expect(page.locator('[data-site-loader]')).toBeHidden();
+  const figure=page.locator(`[data-project-native-source="overview"] [data-editorial-source="${image.src}"]`);await expect(figure).toHaveAttribute('data-editorial-image-state','failed');
+  const status=figure.locator('[role="status"]');await wheel(page,await status.evaluate(n=>Math.max(0,n.getBoundingClientRect().top+scrollY-160)));await expect(status).toBeVisible();
+  await expect(figure.locator('figcaption > p')).toHaveText(image.caption);await expect(figure.locator('figcaption > span:not([data-information-skin])')).toHaveText(image.credit);
+  const action=figure.locator('figcaption > a');await wheel(page,await action.evaluate(n=>Math.max(0,n.getBoundingClientRect().top+scrollY-180)));await expect.poll(()=>page.locator('[data-information-moving="true"]').count(),{timeout:WAIT}).toBe(0);
+  receipt.reading=await figure.evaluate(boxes);receipt.state=await facts(page);receipt.entry=await page.evaluate(()=>window.__site.inspect());await page.screenshot({path:info.outputPath('hybrid-native-image-failure.png'),scale:'device'});
+  await expect(action).toHaveAttribute('href',image.src);await expect(action).toHaveAttribute('target','_blank');const r=receipt.reading.caption.action;
+  expect(r.height).toBeGreaterThanOrEqual(44);expect(r.left).toBeGreaterThanOrEqual(0);expect(r.right).toBeLessThanOrEqual(receipt.reading.viewport.width);expect(r.top).toBeGreaterThanOrEqual(0);expect(r.bottom).toBeLessThanOrEqual(receipt.reading.viewport.height);
+  for(const owner of receipt.reading.chrome){expect(owner.count).toBe(1);for(const box of owner.boxes)expect(overlap(r,box)).toBe(0);}
+  expect(await action.evaluate(n=>{const r=n.getBoundingClientRect(),h=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return h===n||n.contains(h);})).toBe(true);
+  expect(receipt.state.project.nativeImages.find(row=>row.source===image.src).state).toBe('failed');expect(receipt.entry.history.filter(row=>row.id===receipt.entry.id&&['entered','failed','cancelled'].includes(row.phase))).toHaveLength(1);
+  await page.locator('[data-project-chapter-link="credits"]').click();await expect(page.locator('[data-project-chapter="credits"]')).toBeInViewport();const final=await stage(page,'credits','native');receipt.credits=final;nativeGuard(final,'credits');expect(await page.locator('main').evaluate(n=>n.inert)).toBe(false);
+  expect(receipt.requests.filter(url=>new URL(url).pathname===project.model.src).length).toBeLessThanOrEqual(1);expect(receipt.requests.filter(url=>new URL(url).pathname===media.src)).toEqual([]);
+ }catch(error){primary=error;throw error;}finally{try{await writeFile(info.outputPath('hybrid-native-image-failure.json'),JSON.stringify(receipt,null,2));}catch(error){if(!primary)throw error;}}
+});

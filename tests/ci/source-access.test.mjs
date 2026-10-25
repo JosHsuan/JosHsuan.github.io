@@ -1,3 +1,4 @@
+// Exact hybrid additions are independently reversed to d3 in hybrid-scenes.test.mjs.
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
@@ -20,7 +21,7 @@ const baseline={
   "release/xr-study.json": "3605cb7ed9abefc0721091d7883fdc765d0f0471af1b7d4db49f326228a68001",
   "release/xr-workspace.json": "41c48db687e71332240a002e0892141a7eac887c94740ef4c175cc4ccc4e1211",
   "release/story.json": "250c0853d8d5f9d993bc89b8a563eef5717300c1772a8c5da04647d165c740da",
-  "components/ProjectCaseStudy.jsx": "cef322a60c4c44f07777e8bf6744bed995ead408b6c19c5cadbaf4a114b0c3d7",
+  "components/ProjectCaseStudy.jsx": "e4e6b4c4430ecc47e9949f353afaf95c0446d17d5db351093aac2e249e996375",
   "components/XRProject.jsx": "946f16f178bc4d2ddc13c12066cb9670f0d63fbb7df8bb3a47ff3397cc0b1fae",
   "components/ProjectCaseStudy.module.css": "2d2bab984ea7c78fefa0909d900224c9f626539fe995573e8ed99aa12a25a432",
   "components/XRProject.module.css": "49e7c3d770d87c3d4d7eea5cec6c01421b5e998fcc82bff5a33e0c6b829f9cc5",
