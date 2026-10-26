@@ -44,17 +44,17 @@ test('entry waits for actual scene paint and releases a deep-linked library only
  }finally{release();}
 });
 
-test('Reduced entry preserves reading when its deep-linked library hydrates after entry',async({page})=>{
+test('OS motion preference preserves authored entry when its deep-linked library hydrates after entry',async({page})=>{
  let release;const libraryGate=new Promise(resolve=>{release=resolve;});
  await page.route('**/assets/diagrams/library.json',async route=>{await libraryGate;await route.continue();});
  try{
   await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/projects/bending-active/#pattern',{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered',null,{timeout:WAIT});
   const entry=await page.evaluate(()=>window.__story.inspect().entry);
-  expect(entry.reason).toBe('static-ready');expect(entry.progress).toBe(100);expect(entry.reveal).toBe(1);
+  expect(entry.reason).not.toBe('static-ready');expect(await page.evaluate(()=>window.__story.inspect().playback.reducedMotion)).toBe(false);expect(entry.progress).toBe(100);expect(entry.reveal).toBe(1);
   await expect(page.locator('[data-entry-loader]')).toBeHidden();await expect(page.locator('[data-project-content]')).not.toHaveAttribute('inert','');
-  await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(0);
-  await expect(page.getByRole('button',{name:'Enable 3D',exact:true})).toBeVisible();
+  await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);
+  await expect(page.getByRole('button',{name:'Enable 3D',exact:true})).toHaveCount(0);
   await expect(page.getByRole('combobox',{name:'Visual detail',exact:true})).toHaveCount(0);
   await expect(page.getByRole('button',{name:/^(Pause|Resume) motion$/})).toHaveCount(0);
   // Only the library is delayed in this regression. Let preceding diagrams
@@ -116,7 +116,7 @@ test('a native hash navigation relinquishes its chapter anchor before later layo
 
 for(const viewport of [{width:320,height:844},{width:844,height:390}])test(`canonical SSR entry remains readable at ${viewport.width}x${viewport.height} with failed scripts`,async({browser,baseURL},info)=>{
  let primary;const rows=[],requests=[],abortedScripts=[],failedScripts=[];
- const context=await browser.newContext({baseURL,viewport,reducedMotion:'no-preference'});let nojs,healthy;
+ const context=await browser.newContext({baseURL,viewport,reducedMotion:'no-preference'});let nojs;
  try{
   const page=await context.newPage();page.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)/.test(request.url()))requests.push(request.url());});
   page.on('requestfailed',request=>{if(request.resourceType()==='script')failedScripts.push({url:request.url(),error:request.failure()?.errorText});});
@@ -163,33 +163,23 @@ for(const viewport of [{width:320,height:844},{width:844,height:390}])test(`cano
    const fact=await frame.evaluate(readEntryComposition);rows.push({phase:'SSR-responsive-breakpoint',width,height,fact});assertEntryComposition(fact);
    if(width!==780){const path=info.outputPath(`direct-SSR-boundary-${width}x${height}.png`);await page.screenshot({path,scale:'device'});await info.attach(`direct-SSR-boundary-${width}x${height}`,{path,contentType:'image/png'});}
   }
-  // The unchanged pre-hydration fail-open animation is intentionally shortened
-  // by Reduced motion. Measure visible SSR first, then verify that policy before
-  // an independent healthy entry; do not freeze the normal 30-second fallback.
-  await page.emulateMedia({reducedMotion:'reduce'});
-  await expect(page.locator('[data-entry-loader]')).toBeHidden();
+  // Failed scripts retain the normal finite fail-open gate. An OS preference
+  // is no longer an automatic shortcut to a different entry/motion policy.
+  await expect(page.locator('[data-entry-loader]')).toBeHidden({timeout:WAIT});
   const policy=await page.evaluate(()=>({reduced:matchMedia('(prefers-reduced-motion: reduce)').matches,storyAbsent:window.__story===undefined,context:document.querySelector('[data-entry-loader]').getAttribute('data-entry-context'),loaderVisibility:getComputedStyle(document.querySelector('[data-entry-loader]')).visibility,bodyInert:document.querySelector('[data-project-content]').hasAttribute('inert')}));
-  rows.push({phase:'reduced-unhydrated-fail-open',policy});
-  expect(policy.reduced).toBe(true);expect(policy.storyAbsent).toBe(true);expect(policy.context).toBeNull();expect(policy.loaderVisibility).toBe('hidden');expect(policy.bodyInert).toBe(false);
+  rows.push({phase:'normal-unhydrated-fail-open',policy});
+  expect(policy.reduced).toBe(false);expect(policy.storyAbsent).toBe(true);expect(policy.context).toBeNull();expect(policy.loaderVisibility).toBe('hidden');expect(policy.bodyInert).toBe(false);
   await expect(page.locator('[data-project-content]')).toBeVisible();
   await expect(page.locator('[data-home-link]')).toHaveAttribute('href','/#about');await expect(page.locator('[data-home-link]')).toBeVisible();
-  const healthyViewport=page.viewportSize();
-  await context.close();
-  // Independent healthy entry, not recovery of a context whose scripts failed.
-  healthy=await browser.newContext({baseURL,viewport:healthyViewport,reducedMotion:'reduce'});
-  const healthyPage=await healthy.newPage(),healthyRequests=[];
-  healthyPage.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)/.test(request.url()))healthyRequests.push(request.url());});
-  rows.push({phase:'independent-clean-reduced-entry',viewport:healthyViewport,requests:healthyRequests,coverage:'New clean context with original scripts; not failed-context recovery or delayed hydration.'});
-  await healthyPage.goto('/projects/bending-active/',{waitUntil:'load'});
-  await expect.poll(()=>healthyPage.evaluate(()=>window.__story?.inspect().entry.phase),{timeout:WAIT}).toBe('entered');
-  await expect(healthyPage.locator('[data-entry-loader]')).toBeHidden();await expect(healthyPage.locator('[data-project-content]')).not.toHaveAttribute('inert','');await expect(healthyPage.locator('[data-cinematic-stage] canvas')).toHaveCount(0);expect(healthyRequests).toEqual([]);expect(requests).toEqual([]);
-  rows.push({phase:'independent-clean-reduced-entered',url:healthyPage.url()});
+  expect(requests).toEqual([]);await context.close();
+  // Independent healthy 3D under OS Reduced is covered by public-release and
+  // model-inspection. Do not stack a duplicate heavy journey onto this SSR case.
   nojs=await browser.newContext({baseURL,viewport,javaScriptEnabled:false});const native=await nojs.newPage();await native.goto('/projects/bending-active/');
   await expect(native.locator('[data-entry-loader]')).toBeHidden();await expect(native.locator('[data-project-content]')).not.toHaveAttribute('inert','');await expect(native.locator('[data-project-content]')).toBeVisible();
   const home=native.locator('[data-home-link]');await expect(home).toHaveAttribute('href','/#about');await expect(home).toBeVisible();rows.push({phase:'no-js-native-body',url:native.url(),loaderHidden:true});
  }catch(error){primary=error;throw error;}finally{
   let cleanupError=primary;
-  for(const cleanup of [async()=>{const path=info.outputPath('direct-SSR-composition.json');await writeFile(path,JSON.stringify({viewport,coverage:"Failed-script SSR pixels plus independent clean-context Reduced entry; no failed-context recovery or same-document delayed-hydration visual claim.",abortedScripts,failedScripts,requests,rows},null,2));await info.attach('direct-SSR-composition',{path,contentType:'application/json'});},()=>context.close(),()=>healthy?.close(),()=>nojs?.close()])try{await cleanup();}catch(error){cleanupError??=error;}
+  for(const cleanup of [async()=>{const path=info.outputPath('direct-SSR-composition.json');await writeFile(path,JSON.stringify({viewport,coverage:"Failed-script SSR pixels, normal finite fail-open and independent no-JavaScript native body; no failed-context recovery or delayed-hydration claim.",abortedScripts,failedScripts,requests,rows},null,2));await info.attach('direct-SSR-composition',{path,contentType:'application/json'});},()=>context.close(),()=>nojs?.close()])try{await cleanup();}catch(error){cleanupError??=error;}
   if(!primary&&cleanupError)throw cleanupError;
  }
 });

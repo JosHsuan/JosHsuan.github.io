@@ -1,6 +1,10 @@
+// Historical exact-baseline checks below first reverse ONLY the separately
+// reviewed 26 October scroll-reading delta; raw current-DOM contracts live in
+// scroll-reading-contract.test.mjs and source-access.test.mjs. No asset is normalized.
 import assert from 'node:assert/strict';
+import {readFile as readActualFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
-import {readFile} from 'node:fs/promises';
+import {readReviewedFile as readFile} from './scroll-reading-contract.mjs';
 import test from 'node:test';
 import {editorialProjectLayout} from '../../roles/uiux-designer/cases/bending-active-thesis/components/project-editorial-layout.mjs';
 const root=new URL('../../',import.meta.url),casePath='roles/uiux-designer/cases/bending-active-thesis/';
@@ -95,7 +99,7 @@ test('editorial presentation preserves all release data, original source assets 
 });
 const sceneNames=['portfolio-tower-on-site.webp','portfolio-timber-model.webp','portfolio-xr-workshop.webp','portfolio-robotic-assembly.webp','portfolio-timber-interior.webp'];
 const evidenceNames=['portfolio-voxel-framework.webp','portfolio-module-infill.webp','portfolio-xr-assembly-sequence.webp','portfolio-xr-interface.webp','portfolio-xr-data-exchange.webp'];
-test('only Cas uses ten original native figures, six existing evidence actions and one workshop reference',async()=>{
+test('only Cas uses ten original native figures, six existing evidence placements and one workshop reference',async()=>{
  const projects=JSON.parse(await read(casePath+'release/project-studies.json')).projects;
  for(const project of projects){
   const before=JSON.stringify(project),rows=editorialProjectLayout(project);assert.equal(JSON.stringify(project),before);
@@ -112,12 +116,12 @@ test('only Cas uses ten original native figures, six existing evidence actions a
   for(const bad of [{...project,model:{}},{...project,motionMedia:[{}]},{...project,sections:[{id:'unreviewed'}]},{...project,sections:[{...project.sections[0],media:[]}]}])assert.throws(()=>editorialProjectLayout(bad));
  }
 });
-test('native editorial templates retain secure source actions, captions, complete images and one glass owner per surface',async()=>{
+test('native editorial templates retain inline provenance, complete images and one glass owner per surface',async()=>{
  for(const [path,expected]of Object.entries(templates))assert.equal(hash(await read(path)),expected,path);
- const source=await read(casePath+'components/EditorialProjectStudy.jsx'),css=await read(casePath+'components/EditorialProjectStudy.module.css');
- assert(source.includes('data-evidence-source-link={evidence?'));assert(source.includes('rel="noopener noreferrer"'));assert(source.includes('aria-label={`Open full image (new tab): ${image.alt}`}'));
- assert(source.includes('<p>{image.caption}</p><span>{image.credit}</span><SourceAction image={image} evidence={evidence}/>'));
- assert(source.includes('width={image.width} height={image.height} alt={image.alt}'));assert(source.includes('href={image.src} target="_blank"'));
+ const source=await readActualFile(new URL(casePath+'components/EditorialProjectStudy.jsx',root),'utf8'),css=await readActualFile(new URL(casePath+'components/EditorialProjectStudy.module.css',root),'utf8');
+ assert.doesNotMatch(source,/data-evidence-source-link|href=\{image.src\}|<SourceAction/);
+ assert(source.includes('<p>{image.caption}</p><span>{image.credit}</span>'));
+ assert(source.includes('width={image.width} height={image.height} alt={image.alt}'));assert(source.includes('<div className={styles.imageLink}>'));
  assert(!/data-project-media|<canvas|onClick=|requestAnimationFrame|setInterval|setTimeout/.test(source));
  assert(css.includes('position:relative;z-index:2;'));assert(css.includes('height:auto;object-fit:contain'));assert(css.includes('min-height:44px'));assert(css.includes('@media(forced-colors:active)'));
  // Credit typography must not activate the decorative skin before its presenter is ready.

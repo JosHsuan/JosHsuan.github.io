@@ -32,3 +32,18 @@ test('source focus groups cannot escape the raster or lose readable explanations
  reject(({section})=>{section.diagramFocus.steps[0].description='';});
  reject(({section})=>{section.diagramFocus.steps[1].label=section.diagramFocus.steps[0].label;});
 });
+
+test('Entrance plates expose every numbered group and explanation in native document order',()=>{
+ const source=readFileSync(new URL('../components/EntranceDiagramFocus.jsx',root),'utf8');
+ assert.match(source,/<img src=\{image.src\} width=\{image.width\} height=\{image.height\}[^>]*data-entrance-original/);
+ assert.match(source,/<svg viewBox=\{`0 0 \$\{image.width\} \$\{image.height\}`\} aria-hidden="true" focusable="false"/);
+ assert.match(source,/guide.steps.map\(\(step,index\)=><g[^>]*><rect data-focus-region=\{index\} x=\{step.bounds\[0\]\} y=\{step.bounds\[1\]\} width=\{step.bounds\[2\]\} height=\{step.bounds\[3\]\}/);
+ assert.match(source,/<ol[^>]*>\s*\{guide.steps.map\(\(step,index\)=><li[^>]*data-focus-description=\{index\}/);
+ assert.match(source,/\{step.label\}<\/h4><p>\{step.description\}<\/p>/);
+ assert.match(source,/\{image.caption\}/);assert.match(source,/\{image.credit\}/);
+ assert.doesNotMatch(source,/<(?:a|input|button|select)\b|\b(?:useState|onClick|onKeyDown|aria-controls|aria-selected)=?|\shidden(?:[=>\s])/);
+ const css=readFileSync(new URL('../components/EntranceDiagramFocus.module.css',root),'utf8');
+ assert.match(css,/\.plate img\{[^}]*height:auto;object-fit:contain/);
+ assert.match(css,/\.overlay\{[^}]*pointer-events:none/);
+ assert.doesNotMatch(css,/:checked|:has\(|prefers-reduced-motion|\.descriptions[^}]*display:none|\.descriptions[^}]*opacity:0/);
+});

@@ -18,7 +18,7 @@ async function current(page){await expect.poll(async()=>{const s=await read(page
 async function cleanupPreserving(action,primary){try{await action();}catch(error){if(!primary)throw error;}}
 async function receipt(info,name,value){const path=info.outputPath(name+'.json');await writeFile(path,JSON.stringify(value,null,2));await info.attach(name,{path,contentType:'application/json'});}
 
-test('Home native research camera reverses while independent idle adds no 3D work and Pause retains native reading',async({page,isMobile},info)=>{
+test('Home native research camera reverses while independent idle adds no 3D work and no controls gate reading',async({page,isMobile},info)=>{
  let primary;const rows=[],requests=[];page.on('request',r=>{if(/\.(glb|hdr)(?:\?|$)/.test(r.url()))requests.push(r.url());});await page.goto('/');await entered(page);await exposed(page);await expect(page.locator('[data-home-research-poster]')).toHaveCSS('opacity','0');
  const capture=async name=>{await expect.poll(async()=>{const s=await read(page);return Math.abs(s.presenter.progress-s.nativeProgress)<1e-9&&(!s.presenter.enabled||Math.abs(s.hero.resource.progress-s.presenter.progress)<1e-9);},{timeout:WAIT}).toBe(true);const before=await read(page),path=info.outputPath(name+'.png');await page.screenshot({path});const after=await read(page);rows.push({phase:name,before,after});expect(after.hero.resource.pose).toEqual(before.hero.resource.pose);await info.attach(name,{path,contentType:'image/png'});};
  await capture('home-initial');
@@ -41,15 +41,11 @@ test('Home native research camera reverses while independent idle adds no 3D wor
   const before=await read(page);await frames(page,8);const after=await read(page);rows.push({phase:'idle',before,after});
   expect(after.hero.resource.frames).toBe(before.hero.resource.frames);expect(after.hero.resource.preparations).toBe(before.hero.resource.preparations);
   expect(before.idle.animations).toHaveLength(1);expect(after.idle.animations).toHaveLength(1);expect(before.idle.animations[0].playState).toBe('running');expect(after.idle.animations[0].currentTime).toBeGreaterThan(before.idle.animations[0].currentTime);expect(after.idle.transform).not.toBe(before.idle.transform);
-  const pause=page.locator('[data-home-research-pause]');
-  const button=await pause.evaluate(node=>{const r=node.getBoundingClientRect(),s=getComputedStyle(node),rgba=value=>{const a=value.match(/[\d.]+/g)?.map(Number);if(!a||a.length<3||(a[3]??1)!==1)throw Error('Opaque button palette required');return a.slice(0,3);},lum=a=>a.map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4;}).reduce((sum,v,i)=>sum+v*[.2126,.7152,.0722][i],0),f=lum(rgba(s.color)),b=lum(rgba(s.backgroundColor));return{width:r.width,height:r.height,foreground:s.color,background:s.backgroundColor,ratio:(Math.max(f,b)+.05)/(Math.min(f,b)+.05)};});
-  expect(button.width).toBeGreaterThanOrEqual(44);expect(button.height).toBeGreaterThanOrEqual(44);expect(button.ratio).toBeGreaterThanOrEqual(4.5);rows.push({phase:'pause-control',button});await pause.click();await expect(pause).toHaveAttribute('aria-pressed','true');
-  const held=await read(page);await nativeY(page,b);await frames(page,3);const paused=await read(page);rows.push({phase:'paused',held,paused});
-  expect(paused.hero.resource.pose).toEqual(held.hero.resource.pose);expect(paused.hero.resource.frames).toBe(held.hero.resource.frames);expect(paused.idle.animations).toHaveLength(0);expect(paused.idle.name).toBe('none');
-  await pause.click();await expect(pause).toHaveAttribute('aria-pressed','false');const resumed=await current(page);rows.push({phase:'resumed',...resumed});
-  expect(resumed.hero.resource.pose.position).not.toEqual(held.hero.resource.pose.position);
-  expect(resumed.hero.resource.pixelBudget).toBe(isMobile?393216:786432);
-  expect(resumed.hero.resource.vertices).toBe(172789);expect(resumed.hero.resource.triangles).toBe(227521);expect(resumed.hero.resource.presentationSet).toEqual({transparent:true,visibleEditorialMeshes:0,editorialAreaLights:2,contactFloorShadow:false,sourceMeshes:3});
+  await expect(page.locator('[data-home-research-pause],button,a[href^="#"]')).toHaveCount(0);
+  await page.emulateMedia({reducedMotion:'reduce'});await nativeY(page,b);const updated=await current(page);rows.push({phase:'native-scroll-with-os-motion-preference',...updated});
+  expect(updated.hero.acquisitions).toBe(1);expect(updated.hero.disposals).toBe(0);expect(updated.hero.resource.pose.position).not.toEqual(first.hero.resource.pose.position);expect(updated.presenter.policy.reduced).toBe(false);
+  expect(updated.hero.resource.pixelBudget).toBe(isMobile?393216:786432);
+  expect(updated.hero.resource.vertices).toBe(172789);expect(updated.hero.resource.triangles).toBe(227521);expect(updated.hero.resource.presentationSet).toEqual({transparent:true,visibleEditorialMeshes:0,editorialAreaLights:2,contactFloorShadow:false,sourceMeshes:3});
   await expect(page.locator('[data-project-grid] canvas,[data-project-model-preview]')).toHaveCount(0);
   await expect(page.locator('[data-project-card]')).toHaveCount(8);
   for(const suffix of ['/assets/source-layers.glb','/assets/studio-small.hdr'])expect(requests.filter(url=>url.endsWith(suffix))).toHaveLength(1);
@@ -184,26 +180,33 @@ historyTest('Home native project entry disposes its own source and destination r
  }
 });
 
-for(const policy of ['reduced','save-data','forced-colors','no-js'])test(`Home ${policy} keeps original poster and eight native destinations without model acquisition`,async({browser,baseURL,viewport,isMobile,deviceScaleFactor},info)=>{
+for(const policy of ['reduced','save-data','forced-colors','no-js'])test(`Home ${policy} preserves native destinations without an automatic motion-disable switch`,async({browser,baseURL,viewport,isMobile,deviceScaleFactor},info)=>{
  let primary;const context=await browser.newContext({baseURL,viewport,isMobile,hasTouch:isMobile,deviceScaleFactor,javaScriptEnabled:policy!=='no-js',...(policy==='reduced'?{reducedMotion:'reduce'}:{}),...(policy==='forced-colors'?{forcedColors:'active'}:{})});
  try{
-  if(policy==='save-data')await context.addInitScript(()=>Object.defineProperty(navigator,'connection',{configurable:true,value:{saveData:true,addEventListener(){},removeEventListener(){}}}));
+  if(policy==='save-data')await context.addInitScript(()=>Object.defineProperty(navigator,'connection',{configurable:true,value:Object.assign(new EventTarget(),{saveData:true})}));
   const page=await context.newPage(),requests=[];page.on('request',r=>{if(/\.(glb|hdr)(?:\?|$)/.test(r.url()))requests.push(r.url());});
-  await page.goto('/');if(policy!=='no-js')await entered(page);
+  await page.goto('/');if(policy!=='no-js'){await entered(page);await exposed(page);}
   const poster=page.locator('[data-home-research-poster]');await expect(poster).toHaveAttribute('src','/assets/cinematic/model-poster.webp');
-  await expect.poll(()=>poster.evaluate(node=>node.complete&&node.naturalWidth>0),{timeout:WAIT}).toBe(true);await expect(poster).toHaveCSS('opacity','1');
-  await expect(page.locator('[data-home-research-canvas],[data-project-model-preview]')).toHaveCount(0);
-  await expect(page.locator('[data-project-card]')).toHaveCount(8);
-  await expect(page.locator('[data-home-research-link]')).toHaveAttribute('href','/projects/bending-active/');
-  if(policy!=='no-js'){const state=await read(page);expect(state.hero.acquisitions).toBe(0);expect(state.hero.arrivalStatic).toBe(true);expect(state.hero.exposure).toBeNull();}
-  expect(requests).toEqual([]);const sizes=[];
-  for(const width of policy==='reduced'&&isMobile?[390,320]:[viewport.width]){await page.setViewportSize({width,height:viewport.height});await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));await expect.poll(()=>page.evaluate(()=>scrollY),{timeout:WAIT}).toBe(0);const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);expect(overflow).toBe(false);sizes.push({width,overflow});const path=info.outputPath(`home-${policy}-${width}.png`);await page.screenshot({path});await info.attach(`home-${policy}-${width}`,{path,contentType:'image/png'});
-   await poster.evaluate(node=>node.scrollIntoView({block:'center',behavior:'instant'}));
-   const bounds=await poster.evaluate(node=>{const r=node.getBoundingClientRect(),css=getComputedStyle(node);return{left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:innerWidth,height:innerHeight,opacity:css.opacity,fit:css.objectFit,naturalWidth:node.naturalWidth,naturalHeight:node.naturalHeight,y:scrollY};});
-   expect(bounds.left).toBeGreaterThanOrEqual(0);expect(bounds.top).toBeGreaterThanOrEqual(0);expect(bounds.right).toBeLessThanOrEqual(bounds.width);expect(bounds.bottom).toBeLessThanOrEqual(bounds.height);expect(bounds.opacity).toBe('1');expect(bounds.fit).toBe('contain');sizes.at(-1).poster=bounds;
-   const fallbackPath=info.outputPath(`home-${policy}-${width}-poster.png`);await page.screenshot({path:fallbackPath});await info.attach(`home-${policy}-${width}-poster`,{path:fallbackPath,contentType:'image/png'});
+  await expect.poll(()=>poster.evaluate(node=>node.complete&&node.naturalWidth>0),{timeout:WAIT}).toBe(true);
+  await expect(page.locator('[data-project-card]')).toHaveCount(8);await expect(page.locator('[data-home-research-link]')).toHaveAttribute('href','/projects/bending-active/');await expect(page.locator('[data-home-research-pause],button,a[href^="#"]')).toHaveCount(0);
+  if(policy==='no-js'){
+   await expect(poster).toHaveCSS('opacity','1');await expect(page.locator('[data-home-research-canvas],[data-project-model-preview]')).toHaveCount(0);expect(requests).toEqual([]);
+  }else{
+   await expect(poster).toHaveCSS('opacity','0');await expect(page.locator('[data-home-research-canvas]')).toHaveCount(1);const state=await read(page);
+   expect(state.hero.acquisitions).toBe(1);expect(state.hero.arrivalStatic).toBe(false);expect(state.hero.exposure.completed).toBe(true);expect(state.presenter.policy.reduced).toBe(false);expect(state.presenter.policy.saveData).toBe(false);expect(state.presenter.policy.forcedColors).toBe(false);
+   expect(requests.sort()).toEqual([new URL('/assets/source-layers.glb',page.url()).href,new URL('/assets/studio-small.hdr',page.url()).href].sort());
   }
-  await receipt(info,'home-static-policy',{policy,requests,sizes});
+  const sizes=[];
+  for(const width of policy==='reduced'&&isMobile?[390,320]:[viewport.width]){
+   await page.setViewportSize({width,height:viewport.height});await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));await expect.poll(()=>page.evaluate(()=>scrollY),{timeout:WAIT}).toBe(0);const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);expect(overflow).toBe(false);sizes.push({width,overflow});
+   if(policy!=='no-js'){const state=await read(page);expect(state.hero.acquisitions).toBe(1);expect(state.hero.disposals).toBe(0);expect(state.hero.resource.sourceRevision).toBeTruthy();}
+   const path=info.outputPath(`home-${policy}-${width}.png`);await page.screenshot({path});await info.attach(`home-${policy}-${width}`,{path,contentType:'image/png'});
+   if(policy==='no-js'){
+    await poster.evaluate(node=>node.scrollIntoView({block:'center',behavior:'instant'}));const bounds=await poster.evaluate(node=>{const r=node.getBoundingClientRect(),css=getComputedStyle(node);return{left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:innerWidth,height:innerHeight,opacity:css.opacity,fit:css.objectFit,naturalWidth:node.naturalWidth,naturalHeight:node.naturalHeight,y:scrollY};});
+    expect(bounds.left).toBeGreaterThanOrEqual(0);expect(bounds.top).toBeGreaterThanOrEqual(0);expect(bounds.right).toBeLessThanOrEqual(bounds.width);expect(bounds.bottom).toBeLessThanOrEqual(bounds.height);expect(bounds.opacity).toBe('1');expect(bounds.fit).toBe('contain');sizes.at(-1).poster=bounds;
+   }
+  }
+  await receipt(info,'home-motion-policy',{policy,requests,sizes});
  }catch(error){primary=error;throw error;}finally{await cleanupPreserving(()=>context.close(),primary);}
 });
 

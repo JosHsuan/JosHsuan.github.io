@@ -1,13 +1,12 @@
 import {test, expect} from '@playwright/test';
-import {scenarioTimeout, frames, loadScene, holdModel, settle, centerStudy, surface} from './case-helpers.mjs';
+import {scenarioTimeout, frames, loadScene, settle} from './case-helpers.mjs';
 import {RENDER_PIXEL_BUDGET} from '../../roles/uiux-designer/cases/bending-active-thesis/components/render-budget.mjs';
 
 const RESOURCE_WAIT = 20000;
 const binaryAssets = /\/(?:source-layers\.glb|studio-small\.hdr|source-diagrams\.glb)(?:\?|$)/;
 
-// The installed clock stays frozen during native keyboard IPC. Software-GPU
-// runners can spend more than the comparison's eight active seconds between
-// Enter and Arrow, so wall time must not choose which source gets warmed.
+// The installed clock controls renderer sampling only. Native scroll, never
+// elapsed idle time or removed comparison buttons, chooses source identity.
 async function pauseResourceClock(page) {
   const now=await page.evaluate(()=>Date.now());
   // Read the browser's installed clock, with enough future margin for slow
@@ -22,22 +21,23 @@ async function pauseResourceClock(page) {
   };
 }
 
+async function centerStudy(page,chapter='system',progress=.5) {
+  const goal=await page.evaluate(({chapter,progress})=>{
+    const naturalY=node=>{let y=0;for(;node;node=node.offsetParent)y+=node.offsetTop;return y;};
+    const sections=[...document.querySelectorAll('[data-story-chapter]')],index=sections.findIndex(node=>node.dataset.storyChapter===chapter),top=naturalY(sections[index]),end=naturalY(sections[index+1]);
+    return Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,top+(end-top)*progress-innerHeight*.45));
+  },{chapter,progress});
+  await page.evaluate(goal=>scrollTo({top:goal,behavior:'instant'}),goal);await settle(page);
+  await page.waitForFunction(chapter=>window.__thesis.inspect().representation.chapterId===chapter&&window.__thesis.inspect().sourceVisible,chapter,{timeout:RESOURCE_WAIT});
+}
+
 async function warmSourceRepresentations(page,drive) {
-  // Setup needs actual settled source paints, not dense transition sampling.
-  // Larger foreground steps avoid hundreds of software-GPU draws before the
-  // resource baseline; the measured allocation route still uses 48 ms steps.
-  const warm=operation=>drive(operation,500);
-  const painted=[];
-  for(const [chapter,count] of [['system',4],['pattern',3]]){
-    await warm(()=>centerStudy(page,chapter));
-    const el=surface(page,chapter);
+  const warm=operation=>drive(operation,500),painted=[];
+  for(const [chapter,positions] of [['system',[.125,.375,.625,.77]],['pattern',[.167,.5,.70]]]){
     const seen=new Set();
-    for(let index=0;index<count;index++){
-      const previous=await page.evaluate(()=>({index:window.__thesis.inspect().representation.index,frames:window.__thesis.inspect().frames})),expected=(previous.index+1)%count;
-      // These are real browser key events. No RAF/time advances between the
-      // comparison request and its inspection hold, regardless of IPC latency.
-      await el.press('Enter');await el.press('ArrowLeft');await el.press('ArrowRight');
-      await warm(()=>settle(page));
+    for(const [expected,progress] of positions.entries()){
+      const previous=await page.evaluate(()=>window.__thesis.inspect().frames);
+      await warm(()=>centerStudy(page,chapter,progress));
       const value=await page.evaluate(()=>{
         const scene=window.__thesis.inspect(),story=window.__story.inspect();
         return{id:scene.representation.id,index:scene.representation.index,chapter:scene.representation.chapterId,pinned:scene.representation.pinned,
@@ -45,19 +45,14 @@ async function warmSourceRepresentations(page,drive) {
           memory:scene.memory,programs:scene.renderer.programs,detail:scene.detail,
           frames:scene.frames,controllerFrame:story.controllerFrame,renderedControllerFrame:scene.renderedControllerFrame};
       });
-      expect(value).toMatchObject({index:expected,chapter,pinned:true,selected:{chapterId:chapter,index:expected},held:{chapterId:chapter,index:expected},engaged:true,detail:'full'});
-      expect(value.frames).toBeGreaterThan(previous.frames);
-      seen.add(value.id);painted.push(value);
+      expect(value).toMatchObject({index:expected,chapter,pinned:false,engaged:false,detail:'full'});
+      expect(value.frames).toBeGreaterThan(previous);seen.add(value.id);painted.push(value);
     }
-    expect(seen.size).toBe(count);
-    await el.press('Escape');
-    // The last held source has suspended normal pressure sampling. Resume the
-    // final view using measured cadence so no slow warmup sample enters the
-    // allocation route's pressure window.
+    expect(seen.size).toBe(positions.length);
     await (chapter==='pattern'?drive:warm)(()=>settle(page));
   }
   expect(new Set(painted.map(value=>value.id)).size).toBe(7);
-  await test.info().attach('source-material-warmup',{body:JSON.stringify(painted),contentType:'application/json'});
+  await test.info().attach('scroll-source-material-warmup',{body:JSON.stringify(painted),contentType:'application/json'});
 }
 
 async function readResources(page) {
@@ -79,7 +74,7 @@ async function profile(page, viewport) {
   });
   const frame=before.frame;
   await page.setViewportSize(viewport);
-  await centerStudy(page,'system');await holdModel(page,'system');
+  await centerStudy(page,'system');
   await page.waitForFunction(frame => {
     const scene = window.__thesis?.inspect(), story = window.__story?.inspect(), budget = scene?.renderBudget;
     const stage=document.querySelector('[data-cinematic-stage]');
@@ -133,7 +128,7 @@ test('Full 4K resize cycles retain source data, optics and bounded stable render
   const drive=await pauseResourceClock(page);
   try{await warmSourceRepresentations(page,drive);}finally{await page.clock.resume();}
   // Resize rounds retain normal autonomous playback and pressure adaptation.
-  await centerStudy(page,'system');await holdModel(page,'system');
+  await centerStudy(page,'system');
   const canvas = await page.locator('[data-cinematic-stage] canvas').elementHandle(), source = await readResources(page);
   expect(source.source).toMatchObject({vertices: 172789, triangles: 227521, sourceObjects: 51});
   expect(source.diagrams.representations).toHaveLength(7);
@@ -170,9 +165,8 @@ test('Full 4K resize cycles retain source data, optics and bounded stable render
     expect(value.compositor).toMatchObject({width:value.budget.width,height:value.budget.height,dpr:value.budget.dpr});
     return {memory: value.memory, programs: value.programs, width: value.compositor.width, height: value.compositor.height,densityScale:value.budget.densityScale};
   };
-  // A real keyboard inspection hold retains the Full optical shot and prevents
-  // autonomous density relief while engaged. Resizing can release that hold,
-  // so real slow-device pressure may legitimately lower drawing density.
+  // Normal scroll-owned views retain Full source detail; measured slow-device
+  // pressure may legitimately lower drawing density without changing geometry.
   // Explicit source
   // warmup covers lazy geometry/shader creation; one complete resize cycle warms
   // the target configuration, then returns to the same viewport;

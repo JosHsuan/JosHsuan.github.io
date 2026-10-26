@@ -2,11 +2,12 @@
 import ProjectStudyChrome,{StudyLabel} from './ProjectStudyChrome';
 import InformationSkin from './InformationSkin';
 import XRSceneStage from './XRSceneStage';
+import ProjectAnimationPreview from './ProjectAnimationPreview';
 import study from '../release/xr-study.json';
 import workspace from '../release/xr-workspace.json';
 import styles from './XRProject.module.css';
 
-const MODEL_GUIDANCE='When 3D is available, scroll to follow the camera. For optional keyboard inspection, focus the model and use arrow keys; Home or Escape returns to the current scroll view.';
+const MODEL_GUIDANCE='Scroll to follow the original assembly through its authored camera views.';
 
 function Panel({children,className=''}) {
   return <div className={`${styles.panel} ${className}`} data-information-window="editorial" data-information-motion-surface="plane"><InformationSkin/>{children}</div>;
@@ -17,17 +18,16 @@ function Heading({number,label,title,id,kind='system'}) {
 function EvidenceFigure({item,label,eager=false}) {
   return <figure className={styles.figure} data-xr-evidence={item.src}>
     <div className={styles.figureIndex}>{label}</div>
-    <a className={styles.mediaFrame} data-information-window="evidence-image" data-information-motion-surface="plane" href={item.src} target="_blank" rel="noreferrer" aria-label={`View full image (new tab): ${item.alt}`}>
+    <div className={styles.mediaFrame} data-information-window="evidence-image" data-information-motion-surface="plane">
       <InformationSkin/><span className={styles.mediaPlane}><img src={item.src} width={item.width} height={item.height} alt={item.alt} loading={eager?'eager':'lazy'} decoding="async" data-site-critical={eager?'':undefined}/></span>
-    </a>
-    <figcaption data-information-window="evidence-caption" data-information-motion-surface="plane"><InformationSkin/><p>{item.caption}</p><span>{item.credit}</span><a className={styles.recordingLink} data-evidence-source-link href={item.src} target="_blank" rel="noopener noreferrer" aria-label={`Open full image (new tab): ${item.alt}`}>Open full image (new tab)</a></figcaption>
+    </div>
+    <figcaption data-information-window="evidence-caption" data-information-motion-surface="plane"><InformationSkin/><p>{item.caption}</p><span>{item.credit}</span></figcaption>
   </figure>;
 }
 function SceneSlot({stage,inspect=false,context=false}) {
   const poster=context?workspace.image:stage?.poster??study.model.poster;
   return <div className={styles.sceneSlot} data-xr-scene-slot data-xr-scene-kind={context?'workspace':stage?'phone':'model'}
-    data-xr-model-control={inspect?'':undefined} tabIndex={inspect?0:undefined} role={inspect?'group':undefined}
-    aria-label={inspect?`Original bamboo assembly. ${MODEL_GUIDANCE}`:undefined}>
+    data-xr-model-control={inspect?'':undefined} data-xr-scroll-aperture={inspect?'':undefined}>
     <noscript><figure className={styles.staticFigure}><picture>{context&&workspace.image.mobile&&<source media="(max-width:799px)" srcSet={workspace.image.mobile.src}/>}<img src={poster.src} width={poster.width} height={poster.height} alt={poster.alt} loading="lazy"/></picture><figcaption>{context?workspace.caption:stage?stage.caption:study.model.caption}</figcaption></figure></noscript>
   </div>;
 }
@@ -38,7 +38,6 @@ function PhoneChapter({stage,index}) {
       <Panel className={styles.narrative}>
         <Heading number={String(index+1).padStart(2,'0')} label={`${stage.id.toUpperCase()} / RECORDED APP INTERFACE`} title={stage.title} id={`xr-${stage.id}-heading`}/>
         <p>{stage.description}</p><p className={styles.caption}>{stage.caption}</p>
-        <a className={styles.recordingLink} href={stage.src} target="_blank" rel="noreferrer" aria-label="Open full recording (new tab)">Open full recording <span aria-hidden="true">↗</span></a>
         <p className={styles.recordingNote}>Original interface recording, presented on an iPhone display model. The website does not connect to tracking hardware.</p>
         <p className={styles.credit}>{stage.credit}</p>
       </Panel>
@@ -49,7 +48,7 @@ export default function XRProject() {
   return <>
     <ProjectStudyChrome chapters={[{id:'overview',label:'Overview'},{id:'context',label:'Context'},{id:'method',label:'Method'},{id:'adapt',label:'Adapt'},{id:'assemble',label:'Assemble'},{id:'join',label:'Join'},{id:'making',label:'Physical study'},{id:'credits',label:'Credits'}]}/>
     <XRSceneStage model={study.model} stages={study.phoneStages} workspaceVisual={workspace.image}/>
-    <main id="portfolio-main" tabIndex={-1} className={styles.page} data-xr-study data-information-motion-profile="velocity-skin" data-portfolio-root data-portfolio-section="xr-project">
+    <main id="portfolio-main" tabIndex={-1} className={styles.page} data-xr-study data-xr-reading-mode="scroll" data-information-motion-profile="velocity-skin" data-portfolio-root data-portfolio-section="xr-project">
       <article aria-labelledby="xr-title">
         <header id="xr-overview" className={`${styles.chapter} ${styles.hero}`} data-xr-chapter="overview">
           <div className={styles.chapterInner}>
@@ -62,7 +61,7 @@ export default function XRProject() {
                 <div><dt>Practice</dt><dd>Computational design / XR / Digital fabrication</dd></div>
                 {study.role&&<div><dt>My role</dt><dd>{study.role}</dd></div>}
               </dl>
-              <a className={styles.readingLink} href="#xr-context">Scroll to follow the research <span aria-hidden="true">↓</span></a>
+              <p className={styles.readingCue}>Scroll to follow the research <span aria-hidden="true">↓</span></p>
             </Panel>
           </div>
         </header>
@@ -103,7 +102,11 @@ export default function XRProject() {
           <Heading number="05" label="CREDITS" title="A collaborative foundation." id="xr-credits-heading"/>
           <dl className={styles.credits}>{study.credits.map(item=><div key={item.role}><dt>{item.role}</dt><dd>{item.names}</dd></div>)}</dl><p className={styles.sourceNote}>{study.sourceNote}</p>
           <p className={styles.caption}>{study.limitations[1]} {study.limitations[3]}</p>
-          <div className={styles.recordingSource}><a className={styles.recordingLink} href={study.media.motion.src} target="_blank" rel="noreferrer" aria-label="Original presentation excerpt (new tab)">Original presentation excerpt <span aria-hidden="true">↗</span></a><p>{study.media.motion.caption}</p><p className={styles.credit}>{study.media.motion.credit}</p></div>
+          <figure className={styles.recordingSource} data-xr-presentation-recording>
+            <h3>Original research presentation.</h3>
+            <ProjectAnimationPreview animation={study.media.motion} poster={study.media.motion.poster} critical={false} className={styles.presentationRecording} mediaClassName={styles.presentationFrame} label={study.media.motion.alt} controlPlacement="outside" controlLabel="ARCHIVED RESEARCH RECORDING"/>
+            <figcaption><p>{study.media.motion.caption}</p><p className={styles.credit}>{study.media.motion.credit}</p></figcaption>
+          </figure>
           <a className={styles.nextProject} href="/projects/bending-active/"><span>RELATED STUDY</span><strong data-display-type>Bending-Active Metal Panel Deformation</strong><span aria-hidden="true">↗</span></a>
         </Panel></footer>
       </article>

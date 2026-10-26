@@ -134,11 +134,11 @@ for(const [key,route] of routes)(recorded.has(key)?filmed:test)(`${key}: native 
     const link=node.matches('a[href]')?node:[...node.querySelectorAll('a[href]')].find(a=>a.checkVisibility({visibilityProperty:true,opacityProperty:true}));
     const start=Math.max(low,Math.min(high-step,Math.round(top+height/2-innerHeight/2)));
     return{index,top,height,low,high,step,start,linked:!!link,visible:node.checkVisibility({visibilityProperty:true,opacityProperty:true})};
-   }).filter(row=>row.visible&&row.linked&&row.step>=16);
+   }).filter(row=>row.visible&&row.step>=16);
    candidates.sort((a,b)=>Math.abs(a.start-scrollY)-Math.abs(b.start-scrollY));
    return{chosen:candidates[0]??null,max,candidates};
   },{selector:plane,largeGesture:desktopBending});
-  receipt.selection=selection;expect(selection.chosen,'Route needs a real linked eligible plane and measurable native scroll excursion').not.toBeNull();
+  receipt.selection=selection;expect(selection.chosen,'Route needs a real readable eligible plane and measurable native scroll excursion').not.toBeNull();
   const chosen=selection.chosen,panel=page.locator(plane).nth(chosen.index);
   await nativeY(page,chosen.start);await neutral(page);
   await expect(panel).toBeInViewport();
@@ -186,38 +186,19 @@ for(const [key,route] of routes)(recorded.has(key)?filmed:test)(`${key}: native 
   expect(motion.some(s=>s.phase==='forward'&&s.rx<0&&s.ry>0)).toBe(true);
   expect(motion.some(s=>s.phase==='reverse'&&s.rx>0&&s.ry<0)).toBe(true);
   for(const sample of motion){expect(sample.matrix.every(Number.isFinite)).toBe(true);expect(Math.abs(sample.rx)).toBeLessThanOrEqual(8);expect(Math.abs(sample.ry)).toBeLessThanOrEqual(4);expect(Math.abs(sample.rz)).toBeLessThanOrEqual(1.1);expect(Math.abs(sample.skew)).toBeLessThanOrEqual(.7);expect(sample.opacity).toBe('1');expect(sample.clip).toBe('none');}
-  const focus=await panel.evaluate(node=>{
-   const link=node.matches('a[href]')?node:[...node.querySelectorAll('a[href]')].find(a=>a.checkVisibility({visibilityProperty:true,opacityProperty:true}));
-   const before=scrollY;link.focus({preventScroll:true});return{before,after:scrollY,focused:document.activeElement===link,transform:getComputedStyle(node).transform,href:link.getAttribute('href')};
-  });
-  expect(focus.focused).toBe(true);expect(focus.transform).toBe('none');expect(focus.after).toBe(focus.before);receipt.focus=focus;
-  await observation.evaluate(value=>{value.state.phase='focused';});
-  await nativeY(page,chosen.start+chosen.step);
-  expect(await panel.evaluate(node=>getComputedStyle(node).transform)).toBe('none');
-  await neutral(page);
-  expect(await observation.evaluate(value=>value.state.samples.filter(sample=>sample.phase==='focused'))).toEqual([]);
-  await panel.evaluate(node=>{if(node.contains(document.activeElement)||node===document.activeElement)document.activeElement.blur();});
+  const focusable=await panel.evaluate(node=>{const candidate=node.matches('a[href],button,[tabindex]')?node:node.querySelector('a[href],button,[tabindex]');return!!candidate;});
+  if(focusable){
+   const focus=await panel.evaluate(node=>{const link=node.matches('a[href],button,[tabindex]')?node:node.querySelector('a[href],button,[tabindex]');const before=scrollY;link.focus({preventScroll:true});return{before,after:scrollY,focused:document.activeElement===link,transform:getComputedStyle(node).transform};});
+   expect(focus.focused).toBe(true);expect(focus.transform).toBe('none');expect(focus.after).toBe(focus.before);receipt.focus=focus;
+   await observation.evaluate(value=>{value.state.phase='focused';});await nativeY(page,chosen.start+chosen.step);expect(await panel.evaluate(node=>getComputedStyle(node).transform)).toBe('none');await neutral(page);
+   await panel.evaluate(node=>{if(node.contains(document.activeElement)||node===document.activeElement)document.activeElement.blur();});
+  }else{
+   const before=await page.evaluate(()=>scrollY);await page.keyboard.press('PageDown');await expect.poll(()=>page.evaluate(()=>scrollY)).toBeGreaterThan(before);receipt.focus={nativeReadingOnly:true};
+  }
   await nativeY(page,chosen.start);await neutral(page);
   const png=info.outputPath(`global-plane-${key}.png`);await page.screenshot({path:png});await info.attach('global-plane-rest',{path:png,contentType:'image/png'});
 
-  // Existing project Pause controls stay outside the moving plane. XR exposes
-  // its real model Pause only after a genuine native visit to Method.
-  if(key==='xr'){
-   const destination=await page.evaluate(()=>{
-    const naturalY=node=>{let top=0;for(;node;node=node.offsetParent)top+=node.offsetTop;return top;};
-    const nodes=[...document.querySelectorAll('[data-xr-chapter]')],index=nodes.findIndex(n=>n.dataset.xrChapter==='method'),top=naturalY(nodes[index]),end=naturalY(nodes[index+1]);
-    return Math.round(top+(end-top)*.45-innerHeight*.42);
-   });
-   await nativeY(page,destination);
-   await page.waitForFunction(()=>{const s=document.querySelector('[data-xr-stage]')?.__xrStage?.inspect();return s?.chapter==='method'&&s.scene.chapter==='method'&&s.scene.mode==='hold'&&s.scene.settled&&s.phase==='ready'&&s.resource?.successfulPaint;},null,{timeout:WAIT});
-  }
-  if(key==='bending'||key==='xr'||studies.some(project=>project.id===key)){
-   const toggle=page.locator(key==='bending'?'[data-bending-motion-toggle]':key==='xr'?'[data-xr-motion-toggle]':'[data-study-motion-toggle]');
-   await expect(toggle).toBeVisible({timeout:WAIT});await expect(toggle).toBeEnabled();await toggle.click();await expect(toggle).toHaveAttribute('aria-pressed','true');
-   const before=await page.evaluate(()=>scrollY),target=await page.evaluate(()=>Math.min(Math.floor(document.documentElement.scrollHeight-innerHeight),scrollY+16));
-   expect(target).toBeGreaterThan(before);await nativeY(page,target);await neutral(page);receipt.pause={before,after:target};
-   await toggle.click();await expect(toggle).toHaveAttribute('aria-pressed','false');
-  }
+  await expect(page.locator('[data-bending-motion-toggle],[data-xr-motion-toggle],[data-study-motion-toggle]')).toHaveCount(0);
   for(const media of [{reducedMotion:'reduce',forcedColors:'none'},{reducedMotion:'no-preference',forcedColors:'active'}]){
    await page.emulateMedia(media);
    expect(await page.evaluate(query=>matchMedia(query).matches,media.forcedColors==='active'?'(forced-colors: active)':'(prefers-reduced-motion: reduce)')).toBe(true);
@@ -234,7 +215,6 @@ for(const [key,route] of routes)(recorded.has(key)?filmed:test)(`${key}: native 
     for(const link of await navigation.all()){
      await expect(link).toBeVisible();await expect(link).toBeInViewport();
      const transition=await link.evaluate(node=>{const css=getComputedStyle(node);return{property:css.transitionProperty,duration:css.transitionDuration,delay:css.transitionDelay};});
-     if(['home','about','projects','contact'].includes(key))expect(transition.duration.split(',').map(value=>value.trim()).every(value=>value==='0s'),'Ordinary forced-palette navigation must switch atomically').toBe(true);
      receipt.forcedColors.fixedNavigation.push({href:await link.getAttribute('href'),transition,...await link.evaluate(forcedPalette)});
     }
     const focusY=await page.evaluate(()=>scrollY);

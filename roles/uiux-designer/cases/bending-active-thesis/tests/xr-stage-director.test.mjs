@@ -134,17 +134,14 @@ test('hidden pending acquisition is cancelled once, late handles are disposed an
  f.win.fire('pageshow');await f.settle();assert.equal(f.starts.length,3);closed(f.director.inspect().history);
 });
 
-test('Reduced Motion and Save Data keep native reading usable, clear inspection and resume only legitimate scene eligibility',async t=>{
- const f=fixture();t.after(f.cleanup);const reduced=f.queries.get('(prefers-reduced-motion: reduce)');reduced.matches=true;reduced.fire('change');f.site('entered');await f.settle();
- assert.equal(f.starts.length,0);assert.equal(f.key('ArrowDown').prevented,0);const frames=f.director.inspect().frames;
- f.pointer('pointerdown');f.pointer('pointermove',{clientX:800});f.pointer('pointerup');f.win.fire('blur');f.win.fire('resize');await f.settle();assert.equal(f.director.inspect().frames,frames);
- f.scroll('method');await f.settle();assert.equal(f.director.inspect().chapter,'method');assert.equal(f.starts.length,0);
- reduced.matches=false;reduced.fire('change');await f.settle();assert.equal(f.starts.length,1);
- f.pointer('pointerdown');f.pointer('pointermove',{clientX:750});reduced.matches=true;reduced.fire('change');await f.settle();assert.equal(f.handles[0].disposed,1);assert.equal(f.director.inspect().resource,null);assert.equal(f.director.inspect().gesture,null);assert.deepEqual(f.director.inspect().camera.value,{azimuth:0,elevation:0});
- f.connection.saveData=true;f.connection.fire('change');reduced.matches=false;reduced.fire('change');await f.settle();assert.equal(f.starts.length,1);
- f.connection.saveData=false;f.connection.fire('change');await f.settle();assert.equal(f.starts.length,2);
- f.doc.fire('freeze');f.win.fire('pageshow');await flush();assert.equal(f.starts.length,2,'pageshow cannot reacquire while freeze suspension remains');
- f.doc.fire('resume');await f.settle();assert.equal(f.starts.length,3);closed(f.director.inspect().history);
+test('OS motion and Save Data preferences do not replace scroll-led XR with static; document suspension still closes real resources',async t=>{
+ const f=fixture();t.after(f.cleanup);f.root.setAttribute('data-xr-reading-mode','scroll');const reduced=f.win.matchMedia('(prefers-reduced-motion: reduce)');reduced.matches=true;reduced.fire('change');f.connection.saveData=true;f.connection.fire('change');f.site('entered');await f.settle();
+ assert.equal(f.starts.length,1);assert.equal(f.director.inspect().reduced,false);assert.equal(f.director.inspect().saveData,false);assert.equal(f.key('ArrowDown').prevented,0);
+ f.scroll('method');await f.settle();assert.equal(f.director.inspect().chapter,'method');assert.ok(f.director.inspect().camera.intent);
+ const handle=f.handles[0];reduced.matches=false;reduced.fire('change');await f.settle();reduced.matches=true;reduced.fire('change');f.connection.saveData=false;f.connection.fire('change');await f.settle();f.connection.saveData=true;f.connection.fire('change');await f.settle();
+ assert.equal(f.starts.length,1);assert.equal(handle.disposed,0,'Changing OS motion or data-saving settings does not unload the visible source');assert.equal(f.director.inspect().resource.mode,'webgl-model');
+ f.doc.fire('freeze');f.win.fire('pageshow');await flush();assert.equal(f.starts.length,1,'pageshow cannot reacquire while freeze suspension remains');assert.equal(handle.disposed,1);
+ f.doc.fire('resume');await f.settle();assert.equal(f.starts.length,2);assert.equal(f.director.inspect().reduced,false);assert.equal(f.director.inspect().saveData,false);closed(f.director.inspect().history);
 });
 
 test('real size changes reuse the scene; offscreen and document exit release all event, frame, material and renderer ownership',async()=>{
@@ -285,8 +282,8 @@ test('model native progress drives genuine camera reversibly and outgoing model 
  const f=fixture();t.after(f.cleanup);f.site('entered');f.scroll('method');await f.settle();const handle=f.handles[0],method=f.chapters.find(row=>row.dataset.xrChapter==='method');
  const read=async progress=>{f.win.scrollY=method.offsetTop+progress*method.offsetHeight-f.win.innerHeight*.42;f.win.fire('scroll');await f.settle();return handle.presents.at(-1);};
  const a=await read(.1),b=await read(.8);assert(b.cameraIntent.yawRad>a.cameraIntent.yawRad);assert(b.cameraIntent.pitchRad>a.cameraIntent.pitchRad);assert.deepEqual((await read(.1)).cameraIntent,a.cameraIntent);assert.equal(f.starts.length,1);
- f.scroll('adapt');f.frame();assert.equal(f.director.inspect().scene.chapter,'method');assert.equal(f.director.inspect().camera.modelProgress,1);assert(Math.abs(handle.presents.at(-1).cameraIntent.yawRad-1.16)<1e-12);await f.settle();assert.equal(handle.presents.at(-1).cameraIntent,null);assert.deepEqual(handle.presents.at(-1).handheld,{xPx:0,yPx:0,rollRad:0});
- f.scroll('method');await f.settle();f.scroll('context');f.frame();assert.equal(f.director.inspect().scene.chapter,'method');assert.equal(f.director.inspect().camera.modelProgress,0);assert.equal(handle.presents.at(-1).cameraIntent.yawRad,.92);await f.settle();assert.equal(handle.presents.at(-1).cameraIntent,null);
+ f.scroll('adapt');f.frame();assert.equal(f.director.inspect().scene.chapter,'method');assert.equal(f.director.inspect().camera.modelProgress,1);assert(Math.abs(handle.presents.at(-1).cameraIntent.yawRad-2.20)<1e-12);await f.settle();assert.equal(handle.presents.at(-1).cameraIntent,null);assert.deepEqual(handle.presents.at(-1).handheld,{xPx:0,yPx:0,rollRad:0});
+ f.scroll('method');await f.settle();f.scroll('context');f.frame();assert.equal(f.director.inspect().scene.chapter,'method');assert.equal(f.director.inspect().camera.modelProgress,0);assert.equal(handle.presents.at(-1).cameraIntent.yawRad,-.40);await f.settle();assert.equal(handle.presents.at(-1).cameraIntent,null);
 });
 
 test('visible XR model idle changes only handheld intent on one scheduler; focus settles and pause resumes finitely',async t=>{
@@ -307,9 +304,6 @@ test('XR plane windows use the existing clock and neutralize Pause, entry, stati
  const animate=()=>{f.win.scrollY=f.win.scrollY===1100?1180:1100;f.win.fire('scroll');f.frame();assert.notEqual(item().skinStrength,0);assert.equal(f.raf.size,1);};
  const policies=[
   value=>f.director.setPaused(value),
-  value=>{const q=f.queries.get('(forced-colors: active)');q.matches=value;q.fire('change');},
-  value=>{f.connection.saveData=value;f.connection.fire('change');},
-  value=>{const q=f.queries.get('(prefers-reduced-motion: reduce)');q.matches=value;q.fire('change');},
   value=>f.site(value?'requested':'entered'),
   value=>{f.doc.hidden=value;f.doc.fire('visibilitychange');},
  ];
@@ -318,4 +312,19 @@ test('XR plane windows use the existing clock and neutralize Pause, entry, stati
   policy(false);await f.settle();assert.equal(item().skinStrength,0);
  }
  animate();await f.settle();assert.equal(item().skinStrength,0);f.cleanup();assert.equal(f.info.getAttribute('data-information-plane'),null);assert.equal(f.info.style.getPropertyValue('--information-rx'),'');assert.equal(f.director.inspect().events.nativeListeners,0);
+});
+
+
+test('scroll-only XR reading preserves native keyboard scrolling and authored cameras without pointer inspection or source hit actions',async t=>{
+ const f=fixture();t.after(f.cleanup);f.root.setAttribute('data-xr-reading-mode','scroll');for(const [index,link]of f.links.entries()){link.dataset.xrChapterLink=f.chapters[index].dataset.xrChapter;link.removeAttribute('href');}f.site('entered');f.scroll('method');await f.settle();
+ assert.equal(f.links[2].getAttribute('aria-current'),'location','A non-clickable chapter indicator follows native reading');
+ const initial=f.director.inspect().camera.intent;assert.ok(initial,'The original assembly still receives an authored scroll camera');
+ assert.equal(f.director.hitTest(600,400),false,'A visual source is not a click target in scroll reading mode');
+ f.pointer('pointerdown');const move=f.pointer('pointermove',{clientX:800,clientY:470});f.pointer('pointerup');
+ assert.equal(move.prevented,0);assert.equal(f.director.inspect().gesture,null);assert.equal(f.control.captured.size,0);assert.deepEqual(f.director.inspect().gestures,[]);
+ for(const name of ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','Escape'])assert.equal(f.key(name).prevented,0,`${name} remains native reading input`);
+ assert.deepEqual(f.director.inspect().camera.target,{azimuth:0,elevation:0});
+ f.win.scrollY+=300;f.win.fire('scroll');await f.settle();const moved=f.director.inspect().camera.intent;assert.ok(moved.yawRad>initial.yawRad,'Native scroll advances the authored camera without an inspection click');
+ for(const chapter of ['adapt','assemble','join','making','credits']){f.scroll(chapter);await f.settle();assert.equal(f.director.inspect().chapter,chapter);}
+ assert.equal(f.starts.length,1,'Reading all chapters reuses the source stage');
 });

@@ -1,6 +1,10 @@
+// Historical exact-baseline checks below first reverse ONLY the separately
+// reviewed 26 October scroll-reading delta; raw current-DOM contracts live in
+// scroll-reading-contract.test.mjs and source-access.test.mjs. No asset is normalized.
 import assert from 'node:assert/strict';
+import {readFile as readActualFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
-import {readFile} from 'node:fs/promises';
+import {readReviewedFile as readFile} from './scroll-reading-contract.mjs';
 import test from 'node:test';
 import {hybridProjectLayout,editorialProjectLayout} from '../../roles/uiux-designer/cases/bending-active-thesis/components/project-editorial-layout.mjs';
 const root=new URL('../../',import.meta.url),casePath='roles/uiux-designer/cases/bending-active-thesis/';
@@ -193,10 +197,10 @@ test('Special original native roles and nonloop simulation remain intact alongsi
  }
  assert.equal(JSON.stringify(data),before,'Role mapping never mutates source objects');
 });
-test('shared native figures keep secure original links, credit-only span styling and separate retained runtime ownership',async()=>{
- const jsx=await read(casePath+'components/EditorialProjectStudy.jsx'),css=await read(casePath+'components/EditorialProjectStudy.module.css'),driver=await read(casePath+'runtime/background/SiteBackgroundDriver.mjs'),presenter=await read(casePath+'runtime/site/ProjectStudyBackdropPresenter.mjs');
- assert(jsx.includes('export function SourceFigure('));assert(jsx.includes('export function NativeStudyOpening('));assert(jsx.includes('export function NativeStudyChapter('));assert(jsx.includes('<p>{image.caption}</p><span>{image.credit}</span><SourceAction image={image} evidence={evidence}/>'));
- assert(jsx.includes('rel="noopener noreferrer"'));assert(jsx.includes('href={image.src}'));assert(!/onClick=|requestAnimationFrame|setInterval|setTimeout/.test(jsx));
+test('shared native figures keep inline provenance, credit-only span styling and separate retained runtime ownership',async()=>{
+ const jsx=await readActualFile(new URL(casePath+'components/EditorialProjectStudy.jsx',root),'utf8'),css=await readActualFile(new URL(casePath+'components/EditorialProjectStudy.module.css',root),'utf8'),driver=await readActualFile(new URL(casePath+'runtime/background/SiteBackgroundDriver.mjs',root),'utf8'),presenter=await read(casePath+'runtime/site/ProjectStudyBackdropPresenter.mjs');
+ assert(jsx.includes('export function SourceFigure('));assert(jsx.includes('export function NativeStudyOpening('));assert(jsx.includes('export function NativeStudyChapter('));assert(jsx.includes('<p>{image.caption}</p><span>{image.credit}</span>'));
+ assert.doesNotMatch(jsx,/href=\{image.src\}|data-evidence-source-link|<SourceAction/);assert(!/onClick=|requestAnimationFrame|setInterval|setTimeout/.test(jsx));
  assert(css.includes('figcaption>span:not(:global([data-information-skin]))'));assert(css.includes('height:auto;object-fit:contain'));assert(css.includes('min-height:44px'));
  assert(driver.includes('if(studyRoot&&!editorialStudy)projectBackdrop='));assert(driver.includes('if(studyRoot&&!editorialStudy)releaseStage='));assert(driver.includes('if(editorialStudy||hybridStudy)for(const image'));
  assert(presenter.includes("if(nativeChapters.has(chapter))"));assert(presenter.includes("kind:'native'"));assert(presenter.includes("absent:target.kind==='native'"));

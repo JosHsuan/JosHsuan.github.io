@@ -1,6 +1,10 @@
+// Historical exact-baseline checks below first reverse ONLY the separately
+// reviewed 26 October scroll-reading delta; raw current-DOM contracts live in
+// scroll-reading-contract.test.mjs and source-access.test.mjs. No asset is normalized.
 import assert from 'node:assert/strict';
+import {readFile as readActualFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
-import {readFile} from 'node:fs/promises';
+import {readReviewedFile as readFile} from './scroll-reading-contract.mjs';
 import test from 'node:test';
 const root=new URL('../../roles/uiux-designer/cases/bending-active-thesis/',import.meta.url);
 const read=path=>readFile(new URL(path,root),'utf8');
@@ -40,4 +44,15 @@ test('existing source variants, accessible current labels and original model pol
 test('missing, duplicated, fixed-height and unrelated baseline mutations fail closed',async()=>{
  const css=await read('components/model-inspector.module.css');
  for(const broken of [css.slice(0,-addition.length),css+addition,css.replace('@media(min-width:781px)','@media(min-width:780px)'),css.replace('.titleSlot{display:grid;','.titleSlot{height:76px;display:grid;'),css.replace('.titleSizer{display:grid;','.titleSizer{display:none;'),css.replace('.overlay{position:fixed;','.overlay{position:absolute;')])assert.throws(()=>verify(broken));
+});
+
+// Actual current pointer policy is separate from the historical intrinsic-track
+// proof above: only the noninteractive geometry surface ignores pointer input.
+test('native source information remains selectable while geometry never captures reading gestures',async()=>{
+ const css=await readActualFile(new URL('components/model-inspector.module.css',root),'utf8');
+ assert.match(css,/\.surface\{pointer-events:none\}/);
+ assert.doesNotMatch(css,/\.surface,\.sideLabel\{pointer-events:none\}/);
+ const jsx=await readActualFile(new URL('components/ModelInspector.jsx',root),'utf8');
+ assert.match(jsx,/<aside[^>]*data-model-side-label/);
+ assert.doesNotMatch(jsx,/model\.pointer|role="button"|onKeyDown=|onClick=/);
 });

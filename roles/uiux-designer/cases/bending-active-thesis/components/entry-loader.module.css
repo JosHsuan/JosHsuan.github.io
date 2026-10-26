@@ -19,7 +19,7 @@
 .identity{margin:0;color:var(--glass-muted,#c6d0ca);font:400 .75rem/1.5 var(--sans);letter-spacing:.015em}
 .identity a{display:block;min-height:44px;margin-top:.75rem;padding:.75rem 1rem;text-decoration:underline;text-underline-offset:.2em;color:inherit}
 @media(max-width:600px){.panel{padding:1.875rem 1.5rem}.backdrop img{object-position:61% 50%}.title{font-size:1.625rem}}
-@media(prefers-reduced-motion:reduce){.content,.activity{transform:none}}
+
 @media(prefers-reduced-transparency:reduce){.backdrop img{opacity:0}.panel{background:var(--glass-fallback,#182322);-webkit-backdrop-filter:none;backdrop-filter:none}}
 @media(forced-colors:active){.loader,.backdrop{background:Canvas}.backdrop picture,.backdrop::after{display:none}.panel{background:Canvas;color:CanvasText;border-color:CanvasText;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}.eyebrow,.subtitle,.identity,.preparation p{color:CanvasText}.activity{border-color:GrayText;border-top-color:CanvasText;border-right-color:CanvasText}.activity svg{stroke:CanvasText}.activity[data-ready=true]{border-color:CanvasText;background:Canvas}}
 @media print{.loader{display:none}}

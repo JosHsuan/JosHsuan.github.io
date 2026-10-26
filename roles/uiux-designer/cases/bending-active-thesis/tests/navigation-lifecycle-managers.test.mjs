@@ -148,11 +148,12 @@ function lifecycle({reduced=false,saveData=false,storageAvailable=true,previous=
  return {input,manager,media,win,records,updates,disconnect,flags};
 }
 
-test('activation respects Reduced, Save Data and known failure while storage remains optional',()=>{
+test('activation ignores automatic Reduced and Save Data switching while genuine failure and optional storage stay honest',()=>{
  for(const options of [{},{storageAvailable:false},{reduced:true},{saveData:true},{previous:{status:'failed',at:Date.now()}}]){
-  const f=lifecycle(options),automatic=!options.reduced&&!options.saveData&&!options.previous;
+  const f=lifecycle(options),automatic=!options.previous;
   assert.equal(f.updates.some(value=>value[0]==='enable'),automatic);
-  f.media.matches=true;f.media.dispatchEvent(new Event('change'));assert.deepEqual(f.updates.at(-1),['reduced',true]);
+  assert.deepEqual(f.updates.find(value=>value[0]==='reduced'),['reduced',false]);
+  const before=[...f.updates];f.media.matches=true;f.media.dispatchEvent(new Event('change'));assert.deepEqual(f.updates,before);
   f.disconnect();assert.equal(f.input.events.inspect().nativeListeners,0);
  }
 });

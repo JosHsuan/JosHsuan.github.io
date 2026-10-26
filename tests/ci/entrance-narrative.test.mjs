@@ -17,7 +17,7 @@ test('Entrance guides follow original surface, named joint figures and fabricati
 test('native raster focus owns no JavaScript clock and never replaces the original image with SVG',async()=>{
  const component=await readFile(new URL('components/EntranceDiagramFocus.jsx',root),'utf8');
  const css=await readFile(new URL('components/EntranceDiagramFocus.module.css',root),'utf8');
- assert.match(component,/type="radio"/);assert.match(component,/data-entrance-original/);assert.match(component,/href=\{image.src\}/);
+ assert.match(component,/data-entrance-original/);assert.match(component,/<ol[^>]*>/);assert.match(component,/data-focus-description=\{index\}/);assert.doesNotMatch(component,/<(?:a|button|input)\b/);
  assert.doesNotMatch(component,/useEffect|useState|requestAnimationFrame|setTimeout|setInterval|<image /);
- assert.match(css,/fill:none/);assert.match(css,/220ms/);assert.match(css,/data-study-paused/);assert.match(css,/prefers-reduced-motion:reduce/);
+ assert.match(css,/fill:none/);assert.match(css,/pointer-events:none/);assert.match(css,/height:auto;object-fit:contain/);assert.doesNotMatch(css,/:checked|data-study-paused|prefers-reduced-motion/);
 });

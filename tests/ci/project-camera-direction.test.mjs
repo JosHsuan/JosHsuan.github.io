@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import test from 'node:test';
+import {GENERIC_PROJECT_CAMERA_KEYS} from '../../roles/uiux-designer/cases/bending-active-thesis/runtime/motion/authored-project-camera-scores.mjs';
 const root=new URL('../../roles/uiux-designer/cases/bending-active-thesis/',import.meta.url);
 const projects=JSON.parse(await readFile(new URL('release/project-studies.json',root),'utf8')).projects;
 const cases=projects.filter(project=>project.model);
@@ -8,8 +9,9 @@ const cases=projects.filter(project=>project.model);
 test('authored camera direction covers every generic model without inventing a Caschlatsch model',()=>{
  assert.deepEqual(cases.map(p=>p.id),['mode-s-of-making','entrance-installation-art','dot-based-3d-printing','hc3dp-caustics','special-assemblies']);
  assert.equal(projects.find(p=>p.id==='project-caschlatsch').model,undefined);
- for(const {model} of cases){
+ for(const {id,model} of cases){
   const path=model.cameraPath;
+  assert.deepEqual(path,GENERIC_PROJECT_CAMERA_KEYS[id],'pinned release data must consume the exact authored score');
   assert.ok(path.length>=3);
   assert.equal(path[0].chapter,model.chapters[0]);assert.equal(path[0].progress,0);
   assert.equal(path.at(-1).chapter,model.chapters.at(-1));assert.equal(path.at(-1).progress,1);
@@ -21,11 +23,14 @@ test('authored camera direction covers every generic model without inventing a C
    const order=model.chapters.indexOf(key.chapter)+key.progress;
    assert.ok(order>previous,'shared chapter boundary must not create a duplicate anchor');previous=order;
    assert.ok(Number.isFinite(key.yawRad)&&Number.isFinite(key.pitchRad));
-   assert.equal(key.fovDeg,36);assert.equal(key.zoom,1.04);
-   assert.ok(Math.abs(key.pitchRad)<=.42,'first authored pass stays within bounded oblique views');
+   assert.ok(key.fovDeg>=31&&key.fovDeg<=44,'authored lens range remains deliberate and bounded');
+   assert.ok(key.zoom>=1&&key.zoom<=1.18,'full source fitting precedes exterior dolly/lens reframing; no rejected Dot crop');
+   assert.ok(key.pitchRad>=.1&&key.pitchRad<=.82,'crane stays above the datum and clear of a pole singularity');
   }
-  const reference=model.views[model.chapters[0]];
-  assert.deepEqual([path[0].yawRad,path[0].pitchRad],[reference.yaw,reference.pitch]);
+  assert.ok(Math.max(...path.map(key=>key.yawRad))-Math.min(...path.map(key=>key.yawRad))>2.4,'bolder complementary-side arc replaces the old small-angle pass');
+  assert.ok(Math.max(...path.map(key=>key.pitchRad))>=.7,'authored upper relationship receives a real crane view');
+  // Legacy source-view recipes remain pinned by the protected-case digest below;
+  // the owner now explicitly requests a different, bolder editorial opening.
  }
 });
 test('Mode and Dot have genuine within-section paths rather than repeated fixed poses',()=>{
@@ -38,12 +43,15 @@ test('Mode and Dot have genuine within-section paths rather than repeated fixed 
  const dot=projects.find(p=>p.id==='dot-based-3d-printing').model;
  assert.equal(dot.primitive,'points');assert.equal(dot.triangles,0);assert.equal(dot.vertices,14810);
 });
-test('native reading leads optional keyboard inspection without a drag instruction',async()=>{
+test('native scroll alone owns the authored view without model gestures, source actions or reading-mode controls',async()=>{
  const component=await readFile(new URL('components/ProjectCaseStudy.jsx',root),'utf8');
- assert.match(component,/Scroll to follow the camera/);
- assert.match(component,/Home or Escape returns to the current scroll view/);
- assert.match(component,/Return to scroll view/);
- assert.doesNotMatch(component,/drag horizontally|Drag the model/);
+ const presenter=await readFile(new URL('runtime/site/ProjectStudyScenePresenter.mjs',root),'utf8');
+ const controls=await readFile(new URL('components/ProjectCaseStudyControls.jsx',root),'utf8');
+ assert.match(component,/data-project-reading="scroll"/);
+ assert.match(presenter,/root\.getAttribute\('data-project-reading'\)!=='scroll'&&canPresent\(\)/,'the actual pointer/keyboard inspection gate rejects the public scroll-only route');
+ assert.doesNotMatch(component,/data-project-model-(?:target|help|reset)|data-project-motion-(?:toggle|source|replay)/);
+ assert.match(controls,/<div hidden/);assert.doesNotMatch(controls,/<button\b|<a\b|<input\b|<select\b/);
+ assert.doesNotMatch(component,/drag horizontally|Drag the model|Home or Escape returns|Return to scroll view/);
  for(const {model} of cases)assert.doesNotMatch(model.alt,/\bdrag\b/i);
 });
 

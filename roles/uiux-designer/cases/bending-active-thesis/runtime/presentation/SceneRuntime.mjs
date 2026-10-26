@@ -259,7 +259,7 @@ export function createSceneRuntime({input,onReady,onFailure,runtime,gl,camera,sc
       let playback=debug.playback ?? state.playback ?? {chapterWeights:Array.from({length:7},(_,i)=>Number(i===fallbackIndex)),phases:Array(7).fill(.32),activeSeconds:0};
       if(Number.isFinite(debug.stageU)) {const index=Math.min(6,Math.floor(clamp(debug.stageU,0,1)*7));playback={...playback,chapterWeights:Array.from({length:7},(_,i)=>Number(i===index))};}
       const chapterScene=debug.chapterScene ?? ((!debug.playback && !Number.isFinite(debug.stageU)) ? state.chapterScene : null) ?? sampleChapterScene(playback,{reducedMotion:state.systemReduced??reduced,aspect,pointer:state.pointer});
-      const selected=resolveSourceSelection(playback,debug.sourceSelection ?? state.sourceSelection,chapterScene,state.modelEngaged?state.modelHeldSource:null);
+      const selected=resolveSourceSelection(playback,debug.sourceSelection ?? state.sourceSelection,chapterScene,state.modelEngaged?state.modelHeldSource:null,Number.isFinite(debug.stageU)||debug.playback?undefined:state.nativeU);
       const viewports=debug.modelViewports ?? state.modelViewports;
       const slot=viewports?.[selected.chapterId] ?? {viewport:state.inspectionViewport,weight:selected.chapterId==='form'?(state.inspectionWeight??0):0};
       const studyWeight=state.compositionMode==='viewport-stage'?Number(['form','system','pattern'].includes(selected.chapterId)):clamp(slot.weight??0,0,1), family=d.families[selected.family];

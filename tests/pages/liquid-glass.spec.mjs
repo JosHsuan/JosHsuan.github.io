@@ -5,11 +5,11 @@ import {renderedTextContrast} from './reading-contrast.mjs';
 
 const identity='[data-liquid-glass="identity"]';
 const liquid=page=>page.evaluate(()=>window.__story.inspect().liquidGlass);
-async function staticPage(page){
- await page.emulateMedia({reducedMotion:'reduce',contrast:'no-preference',forcedColors:'none'});await page.goto('/projects/bending-active/#overview');
- await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered'&&window.__story.inspect().liquidGlass.count===3,null,{timeout:WAIT});
+async function identityPage(page){
+ await page.emulateMedia({reducedMotion:'reduce',contrast:'no-preference',forcedColors:'none'});await loadScene(page);
+ await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered'&&window.__story.inspect().liquidGlass.count===1,null,{timeout:WAIT});
  await page.evaluate(()=>document.fonts.ready);await settle(page);
- await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(0);
+ await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);
 }
 
 // A synthetic background goes behind the real, built identity surface. Its
@@ -110,14 +110,14 @@ function controlMaterialDiagnostic(element){
 }
 
 test('built glass bends the real background only at its rim and leaves foreground geometry intact',async({page,browserName},testInfo)=>{
- test.setTimeout(scenarioTimeout(120000));await staticPage(page);
+ test.setTimeout(scenarioTimeout(120000));await identityPage(page);
  await page.screenshot({path:testInfo.outputPath('actual-liquid-controls.png'),animations:'disabled'});
- for(const kind of ['identity','chapter-navigation','reading-controls'])await page.locator(`[data-liquid-glass="${kind}"]`).screenshot({path:testInfo.outputPath('actual-'+kind+'.png'),animations:'disabled'});
+ for(const kind of ['identity'])await page.locator(`[data-liquid-glass="${kind}"]`).screenshot({path:testInfo.outputPath('actual-'+kind+'.png'),animations:'disabled'});
  const surfaces=await page.locator('[data-liquid-glass]').evaluateAll(elements=>elements.map(element=>{
   const skin=element.querySelector(':scope > [data-liquid-skin]'),style=getComputedStyle(element),paint=getComputedStyle(skin);
   return{kind:element.dataset.liquidGlass,mode:element.dataset.liquidMode,skins:element.querySelectorAll(':scope > [data-liquid-skin]').length,parentBackdrop:style.backdropFilter||style.webkitBackdropFilter,skinBackdrop:paint.backdropFilter||paint.webkitBackdropFilter};
  }));
- expect(surfaces.map(row=>row.kind).sort()).toEqual(['chapter-navigation','identity','reading-controls']);
+ expect(surfaces.map(row=>row.kind).sort()).toEqual(['identity']);
  for(const row of surfaces){expect(row.skins).toBe(1);expect(row.parentBackdrop).toBe('none');expect(row.skinBackdrop).toContain('blur(');}
  const size=await backdropFixture(page,{pattern:true,geometry:true});await settle(page);
  await page.waitForFunction(()=>window.__story.inspect().liquidGlass.items.find(item=>item.kind==='identity')?.width===300,null,{timeout:WAIT});
@@ -152,7 +152,7 @@ test('built glass bends the real background only at its rim and leaves foregroun
  const after=await surface.evaluate(element=>{const r=element.getBoundingClientRect();return{rect:{x:r.x,y:r.y,width:r.width,height:r.height},text:element.textContent};});
  expect(after.rect).toEqual(before.rect);expect(after.text).toBe(before.text);
  expect(await skin.evaluate(element=>getComputedStyle(element).filter)).toBe('none');
- const stats=await liquid(page);expect(stats.mapPixels).toBeLessThanOrEqual(3*65536);
+ const stats=await liquid(page);expect(stats.mapPixels).toBeLessThanOrEqual(65536);
  // Native scroll moves an ordinary document background behind the same fixed
  // production lens. A CSS transform or a regenerated screenshot/map is not a
  // substitute for this compositor response.
@@ -171,18 +171,18 @@ test('built glass bends the real background only at its rim and leaves foregroun
  expect(positionAfter.scroll-positionBefore.scroll).toBe(18);expect(positionAfter.background-positionBefore.background).toBe(-18);
  expect(scrollPixels.totalMean).toBeGreaterThan(1);expect((await liquid(page)).mapGenerations).toBe(mapGenerationBefore);
  await writeFile(testInfo.outputPath('native-scroll-optical-pixels.json'),JSON.stringify({positionBefore,positionAfter,mapGenerationBefore,mapGenerationAfter:(await liquid(page)).mapGenerations,pixels:scrollPixels},null,2)+'\n');
- expect(await page.locator('canvas').count()).toBe(1);
+ await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);
 });
 
 test('pointer lighting and press share the Director clock and cancel, focus and page lifecycle close them',async({page,context,isMobile},testInfo)=>{
  test.setTimeout(scenarioTimeout(120000));await loadScene(page);
- // Start with a real Full scene, then use the authored MAKE reading absence.
+ // Prepare the actual source, then use its authored MAKE reading absence.
  // The retained renderer sleeps through its production visibility policy;
- // the same Director and fixed DOM controls still own every interaction below.
+ // the same Director and page-navigation identity still own the lens response.
  await page.locator('#make').evaluate(element=>element.scrollIntoView({block:'start',behavior:'instant'}));await settle(page);
  const readingRegion=await page.evaluate(()=>({placement:window.__story.inspect().canvasPlacement,renderSuspended:window.__thesis.inspect().renderSuspended,glassCount:window.__story.inspect().liquidGlass.count}));
  expect(readingRegion.placement).toMatchObject({chapter:'make',mode:'absent',visible:false});
- expect(readingRegion.renderSuspended).toBe(true);expect(readingRegion.glassCount).toBe(3);
+ expect(readingRegion.renderSuspended).toBe(true);expect(readingRegion.glassCount).toBe(1);
  await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);
  await backdropFixture(page);
  const surface=page.locator(identity),rect=await surface.boundingBox();expect(rect).not.toBeNull();
@@ -219,9 +219,9 @@ test('pointer lighting and press share the Director clock and cancel, focus and 
  await page.keyboard.press('Tab');
  await expect(page).toHaveURL(/#overview$/);
  await expect(page.locator('[data-cinematic-stage]')).toHaveAttribute('data-presentation-context','project');
- await expect(page.locator('[data-story-navigation]')).toBeVisible();
- const link=page.locator('[data-story-navigation] a').first();await link.focus();await expect(link).toBeFocused();await frames(page,2);
- const focused=await page.evaluate(()=>window.__story.inspect().liquidGlass.items.find(item=>item.kind==='chapter-navigation'));
+ await expect(page.locator('[data-story-navigation] li')).toHaveCount(7);await expect(page.locator('[data-story-navigation] :is(a,button),[data-reading-tools],button')).toHaveCount(0);
+ const link=page.locator(identity);await link.focus();await expect(link).toBeFocused();await expect(link).toHaveAttribute('href','/#about');await frames(page,2);
+ const focused=await page.evaluate(()=>window.__story.inspect().liquidGlass.items.find(item=>item.kind==='identity'));
  expect(focused.hover).toBe(0);expect(focused.press).toBe(0);expect(focused.settled).toBe(true);
  await page.evaluate(()=>document.activeElement.blur());await page.mouse.move(rect.x+rect.width*.3,rect.y+rect.height*.5);await expect.poll(async()=>(await read()).hover,{timeout:WAIT}).toBeGreaterThan(.9);
  await page.evaluate(()=>window.dispatchEvent(new Event('pagehide')));
@@ -231,12 +231,12 @@ test('pointer lighting and press share the Director clock and cancel, focus and 
  expect((await liquid(page)).items.every(item=>item.hover===0&&item.press===0)).toBe(true);
  expect((await liquid(page)).mapGenerations).toBe(maps);
  await page.emulateMedia({reducedMotion:'reduce'});await settle(page);await page.mouse.move(rect.x+rect.width*.8,rect.y+rect.height*.5);await frames(page,2);
- expect((await read()).hover).toBe(0);expect((await read()).press).toBe(0);
+ await expect.poll(async()=>(await read()).hover,{timeout:WAIT}).toBeGreaterThan(.9);expect((await read()).press).toBe(0);
  await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);
 });
 
 test('native opacity preferences and no-JavaScript navigation retain readable materials',async({page,browser,baseURL,context,browserName},testInfo)=>{
- test.setTimeout(scenarioTimeout(120000));await staticPage(page);
+ test.setTimeout(scenarioTimeout(120000));await identityPage(page);
  const modes=()=>page.locator('[data-liquid-glass]').evaluateAll(elements=>elements.map(element=>{
   const skin=element.querySelector(':scope > [data-liquid-skin]'),style=getComputedStyle(skin);return{mode:element.dataset.liquidMode,backdrop:style.backdropFilter||style.webkitBackdropFilter,background:style.backgroundColor,transform:style.transform,before:getComputedStyle(skin,'::before').display,after:getComputedStyle(skin,'::after').display,map:skin.querySelector('[data-liquid-map]').getAttribute('href')};
  }));
@@ -254,12 +254,12 @@ test('native opacity preferences and no-JavaScript navigation retain readable ma
  await settle(page);
  // Measure the built material's resting gray transfer and maximum authored
  // response, rather than an opaque accessibility replacement.
- // Freeze the Director so Reduced Motion cannot reset these test inputs.
+ // Freeze the Director so pointer/scene publication cannot reset test inputs.
  const contrastFixture=await page.evaluate(()=>{
   window.dispatchEvent(new Event('pagehide'));
   const background=document.createElement('div');background.dataset.liquidContrastBackground='';
   Object.assign(background.style,{position:'fixed',inset:'0',zIndex:'2147483000',pointerEvents:'none',background:'#fff'});document.body.appendChild(background);
-  const owners=[document.querySelector('[data-page-masthead]'),document.querySelector('[data-story-navigation]'),document.querySelector('[data-reading-tools]')];
+  const owners=[document.querySelector('[data-page-masthead]')];
   const surfaces=[...document.querySelectorAll('[data-liquid-glass]')];
   const saved=Array.from(new Set([...owners,...surfaces])).map(element=>({element,style:element.getAttribute('style')}));
   for(const owner of owners)owner.style.zIndex='2147483001';
@@ -338,8 +338,27 @@ test('native opacity preferences and no-JavaScript navigation retain readable ma
  try{
   const staticPage=await nojs.newPage();await staticPage.goto('/projects/bending-active/#overview');await staticPage.evaluate(()=>document.fonts.ready);
   const owner=staticPage.locator(identity);await expect(owner).toBeVisible();await expect(owner).not.toHaveAttribute('data-liquid-ready',/.*/);
-  await expect(owner.locator(':scope > [data-liquid-skin]')).toBeHidden();await expect(staticPage.locator('[data-story-navigation] a')).toHaveCount(7);
+  await expect(owner.locator(':scope > [data-liquid-skin]')).toBeHidden();await expect(staticPage.locator('[data-story-navigation] li')).toHaveCount(7);await expect(staticPage.locator('[data-story-navigation] :is(a,button),button')).toHaveCount(0);
   const contrast=await renderedTextContrast(staticPage,owner);expect(contrast.length).toBeGreaterThan(0);for(const row of contrast)expect(row.ratio,row.text).toBeGreaterThanOrEqual(row.required);
-  await expect(staticPage.locator('[data-story-navigation] a[href="#system"]')).toHaveAttribute('href','#system');await expect(staticPage.locator('[data-cinematic-stage] canvas')).toHaveCount(0);
+  await expect(owner).toHaveAttribute('href','/#about');await expect(staticPage.locator('[data-page-masthead] a[href="/projects/"]')).toHaveAttribute('href','/projects/');await expect(staticPage.locator('[data-cinematic-stage] canvas')).toHaveCount(0);
  }finally{await nojs.close();}
+});
+
+
+test('XR and generic project chrome retain only real identity/counter materials and passive scroll progress, never ghost chapter controls',async({page})=>{
+ test.setTimeout(scenarioTimeout(120000));
+ for(const [route,kinds,chapterMarker]of [
+  ['/projects/xr-bending-active/',['identity'],'[data-xr-chapter-link]'],
+  ['/projects/special-assemblies/',['identity','reading-controls'],'[data-project-chapter-link]'],
+ ]){
+  await page.goto(route);await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});
+  await page.waitForFunction(()=>[...document.querySelectorAll('[data-liquid-glass]')].every(node=>node.hasAttribute('data-liquid-ready')),null,{timeout:WAIT});
+  const materials=await page.locator('[data-liquid-glass]').evaluateAll(nodes=>nodes.map(node=>({kind:node.dataset.liquidGlass,skins:node.querySelectorAll(':scope > [data-liquid-skin]').length,buttons:node.querySelectorAll('button,input,select').length})));
+  expect(materials.map(row=>row.kind).sort()).toEqual(kinds.sort());for(const row of materials){expect(row.skins).toBe(1);expect(row.buttons).toBe(0);}
+  expect(await page.locator(chapterMarker).count()).toBeGreaterThan(0);expect(await page.locator(chapterMarker).evaluateAll(nodes=>nodes.every(node=>!node.matches('a,button,input,select')&&!node.querySelector('a,button,input,select')))).toBe(true);
+  await expect(page.locator('[data-liquid-glass="chapter-navigation"],[data-xr-reading-tools],button,a[href^="#"],a[href^="/assets/"]')).toHaveCount(0);
+  await expect(page.locator(identity)).toHaveAttribute('href','/#about');
+  const destination=page.locator(route.includes('xr-')?'#xr-context':'#special-assemblies-context');await destination.evaluate(node=>node.scrollIntoView({block:'start',behavior:'instant'}));
+  await expect(page.locator(`${chapterMarker}[aria-current="location"]`)).toHaveCount(1);
+ }
 });

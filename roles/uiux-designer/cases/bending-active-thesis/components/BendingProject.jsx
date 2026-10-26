@@ -1,6 +1,5 @@
 import CinematicExperience from './CinematicExperience';
 import EntryLoader from './EntryLoader';
-import EvidenceInspector from './EvidenceInspector';
 import SourceDiagram from './SourceDiagram';
 import InformationSkin from './InformationSkin';
 import LiquidGlassSkin from './LiquidGlassSkin';
@@ -33,11 +32,9 @@ function Heading({ number, label, lines, id, kind }) {
 
 function EvidenceImage({ item, className = '', kind = 'photo' }) {
   return <figure className={[styles.evidence, className].join(' ')} data-story-media data-media-kind={kind} style={{'--evidence-aspect-ratio':item.width/item.height}}>
-    <span id={`evidence-interaction-${evidence.indexOf(item)}`} hidden>Opens an inline source comparison when available; otherwise opens the original in a new tab.</span>
     <div className={styles.figureIndex} data-protect data-choreography="caption" aria-hidden="true"><span>Evidence / {String(evidence.indexOf(item)+1).padStart(2,'0')}</span><span>{kind === 'diagram' ? 'RESEARCH DRAWING' : 'PHYSICAL RECORD'}</span></div>
-    <a className={styles.mediaFrame} data-information-window="evidence-image" data-information-motion-surface="plane" data-inspect-figure={evidence.indexOf(item)} href={item.source} target="_blank" rel="noreferrer" aria-label={`Inspect evidence: ${item.figure}`} aria-describedby={`evidence-interaction-${evidence.indexOf(item)}`}><InformationSkin/><span className={styles.mediaPlane} data-protect data-choreography={kind === 'photo' ? 'photo' : 'diagram'} data-feedback-plane><span className={styles.frameCorner} aria-hidden="true"/><img src={item.src} width={item.width} height={item.height} alt={item.alt} loading="lazy" /></span><span className={styles.mediaAction}>Inspect evidence <span aria-hidden="true">↗</span></span></a>
+    <div className={styles.mediaFrame} data-information-window="evidence-image" data-information-motion-surface="plane"><InformationSkin/><span className={styles.mediaPlane} data-protect data-choreography={kind === 'photo' ? 'photo' : 'diagram'} data-feedback-plane><span className={styles.frameCorner} aria-hidden="true"/><img src={item.src} width={item.width} height={item.height} alt={item.alt} loading="lazy" /></span></div>
     <figcaption data-information-window="evidence-caption" data-information-motion-surface="plane" data-editorial-caption data-protect data-choreography="caption"><InformationSkin/><span>{item.figure}</span><p>{item.caption}</p></figcaption>
-    <div data-evidence-host={evidence.indexOf(item)} />
   </figure>;
 }
 
@@ -49,13 +46,11 @@ export default function Page() {
   return <ExperienceProvider>
     <EntryLoader />
     <CinematicExperience />
-    <EvidenceInspector items={evidence} />
-    <a href="#main" className={styles.skip}>Skip to content</a>
     <header className={styles.masthead} data-protect data-page-masthead>
       <a href="/#about" className={styles.owner} data-home-link data-choreography="nav" data-liquid-glass="identity" aria-label={`${review.owner} — Home`}>{review.owner}<span aria-hidden="true"> / </span><span className={styles.discipline}>DESIGN + TECHNOLOGY</span><LiquidGlassSkin id="identity" /></a>
       <nav className={styles.siteLinks} aria-label="Portfolio"><a href="/about/">About</a><a href="/projects/">Project</a><a href="/contact/">Contact</a></nav>
     </header>
-    <nav className={styles.chapterRail} aria-label="Study chapters" data-protect data-story-navigation data-liquid-glass="chapter-navigation">{['overview','form','system','pattern','make','validation','credits'].map((id,index)=><a key={id} href={`#${id}`} data-chapter-link={id}><span data-choreography="nav">{String(index+1).padStart(2,'0')}</span><span className={styles.railLabel}>{id}</span></a>)}<LiquidGlassSkin id="chapter-navigation" /></nav>
+    <ol className={styles.chapterRail} aria-hidden="true" data-protect data-story-navigation>{['overview','form','system','pattern','make','validation','credits'].map((id,index)=><li key={id} data-chapter-link={id}><span data-choreography="nav">{String(index+1).padStart(2,'0')}</span><span className={styles.railLabel}>{id}</span></li>)}</ol>
     <div className={styles.readingFrame} data-reading-frame><main id="main" tabIndex={-1} className={styles.story} data-story-root data-information-motion-profile="velocity-skin">
       <div data-project-content style={{display:'contents'}}>
       <section id="overview" className={[styles.chapter, styles.overview].join(' ')} tabIndex={-1} data-story-chapter="overview" data-layout="left" aria-labelledby="project-title">
@@ -77,7 +72,9 @@ export default function Page() {
             <Heading number="01" label={story.form.label} lines={story.form.heading} id="form-heading" kind="form" />
             <Paragraphs paragraphs={story.form.paragraphs} />
             <p className={styles.marginNote} data-protect data-choreography="caption">{story.form.aside}</p>
-            <a className={styles.studyLink} data-protect href="#model-study"><span data-choreography="nav">Explore the surface</span><span aria-hidden="true">↓</span><small>Scroll to explore. Click or tap the model to compare sources.</small></a>
+            <p className={styles.studyCue} data-protect>Continue scrolling through the source representations.</p>
+            <ol className={styles.sourceSequence} aria-label="Source representations">{['Origami representation','Opening representation','Bending-active representation','Authored curvature colors'].map(label=><li key={label}>{label}</li>)}</ol>
+            <p className={styles.smallNote}>Authored curvature colors are retained as source evidence. Scalar field, units and legend are unavailable.</p>
           </div>
           <div id="model-study" tabIndex={-1} className={styles.inlineStudy} data-model-study-host="form"><div className={styles.nativeModelInformation} data-model-information-host="form"/></div>
           <div className={styles.diagramWide}><SourceDiagram kind="miura" title="From a flat grid to a folded surface" /></div>
@@ -90,12 +87,12 @@ export default function Page() {
           <div className={styles.copy} data-story-panel data-information-window="editorial" data-information-motion-surface="plane"><InformationSkin/>
             <Heading number="02" label={story.system.label} lines={story.system.heading} id="system-heading" kind="system" />
             <Paragraphs paragraphs={story.system.paragraphs} />
-            <ol className={styles.methodSequence}>{story.system.sequence.map((step, index) => <li key={step} style={{'--step-index':index}} data-protect><details><summary><span>{String(index + 1).padStart(2, '0')}</span><span data-choreography="diagram">{step}</span><span className={styles.stepArrow} aria-hidden="true">↗</span></summary><p>{methodNotes[index]}</p></details></li>)}</ol>
+            <ol className={styles.methodSequence}>{story.system.sequence.map((step, index) => <li key={step} style={{'--step-index':index}} data-protect><div className={styles.methodStep}><h3><span>{String(index + 1).padStart(2, '0')}</span><span data-choreography="diagram">{step}</span></h3><p>{methodNotes[index]}</p></div></li>)}</ol>
 
           </div>
           <div className={styles.inlineStudy} data-model-study-host="system"><div className={styles.nativeModelInformation} data-model-information-host="system"/></div>
           <div className={styles.diagramWide}><SourceDiagram kind="workflow" title="Read the design-to-fabrication sequence" />
-            <details className={styles.sourceComparison} data-information-window="source-details" data-information-motion-surface="plane"><InformationSkin/><summary data-protect>Compare with the original thesis figure</summary><EvidenceImage item={story.media.geometry} kind="diagram" /></details>
+            <section className={styles.sourceComparison} data-information-window="source-details" data-information-motion-surface="plane" aria-label="Research geometry figure"><InformationSkin/><EvidenceImage item={story.media.geometry} kind="diagram" /></section>
           </div>
         </div>
       </section>
@@ -106,10 +103,11 @@ export default function Page() {
             <Heading number="03" label={story.pattern.label} lines={story.pattern.heading} id="pattern-heading" kind="system" />
             <Paragraphs paragraphs={story.pattern.paragraphs} />
             <p className={styles.smallNote} data-protect data-choreography="caption">{story.pattern.note}</p>
+            <dl className={styles.experimentSequence} aria-label="Original source experiments"><div><dt>Experiment A</dt><dd>Original experimental sheet with an arched profile.</dd></div><div><dt>Experiment B</dt><dd>Original experimental sheet with a pronounced spatial twist.</dd></div><div><dt>Experiment C</dt><dd>Original experimental sheet with alternating rises and depressions.</dd></div></dl>
           </div>
           <div className={styles.inlineStudy} data-model-study-host="pattern"><div className={styles.nativeModelInformation} data-model-information-host="pattern"/></div>
           <div className={styles.diagramWide}><SourceDiagram kind="library" title="Follow the sampled function library" />
-            <details className={styles.sourceComparison} data-information-window="source-details" data-information-motion-surface="plane"><InformationSkin/><summary data-protect>Read the original library figure</summary><EvidenceImage item={story.media.library} kind="diagram" /></details>
+            <section className={styles.sourceComparison} data-information-window="source-details" data-information-motion-surface="plane" aria-label="Function library figure"><InformationSkin/><EvidenceImage item={story.media.library} kind="diagram" /></section>
           </div>
         </div>
       </section>
@@ -145,11 +143,11 @@ export default function Page() {
             <p data-protect data-choreography="credit">{story.credits.contribution}</p>
             <p className={styles.smallNote} data-protect data-choreography="caption">{story.credits.collaboration}</p>
             <p className={styles.smallNote} data-protect data-choreography="caption">{story.credits.limitation}</p>
-            <details className={styles.sourceNotes} data-protect data-choreography="credit">
-              <summary>Project credits & reference figures</summary>
+            <section className={styles.sourceNotes} data-protect data-choreography="credit" aria-label="Project credits and reference figures">
+              <h3>Project credits & reference figures</h3>
               <p>{review.credits.media}</p>
-              <div className={styles.sourceLinks} aria-label="Original research figures">{Object.values(story.media).map(item => <a key={item.figure} href={item.source} target="_blank" rel="noreferrer" aria-label={`${item.figure} (new tab)`}>{item.figure} <span aria-hidden="true">↗</span></a>)}</div>
-            </details>
+              <ul className={styles.referenceFigures}>{Object.values(story.media).map(item => <li key={item.figure}>{item.figure} — {item.caption}</li>)}</ul>
+            </section>
           </div>
           <footer className={styles.endnote} data-protect data-choreography="credit"><a href="/#projects">Back to Project ↑</a><span>FORM / SYSTEM / MAKE</span></footer>
         </div>

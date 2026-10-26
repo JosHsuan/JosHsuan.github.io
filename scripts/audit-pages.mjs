@@ -225,7 +225,7 @@ export async function auditPages() {
   assert.equal((html.match(/data-story-chapter=/g) || []).length, 0, 'Home must not scroll into a case');
   assert.equal((html.match(/<h1[ >]/g) || []).length, 1, 'One personal introduction heading');
   assert(html.includes('data-home-introduction'), 'Public introduction is present');
-  assert(html.includes('data-home-project-link') && html.includes('href="#projects"'), 'Native introduction-to-project-index link');
+  assert(html.includes('data-home-project-link') && html.includes('href="/projects/"'), 'Native introduction-to-project-page link');
   assert(!html.includes('data-cinematic-stage'), 'Home does not mount the case stage');
   const introduction=html.match(/<section id="about"[\s\S]*?<\/section>/)?.[0];
   assert(introduction&&introduction.includes('data-home-research-story')&&introduction.includes('data-home-research-stage')&&introduction.includes('data-home-research-poster')&&!introduction.includes('data-project-model-preview'), 'Home introduction has one original research specimen and a native poster');
@@ -261,8 +261,8 @@ export async function auditPages() {
     assert(sitemap.includes(manifest.origin+route),'Selected project is discoverable in the sitemap');
     assert.equal(tagAttribute(tagWith(page,'main','data-project-study'),'data-project-study'),project.id);
     assert.equal(markerCount(page,'data-project-chapter'),project.sections.length+2,'Opening, actual story chapters and credits');
-    assert.equal(markerCount(page,'data-project-chapter-link'),project.sections.length+2,'Every chapter has a native direct link');
-    for(const group of ['identity','chapter-navigation','reading-controls'])assert.equal((page.match(new RegExp(`data-liquid-glass="${group}"`,'g'))??[]).length,1,'One shared study control group: '+group);
+    assert.equal(markerCount(page,'data-project-chapter-link'),project.sections.length+2,'Every chapter has a passive progress marker');
+    for(const group of ['identity','reading-controls'])assert.equal((page.match(new RegExp(`data-liquid-glass="${group}"`,'g'))??[]).length,1,'One shared study control group: '+group);
     assert(page.includes(project.title)&&page.includes(project.role),'Actual title and individual/team role');
     assertProjectVoice(page,route);
     const backdropSources=new Set([...page.matchAll(/<img\b[^>]*\bdata-project-(?:media-poster|model-poster)(?:=|[\s>])[^>]*>/g)].map(match=>tagAttribute(match[0],'src')));
@@ -280,7 +280,7 @@ export async function auditPages() {
       assert.equal(tagAttribute(tag,'src'),null,'Runtime policy owns movie acquisition; no initial automatic source');
       assert.equal(Number(tagAttribute(tag,'width')),media.width);assert.equal(Number(tagAttribute(tag,'height')),media.height);
       assert.equal(/\bloop(?:=|[\s>])/.test(tag),media.loop,'Finite source semantics are preserved');
-      assert(page.includes(media.poster.src)&&page.includes(`href="${media.src}"`),'Pinned poster and direct no-JavaScript animation link remain available');
+      assert(page.includes(media.poster.src)&&page.includes(media.caption),'Pinned poster and complete inline caption remain available without opening media');
     }
     assert(!page.includes('data-xr-stage')&&!page.includes('data-cinematic-stage'),'Documentary evidence does not acquire an unrelated 3D scene');
   }
@@ -306,21 +306,25 @@ export async function auditPages() {
     assertXRWorkspaceImage(await readFile(path.join(out,pin.path)),image);
   }
   for(const chapter of ['overview','context','method','adapt','assemble','join','making','credits'])assert.equal((xr.match(new RegExp(`data-xr-chapter="${chapter}"`,'g'))??[]).length,1,`One native XR chapter: ${chapter}`);
-  assert.equal(markerCount(xr,'data-xr-chapter-link'),8,'Every native XR chapter remains directly navigable');
+  assert.equal(markerCount(xr,'data-xr-chapter-link'),8,'Every native XR chapter has a passive progress marker');
   assert.equal(markerCount(xr,'data-project-section-label'),9,'Opening and all eight section labels use the shared glyph/label API');
   assert.equal((xr.match(/data-glyph-kind=/g)??[]).length,9,'Every section label retains its readable glyph');
   assert.equal(markerCount(xr,'data-xr-evidence'),8,'Only the opening photograph is removed from the original nine evidence figures');
-  for(const group of ['identity','chapter-navigation','reading-controls'])assert.equal((xr.match(new RegExp(`data-liquid-glass="${group}"`,'g'))??[]).length,1,`One shared XR glass group: ${group}`);
+  for(const group of ['identity'])assert.equal((xr.match(new RegExp(`data-liquid-glass="${group}"`,'g'))??[]).length,1,`One shared XR glass group: ${group}`);
   const bending=await readFile(path.join(out,'projects/bending-active/index.html'),'utf8');
   assertProjectVoice(bending,'/projects/bending-active/');
   assert.equal(tagAttribute(tagWith(xr,'header','data-page-masthead'),'class'),tagAttribute(tagWith(bending,'header','data-page-masthead'),'class'),'XR and Bending use the same maintained masthead class');
-  const bendingRail=tagAttribute(tagWith(bending,'nav','data-story-navigation'),'class');
-  assert(tagAttribute(tagWith(xr,'nav','data-xr-chapter-navigation'),'class').split(/\s+/).includes(bendingRail),'XR keeps the original shared chapter-rail class');
-  for(const marker of ['data-xr-stage','data-xr-chapter','data-xr-model-control','data-information-window','data-xr-native-phone',study.model.poster.src,'adapt-interface.mp4','assemble-interface.mp4','join-interface.mp4'])assert(xr.includes(marker),`XR immersive integration: ${marker}`);
+  for(const marker of ['data-xr-stage','data-xr-chapter','data-xr-reading-mode','data-information-window','data-xr-native-phone',study.model.poster.src,'adapt-interface.mp4','assemble-interface.mp4','join-interface.mp4'])assert(xr.includes(marker),`XR immersive integration: ${marker}`);
   assert(!xr.includes('data-phone-front-toggle')&&!xr.includes('data-phone-stage='),'XR recording chapters must not depend on view/stage buttons');
   assert(!xr.includes('<details'),'XR core evidence remains directly readable');
   const modelPin=manifest.assets.find(asset=>'/'+asset.path===study.model.src);
   assert(modelPin&&modelPin.sha256===study.model.sha256,'XR main source model must match the approved asset');
+  for(const route of ['', 'about/', 'projects/', 'contact/', 'projects/bending-active/', 'projects/xr-bending-active/', ...PROJECT_SLUGS.map(slug=>`projects/${slug}/`)]){
+    const page=await readFile(path.join(out,route,'index.html'),'utf8');
+    assert(!/<(?:button|details|input|select)\b/.test(page),`${route||'/'}: reading has no click-only controls or disclosures`);
+    assert(!/<a\b[^>]*href="(?:#|\/assets\/)/.test(page),`${route||'/'}: only page-changing links, no source popups or in-page buttons`);
+    assert(!page.includes('Skip to content')&&!page.includes('Pause motion'),`${route||'/'}: no removed accessibility or motion controls`);
+  }
   const release=JSON.parse(await readFile(path.join(out,'release.json'),'utf8'));
   assert.equal(release.release,manifest.id);assert.match(release.commit,/^[a-f0-9]{40}$/,'Public source commit');
   assert.equal(release.storyRevision,manifest.storySHA256);assert.equal(release.introductionRevision,manifest.introductionSHA256,'Public exact-introduction revision');

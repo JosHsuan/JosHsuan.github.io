@@ -2,24 +2,20 @@
 /* eslint-disable @next/next/no-img-element -- Pinned source posters are the SSR/no-WebGL fallback. */
 import {useEffect,useRef,useState} from 'react';
 import {createXRStageDirector} from '../runtime/xr/XRStageDirector.mjs';
-import LiquidGlassSkin from './LiquidGlassSkin';
-import cinematic from './cinematic.module.css';
 import styles from './xr-scene-stage.module.css';
 
-const chapterOrder=['overview','context','method','adapt','assemble','join','making','credits'];
 export default function XRSceneStage({model,stages,workspaceVisual}){
- const host=useRef(null),director=useRef(null),positions=useRef(new Map());
+ const host=useRef(null),positions=useRef(new Map());
  const [state,setState]=useState({phase:'poster',reason:'initial',chapter:'overview',sceneChapter:'overview',sceneMode:'absent',paused:false,reduced:false,saveData:false});
- const [rendering,setRendering]=useState('poster');
  useEffect(()=>{
   const node=host.current,root=document.querySelector('[data-xr-study]');let connected=true;
   root.dataset.xrEnhanced='';
   const runtime=createXRStageDirector({root,host:node,window,document,onState:next=>{if(connected)setState(next);},acquire:async({signal,onFailure})=>{
    const {acquireXRStage}=await import('./xr-stage-scene.mjs');if(signal.aborted)throw new DOMException('XR stage released','AbortError');
-   return acquireXRStage({host:node,signal,model,stages,positions:positions.current,videos:Object.fromEntries(stages.map(stage=>[stage.id,node.querySelector(`[data-xr-stage-video="${stage.id}"]`)])),onFailure,onMode:next=>{if(connected)setRendering(next);}});
+   return acquireXRStage({host:node,signal,model,stages,positions:positions.current,videos:Object.fromEntries(stages.map(stage=>[stage.id,node.querySelector(`[data-xr-stage-video="${stage.id}"]`)])),onFailure});
   }});
-  director.current=runtime;node.__xrStage=runtime;const disconnect=runtime.connect();
-  return()=>{connected=false;disconnect?.();director.current=null;delete root.dataset.xrEnhanced;if(node.__xrStage===runtime)delete node.__xrStage;};
+  node.__xrStage=runtime;const disconnect=runtime.connect();
+  return()=>{connected=false;disconnect?.();delete root.dataset.xrEnhanced;if(node.__xrStage===runtime)delete node.__xrStage;};
  },[model,stages]);
  return <>
   <div ref={host} className={styles.stage} data-xr-stage data-xr-opening={state.sceneChapter==='overview'?'true':'false'} data-research-phase={state.phase} data-research-reason={state.reason} aria-hidden="true">
@@ -37,13 +33,5 @@ export default function XRSceneStage({model,stages,workspaceVisual}){
     </div>)}
    </div>
   </div>
-  <div className={cinematic.readingTools} data-xr-reading-tools data-protect data-liquid-glass="reading-controls">
-   <span aria-live="polite">{String(chapterOrder.indexOf(state.chapter)+1).padStart(2,'0')} / 08</span>
-   <div className={`${styles.controls} ${state.chapter==='method'?styles.modelControls:''}`} data-xr-scene-controls hidden={state.sceneMode!=='hold'||state.sceneChapter!==state.chapter||['overview','context'].includes(state.chapter)||state.phase!=='ready'||!['webgl-model','webgl-phone','native-video'].includes(rendering)}>
-    {['adapt','assemble','join'].includes(state.chapter)?<button type="button" data-xr-motion-toggle disabled={state.reduced||state.saveData||state.phase!=='ready'} aria-pressed={state.paused} onClick={()=>director.current?.setPaused(!state.paused)}>{state.paused?'Play recording':'Pause recording'}</button>:state.chapter==='method'?<><span className={styles.inspectionHint}>SCROLL VIEW</span><button type="button" data-xr-motion-toggle disabled={state.reduced||state.saveData||state.phase!=='ready'} aria-pressed={state.paused} onClick={()=>director.current?.setPaused(!state.paused)}>{state.paused?'Resume motion':'Pause motion'}</button></>:null}
-   </div>
-   <LiquidGlassSkin id="reading-controls"/>
-  </div>
-  <noscript><style>{'[data-xr-scene-controls]{display:none!important}'}</style></noscript>
  </>;
 }

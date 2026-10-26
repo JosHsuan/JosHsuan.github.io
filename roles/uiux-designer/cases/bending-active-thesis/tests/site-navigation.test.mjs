@@ -72,12 +72,12 @@ test('preview preparation consumes the existing arrival budget instead of receiv
  native.owned.forEach(item=>item.finish());await flush();assert.equal(manager.inspect().phase,'entered');
 });
 
-test('explicit static preview policy still waits for critical poster decoding before static entry',async t=>{
+test('genuine static-preview fallback still waits for critical poster decoding before hidden entry',async t=>{
  const poster=new Element(),decoded=deferred(),node=new Element();Object.assign(poster,{complete:true,naturalWidth:100,decode:()=>decoded.promise});
- const f=environment({previews:[node],images:[poster]}),native=nativeReveal(f);f.media.matches=true;const manager=connect(t,f);
- registerPagePreviewReadiness(f.doc,node).report({mode:'static',reason:'reduced-motion'});await flush();assert.deepEqual(phases(manager),['requested']);assert.equal(f.content.hasAttribute('inert'),true);
- decoded.resolve();await flush();assert.deepEqual(phases(manager),['requested','ready','revealing','entered']);assert.deepEqual(manager.inspect().readiness.previews,[{mode:'static',reason:'reduced-motion'}]);
- assert.equal(native.calls.length,0);assert.equal(native.requested.length,0);
+ const f=environment({previews:[node],images:[poster]}),native=nativeReveal(f);f.doc.hidden=true;const manager=connect(t,f);
+ registerPagePreviewReadiness(f.doc,node).report({mode:'static',reason:'webgl-unavailable'});await flush();assert.deepEqual(phases(manager),['requested']);assert.equal(f.content.hasAttribute('inert'),true);
+ decoded.resolve();await flush();assert.deepEqual(phases(manager),['requested','ready','revealing','entered']);assert.deepEqual(manager.inspect().readiness.previews,[{mode:'static',reason:'webgl-unavailable'}]);
+ assert.equal(manager.inspect().reason,'hidden-static');assert.equal(native.calls.length,0);assert.equal(native.requested.length,0);
 });
 
 test('unknown preview markers fail open at the original startup endpoint without fabricating ready or entered',async t=>{
@@ -183,14 +183,22 @@ test('every interrupted presentation barrier cancels its sole pending frame and 
  }
 });
 
-test('Reduced or hidden before presentation or during the effects closes the existing visual owner statically',async t=>{
+test('OS motion changes never close visual ownership; real hidden state still closes before or during effects',async t=>{
  for(const delivered of [0,1])for(const mode of ['reduced','hidden']){
   const f=environment(),native=nativeReveal(f),manager=connect(t,f);await flush();if(delivered){native.frame();await flush();}const pending=native.requested.at(-1);
-  if(mode==='reduced'){f.media.matches=true;f.media.dispatchEvent(new Event('change'));}else{f.doc.hidden=true;f.doc.dispatchEvent(new Event('visibilitychange'));}
-  assert.deepEqual(phases(manager),['requested','ready','revealing','entered']);assert.equal(manager.inspect().reason,mode==='reduced'?'reduced-motion':'hidden-static');
-  assert.deepEqual(native.cancelled,delivered?[]:[pending.id]);assert.equal(native.frames.size,0);assert.equal(native.calls.length,delivered?2:0);assert.equal(f.timers.size,0);
+  if(mode==='reduced'){
+   const before=manager.inspect();f.media.matches=true;f.media.dispatchEvent(new Event('change'));await flush();
+   assert.deepEqual(manager.inspect(),before,'OS preference cannot create a readiness, cancellation or static terminal');
+   assert.equal(native.frames.size,delivered?0:1);for(const item of native.owned)assert.equal(item.cancels,0);
+   if(!delivered){native.frame();await flush();}assert.equal(manager.inspect().phase,'revealing');
+   native.owned.forEach(item=>item.finish());await flush();assert.equal(manager.inspect().reason,'');assert.deepEqual(native.cancelled,[]);
+  }else{
+   f.doc.hidden=true;f.doc.dispatchEvent(new Event('visibilitychange'));
+   assert.equal(manager.inspect().reason,'hidden-static');assert.deepEqual(native.cancelled,delivered?[]:[pending.id]);
+  }
+  assert.deepEqual(phases(manager),['requested','ready','revealing','entered']);assert.equal(native.frames.size,0);assert.equal(native.calls.length,mode==='reduced'?2:delivered?2:0);assert.equal(f.timers.size,0);
   for(const item of native.owned){assert.equal(item.cancels,1);assert.deepEqual(item.hiddenAtCancel,[true]);}
-  pending.callback(f.now());assert.equal(native.requested.length,1);assert.equal(native.calls.length,delivered?2:0);
+  pending.callback(f.now());assert.equal(native.requested.length,1);assert.equal(native.calls.length,mode==='reduced'?2:delivered?2:0);
  }
 });
 
@@ -206,7 +214,8 @@ test('overdue preparation, native completions, CSS events and policy changes can
   else if(signal==='post-presentation-policy'||signal==='preparation-policy'){f.doc.hidden=true;f.doc.dispatchEvent(new Event('visibilitychange'));}
   else if(signal==='css-event')f.loader.dispatchEvent(new Event('animationend'));
   else if(signal==='reduced'){f.media.matches=true;f.media.dispatchEvent(new Event('change'));}
-  await flush();assert.equal(manager.inspect().phase,'failed',signal);assert.equal(manager.inspect().reason,preparing?'presentation-timeout':'reveal-timeout',signal);
+  await flush();if(signal==='reduced'){assert.equal(manager.inspect().phase,'revealing');assert.equal(f.timers.size,1);f.advance(0);await flush();}
+  assert.equal(manager.inspect().phase,'failed',signal);assert.equal(manager.inspect().reason,preparing?'presentation-timeout':'reveal-timeout',signal);
   assert.equal(phases(manager).includes('entered'),false);assert.equal(f.timers.size,0);if(native)assert.equal(native.frames.size,0);
  }
 });
@@ -265,15 +274,19 @@ test('two fulfilled effects cannot bypass a withheld, rejected or missing second
  }
 });
 
-test('Reduced and hidden policies cannot bypass unfinished or expired document resources',async t=>{
+test('OS preference does not bypass document or animation readiness; hidden and expired resources retain real closure',async t=>{
  for(const mode of ['reduced','hidden'])for(const expired of [false,true]){
   const font=deferred(),f=environment({fonts:font.promise}),native=nativeReveal(f),manager=connect(t,f);await flush();
   if(mode==='reduced'){f.media.matches=true;f.media.dispatchEvent(new Event('change'));}else{f.doc.hidden=true;f.doc.dispatchEvent(new Event('visibilitychange'));}
   assert.deepEqual(phases(manager),['requested']);assert.equal(f.content.hasAttribute('inert'),true);
   if(expired)f.elapse(15000);else f.advance(4000);font.resolve();await flush();
+  if(mode==='reduced'&&!expired){
+   assert.deepEqual(phases(manager),['requested']);assert.equal(f.content.hasAttribute('inert'),true);assert.equal(native.frames.size,1);
+   native.frame();await flush();assert.equal(manager.inspect().phase,'revealing');native.owned.forEach(item=>item.finish());await flush();
+  }
   assert.deepEqual(phases(manager),expired?['requested','failed']:['requested','ready','revealing','entered']);
   assert.equal(manager.inspect().reason,expired?'presentation-timeout':mode==='hidden'?'hidden-static':'');
-  assert.equal(native.calls.length,0);assert.equal(native.requested.length,0);assert.equal(f.timers.size,0);assert.equal(f.content.hasAttribute('inert'),false);
+  assert.equal(native.calls.length,mode==='reduced'&&!expired?2:0);assert.equal(native.requested.length,mode==='reduced'&&!expired?1:0);assert.equal(f.timers.size,0);assert.equal(f.content.hasAttribute('inert'),false);
  }
 });
 
@@ -291,13 +304,20 @@ test('native pending-play handles release before any ready fact on cancellation 
  }
 });
 
-test('static policy during native pending play closes only the resource-ready request and cancels both owned effects',async t=>{
+test('OS preference cannot accept pending play; real hidden state closes resource-ready request and cancels owned effects',async t=>{
  for(const mode of ['reduced','hidden']){
   const f=environment(),native=nativeReveal(f,{manualReady:true}),manager=connect(t,f);await presented(native);assert.equal(manager.inspect().phase,'requested');
-  if(mode==='reduced'){f.media.matches=true;f.media.dispatchEvent(new Event('change'));}else{f.doc.hidden=true;f.doc.dispatchEvent(new Event('visibilitychange'));}
-  assert.deepEqual(phases(manager),['requested','ready','revealing','entered']);assert.equal(manager.inspect().reason,mode==='reduced'?'reduced-motion':'hidden-static');
-  native.owned.forEach(item=>{item.accept();item.finish();assert.equal(item.cancels,1);assert.deepEqual(item.hiddenAtCancel,[true]);});await flush();
-  assert.equal(manager.inspect().phase,'entered');assert.equal(phases(manager).filter(phase=>phase==='entered').length,1);assert.equal(f.timers.size,0);
+  if(mode==='reduced'){
+   f.media.matches=true;f.media.dispatchEvent(new Event('change'));await flush();assert.deepEqual(phases(manager),['requested']);
+   native.owned.forEach(item=>{assert.equal(item.cancels,0);item.accept();});await flush();assert.equal(manager.inspect().phase,'revealing');
+   native.owned.forEach(item=>item.finish());await flush();assert.equal(manager.inspect().reason,'');
+  }else{
+   f.doc.hidden=true;f.doc.dispatchEvent(new Event('visibilitychange'));assert.equal(manager.inspect().reason,'hidden-static');
+   native.owned.forEach(item=>{item.accept();item.finish();});await flush();
+  }
+  assert.deepEqual(phases(manager),['requested','ready','revealing','entered']);
+  native.owned.forEach(item=>{assert.equal(item.cancels,1);assert.deepEqual(item.hiddenAtCancel,[true]);});
+  assert.equal(phases(manager).filter(phase=>phase==='entered').length,1);assert.equal(f.timers.size,0);
  }
 });
 
@@ -374,12 +394,21 @@ test('queued native completion cannot escape supersession, pagehide, disposal or
  }
 });
 
-test('native-capable Reduced and hidden arrivals stay static and live policy changes release both effects',async t=>{
+test('native reveal ignores initial and changed OS motion preference while real hidden arrivals remain static',async t=>{
  for(const mode of ['reduced','hidden']){
   const initial=environment(),available=nativeReveal(initial);if(mode==='reduced')initial.media.matches=true;else initial.doc.hidden=true;
-  const staticManager=connect(t,initial);await flush();assert.equal(staticManager.inspect().phase,'entered');assert.equal(available.calls.length,0);assert.equal(available.requested.length,0);assert.equal(initial.timers.size,0);
+  const initialManager=connect(t,initial);await flush();
+  if(mode==='reduced'){
+   assert.equal(initialManager.inspect().phase,'requested');assert.equal(available.frames.size,1);assert.equal(initial.content.hasAttribute('inert'),true);
+   available.frame();await flush();assert.equal(initialManager.inspect().phase,'revealing');available.owned.forEach(item=>item.finish());await flush();
+   assert.equal(available.calls.length,2);assert.equal(available.requested.length,1);assert.equal(initialManager.inspect().reason,'');
+  }else{assert.equal(available.calls.length,0);assert.equal(available.requested.length,0);assert.equal(initialManager.inspect().reason,'hidden-static');}
+  assert.equal(initialManager.inspect().phase,'entered');assert.equal(initial.timers.size,0);
   const f=environment(),native=nativeReveal(f),manager=connect(t,f);await presented(native);
-  if(mode==='reduced'){f.media.matches=true;f.media.dispatchEvent(new Event('change'));}else{f.doc.hidden=true;f.doc.dispatchEvent(new Event('visibilitychange'));}
+  if(mode==='reduced'){
+   const before=manager.inspect();f.media.matches=true;f.media.dispatchEvent(new Event('change'));await flush();assert.deepEqual(manager.inspect(),before);
+   native.owned.forEach(item=>{assert.equal(item.cancels,0);item.finish();});await flush();assert.equal(manager.inspect().reason,'');
+  }else{f.doc.hidden=true;f.doc.dispatchEvent(new Event('visibilitychange'));assert.equal(manager.inspect().reason,'hidden-static');}
   assert.equal(manager.inspect().phase,'entered');await flush();f.advance(1600);
   assert.deepEqual(phases(manager),['requested','ready','revealing','entered']);assert.equal(f.timers.size,0);
   for(const item of native.owned){assert.equal(item.cancels,1);assert.deepEqual(item.hiddenAtCancel,[true]);}
@@ -418,13 +447,12 @@ test('font/image failure and readiness deadline fail open with one failed termin
  }
 });
 
-test('missing animation completion is failed rather than synthetic entered; Reduced and hidden arrivals do not animate',async t=>{
- const f=environment(),manager=connect(t,f);await flush();assert.equal(manager.inspect().phase,'revealing');f.advance(1600);
- assert.deepEqual(phases(manager),['requested','ready','revealing','failed']);assert.equal(manager.inspect().reason,'reveal-timeout');
- for(const mode of ['reduced','hidden']){
-  const next=environment();if(mode==='reduced')next.media.matches=true;else next.doc.hidden=true;
-  const current=connect(t,next);await flush();assert.deepEqual(phases(current),['requested','ready','revealing','entered']);assert.equal(next.timers.size,0);
+test('missing animation completion fails truthfully regardless of OS motion preference; real hidden arrival stays static',async t=>{
+ for(const reduced of [false,true]){
+  const f=environment();f.media.matches=reduced;const manager=connect(t,f);await flush();assert.equal(manager.inspect().phase,'revealing');f.advance(1600);
+  assert.deepEqual(phases(manager),['requested','ready','revealing','failed']);assert.equal(manager.inspect().reason,'reveal-timeout');assert.equal(f.timers.size,0);
  }
+ const hidden=environment();hidden.doc.hidden=true;const current=connect(t,hidden);await flush();assert.deepEqual(phases(current),['requested','ready','revealing','entered']);assert.equal(current.inspect().reason,'hidden-static');assert.equal(hidden.timers.size,0);
 });
 
 test('same-page hashes, modified/external/downloaded links remain native without starting requests',async t=>{

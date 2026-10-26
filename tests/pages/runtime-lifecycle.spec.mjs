@@ -1,5 +1,5 @@
 import {test, expect} from '@playwright/test';
-import {WAIT, scenarioTimeout, loadScene, centerStudy, holdModel, surface, hitPoint, frames, settle, expectIdle} from './case-helpers.mjs';
+import {WAIT, scenarioTimeout, loadScene, centerStudy, surface, hitPoint, frames, settle} from './case-helpers.mjs';
 
 async function snapshot(page) {
   return page.evaluate(() => {
@@ -43,68 +43,21 @@ test('overlapping page-cache and freeze signals stop work until the last reason 
   await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1); expect(errors).toEqual([]);
 });
 
-test('lifecycle suspension releases mouse inspection and preserves native touch neutrality in the Full story', async ({page, context, isMobile}) => {
-  test.setTimeout(scenarioTimeout(120000));
-  const errors = []; page.on('pageerror', error => errors.push(error.message));
-  await loadScene(page); await centerStudy(page);
-  await surface(page).evaluate(element => {
-    element.addEventListener('gotpointercapture', event => {element.dataset.testCapturedPointer = String(event.pointerId);}, {once: true});
-    element.__testOriginalCapture=element.setPointerCapture;const capture=element.setPointerCapture.bind(element);element.__testExplicitCaptures=0;
-    element.setPointerCapture=id=>{element.__testExplicitCaptures++;return capture(id);};
-  });
-  let cdp=null;
-  try{
-  const point = await hitPoint(page);cdp=isMobile?await context.newCDPSession(page):null;
-  if (isMobile) {
-    await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{...point,id:1}]});
-    await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:point.x+40,y:point.y,id:1}]});
-  } else {
-    await page.mouse.move(point.x, point.y);
-    await expect(surface(page)).toHaveAttribute('data-model-hit', 'true');
-    await page.mouse.down(); await page.mouse.move(point.x + 40, point.y - 12, {steps: 3});
-  }
-  if(isMobile){
-    // Browser implicit touch capture is legal; the model must never request it
-    // or turn native touch tracking into inspection ownership.
-    await expect(surface(page)).not.toHaveAttribute('data-model-dragging','true');
-    expect(await surface(page).evaluate(element=>element.__testExplicitCaptures)).toBe(0);
-    expect(await page.evaluate(()=>{const s=window.__story.inspect();return {engaged:s.modelEngaged,held:s.modelHeldSource,selection:s.sourceSelection};})).toEqual({engaged:false,held:null,selection:null});
-  }else{
-    await expect(surface(page)).toHaveAttribute('data-model-dragging', 'true');
-    expect(await surface(page).evaluate(element => element.hasPointerCapture(Number(element.dataset.testCapturedPointer)))).toBe(true);
-    await frames(page, 2);
-    expect(await page.evaluate(() => window.__story.inspect().modelEngaged)).toBe(true);
-  }
-  const held = await snapshot(page);
-  await page.evaluate(() => window.dispatchEvent(new Event('pagehide')));
-  expect(await page.evaluate(() => window.__story.inspect().modelEngaged)).toBe(false);
-  expect(await page.evaluate(() => window.__story.inspect().modelHeldSource)).toBeNull();
-  await expect(surface(page)).not.toHaveAttribute('data-model-dragging', 'true');
-  if(cdp){
-    await cdp.send('Input.dispatchTouchEvent',{type:'touchCancel',touchPoints:[]});await cdp.detach();cdp=null;
-    expect(await surface(page).evaluate(element=>element.__testExplicitCaptures)).toBe(0);
-  }else{
-    // Suspension, not pointerup, must release the application's mouse capture.
-    expect(await surface(page).evaluate(element=>element.hasPointerCapture(Number(element.dataset.testCapturedPointer)))).toBe(false);
-    await page.mouse.up();
-  }
-  expect(await surface(page).evaluate(element => element.hasPointerCapture(Number(element.dataset.testCapturedPointer)))).toBe(false);
-  await surface(page).evaluate(element=>{element.setPointerCapture=element.__testOriginalCapture;delete element.__testOriginalCapture;delete element.__testExplicitCaptures;});
-  const suspended = await snapshot(page); await frames(page, 5); expect(await snapshot(page)).toEqual(suspended);
-  await page.evaluate(() => window.dispatchEvent(new Event('pageshow'))); await settle(page);
-  expect(await page.evaluate(() => ({angle: window.__story.inspect().inspection.value.azimuth, y: scrollY, detail:window.__thesis.inspect().detail}))).toEqual({angle: 30, y: held.y, detail:'full'});
+test('lifecycle suspension preserves unclaimed pointer input and resumes the same scroll-owned source', async ({page, context, isMobile}) => {
+ test.setTimeout(scenarioTimeout(120000));const errors=[];page.on('pageerror',error=>errors.push(error.message));
+ await loadScene(page);await centerStudy(page,'form');const canvas=await page.locator('[data-cinematic-stage] canvas').elementHandle();
+ const point=await hitPoint(page),before=await page.evaluate(()=>({y:scrollY,source:window.__thesis.inspect().representation.id,time:window.__story.inspect().playback.activeSeconds}));let cdp=null;
+ try{
+  if(isMobile){cdp=await context.newCDPSession(page);await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{...point,id:1}]});}
+  else{await page.mouse.move(point.x,point.y);await page.mouse.down();}
+  expect(await page.evaluate(()=>{const s=window.__story.inspect();return{engaged:s.modelEngaged,held:s.modelHeldSource,selection:s.sourceSelection};})).toEqual({engaged:false,held:null,selection:null});
+  await expect(surface(page)).not.toHaveAttribute('data-model-dragging','true');
+  await page.evaluate(()=>window.dispatchEvent(new Event('pagehide')));const held=await snapshot(page);await frames(page,5);expect(await snapshot(page)).toEqual(held);
+  if(cdp){await cdp.send('Input.dispatchTouchEvent',{type:'touchCancel',touchPoints:[]});await cdp.detach();cdp=null;}else await page.mouse.up();
+  await page.evaluate(()=>window.dispatchEvent(new Event('pageshow')));await settle(page);
+  expect(await page.evaluate(()=>({y:scrollY,source:window.__thesis.inspect().representation.id}))).toEqual({y:before.y,source:before.source});
   await expect.poll(()=>page.evaluate(()=>window.__story.inspect().playback.activeSeconds),{timeout:WAIT}).toBeGreaterThan(held.time);
-  const pause=page.getByRole('button',{name:'Pause motion',exact:true});
-  await expect(pause).toHaveCount(1);await expect(pause).toBeEnabled();await expect(pause).toHaveAttribute('aria-pressed','false');
-  await holdModel(page);await expectIdle(page);
-  const keyboardY=await page.evaluate(()=>scrollY);await surface(page).press('Escape');await settle(page);
-  expect(await page.evaluate(()=>{const s=window.__story.inspect();return {engaged:s.modelEngaged,held:s.modelHeldSource,angle:s.inspection.value.azimuth,y:scrollY};})).toEqual({engaged:false,held:null,angle:30,y:keyboardY});
-  expect(errors).toEqual([]);
-  }finally{
-    // Cleanup must also run after a failed lifecycle assertion, without
-    // replacing its diagnostic with a best-effort input/session error.
-    if(cdp){try{await cdp.send('Input.dispatchTouchEvent',{type:'touchCancel',touchPoints:[]});}catch{}try{await cdp.detach();}catch{}}
-    if(!isMobile)try{await page.mouse.up();}catch{}
-    try{await surface(page).evaluate(element=>{if(element.__testOriginalCapture){element.setPointerCapture=element.__testOriginalCapture;delete element.__testOriginalCapture;}delete element.__testExplicitCaptures;});}catch{}
-  }
+  expect(await page.evaluate(el=>document.querySelector('[data-cinematic-stage] canvas')===el,canvas)).toBe(true);
+  await expect(page.getByRole('button',{name:/Pause|Resume|Enable/})).toHaveCount(0);expect(errors).toEqual([]);
+ }finally{if(cdp){try{await cdp.send('Input.dispatchTouchEvent',{type:'touchCancel',touchPoints:[]});await cdp.detach();}catch{}}else if(!isMobile)try{await page.mouse.up();}catch{}}
 });

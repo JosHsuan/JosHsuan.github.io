@@ -6,7 +6,7 @@ import styles from './source-diagram.module.css';
 import InformationSkin from './InformationSkin';
 
 const TITLES = {library: 'Function library', miura: 'Miura fold anatomy', workflow: 'From geometry to fabrication'};
-const HINTS = {library: 'Length traces unfold from 60 mm to 160 mm.', miura: 'Read the net, folds and form.', workflow: 'Follow the workflow. Select a stage to compare its model.'};
+const HINTS = {library: 'Length traces unfold from 60 mm to 160 mm.', miura: 'Read the net, folds and form.', workflow: 'Read the complete workflow, then continue through its source stages.'};
 const RATIOS = {library: '360 / 326', miura: '490 / 230', workflow: '560 / 524'};
 const ASSETS = '/assets/diagrams/';
 
@@ -31,7 +31,23 @@ const NativeDrawing = memo(function NativeDrawing({data, prefix}) {
   </g>;
 });
 
-/** Source hydration and discrete choices. The director owns the library reveal. */
+// These descriptions are transcribed from the pinned public diagram JSON.
+// Keep them in native HTML even before hydration or when the drawing cannot load.
+const READING_GROUPS = {
+  miura: [
+    {label:'Net',description:'The authored Miura diagram, with its source geometry and notation.'},
+    {label:'Fold lines',description:'The authored Miura diagram, with its source geometry and notation.'},
+    {label:'Folded form',description:'The authored Miura diagram, with its source geometry and notation.'},
+  ],
+  workflow: [
+    {label:'Origami',description:'Representation model (Origami Pattern).'},
+    {label:'Opening',description:'Input the Length Value of Opening.'},
+    {label:'Bending',description:'Bend-Active Simulation Model (With Material Character).'},
+    {label:'Source colours',description:'Curvature Analysis of Simulation Model; original authored colours.'},
+  ],
+};
+
+/** Source hydration and scroll-led emphasis. The director owns the reveal. */
 export default function SourceDiagram({kind = 'library', title, className = ''}) {
   const input=useExperienceInput();
   const validKind = Object.hasOwn(TITLES, kind) ? kind : 'library';
@@ -51,9 +67,7 @@ export default function SourceDiagram({kind = 'library', title, className = ''})
   const available = data?.kind === validKind ? data : null;
   const paths = available ? new Map(available.paths.map(path => [path.id, path])) : null;
   return <figure ref={frame} className={`${styles.frame} ${className}`} data-source-diagram={validKind} data-information-window="source-diagram" data-information-motion-surface="plane"
-    data-diagram-count={available?.groups.length ?? (validKind === 'library' ? 11 : validKind === 'miura' ? 3 : 4)}
-    onKeyDown={validKind==='library'?undefined:manager.key}
-    onBlur={validKind==='library'?undefined:manager.blur}>
+    data-diagram-count={available?.groups.length ?? (validKind === 'library' ? 11 : validKind === 'miura' ? 3 : 4)}>
     <InformationSkin/>
     <figcaption className={styles.heading} data-protect data-choreography="caption">
       <span className={styles.eyebrow}>Research study</span>
@@ -63,34 +77,19 @@ export default function SourceDiagram({kind = 'library', title, className = ''})
     <div className={styles.hitRegion} style={{aspectRatio: RATIOS[validKind]}} data-library-drawing={validKind==='library'?'':undefined}>
       <div className={styles.panel} data-choreography="diagram" data-protect>
         {available ? <svg className={styles.vector} viewBox={available.viewBox.join(' ')} role="img" aria-labelledby={`${id}-title ${id}-description`}>
-          <desc id={`${id}-description`}>{validKind==='library'?'Original authored function library. Eleven length traces reveal sequentially from 60 mm to 160 mm, each from its bottom endpoint. All source axes and labels remain visible.':'Original authored diagram. The controls below highlight its source traces and stages.'}</desc>
+          <desc id={`${id}-description`}>{validKind==='library'?'Original authored function library. Eleven length traces reveal sequentially from 60 mm to 160 mm, each from its bottom endpoint. All source axes and labels remain visible.':'Original authored diagram. All source traces and stages remain visible; their descriptions follow in reading order.'}</desc>
           <NativeDrawing data={available} prefix={id}/>
           {validKind!=='library'&&available.groups.map((group, index) => <g key={group.id} id={`${id}-${group.id}`} className={styles.highlight}
-            data-diagram-index={index} data-diagram-active="false" aria-hidden="true"
-            onPointerEnter={event => {if (validKind !== 'workflow' && event.pointerType !== 'touch') {manager.hover(index);}}}
-            onPointerLeave={() => {manager.leave();}}
-            onClick={() => manager.activate(index)}>
+            data-diagram-index={index} data-diagram-active="false" aria-hidden="true">
             {group.paths.length ? group.paths.map(pathId => <path key={pathId} className={styles.trace} d={paths.get(pathId)?.attrs.d}/>)
               : <rect className={styles.node} x={group.bounds[0]} y={group.bounds[1]} width={group.bounds[2]-group.bounds[0]} height={group.bounds[3]-group.bounds[1]} rx="12"/>}
-            <rect className={styles.regionHit} x={group.bounds[0]} y={group.bounds[1]} width={group.bounds[2]-group.bounds[0]} height={group.bounds[3]-group.bounds[1]}/>
           </g>)}
         </svg> : <img className={styles.fallback} src={`${ASSETS}${validKind}.svg`} alt={`${heading}: original authored diagram`} loading="lazy"/>}
       </div>
     </div>
     {validKind==='library'&&<p className={styles.caption} data-protect>Eleven original length traces. The sequence reveals the authored drawing; it does not calculate a new structural prediction.</p>}
-    {available && validKind!=='library' && <div className={styles.controls} data-protect>
-      <div className={styles.choices} role="group" aria-label={`Select ${heading.toLowerCase()}`}>
-        {available.groups.map((group, index) => <button type="button" key={group.id} data-diagram-index={index} data-diagram-active="false"
-          aria-controls={`${id}-${group.id}`} aria-pressed="false"
-          onFocus={() => {if (validKind !== 'workflow') {manager.hover(index);}}} onClick={() => manager.activate(index)}><span data-choreography="nav">{group.label}</span></button>)}
-        <button type="button" className={styles.follow} onClick={() => {manager.follow();}}><span data-choreography="nav">Follow chapter</span></button>
-      </div>
-      <p className={styles.caption} data-choreography="prose">
-        <span data-diagram-caption>{available.groups[0].description}</span>
-        {/* Every real variant contributes its wrapped height without duplicate speech. */}
-        {available.groups.map(group => <span key={group.id} className={styles.captionSizer} aria-hidden="true">{group.description}</span>)}
-      </p>
-      <span className={styles.live} role="status" aria-live="polite" data-diagram-announcement/>
-    </div>}
+    {validKind!=='library' && <ol className={styles.readingSequence} aria-label={`${heading} source stages`}>
+      {READING_GROUPS[validKind].map((group,index)=><li key={group.label} data-diagram-index={index} data-diagram-active="false"><h4>{group.label}</h4><p>{group.description}</p></li>)}
+    </ol>}
   </figure>;
 }

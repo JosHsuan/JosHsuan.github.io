@@ -177,7 +177,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       const explicitChapter=state.modelEngaged?state.modelInteractionChapter:requested?.chapterId===chapter.id&&requestAge>=0&&requestAge<SOURCE_COMPARISON_SECONDS?requested.chapterId:undefined;
       canvasPlacement=advanceCanvasMotion(canvasMotion,dt,{anchors:offsets,docY:scrollY,viewport:{width:canvasSurface.width,height:canvasSurface.height},reducedMotion:state.reduced,seek:didSeek,resumed:didResume,paused:canvasAwaitingPaint,forcedChapter:explicitChapter});
       // Native reading owns only the authored orientation; existing playback
-      // retains its independent idle/representation clock and source choices.
+      // retains its independent subtle idle clock; source choices follow reading.
       scrollCamera=advanceSourceScrollCamera(scrollCameraState,{nativeU:u,presentedChapter:canvasPlacement.chapter,dt,
         paused:state.motionPaused||!state.sceneEnabled||state.sceneFailed,systemReduced:state.systemReduced,resumed:didResume});
       advanceInspection(inspection,dt,{reducedMotion:state.reduced,resumed});
@@ -280,10 +280,10 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       // stationary light field for autonomous camera/ASCII beats.
       pageField.present(latestScene,{frameTimeMs:now,paused:state.motionPaused||!state.sceneEnabled||state.sceneFailed,hidden:state.hidden,systemReduced:state.systemReduced},canvasSurface.width,canvasSurface.height);
       diagrams.forEach(({element:diagram,index})=>{
-        const count=Math.max(1,Number(diagram.dataset.diagramCount)||4),phase=playbackScore.phases[index];
+        const count=Math.max(1,Number(diagram.dataset.diagramCount)||4),progress=Math.max(0,Math.min(1,u*7-index));
         // The discrete index owns source highlighting. The old continuously
         // written phase/energy custom properties were not consumed by CSS.
-        publisher.attribute(diagram,'data-autonomous-index',Math.floor(phase*count)%count);
+        publisher.attribute(diagram,'data-autonomous-index',Math.min(count-1,Math.floor(progress*count)));
         publisher.attribute(diagram,'data-source-presented',index===2&&canvasChapter==='system'&&canvasPlacement.visible&&!canvasAwaitingPaint&&state.sceneEnabled&&!state.sceneFailed?'true':null);
       });
       // Contained rear Canvas; readable DOM cores need no geometry mask. A small

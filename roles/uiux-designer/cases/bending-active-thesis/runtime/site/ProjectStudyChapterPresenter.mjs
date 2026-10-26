@@ -9,7 +9,7 @@ export function createProjectStudyChapterPresenter({root,tools,navigation,publis
  const syncPause=()=>{
   if(disposed)return false;
   const next=root.hasAttribute('data-study-paused');if(next===paused)return false;paused=next;
-  publisher.attribute(toggle,'aria-pressed',String(next));publisher.text(toggle,next?'Resume motion':'Pause motion');return true;
+  if(toggle){publisher.attribute(toggle,'aria-pressed',String(next));publisher.text(toggle,next?'Resume motion':'Pause motion');}return true;
  };
  const release=toggle?listen(toggle,'click',()=>{
   if(disposed)return;

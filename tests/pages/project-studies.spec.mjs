@@ -11,17 +11,9 @@ const stage=page=>page.locator('[data-project-model-stage]');
 // This is the real ordinary-page driver adapter, not a second stage clock.
 const facts=page=>page.evaluate(()=>window.__globalBackground.inspect().driver.projectStudy.scene);
 const dot=studies.find(project=>project.id==='dot-based-3d-printing');
-const inspection=async page=>{const {target,value,settled}= (await facts(page)).camera;return{target,value,settled};};
 function closed(state){
  for(const id of new Set(state.history.map(fact=>fact.id))){const own=state.history.filter(fact=>fact.id===id);expect(own.filter(fact=>fact.phase==='requested')).toHaveLength(1);expect(own.filter(fact=>['ready','failed','cancelled'].includes(fact.phase))).toHaveLength(1);}
- if(state.motion===null){
-  // Initial Reduced Motion can settle arrival before the ordinary driver's
-  // first source publication. No model acquisition or motion request exists.
-  expect(state).toMatchObject({externalStage:true,phase:'poster',reason:'reduced-motion',arrivalStatic:true,staticReason:'reduced-motion',active:false,pending:false,id:null,acquisitions:0,disposals:0,renders:0,resource:null,paintedChapter:null,preparedChapter:null,sharedStage:null});
-  expect(state.history).toEqual([]);expect(state.resourceFailures).toEqual([]);
-  expect(state.posterPreparation).toMatchObject({requested:false,pending:false});
-  return;
- }
+ if(state.motion===null){expect(state.arrivalStatic).toBe(true);expect(state.resource).toBeNull();return;}
  for(const id of new Set(state.motion.history.map(fact=>fact.id))){const own=state.motion.history.filter(fact=>fact.id===id);expect(own.filter(fact=>fact.status==='requested')).toHaveLength(1);expect(own.filter(fact=>['completed','cancelled','failed'].includes(fact.status))).toHaveLength(1);}
 }
 function sourceDraw(state,model,viewport){
@@ -103,13 +95,13 @@ async function decodeSource(chapter,image){
   const root=chapter.locator('xpath=ancestor::main[@data-project-study]'),canonical=root.locator(`[data-editorial-source="${image.src}"]`);await expect(canonical).toHaveCount(1);
   const owner=await canonical.evaluate(node=>node.closest('[data-project-chapter]').dataset.projectChapter);
   if(owner!==identity.chapter&&identity.chapter!=='overview'){
-   const reference=chapter.locator(`[data-editorial-source-reference="${image.src}"]`);await expect(reference).toHaveCount(1);await expect(reference).toContainText(image.caption);await expect(reference).toContainText(image.credit);await expect(reference.locator('a')).toHaveAttribute('href',image.src);await expect(reference.locator('a')).toHaveAttribute('target','_blank');
+   const reference=chapter.locator(`[data-editorial-source-reference="${image.src}"]`);await expect(reference).toHaveCount(1);await expect(reference).toContainText(image.caption);await expect(reference).toContainText(image.credit);
   }
   if(identity.chapter==='overview')expect(owner).toBe(identity.project==='project-caschlatsch'?'system':'overview');
   if(['special-assemblies','hc3dp-caustics','dot-based-3d-printing','entrance-installation-art','mode-s-of-making'].includes(identity.project))expect(owner).toBe(identity.chapter);
   const original=canonical.locator('[data-editorial-image]');await expect(original).toHaveCount(1);await original.scrollIntoViewIfNeeded();
   expect(await original.evaluate(async node=>{await node.decode();return{src:node.getAttribute('src'),width:node.naturalWidth,height:node.naturalHeight,fit:getComputedStyle(node).objectFit,alt:node.alt};})).toEqual({src:image.src,width:image.width,height:image.height,fit:'contain',alt:image.alt});
-  await expect(canonical.locator('figcaption > p')).toHaveText(image.caption);await expect(canonical.locator('figcaption > span:not([data-information-skin])')).toHaveText(image.credit);await expect(canonical.locator('figcaption > a')).toHaveAttribute('href',image.src);await expect(original.locator('xpath=ancestor::a[1]')).toHaveAttribute('href',image.src);await expect(original.locator('xpath=ancestor::a[1]')).toHaveAttribute('target','_blank');return;
+  await expect(canonical.locator('figcaption > p')).toHaveText(image.caption);await expect(canonical.locator('figcaption > span:not([data-information-skin])')).toHaveText(image.credit);return;
  }
  const project=studies.find(item=>item.id===identity.project),motion=project.motionMedia?.find(item=>item.chapter===identity.chapter&&item.poster.src===image.src);
  const element=chapter.locator(`img[src="${image.src}"]`).first();
@@ -119,14 +111,14 @@ async function decodeSource(chapter,image){
   // duplicate placement must not be recreated just to satisfy an old fixture.
   const root=chapter.locator('xpath=ancestor::main[@data-project-study]');
   expect(await root.locator(`[data-project-media-poster][src="${image.src}"]`).count()).toBeGreaterThan(0);
-  await expect(root.locator(`a[href="${image.src}"]`).first()).toHaveAttribute('target','_blank');
+
   await expect(chapter.locator(`[data-project-evidence-image][src="${image.src}"]`)).toHaveCount(0);
   return;
  }
  await expect(element).toHaveAttribute('src',image.src);
  await element.scrollIntoViewIfNeeded();
  expect(await element.evaluate(async node=>{await node.decode();return{width:node.naturalWidth,height:node.naturalHeight,fit:getComputedStyle(node).objectFit,alt:node.alt};})).toEqual({width:image.width,height:image.height,fit:'contain',alt:motion?.alt??image.alt});
- await expect(chapter.locator(`a[href="${image.src}"]`).first()).toHaveAttribute('target','_blank');
+
  await expect(chapter).toContainText(motion?.caption??image.caption);await expect(chapter).toContainText(motion?.credit??image.credit);
 }
 
@@ -153,22 +145,10 @@ async function observeContinuousModel(page,chapter){
  return{result,async dispose(){try{await handle.evaluate(owner=>owner.dispose());}finally{await handle.dispose();}}};
 }
 async function modelChapter(page,project,chapter=project.model.chapters[0]){
- const control=page.locator(`[data-project-chapter="${chapter}"] [data-project-model-control]`);
- await control.evaluate(node=>node.scrollIntoView({block:'center',behavior:'instant'}));
+ const section=page.locator(`[data-project-chapter="${chapter}"]`);
+ await section.evaluate(node=>node.scrollIntoView({block:'start',behavior:'instant'}));
  await settled(page,chapter,project.model);sourceDraw(await facts(page),project.model,page.viewportSize());await fullCanvas(page);
- return control;
-}
-async function pressSource(page,control){
- // The presenter exposes no synthetic hit/readiness hook. Try bounded native
- // pointer presses in the visible aperture; a gesture exists only after its
- // actual source raycast succeeds. No generated replacement can satisfy this.
- const candidates=await control.evaluate(node=>{
-  const box=node.getBoundingClientRect(),left=Math.max(1,box.left),right=Math.min(innerWidth-1,box.right),top=Math.max(110,box.top),bottom=Math.min(innerHeight-100,box.bottom),points=[];
-  for(let y=.05;y<1;y+=.1)for(let x=.05;x<1;x+=.1){const point={x:left+(right-left)*x,y:top+(bottom-top)*y,distance:Math.hypot(x-.5,y-.5)},under=document.elementFromPoint(point.x,point.y);if(under&&!under.closest('a,button,input,select,textarea,summary,[data-protect],[data-information-window]'))points.push(point);}
-  return points.sort((a,b)=>a.distance-b.distance);
- });
- for(const point of candidates){await page.mouse.move(point.x,point.y);await page.mouse.down();if((await facts(page)).gesture)return point;await page.mouse.up();}
- throw Error('No native pointer press hit the painted Dot source: '+JSON.stringify(await facts(page)));
+ return section;
 }
 function closedGestures(state){
  for(const id of new Set(state.gestures.map(fact=>fact.id))){const own=state.gestures.filter(fact=>fact.id===id);expect(own.filter(fact=>fact.status==='requested')).toHaveLength(1);expect(own.filter(fact=>['released','cancelled'].includes(fact.status))).toHaveLength(1);}
@@ -235,11 +215,11 @@ for(const project of studies)test(`${project.shortTitle} has native evidence cha
   const chapter=page.locator(`[data-project-chapter="${section.id}"]`);
   let continuity=null;
   if(project.model?.chapters.includes(previous)&&project.model.chapters.includes(section.id)){
-   await page.locator(`[data-project-chapter-link="${previous}"]`).click();await settled(page,previous,project.model);
+   await page.locator(`[data-project-chapter-link="${previous}"]`.replace('data-project-chapter-link','data-project-chapter')).evaluate(node=>node.scrollIntoView({block:'start',behavior:'instant'}));await settled(page,previous,project.model);
    continuity=await observeContinuousModel(page,section.id);
   }
   try{
-  await page.locator(`[data-project-chapter-link="${section.id}"]`).click();
+  await page.locator(`[data-project-chapter-link="${section.id}"]`.replace('data-project-chapter-link','data-project-chapter')).evaluate(node=>node.scrollIntoView({block:'start',behavior:'instant'}));
   if(project.model){
    await settled(page,section.id,project.model);
    const state=await facts(page);sourceDraw(state,project.model,page.viewportSize());closed(state);
@@ -262,19 +242,14 @@ for(const project of studies)test(`${project.shortTitle} has native evidence cha
   expect(background.owner).toBe('site');expect(background.activeBindings).toBe(1);expect(background.acquisitions).toBe(1);expect(background.releases).toBe(0);
   expect(background.driver.projectStudy.liquidGlass.ticks).toBe(background.driver.frames);
  }
- await page.locator('[data-project-chapter-link="credits"]').click();
+ await page.locator('[data-project-chapter-link="credits"]'.replace('data-project-chapter-link','data-project-chapter')).evaluate(node=>node.scrollIntoView({block:'start',behavior:'instant'}));
  if(project.model){await settled(page,'credits',project.model);closed(await facts(page));await expect(stage(page)).not.toHaveAttribute('data-project-model-active','');}
  for(const credit of project.credits)await expect(page.locator('[data-project-chapter="credits"]')).toContainText(credit.names);
- const toggle=page.locator('[data-study-motion-toggle]');await toggle.click();
- await expect(toggle).toHaveAttribute('aria-pressed','true');
- await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.projectStudy.paused)).toBe(true);
- await frames(page,8);const frozen=await page.evaluate(()=>window.__globalBackground.inspect().driver.playback.activeSeconds);
- await page.mouse.wheel(0,-160);await frames(page,8);
- expect(await page.evaluate(()=>window.__globalBackground.inspect().driver.playback.activeSeconds)).toBe(frozen);
- await toggle.click();await expect(toggle).toHaveAttribute('aria-pressed','false');
- await page.emulateMedia({reducedMotion:'reduce'});
- await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.enabled)).toBe(false);
- if(project.model){await expect(stage(page).locator('canvas')).toHaveCount(0);expect((await facts(page)).resource).toBeNull();expect((await facts(page)).disposals).toBe((await facts(page)).acquisitions);closed(await facts(page));}
+ await expect(page.locator('main button,main details,[data-study-motion-toggle]')).toHaveCount(0);
+ const beforePreference=project.model?await facts(page):null;
+ await page.emulateMedia({reducedMotion:'reduce'});await frames(page,8);
+ await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.enabled)).toBe(true);
+ if(project.model){await expect(stage(page).locator('canvas')).toHaveCount(1);const after=await facts(page);expect(after.arrivalStatic).toBe(false);expect(after.acquisitions).toBe(beforePreference.acquisitions);expect(after.disposals).toBe(0);closed(after);}
  expect(models).toEqual(project.model?[new URL(project.model.src,page.url()).href]:[]);
  expect(errors).toEqual([]);
 });
@@ -317,15 +292,11 @@ for(const project of studies)test(`${project.shortTitle} preserves every source 
    await expect(page.locator('[data-site-loader]')).toBeHidden();
    await expect(page.locator('[data-project-chapter]')).toHaveCount(project.sections.length+2);await expect(page.locator('canvas')).toHaveCount(1);await expect(page.locator('[data-project-study-canvas]')).toHaveCount(0);
    await decodeSource(page.locator('[data-project-chapter="overview"]'),project.hero);
-   const fullSource=['project-caschlatsch','special-assemblies','hc3dp-caustics','dot-based-3d-printing','entrance-installation-art','mode-s-of-making'].includes(project.id)?page.locator(`[data-editorial-source="${project.hero.src}"] figcaption > a`):page.locator(`[data-project-chapter="overview"] a[href="${project.hero.src}"]`);
-   await readNative(fullSource);
-   const [sourcePage]=await Promise.all([context.waitForEvent('page'),fullSource.click()]);
-   await sourcePage.waitForURL(new URL(project.hero.src,page.url()).href);await sourcePage.waitForLoadState('domcontentloaded');expect(new URL(sourcePage.url()).pathname).toBe(project.hero.src);
-   await expect(sourcePage.locator('img')).toHaveJSProperty('naturalWidth',project.hero.width);await sourcePage.close();
+   await expect(page.locator('main a[href^="/assets/"],main button,main details')).toHaveCount(0);
    for(const section of project.sections){
     const chapter=page.locator(`[data-project-chapter="${section.id}"]`),heading=chapter.locator('h2');
-    await page.locator(`[data-project-chapter-link="${section.id}"]`).click();
-    await expect(page).toHaveURL(new RegExp(`#${project.id}-${section.id}$`));
+    await page.locator(`[data-project-chapter-link="${section.id}"]`.replace('data-project-chapter-link','data-project-chapter')).evaluate(node=>node.scrollIntoView({block:'start',behavior:'instant'}));
+    expect(new URL(page.url()).hash).toBe('');
     await expect(chapter).toHaveAttribute('id',`${project.id}-${section.id}`);await expect(chapter).toHaveAttribute('aria-labelledby',`${project.id}-${section.id}-heading`);
     // A native chapter link enters the source-first section; its heading can
     // follow a complete image/caption instead of sharing the initial viewport.
@@ -337,7 +308,7 @@ for(const project of studies)test(`${project.shortTitle} preserves every source 
     for(const caption of await chapter.locator('[data-project-source-caption] > p[id$="-caption"],figure figcaption > p').all())await readNative(caption);
    }
    expect(await page.locator('[data-project-media] img,figure img').evaluateAll(images=>images.every(image=>image.alt.trim().length>10))).toBe(true);
-   await page.locator('[data-project-chapter-link="credits"]').click();
+   await page.locator('[data-project-chapter-link="credits"]'.replace('data-project-chapter-link','data-project-chapter')).evaluate(node=>node.scrollIntoView({block:'start',behavior:'instant'}));
    await readNative(page.locator('[data-project-chapter="credits"] h2'));
    for(const credit of project.credits){await expect(page.locator('[data-project-chapter="credits"]')).toContainText(credit.names);await readNative(page.locator('[data-project-chapter="credits"]').getByText(credit.names,{exact:true}));}
    expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
@@ -353,102 +324,19 @@ test('a failed documentary image ends entry once and keeps the source narrative 
  await expect(page.locator('[data-project-chapter-link]')).toHaveCount(project.sections.length+2);
  const state=await page.evaluate(()=>window.__site.inspect());
  expect(state.history.filter(fact=>fact.id===state.id&&['entered','failed','cancelled'].includes(fact.phase))).toHaveLength(1);
- await page.locator('[data-project-chapter-link="credits"]').click();
+ await page.locator('[data-project-chapter-link="credits"]'.replace('data-project-chapter-link','data-project-chapter')).evaluate(node=>node.scrollIntoView({block:'start',behavior:'instant'}));
  await expect(page.locator('[data-project-chapter="credits"]')).toBeInViewport();
 });
 
-test('the original Dot source supports native drag and keyboard inspection, returns exactly, and closes on pause and Reduced Motion',async({page,isMobile,browserName})=>{
+test('the original Dot source follows scrolling and never captures native pointer or reading keys',async({page})=>{
  test.setTimeout(scenarioTimeout(120000));expect(dot.model.primitive).toBe('points');
- const errors=[];page.on('pageerror',error=>errors.push(error.message));
- await page.goto(route(dot));await entered(page);const control=await modelChapter(page,dot);
- const chapter=dot.model.chapters[0],state=page.locator(`[data-project-model-state="${chapter}"]`),help=page.locator(`[data-project-model-help="${chapter}"]`),reset=page.locator(`[data-project-model-reset="${chapter}"]`),chapterOrder=['overview',...dot.sections.map(section=>section.id),'credits'];
- const semanticChapter=async(wanted,paused)=>{
-  await expect.poll(()=>page.evaluate(()=>{
-   const owner=window.__globalBackground.inspect().driver.projectStudy.chapters;
-   return{chapter:owner.chapter,paused:owner.paused,total:owner.chapters,disposed:owner.disposed,root:document.querySelector('[data-project-study]').dataset.projectActiveChapter,current:[...document.querySelectorAll('[data-project-chapter-link][aria-current="location"]')].map(node=>node.dataset.projectChapterLink),counter:document.querySelector('[data-project-chapter-count]').textContent};
-  }),{timeout:WAIT}).toEqual({chapter:wanted,paused,total:chapterOrder.length,disposed:false,root:wanted,current:[wanted],counter:`${String(chapterOrder.indexOf(wanted)+1).padStart(2,'0')} / ${String(chapterOrder.length).padStart(2,'0')}`});
- };
- await semanticChapter(chapter,false);await expect(state).toHaveAttribute('data-project-model-availability','ready');await expect(help).toBeVisible();await expect(reset).toBeHidden();
- await control.evaluate(node=>node.focus({preventScroll:true}));await control.press('ArrowLeft');
- await expect.poll(async()=>(await facts(page)).camera.value.azimuth,{timeout:WAIT}).toBeGreaterThan(.01);
- await control.press('Home');await expect.poll(()=>inspection(page)).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});
- await control.press('ArrowLeft');await expect.poll(async()=>(await facts(page)).camera.value.azimuth,{timeout:WAIT}).toBeGreaterThan(.01);
- await expect(state).toHaveAttribute('data-project-model-availability','inspecting');await expect(reset).toBeVisible();
- await page.keyboard.press('Tab');await expect(reset).toBeFocused();
- expect((await facts(page)).camera.target.azimuth).toBeCloseTo(.12,8);expect((await facts(page)).camera.value.azimuth).toBeGreaterThan(.01);
- await reset.press('Enter');await expect.poll(()=>inspection(page),{timeout:WAIT}).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});
- await expect.poll(async()=>{const {chapter:current,azimuth,elevation}= (await facts(page)).resource.view;return{chapter:current,azimuth,elevation};}).toEqual({chapter,azimuth:0,elevation:0});
- const returned=await facts(page);expect(returned.resource.view.cameraIntent).toEqual(returned.camera.intent);await expect(state).toHaveAttribute('data-project-model-availability','ready');await expect(reset).toBeHidden();
- await modelChapter(page,dot);await control.evaluate(node=>node.focus({preventScroll:true}));await control.press('ArrowLeft');
- await expect.poll(async()=>(await facts(page)).camera.value.azimuth,{timeout:WAIT}).toBeGreaterThan(.01);await control.press('Escape');
- await expect.poll(()=>inspection(page)).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});
- const source=page.locator(`[data-project-source-caption="${chapter}"] a`).first(),sourceKeys=await page.evaluateHandle(()=>{
-  const events=[],read=event=>{if(event.target.closest('[data-project-source-caption]'))events.push({key:event.key,trusted:event.isTrusted,prevented:event.defaultPrevented});};
-  addEventListener('keydown',read);return{events,dispose:()=>removeEventListener('keydown',read)};
- });
- try{
-  for(const key of ['ArrowLeft','Home']){
-   await modelChapter(page,dot);await source.evaluate(node=>node.focus({preventScroll:true}));await source.press(key);
-   expect(await sourceKeys.evaluate(probe=>probe.events.at(-1))).toEqual({key,trusted:true,prevented:false});
-   expect((await facts(page)).camera.target).toEqual({azimuth:0,elevation:0});
-   if(key==='Home'){
-    // Native Home keyup precedes the browser's default scroll completion.
-    // Observe that real operation and source exit before issuing another
-    // chapter command, rather than racing it or relaxing viewport geometry.
-    await page.waitForFunction(()=>{
-     const study=window.__globalBackground?.inspect().driver.projectStudy,scene=study?.scene,source=study?.backdrop.stage;
-     return scrollY===0&&study?.chapters.chapter==='overview'&&document.querySelector('[data-project-study]')?.dataset.projectActiveChapter==='overview'&&scene?.chapter==='overview'&&scene.motion.mode==='absent'&&scene.motion.settled&&!scene.motion.transition&&source?.chapter==='overview'&&source.kind==='native'&&source.key==='native:overview'&&source.mode==='absent'&&source.pose.opacity===0&&source.request?.absent===true&&source.settled&&!source.transition;
-    },null,{timeout:WAIT});
-    await semanticChapter('overview',false);
-   }
-  }
- }finally{try{await sourceKeys.evaluate(probe=>probe.dispose());}finally{await sourceKeys.dispose();}}
- await modelChapter(page,dot);await semanticChapter(chapter,false);
- const point=await pressSource(page,control),dx=point.x<page.viewportSize().width*.6?60:-60;
- await page.mouse.move(point.x+dx,point.y+12,{steps:6});
- await expect.poll(async()=>Math.abs((await facts(page)).camera.value.azimuth),{timeout:WAIT}).toBeGreaterThan(.01);
- expect((await facts(page)).gesture.locked).toBe(true);await page.mouse.up();
- await expect.poll(()=>inspection(page),{timeout:WAIT}).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});closedGestures(await facts(page));
- if(isMobile){
-  // The configured mobile project is Chromium/Pixel 7. CDP drives its native
-  // touch pipeline, including touch-action and pointer cancellation; DOM
-  // PointerEvent dispatch cannot prove that vertical document scrolling works.
-  expect(browserName).toBe('chromium');const session=await page.context().newCDPSession(page);let touching=false;
-  const touch=async(type,x=point.x,y=point.y)=>{await session.send('Input.dispatchTouchEvent',{type,touchPoints:type==='touchEnd'?[]:[{x,y,id:1,radiusX:2,radiusY:2,force:1}]});touching=type!=='touchEnd';};
-  try{
-   const before=await page.evaluate(()=>scrollY);
-   await touch('touchStart');await expect.poll(async()=>!!(await facts(page)).gesture).toBe(true);const horizontal=(await facts(page)).gesture.id;
-   for(let step=1;step<=6;step++){await touch('touchMove',point.x+dx*step/6,point.y+3*step/6);await frames(page,1);}
-   await expect.poll(async()=>Math.abs((await facts(page)).camera.value.azimuth),{timeout:WAIT}).toBeGreaterThan(.01);expect((await facts(page)).gesture.locked).toBe(true);
-   expect(await page.evaluate(()=>scrollY)).toBe(before);await touch('touchEnd');
-   await expect.poll(()=>inspection(page),{timeout:WAIT}).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});
-   expect((await facts(page)).gestures.filter(fact=>fact.id===horizontal)).toEqual([{id:horizontal,status:'requested'},{id:horizontal,status:'released',reason:'released'}]);closedGestures(await facts(page));
-   await touch('touchStart');await expect.poll(async()=>!!(await facts(page)).gesture).toBe(true);const vertical=(await facts(page)).gesture.id;
-   for(let step=1;step<=7;step++){await touch('touchMove',point.x,point.y-14*step);await frames(page,1);}
-   await touch('touchEnd');await expect.poll(()=>page.evaluate(()=>scrollY),{timeout:WAIT}).toBeGreaterThan(before);
-   await expect.poll(async()=>(await facts(page)).gesture).toBeNull();const cancelled=(await facts(page)).gestures.filter(fact=>fact.id===vertical);
-   expect(cancelled).toHaveLength(2);expect(cancelled[0]).toEqual({id:vertical,status:'requested'});expect(cancelled[1].status).toBe('cancelled');expect(['native-scroll','pointercancel']).toContain(cancelled[1].reason);closedGestures(await facts(page));
-   expect((await facts(page)).camera.value).toEqual({azimuth:0,elevation:0});await modelChapter(page,dot);
-  }finally{try{if(touching)await touch('touchEnd');}finally{await session.detach();}}
- }
- await control.evaluate(node=>node.focus({preventScroll:true}));await control.press('ArrowDown');
- await expect.poll(async()=>(await facts(page)).camera.value.elevation,{timeout:WAIT}).toBeGreaterThan(.01);
- const toggle=page.locator('[data-study-motion-toggle]');await toggle.click();await expect(toggle).toHaveAttribute('aria-pressed','true');
- await expect.poll(()=>inspection(page)).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});
- await semanticChapter(chapter,true);await expect(state).toHaveAttribute('data-project-model-availability','paused');await expect(help).toBeHidden();await expect(reset).toBeHidden();
- // Native reading/selection remains live while source motion is paused. The
- // one semantic owner must update rail and counter on forward and reverse.
- await page.locator('[data-project-chapter-link="results"]').click();await semanticChapter('results',true);
- await page.locator(`[data-project-chapter-link="${chapter}"]`).click();await settled(page,chapter,dot.model);await semanticChapter(chapter,true);await expect(state).toHaveAttribute('data-project-model-availability','paused');
- await frames(page,2);const frozen=await page.evaluate(()=>{const driver=window.__globalBackground.inspect().driver;return{time:driver.playback.activeSeconds,draws:driver.projectStudy.scene.resource.draws};});
- await control.evaluate(node=>node.focus({preventScroll:true}));await control.press('ArrowLeft');await frames(page,8);
- expect(await page.evaluate(()=>{const driver=window.__globalBackground.inspect().driver;return{time:driver.playback.activeSeconds,draws:driver.projectStudy.scene.resource.draws};})).toEqual(frozen);
- await toggle.click();await expect(toggle).toHaveAttribute('aria-pressed','false');await settled(page,dot.model.chapters[0],dot.model);await semanticChapter(chapter,false);await expect(state).toHaveAttribute('data-project-model-availability','ready');await expect(help).toBeVisible();
- const y=await page.evaluate(()=>scrollY);await page.mouse.wheel(0,80);await expect.poll(()=>page.evaluate(()=>scrollY)).toBeGreaterThan(y);
- await modelChapter(page,dot);await pressSource(page,control);await page.emulateMedia({reducedMotion:'reduce'});await page.mouse.up();
- await expect(stage(page).locator('canvas')).toHaveCount(0);const reduced=await facts(page);closed(reduced);closedGestures(reduced);expect(reduced.resource).toBeNull();expect(reduced.disposals).toBe(reduced.acquisitions);expect(reduced.staticReason).toBe('reduced-motion');
- await expect(state).toHaveAttribute('data-project-model-availability','static');await expect(help).toBeHidden();await expect(reset).toBeHidden();
- await page.emulateMedia({reducedMotion:'no-preference'});await frames(page,8);await expect(stage(page).locator('canvas')).toHaveCount(0);expect((await facts(page)).acquisitions).toBe(reduced.acquisitions);expect(errors).toEqual([]);
+ await page.goto(route(dot));await entered(page);await modelChapter(page,dot);
+ await expect(page.locator('[data-project-model-control],[data-project-model-reset],[data-project-model-help],button')).toHaveCount(0);
+ const original=await facts(page),viewport=page.viewportSize();sourceDraw(original,dot.model,viewport);
+ await page.mouse.move(viewport.width*.5,viewport.height*.6);await page.mouse.down();await page.mouse.move(viewport.width*.7,viewport.height*.6);await page.mouse.up();await frames(page,3);
+ const after=await facts(page);expect(after.gestures).toEqual([]);expect(after.gesture).toBeNull();expect(after.camera.target).toEqual({azimuth:0,elevation:0});expect(after.camera.value).toEqual({azimuth:0,elevation:0});
+ const y=await page.evaluate(()=>scrollY);await page.keyboard.press('PageDown');await expect.poll(()=>page.evaluate(()=>scrollY)).toBeGreaterThan(y);
+ await modelChapter(page,dot);sourceDraw(await facts(page),dot.model,viewport);closed(await facts(page));
 });
 
 test('an actual HTTP source failure settles once, preserves native sources, and never upgrades after the server recovers',async({page})=>{
@@ -462,32 +350,27 @@ test('an actual HTTP source failure settles once, preserves native sources, and 
   const failed=await facts(page);closed(failed);expect(failed.reason).toBe('Project model unavailable');expect(failed.resource).toBeNull();expect(failed.arrivalStatic).toBe(true);expect(requests).toBe(1);
   expect(await page.evaluate(()=>window.__site.inspect().readiness.previews)).toEqual([{mode:'static',reason:'Project model unavailable'}]);
   await expect(page.locator('canvas')).toHaveCount(1);deny=false;
-  for(const section of dot.sections){await page.locator(`[data-project-chapter-link="${section.id}"]`).click();await settled(page,section.id,dot.model);for(const image of section.media)await decodeSource(page.locator(`[data-project-chapter="${section.id}"]`),image);}
+  for(const section of dot.sections){await page.locator(`[data-project-chapter-link="${section.id}"]`.replace('data-project-chapter-link','data-project-chapter')).evaluate(node=>node.scrollIntoView({block:'start',behavior:'instant'}));await settled(page,section.id,dot.model);for(const image of section.media)await decodeSource(page.locator(`[data-project-chapter="${section.id}"]`),image);}
   await page.emulateMedia({reducedMotion:'reduce'});await page.emulateMedia({reducedMotion:'no-preference'});await frames(page,8);
   await expect(stage(page)).toHaveAttribute('data-project-model-rendering','poster');await expect(page.locator('canvas')).toHaveCount(1);expect(requests).toBe(1);expect((await facts(page)).history).toEqual(failed.history);closed(await facts(page));
  }finally{await page.goto('about:blank');server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
 });
 
-test('Reduced Motion during a real pending source request latches its static arrival before the delayed response is released',async({page})=>{
- let release,held=false,continued;const gate=new Promise(resolve=>{release=resolve;}),delivery=new Promise(resolve=>{continued=resolve;});
- await page.route('**'+dot.model.src,async request=>{held=true;await gate;try{await request.continue();}finally{continued();}});
+test('OS motion changes during a real pending source request do not cancel its model preparation',async({page})=>{
+ let release,held=false;const gate=new Promise(resolve=>{release=resolve;});
+ await page.route('**'+dot.model.src,async request=>{held=true;await gate;await request.continue();});
  try{
   await page.goto(route(dot),{waitUntil:'domcontentloaded'});await expect.poll(()=>held,{timeout:WAIT}).toBe(true);await expect(page.locator('[data-site-loader]')).toBeVisible();
-  await page.emulateMedia({reducedMotion:'reduce'});await entered(page);
-  const reduced=await facts(page);closed(reduced);expect(reduced.arrivalStatic).toBe(true);expect(reduced.staticReason).toBe('reduced-motion');expect(reduced.resource).toBeNull();expect(reduced.pending).toBe(false);
-  release();await delivery;await page.emulateMedia({reducedMotion:'no-preference'});
-  await page.locator(`[data-project-chapter-link="${dot.model.chapters[0]}"]`).click();await settled(page,dot.model.chapters[0],dot.model);await frames(page,8);
-  await expect(page.locator('canvas')).toHaveCount(1);await expect(stage(page)).toHaveAttribute('data-project-model-rendering','poster');
-  expect((await facts(page)).history).toEqual(reduced.history);expect((await facts(page)).acquisitions).toBe(reduced.acquisitions);expect((await facts(page)).resource).toBeNull();closed(await facts(page));
- }finally{release();}
+  await page.emulateMedia({reducedMotion:'reduce'});const pending=await facts(page);expect(pending.arrivalStatic).toBe(false);expect(pending.pending).toBe(true);expect(pending.acquisitions).toBe(1);
+  release();await entered(page);await modelChapter(page,dot);sourceDraw(await facts(page),dot.model,page.viewportSize());closed(await facts(page));
+ }finally{release();await page.unrouteAll({behavior:'wait'});}
 });
 
-test('an initially reduced documentary page makes no source request and keeps the same static arrival after preference changes',async({page})=>{
- const models=[];page.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)/.test(request.url()))models.push(request.url());});
- await page.emulateMedia({reducedMotion:'reduce'});await page.goto(route(dot));await entered(page);
- const reduced=await facts(page);expect(reduced.acquisitions).toBe(0);expect(reduced.arrivalStatic).toBe(true);expect(reduced.staticReason).toBe('reduced-motion');expect(reduced.resource).toBeNull();closed(reduced);
- await page.emulateMedia({reducedMotion:'no-preference'});await page.locator(`[data-project-chapter-link="${dot.model.chapters[0]}"]`).click();await settled(page,dot.model.chapters[0],dot.model);await frames(page,8);
- await expect(page.locator('canvas')).toHaveCount(1);expect(models).toEqual([]);expect((await facts(page)).acquisitions).toBe(0);await expect(stage(page)).toHaveAttribute('data-project-model-rendering','poster');
+test('an initially reduced documentary page still prepares and retains its authored scroll source',async({page})=>{
+ const requests=[];page.on('request',request=>{if(request.url().endsWith(dot.model.src))requests.push(request.url());});
+ await page.emulateMedia({reducedMotion:'reduce'});await page.goto(route(dot));await entered(page);await modelChapter(page,dot);
+ const before=await facts(page);sourceDraw(before,dot.model,page.viewportSize());expect(before.arrivalStatic).toBe(false);expect(requests).toHaveLength(1);
+ await page.emulateMedia({reducedMotion:'no-preference'});await frames(page,8);const after=await facts(page);expect(after.acquisitions).toBe(before.acquisitions);expect(after.disposals).toBe(0);expect(after.resource.sourceRevision).toBe(dot.model.sha256);closed(after);
 });
 
 test('native WebGL context loss releases the painted source exactly once and retains truthful documentary reading',async({page})=>{

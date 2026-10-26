@@ -22,7 +22,6 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
   const dom=new DOMPresenter(),publisher=dom.forOwner('global-background');
   const binding=runtime.acquire({owner:'site',canvas,backdrop,publisher});
   const playback=createChapterPlayback('overview');
-  const reduced=win.matchMedia('(prefers-reduced-motion: reduce)');
   const fine=win.matchMedia('(hover: hover) and (pointer: fine)');
   const studyRoot=doc.querySelector?.('[data-project-study]')??null;
   const editorialStudy=studyRoot?.getAttribute('data-study-presentation')==='editorial-scenes';
@@ -47,9 +46,9 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
   scheduler.suspend('visibility',doc.hidden);
   const listen=(target,type,handler,options)=>events.listen(scope,target,type,handler,options);
   const ready=()=>['entered','failed'].includes(doc.documentElement.getAttribute('data-site-entry-state'));
-  const motionAllowed=()=>!scheduler.suspended&&ready()&&!reduced.matches&&!studyPaused();
-  const homePolicy=()=>({ready:ready(),reduced:reduced.matches||studyPaused(),suspended:scheduler.suspended,saveData:!!connection?.saveData,forcedColors:!!forced?.matches});
-  const projectPolicy=()=>({hidden:doc.hidden||scheduler.suspended,reduced:reduced.matches,saveData:!!connection?.saveData,paused:studyPaused(),siteReady:doc.documentElement.getAttribute('data-site-entry-state')==='entered'});
+  const motionAllowed=()=>!scheduler.suspended&&ready()&&!false&&!studyPaused();
+  const homePolicy=()=>({ready:ready(),reduced:studyPaused(),suspended:scheduler.suspended,saveData:false,forcedColors:false});
+  const projectPolicy=()=>({hidden:doc.hidden||scheduler.suspended,reduced:false,saveData:false,paused:studyPaused(),siteReady:doc.documentElement.getAttribute('data-site-entry-state')==='entered'});
   if(studyRoot&&!editorialStudy)projectBackdrop=createProjectStudyBackdropPresenter({root:studyRoot,window:win,document:doc,publisher:dom.forOwner('project-study-backdrop'),schedule:()=>scheduler.schedule(),policy:projectPolicy});
   // Documentary scenes keep their actual images in native chapter flow. They
   // never acquire a second fixed copy or the background transition transport.
@@ -77,15 +76,15 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
     const reading=projectChapters?.publish({docY:win.scrollY,viewportHeight:win.innerHeight});
     if(glassDirty){liquid.measure({opaque:opaqueGlass()});glassDirty=false;}
     const impulse=pendingImpulse;pendingImpulse=0;
-    advanceChapterPlayback(playback,dt,{chapter:'overview',impulse,reducedMotion:reduced.matches,resumed,paused:!ready()||studyPaused()});
+    advanceChapterPlayback(playback,dt,{chapter:'overview',impulse,reducedMotion:false,resumed,paused:!ready()||studyPaused()});
     resumed=false;
     const score=sampleChapterPlayback(playback);
     const uv=[pointer.x/win.innerWidth,1-pointer.y/win.innerHeight];
-    latest=sampleChapterScene(score,{reducedMotion:reduced.matches,aspect:size.width/size.height,pointer:{uv,active:fine.matches&&pointer.active&&!reduced.matches&&uv.every(value=>value>=0&&value<=1),strength:.35}});
-    binding.present(latest,{frameTimeMs:now,paused:!ready()||studyPaused(),hidden:doc.hidden,systemReduced:reduced.matches},size.width,size.height);
+    latest=sampleChapterScene(score,{reducedMotion:false,aspect:size.width/size.height,pointer:{uv,active:fine.matches&&pointer.active&&uv.every(value=>value>=0&&value<=1),strength:.35}});
+    binding.present(latest,{frameTimeMs:now,paused:!ready()||studyPaused(),hidden:doc.hidden,systemReduced:false},size.width,size.height);
     homeResearch?.publish({...homePolicy(),docY:win.scrollY});
     const moving=home?.publish({...homePolicy(),dt,docY:win.scrollY,resumed:wasResumed,seek:wasResumed})??false;
-    const glassMoving=liquid?.publish({dt,reduced:reduced.matches||studyPaused()||!ready(),resumed:wasResumed,hidden:doc.hidden,opaque:opaqueGlass(),keyboardFocus})??false;
+    const glassMoving=liquid?.publish({dt,reduced:studyPaused()||!ready(),resumed:wasResumed,hidden:doc.hidden,opaque:opaqueGlass(),keyboardFocus})??false;
     const sceneMoving=projectBackdrop?.publish({dt,resumed:wasResumed,reading,activeSeconds:score.activeSeconds})??false;
     if(moving||glassMoving||sceneMoving||score.needsFrame&&binding.inspect().ready&&!binding.inspect().failed)scheduler.schedule();
     else previous=0;
@@ -119,15 +118,14 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
   for(const type of ['touchend','touchcancel'])listen(win,type,()=>{touchY=null;},{passive:true});
   listen(win,'pointermove',event=>{
     if(!motionAllowed()||!['mouse','pen'].includes(event.pointerType))return;
-    pointer={x:event.clientX,y:event.clientY,active:fine.matches&&!reduced.matches};scheduler.schedule();
+    pointer={x:event.clientX,y:event.clientY,active:fine.matches};scheduler.schedule();
   },{passive:true});
   listen(doc.documentElement,'pointerleave',reset);listen(win,'blur',reset);listen(fine,'change',reset);
-  listen(reduced,'change',()=>{reset();previous=0;resumed=true;scheduler.schedule();});
   listen(win,'resize',()=>{if(measure())scheduler.schedule();homeInvalidate();},{passive:true});
   if(home){
     // Native scrolling, including keyboard and anchor movement, invalidates the
     // same demand scheduler. Home never starts a second frame clock.
-    listen(win,'scroll',()=>{if(projectChapters||ready()&&!scheduler.suspended&&!reduced.matches&&!connection?.saveData&&!forced?.matches)scheduler.schedule();},{passive:true});
+    listen(win,'scroll',()=>{if(projectChapters||ready()&&!scheduler.suspended)scheduler.schedule();},{passive:true});
     if(projectChapters)listen(win,'hashchange',()=>scheduler.schedule(),{passive:true});
     listen(homeRoot,'load',homeInvalidate,{capture:true});
     listen(homeRoot,'focusin',()=>{if(!scheduler.suspended)scheduler.schedule();});

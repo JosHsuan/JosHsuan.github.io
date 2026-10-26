@@ -30,9 +30,8 @@ export default function ProjectModelPreview({poster,className=''}){
    return preview.acquireProjectModelScene({host:node,signal,onFailure:reason=>lifecycle.fail(reason)});
   }});
   if(arrivalStatic)lifecycle.stop(staticReason);
-  const eligibility=observePreviewEligibility({element:node,window,document,mode:'page',onChange:({active,reason,reduced,saveData})=>{
+  const eligibility=observePreviewEligibility({element:node,window,document,mode:'page',onChange:({active,reason})=>{
    if(arrivalStatic)return;
-   if(reduced||saveData){lifecycle.stop(reason);staticReady(reason);return;}
    // A page opened/hidden before preparation settles on its decoded SSR
    // poster for this arrival; returning cannot introduce a late 2D-to-3D pop.
    if(!active&&lifecycle.inspect().phase!=='ready'){settleStatic(reason);return;}

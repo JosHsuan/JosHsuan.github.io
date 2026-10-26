@@ -71,3 +71,5 @@
 @media print{.nativeSurface{color:#111;padding:1rem 0}.nativeOpeningRow,.nativeSceneRow{display:block}.nativeSurface .rail{width:100%}}
 /* Dot's two original Results photographs are 1024px wide; retain their source-scale ceiling. */
 :global([data-project-study="dot-based-3d-printing"]) .nativeSurface[data-project-native-source="results"] .scene{max-width:1024px}
+
+.scrollCue{color:var(--muted);font-size:var(--type-size-caption)!important;line-height:var(--type-leading-caption)!important;margin-top:1.5rem!important}

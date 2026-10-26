@@ -1,11 +1,11 @@
 import {test,expect} from '@playwright/test';
 import {readFile,writeFile} from 'node:fs/promises';
-import {WAIT} from './case-helpers.mjs';
+import {WAIT,scenarioTimeout} from './case-helpers.mjs';
 
 const root='../../roles/uiux-designer/cases/bending-active-thesis/release/';
 const projects=JSON.parse(await readFile(new URL(root+'project-studies.json',import.meta.url),'utf8')).projects;
 const xr=JSON.parse(await readFile(new URL(root+'xr-study.json',import.meta.url),'utf8'));
-// Explicit foreground scope, independent of production evidence deduplication.
+// Explicit foreground inventory, independent of production evidence deduplication.
 const names={
  'mode-s-of-making':['film-design-workflow','film-rotary-system','film-corexy-system'],
  'entrance-installation-art':['pattern-variations','workshop-assembly','built-installation'],
@@ -16,141 +16,102 @@ const names={
 };
 const routes=Object.entries(names).map(([id,files])=>{
  const project=projects.find(item=>item.id===id);
- return{id,path:`/projects/${project.slug}/`,sources:files.map(name=>project.sections.flatMap(section=>section.media).find(image=>image.src===`/assets/projects/${id}/${name}.webp`))};
+ return{id,study:project,path:`/projects/${project.slug}/`,chapters:['overview',...project.sections.map(section=>section.id),'credits'],sources:files.map(name=>project.sections.flatMap(section=>section.media).find(image=>image.src===`/assets/projects/${id}/${name}.webp`))};
 });
-routes.push({id:'xr',path:'/projects/xr-bending-active/',sources:['adaptiveMethod','physicalCapture','measurement','communication','dataCategories','physicalAssembly','assembly','physicalResult'].map(key=>xr.media[key])});
-const selector='a[data-evidence-source-link]';
-
-async function save(info,name,value){
- const path=info.outputPath(name+'.json');await writeFile(path,JSON.stringify(value,null,2));await info.attach(name,{path,contentType:'application/json'});
-}
-async function open(page,route,{noJS=false}={}){
+routes.push({id:'xr',study:xr,path:'/projects/xr-bending-active/',chapters:['overview','context','method','adapt','assemble','join','making','credits'],sources:['adaptiveMethod','physicalCapture','measurement','communication','dataCategories','physicalAssembly','assembly','physicalResult'].map(key=>xr.media[key])});
+const removed='a[data-evidence-source-link],a[href^="/assets/"],a[href^="#"],button,input,select,details,summary,[role="radio"],[data-study-motion-toggle],[data-project-model-engage],[data-project-model-return]';
+async function save(info,name,value){const path=info.outputPath(name+'.json');await writeFile(path,JSON.stringify(value,null,2));await info.attach(name,{path,contentType:'application/json'});}
+async function open(page,route,noJS=false){
  expect((await page.goto(route.path)).status()).toBe(200);
  if(!noJS)await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});
  await page.evaluate(()=>document.fonts.ready);
 }
-function visibility(node){
- const rect=element=>{const r=element.getBoundingClientRect();return{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height};};
- const box=rect(node),chrome=[...document.querySelectorAll('[data-portfolio-masthead],[data-portfolio-navigation],[data-project-chapter-navigation],[data-study-motion-toggle],[data-xr-chapter-navigation],[data-xr-reading-tools]')].filter(element=>element.checkVisibility({visibilityProperty:true,opacityProperty:true})).map(rect);
- const x=(box.left+box.right)/2,y=(box.top+box.bottom)/2,hit=document.elementFromPoint(x,y);
- return{box,viewport:{width:innerWidth,height:innerHeight},chrome,hit:!!hit&&(hit===node||node.contains(hit)),y:scrollY,focused:document.activeElement===node,focusVisible:node.matches(':focus-visible')};
+// Real wheel input, never scrollIntoView, focus injection, section-link activation
+// or app diagnostics that could supply a reading command.
+async function wheelTo(page,node){
+ const target=await node.evaluate(n=>Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,n.getBoundingClientRect().top+scrollY-innerHeight*.35)));
+ const before=await page.evaluate(()=>scrollY);await page.mouse.move(page.viewportSize().width-3,page.viewportSize().height*.5);await page.mouse.wheel(0,target-before);
+ await expect.poll(()=>page.evaluate(y=>Math.abs(scrollY-y),target),{timeout:WAIT}).toBeLessThanOrEqual(1);
+ return{before,target,after:await page.evaluate(()=>scrollY)};
 }
-function readable(value){
- const {box,viewport}=value;
- expect(box.width).toBeGreaterThanOrEqual(44);expect(box.height).toBeGreaterThanOrEqual(44);
- expect(box.left).toBeGreaterThanOrEqual(0);expect(box.right).toBeLessThanOrEqual(viewport.width);
- expect(box.top).toBeGreaterThanOrEqual(0);expect(box.bottom).toBeLessThanOrEqual(viewport.height);
- for(const chrome of value.chrome)expect(Math.min(box.right,chrome.right)>Math.max(box.left,chrome.left)&&Math.min(box.bottom,chrome.bottom)>Math.max(box.top,chrome.top),'Source action must not intersect visible fixed chrome').toBe(false);
- expect(value.hit,'Native source action is not occluded').toBe(true);
+function sourceFacts(image){
+ const figure=image.closest('figure'),box=image.getBoundingClientRect(),css=getComputedStyle(image);
+ return{src:image.getAttribute('src'),width:Number(image.getAttribute('width')),height:Number(image.getAttribute('height')),alt:image.alt,natural:[image.naturalWidth,image.naturalHeight],linked:!!image.closest('a,button'),caption:figure?.querySelector('figcaption > p')?.textContent,credit:figure?.querySelector('figcaption > span:not([data-information-skin])')?.textContent,fit:css.objectFit,box:{left:box.left,right:box.right,width:box.width,height:box.height},viewport:{width:innerWidth,height:innerHeight}};
 }
-async function wheelTo(page,link,receipt){
- const target=await link.evaluate(node=>Math.round(Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,scrollY+node.getBoundingClientRect().top-innerHeight*.45))));
- const before=await page.evaluate(()=>scrollY);
- await page.mouse.move(page.viewportSize().width-3,page.viewportSize().height*.5);await page.mouse.wheel(0,target-before);
- Object.assign(receipt,{target,before,after:before});
- // Host-side observation also works with application JavaScript disabled;
- // the page's requestAnimationFrame polling is not a no-JS readiness signal.
- await expect.poll(async()=>{receipt.after=await page.evaluate(()=>scrollY);return Math.abs(receipt.after-target);},{timeout:WAIT}).toBeLessThanOrEqual(1);
-}
-function forcedContrast(node){
- const rgba=value=>{const a=value.match(/^rgba?\(([^)]+)\)$/)?.[1].split(/[,\s/]+/).filter(Boolean).map(Number);if(!a||a.length<3||a.some(n=>!Number.isFinite(n)))throw Error('Unsupported paint '+value);return[...a.slice(0,3),a[3]??1];};
- const css=getComputedStyle(node),foreground=rgba(css.color);let background,owner;
- for(let element=node;element;element=element.parentElement){
-  const style=getComputedStyle(element);if(Number(style.opacity)!==1)throw Error('Unsupported group opacity');
-  if(background)continue;
-  const skin=element.querySelector(':scope > [data-information-skin]'),skinCSS=skin&&getComputedStyle(skin),paint=skin&&getComputedStyle(skin,'::before');
-  const visible=skin&&skinCSS.display!=='none'&&skinCSS.visibility==='visible'&&Number(skinCSS.opacity)>0&&paint.content!=='none'&&paint.display!=='none'&&paint.visibility==='visible'&&Number(paint.opacity)>0;
-  const skinColor=visible?rgba(paint.backgroundColor):null;
-  const useSkin=skinColor&&skinColor[3]>0,color=useSkin?skinColor:rgba(style.backgroundColor);
-  if(color[3]>0){if(color[3]!==1||(useSkin&&(Number(skinCSS.opacity)!==1||Number(paint.opacity)!==1)))throw Error('Unsupported translucent paint');background=color;owner=element.tagName+(useSkin?' skin::before':'');}
- }
- if(!background||foreground[3]!==1)throw Error('Opaque native source link paint required');
- const lum=rgb=>rgb.slice(0,3).map(v=>v/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4).reduce((sum,v,i)=>sum+v*[.2126,.7152,.0722][i],0);
- const a=lum(foreground),b=lum(background);return{foreground,background,owner,ratio:(Math.max(a,b)+.05)/(Math.min(a,b)+.05)};
-}
-async function layout(page,info,noJS){
- const receipts=[];let primaryError;
+async function audit(page,info,noJS){
+ test.setTimeout(scenarioTimeout(180000));const receipt=[];let primary;
  try{
+  // A browser preference is not an alternate static reading product: it must
+  // expose the same complete documents, without introducing a Pause switch.
   await page.emulateMedia({reducedMotion:'reduce'});
   for(const route of routes){
-   await open(page,route,{noJS});
-   const links=page.locator(selector);await expect(links).toHaveCount(route.sources.length);
-   const records=await links.evaluateAll(nodes=>nodes.map(node=>{
-    const figure=node.closest('figure'),caption=node.parentElement,image=figure.querySelector('img'),anchor=image.closest('a'),box=node.getBoundingClientRect(),css=getComputedStyle(node);
-    return{href:node.getAttribute('href'),target:node.target,rel:node.rel,text:node.textContent,aria:node.getAttribute('aria-label'),width:box.width,height:box.height,display:css.display,visibility:css.visibility,
-     caption:caption.querySelector(':scope > p')?.textContent,credit:caption.querySelector(':scope > span:not([data-information-skin])')?.textContent,
-     image:{src:image.getAttribute('src'),width:Number(image.getAttribute('width')),height:Number(image.getAttribute('height')),alt:image.alt,href:anchor.getAttribute('href'),target:anchor.target},count:figure.querySelectorAll('[data-evidence-source-link]').length};
-   }));
-   receipts.push({id:route.id,noJS,records});
-   for(const [index,record] of records.entries()){
-    const source=route.sources[index];expect(source).toBeTruthy();
-    expect(record).toMatchObject({href:source.src,target:'_blank',rel:'noopener noreferrer',text:'Open full image (new tab)',aria:`Open full image (new tab): ${source.alt}`,caption:source.caption,credit:source.credit,count:1,image:{src:source.src,width:source.width,height:source.height,alt:source.alt,href:source.src,target:'_blank'}});
-    expect(record.width).toBeGreaterThanOrEqual(44);expect(record.height).toBeGreaterThanOrEqual(44);expect(record.display).not.toBe('none');expect(record.visibility).toBe('visible');
+   await open(page,route,noJS);await expect(page.locator('main').locator(removed)).toHaveCount(0);
+   await expect(page.locator('[data-project-chapter-navigation],[data-xr-chapter-navigation]').locator('a,button,input,[tabindex]')).toHaveCount(0);
+   const row={id:route.id,noJS,sources:[],chapters:[],prose:[]};receipt.push(row);
+   for(const source of route.sources){
+    expect(source).toBeTruthy();const image=page.locator(`img[src="${source.src}"]`).first();await expect(image).toHaveCount(1);
+    const wheel=await wheelTo(page,image);await expect(image).toBeInViewport();
+    await expect.poll(()=>image.evaluate(n=>n.complete&&n.naturalWidth>0),{timeout:WAIT}).toBe(true);
+    const facts=await image.evaluate(sourceFacts);row.sources.push({wheel,...facts});
+    expect(facts).toMatchObject({src:source.src,width:source.width,height:source.height,alt:source.alt,natural:[source.width,source.height],linked:false,caption:source.caption,credit:source.credit});
+    // Native dimensions plus contain-fit preserve the complete raster even
+    // when a viewport-height ceiling letterboxes its CSS element box.
+    expect(facts.fit).toBe('contain');
+    expect(facts.box.left).toBeGreaterThanOrEqual(0);expect(facts.box.right).toBeLessThanOrEqual(facts.viewport.width);
+    const caption=image.locator('xpath=ancestor::figure[1]').locator('figcaption');await wheelTo(page,caption);await expect(caption).toBeInViewport();await expect(caption).toBeVisible();
    }
-   const link=links.first();receipts.at(-1).wheel={};await wheelTo(page,link,receipts.at(-1).wheel);const visible=await link.evaluate(visibility);receipts.at(-1).visible=visible;readable(visible);
-   const image=link.locator('xpath=ancestor::figure[1]').locator('img');await expect.poll(()=>image.evaluate(node=>node.complete&&node.naturalWidth>0)).toBe(true);
-   expect(await image.evaluate(node=>[node.naturalWidth,node.naturalHeight])).toEqual([route.sources[0].width,route.sources[0].height]);
-   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth)).toBe(true);
-   const png=info.outputPath(`source-access-${route.id}-${noJS?'no-js':'reduced'}.png`);await page.screenshot({path:png});await info.attach(route.id,{path:png,contentType:'image/png'});
-   await page.emulateMedia({forcedColors:'active'});expect(await page.evaluate(()=>matchMedia('(forced-colors: active)').matches)).toBe(true);const contrast=await link.evaluate(forcedContrast);receipts.at(-1).forcedContrast=contrast;expect(contrast.ratio).toBeGreaterThanOrEqual(4.5);
-   await page.emulateMedia({forcedColors:'none'});
+   for(const id of route.chapters){
+    const chapter=page.locator(`[data-${route.id==='xr'?'xr':'project'}-chapter="${id}"]`);await expect(chapter).toHaveCount(1);
+    const heading=chapter.locator('h1,h2').first();const wheel=await wheelTo(page,heading);await expect(heading).toBeInViewport();await expect(heading).toBeVisible();row.chapters.push({id,wheel,text:await heading.textContent()});
+   }
+   const prose=route.id==='xr'
+    ?[xr.introduction,...['context','method','prototype','making'].flatMap(id=>xr.sections[id].paragraphs),...xr.workflow.map(step=>step.description),...xr.phoneStages.flatMap(stage=>[stage.description,stage.caption,stage.credit]),...xr.credits.map(credit=>credit.names),xr.sourceNote]
+    :[route.study.summary,...route.study.sections.flatMap(section=>section.paragraphs),...route.study.credits.map(credit=>credit.names),route.study.sourceNote];
+   for(const text of new Set(prose)){
+    const paragraph=page.locator('main').getByText(text,{exact:true}).first();await expect(paragraph).toHaveCount(1);
+    const wheel=await wheelTo(page,paragraph);await expect(paragraph).toBeVisible();await expect(paragraph).toBeInViewport();
+    expect(await paragraph.evaluate(n=>!n.closest('[hidden],[inert],details:not([open])'))).toBe(true);row.prose.push({text,wheel});
+   }
+   expect(new URL(page.url()).hash).toBe('');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth)).toBe(true);
+   await page.screenshot({path:info.outputPath(`scroll-source-${route.id}-${noJS?'no-js':'preference'}.png`)});
   }
- }catch(error){primaryError=error;throw error;}
- finally{try{await save(info,'source-access-layout',receipts);}catch(error){if(!primaryError)throw error;}}
+ }catch(error){primary=error;throw error;}finally{try{await save(info,'scroll-source-reading',receipt);}catch(error){if(!primary)throw error;}}
 }
-test('all seven evidence routes retain visible native source actions in reduced layout',async({page},info)=>layout(page,info,false));
-test.describe('native source access without application JavaScript',()=>{
+test('all 31 original evidence sources, provenance and every chapter are readable using only scrolling',async({page},info)=>audit(page,info,false));
+test.describe('native documentary reading without application JavaScript',()=>{
  test.use({javaScriptEnabled:false});
- test('all seven routes retain complete captions and source actions without JavaScript',async({page},info)=>layout(page,info,true));
+ test('all seven evidence routes remain complete and scroll-readable without JavaScript',async({page},info)=>audit(page,info,true));
 });
 
-async function state(page,link){return{url:page.url(),...await link.evaluate(node=>({y:scrollY,focused:document.activeElement===node,chapter:node.closest('[data-project-chapter],[data-xr-chapter]')?.getAttribute('data-project-chapter')??node.closest('[data-xr-chapter]')?.getAttribute('data-xr-chapter'),semantic:document.querySelector('[data-project-active-chapter]')?.getAttribute('data-project-active-chapter')??document.querySelector('[data-xr-active-chapter]')?.getAttribute('data-xr-active-chapter')??null}))};}
-async function readingCurrent(page){
- // Match the existing native chapter owners, not the link's containing section:
- // a focused action can sit below the viewport's reading probe.
- await page.waitForFunction(()=>{
-  const xr=document.querySelector('[data-xr-study]'),nodes=[...document.querySelectorAll(xr?'[data-xr-chapter]':'[data-project-chapter]')];
-  const line=scrollY+innerHeight*(xr ? .42 : .5);
-  const top=node=>{if(!xr)return node.getBoundingClientRect().top+scrollY;let y=0;for(let el=node;el;el=el.offsetParent)y+=el.offsetTop;return y;};
-  let current=nodes[0];for(const node of nodes)if(top(node)<=line)current=node;
-  const expected=current?.getAttribute(xr?'data-xr-chapter':'data-project-chapter');
-  return !!expected&&document.querySelector(xr?'[data-xr-active-chapter]':'[data-project-active-chapter]')?.getAttribute(xr?'data-xr-active-chapter':'data-project-active-chapter')===expected;
- },null,{timeout:WAIT});
-}
-async function sourcePopup(page,link,source,activate){
- await readingCurrent(page);
- const before=await state(page,link);expect(before.focused).toBe(true);expect(before.semantic).not.toBeNull();
- let popup,primaryError;
+test('native reading keys scroll the document rather than entering model or chapter modes',async({page},info)=>{
+ const receipt=[];let primary;
  try{
-  [popup]=await Promise.all([page.waitForEvent('popup'),activate()]);
-  await popup.waitForLoadState('domcontentloaded');expect(new URL(popup.url()).pathname).toBe(source.src);
-  const image=popup.locator('img');await expect(image).toHaveCount(1);await expect.poll(()=>image.evaluate(node=>node.complete&&node.naturalWidth>0)).toBe(true);
-  expect(await image.evaluate(node=>[node.naturalWidth,node.naturalHeight])).toEqual([source.width,source.height]);
- }catch(error){primaryError=error;throw error;}
- finally{
-  try{if(popup)await popup.close();await page.bringToFront();}catch(error){if(!primaryError)throw error;}
- }
- expect(await state(page,link)).toEqual(before);return before;
-}
-test('native keyboard and touch open original evidence and return to the unchanged reading position',async({page,isMobile},info)=>{
- const receipts=[];let primaryError;
- try{
-  for(const route of [routes.find(item=>item.id==='dot-based-3d-printing'),routes.find(item=>item.id==='xr')]){
-   await open(page,route);const link=page.locator(selector).first();
-   // Traverse real document tab order, with a bound derived from this page's
-   // native focusable elements; never inject focus or scroll into place.
-   const bound=await page.locator('a[href],button,input,select,textarea,[tabindex]').count();let reached=false;
-   for(let index=0;index<bound+2;index++){
-    await page.keyboard.press('Tab');if(await link.evaluate(node=>document.activeElement===node)){reached=true;break;}
+  for(const route of [routes.find(item=>item.id==='dot-based-3d-printing'),routes.find(item=>item.id==='entrance-installation-art')]){
+   await open(page,route);await expect(page.locator('main').locator(removed)).toHaveCount(0);
+   const row={id:route.id,keys:[]};receipt.push(row);
+   for(const key of ['PageDown','ArrowDown','Space']){
+    const before=await page.evaluate(()=>scrollY);await page.keyboard.press(key);await expect.poll(()=>page.evaluate(()=>scrollY),{timeout:WAIT}).toBeGreaterThan(before);row.keys.push({key,before,after:await page.evaluate(()=>scrollY)});
    }
-   expect(reached,'Native Tab must reach the source action').toBe(true);
-   const visible=await link.evaluate(visibility);receipts.push({id:route.id,keyboard:visible});readable(visible);expect(visible.focusVisible).toBe(true);
-   receipts.at(-1).keyboardReturn=await sourcePopup(page,link,route.sources[0],()=>page.keyboard.press('Enter'));
-   if(isMobile){
-    const touch=await link.evaluate(visibility);readable(touch);
-    receipts.at(-1).touchReturn=await sourcePopup(page,link,route.sources[0],()=>page.touchscreen.tap((touch.box.left+touch.box.right)/2,(touch.box.top+touch.box.bottom)/2));
-   }
+   await page.keyboard.press('End');await expect(page.locator('[data-project-chapter="credits"]')).toBeInViewport();row.end=await page.evaluate(()=>scrollY);
+   await page.keyboard.press('Home');await expect.poll(()=>page.evaluate(()=>scrollY),{timeout:WAIT}).toBe(0);expect(new URL(page.url()).hash).toBe('');
+   expect(await page.evaluate(()=>document.querySelector('main').inert)).toBe(false);
   }
- }catch(error){primaryError=error;throw error;}
- finally{try{await save(info,'source-access-return',receipts);}catch(error){if(!primaryError)throw error;}}
+ }catch(error){primary=error;throw error;}finally{try{await save(info,'native-reading-keys',receipt);}catch(error){if(!primary)throw error;}}
+});
+
+test('a genuinely failed opening image keeps truthful status and complete scrolling content',async({page},info)=>{
+ const project=projects.find(item=>item.id==='entrance-installation-art'),image=project.hero,receipt={source:image.src};let primary;
+ try{
+  await page.route('**'+image.src,route=>route.abort());expect((await page.goto(`/projects/${project.slug}/`)).status()).toBe(200);
+  await page.waitForFunction(()=>['entered','failed'].includes(window.__site?.inspect().phase),null,{timeout:WAIT});await expect(page.locator('[data-site-loader]')).toBeHidden();
+  const figure=page.locator(`[data-project-native-source="overview"] [data-editorial-source="${image.src}"]`);await expect(figure).toHaveAttribute('data-editorial-image-state','failed');
+  const status=figure.locator('[role="status"]');await wheelTo(page,status);await expect(status).toBeVisible();await expect(status).toContainText('Image unavailable');
+  expect(await figure.locator('img').evaluate(n=>n.complete&&n.naturalWidth===0)).toBe(true);
+  await expect(figure.locator('figcaption > p')).toHaveText(image.caption);await expect(figure.locator('figcaption > span:not([data-information-skin])')).toHaveText(image.credit);
+  await expect(page.locator('main').locator(removed)).toHaveCount(0);
+  for(const id of [...project.sections.map(section=>section.id),'credits']){const chapter=page.locator(`[data-project-chapter="${id}"]`);await wheelTo(page,chapter.locator('h2').first());await expect(chapter.locator('h2').first()).toBeInViewport();}
+  receipt.entry=await page.evaluate(()=>window.__site.inspect());receipt.image=await figure.locator('img').evaluate(sourceFacts);receipt.y=await page.evaluate(()=>scrollY);
+  expect(receipt.entry.history.filter(row=>row.id===receipt.entry.id&&['entered','failed','cancelled'].includes(row.phase))).toHaveLength(1);
+  expect(await page.locator('main').evaluate(n=>n.inert)).toBe(false);expect(new URL(page.url()).hash).toBe('');
+ }catch(error){primary=error;throw error;}finally{try{await save(info,'scroll-source-real-failure',receipt);}catch(error){if(!primary)throw error;}}
 });

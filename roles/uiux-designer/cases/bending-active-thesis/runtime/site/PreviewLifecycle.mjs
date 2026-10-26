@@ -88,19 +88,18 @@ export function createPreviewLifecycle({start,onState=()=>{},deadline=15000,setT
 export function observePreviewEligibility({element,window:win,document:doc,onChange,onSize,mode='visible'}={}){
  if(!['visible','page'].includes(mode))throw TypeError('Unknown preview eligibility mode');
  const events=new EventManager(),scope=events.createScope('preview-eligibility');
- const reduced=win.matchMedia?.('(prefers-reduced-motion: reduce)'),connection=win.navigator?.connection;
+ const connection=win.navigator?.connection;
  let visible=false,pageAway=false,disposed=false,last='';
  const inspect=()=>{
-  const hidden=!!doc.hidden,reduce=!!reduced?.matches,saveData=!!connection?.saveData,siteReady=doc.documentElement.getAttribute('data-site-entry-state')==='entered';
-  const active=!hidden&&!pageAway&&!reduce&&!saveData&&(mode==='page'||visible&&siteReady);
-  const reason=pageAway?'page-exit':hidden?'hidden':reduce?'reduced-motion':saveData?'save-data':mode==='page'?'page-ready':!siteReady?'entry-pending':!visible?'offscreen':'visible';
+  const hidden=!!doc.hidden,reduce=false,saveData=!!connection?.saveData,siteReady=doc.documentElement.getAttribute('data-site-entry-state')==='entered';
+  const active=!hidden&&!pageAway&&(mode==='page'||visible&&siteReady);
+  const reason=pageAway?'page-exit':hidden?'hidden':mode==='page'?'page-ready':!siteReady?'entry-pending':!visible?'offscreen':'visible';
   return{active,reason,visible,hidden,pageAway,reduced:reduce,saveData,siteReady,mode};
  };
  const publish=()=>{if(disposed)return;const state=inspect(),key=JSON.stringify(state);if(key!==last){last=key;onChange(state);}};
  events.listen(scope,doc,'visibilitychange',publish);
  events.listen(scope,win,'pagehide',()=>{pageAway=true;publish();});
  events.listen(scope,win,'pageshow',()=>{pageAway=false;publish();});
- if(reduced)events.listen(scope,reduced,'change',publish);
  if(connection?.addEventListener)events.listen(scope,connection,'change',publish);
  if(win.IntersectionObserver){const observer=new win.IntersectionObserver(entries=>{for(const entry of entries)if(entry.target===element)visible=entry.isIntersecting&&entry.intersectionRatio>0;publish();},{threshold:[0,.01]});observer.observe(element);scope.add(()=>observer.disconnect());}
  if(win.MutationObserver){const observer=new win.MutationObserver(publish);observer.observe(doc.documentElement,{attributes:true,attributeFilter:['data-site-entry-state']});scope.add(()=>observer.disconnect());}

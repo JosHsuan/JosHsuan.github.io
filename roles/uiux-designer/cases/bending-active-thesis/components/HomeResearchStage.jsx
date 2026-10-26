@@ -8,11 +8,11 @@ import {registerHomeResearchStage} from '../runtime/site/HomeResearchStageRegist
 
 const lease=createExclusivePreviewLease();
 export default function HomeResearchStage({poster,className=''}){
- const host=useRef(null),controls=useRef(null),[state,setState]=useState({phase:'poster',reason:'initial',paused:false,painted:false});
+ const host=useRef(null),[state,setState]=useState({phase:'poster',reason:'initial',paused:false,painted:false});
  useEffect(()=>{
   const node=host.current,root=node.closest('[data-home-research-story]');
   if(!root)return;
-  const listeners=new Set(),forced=window.matchMedia('(forced-colors: active)');
+  const listeners=new Set();
   let readiness=null,lifecycle=null,resource=null,arrivalStatic=false,staticReason='',disposed=false,paused=false,exposure=null;
   const publish=()=>{for(const listener of [...listeners])if(listeners.has(listener))listener();};
   const staticReady=reason=>readiness?.report({mode:'static',reason});
@@ -64,20 +64,15 @@ export default function HomeResearchStage({poster,className=''}){
   }};
   const release=registerHomeResearchStage(document,descriptor);
   if(arrivalStatic)lifecycle.stop(staticReason);
-  if(forced.matches)settleStatic('forced-colors');
-  const eligibility=observePreviewEligibility({element:node,window,document,mode:'page',onChange:({active,reason,reduced,saveData})=>{
+  const eligibility=observePreviewEligibility({element:node,window,document,mode:'page',onChange:({active,reason})=>{
    if(arrivalStatic)return;
-   if(reduced||saveData||forced.matches){settleStatic(forced.matches?'forced-colors':reason);return;}
    if(!active&&lifecycle.inspect().phase!=='ready'){settleStatic(reason);return;}
    lifecycle.setActive(active,reason);
   },onSize:(width,height)=>lifecycle.resize(width,height)});
-  const policy=()=>{if(forced.matches)settleStatic('forced-colors');};
   const pagehide=event=>{if(!event.persisted){staticReady('page-exit');lifecycle.dispose();}};
-  const toggle=()=>{if(lifecycle.inspect().phase!=='ready')return;paused=!paused;setState(previous=>({...previous,paused}));publish();};
-  controls.current=toggle;
-  forced.addEventListener('change',policy);window.addEventListener('pagehide',pagehide);
+  window.addEventListener('pagehide',pagehide);
   const diagnostic={inspect:()=>({...inspect(),eligibility:eligibility.inspect()})};node.__homeResearch=diagnostic;window.__homeResearch=diagnostic;
-  return()=>{disposed=true;controls.current=null;release();forced.removeEventListener('change',policy);window.removeEventListener('pagehide',pagehide);eligibility.dispose();lifecycle.dispose();readiness.release();listeners.clear();delete node.__homeResearch;if(window.__homeResearch===diagnostic)delete window.__homeResearch;};
+  return()=>{disposed=true;release();window.removeEventListener('pagehide',pagehide);eligibility.dispose();lifecycle.dispose();readiness.release();listeners.clear();delete node.__homeResearch;if(window.__homeResearch===diagnostic)delete window.__homeResearch;};
  },[]);
  return <div className={className} data-home-research-stage data-preview-phase={state.phase} data-preview-reason={state.reason}>
   <div ref={host} data-home-research-host data-site-preview-required style={{position:'absolute',inset:0,overflow:'hidden',pointerEvents:'none'}}>
@@ -85,6 +80,5 @@ export default function HomeResearchStage({poster,className=''}){
        ready first draw hides its paint beneath the transparent source canvas. */}
    <img src={poster.src} width={poster.width} height={poster.height} alt={poster.alt??''} loading="eager" decoding="async" data-site-critical data-home-research-poster style={{display:'block',width:'100%',height:'100%',objectFit:'contain',opacity:state.painted?0:1}}/>
   </div>
-  {state.phase==='ready'&&<button type="button" data-home-research-pause aria-pressed={state.paused} onClick={()=>controls.current?.()}>{state.paused?'Resume specimen motion':'Pause specimen motion'}</button>}
  </div>;
 }

@@ -7,9 +7,8 @@ const links=[
 ];
 
 /** Native links stay usable before the shared entry and navigation layer starts. */
-export default function PortfolioNavigation({current='home',mainId='portfolio-main'}){
+export default function PortfolioNavigation({current='home'}){
   return <>
-    <a href={`#${mainId}`} className={styles.skip}>Skip to content</a>
     <header className={styles.navigation} data-portfolio-masthead>
       <a href="/" className={styles.identity} aria-label="JosHsuan Chao — Home" aria-current={current==='home'?'page':undefined} data-home-link>
         <span>JosHsuan Chao</span><span className={styles.identityDivider} aria-hidden="true">/</span><span className={styles.identityDiscipline}>DESIGN + TECHNOLOGY</span>

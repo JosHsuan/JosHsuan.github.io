@@ -1,77 +1,45 @@
 import {test,expect} from '@playwright/test';
 import {WAIT,scenarioTimeout,loadScene,settle,frames,centerStudy} from './case-helpers.mjs';
 import {renderedTextContrast} from './reading-contrast.mjs';
-import {SOURCE_COMPARISON_SECONDS} from '../../roles/uiux-designer/cases/bending-active-thesis/components/source-scene-score.mjs';
 
-test('Roboto Mono headings and reading text and rounded orange-photo shadowboxes retain an accessible original',async({page,isMobile})=>{
+test('Roboto Mono headings and rounded photographic frames retain original pixels and colors in native scroll reading',async({page})=>{
+ // Typography and photographic evidence must also work with genuinely unavailable 3D.
+ await page.route('**/source-layers.glb',route=>route.abort());
  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/projects/bending-active/#overview');await page.waitForFunction(()=>window.__story?.inspect().entry?.phase==='entered',null,{timeout:WAIT});await page.evaluate(()=>document.fonts.ready);
  const fonts=await page.evaluate(async()=>{
   const faces=await Promise.all([document.fonts.load('400 16px "Roboto Mono"','Original source artwork 60° × 160 mm ↗'),document.fonts.load('400 16px "Roboto Mono"','Bending-Active Metal Panel Deformation')]);
   return{loaded:{body:document.fonts.check('400 16px "Roboto Mono"','Original source artwork 60° × 160 mm ↗'),display:document.fonts.check('400 16px "Roboto Mono"','Bending-Active Metal Panel Deformation')},faces:faces.flat().map(face=>({family:face.family.replaceAll(/['"]/g,''),status:face.status})),body:getComputedStyle(document.body).fontFamily,heading:getComputedStyle(document.querySelector('h1')).fontFamily,lastHeading:getComputedStyle(document.querySelector('h1 span:last-child')).fontFamily};
  });expect(fonts).toMatchObject({loaded:{body:true,display:true},faces:[{family:'Roboto Mono',status:'loaded'},{family:'Roboto Mono',status:'loaded'}]});expect(fonts.body).toContain('Roboto Mono');expect(fonts.heading).toContain('Roboto Mono');expect(fonts.lastHeading).toContain('Roboto Mono');
- const photo=page.locator('#make [data-media-kind="photo"] img'),link=page.locator('#make [data-inspect-figure]');await link.scrollIntoViewIfNeeded();
- expect(await photo.evaluate(el=>getComputedStyle(el).filter)).toContain('invert(1)');expect(await link.evaluate(el=>parseFloat(getComputedStyle(el).borderTopLeftRadius))).toBeGreaterThanOrEqual(16);
- if(!isMobile){await link.hover();expect(await photo.evaluate(el=>getComputedStyle(el).filter)).toBe('none');}else{await link.focus();expect(await photo.evaluate(el=>getComputedStyle(el).filter)).toBe('none');}
- await link.press('Enter');await expect(page.locator('[data-source-comparison] img')).toBeVisible();expect(await page.locator('[data-source-comparison] img').evaluate(el=>getComputedStyle(el).filter)).toBe('none');await page.getByRole('button',{name:'Close source comparison'}).click();await expect(link).toBeFocused();
+ const photo=page.locator('#make [data-media-kind="photo"] img'),frame=page.locator('#make [data-information-window="evidence-image"]');await frame.scrollIntoViewIfNeeded();await settle(page);
+ await expect(photo).toHaveCSS('filter','none');await expect(photo).toHaveCSS('mix-blend-mode','normal');expect(await frame.evaluate(el=>parseFloat(getComputedStyle(el).borderTopLeftRadius))).toBeGreaterThanOrEqual(16);
+ await expect(frame.locator('a,button')).toHaveCount(0);await expect(page.locator('[data-source-comparison],[data-inspect-figure]')).toHaveCount(0);
+ await expect(photo).toHaveAttribute('src','/assets/cinematic/connection-detail.webp');await expect.poll(()=>photo.evaluate(el=>el.complete&&el.naturalWidth>0),{timeout:WAIT}).toBe(true);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
 });
 
-test('original SVG paths retain fold and workflow selections, a complete static library and failure fallbacks',async({page})=>{
- test.setTimeout(scenarioTimeout(120000));await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/projects/bending-active/#overview');await page.waitForFunction(()=>window.__story?.inspect().entry?.phase==='entered',null,{timeout:WAIT});
- for(const [kind,count]of [['miura',3],['workflow',4]]){const diagram=page.locator(`[data-source-diagram="${kind}"]`);await diagram.scrollIntoViewIfNeeded();await expect(diagram.locator('svg')).toBeVisible({timeout:WAIT});expect(await diagram.locator('svg path').count()).toBeGreaterThan(10);const buttons=diagram.locator('button[data-diagram-index]');await expect(buttons).toHaveCount(count);await buttons.last().focus();await page.keyboard.press('Enter');await expect(buttons.last()).toHaveAttribute('aria-pressed','true');await expect(diagram.locator('[data-diagram-caption]')).not.toBeEmpty();
-  // Every authored caption must fit without changing the reading stop plan.
-  // Selection shares the same paint path as autonomous presentation changes.
-  await page.evaluate(()=>document.fonts.ready);
-  const heights=await diagram.evaluate(async el=>{const values=[];for(const button of el.querySelectorAll('button[data-diagram-index]')){button.click();await new Promise(requestAnimationFrame);values.push({figure:el.getBoundingClientRect().height,document:document.documentElement.scrollHeight});}return values;});
-  for(const value of heights){expect(Math.abs(value.figure-heights[0].figure)).toBeLessThan(.01);expect(value.document).toBe(heights[0].document);}
-  await diagram.getByRole('button',{name:'Follow chapter'}).click();}
+test('original SVG paths retain every inline stage, the complete library and source-preserving failure fallbacks',async({page})=>{
+ test.setTimeout(scenarioTimeout(120000));await page.goto('/projects/bending-active/#overview');await page.waitForFunction(()=>window.__story?.inspect().entry?.phase==='entered',null,{timeout:WAIT});
+ for(const [kind,count]of [['miura',3],['workflow',4]]){
+  const diagram=page.locator(`[data-source-diagram="${kind}"]`);await diagram.scrollIntoViewIfNeeded();await expect(diagram.locator('svg')).toBeVisible({timeout:WAIT});expect(await diagram.locator('svg path').count()).toBeGreaterThan(10);await expect(diagram.locator('button')).toHaveCount(0);await expect(diagram.locator('ol li')).toHaveCount(count);
+  const stages=await diagram.locator('ol li').allTextContents();for(const text of stages)expect(text.trim().length).toBeGreaterThan(10);
+ }
  const library=page.locator('[data-source-diagram="library"]');await library.locator('svg').scrollIntoViewIfNeeded();await settle(page);
- await expect(library.locator('svg path')).toHaveCount(452);await expect(library.locator('svg text')).toHaveCount(27);await expect(library.locator('button')).toHaveCount(0);await expect(library).toHaveAttribute('data-diagram-reveal','completed');
+ await expect(library.locator('svg path')).toHaveCount(452);await expect(library.locator('svg text')).toHaveCount(27);await expect(library.locator('button')).toHaveCount(0);await expect(library).toHaveAttribute('data-diagram-reveal','completed',{timeout:WAIT});
  expect(await library.locator('[data-library-trace]').evaluateAll(paths=>paths.every(path=>getComputedStyle(path).strokeDasharray==='none'&&getComputedStyle(path).visibility==='visible'))).toBe(true);
- await page.route('**/assets/diagrams/*.json',r=>r.abort());await page.reload();await page.waitForFunction(()=>window.__story?.inspect().entry?.phase==='entered',null,{timeout:WAIT});for(const kind of ['miura','library','workflow']){const img=page.locator(`[data-source-diagram="${kind}"] img`);await img.scrollIntoViewIfNeeded();await expect.poll(()=>img.evaluate(el=>el.complete&&el.naturalWidth>0)).toBe(true);}
+ await page.route('**/assets/diagrams/*.json',r=>r.abort());await page.reload();await page.waitForFunction(()=>window.__story?.inspect().entry?.phase==='entered',null,{timeout:WAIT});
+ for(const kind of ['miura','library','workflow']){const img=page.locator(`[data-source-diagram="${kind}"] img`);await img.scrollIntoViewIfNeeded();await expect.poll(()=>img.evaluate(el=>el.complete&&el.naturalWidth>0),{timeout:WAIT}).toBe(true);}
+ await expect(page.locator('[data-source-diagram="miura"] ol li')).toHaveCount(3);await expect(page.locator('[data-source-diagram="workflow"] ol li')).toHaveCount(4);
 });
 
-test('zero-wheel chapter loops advance field and workflow selections while OS Reduced stops autonomous time',async({page})=>{
- test.setTimeout(scenarioTimeout(180000));await page.clock.install({time:new Date('2026-01-01T00:00:00Z')});await loadScene(page);await page.locator('[data-chapter-link="system"]').click();await centerStudy(page,'system');await page.mouse.move(10,130);await frames(page,4);
- expect(await page.evaluate(()=>({visible:window.__story.inspect().canvasPlacement.visible,suspended:window.__thesis.inspect().renderSuspended}))).toEqual({visible:true,suspended:false});
- // Fixed sub-stale intervals verify autonomous behavior even when one software
- // GPU frame takes more than a real second. The actual DOM and Canvas still run.
- let first,second;
- const sample=()=>page.evaluate(()=>({time:window.__story.inspect().playback.activeSeconds,field:window.__story.inspect().pageField.fieldTime,draws:window.__story.inspect().pageField.draws,selection:document.querySelector('[data-source-diagram="workflow"]').dataset.diagramSelection,y:scrollY,layering:window.__thesis.inspect().compositor.layering}));
- try{
-  await page.clock.pauseAt(new Date('2026-01-01T01:00:00Z'));
-  first=await sample();
-  // Cross a real source beat; verify the visible SVG selection rather than an
-  // unused phase variable. Actual DOM, source presentation and Canvas run.
-  for(let i=0;i<24;i++){await page.clock.fastForward(500);second=await sample();if(second.selection&&second.selection!==first.selection)break;}
- }finally{await page.clock.resume();}
- expect(second.y).toBe(first.y);expect(second.time).toBeGreaterThan(first.time);expect(second.field).toBeGreaterThan(first.field);expect(second.draws).toBeGreaterThan(first.draws);expect(second.selection).toBeTruthy();expect(second.selection).not.toBe(first.selection);expect(second.layering).toMatchObject({position:'rear',semanticMask:false,independentField:true});
- const workflow=page.locator('[data-source-diagram="workflow"]'),choice=workflow.locator('button[data-diagram-index="2"]');
- // The SVG controls sit below the source surface. Finish their native focus
- // relocation and the reading response before the real pointer click, rather
- // than clicking while Playwright's autoscroll and the document are settling.
- await choice.focus();await settle(page);
- // Observe the actual pointer click after React's root handler has accepted
- // the comparison. Later software-GPU round trips can outlive its eight-second
- // lifetime; the receipt keeps DOM selection and source state in one event.
- await page.evaluate(()=>{
-  window.__testSourceSelectionReceipt=null;
-  const observe=event=>{
-   const button=event.target.closest('[data-source-diagram="workflow"] button[data-diagram-index="2"]');if(!button)return;
-   const state=window.__story.inspect(),selection=state.sourceSelection;
-   window.__testSourceSelectionReceipt={trusted:event.isTrusted,pressed:button.getAttribute('aria-pressed'),diagram:button.closest('[data-source-diagram]').dataset.diagramSelection,selection:selection?{...selection}:null,activeSeconds:state.playback.activeSeconds,age:selection?state.playback.activeSeconds-selection.selectedAt:null};
-   document.removeEventListener('click',observe);
-  };
-  document.addEventListener('click',observe);
- });
- await choice.click();await settle(page);
- const selectionReceipt=await page.evaluate(()=>window.__testSourceSelectionReceipt);
- expect(selectionReceipt).toMatchObject({trusted:true,pressed:'true',diagram:'bending',selection:{chapterId:'system',index:2}});
- expect(Number.isFinite(selectionReceipt.activeSeconds)).toBe(true);expect(Number.isFinite(selectionReceipt.selection.selectedAt)).toBe(true);expect(Number.isFinite(selectionReceipt.age)).toBe(true);expect(selectionReceipt.age).toBeGreaterThanOrEqual(0);expect(selectionReceipt.age).toBeLessThan(SOURCE_COMPARISON_SECONDS);
- await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(()=>window.__story.inspect().playback.reducedMotion,null,{timeout:WAIT});await settle(page);const frozen=await page.evaluate(()=>window.__story.inspect().playback.activeSeconds);await frames(page,10);expect(await page.evaluate(()=>window.__story.inspect().playback.activeSeconds)).toBe(frozen);
+test('stationary reading keeps one source while independent field motion and OS-preference-neutral playback continue',async({page})=>{
+ test.setTimeout(scenarioTimeout(180000));await page.clock.install({time:new Date('2026-01-01T00:00:00Z')});await loadScene(page);await centerStudy(page,'system');await page.mouse.move(10,130);await frames(page,4);
+ const sample=()=>page.evaluate(()=>({time:window.__story.inspect().playback.activeSeconds,field:window.__story.inspect().pageField.fieldTime,draws:window.__story.inspect().pageField.draws,selection:document.querySelector('[data-source-diagram="workflow"]').dataset.diagramSelection,y:scrollY,layering:window.__thesis.inspect().compositor.layering,source:window.__thesis.inspect().representation.id}));let first,second;
+ try{await page.clock.pauseAt(new Date('2026-01-01T01:00:00Z'));first=await sample();for(let i=0;i<8;i++)await page.clock.fastForward(500);second=await sample();}finally{await page.clock.resume();}
+ expect(second.y).toBe(first.y);expect(second.time).toBeGreaterThan(first.time);expect(second.field).toBeGreaterThan(first.field);expect(second.draws).toBeGreaterThan(first.draws);expect(second.selection).toBe(first.selection);expect(second.source).toBe(first.source);expect(second.layering).toMatchObject({position:'rear',semanticMask:false,independentField:true});
+ await page.emulateMedia({reducedMotion:'reduce'});await settle(page);const before=await sample();await frames(page,10);const after=await sample();expect(after.time).toBeGreaterThan(before.time);expect(after.source).toBe(before.source);expect(await page.evaluate(()=>window.__story.inspect().playback.reducedMotion)).toBe(false);
 });
 
-test('viewport source holds while information scrolls and workflow follows its presented shared phase',async({page})=>{
+test('viewport source holds while native scroll selects the matching source and inline workflow emphasis',async({page})=>{
  test.setTimeout(scenarioTimeout(150000));
  // The narrow stacked layout moves the original HTML source slot away. The
  // viewport scene must retain its own chapter hold while the SVG is read.
@@ -85,18 +53,18 @@ test('viewport source holds while information scrolls and workflow follows its p
  const after=await page.evaluate(()=>({y:scrollY,viewport:window.__thesis.inspect().pose.viewport,surface:window.__story.inspect().canvasSurface,placement:window.__story.inspect().canvasPlacement}));
  expect(Math.abs(after.y-before.y)).toBeGreaterThan(100);expect(after.viewport).toEqual(before.viewport);expect(after.surface).toEqual(before.surface);
  expect(after.placement).toMatchObject({chapter:'system',mode:'hold',x:0,y:0,scale:1,visible:true});
- const sample=()=>page.evaluate(()=>{const root=document.querySelector('[data-source-diagram="workflow"]'),scene=window.__thesis.inspect(),story=window.__story.inspect();return {time:story.playback.activeSeconds,frames:scene.frames,visible:story.canvasPlacement.visible,suspended:scene.renderSuspended,selection:root.dataset.diagramSelection,index:scene.representation.index,pressed:Number(root.querySelector('button[aria-pressed="true"]').dataset.diagramIndex),y:scrollY};});
+ const sample=()=>page.evaluate(()=>{const root=document.querySelector('[data-source-diagram="workflow"]'),scene=window.__thesis.inspect(),story=window.__story.inspect();return {time:story.playback.activeSeconds,frames:scene.frames,visible:story.canvasPlacement.visible,suspended:scene.renderSuspended,selection:root.dataset.diagramSelection,index:scene.representation.index,emphasis:Number(root.querySelector('ol li[data-diagram-active="true"]').dataset.diagramIndex),y:scrollY};});
  let first,second;
  try{
   await page.clock.pauseAt(new Date('2026-01-01T01:00:00Z'));first=await sample();
   for(let i=0;i<24;i++){
    await page.clock.fastForward(500);second=await sample();
    expect(second.visible).toBe(true);expect(second.suspended).toBe(false);expect(second.y).toBe(first.y);
-   expect(second.selection).toBe(['origami','opening','bending','colours'][second.index]);expect(second.pressed).toBe(second.index);
-   if(second.selection!==first.selection)break;
+   expect(second.selection).toBe(['origami','opening','bending','colours'][second.index]);expect(second.emphasis).toBe(second.index);
+
   }
  }finally{await page.clock.resume();}
- expect(second.time).toBeGreaterThan(first.time);expect(second.frames).toBeGreaterThan(first.frames);expect(second.selection).not.toBe(first.selection);await expect(svg).toBeInViewport();
+ expect(second.time).toBeGreaterThan(first.time);expect(second.frames).toBeGreaterThan(first.frames);expect(second.selection).toBe(first.selection);expect(second.index).toBe(first.index);await expect(svg).toBeInViewport();
  // Returning to the information slot does not become a second camera owner.
  await centerStudy(page,'system');await expect(workflow).toHaveAttribute('data-source-presented','true');
  expect(await page.evaluate(()=>{const scene=window.__thesis.inspect();return document.querySelector('[data-source-diagram="workflow"]').dataset.diagramSelection===['origami','opening','bending','colours'][scene.representation.index];})).toBe(true);

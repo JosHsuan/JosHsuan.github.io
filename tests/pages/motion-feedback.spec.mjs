@@ -3,10 +3,6 @@ import {settle,scenarioTimeout} from './case-helpers.mjs';
 const WAIT=45000;
 async function load(page,path='/projects/bending-active/#overview'){await page.goto(path);await page.waitForFunction(()=>window.__thesis?.inspect().ready&&window.__story?.inspect().entry.phase==='entered',null,{timeout:WAIT});await page.evaluate(()=>document.fonts.ready);await settle(page);}
 async function phase(page,id,value,settleAfter=settle){await page.evaluate(({id,value})=>{const el=document.getElementById(id);let y=0;for(let n=el;n;n=n.offsetParent)y+=n.offsetTop;scrollTo({top:y+el.offsetHeight*value-innerHeight*.45,behavior:'instant'});},{id,value});await settleAfter(page);}
-// Locator auto-scroll may finish before the authored reading plane settles.
-// Click the visible, settled summary instead of a stale pre-response coordinate.
-async function openSourceFigure(page){const summary=page.getByText('Compare with the original thesis figure',{exact:true});await summary.scrollIntoViewIfNeeded();await settle(page);await summary.click();await expect(summary.locator('..')).toHaveAttribute('open','');await settle(page);}
-
 // Each fastForward fires a due RAF once. A 500ms controller step exercises the
 // real heavy-frame response without rendering dozens of intermediate
 // software-GPU frames with runFor. This is a functional clock fixture.
@@ -79,53 +75,43 @@ test('native reading stays responsive without controller frames while the scene 
   const reading=await page.evaluate(()=>window.__story.inspect());
   expect(reading.stops).toEqual([]);expect(reading.holdId).toBe(null);expect(reading.holdWeight).toBe(0);
   for(const id of ['pattern','make','system']){await phase(page,id,.5,settleClock);expect(await page.evaluate(original=>document.querySelector('[data-cinematic-stage] canvas')===original,canvas)).toBe(true);}
-  await page.locator('[data-model-viewport][data-study-chapter="system"]').evaluate(el=>{let y=0;for(let n=el;n;n=n.offsetParent)y+=n.offsetTop;scrollTo({top:y-Math.max(112,(innerHeight-el.offsetHeight)*.34),behavior:"instant"});});await settleClock(page);
+  await phase(page,'system',.6,settleClock);
   const snapshot=()=>page.evaluate(()=>{const story=window.__story.inspect(),scene=window.__thesis.inspect();return {time:story.playback.activeSeconds,field:scene.compositor.field.time,pose:scene.pose.position,frames:scene.frames};});
   const autonomousBefore=await snapshot();for(let step=0;step<3;step++)await page.clock.fastForward(500);const autonomousAfter=await snapshot();
   expect(autonomousAfter.time).toBeGreaterThan(autonomousBefore.time);expect(autonomousAfter.field).toBeGreaterThan(autonomousBefore.field);expect(autonomousAfter.pose).not.toEqual(autonomousBefore.pose);expect(autonomousAfter.frames).toBeGreaterThan(autonomousBefore.frames);
-  // Media emulation, its change event and React preference publication are
-  // separate tasks. Await the runtime's Reduced acknowledgment and final paint.
-  await page.emulateMedia({reducedMotion:'reduce'});await settleClock(page,{reducedIdle:true});
-  expect(await page.evaluate(()=>window.__story.inspect().scheduled)).toBe(false);
-  const frozen=await snapshot();for(let step=0;step<8;step++)await page.clock.fastForward(500);const idle=await snapshot();
-  expect(idle).toEqual(frozen);
+  // OS media changes cannot silently replace the authored scroll experience.
+  const source=await page.evaluate(()=>window.__thesis.inspect().representation.id);
+  await page.emulateMedia({reducedMotion:'reduce'});await settleClock(page);
+  expect(await page.evaluate(()=>window.__story.inspect().playback.reducedMotion)).toBe(false);
+  const continuing=await snapshot();for(let step=0;step<3;step++)await page.clock.fastForward(500);const later=await snapshot();
+  expect(later.time).toBeGreaterThan(continuing.time);expect(later.frames).toBeGreaterThan(continuing.frames);
+  expect(await page.evaluate(()=>window.__thesis.inspect().representation.id)).toBe(source);
  } finally {
   await page.clock.resume();
  }
 });
 
-test('information has one fluid surface; focus, hashes and live Reduced keep content reachable',async({page,isMobile})=>{
- test.setTimeout(scenarioTimeout(180000));await load(page);await phase(page,'system',.45);await openSourceFigure(page);
- const source=page.locator('[data-inspect-figure="0"]'),media=source.locator('[data-feedback-plane]');await expect(media).toBeVisible();await source.scrollIntoViewIfNeeded();await settle(page);
- // The enclosing C3 information window owns material response; nested media
- // no longer receives a second perspective/choreography writer.
- if(!isMobile){await media.hover({position:{x:15,y:15}});await settle(page);expect(await media.evaluate(el=>getComputedStyle(el).transform)).toBe('none');await page.mouse.move(1,1);await settle(page);}
- // Reading settles independently of the final few hover-return frames.
- await expect.poll(()=>media.evaluate(el=>getComputedStyle(el).transform)).toBe('none');
- await source.focus();await settle(page);const focus=await source.boundingBox();expect(focus.y+focus.height).toBeGreaterThan(90);expect(focus.y).toBeLessThan(await page.evaluate(()=>innerHeight));
- await source.press('Enter');await expect(page.locator('[data-source-comparison]')).toBeVisible();expect(await page.evaluate(()=>document.body.style.overflow)).not.toBe('hidden');await page.getByRole('button',{name:'Close source comparison'}).click();await expect(source).toBeFocused();
- for(const id of ['make','credits','form']){await page.locator(`[data-chapter-link="${id}"]`).click();await settle(page);expect(await page.evaluate(()=>window.__story.inspect().readingShiftY)).toBe(0);await expect(page.locator(`[data-chapter-link="${id}"]`)).toHaveAttribute('aria-current','location');}
- await page.emulateMedia({reducedMotion:'reduce'});await settle(page);
- const staticTransforms=()=>page.evaluate(()=>[...document.querySelectorAll('[data-story-root],[data-feedback-plane],[data-heading-line],[data-editorial-copy]')].map(el=>getComputedStyle(el).transform));expect((await staticTransforms()).every(value=>value==='none')).toBe(true);
- await phase(page,'system',.6);expect((await staticTransforms()).every(value=>value==='none')).toBe(true);
+test('information stays a single native surface with inline figures and no click gates',async({page,isMobile})=>{
+ test.setTimeout(scenarioTimeout(150000));await load(page);await phase(page,'system',.45);
+ const source=page.locator('#system [data-information-window="source-details"]'),media=source.locator('[data-feedback-plane]');
+ await source.scrollIntoViewIfNeeded();await settle(page);await expect(media).toBeVisible();
+ if(!isMobile){await media.hover({position:{x:15,y:15}});await settle(page);expect(await media.evaluate(el=>getComputedStyle(el).transform)).toBe('none');await page.mouse.move(1,1);}
+ await expect(page.locator('details,summary,[data-inspect-figure],[data-source-comparison]')).toHaveCount(0);
+ for(const id of ['make','credits','form']){await phase(page,id,.4);expect(await page.evaluate(()=>window.__story.inspect().readingShiftY)).toBe(0);await expect(page.locator(`[data-chapter-link="${id}"]`)).toHaveAttribute('aria-current','location');}
+ await page.emulateMedia({reducedMotion:'reduce'});await settle(page);expect(await page.evaluate(()=>window.__story.inspect().playback.reducedMotion)).toBe(false);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
 });
 
-test('initial fragments, keyboard focus and browser history preserve exact native reading positions',async({page})=>{
- test.setTimeout(scenarioTimeout(180000));await load(page,'/projects/bending-active/#system');await expect(page.locator('[data-model-study]').first()).toBeAttached();
+test('initial fragments, native keyboard scrolling and browser history retain exact reading positions without chapter buttons',async({page})=>{
+ test.setTimeout(scenarioTimeout(150000));await load(page,'/projects/bending-active/#system');
  await expect(page.locator('[data-chapter-link="system"]')).toHaveAttribute('aria-current','location');
  const heading=await page.locator('#system [data-story-heading]').boundingBox();expect(heading.y+heading.height).toBeGreaterThan(100);expect(heading.y).toBeLessThan(await page.evaluate(()=>innerHeight));
- const make=page.locator('[data-chapter-link="make"]');await make.focus();await page.keyboard.press('Enter');await settle(page);await expect(page.locator('#make')).toBeFocused();
- await page.keyboard.press('PageDown');await settle(page);expect(await page.evaluate(()=>window.__story.inspect().readingShiftY)).toBe(0);
+ await expect(page.locator('[data-story-navigation] a,[data-story-navigation] button')).toHaveCount(0);
+ const before=await page.evaluate(()=>scrollY);await page.keyboard.press('PageDown');await settle(page);expect(await page.evaluate(()=>scrollY)).toBeGreaterThan(before);
  await page.keyboard.press('Home');await settle(page);expect(await page.evaluate(()=>scrollY)).toBe(0);
  await page.keyboard.press('End');await settle(page);expect(await page.evaluate(()=>Math.abs(scrollY-(document.documentElement.scrollHeight-innerHeight)))).toBeLessThan(1);
- await page.locator('[data-chapter-link="system"]').click();await settle(page);await page.mouse.wheel(0,160);await settle(page);
- const saved=await page.evaluate(()=>({y:scrollY,hash:location.hash}));
- await page.locator('[data-chapter-link="make"]').click();await settle(page);const forward=await page.evaluate(()=>scrollY);
- await page.goBack();await settle(page);expect(await page.evaluate(()=>location.hash)).toBe(saved.hash);expect(Math.abs(await page.evaluate(()=>scrollY)-saved.y)).toBeLessThan(1);expect(await page.evaluate(()=>window.__story.inspect().readingShiftY)).toBe(0);
- await page.goForward();await settle(page);expect(await page.evaluate(()=>location.hash)).toBe('#make');expect(Math.abs(await page.evaluate(()=>scrollY)-forward)).toBeLessThan(1);
- // A programmatic keyboard focus during a live wheel response must remain
- // in the safe reading viewport after compensation is cleared.
- await openSourceFigure(page);await page.evaluate(()=>{scrollBy({top:140,behavior:'instant'});requestAnimationFrame(()=>document.querySelector('[data-inspect-figure="0"]').focus());});await settle(page);
- const focused=await page.locator('[data-inspect-figure="0"]').boundingBox();await expect(page.locator('[data-inspect-figure="0"]')).toBeFocused();expect(focused.y+focused.height).toBeGreaterThan(100);expect(focused.y).toBeLessThan(await page.evaluate(()=>innerHeight-80));expect(await page.evaluate(()=>window.__story.inspect().readingShiftY)).toBe(0);
+ await phase(page,'system',.45);await page.mouse.wheel(0,160);await settle(page);const saved=await page.evaluate(()=>({y:scrollY,hash:location.hash}));
+ await page.getByRole('link',{name:'Project',exact:true}).click();await page.waitForURL('**/projects/');await page.goBack();await settle(page);
+ expect(await page.evaluate(()=>location.hash)).toBe(saved.hash);expect(Math.abs(await page.evaluate(()=>scrollY)-saved.y)).toBeLessThan(1);expect(await page.evaluate(()=>window.__story.inspect().readingShiftY)).toBe(0);
+ await page.goForward();await page.waitForURL('**/projects/');
 });

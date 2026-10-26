@@ -1,4 +1,5 @@
 import {createScrollCameraPath,sampleScrollCamera,composeCameraIntent,sampleHandheldSurface} from '../motion/scroll-camera-score.mjs';
+import {XR_METHOD_CAMERA_KEYS} from '../motion/authored-project-camera-scores.mjs';
 import {EventManager} from '../core/EventManager.ts';
 import {DOMPresenter} from '../presentation/DOMPresenter.ts';
 import {createInformationWindowPresenter} from '../presentation/InformationWindowPresenter.mjs';
@@ -9,7 +10,7 @@ import {createXRStageMotion,advanceXRStageMotion,cancelXRStageMotion} from './XR
 
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const BLOCKED='a,button,input,select,textarea,summary,[contenteditable]:not([contenteditable="false"]),[role="textbox"],[data-protect],[data-information-window]';
-const MODEL_CAMERA_PATH=createScrollCameraPath([{at:0,yawRad:.92,pitchRad:.28,fovDeg:36,zoom:1},{at:.5,yawRad:1.06,pitchRad:.32,fovDeg:36,zoom:1},{at:1,yawRad:1.16,pitchRad:.36,fovDeg:36,zoom:1}]);
+const MODEL_CAMERA_PATH=createScrollCameraPath(XR_METHOD_CAMERA_KEYS);
 const neutralHandheld=()=>({xPx:0,yPx:0,rollRad:0});
 const zero=()=>({azimuth:0,elevation:0});
 const naturalY=element=>{let top=0;for(let node=element;node;node=node.offsetParent)top+=node.offsetTop;return top;};
@@ -31,7 +32,6 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
    const sceneMotion=createXRStageMotion(),sceneSurface=host.querySelector('[data-xr-scene-surface]')??host;
    const workspaceImage=host.querySelector('[data-xr-workspace-visual]');
    const workspace={phase:workspaceImage?'loading':'failed',reason:workspaceImage?null:'workspace-absent',width:0,height:0,source:null};
-   const reduced=win.matchMedia('(prefers-reduced-motion: reduce)'),connection=win.navigator?.connection;
    const glassPreferences=['(forced-colors: active)','(prefers-contrast: more)','(prefers-reduced-transparency: reduce)'].map(query=>win.matchMedia(query));
    const opaqueGlass=()=>glassPreferences.some(query=>query.matches);
    const observerList=[],observed=new Set(),gestureHistory=[];
@@ -42,8 +42,10 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
    let paintedChapter=null,paintPending=false,paintGeneration=0,workspaceGeneration=0,liquidKeyboardFocus=true;
    const scheduler=createFrameScheduler({request:fn=>win.requestAnimationFrame(fn),cancel:id=>win.cancelAnimationFrame(id),onFrame:tick});
    const listen=(node,type,fn,options)=>events.listen(scope,node,type,fn,options);
-   const policy=()=>({reduced:!!reduced.matches,saveData:!!connection?.saveData,hidden:!!doc.hidden,siteReady:doc.documentElement.getAttribute('data-site-entry-state')==='entered'});
-    const canInspect=()=>{const p=policy(),painted=resource?.inspect();return chapter==='method'&&sceneMotion.chapter===chapter&&sceneMotion.mode==='hold'&&sceneMotion.settled&&!!resource&&painted?.mode==='webgl-model'&&painted.successfulPaint&&!disposed&&!scheduler.suspended&&!away&&visible&&!p.hidden&&!p.reduced&&!p.saveData&&!paused&&p.siteReady;};
+   // Reading motion follows native scroll regardless of an OS motion preference.
+   // Real resource failures and document lifetime still close work.
+   const policy=()=>({reduced:false,saveData:false,hidden:!!doc.hidden,siteReady:doc.documentElement.getAttribute('data-site-entry-state')==='entered'});
+    const canInspect=()=>{const p=policy(),painted=resource?.inspect();return root.getAttribute('data-xr-reading-mode')!=='scroll'&&chapter==='method'&&sceneMotion.chapter===chapter&&sceneMotion.mode==='hold'&&sceneMotion.settled&&!!resource&&painted?.mode==='webgl-model'&&painted.successfulPaint&&!disposed&&!scheduler.suspended&&!away&&visible&&!p.hidden&&!p.reduced&&!p.saveData&&!paused&&p.siteReady;};
    const state=()=>{const p=policy(),s=lifecycle.inspect();return{phase:s.phase,reason:s.reason,chapter,sceneChapter:sceneMotion.chapter,sceneMode:sceneMotion.mode,reduced:p.reduced,saveData:p.saveData,paused};};
    const notify=()=>{if(disposed)return;const next=state(),key=JSON.stringify(next);if(key!==lastState){lastState=key;onState(next);}};
    const focusedReading=()=>!!doc.activeElement?.closest?.(BLOCKED+', [data-xr-model-control]');
@@ -134,7 +136,7 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
     if(method)modelProgress=clamp((line-method.top)/Math.max(1,(chapters[methodIndex+1]?.top??method.top+method.height)-method.top),0,1);
     publisher.attribute(root,'data-xr-active-chapter',chapter);
     for(const link of links){
-     const id=link.getAttribute('href')?.slice(1),section=id&&doc.getElementById(id);
+     const id=link.dataset.xrChapterLink?`xr-${link.dataset.xrChapterLink}`:link.getAttribute('href')?.slice(1),section=id&&doc.getElementById(id);
      publisher.attribute(link,'aria-current',section&&(section===selected.element||section.contains(selected.element))?'location':null);
     }
    }
@@ -171,7 +173,7 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
      if(cameraRecovery){cameraRecovery.elapsed=Math.min(.35,cameraRecovery.elapsed+delta);if(cameraRecovery.elapsed>=.35)cameraRecovery=null;}
     }
     if(p.reduced||p.saveData||lifecycle.inspect().phase==='failed'){handheldGain=0;cameraRecovery=null;cameraWasPaused=false;}
-    const informationNeutral=p.reduced||p.saveData||p.hidden||!p.siteReady||paused||away||!visible||glassPreferences[0].matches;
+    const informationNeutral=p.reduced||p.saveData||p.hidden||!p.siteReady||paused||away||!visible;
     const moving=windows.publish({docY:win.scrollY,dt,reduced:informationNeutral,seek:resumed,resumed});
     const glassMoving=liquid.publish({dt,reduced:informationNeutral,resumed,hidden:p.hidden,opaque:opaqueGlass(),keyboardFocus:liquidKeyboardFocus});
     resumed=false;paint();notify();
@@ -221,8 +223,6 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
    listen(doc,'visibilitychange',()=>suspend('visibility',doc.hidden));listen(doc,'freeze',()=>{away=true;suspend('freeze',true);});listen(doc,'resume',()=>{away=false;suspend('freeze',false);});
    listen(win,'pagehide',event=>{away=true;if(event.persisted)suspend('page',true);else dispose();});
    listen(win,'pageshow',()=>{away=false;scheduler.suspend('visibility',doc.hidden);suspend('page',false);});
-   listen(reduced,'change',()=>{closeGesture('preference-change',true);previous=0;resumed=true;updateEligibility('preference-change');scheduler.schedule();});
-   if(connection?.addEventListener)listen(connection,'change',()=>{closeGesture('preference-change',true);updateEligibility('preference-change');scheduler.schedule();});
    for(const query of glassPreferences)listen(query,'change',()=>{liquid.reset();invalidate();});
    // Native image decoding is Context's own readiness fact. A prepared hidden
    // assembly cannot acknowledge the complete workspace still on its behalf.

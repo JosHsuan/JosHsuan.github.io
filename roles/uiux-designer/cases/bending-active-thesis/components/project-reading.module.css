@@ -1,0 +1,7 @@
+.chapterIndex{position:fixed;right:1.5vw;top:38%;z-index:25;display:grid;gap:.75rem;pointer-events:none;color:var(--muted);font:400 var(--type-size-label)/1.2 var(--mono)}
+.chapter{position:relative;display:flex;align-items:center;gap:.7rem;min-height:1.4rem;opacity:.42;transition:opacity .2s,color .2s}
+.chapter[aria-current]{opacity:1;color:var(--accent)}
+.chapterLabel{position:absolute;right:100%;padding-right:.7rem;white-space:nowrap;opacity:0;text-transform:uppercase;font-size:.7em}
+.chapter[aria-current] .chapterLabel{opacity:1}
+@media(max-width:799px){.chapterIndex{display:none}}
+@media print{.chapterIndex{display:none}}

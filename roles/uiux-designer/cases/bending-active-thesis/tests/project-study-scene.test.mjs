@@ -303,8 +303,8 @@ test('pause resume recovers on the existing clock even with focused controls, th
  f.scene.setReading({chapter:'context',progress:0},0);assert.equal(f.scene.publish({dt:0,stage}),false);assert.deepEqual(f.presentations.at(-1).cameraIntent,original,'Steady native scroll is not filtered');f.scene.dispose();
 });
 
-test('compositor handheld retains pause, returns focus finitely, reserves controls before acquisition, and presents intent before sizing',async()=>{
- const f=fixture({externalStage:true,camera:true});assert.equal(f.host.getAttribute('data-project-model-controls-layout'),'reserved');await flush();assert.deepEqual(f.calls.slice(0,2),['present','resize']);f.policy.siteReady=true;
+test('compositor handheld retains pause, returns focus finitely, keeps no interactive control reserve, and presents intent before sizing',async()=>{
+ const f=fixture({externalStage:true,camera:true});assert.equal(f.host.getAttribute('data-project-model-controls-layout'),null);await flush();assert.deepEqual(f.calls.slice(0,2),['present','resize']);f.policy.siteReady=true;
  const stage={kind:'model',chapter:'context',mode:'hold',settled:true,pose:{opacity:1},history:[]};f.root.dataset.projectActiveChapter='context';f.scene.setReading({chapter:'context',progress:.4},2);f.scene.publish({dt:0,stage});
  const intent=f.presentations.at(-1).cameraIntent,handheld=f.presentations.at(-1).handheld;assert(handheld.xPx>0);
  f.policy.paused=true;f.scene.setReading({chapter:'context',progress:.4},20);assert.equal(f.scene.publish({dt:.1,stage}),false);assert.deepEqual(f.presentations.at(-1).handheld,handheld);
@@ -315,9 +315,9 @@ test('compositor handheld retains pause, returns focus finitely, reserves contro
  const reduced=fixture({camera:true,reduced:true});assert.equal(reduced.host.getAttribute('data-project-model-controls-layout'),null);reduced.scene.dispose();
 });
 
-test('only usable model controls describe help; reserve survives pause but clears fallback/dispose',async()=>{
+test('only usable model controls describe help; no control reserve appears on pause but clears fallback/dispose',async()=>{
  const f=fixture({externalStage:true,camera:true});await flush();assert.equal(f.modelUI.context.target.getAttribute('aria-describedby'),'context-state');f.policy.siteReady=true;f.root.dataset.projectActiveChapter='context';
  const stage={kind:'model',chapter:'context',mode:'hold',settled:true,pose:{opacity:1},history:[]};f.scene.setReading({chapter:'context',progress:0},0);f.scene.publish({dt:0,stage});
- assert.equal(f.modelUI.context.target.getAttribute('aria-describedby'),'context-state context-help');f.policy.paused=true;f.scene.publish({dt:0,stage});assert.equal(f.modelUI.context.target.getAttribute('aria-describedby'),'context-state');assert.equal(f.host.getAttribute('data-project-model-controls-layout'),'reserved');
+ assert.equal(f.modelUI.context.target.getAttribute('aria-describedby'),'context-state context-help');f.policy.paused=true;f.scene.publish({dt:0,stage});assert.equal(f.modelUI.context.target.getAttribute('aria-describedby'),'context-state');assert.equal(f.host.getAttribute('data-project-model-controls-layout'),null);
  f.fail('context-lost');assert.equal(f.host.getAttribute('data-project-model-controls-layout'),null);f.scene.dispose();assert.equal(f.modelUI.context.target.getAttribute('aria-describedby'),'context-state context-help');
 });

@@ -51,7 +51,6 @@
  .evidenceBand{gap:2.2rem;padding:1rem 1.5rem 4rem}.mediaPair{grid-template-columns:1fr;gap:2.2rem}.figureIndex{font-size:.47rem;line-height:1.7;letter-spacing:.04em}.mediaFrame{padding:.3rem;border-radius:16px}.mediaPlane{border-radius:12px}.figure figcaption{padding:1rem;border-radius:14px;font-size:.73rem}.figure figcaption>span{font-size:.65rem}
  .sectionIntroduction{margin:2rem 1.5rem 0}.phoneChapter .chapterInner{min-height:0;padding-top:1.5rem;padding-bottom:6rem}.phoneChapter .sceneSlot{min-height:78svh}.phoneChapter .panel{margin-top:1rem}.readingChapter{max-width:none;padding:2.2rem 1.5rem 5rem}.readingChapter>.panel{padding:1.5rem}.credits dd{font-size:.82rem}.nextProject strong{font-size:1.5rem}
 }
-@media(prefers-reduced-motion:reduce){.page:global([data-xr-director-ready]) :global([data-information-window][data-information-ready]){transform:none!important}}
 @media(forced-colors:active){.page{color:CanvasText;--xr-line:CanvasText}.figureIndex,.staticFigure{color:CanvasText}.sceneSlot:focus-visible,.page :focus-visible{outline-color:Highlight}.mediaPlane{border:1px solid CanvasText}}
 @media print{.page{color:#151b17;padding:1rem;--xr-line:#8b9991}.chapterInner,.hero .chapterInner,.phoneChapter .chapterInner{display:block;min-height:0;padding:1rem 0}.sceneSlot{display:none}.panel{max-width:none;break-inside:avoid;padding:1rem!important}.panel h1,.panel h2{font-size:2rem}.chapterNavigation,.backLink,.readingLink{display:none}.evidenceBand{padding:1rem 0;gap:1.5rem}.figure{break-inside:avoid}.figureIndex{color:#333}.mediaPair{gap:1rem}.readingChapter{max-width:none;padding:1rem 0}.page:global([data-xr-director-ready]) :global([data-information-window][data-information-ready]){transform:none!important}}
 
@@ -77,3 +76,15 @@
  .figure figcaption p{max-width:var(--type-measure-caption)}
  .backLink,.readingLink,.recordingLink{font-size:var(--type-size-control)}
 }
+
+/* Scroll-led reading keeps documentary pixels and the archived presentation
+   in the article without source-opening or media-operation controls. */
+.panel>.readingCue{display:flex;justify-content:space-between;gap:1rem;margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--xr-line);color:var(--glass-control-accent);font-size:var(--type-size-control);line-height:var(--type-leading-control);letter-spacing:var(--type-tracking-control)}
+.recordingSource{margin-inline:0;margin-bottom:0}
+.recordingSource>h3{margin:0 0 1rem}
+.recordingSource figcaption p{color:var(--glass-muted);font-size:var(--type-size-caption);line-height:var(--type-leading-caption);letter-spacing:var(--type-tracking-caption)}
+.presentationRecording{position:relative;min-width:0}
+.presentationRecording [data-animation-control-row]{display:flex;gap:1rem;align-items:center;justify-content:space-between;margin-bottom:.7rem;color:var(--glass-muted);font-size:var(--type-size-label);line-height:var(--type-leading-label);letter-spacing:var(--type-tracking-label)}
+.presentationFrame{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;border:1px solid var(--xr-line);border-radius:14px}
+.presentationFrame :is(img,video){object-fit:contain}
+@media print{.readingCue,.presentationRecording [data-animation-control-row]{display:none}}

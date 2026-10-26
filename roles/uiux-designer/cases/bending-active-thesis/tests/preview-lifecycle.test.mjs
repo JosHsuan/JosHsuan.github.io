@@ -40,13 +40,13 @@ test('page-prepared handles survive hidden and BFCache inactivity without resize
  assert.deepEqual(f.controller.inspect().history.map(fact=>fact.phase),['requested','ready']);f.controller.dispose();assert.equal(disposals,1);
 });
 
-test('retention does not keep partial acquisition alive and an explicit policy stop still releases an acquired handle',async t=>{
+test('retention does not keep partial acquisition alive and an explicit owner stop still releases an acquired handle',async t=>{
  const pending=deferred();let signal,lateDisposals=0;
  const f=fixture(t,options=>{signal=options.signal;return pending.promise;},{retainWhenInactive:true});f.controller.setActive(true);await flush();f.controller.setActive(false,'hidden');
  assert.equal(signal.aborted,true);assert.equal(f.controller.inspect().phase,'poster');assert.equal(f.timers.size,0);
  pending.resolve({dispose(){lateDisposals++;}});await flush();assert.equal(lateDisposals,1);assert.deepEqual(f.controller.inspect().history.map(fact=>fact.phase),['requested','cancelled']);
- let disposals=0;const ready=fixture(t,async()=>({dispose(){disposals++;}}),{retainWhenInactive:true});ready.controller.setActive(true);await flush();ready.controller.setActive(false,'hidden');ready.controller.stop('save-data');
- assert.equal(disposals,1);assert.equal(ready.controller.inspect().phase,'poster');assert.equal(ready.controller.inspect().reason,'save-data');
+ let disposals=0;const ready=fixture(t,async()=>({dispose(){disposals++;}}),{retainWhenInactive:true});ready.controller.setActive(true);await flush();ready.controller.setActive(false,'hidden');ready.controller.stop('owner-release');
+ assert.equal(disposals,1);assert.equal(ready.controller.inspect().phase,'poster');assert.equal(ready.controller.inspect().reason,'owner-release');
 });
 
 test('a resume draw failure releases a retained context and records a resource failure without a second acquisition terminal',async t=>{
@@ -80,7 +80,7 @@ test('render failure and context loss release resources; a completed loading req
  ready.controller.fail('context-lost');assert.equal(ready.controller.inspect().resourceFailures.length,1);
 });
 
-test('eligibility composes true intersection, document/site/policy state and disconnects all native observers',()=>{
+test('eligibility composes true intersection and document/site state without automatic motion policies, then disconnects all observers',()=>{
  const doc=new EventTarget(),win=new EventTarget(),media=Object.assign(new EventTarget(),{matches:false}),connection=Object.assign(new EventTarget(),{saveData:false});
  const attributes=new Map([['data-site-entry-state','requested']]);doc.documentElement={getAttribute:key=>attributes.get(key)??null};doc.hidden=false;
  const observers=[];
@@ -91,22 +91,24 @@ test('eligibility composes true intersection, document/site/policy state and dis
  intersection.callback([{target:element,isIntersecting:true,intersectionRatio:1}]);assert.equal(states.at(-1).active,false);
  attributes.set('data-site-entry-state','entered');mutation.callback();assert.equal(states.at(-1).active,true);
  doc.hidden=true;doc.dispatchEvent(new Event('visibilitychange'));assert.equal(states.at(-1).reason,'hidden');doc.hidden=false;doc.dispatchEvent(new Event('visibilitychange'));
- media.matches=true;media.dispatchEvent(new Event('change'));assert.equal(states.at(-1).reason,'reduced-motion');media.matches=false;media.dispatchEvent(new Event('change'));
- connection.saveData=true;connection.dispatchEvent(new Event('change'));assert.equal(states.at(-1).reason,'save-data');connection.saveData=false;connection.dispatchEvent(new Event('change'));
+ const beforePreferences=eligibility.inspect(),countBeforePreferences=states.length;media.matches=true;media.dispatchEvent(new Event('change'));assert.equal(states.length,countBeforePreferences,'OS motion changes have no preview-policy listener');
+ connection.saveData=true;connection.dispatchEvent(new Event('change'));assert.equal(eligibility.inspect().active,beforePreferences.active);assert.equal(eligibility.inspect().reason,beforePreferences.reason);assert.equal(eligibility.inspect().reduced,false);assert.equal(eligibility.inspect().saveData,true,'Data-saving can remain a diagnostic fact without being a motion-disable gate');
+ media.matches=false;media.dispatchEvent(new Event('change'));connection.saveData=false;connection.dispatchEvent(new Event('change'));assert.equal(eligibility.inspect().active,true);assert.equal(eligibility.inspect().reason,beforePreferences.reason);
  win.dispatchEvent(new Event('pagehide'));assert.equal(states.at(-1).reason,'page-exit');win.dispatchEvent(new Event('pageshow'));assert.equal(states.at(-1).active,true);
  intersection.callback([{target:element,isIntersecting:true,intersectionRatio:0}]);assert.equal(states.at(-1).active,false);eligibility.dispose();assert(observers.every(value=>value.disconnected));
  const count=states.length;doc.dispatchEvent(new Event('visibilitychange'));assert.equal(states.length,count);
 });
 
-test('page preparation begins before entry and outside the viewport while document and resource policies retain authority',()=>{
+test('page preparation begins before entry and outside the viewport regardless of OS motion or data-saving settings, while document lifetime retains authority',()=>{
  const doc=new EventTarget(),win=new EventTarget(),media=Object.assign(new EventTarget(),{matches:false}),connection=Object.assign(new EventTarget(),{saveData:false});
  const attributes=new Map([['data-site-entry-state','requested']]);doc.documentElement={getAttribute:key=>attributes.get(key)??null};doc.hidden=false;
  Object.assign(win,{matchMedia:()=>media,navigator:{connection}});const states=[];
  const eligibility=observePreviewEligibility({element:{},window:win,document:doc,mode:'page',onChange:state=>states.push(state)});
  assert.equal(states.at(-1).active,true);assert.equal(states.at(-1).siteReady,false);assert.equal(states.at(-1).visible,false);assert.equal(states.at(-1).reason,'page-ready');
  doc.hidden=true;doc.dispatchEvent(new Event('visibilitychange'));assert.equal(states.at(-1).active,false);doc.hidden=false;doc.dispatchEvent(new Event('visibilitychange'));assert.equal(states.at(-1).active,true);
- media.matches=true;media.dispatchEvent(new Event('change'));assert.equal(states.at(-1).reason,'reduced-motion');media.matches=false;media.dispatchEvent(new Event('change'));
- connection.saveData=true;connection.dispatchEvent(new Event('change'));assert.equal(states.at(-1).reason,'save-data');connection.saveData=false;connection.dispatchEvent(new Event('change'));
+ const beforePreferences=eligibility.inspect(),countBeforePreferences=states.length;media.matches=true;media.dispatchEvent(new Event('change'));assert.equal(states.length,countBeforePreferences,'OS motion changes have no preview-policy listener');
+ connection.saveData=true;connection.dispatchEvent(new Event('change'));assert.equal(eligibility.inspect().active,beforePreferences.active);assert.equal(eligibility.inspect().reason,beforePreferences.reason);assert.equal(eligibility.inspect().reduced,false);assert.equal(eligibility.inspect().saveData,true,'Data-saving can remain a diagnostic fact without being a motion-disable gate');
+ media.matches=false;media.dispatchEvent(new Event('change'));connection.saveData=false;connection.dispatchEvent(new Event('change'));assert.equal(eligibility.inspect().active,true);assert.equal(eligibility.inspect().reason,beforePreferences.reason);
  win.dispatchEvent(new Event('pagehide'));assert.equal(states.at(-1).active,false);win.dispatchEvent(new Event('pageshow'));assert.equal(states.at(-1).active,true);
  eligibility.dispose();const count=states.length;doc.dispatchEvent(new Event('visibilitychange'));assert.equal(states.length,count);
 });

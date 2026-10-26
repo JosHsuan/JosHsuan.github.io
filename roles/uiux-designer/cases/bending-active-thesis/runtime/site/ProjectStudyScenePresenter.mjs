@@ -69,7 +69,7 @@ export function createProjectStudyScenePresenter({root,host,model,window:win,doc
  const inspectionNodes=new Map(model.chapters.map(key=>[key,{target:null,state:null,help:null,reset:null,published:''}]));
  for(const [selector,field,data]of [['[data-project-model-target]','target','projectModelTarget'],['[data-project-model-state]','state','projectModelState'],['[data-project-model-help]','help','projectModelHelp'],['[data-project-model-reset]','reset','projectModelReset']])for(const node of root.querySelectorAll(selector)){const row=inspectionNodes.get(node.dataset[data]);if(row)row[field]=node;}
  for(const row of inspectionNodes.values())row.originalDescription=row.target?.getAttribute?.('aria-describedby')??null;
- publisher.attribute(host,'data-project-model-controls-layout',!policy().reduced&&!policy().saveData?'reserved':null);
+ publisher.attribute(host,'data-project-model-controls-layout',null);
  let disposed=false,suspended=false,arrivalStatic=false,staticReason='',resource=null,lifecycle=null,readiness=null,sharedStage=null,preparedChapter=null,posterFailed=false;
  let size={width:win.innerWidth,height:win.innerHeight},chapter=root.dataset.projectActiveChapter??'overview',paintedChapter=null,lastPaint='';
  let target=rest(),value=rest(),velocity=rest(),settled=true,press=null,gestureSequence=0;
@@ -86,7 +86,7 @@ export function createProjectStudyScenePresenter({root,host,model,window:win,doc
  const listen=(node,type,fn,options)=>events.listen(scope,node,type,fn,options);
  const posterReady=()=>{if(disposed||posterFailureReason)return;if(poster?.complete&&!poster.naturalWidth){failPoster('model-poster-unavailable');return;}if(poster?.complete&&poster.naturalWidth)stopPosterDeadline();publisher.attribute(host,'data-project-model-poster-ready',poster?.complete&&poster.naturalWidth?'':null);schedule();};
  if(poster){listen(poster,'load',posterReady);listen(poster,'error',posterReady);posterReady();}
- function announce(){if(disposed)return;publisher.attribute(host,'data-project-model-controls-layout',!arrivalStatic&&!policy().reduced&&!policy().saveData?'reserved':null);const state=lifecycle?.inspect();publisher.attribute(host,'data-project-model-phase',state?.phase??'poster');publisher.attribute(host,'data-project-model-reason',posterFailureReason||staticReason||state?.reason||'');publisher.attribute(host,'data-project-model-rendering',!arrivalStatic&&state?.phase==='ready'?'webgl-model':'poster');publishInspection();}
+ function announce(){if(disposed)return;publisher.attribute(host,'data-project-model-controls-layout',null);const state=lifecycle?.inspect();publisher.attribute(host,'data-project-model-phase',state?.phase??'poster');publisher.attribute(host,'data-project-model-reason',posterFailureReason||staticReason||state?.reason||'');publisher.attribute(host,'data-project-model-rendering',!arrivalStatic&&state?.phase==='ready'?'webgl-model':'poster');publishInspection();}
  const staticReady=()=>readiness?.report({mode:'static',reason:staticReason});
  const settleStatic=reason=>{if(disposed||arrivalStatic)return;cameraRecovery=null;cameraWasPaused=false;arrivalStatic=true;staticReason=reason;lifecycle?.stop(reason);staticReady();announce();schedule();};
  readiness=registerPagePreviewReadiness(doc,host,{onFallback:settleStatic});if(arrivalStatic)staticReady();
@@ -146,9 +146,10 @@ export function createProjectStudyScenePresenter({root,host,model,window:win,doc
   return{...presentation,cameraIntent:lastCameraIntent,handheld:lastHandheld};
  }
 
- function canInspect(){const p=policy(),stage=externalStage?sharedStage:motion;return!!(!disposed&&!arrivalStatic&&!suspended&&!p.hidden&&!p.reduced&&!p.saveData&&!p.paused&&p.siteReady&&stage?.mode==='hold'&&stage.settled&&model.chapters.includes(chapter)&&stage.chapter===chapter&&(!externalStage||stage.kind==='model')&&lifecycle?.inspect().phase==='ready'&&paintedChapter===chapter&&resource?.inspect().successfulPaint);}
+ function canPresent(){const p=policy(),stage=externalStage?sharedStage:motion;return!!(!disposed&&!arrivalStatic&&!suspended&&!p.hidden&&!p.reduced&&!p.saveData&&!p.paused&&p.siteReady&&stage?.mode==='hold'&&stage.settled&&model.chapters.includes(chapter)&&stage.chapter===chapter&&(!externalStage||stage.kind==='model')&&lifecycle?.inspect().phase==='ready'&&paintedChapter===chapter&&resource?.inspect().successfulPaint);}
+ const canInspect=()=>root.getAttribute('data-project-reading')!=='scroll'&&canPresent();
  function publishInspection(){
-  if(disposed)return;const p=policy(),phase=lifecycle?.inspect().phase,available=canInspect(),offset=Object.keys(value).some(key=>value[key]!==0||target[key]!==0||velocity[key]!==0),returning=offset&&!press&&Object.values(target).every(number=>number===0);
+  if(disposed)return;const p=policy(),phase=lifecycle?.inspect().phase,available=canPresent(),offset=Object.keys(value).some(key=>value[key]!==0||target[key]!==0||velocity[key]!==0),returning=offset&&!press&&Object.values(target).every(number=>number===0);
   for(const [key,row]of inspectionNodes){
    const current=key===chapter,usable=current&&available;
    const state=!current||arrivalStatic||p.reduced||p.saveData?'static':p.paused||p.hidden||suspended?'paused':!p.siteReady||phase==='requested'||!usable?'loading':returning?'returning':offset||press?.locked?'inspecting':'ready';

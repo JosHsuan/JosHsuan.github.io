@@ -13,9 +13,6 @@ import styles from './ProjectCaseStudy.module.css';
 function Panel({children,opening=false}){
  return <div className={`${styles.panel} ${opening?styles.openingPanel:''}`} data-information-window="editorial" data-information-motion-surface="plane" data-home-scroll-window="project-narrative"><InformationSkin/>{children}</div>;
 }
-function SourceLink({image}){
- return <a className={styles.sourceLink} href={image.src} target="_blank" rel="noreferrer" aria-label={`View full image (new tab): ${image.alt}`}>View full image <span aria-hidden="true">↗</span></a>;
-}
 function layoutAttributes(layout){
  return{'data-study-composition':layout.composition,'data-study-layout':layout.layout,'data-study-source-shape':layout.sourceShape,'data-study-source-role':layout.sourceRole,'data-study-reading-density':layout.readingDensity};
 }
@@ -30,27 +27,16 @@ function PrimaryVisual({image,chapter,prefix,opening=false,model,motion}){
     <span className={styles.imageFailure} role="status">Image unavailable. The source caption and project text remain available.</span>
    </div>
   </figure>
-  {inspect&&<div className={styles.modelTarget} data-project-model-control data-project-model-target={chapter} tabIndex={0} role="group" aria-label={`${model.alt} When 3D is available, scroll to follow the camera. With keyboard focus, use arrow keys to inspect. Home or Escape returns to the current scroll view.`} aria-describedby={`${prefix}-${chapter}-model-state ${prefix}-${chapter}-model-help`}/>}
   </div>
   <div className={styles.sourcePanel} data-project-source-caption={chapter} data-information-window="evidence-caption" data-information-motion-surface="plane" data-home-scroll-window="project-caption">
    <InformationSkin/>
    {inspect&&<>
     <p className={styles.modelState} id={`${prefix}-${chapter}-model-state`} data-project-model-state={chapter} role="status">Original source view.</p>
     <p className={styles.modelDescription} data-project-model-description>{model.alt}</p>
-    <p className={styles.modelHelp} id={`${prefix}-${chapter}-model-help`} data-project-model-help={chapter} hidden>Scroll to follow the camera. With focus, use arrow keys to inspect; Home or Esc returns to the current scroll view.</p>
-    <button className={styles.sourceAction} type="button" data-project-model-reset={chapter} hidden>Return to scroll view</button>
    </>}
    <p id={`${prefix}-${chapter}-caption`} className={styles.sourceCaption}>{source.caption}</p>
    <p id={`${prefix}-${chapter}-credit`} className={styles.credit}>{source.credit}</p>
-   <div className={styles.sourceLinks}>{motion?<>
-    <a className={styles.sourceLink} data-project-motion-source href={motion.src} target="_blank" rel="noreferrer" aria-label={`${motion.kind==='recording'?'View recording':'View animation'} (new tab): ${motion.alt}`}>{motion.kind==='recording'?'View recording':'View animation'} <span aria-hidden="true">↗</span></a>
-    <SourceLink image={poster}/>
-   </>:<SourceLink image={image}/>}</div>
    {motion&&<>
-    <div className={styles.motionControls}>
-     <button type="button" data-project-motion-toggle={motion.id} aria-pressed="false" hidden>Play recording</button>
-     <button type="button" data-project-motion-replay={motion.id} hidden>Replay recording</button>
-    </div>
     <p className={styles.motionStatus} data-project-motion-status={motion.id} role="status"/>
    </>}
   </div>
@@ -58,8 +44,8 @@ function PrimaryVisual({image,chapter,prefix,opening=false,model,motion}){
 }
 function EvidenceFigure({image}){
  return <figure className={styles.evidence} data-study-evidence-layout={projectStudyEvidenceLayout(image)} data-study-evidence-role={image.purpose==='diagram'?'technical-plate':'photograph'}>
-  <a className={styles.evidenceImage} data-information-window="evidence-image" data-information-motion-surface="plane" data-home-scroll-window="project-evidence" href={image.src} target="_blank" rel="noreferrer" aria-label={`View full image (new tab): ${image.alt}`}><InformationSkin/><img data-project-evidence-image src={image.src} width={image.width} height={image.height} alt={image.alt} loading="lazy" decoding="async"/></a>
-  <figcaption data-information-window="evidence-caption" data-information-motion-surface="plane" data-home-scroll-window="project-caption"><InformationSkin/><p>{image.caption}</p><span>{image.credit}</span><a className={styles.sourceLink} data-evidence-source-link href={image.src} target="_blank" rel="noopener noreferrer" aria-label={`Open full image (new tab): ${image.alt}`}>Open full image (new tab)</a></figcaption>
+  <div className={styles.evidenceImage} data-information-window="evidence-image" data-information-motion-surface="plane" data-home-scroll-window="project-evidence"><InformationSkin/><img data-project-evidence-image src={image.src} width={image.width} height={image.height} alt={image.alt} loading="lazy" decoding="async"/></div>
+  <figcaption data-information-window="evidence-caption" data-information-motion-surface="plane" data-home-scroll-window="project-caption"><InformationSkin/><p>{image.caption}</p><span>{image.credit}</span></figcaption>
  </figure>;
 }
 
@@ -73,7 +59,7 @@ export default function ProjectCaseStudy({project}){
  return <>
   <ProjectStudyChrome chapters={chapters} prefix={prefix} navigationLabel={`${project.shortTitle} project sections`} railClassName={styles.chapterRail}/>
   <ProjectCaseStudyControls projectId={project.id} chapterCount={chapters.length}/>
-  <main id="portfolio-main" tabIndex={-1} className={styles.page} data-project-study={project.id} data-study-presentation={hybrid?'hybrid-scenes':undefined} data-information-motion-profile="velocity-skin" data-portfolio-root data-portfolio-section="project-study">
+  <main id="portfolio-main" tabIndex={-1} className={styles.page} data-project-study={project.id} data-project-reading="scroll" data-study-presentation={hybrid?'hybrid-scenes':undefined} data-information-motion-profile="velocity-skin" data-portfolio-root data-portfolio-section="project-study">
    {project.model&&<ProjectCaseStudyStage projectId={project.id} model={project.model}/>}
    <article aria-labelledby={`${prefix}-overview-heading`}>
     {hybrid?<NativeStudyOpening project={project}/>:<header id={`${prefix}-overview`} tabIndex={-1} className={`${styles.chapter} ${styles.opening}`} data-project-chapter="overview" {...layoutAttributes(projectStudyLayout(project,'overview'))}>
@@ -88,7 +74,7 @@ export default function ProjectCaseStudy({project}){
         <div><dt>Context</dt><dd>{project.context}</dd></div>
         <div><dt>Role</dt><dd>{project.role}</dd></div>
        </dl>
-       <a className={styles.readingLink} href={`#${prefix}-${project.sections[0].id}`}>Follow the study <span aria-hidden="true">↓</span></a>
+       <p className={styles.readingLink}>Scroll to follow the study <span aria-hidden="true">↓</span></p>
       </Panel>
       <PrimaryVisual image={project.hero} chapter="overview" prefix={prefix} opening model={project.model} motion={project.motionMedia?.find(media=>media.chapter==='overview')}/>
      </div>

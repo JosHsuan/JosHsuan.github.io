@@ -33,7 +33,9 @@ function readMaterial(input){
 }
 
 async function staticStudy(page){
- await page.emulateMedia({reducedMotion:'reduce',contrast:'no-preference',forcedColors:'none'});
+ // A real blocked resource is the static material fixture, not OS motion policy.
+ await page.emulateMedia({contrast:'no-preference',forcedColors:'none'});
+ await page.route('**/assets/source-layers.glb',route=>route.abort());
  await page.goto('/projects/bending-active/#overview');
  await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered'&&window.__story.inspect().libraryDiagram.count===1,null,{timeout:WAIT});
  await page.evaluate(()=>document.fonts.ready);await settle(page);
@@ -126,7 +128,7 @@ async function neutralReadingMaterials(page,testInfo){
  const selectors=[
   '#form [data-information-window="editorial"]','[data-source-diagram="miura"]',
   '#make [data-information-window="evidence-image"]','#make [data-information-window="evidence-caption"]',
-  '[data-model-side-label][data-study-chapter="form"]','#pattern [data-information-window="source-details"]','[data-source-comparison]',
+  '[data-model-side-label][data-study-chapter="form"]','#pattern [data-information-window="source-details"]',
  ];
  const viewport=page.viewportSize(),results=[];
  await page.evaluate(()=>{
@@ -180,14 +182,12 @@ async function neutralReadingMaterials(page,testInfo){
     if(box.height+24>page.viewportSize().height)await page.setViewportSize({width:viewport.width,height:Math.ceil(box.height+24)});
     if(kind==='source-diagram'){
      const geometry=await owner.evaluate(element=>{
-      const choices=element.querySelector('[role="group"]'),caption=element.querySelector('[data-diagram-caption]')?.parentElement;
-      if(!choices||!caption)return null;
-      return{choicesBottom:choices.getBoundingClientRect().bottom,buttonBottom:Math.max(...[...choices.querySelectorAll('button')].map(button=>button.getBoundingClientRect().bottom)),captionTop:caption.getBoundingClientRect().top,captionBottom:caption.getBoundingClientRect().bottom,ownerBottom:element.getBoundingClientRect().bottom};
+      const sequence=element.querySelector('ol'),drawing=element.querySelector('[data-library-drawing], [class*="hitRegion"]');
+      if(!sequence||!drawing)return null;
+      return{drawingBottom:drawing.getBoundingClientRect().bottom,sequenceTop:sequence.getBoundingClientRect().top,sequenceBottom:sequence.getBoundingClientRect().bottom,ownerBottom:element.getBoundingClientRect().bottom,stages:sequence.querySelectorAll('li').length};
      });
-     expect(geometry,'source-diagram retains its native controls and caption').not.toBeNull();
-     expect(geometry.buttonBottom,'native button rows fit their controls container').toBeLessThanOrEqual(geometry.choicesBottom+.5);
-     expect(geometry.captionTop,'the material fixture must not put buttons over its caption').toBeGreaterThanOrEqual(geometry.choicesBottom-.5);
-     expect(geometry.captionBottom,'caption remains inside the measured material').toBeLessThanOrEqual(geometry.ownerBottom+.5);
+     expect(geometry,'source-diagram retains all native stage descriptions').not.toBeNull();
+     expect(geometry.stages).toBeGreaterThan(0);expect(geometry.sequenceTop).toBeGreaterThanOrEqual(geometry.drawingBottom-.5);expect(geometry.sequenceBottom).toBeLessThanOrEqual(geometry.ownerBottom+.5);
      result.layout=geometry;
     }
     const samples=result.samples;
@@ -212,7 +212,7 @@ async function neutralReadingMaterials(page,testInfo){
     result.status='passed';
    }finally{await page.evaluate(()=>window.__readingMaterialRestore?.());await owner.dispose();}
   }
-  expect(results.map(row=>row.kind).sort()).toEqual(['editorial','evidence-caption','evidence-image','model-label','source-details','source-diagram','source-portal']);
+  expect(results.map(row=>row.kind).sort()).toEqual(['editorial','evidence-caption','evidence-image','model-label','source-details','source-diagram']);
   expect(await page.locator('[data-story-root]').evaluate(element=>({color:getComputedStyle(element).color,background:getComputedStyle(document.body).backgroundColor}))).toEqual(outside);
  }finally{
   const body=JSON.stringify({foregrounds,results},null,2)+'\n';
@@ -226,20 +226,16 @@ async function neutralReadingMaterials(page,testInfo){
 test('all information surfaces share one glass owner and preserve readable source paper',async({page},testInfo)=>{
  test.setTimeout(scenarioTimeout(120000));await staticStudy(page);
  const details=page.locator('#pattern [data-information-window="source-details"]');
- await details.locator(':scope > summary').click();await expect(details).toHaveJSProperty('open',true);await settle(page);
- const trigger=page.locator('#make [data-inspect-figure]');
- await trigger.scrollIntoViewIfNeeded();await settle(page);await trigger.click();
- const portal=page.locator('[data-source-comparison]');await expect(portal).toBeVisible();
- await expect(portal).toHaveAttribute('data-information-ready',/.*/,{timeout:WAIT});
- await expect.poll(()=>portal.locator('img').evaluate(image=>image.complete&&image.naturalWidth>0),{timeout:WAIT}).toBe(true);await settle(page);
+ await details.scrollIntoViewIfNeeded();await expect(details.locator('img')).toBeVisible();await settle(page);
+ await expect(page.locator('details,summary,[data-inspect-figure],[data-source-comparison]')).toHaveCount(0);
  const surfaces=await page.locator('[data-information-window]').evaluateAll(readMaterial);
- expect([...new Set(surfaces.map(row=>row.kind))].sort()).toEqual(['editorial','evidence-caption','evidence-image','model-label','source-details','source-diagram','source-portal']);
+ expect([...new Set(surfaces.map(row=>row.kind))].sort()).toEqual(['editorial','evidence-caption','evidence-image','model-label','source-details','source-diagram']);
  expect(surfaces.some(row=>row.nested)).toBe(true);expect(surfaces.some(row=>row.ready)).toBe(true);
  for(const row of surfaces)expectSingleMaterial(row);
 
- await expect(page.locator('[data-liquid-glass][data-liquid-ready]')).toHaveCount(3,{timeout:WAIT});
- const navigation=await page.locator('[data-story-navigation],[data-liquid-glass="identity"],[data-reading-tools]').evaluateAll(readMaterial);
- expect(navigation).toHaveLength(3);
+ await expect(page.locator('[data-liquid-glass][data-liquid-ready]')).toHaveCount(1,{timeout:WAIT});
+ const navigation=await page.locator('[data-liquid-glass="identity"]').evaluateAll(readMaterial);
+ expect(navigation).toHaveLength(1);
  for(const row of navigation){
   expect(row.material).toBe('navigation');expect(row.opacity).toBe(1);expect(row.skinCount).toBe(1);expect(row.ready).toBe(true);
   expect(row.mode).toMatch(/^(refractive|reflective|opaque)$/);
@@ -255,14 +251,13 @@ test('all information surfaces share one glass owner and preserve readable sourc
  for(const paper of papers){expect(paper.material).toBe('source-paper');expect(paper.alpha).toBe(1);expect(paper.filter).not.toContain('blur(');expect(paper.owners).toEqual([]);}
  // Backdrop blur belongs behind the interface. Neither its text, original
  // vector linework nor original comparison image may inherit a content blur.
- const content=await page.locator('#project-title,#system [data-editorial-copy],[data-source-diagram] svg,[data-model-side-label] h3,[data-source-comparison] img').evaluateAll(elements=>elements.map(element=>{
+ const content=await page.locator('#project-title,#system [data-editorial-copy],[data-source-diagram] svg,[data-model-side-label] h3,#pattern [data-information-window="source-details"] img').evaluateAll(elements=>elements.map(element=>{
   const filters=[];for(let owner=element;owner;owner=owner.parentElement)filters.push(getComputedStyle(owner).filter);
   const style=getComputedStyle(element);return{filters,backdrop:style.getPropertyValue('backdrop-filter')||style.getPropertyValue('-webkit-backdrop-filter')||'none'};
  }));
  expect(content.length).toBeGreaterThan(6);
  for(const row of content){expect(row.filters.some(filter=>filter.includes('blur('))).toBe(false);expect(row.backdrop).toBe('none');}
  await neutralReadingMaterials(page,testInfo);
- await page.getByRole('button',{name:'Close source comparison'}).click();await expect(portal).toHaveCount(0);await expect(trigger).toBeFocused();
 });
 
 test('native transparency and contrast preferences update an already registered material',async({page,context,browserName},testInfo)=>{
@@ -315,7 +310,7 @@ test('without JavaScript the reading material remains legible and original drawi
   await expect.poll(()=>original.evaluate(image=>image.complete&&image.naturalWidth>0),{timeout:WAIT}).toBe(true);
   expect((await drawing.evaluate(readMaterial)).alpha).toBe(1);
   expect(await original.evaluate(element=>getComputedStyle(element).filter)).not.toContain('blur(');
-  const details=page.locator('#pattern [data-information-window="source-details"]');await details.locator(':scope > summary').click();await expect(details).toHaveJSProperty('open',true);
-  await expect(details.locator('[data-inspect-figure]')).toHaveAttribute('href',/\/assets\/cinematic\/source-p\d+\.webp$/);
+  const details=page.locator('#pattern [data-information-window="source-details"]');await details.scrollIntoViewIfNeeded();await expect(details.locator('img')).toBeVisible();
+  await expect(details.locator('a,button,summary')).toHaveCount(0);await expect(details.locator('img')).toHaveAttribute('src','/assets/cinematic/function-library.webp');
  }finally{await context.close();}
 });

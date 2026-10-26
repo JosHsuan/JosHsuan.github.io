@@ -6,6 +6,8 @@ import * as T from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {stageCameraPose,stageRenderView} from '../components/xr-stage-scene.mjs';
 import {collectResearchSupport,createResearchPhoneGeometry,RESEARCH_MODEL_PIXELS,RESEARCH_PHONE_PIXELS} from '../components/research-scene-geometry.mjs';
+import {XR_METHOD_CAMERA_KEYS} from '../runtime/motion/authored-project-camera-scores.mjs';
+import {createScrollCameraPath,sampleScrollCamera} from '../runtime/motion/scroll-camera-score.mjs';
 import {resolveRenderBudget} from '../components/render-budget.mjs';
 
 const viewports=[[1440,1000],[1920,1080],[800,600],[799,1000],[390,844],[320,700]];
@@ -151,4 +153,20 @@ test('the real full-viewport canvas preserves every source point, reading-safe c
    assert.deepEqual(croppedBudget,fullBudget,'The renderer budget now applies to the real full viewport');
   }finally{phone?.dispose();}
  }
+});
+
+
+test('the bold scroll-only XR exterior arc and crane preserve every pinned source vertex and reading clearance on desktop and mobile',()=>{
+ const path=createScrollCameraPath(XR_METHOD_CAMERA_KEYS),original=sourceState(),supportDigest=arrayDigest(sourceSupport),bounds={min:[Infinity,Infinity,Infinity],max:[-Infinity,-Infinity,-Infinity]};
+ for(let i=0;i<sourceSupport.length;i++){const axis=i%3;bounds.min[axis]=Math.min(bounds.min[axis],sourceSupport[i]);bounds.max[axis]=Math.max(bounds.max[axis],sourceSupport[i]);}
+ const centre=bounds.min.map((min,i)=>(min+bounds.max[i])/2);
+ assert(path.at(-1).yawRad-path[0].yawRad>2.5,'The authored exterior arc is substantially broader than the former fourteen-degree study');
+ assert(Math.max(...path.map(key=>key.pitchRad))-Math.min(...path.map(key=>key.pitchRad))>.5,'The crane deliberately changes elevation as well as orbit');
+ for(const[width,height]of viewports)for(let index=0;index<=20;index++){
+  const progress=index/20,intent=sampleScrollCamera(path,progress),pose=stageCameraPose(sourceSupport,width,height,{chapter:'method',cameraIntent:intent});
+  assertProjected(sourceSupport,pose,width,height,false,`${width}×${height} bold method ${progress}`);
+  assert(pose.distance>pose.radius,'The external camera cannot enter the enclosing source sphere');
+  assert.deepEqual(pose.target,centre,'The target remains the actual unchanged source centre, not invented internal geometry');
+ }
+ assert.equal(arrayDigest(sourceSupport),supportDigest);assert.deepEqual(sourceState(),original,'A bolder authored camera never mutates source geometry, topology, normals or material');
 });

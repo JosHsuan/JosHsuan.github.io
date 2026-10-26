@@ -1,6 +1,9 @@
+// Historical exact-baseline checks below first reverse ONLY the separately
+// reviewed 26 October scroll-reading delta; raw current-DOM contracts live in
+// scroll-reading-contract.test.mjs and source-access.test.mjs. No asset is normalized.
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
-import {readFile} from 'node:fs/promises';
+import {readReviewedFile as readFile} from './scroll-reading-contract.mjs';
 import test from 'node:test';
 import {projectStudyEvidence} from '../../roles/uiux-designer/cases/bending-active-thesis/components/project-study-media.mjs';
 import {projectStudyEvidenceLayout} from '../../roles/uiux-designer/cases/bending-active-thesis/components/project-study-layout.mjs';

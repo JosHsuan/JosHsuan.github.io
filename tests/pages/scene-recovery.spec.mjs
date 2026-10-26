@@ -19,40 +19,28 @@ async function expectStaticReading(page){
   await expect(page.locator('[data-story-chapter]')).toHaveCount(7);
   await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(0);
   await expect(page.locator('canvas[data-ascii-field]')).toHaveCount(1);
-  await expect(page.getByRole('button',{name:'Enable 3D',exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:/Enable|Retry|Pause|Resume/})).toHaveCount(0);
   expect(await page.evaluate(()=>window.__recoveryContexts)).toEqual({attempts:0,canvases:0});
   const before=await page.evaluate(()=>({time:window.__story.inspect().playback.activeSeconds,draws:window.__story.inspect().pageField.draws}));
-  await page.locator('[data-chapter-link="system"]').click();await settle(page);
+  await page.locator('#system').evaluate(el=>{let y=0;for(let n=el;n;n=n.offsetParent)y+=n.offsetTop;scrollTo({top:y,behavior:'instant'});});await settle(page);
   await expect(page.locator('[data-chapter-link="system"]')).toHaveAttribute('aria-current','location');
   expect(await page.evaluate(()=>({chapter:window.__story.inspect().playback.chapterId,time:window.__story.inspect().playback.activeSeconds,draws:window.__story.inspect().pageField.draws}))).toEqual({chapter:'system',...before});
   const source=page.locator('[data-model-viewport][data-study-chapter="system"]');
-  await expect(source).toHaveAttribute('aria-disabled','true');
+  await expect(source).not.toHaveAttribute('role','button');
   await expect.poll(()=>source.locator('img').evaluate(image=>image.complete&&image.naturalWidth>0),{timeout:WAIT}).toBe(true);
   await page.waitForFunction(()=>!window.__story.inspect().scheduled,null,{timeout:WAIT});
   const held=await page.evaluate(()=>({controller:window.__story.inspect().controllerFrame,time:window.__story.inspect().playback.activeSeconds}));
   await frames(page,6);expect(await page.evaluate(()=>({controller:window.__story.inspect().controllerFrame,time:window.__story.inspect().playback.activeSeconds}))).toEqual(held);
 }
 
-async function enableExplicitly(page){
-  await page.getByRole('button',{name:'Enable 3D',exact:true}).click();
-  await page.waitForFunction(()=>window.__thesis?.inspect().ready,null,{timeout:WAIT});await settle(page);
-  await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);
-  expect(await page.evaluate(()=>window.__recoveryContexts.canvases)).toBe(1);
-  expect(await page.evaluate(key=>JSON.parse(sessionStorage.getItem(key)).status,SCENE_RECOVERY_KEY)).toBe('active');
-  expect(await page.evaluate(()=>window.__thesis.inspect().source)).toMatchObject({vertices:172789,triangles:227521,sourceObjects:51});
-  expect(await page.evaluate(()=>({detail:window.__thesis.inspect().detail,shadow:window.__thesis.inspect().renderer.shadowEnabled}))).toEqual({detail:'full',shadow:true});
-}
-
 // Synthetic WebGL context loss exercises the application fallback, not the
 // owner's physical Safari process termination or its underlying cause.
-test('context loss preserves reading and reload requires explicit 3D recovery',async({page})=>{
+test('context loss preserves inline reading and reload does not offer automatic or button-triggered retry',async({page})=>{
   test.setTimeout(scenarioTimeout(120000));
   await instrumentContexts(page);const errors=[];page.on('pageerror',error=>errors.push(error.message));
   await loadScene(page);
   expect(await page.evaluate(()=>window.__recoveryContexts.canvases)).toBe(1);
   await page.evaluate(()=>window.__thesis.loseContext());
-  await expect(page.locator('[data-scene-fallback]')).toHaveText('Source study available · 3D unavailable',{timeout:WAIT});
-  await expect(page.locator('[data-scene-fallback]')).toBeVisible();
   await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(0,{timeout:WAIT});
   await expect.poll(()=>page.evaluate(key=>JSON.parse(sessionStorage.getItem(key)).status,SCENE_RECOVERY_KEY)).toBe('failed');
   await settle(page);
@@ -63,7 +51,7 @@ test('context loss preserves reading and reload requires explicit 3D recovery',a
     controller:story.controllerFrame,time:story.playback.activeSeconds,draws:story.pageField.draws,scheduled:story.scheduled,
   };});
   const held=await sample();await frames(page,8);expect(await sample()).toEqual(held);
-  await page.reload();await expectStaticReading(page);await enableExplicitly(page);
+  await page.reload();await expectStaticReading(page);
   expect(errors).toEqual([]);
 });
 
@@ -76,14 +64,14 @@ test('a simulated unfinished scene lease blocks automatic reload without blockin
   await page.evaluate(key=>window.addEventListener('pagehide',()=>sessionStorage.setItem(key,JSON.stringify({status:'active',at:Date.now()})),{once:true}),SCENE_RECOVERY_KEY);
   await page.reload();await expectStaticReading(page);
   expect(await page.evaluate(key=>JSON.parse(sessionStorage.getItem(key)).status,SCENE_RECOVERY_KEY)).toBe('active');
-  await enableExplicitly(page);expect(errors).toEqual([]);
+  await expect(page.getByRole('button')).toHaveCount(0);expect(errors).toEqual([]);
 });
 
-test('a known failed scene remains manual after the uncertain-lease time window',async({page})=>{
+test('a known failed scene retains safe native reading after the uncertain-lease time window',async({page})=>{
   test.setTimeout(scenarioTimeout(120000));
   await instrumentContexts(page);
   await page.addInitScript(key=>{
     if(!sessionStorage.getItem(key))sessionStorage.setItem(key,JSON.stringify({status:'failed',at:Date.now()-31*60*1000}));
   },SCENE_RECOVERY_KEY);
-  await page.goto('/projects/bending-active/#overview');await expectStaticReading(page);await enableExplicitly(page);
+  await page.goto('/projects/bending-active/#overview');await expectStaticReading(page);
 });

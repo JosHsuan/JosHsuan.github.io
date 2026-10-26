@@ -1,5 +1,5 @@
 import {test, expect} from '@playwright/test';
-import {WAIT, scenarioTimeout, centerStudy, holdModel, frames, settle, expectIdle} from './case-helpers.mjs';
+import {WAIT, scenarioTimeout, centerStudy, frames, settle} from './case-helpers.mjs';
 
 async function entered(page){await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered',null,{timeout:WAIT});}
 
@@ -22,111 +22,45 @@ test('published story, canonical metadata and every linked asset work without Ja
   await context.close();
 });
 
-test('public model initializes in Full and preserves chapter navigation without quality controls and with accessible motion pause', async ({page,isMobile}) => {
-  test.setTimeout(scenarioTimeout(120000));
-  const errors=[]; page.on('pageerror', error=>errors.push(error.message));
-  // Exercise the visitor's real entry once in the public release baseline.
-  // Other scene suites enter #overview directly to retain their focused scope.
-  await page.goto('/');
-  await expect(page.locator('[data-site-loader]')).toBeHidden({timeout:WAIT});
-  await expect(page.locator('[data-home-introduction]')).toBeVisible();
-  const projectLink=page.locator('[data-home-project-link]');
-  await expect(projectLink).toHaveAttribute('href','#projects');await projectLink.click();
-  await expect(page.locator('[data-project-grid]')).toBeInViewport();
-  await page.locator('[data-project-card="bending-active"]').click();
-  await expect(page).toHaveURL(/\/projects\/bending-active\/$/);
-  await page.waitForFunction(()=>window.__thesis?.inspect().ready&&window.__story?.inspect().entry.phase==='entered',null,{timeout:WAIT});
-  await page.evaluate(()=>document.fonts.ready);await settle(page);
-  await expect(page.locator('[data-cinematic-stage]')).toHaveAttribute('data-presentation-context','project');
-  // A visitor's real keyboard inspection holds the source while its Full
-  // materials, resource policy and geometry are measured.
-  await centerStudy(page,'form');await holdModel(page);
-  const initial=await page.evaluate(()=>window.__thesis.inspect());
-  expect(initial.source).toMatchObject({vertices:172789,triangles:227521,sourceObjects:51});
-  expect(initial.material).toMatchObject({finish:'satin',roughness:.58,anisotropy:.35});
-  expect(initial.exhibition).toMatchObject({sourceGeometry:false,areaLights:2,extraShadowMaps:0});
-  expect(initial.detail).toBe('full');
-  expect(initial.compositor.requestedSamples).toBe(isMobile?0:2);
-  expect(initial.renderSuspended).toBe(false);
-  await expect(page.getByRole('combobox',{name:'Visual detail',exact:true})).toHaveCount(0);
-  const motion=page.locator('[data-bending-motion-toggle]');
-  await expect(motion).toHaveCount(1);await expect(motion).toHaveAccessibleName('Pause motion');await expect(motion).toBeEnabled();await expect(motion).toHaveAttribute('aria-pressed','false');
-  await page.locator('[data-chapter-link="system"]').click();
-  // Native document input drives one visible reading plane and scene score.
-  // Linux software rendering can exceed the default five-second assertion budget.
-  await expect(page.locator('[data-chapter-link="system"]')).toHaveAttribute('aria-current', 'location', {timeout:30000});
-  await centerStudy(page,'system');await holdModel(page,'system');
-  await page.waitForFunction(() => {
-    const story = window.__story?.inspect(), scene = window.__thesis?.inspect();
-    return story?.settled && story.chapterId === 'system' && scene?.representation?.chapterId === 'system';
-  }, null, {timeout:30000});
-  expect(await page.evaluate(()=>window.__thesis.inspect().detail)).toBe('full');
-  expect(await page.evaluate(()=>window.__thesis.inspect().compositor.requestedSamples)).toBe(isMobile?0:2);
-  expect(await page.evaluate(()=>window.__thesis.inspect().compositor.mist.enabled)).toBe(true);
-  await page.locator('[data-chapter-link="make"]').click();
-  await settle(page);
-  await page.waitForFunction(()=>{const story=window.__story?.inspect(),scene=window.__thesis?.inspect();return story?.settled&&story.chapterId==='make'&&story.canvasPlacement?.settled&&story.canvasPlacement.visible===false&&scene?.renderSuspended&&!scene.sourceVisible;},null,{timeout:30000});
-  // An absent surface deliberately retains its previous rendered pose. Prove
-  // that the live Canvas is suspended instead of requiring an invisible frame.
-  const resting=await page.evaluate(()=>window.__thesis.inspect().frames);await frames(page,8);
-  expect(await page.evaluate(()=>window.__thesis.inspect().frames)).toBe(resting);
-  await page.locator('[data-chapter-link="form"]').click();
-  await centerStudy(page,'form');
-  await page.waitForFunction(()=>{const story=window.__story?.inspect(),scene=window.__thesis?.inspect();return story?.settled&&scene?.pose.chapter.id==='form'&&scene.sourceVisible&&!scene.renderSuspended&&scene.canvasPlacement?.visible;},null,{timeout:30000});
-  expect(await page.evaluate(()=>window.__thesis.inspect().frames)).toBeGreaterThan(resting);
-  const runningTime=await page.evaluate(()=>window.__story.inspect().playback.activeSeconds);
-  await expect.poll(()=>page.evaluate(()=>window.__story.inspect().playback.activeSeconds),{timeout:WAIT}).toBeGreaterThan(runningTime);
-  await motion.click();await expect(motion).toHaveAccessibleName('Resume motion');await expect(motion).toHaveAttribute('aria-pressed','true');await settle(page);await expectIdle(page);
-  const paused=await page.evaluate(()=>({time:window.__story.inspect().playback.activeSeconds,frames:window.__thesis.inspect().frames,y:scrollY,paused:window.__thesis.inspect().motionPaused}));
-  expect(paused.paused).toBe(true);await frames(page,5);
-  expect(await page.evaluate(()=>({time:window.__story.inspect().playback.activeSeconds,frames:window.__thesis.inspect().frames,y:scrollY,paused:window.__thesis.inspect().motionPaused}))).toEqual(paused);
-  await motion.click();await expect(motion).toHaveAccessibleName('Pause motion');await expect(motion).toHaveAttribute('aria-pressed','false');await settle(page);
-  await expect.poll(()=>page.evaluate(()=>window.__story.inspect().playback.activeSeconds),{timeout:WAIT}).toBeGreaterThan(paused.time);
-  expect(await page.evaluate(()=>({y:scrollY,paused:window.__thesis.inspect().motionPaused}))).toEqual({y:paused.y,paused:false});
-  await holdModel(page);await expectIdle(page);
-  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
-  expect(errors).toEqual([]);
+async function chapter(page,id){await page.locator(`[data-story-chapter="${id}"]`).evaluate(el=>{let y=0;for(let n=el;n;n=n.offsetParent)y+=n.offsetTop;scrollTo({top:y,behavior:'instant'});});await settle(page);}
+
+test('public model initializes in Full and all project reading follows scroll without quality or pause controls',async({page,isMobile})=>{
+ test.setTimeout(scenarioTimeout(120000));const errors=[];page.on('pageerror',error=>errors.push(error.message));
+ await page.goto('/');await expect(page.locator('[data-site-loader]')).toBeHidden({timeout:WAIT});await expect(page.locator('[data-home-introduction]')).toBeVisible();
+ await page.locator('[data-project-grid]').scrollIntoViewIfNeeded();await expect(page.locator('[data-project-grid]')).toBeInViewport();
+ await page.locator('[data-project-card="bending-active"]').click();await expect(page).toHaveURL(/\/projects\/bending-active\/$/);
+ await page.waitForFunction(()=>window.__thesis?.inspect().ready&&window.__story?.inspect().entry.phase==='entered',null,{timeout:WAIT});await page.evaluate(()=>document.fonts.ready);await settle(page);
+ await centerStudy(page,'form');const initial=await page.evaluate(()=>window.__thesis.inspect());
+ expect(initial.source).toMatchObject({vertices:172789,triangles:227521,sourceObjects:51});expect(initial.material).toMatchObject({finish:'satin',roughness:.58,anisotropy:.35});expect(initial.exhibition).toMatchObject({sourceGeometry:false,areaLights:2,extraShadowMaps:0});expect(initial.detail).toBe('full');expect(initial.compositor.requestedSamples).toBe(isMobile?0:2);expect(initial.renderSuspended).toBe(false);
+ await expect(page.getByRole('combobox',{name:'Visual detail',exact:true})).toHaveCount(0);await expect(page.locator('[data-bending-motion-toggle],[data-story-navigation] a,[data-story-navigation] button')).toHaveCount(0);
+ await centerStudy(page,'system');await expect(page.locator('[data-chapter-link="system"]')).toHaveAttribute('aria-current','location',{timeout:WAIT});
+ expect(await page.evaluate(()=>window.__thesis.inspect().detail)).toBe('full');expect(await page.evaluate(()=>window.__thesis.inspect().compositor.requestedSamples)).toBe(isMobile?0:2);
+ await chapter(page,'make');await page.waitForFunction(()=>{const story=window.__story?.inspect(),scene=window.__thesis?.inspect();return story?.canvasPlacement?.settled&&story.canvasPlacement.visible===false&&scene?.renderSuspended&&!scene.sourceVisible;},null,{timeout:WAIT});
+ const resting=await page.evaluate(()=>window.__thesis.inspect().frames);await frames(page,8);expect(await page.evaluate(()=>window.__thesis.inspect().frames)).toBe(resting);
+ await centerStudy(page,'form');await page.waitForFunction(()=>window.__thesis.inspect().sourceVisible&&!window.__thesis.inspect().renderSuspended,null,{timeout:WAIT});expect(await page.evaluate(()=>window.__thesis.inspect().frames)).toBeGreaterThan(resting);
+ const before=await page.evaluate(()=>({time:window.__story.inspect().playback.activeSeconds,source:window.__thesis.inspect().representation.id}));await frames(page,8);expect(await page.evaluate(()=>window.__story.inspect().playback.activeSeconds)).toBeGreaterThan(before.time);expect(await page.evaluate(()=>window.__thesis.inspect().representation.id)).toBe(before.source);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);expect(errors).toEqual([]);
 });
 
-test('evidence inspection and method disclosure preserve native reading and keyboard focus', async ({page}) => {
-  await page.emulateMedia({reducedMotion:'reduce'});
-  await page.goto('/projects/bending-active/#overview');await entered(page);
-  await page.locator('[data-chapter-link="system"]').click();
-  const step=page.locator('#system details').first();
-  await step.locator('summary').click();
-  await expect(step).toHaveAttribute('open','');
-  await expect(step).toContainText('desired surface geometry');
-  await page.getByText('Compare with the original thesis figure',{exact:true}).click();
-  const trigger=page.locator('[data-inspect-figure="0"]');
-  await trigger.focus();await page.keyboard.press('Enter');
-  const comparison=page.getByRole('region',{name:'Original source for FIG. 3–04'});
-  await expect(comparison).toBeVisible();
-  await expect(comparison.locator('img')).toHaveAttribute('src','/assets/cinematic/source-p024.webp');
-  await expect(page.locator('dialog[open]')).toHaveCount(0);
-  await comparison.getByRole('button',{name:'Close source comparison'}).focus();
-  await page.keyboard.press('Escape');
-  await expect(comparison).toHaveCount(0);
-  await expect(trigger).toBeFocused();
-  expect(await page.evaluate(()=>document.body.style.overflow)).not.toBe('hidden');
-  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
+test('method explanations, research figures and credits are readable inline without disclosure or source-opening clicks',async({page})=>{
+ test.setTimeout(scenarioTimeout(120000));await page.goto('/projects/bending-active/#system');await entered(page);await settle(page);
+ await expect(page.locator('#system')).toContainText('Start with the desired surface geometry.');await expect(page.locator('#system')).toContainText('Paired edges describe how openings close and the panel bends.');
+ const geometry=page.locator('#system [data-information-window="source-details"] img');await geometry.scrollIntoViewIfNeeded();await expect(geometry).toBeVisible();await expect(geometry).toHaveAttribute('src','/assets/cinematic/geometry-strip.webp');
+ const library=page.locator('#pattern [data-information-window="source-details"] img');await library.scrollIntoViewIfNeeded();await expect(library).toBeVisible();
+ await chapter(page,'credits');await expect(page.locator('#credits')).toContainText('Project credits & reference figures');
+ await expect(page.locator('details,summary,[data-inspect-figure],[data-source-comparison],a[href^="/assets/"]')).toHaveCount(0);
+ expect(await page.evaluate(()=>document.body.style.overflow)).not.toBe('hidden');expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
 });
 
-test('reduced motion and unavailable model retain the public story', async ({browser}) => {
-  const context = await browser.newContext({reducedMotion:'reduce'});
-  const page = await context.newPage(); const sceneRequests=[];
-  page.on('request', request=>{if(/\.(glb|hdr)(\?|$)/.test(request.url()))sceneRequests.push(request.url());});
-  await page.goto('http://127.0.0.1:4186/projects/bending-active/#overview');
-  await entered(page);
-  await expect(page.getByRole('button',{name:'Enable 3D',exact:true})).toBeVisible();
-  expect(await page.evaluate(()=>window.__story.inspect().entry.reason)).toBe('static-ready');
-  expect(sceneRequests).toEqual([]);
-  await expect(page.locator('[data-story-chapter]')).toHaveCount(7);
-  await context.close();
-  const fallback = await browser.newContext(); const failedPage = await fallback.newPage();
-  await failedPage.route('**/source-layers.glb', route=>route.abort());
-  await failedPage.goto('http://127.0.0.1:4186/projects/bending-active/#overview');await entered(failedPage);
-  await expect(failedPage.locator('[data-scene-fallback]')).toContainText('3D unavailable');
-  expect(await failedPage.evaluate(()=>window.__story.inspect().entry.reason)).toBe('scene-unavailable');
-  await expect(failedPage.locator('[data-story-chapter]')).toHaveCount(7);
-  await fallback.close();
+test('OS motion preference retains authored 3D while an actually unavailable model preserves the public story',async({browser})=>{
+ test.setTimeout(scenarioTimeout(120000));const context=await browser.newContext({reducedMotion:'reduce'}),page=await context.newPage(),sceneRequests=[];
+ try{
+  page.on('request',request=>{if(/\.(glb|hdr)(\?|$)/.test(request.url()))sceneRequests.push(request.url());});await page.goto('http://127.0.0.1:4186/projects/bending-active/#overview');await entered(page);
+  await page.waitForFunction(()=>window.__thesis?.inspect().ready,null,{timeout:WAIT});expect(await page.evaluate(()=>window.__story.inspect().playback.reducedMotion)).toBe(false);expect(sceneRequests.length).toBeGreaterThan(0);await expect(page.getByRole('button',{name:/Enable|Pause|Resume/})).toHaveCount(0);
+ }finally{await context.close();}
+ const fallback=await browser.newContext(),failedPage=await fallback.newPage();
+ try{
+  await failedPage.route('**/source-layers.glb',route=>route.abort());await failedPage.goto('http://127.0.0.1:4186/projects/bending-active/#overview');await entered(failedPage);
+  expect(await failedPage.evaluate(()=>window.__story.inspect().entry.reason)).toBe('scene-unavailable');await expect(failedPage.locator('[data-story-chapter]')).toHaveCount(7);await expect(failedPage.locator('#system')).toContainText('Start with the desired surface geometry.');await expect(failedPage.locator('[data-cinematic-stage] canvas')).toHaveCount(0);await expect(failedPage.locator('a[href^="/assets/"],button')).toHaveCount(0);
+ }finally{await fallback.close();}
 });

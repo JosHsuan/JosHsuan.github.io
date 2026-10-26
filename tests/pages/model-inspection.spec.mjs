@@ -4,12 +4,17 @@ import {writeFile} from 'node:fs/promises';
 import {PerspectiveCamera,Vector3,Matrix4} from 'three';
 import {viewportStageSourceViewport} from '../../roles/uiux-designer/cases/bending-active-thesis/components/source-scene-score.mjs';
 import {modelInformationSummary,modelAnnotationLabel} from '../../roles/uiux-designer/cases/bending-active-thesis/components/model-information.mjs';
-import {WAIT,scenarioTimeout,surface,frames,settle,loadScene,centerStudy,hitPoint,expectIdle} from './case-helpers.mjs';
+import {WAIT,scenarioTimeout,surface,frames,settle,loadScene,centerStudy,hitPoint} from './case-helpers.mjs';
 const catalog=JSON.parse(readFileSync(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/public/assets/thesis/source-diagrams.json',import.meta.url),'utf8'));
-// A real keyboard inspection owns the view for geometric measurements. Both
-// key presses return to the same angle without adding a hidden pause control.
-async function holdView(page,chapter='form'){
- await surface(page,chapter).press('ArrowLeft');await surface(page,chapter).press('ArrowRight');await settle(page);
+// Exact native document positions select source families; no runtime/geometry override.
+async function scrollSource(page,chapter,index,count){
+ await page.evaluate(({chapter,index,count})=>{
+  const element=document.getElementById(chapter),sections=[...document.querySelectorAll('[data-story-chapter]')],n=sections.indexOf(element);
+  const naturalY=el=>{let y=0;for(let node=el;node;node=node.offsetParent)y+=node.offsetTop;return y;};
+  const start=naturalY(element),end=n<sections.length-1?naturalY(sections[n+1]):start+element.offsetHeight;
+  scrollTo({top:start+(end-start)*(index+.5)/count-innerHeight*.45,behavior:'instant'});
+ },{chapter,index,count});await settle(page);
+ await page.waitForFunction(({chapter,index})=>{const r=window.__thesis?.inspect().representation;return r?.chapterId===chapter&&r.index===index;},{chapter,index},{timeout:WAIT});
 }
 async function entered(page){await page.waitForFunction(()=>window.__story?.inspect().entry?.phase==='entered',null,{timeout:WAIT});}
 async function expectSourceInformation(page,chapter) {
@@ -58,59 +63,28 @@ async function fit(page,receipt){
  return {left:display.left+extent.left*display.width,right:display.left+extent.right*display.width,top:display.top+extent.top*display.height,bottom:display.top+extent.bottom*display.height};
 }
 
-test('model information follows autonomous changes and explicit comparison release',async({page})=>{
- test.setTimeout(scenarioTimeout(120000));await loadScene(page);await centerStudy(page,'form');
- const initial=await page.evaluate(()=>window.__thesis.inspect().representation.id);
- await expect.poll(()=>page.evaluate(()=>window.__thesis.inspect().representation.id),{timeout:WAIT}).not.toBe(initial);
- await holdView(page);await expectSourceInformation(page,'form');
- // Observe the actual painted comparison before slow driver roundtrips can
- // consume its eight-second lease; keyboard hold has independent ownership.
- const pinObservation=await surface(page).evaluateHandle(node=>{
-  const before=window.__thesis.inspect().representation,expectedIndex=(before.index+1)%before.count;
-  let sample=null;
-  const observer=new MutationObserver(()=>{
-   const current=window.__thesis.inspect().representation;
-   if(current.pinned&&current.chapterId===before.chapterId&&current.index===expectedIndex){sample={index:current.index,id:current.id};observer.disconnect();}
-  });
-  observer.observe(node.closest('[data-model-study]'),{subtree:true,attributes:true,childList:true,characterData:true});
-  observer.observe(document.querySelector(`[data-model-side-label][data-study-chapter="${node.dataset.studyChapter}"]`),{subtree:true,attributes:true,childList:true,characterData:true});
-  return{get sample(){return sample;},dispose(){observer.disconnect();}};
- });
- try{
-  await surface(page).press('Enter');
-  await expect.poll(()=>pinObservation.evaluate(value=>value.sample!==null)).toBe(true);
- }finally{await pinObservation.evaluate(value=>value.dispose());await pinObservation.dispose();}
- await holdView(page);await expectSourceInformation(page,'form');
- expect(await page.evaluate(()=>window.__thesis.inspect().representation.held)).toBe(true);
- const heldTime=await page.evaluate(()=>window.__story.inspect().playback.activeSeconds);
- await surface(page).press('Escape');await settle(page);
- expect(await page.evaluate(()=>({engaged:window.__story.inspect().modelEngaged,selection:window.__story.inspect().sourceSelection,held:window.__story.inspect().modelHeldSource}))).toEqual({engaged:false,selection:null,held:null});
- expect(await page.evaluate(()=>window.__thesis.inspect().representation.pinned)).toBe(false);
- await expect.poll(()=>page.evaluate(()=>window.__story.inspect().playback.activeSeconds),{timeout:WAIT}).toBeGreaterThan(heldTime);
- // After proving release resumes the shared clock, use real keyboard ownership
- // before checking multiple DOM fields against one rendered representation.
- await holdView(page);await expectSourceInformation(page,'form');await expectIdle(page);
+test('model information follows scroll sources and remains unchanged while reading is stationary',async({page})=>{
+ test.setTimeout(scenarioTimeout(120000));await loadScene(page);
+ for(const [chapter,count] of [['form',4],['system',4],['pattern',3]]){
+  for(let index=0;index<count;index++){await scrollSource(page,chapter,index,count);await expectSourceInformation(page,chapter);}
+  const before=await page.evaluate(()=>window.__thesis.inspect().representation.id);await frames(page,8);
+  expect(await page.evaluate(()=>window.__thesis.inspect().representation.id)).toBe(before);
+ }
+ expect(await page.evaluate(()=>{const s=window.__story.inspect();return{engaged:s.modelEngaged,selection:s.sourceSelection,held:s.modelHeldSource};})).toEqual({engaged:false,selection:null,held:null});
 });
 
-test('source information uses desktop side placement or stable native mobile flow and follows inspection',async({page})=>{
+test('source information uses desktop side placement or stable native mobile flow without controls',async({page})=>{
  test.setTimeout(scenarioTimeout(150000));await loadScene(page);
  for(const [width,height] of [[1440,1000],[820,1180],[390,844],[320,700]]){
-  await page.setViewportSize({width,height});await centerStudy(page,'pattern');await surface(page,'pattern').press('Enter');await holdView(page,'pattern');
-  const sample=()=>page.evaluate(()=>{
-   const study=document.querySelector('[data-model-study][data-model-active="true"]'),label=document.querySelector(`[data-model-side-label][data-study-chapter="${study.dataset.studyChapter}"]`),panel=label.getBoundingClientRect(),model=study.querySelector('[data-model-viewport]').getBoundingClientRect();
-   const host=document.querySelector(`[data-model-study-host="${study.dataset.studyChapter}"]`),next=host.nextElementSibling.getBoundingClientRect();
-   const r=window.__thesis.inspect().representation;
-   return {native:label.dataset.modelLabelPlacement==='native',position:getComputedStyle(label).position,inHost:label.parentElement===host.querySelector('[data-model-information-host]'),nextTop:next.top,documentY:panel.top+scrollY,documentHeight:document.documentElement.scrollHeight,panel:{left:panel.left,right:panel.right,top:panel.top,bottom:panel.bottom},model:{left:model.left,right:model.right,top:model.top,bottom:model.bottom},annotation:r.annotation,poseAzimuth:window.__thesis.inspect().pose.azimuth,source:r.id};
+  await page.setViewportSize({width,height});await scrollSource(page,'pattern',1,3);await expectSourceInformation(page,'pattern');await fit(page);
+  const value=await page.evaluate(()=>{
+   const label=document.querySelector('[data-model-side-label][data-study-chapter="pattern"]'),r=label.getBoundingClientRect(),host=document.querySelector('[data-model-study-host="pattern"]');
+   return{native:label.dataset.modelLabelPlacement==='native',position:getComputedStyle(label).position,inHost:label.parentElement===host.querySelector('[data-model-information-host]'),left:r.left,right:r.right,top:r.top,bottom:r.bottom,height:r.height,nextTop:host.nextElementSibling.getBoundingClientRect().top,controls:label.querySelectorAll('a,button,input,select').length};
   });
-  const before=await sample();expect(before.native).toBe(width<=780);
-  if(width<=780){expect(before.position).toBe('relative');expect(before.inHost).toBe(true);expect(before.panel.left).toBeGreaterThanOrEqual(0);expect(before.panel.right).toBeLessThanOrEqual(width);expect(before.panel.bottom).toBeLessThanOrEqual(before.nextTop);expect(before.panel.bottom-before.panel.top).toBeGreaterThan(0);}
-  else{expect(before.panel.left).toBeGreaterThan(before.model.right);expect(before.panel.right).toBeLessThanOrEqual(width);expect(before.panel.top).toBeCloseTo(before.model.top,1);expect(before.panel.bottom).toBeLessThan(height-40);}
-  await expect(page.locator('[data-model-study-host] header,[data-model-study-host] footer')).toHaveCount(0);
-  await surface(page,'pattern').press('ArrowRight');await settle(page);await expectSourceInformation(page,'pattern');await fit(page);
-  const after=await sample();expect(after.panel).toEqual(before.panel);expect(after.documentY).toBe(before.documentY);expect(after.documentHeight).toBe(before.documentHeight);expect(after.poseAzimuth).not.toBe(before.poseAzimuth);
-  if(width<=780){expect(before.annotation).toBeNull();expect(after.annotation).toBeNull();}
-  else{expect(after.annotation.index).toBe(before.annotation.index);expect(Math.abs(after.annotation.x-before.annotation.x)+Math.abs(after.annotation.y-before.annotation.y)).toBeGreaterThan(.1);}
-  await surface(page,'pattern').press('Escape');await settle(page);
+  expect(value.native).toBe(width<=780);expect(value.controls).toBe(0);expect(value.height).toBeGreaterThan(0);
+  expect(value.left).toBeGreaterThanOrEqual(0);expect(value.right).toBeLessThanOrEqual(width);
+  if(width<=780){expect(value.position).toBe('relative');expect(value.inHost).toBe(true);expect(value.bottom).toBeLessThanOrEqual(value.nextTop);}
+  else{expect(value.top).toBeGreaterThanOrEqual(0);expect(value.bottom).toBeLessThan(height-40);}
  }
 });
 
@@ -223,7 +197,7 @@ test('tablet source fits beside the reading copy and clear of fixed navigation',
   const layout=await page.evaluate(id=>{const copy=document.querySelector(`#${id} [data-story-panel]`).getBoundingClientRect(),rail=document.querySelector('[data-story-navigation]').getBoundingClientRect();return {copyRight:copy.right,railLeft:rail.left};},chapter);
   const count=chapter==='pattern'?3:4;
   for(let index=0;index<count;index++) {
-   await surface(page,chapter).press('Enter');await holdView(page,chapter);
+   await scrollSource(page,chapter,index,count);
    const projected=await fit(page);
    expect(projected.left,`${chapter}: source must be exposed beside the real reading card`).toBeGreaterThanOrEqual(layout.copyRight+4);
    expect(projected.right,`${chapter}: complete source must clear the permanent rail`).toBeLessThanOrEqual(layout.railLeft-4);
@@ -231,7 +205,7 @@ test('tablet source fits beside the reading copy and clear of fixed navigation',
  }
 });
 test('three source surfaces share one WebGL Canvas and preserve every fitted original representation',async({page},info)=>{
- test.setTimeout(scenarioTimeout(180000));const receipt={scope:'Full source representation inspection using existing DOM document positioning and keyboard hold; not a wheel journey or forced density fixture.',phase:'loading',sources:[]};let primaryError;
+ test.setTimeout(scenarioTimeout(180000));const receipt={scope:'Original source representation projection using native document scroll positions only; not a wheel journey or forced density fixture.',phase:'loading',sources:[]};let primaryError;
  try{const models=[],errors=[];page.on('request',r=>{if(/\.glb(?:\?|$)/.test(r.url()))models.push(r.url());});page.on('pageerror',e=>errors.push(e.message));await loadScene(page);const canvas=await page.locator('[data-cinematic-stage] canvas').elementHandle();
  await expect(page.locator('[data-model-study]')).toHaveCount(3);await expect(page.locator('[data-model-study] input,[data-model-study] select,[data-model-study] [role="tab"],[data-model-study] [role="slider"],[data-model-side-label] input,[data-model-side-label] select,[data-model-side-label] [role="tab"],[data-model-side-label] [role="slider"]')).toHaveCount(0);
  expect(await page.evaluate(()=>window.__thesis.inspect().source)).toMatchObject({vertices:172789,triangles:227521,sourceObjects:51});
@@ -240,7 +214,7 @@ test('three source surfaces share one WebGL Canvas and preserve every fitted ori
  for(const id of ['form','system','pattern']){await centerStudy(page,id);const count=id==='pattern'?3:4;const seen=new Set();
   expect(await layout(),'Changing the source family must preserve native document layout.').toEqual(before);
   for(let n=0;n<count;n++){
-   await surface(page,id).press('Enter');await holdView(page,id);const r=await page.evaluate(()=>window.__thesis.inspect().representation);seen.add(r.id);
+   await scrollSource(page,id,n,count);const r=await page.evaluate(()=>window.__thesis.inspect().representation);seen.add(r.id);
    const row={chapter:id,index:n,sourceId:r.id};receipt.sources.push(row);await fit(page,row);await expectSourceInformation(page,id);expect(await layout(),'Source representation captions must preserve native document layout.').toEqual(before);
    expect(row.representation.sourceGeometryUnmodified).toBe(true);expect(row.representation.id).toBe(r.id);
    row.floorObserved=row.renderPressure.stage===3;
@@ -252,45 +226,43 @@ test('three source surfaces share one WebGL Canvas and preserve every fitted ori
     const png=info.outputPath(`system-source-${r.id}-device.png`);await page.screenshot({path:png,scale:'device'});await info.attach(`system-source-${r.id}-device`,{path:png,contentType:'image/png'});row.png=`system-source-${r.id}-device.png`;
    }
   }expect(seen.size).toBe(count);}
- await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);await expect(page.locator('canvas[data-ascii-field]')).toHaveCount(1);await expect(page.locator('canvas')).toHaveCount(2);expect(await page.evaluate(el=>document.querySelector('[data-cinematic-stage] canvas')===el,canvas)).toBe(true);expect(models.filter(x=>x.includes('source-layers.glb'))).toHaveLength(1);expect(models.filter(x=>x.includes('source-diagrams.glb'))).toHaveLength(1);expect(errors).toEqual([]);await expectIdle(page);receipt.phase='completed';
+ await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);await expect(page.locator('canvas[data-ascii-field]')).toHaveCount(1);await expect(page.locator('canvas')).toHaveCount(2);expect(await page.evaluate(el=>document.querySelector('[data-cinematic-stage] canvas')===el,canvas)).toBe(true);expect(models.filter(x=>x.includes('source-layers.glb'))).toHaveLength(1);expect(models.filter(x=>x.includes('source-diagrams.glb'))).toHaveLength(1);expect(errors).toEqual([]);receipt.phase='completed';
  }catch(error){primaryError=error;throw error;}finally{try{const path=info.outputPath('source-representation-pressure.json');await writeFile(path,JSON.stringify(receipt,null,2));await info.attach('source-representation-pressure',{path,contentType:'application/json'});}catch(error){if(!primaryError)throw error;}}
 });
-test('actual object hover and click compare sources; empty space is not an invisible button',async({page,isMobile})=>{
- test.setTimeout(scenarioTimeout(120000));await loadScene(page);await centerStudy(page);const p=await hitPoint(page),before=await page.evaluate(()=>window.__thesis.inspect().representation.id);
- if(!isMobile){await page.mouse.move(p.x,p.y);await expect(surface(page)).toHaveAttribute('data-model-hit','true');await page.mouse.click(p.x,p.y);}else await page.touchscreen.tap(p.x,p.y);
- await holdView(page);expect(await page.evaluate(()=>window.__thesis.inspect().representation.id)).not.toBe(before);await expectSourceInformation(page,'form');
- const empty=await page.evaluate(()=>{const r=document.querySelector('[data-model-viewport][data-study-chapter="form"]').getBoundingClientRect();for(const x of [.02,.98])for(const y of [.03,.9]){const p={x:r.left+r.width*x,y:r.top+r.height*y};if(p.y>100&&p.y<innerHeight-90&&!window.__thesis.hitTest(p.x,p.y))return p;}return null;});expect(empty).toBeTruthy();const selected=await page.evaluate(()=>window.__thesis.inspect().representation.id);await page.mouse.click(empty.x,empty.y);await frames(page);expect(await page.evaluate(()=>window.__thesis.inspect().representation.id)).toBe(selected);
+test('actual object clicks and empty space never select a source or capture inspection',async({page,isMobile})=>{
+ test.setTimeout(scenarioTimeout(120000));await loadScene(page);await scrollSource(page,'form',1,4);
+ const p=await hitPoint(page),before=await page.evaluate(()=>window.__thesis.inspect().representation.id);
+ if(isMobile)await page.touchscreen.tap(p.x,p.y);else await page.mouse.click(p.x,p.y);
+ await frames(page,4);
+ expect(await page.evaluate(()=>window.__thesis.inspect().representation.id)).toBe(before);
+ expect(await page.evaluate(()=>{const s=window.__story.inspect();return{engaged:s.modelEngaged,selection:s.sourceSelection,held:s.modelHeldSource};})).toEqual({engaged:false,selection:null,held:null});
+ await expect(surface(page)).not.toHaveAttribute('role','button');await expect(surface(page)).not.toHaveAttribute('tabindex','0');
 });
-test('keyboard holds and returns a view; touch pan outside and across source geometry preserves native reading',async({page,context,isMobile})=>{
- test.setTimeout(scenarioTimeout(150000));await loadScene(page);await centerStudy(page);await surface(page).press('ArrowRight');await settle(page);expect(await page.evaluate(()=>window.__story.inspect().inspection.value.azimuth)).toBe(23);await fit(page);
- const time=await page.evaluate(()=>window.__story.inspect().playback.activeSeconds);await frames(page,8);expect(await page.evaluate(()=>window.__story.inspect().playback.activeSeconds)).toBe(time);
- await surface(page).press('Escape');await settle(page);expect(await page.evaluate(()=>window.__story.inspect().inspection.value.azimuth)).toBe(30);
- if(isMobile){const p={x:8,y:600},before=await page.evaluate(()=>scrollY),cdp=await context.newCDPSession(page);expect(await page.evaluate(p=>!!document.elementFromPoint(p.x,p.y)?.closest('[data-model-viewport]'),p)).toBe(false);await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{...p,id:1}]});for(let i=1;i<=6;i++)await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:p.x,y:p.y-i*20,id:1}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await cdp.detach();await expect.poll(()=>page.evaluate(()=>scrollY)).toBeGreaterThan(before+30);
-  await centerStudy(page);const inside=await hitPoint(page),nativeBefore=await page.evaluate(()=>({y:scrollY,azimuth:window.__story.inspect().inspection.value.azimuth}));
-  const touch=await context.newCDPSession(page);await touch.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{...inside,id:2}]});
-  for(let i=1;i<=6;i++)await touch.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:inside.x,y:inside.y-i*20,id:2}]});
-  await touch.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await touch.detach();
-  await expect.poll(()=>page.evaluate(()=>scrollY)).toBeGreaterThan(nativeBefore.y+30);
-  expect(await page.evaluate(()=>({engaged:window.__story.inspect().modelEngaged,azimuth:window.__story.inspect().inspection.value.azimuth}))).toEqual({engaged:false,azimuth:nativeBefore.azimuth});
- }
- else{const p=await hitPoint(page);await page.mouse.move(p.x,p.y);await expect(surface(page)).toHaveAttribute('data-model-hit','true');await page.mouse.down();await page.mouse.move(p.x+60,p.y-18,{steps:5});await frames(page);expect(await page.evaluate(()=>window.__story.inspect().inspection.target.azimuth)).toBeLessThan(30);await page.mouse.up();await settle(page);expect(await page.evaluate(()=>window.__story.inspect().inspection.value.azimuth)).toBe(30);}
- await centerStudy(page);await surface(page).press('ArrowRight');await page.locator('[data-chapter-link="make"]').click();await settle(page);await expect.poll(()=>page.evaluate(()=>window.__story.inspect().playback.activeSeconds)).toBeGreaterThan(time);expect(await page.evaluate(()=>document.body.style.overflow)).not.toBe('hidden');
+
+test('keyboard scrolling reads source chapters without focusable model controls',async({page})=>{
+ test.setTimeout(scenarioTimeout(120000));await loadScene(page);await centerStudy(page,'system');
+ await expect(page.locator('[data-model-viewport][role="button"],[data-model-viewport][tabindex="0"]')).toHaveCount(0);
+ const before=await page.evaluate(()=>scrollY);await page.keyboard.press('PageDown');await settle(page);
+ expect(await page.evaluate(()=>scrollY)).toBeGreaterThan(before);expect(await page.evaluate(()=>window.__story.inspect().readingShiftY)).toBe(0);
+ await page.keyboard.press('End');await settle(page);await expect(page.locator('#credits')).toBeInViewport();
+ expect(await page.evaluate(()=>document.body.style.overflow)).not.toBe('hidden');
 });
-test('Reduced requires activation and keeps Full source comparison accessible without autonomous motion',async({page,isMobile})=>{
- test.setTimeout(scenarioTimeout(120000));const models=[];page.on('request',r=>{if(/\.glb(?:\?|$)/.test(r.url()))models.push(r.url());});await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/projects/bending-active/#overview');await entered(page);await centerStudy(page,'form',{ready:false});expect(models).toHaveLength(0);await page.locator('[data-model-side-label][data-study-chapter="form"]').getByRole('button',{name:'Enable model'}).click();await page.waitForFunction(()=>window.__thesis?.inspect().ready,null,{timeout:WAIT});await centerStudy(page);await surface(page).press('Enter');await settle(page);await fit(page);await expectSourceInformation(page,'form');
- await expect(page.getByRole('combobox',{name:'Visual detail',exact:true})).toHaveCount(0);
- const scene=await page.evaluate(()=>window.__thesis.inspect());
- expect(scene.detail).toBe('full');expect(scene.compositor.requestedSamples).toBe(isMobile?0:2);
- expect(scene.optics.maxBlurPx).toBe(0);expect(scene.optics.mistStrength).toBe(0);
- await expectIdle(page);
+
+test('OS reduced preference does not add activation controls or replace authored source motion',async({page})=>{
+ test.setTimeout(scenarioTimeout(120000));await page.emulateMedia({reducedMotion:'reduce'});await loadScene(page);await scrollSource(page,'form',2,4);
+ await expect(page.getByRole('button',{name:/Enable|Pause|Resume/})).toHaveCount(0);
+ expect(await page.evaluate(()=>({reduced:window.__thesis.inspect().systemReduced,playback:window.__story.inspect().playback.reducedMotion}))).toEqual({reduced:false,playback:false});
+ await expectSourceInformation(page,'form');await fit(page);
 });
-test('load failure and context loss preserve fallback reading and release source gestures',async({page})=>{
- test.setTimeout(scenarioTimeout(150000));await page.route('**/source-layers.glb',r=>r.abort());await page.goto('/projects/bending-active/#overview');await entered(page);await centerStudy(page,'form',{ready:false});await expect(page.locator('[data-model-study][data-study-chapter="form"]')).toContainText('Interactive geometry unavailable');await expect(surface(page)).toHaveAttribute('aria-disabled','true');
- await page.unroute('**/source-layers.glb');await page.reload();await entered(page);
- // An intentional failed renderer leaves the same recovery record as an
- // interrupted process. Reload stays readable until the visitor chooses 3D.
- await expect(page.getByRole('button',{name:'Enable 3D',exact:true})).toBeVisible({timeout:WAIT});
- expect(await page.evaluate(()=>window.__thesis?.inspect().ready??false)).toBe(false);
- await page.getByRole('button',{name:'Enable 3D',exact:true}).click();await page.waitForFunction(()=>window.__thesis?.inspect().ready,null,{timeout:WAIT});
- await page.evaluate(()=>document.fonts.ready);await settle(page);await centerStudy(page);const p=await hitPoint(page);await page.mouse.move(p.x,p.y);await page.mouse.down();await page.evaluate(()=>window.__thesis.loseContext());await expect(surface(page)).toHaveAttribute('aria-disabled','true',{timeout:WAIT});await page.mouse.up();await expect(page.locator('[data-story-chapter]')).toHaveCount(7);expect(await page.evaluate(()=>document.body.style.overflow)).not.toBe('hidden');expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
+
+test('load failure and context loss retain inline source reading without enable or retry controls',async({page})=>{
+ test.setTimeout(scenarioTimeout(150000));await page.route('**/source-layers.glb',r=>r.abort());await page.goto('/projects/bending-active/#overview');await entered(page);
+ await expect(page.locator('#system [data-information-window="source-details"] img')).toHaveAttribute('src','/assets/cinematic/geometry-strip.webp');
+ await expect(page.locator('details,summary,[data-inspect-figure]')).toHaveCount(0);await expect(page.getByRole('button',{name:/Enable|Retry/})).toHaveCount(0);
+ // This is an explicit test-fixture reset, not an application retry control.
+ await page.unroute('**/source-layers.glb');await page.evaluate(()=>sessionStorage.removeItem('thesis-scene-session-v1'));await loadScene(page);await centerStudy(page,'system');
+ await page.evaluate(()=>window.__thesis.loseContext());
+ await expect.poll(()=>page.evaluate(()=>document.documentElement.hasAttribute('data-canvas-available')),{timeout:WAIT}).toBe(false);
+ await expect(page.locator('[data-story-chapter]')).toHaveCount(7);await expect(page.locator('#credits')).toContainText('Project credits');
+ expect(await page.evaluate(()=>document.body.style.overflow)).not.toBe('hidden');expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
 });

@@ -241,34 +241,50 @@
           {
             "chapter": "context",
             "progress": 0,
-            "yawRad": 0.56,
-            "pitchRad": 0.18,
-            "fovDeg": 36,
-            "zoom": 1.04
+            "yawRad": -0.35,
+            "pitchRad": 0.12,
+            "fovDeg": 42,
+            "zoom": 1.18
           },
           {
             "chapter": "context",
-            "progress": 0.6,
-            "yawRad": 0.72,
-            "pitchRad": 0.22,
+            "progress": 0.2,
+            "yawRad": -0.35,
+            "pitchRad": 0.12,
+            "fovDeg": 42,
+            "zoom": 1.18
+          },
+          {
+            "chapter": "context",
+            "progress": 0.75,
+            "yawRad": 0.55,
+            "pitchRad": 0.48,
             "fovDeg": 36,
             "zoom": 1.04
           },
           {
             "chapter": "system",
             "progress": 0,
-            "yawRad": 0.84,
-            "pitchRad": 0.26,
-            "fovDeg": 36,
-            "zoom": 1.04
+            "yawRad": 1.05,
+            "pitchRad": 0.72,
+            "fovDeg": 32,
+            "zoom": 1
+          },
+          {
+            "chapter": "system",
+            "progress": 0.55,
+            "yawRad": 1.9,
+            "pitchRad": 0.32,
+            "fovDeg": 40,
+            "zoom": 1.06
           },
           {
             "chapter": "system",
             "progress": 1,
-            "yawRad": 0.98,
-            "pitchRad": 0.3,
-            "fovDeg": 36,
-            "zoom": 1.04
+            "yawRad": 2.25,
+            "pitchRad": 0.18,
+            "fovDeg": 38,
+            "zoom": 1.16
           }
         ]
       },
@@ -673,26 +689,42 @@
           {
             "chapter": "context",
             "progress": 0,
-            "yawRad": 0.58,
-            "pitchRad": 0.16,
-            "fovDeg": 36,
-            "zoom": 1.04
+            "yawRad": -0.55,
+            "pitchRad": 0.1,
+            "fovDeg": 44,
+            "zoom": 1.14
+          },
+          {
+            "chapter": "context",
+            "progress": 0.25,
+            "yawRad": -0.25,
+            "pitchRad": 0.2,
+            "fovDeg": 42,
+            "zoom": 1.06
           },
           {
             "chapter": "system",
             "progress": 0,
-            "yawRad": 0.9,
-            "pitchRad": 0.34,
-            "fovDeg": 36,
+            "yawRad": 0.85,
+            "pitchRad": 0.5,
+            "fovDeg": 34,
+            "zoom": 1
+          },
+          {
+            "chapter": "system",
+            "progress": 0.62,
+            "yawRad": 1.65,
+            "pitchRad": 0.7,
+            "fovDeg": 32,
             "zoom": 1.04
           },
           {
             "chapter": "system",
             "progress": 1,
-            "yawRad": 1.08,
-            "pitchRad": 0.38,
-            "fovDeg": 36,
-            "zoom": 1.04
+            "yawRad": 2.15,
+            "pitchRad": 0.22,
+            "fovDeg": 42,
+            "zoom": 1.16
           }
         ]
       },
@@ -923,26 +955,42 @@
           {
             "chapter": "system",
             "progress": 0,
-            "yawRad": 0.5,
+            "yawRad": -0.4,
             "pitchRad": 0.16,
-            "fovDeg": 36,
-            "zoom": 1.04
+            "fovDeg": 42,
+            "zoom": 1.16
           },
           {
             "chapter": "system",
-            "progress": 0.5,
-            "yawRad": 0.76,
-            "pitchRad": 0.22,
-            "fovDeg": 36,
+            "progress": 0.18,
+            "yawRad": 0.1,
+            "pitchRad": 0.24,
+            "fovDeg": 40,
+            "zoom": 1.08
+          },
+          {
+            "chapter": "system",
+            "progress": 0.52,
+            "yawRad": 0.85,
+            "pitchRad": 0.82,
+            "fovDeg": 32,
+            "zoom": 1
+          },
+          {
+            "chapter": "system",
+            "progress": 0.82,
+            "yawRad": 1.6,
+            "pitchRad": 0.4,
+            "fovDeg": 38,
             "zoom": 1.04
           },
           {
             "chapter": "system",
             "progress": 1,
-            "yawRad": 1.02,
-            "pitchRad": 0.28,
-            "fovDeg": 36,
-            "zoom": 1.04
+            "yawRad": 2.1,
+            "pitchRad": 0.2,
+            "fovDeg": 42,
+            "zoom": 1.14
           }
         ]
       },
@@ -1175,26 +1223,42 @@
           {
             "chapter": "context",
             "progress": 0,
-            "yawRad": 0.72,
-            "pitchRad": 0.14,
-            "fovDeg": 36,
-            "zoom": 1.04
+            "yawRad": -0.6,
+            "pitchRad": 0.12,
+            "fovDeg": 44,
+            "zoom": 1.18
+          },
+          {
+            "chapter": "context",
+            "progress": 0.35,
+            "yawRad": -0.2,
+            "pitchRad": 0.24,
+            "fovDeg": 40,
+            "zoom": 1.1
           },
           {
             "chapter": "system",
             "progress": 0,
-            "yawRad": 0.92,
-            "pitchRad": 0.38,
+            "yawRad": 0.7,
+            "pitchRad": 0.72,
+            "fovDeg": 31,
+            "zoom": 1
+          },
+          {
+            "chapter": "system",
+            "progress": 0.55,
+            "yawRad": 1.55,
+            "pitchRad": 0.42,
             "fovDeg": 36,
             "zoom": 1.04
           },
           {
             "chapter": "system",
             "progress": 1,
-            "yawRad": 1.08,
-            "pitchRad": 0.42,
-            "fovDeg": 36,
-            "zoom": 1.04
+            "yawRad": 2.25,
+            "pitchRad": 0.18,
+            "fovDeg": 44,
+            "zoom": 1.18
           }
         ]
       },
@@ -1434,26 +1498,42 @@
           {
             "chapter": "context",
             "progress": 0,
-            "yawRad": 0.6,
-            "pitchRad": 0.16,
-            "fovDeg": 36,
+            "yawRad": -0.55,
+            "pitchRad": 0.18,
+            "fovDeg": 42,
+            "zoom": 1.16
+          },
+          {
+            "chapter": "context",
+            "progress": 0.55,
+            "yawRad": 0.15,
+            "pitchRad": 0.38,
+            "fovDeg": 38,
             "zoom": 1.04
           },
           {
             "chapter": "system",
             "progress": 0,
-            "yawRad": 0.92,
-            "pitchRad": 0.32,
+            "yawRad": 0.85,
+            "pitchRad": 0.82,
+            "fovDeg": 32,
+            "zoom": 1
+          },
+          {
+            "chapter": "system",
+            "progress": 0.6,
+            "yawRad": 1.65,
+            "pitchRad": 0.45,
             "fovDeg": 36,
-            "zoom": 1.04
+            "zoom": 1.02
           },
           {
             "chapter": "system",
             "progress": 1,
-            "yawRad": 1.12,
-            "pitchRad": 0.36,
-            "fovDeg": 36,
-            "zoom": 1.04
+            "yawRad": 2.3,
+            "pitchRad": 0.2,
+            "fovDeg": 42,
+            "zoom": 1.12
           }
         ]
       },

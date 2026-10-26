@@ -2,181 +2,36 @@ import {test,expect} from '@playwright/test';
 import {writeFile} from 'node:fs/promises';
 import {WAIT,scenarioTimeout,loadScene,centerStudy,hitPoint,surface,frames,settle} from './case-helpers.mjs';
 
-// Mobile uses browser-native touch input, so this exercises CSS touch-action,
-// pointer capture and actual page pan instead of synthetic PointerEvents.
-test('mouse orbits both axes while native source touch pans and taps compare',async({page,context,isMobile})=>{
- test.setTimeout(scenarioTimeout(150000));
- const errors=[];page.on('pageerror',error=>errors.push(error.message));
- await loadScene(page);await centerStudy(page);
- const touchAction=await surface(page).evaluate(el=>getComputedStyle(el).touchAction);
- expect(['manipulation','pan-x pan-y pinch-zoom']).toContain(touchAction);
- await expect(surface(page)).toHaveCSS('pointer-events','auto');
- const cdp=isMobile?await context.newCDPSession(page):null;
- const pressSnapshot=await page.evaluateHandle(()=>{
-  const sample={};
-  document.addEventListener('pointerdown',()=>{
-   const source=window.__thesis.inspect().representation;
-   Object.assign(sample,{source:source.id,index:source.index,chapterId:source.chapterId,scroll:scrollY});
-  },{capture:true,once:true});
-  return sample;
- });
- const p=await hitPoint(page),scrollBeforePress=await page.evaluate(()=>scrollY);
- let touchActive=false;
- const start=async()=>{
-  if(cdp){await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{...p,id:1}]});touchActive=true;}
-  else{await page.mouse.move(p.x,p.y);await page.mouse.down();}
- };
- const move=async(dx,dy)=>{
-  if(cdp)await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:p.x+dx,y:p.y+dy,id:1}]});
-  else await page.mouse.move(p.x+dx,p.y+dy,{steps:4});
-  await frames(page);
- };
+// Native gestures are input evidence. Programmatic scroll fixtures in the
+// projection suite do not substitute for the actual mouse/touch reading path.
+test('source geometry never captures mouse dragging and native touch scrolling remains document-owned',async({page,context,isMobile},info)=>{
+ test.setTimeout(scenarioTimeout(150000));const errors=[];page.on('pageerror',error=>errors.push(error.message));
+ const receipt={scope:'Native pointer/touch neutrality, not physical-device performance.',phase:'loading',inputs:[]};let primaryError,cdp=null;
  try{
-  if(cdp){
-   // Observe explicit application capture separately from the browser's legal
-   // implicit touch capture. Native touch must never request orbit ownership.
-   await surface(page).evaluate(el=>{
-    const original=el.setPointerCapture;
-    el.__captureCalls=0;
-    el.setPointerCapture=function(...args){el.__captureCalls++;return original.apply(this,args);};
-    el.__restoreCapture=()=>{delete el.setPointerCapture;delete el.__captureCalls;delete el.__restoreCapture;};
-   });
-   const neutral=await page.evaluate(()=>window.__story.inspect().inspection.value);
-   await start();
-   expect(await page.evaluate(()=>window.__story.inspect().modelEngaged)).toBe(false);
-   await expect(surface(page)).not.toHaveAttribute('data-model-dragging','true');
-   for(let i=1;i<=6;i++)await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:p.x,y:p.y-i*20,id:1}]});
-   await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});touchActive=false;
-   await expect.poll(()=>page.evaluate(()=>scrollY),{timeout:WAIT}).toBeGreaterThan(scrollBeforePress+30);
-   await settle(page);
-   const panned=await page.evaluate(()=>window.__story.inspect());
-   expect(panned.modelEngaged).toBe(false);expect(panned.modelHeldSource).toBeNull();expect(panned.sourceSelection).toBeNull();
-   expect(panned.inspection.value).toEqual(neutral);expect(panned.inspection.target).toEqual(neutral);
-   expect(await surface(page).evaluate(el=>el.__captureCalls)).toBe(0);
-   await expect(surface(page)).not.toHaveAttribute('data-model-dragging','true');
-
-   // A short actual source tap still selects the next painted comparison.
-   await centerStudy(page);
-   // Install observation before choosing the fresh real source point. This
-   // records browser event time, not protocol acknowledgment wall time.
-   const tapReceipt=await surface(page).evaluateHandle(el=>{
-    const events=[];
-    const observe=event=>{
-     if(event.pointerType!=='touch'||events.length>=8)return;
-     const story=window.__story.inspect(),scene=window.__thesis.inspect();
-     events.push({type:event.type,timeStamp:event.timeStamp,x:event.clientX,y:event.clientY,
-      pointerId:event.pointerId,isPrimary:event.isPrimary,index:Number(el.dataset.sourceIndex),
-      target:event.target.tagName,protected:!!event.target.closest?.('button,a,select,input,summary,[data-protect],[data-feedback-plane]'),
-      hit:window.__thesis.hitTest(event.clientX,event.clientY),ready:scene.ready,
-      representation:scene.representation,selection:story.sourceSelection,engaged:story.modelEngaged});
-    };
-    for(const type of ['pointerdown','pointerup','pointercancel'])document.addEventListener(type,observe,true);
-    return{events,dispose(){for(const type of ['pointerdown','pointerup','pointercancel'])document.removeEventListener(type,observe,true);}};
-   });
-   let tap,primaryTapError;
-   try{
-    tap=await hitPoint(page);
-    // The pinned Playwright public API dispatches native Chromium start/end
-    // together; awaiting start's protocol acknowledgment can turn a tap into
-    // an unintended long hold. No event timestamps or app limits are changed.
-    touchActive=true;await page.touchscreen.tap(tap.x,tap.y);touchActive=false;
-    const events=await tapReceipt.evaluate(value=>value.events);
-    expect(events.map(event=>event.type)).toEqual(['pointerdown','pointerup']);
-    const [down,up]=events;
-    expect(up.pointerId).toBe(down.pointerId);
-    for(const event of events){
-     expect(event.isPrimary).toBe(true);expect(event.protected).toBe(false);expect(event.ready).toBe(true);
-     expect(event.hit).toMatchObject({source:true,chapterId:'form'});
-    }
-    expect(up.timeStamp-down.timeStamp).toBeGreaterThanOrEqual(0);
-    expect(up.timeStamp-down.timeStamp).toBeLessThan(650);
-    expect(Math.hypot(up.x-down.x,up.y-down.y)).toBeLessThanOrEqual(10);
-    expect(Number.isInteger(up.index)).toBe(true);
-    await expect.poll(()=>page.evaluate(()=>window.__story.inspect().sourceSelection?.index),{timeout:WAIT}).toBe((up.index+1)%4);
-    expect(await page.evaluate(()=>window.__story.inspect().sourceSelection.chapterId)).toBe('form');
-    await expect.poll(()=>page.evaluate(()=>{const r=window.__thesis.inspect().representation;return {chapterId:r.chapterId,index:r.index,pinned:r.pinned};}),{timeout:WAIT}).toEqual({chapterId:'form',index:(up.index+1)%4,pinned:true});
-    expect(await surface(page).evaluate(el=>el.__captureCalls)).toBe(0);
-    expect(await page.evaluate(()=>window.__story.inspect().modelEngaged)).toBe(false);
-    await surface(page).press('Escape');await settle(page);
-   }catch(error){primaryTapError=error;throw error;}
-   finally{
-    try{
-     const events=await tapReceipt.evaluate(value=>value.events);
-     const path=test.info().outputPath('native-source-tap.json');
-     await writeFile(path,JSON.stringify({point:tap,events},null,2));
-     await test.info().attach('native-source-tap',{path,contentType:'application/json'});
-    }catch(error){if(!primaryTapError)throw error;}
-    finally{try{await tapReceipt.evaluate(value=>value.dispose());await tapReceipt.dispose();}catch(error){if(!primaryTapError)throw error;}}
-   }
+  await loadScene(page);await centerStudy(page,'form');
+  await expect(surface(page)).toHaveCSS('pointer-events','none');await expect(surface(page)).not.toHaveAttribute('role','button');
+  const p=await hitPoint(page),before=await page.evaluate(()=>({y:scrollY,source:window.__thesis.inspect().representation.id,inspection:window.__story.inspect().inspection.target}));
+  if(isMobile){
+   cdp=await context.newCDPSession(page);
+   await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{...p,id:1}]});
+   for(let i=1;i<=8;i++)await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:p.x,y:p.y-i*15,id:1}]});
+   await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+   await expect.poll(()=>page.evaluate(()=>scrollY),{timeout:WAIT}).toBeGreaterThan(before.y+30);
   }else{
-  await start();
-  const pressed=await pressSnapshot.jsonValue();
-  await expect.poll(()=>page.evaluate(()=>window.__story.inspect().modelEngaged),{timeout:WAIT}).toBe(true);
-  await settle(page);
-  // Autoplay may advance before pointerdown, but the source displayed at that
-  // native event must survive the handoff to the next successfully drawn frame.
-  const held=await page.evaluate(()=>({
-   pose:window.__thesis.inspect().pose,source:window.__thesis.inspect().representation.id,
-   inspection:window.__story.inspect().inspection.value,time:window.__story.inspect().playback.activeSeconds,scroll:scrollY,
-   heldSource:window.__story.inspect().modelHeldSource,pinned:window.__thesis.inspect().representation.pinned,
-  }));
-  expect(pressed.scroll).toBe(scrollBeforePress);
-  expect(held).toMatchObject({source:pressed.source,scroll:pressed.scroll,pinned:false,heldSource:{chapterId:pressed.chapterId,index:pressed.index}});
-  await move(30,24);
-  await expect.poll(()=>page.evaluate(()=>window.__story.inspect().inspection.target.azimuth)).toBeCloseTo(held.inspection.azimuth-6.9,4);
-  await expect.poll(()=>page.evaluate(()=>window.__story.inspect().inspection.target.elevation)).toBeCloseTo(held.inspection.elevation+4.32,4);
-  await settle(page);
-  const rightDown=await page.evaluate(()=>({pose:window.__thesis.inspect().pose,scroll:scrollY,source:window.__thesis.inspect().representation.id,time:window.__story.inspect().playback.activeSeconds}));
-  // The existing camera owner renders the requested orbit. Reversing camera
-  // azimuth makes the source surface turn right; elevation makes it turn down.
-  expect(rightDown.pose.azimuth).toBeLessThan(held.pose.azimuth);expect(rightDown.pose.elevation).toBeGreaterThan(held.pose.elevation);
-  expect(rightDown).toMatchObject({scroll:held.scroll,source:held.source,time:held.time});
-  await move(-30,-24);await settle(page);
-  const leftUp=await page.evaluate(()=>({pose:window.__thesis.inspect().pose,scroll:scrollY,source:window.__thesis.inspect().representation.id,time:window.__story.inspect().playback.activeSeconds}));
-  expect(leftUp.pose.azimuth).toBeGreaterThan(held.pose.azimuth);expect(leftUp.pose.elevation).toBeLessThan(held.pose.elevation);
-  expect(leftUp).toMatchObject({scroll:held.scroll,source:held.source,time:held.time});
-  if(cdp){await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});touchActive=false;}else await page.mouse.up();
-  await settle(page);
-  const released=await page.evaluate(()=>window.__story.inspect());
-  expect(released.modelEngaged).toBe(false);expect(released.sourceSelection).toBeNull();expect(released.modelHeldSource).toBeNull();
-  expect(released.inspection.value).toMatchObject({azimuth:30,elevation:30});
-  await expect(surface(page)).not.toHaveAttribute('data-model-dragging','true');
-
+   await page.mouse.move(p.x,p.y);await page.mouse.down();await page.mouse.move(p.x+45,p.y-30,{steps:5});await page.mouse.up();await frames(page,4);
+   expect(await page.evaluate(()=>scrollY)).toBe(before.y);
+   expect(await page.evaluate(()=>window.__thesis.inspect().representation.id)).toBe(before.source);
   }
-
-  const outside=await page.evaluate(()=>{
-   for(const x of [8,innerWidth-8,innerWidth*.5])for(const y of [innerHeight*.7,innerHeight*.55]){
-    const el=document.elementFromPoint(x,y);
-    if(el&&!el.closest('[data-model-viewport],button,a,input,select,summary'))return{x,y};
-   }
-   throw Error('No native reading region outside the model');
-  });
-  const scrollBefore=await page.evaluate(()=>scrollY);
-  if(cdp){
-   await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{...outside,id:1}]});touchActive=true;
-   for(let i=1;i<=6;i++)await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:outside.x,y:outside.y-i*20,id:1}]});
-   await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});touchActive=false;
-  }else{await page.mouse.move(outside.x,outside.y);await page.mouse.wheel(0,140);}
-  await expect.poll(()=>page.evaluate(()=>scrollY),{timeout:WAIT}).toBeGreaterThan(scrollBefore+30);
-  expect(await page.evaluate(()=>document.body.style.overflow)).not.toBe('hidden');
-
-  // Retaining keyboard focus keeps the overlay mounted during a non-model
-  // chapter. Its invisible viewport must still release native pointer input.
-  await surface(page).evaluate(el=>el.focus({preventScroll:true}));
-  await page.evaluate(()=>{
-   const section=document.querySelector('[data-story-chapter="make"]');
-   let y=0;for(let el=section;el;el=el.offsetParent)y+=el.offsetTop;
-   scrollTo({top:y+Math.max(0,(section.offsetHeight-innerHeight)/2),behavior:'instant'});
-  });
   await settle(page);
-  await expect(page.locator('[data-model-overlay]')).toHaveAttribute('data-model-ui-visible','false');
-  expect(await surface(page).evaluate(el=>document.activeElement===el)).toBe(true);
-  await expect(surface(page)).toHaveCSS('pointer-events','none');
-  expect(errors).toEqual([]);
- }finally{
-  if(cdp){if(touchActive)await cdp.send('Input.dispatchTouchEvent',{type:'touchCancel',touchPoints:[]});await cdp.detach();}
-  else await page.mouse.up();
-  if(cdp)await surface(page).evaluate(el=>el.__restoreCapture?.()).catch(()=>{});
-  await pressSnapshot.dispose();
+  const after=await page.evaluate(()=>{const s=window.__story.inspect();return{y:scrollY,inspection:s.inspection.target,engaged:s.modelEngaged,held:s.modelHeldSource,selection:s.sourceSelection};});
+  expect(after.inspection).toEqual(before.inspection);expect(after).toMatchObject({engaged:false,held:null,selection:null});
+  await expect(surface(page)).not.toHaveAttribute('data-model-dragging','true');receipt.inputs.push({point:p,before,after,isMobile});
+  const y=await page.evaluate(()=>scrollY);await page.mouse.wheel(0,220);await expect.poll(()=>page.evaluate(()=>scrollY),{timeout:WAIT}).toBeGreaterThan(y+50);await settle(page);
+  expect(await page.evaluate(()=>window.__story.inspect().readingShiftY)).toBe(0);expect(await page.evaluate(()=>document.body.style.overflow)).not.toBe('hidden');
+  expect(errors).toEqual([]);receipt.phase='completed';
+ }catch(error){primaryError=error;throw error;}
+ finally{
+  if(cdp){try{await cdp.send('Input.dispatchTouchEvent',{type:'touchCancel',touchPoints:[]});await cdp.detach();}catch{}}
+  try{const path=info.outputPath('native-source-scroll-neutrality.json');await writeFile(path,JSON.stringify(receipt,null,2));await info.attach('native-source-scroll-neutrality',{path,contentType:'application/json'});}catch(error){if(!primaryError)throw error;}
  }
 });

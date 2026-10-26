@@ -24,7 +24,6 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
  let handedOff=false,sceneId=null,documentResult=null,pendingScene=null,lastScenePhase='preparing',previewResource=null;
  let revealGeneration=0,revealMode=null,revealAnimations=[],revealFrame=null,revealExpiresAt=null,startupExpiresAt=null,completePreparation=null;
  const sceneRoute=path(win.location.pathname)===BENDING_ROUTE;
- const reduced=win.matchMedia?.('(prefers-reduced-motion: reduce)');
  const monotonic=()=>win.performance?.now()??now();
  // Opt-in observation only: no new clock, scheduler or readiness prerequisite.
  const diagnosticEvents=win.__SITE_NAVIGATION_DIAGNOSTICS__===true?[]:null;
@@ -116,7 +115,7 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
   const content=element.querySelector?.('[data-site-loader-content]');
   revealMode=typeof element.animate==='function'&&typeof content?.animate==='function'&&typeof win.requestAnimationFrame==='function'&&typeof win.cancelAnimationFrame==='function'?'native':'css';
   const generation=++revealGeneration,epoch=diagnosticEpoch;
-  diagnostic('reveal-selected',{mode:revealMode,immediate,reduced:Boolean(reduced?.matches)},epoch);
+  diagnostic('reveal-selected',{mode:revealMode,immediate,reduced:false},epoch);
   const current=()=>!disposed&&generation===revealGeneration&&active?.id===id&&active.kind==='arrival'&&['requested','ready','revealing'].includes(active.phase);
   let finished=false,effectsStarted=false;
   const accept=({staticReveal=false,reason=''}={})=>{
@@ -134,12 +133,12 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
    if(finished)completeReveal();
   };
   completePreparation=reason=>accept({staticReveal:true,reason});
-  if(immediate||reduced?.matches||doc.hidden){accept({staticReveal:true,reason:doc.hidden?'hidden-static':staticReason});return;}
+  if(immediate||doc.hidden){accept({staticReveal:true,reason:doc.hidden?'hidden-static':staticReason});return;}
   if(revealMode!=='native'){accept();return;}
   attr(element,'data-site-reveal','native');
   const begin=()=>{
    if(!current()||active.phase!=='requested'||effectsStarted||startupExpired())return;
-   if(reduced?.matches||doc.hidden){completePreparation(doc.hidden?'hidden-static':'reduced-motion');return;}
+   if(doc.hidden){completePreparation('hidden-static');return;}
    effectsStarted=true;diagnostic('native-effects-begin',{},epoch);
    const preparations=[],completions=[];
    try{
@@ -325,10 +324,6 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
    events.listen(scope,doc,'visibilitychange',()=>{
     if(!doc.hidden||active?.kind!=='arrival'||sceneRoute||!documentResult?.ready)return;
     if(active.phase==='requested')completePreparation?.('hidden-static');else if(['ready','revealing'].includes(active.phase))completeReveal('hidden-static');
-   });
-   if(reduced)events.listen(scope,reduced,'change',()=>{
-    if(!reduced.matches||active?.kind!=='arrival'||sceneRoute||!documentResult?.ready)return;
-    if(active.phase==='requested')completePreparation?.('reduced-motion');else if(['ready','revealing'].includes(active.phase))completeReveal('reduced-motion');
    });
    arrival();if(sceneRoute)releaseScene=subscribeScene(sceneFact);
    return dispose;

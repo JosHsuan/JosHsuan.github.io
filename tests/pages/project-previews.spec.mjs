@@ -163,7 +163,7 @@ test('the real model paints behind loading before its project card is released, 
  }
 });
 
-test('the selected native recording plays only while eligible and a pause click does not navigate',async({page})=>{
+test('the selected native recording follows scroll eligibility with no operation controls and closes on departure',async({page})=>{
  await page.goto('/projects/xr-bending-active/');await entered(page);
  await xrChapter(page,'context');
  const workspace=xrStage(page).locator('[data-xr-workspace-visual]');await expect(workspace).toBeVisible();
@@ -172,51 +172,38 @@ test('the selected native recording plays only while eligible and a pause click 
  expect(source).toEqual({ready:true,src:expected.src,width:expected.width,height:expected.height,fit:'contain'});
  expect((await xrFacts(page)).workspace).toMatchObject({phase:'ready',width:expected.width,height:expected.height});
  await expect(xrStage(page).locator('canvas')).toHaveCount(1);await expect(xrStage(page).locator('canvas')).toBeHidden();
- await expect(xrStage(page).locator('[data-xr-model-poster]')).toBeHidden();await expect(page.locator('[data-xr-scene-controls]')).toBeHidden();
+ await expect(xrStage(page).locator('[data-xr-model-poster]')).toBeHidden();await expect(page.locator('[data-xr-scene-controls]')).toHaveCount(0);
  closedRequests(await xrFacts(page));
  await xrChapter(page,'adapt');
  const video=xrVideo(page);
  expect(await video.evaluate(node=>node.muted&&node.loop&&node.playsInline&&!node.paused&&node.readyState>=2)).toBe(true);
  const initial=await video.evaluate(node=>node.currentTime);await expect.poll(()=>video.evaluate(node=>node.currentTime)).toBeGreaterThan(initial);
- const before=page.url(),button=page.locator('[data-xr-motion-toggle]');await expect(button).toHaveAccessibleName('Pause recording');
- const placement=await button.evaluate(node=>({rect:node.getBoundingClientRect().toJSON(),nestedInLink:!!node.closest('a')}));
- expect(placement.rect.width).toBeGreaterThanOrEqual(44);expect(placement.rect.height).toBeGreaterThanOrEqual(44);expect(placement.nestedInLink).toBe(false);
- await button.click();expect(page.url()).toBe(before);await expect(button).toHaveAccessibleName('Play recording');
- await expect.poll(()=>video.evaluate(node=>node.paused)).toBe(true);const paused=await video.evaluate(node=>node.currentTime);await frames(page,8);expect(await video.evaluate(node=>node.currentTime)).toBe(paused);
+ await expect(page.locator('[data-xr-motion-toggle],[data-xr-reading-tools]')).toHaveCount(0);
  await expect(video).toHaveAttribute('src',new URL('/assets/xr/adapt-interface.mp4',page.url()).href);closedRequests(await xrFacts(page));
- await button.click();await expect(button).toHaveAccessibleName('Pause recording');await expect.poll(()=>video.evaluate(node=>node.currentTime)).not.toBe(paused);expect(page.url()).toBe(before);
  await xrChapter(page,'overview');await expect(xrStage(page).locator('video[src]')).toHaveCount(0);expect((await xrFacts(page)).resource.media.stage).toBeNull();closedRequests(await xrFacts(page));
  await expect(xrStage(page)).toHaveAttribute('data-xr-opening','true');
  await expect(xrStage(page).locator('[data-xr-opening-visual]')).toHaveCount(0);await expect(page.locator('[data-xr-hero]')).toHaveCount(0);
  await expect(page.locator('#xr-overview h1')).toHaveText(xrStudy.title);await expect(page.locator('#xr-overview h1')).toBeVisible();
- await expect(page.locator('#xr-overview p')).toHaveText(xrStudy.introduction);await expect(page.locator('#xr-overview p')).toBeVisible();
+ await expect(page.locator('#xr-overview p').filter({hasText:xrStudy.introduction})).toHaveText(xrStudy.introduction);await expect(page.locator('#xr-overview p').filter({hasText:xrStudy.introduction})).toBeVisible();
  expect((await xrFacts(page)).scene).toMatchObject({chapter:'overview',mode:'absent',settled:true,visible:false});
  await expect(workspace).toBeHidden();await expect(xrStage(page).locator('[data-xr-model-poster]')).toBeHidden();
- await expect(xrStage(page).locator('canvas')).toHaveCount(1);await expect(xrStage(page).locator('canvas')).toBeHidden();await expect(page.locator('[data-xr-scene-controls]')).toBeHidden();
+ await expect(xrStage(page).locator('canvas')).toHaveCount(1);await expect(xrStage(page).locator('canvas')).toBeHidden();await expect(page.locator('[data-xr-scene-controls]')).toHaveCount(0);
  await page.evaluate(()=>addEventListener('pagehide',()=>sessionStorage.setItem('test-xr-preview-departure',JSON.stringify(document.querySelector('[data-xr-stage]').__xrStage.inspect())),{once:true}));
  await page.locator('[data-portfolio-navigation] a[href="/contact/"]').click();await entered(page);
  const departed=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('test-xr-preview-departure')));expect(departed.resource).toBeNull();expect(departed.disposals).toBe(departed.acquisitions);closedRequests(departed);
  await expect(page.locator('canvas')).toHaveCount(1);await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);
 });
 
-test('motion preference changes close active previews and preserve the same-frame fallback',async({page})=>{
- await openGrid(page);
- await expect(model(page)).toHaveAttribute('data-preview-phase','ready',{timeout:WAIT});
- const beforePolicy=await modelFacts(page);expect(beforePolicy.resource.firstDraw.completed).toBe(true);
- await page.emulateMedia({reducedMotion:'reduce'});await expect(model(page).locator('canvas')).toHaveCount(0);
- await expect(page.locator('[data-model-poster]')).toBeVisible();
- const reducedModel=await modelFacts(page);expect(reducedModel.resource).toBeNull();expect(reducedModel.reason).toBe('reduced-motion');expect(reducedModel.disposals).toBe(reducedModel.acquisitions);closedRequests(reducedModel);
- await page.emulateMedia({reducedMotion:'no-preference'});
- await expect(model(page)).toHaveAttribute('data-preview-phase','ready',{timeout:WAIT});
- const restoredModel=await modelFacts(page);expect(restoredModel.acquisitions).toBeGreaterThan(beforePolicy.acquisitions);expect(restoredModel.resource.firstDraw.completed).toBe(true);closedRequests(restoredModel);
- await page.goto('/projects/xr-bending-active/');await entered(page);
- await xrChapter(page,'adapt');
- await page.emulateMedia({reducedMotion:'reduce'});
- await expect(xrStage(page).locator('canvas')).toHaveCount(0);await expect(xrStage(page).locator('video[src]')).toHaveCount(0);
- await expect(xrStage(page).locator('[data-xr-native-phone="adapt"] img')).toBeVisible();await expect(page.locator('[data-xr-motion-toggle]')).toBeDisabled();
- const reduced=await xrFacts(page);expect(reduced.resource).toBeNull();expect(reduced.disposals).toBe(reduced.acquisitions);closedRequests(reduced);
- await page.emulateMedia({reducedMotion:'no-preference'});
- await xrChapter(page,'adapt');expect((await xrFacts(page)).acquisitions).toBeGreaterThan(reduced.acquisitions);closedRequests(await xrFacts(page));
+test('motion and data-saving preferences retain the original model preview and native recording instead of automatic static switching',async({page})=>{
+ await page.addInitScript(()=>Object.defineProperty(navigator,'connection',{configurable:true,value:Object.assign(new EventTarget(),{saveData:true})}));
+ await openGrid(page);await expect(model(page)).toHaveAttribute('data-preview-phase','ready',{timeout:WAIT});
+ const beforePolicy=await modelFacts(page),canvas=await model(page).locator('canvas').elementHandle();expect(beforePolicy.resource.firstDraw.completed).toBe(true);expect(beforePolicy.eligibility.saveData).toBe(true);
+ await page.emulateMedia({reducedMotion:'reduce'});await page.evaluate(()=>{navigator.connection.saveData=false;navigator.connection.dispatchEvent(new Event('change'));navigator.connection.saveData=true;navigator.connection.dispatchEvent(new Event('change'));});await frames(page,8);const changed=await modelFacts(page);
+ expect(await canvas.evaluate(node=>node.isConnected&&node===document.querySelector('[data-project-model-preview] canvas'))).toBe(true);expect(changed.acquisitions).toBe(beforePolicy.acquisitions);expect(changed.disposals).toBe(beforePolicy.disposals);expect(changed.resource.firstDraw.completed).toBe(true);closedRequests(changed);
+ await page.goto('/projects/xr-bending-active/');await entered(page);await xrChapter(page,'adapt');
+ const initial=await xrFacts(page),recording=xrVideo(page),position=await recording.evaluate(node=>node.currentTime);await page.emulateMedia({reducedMotion:'no-preference'});await page.emulateMedia({reducedMotion:'reduce'});
+ await expect.poll(()=>recording.evaluate(node=>node.currentTime)).toBeGreaterThan(position);const retained=await xrFacts(page);expect(retained.acquisitions).toBe(initial.acquisitions);expect(retained.disposals).toBe(initial.disposals);expect(retained.resource.mode).toBe('webgl-phone');expect(retained.reduced).toBe(false);closedRequests(retained);
+ await expect(page.locator('[data-xr-motion-toggle]')).toHaveCount(0);
 });
 
 test('failed model and video assets settle to explicit static fallbacks with native links and truthful posters available',async({page})=>{
@@ -250,7 +237,7 @@ test('failed model and video assets settle to explicit static fallbacks with nat
  await expect(page.locator('[data-project-model-preview] canvas')).toHaveCount(0);
  await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);
  expect(denied.model).toBeGreaterThan(0);expect(denied.video).toBeGreaterThan(0);
- closedRequests(await xrFacts(page));await expect(page.locator('#xr-adapt a[href="/assets/xr/adapt-interface.mp4"]')).toBeVisible();
+ closedRequests(await xrFacts(page));await expect(page.locator('#xr-adapt-heading')).toBeVisible();await expect(page.locator('#xr-adapt a')).toHaveCount(0);
  await expect(page.locator('h1')).toHaveText('An Extended-Reality App Using Motion Capture for Bending-Active Structure');
  }catch(error){primaryError=error;throw error;
  }finally{

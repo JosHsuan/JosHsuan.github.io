@@ -58,7 +58,7 @@ function Introduction(){
           <p className={styles.statement} data-introduction-statement>{introduction.statement}</p>
           <p className={styles.description} data-introduction-description>{introduction.description}</p>
         </div>
-        <a href="#projects" className={`${styles.projectInvitation} ${styles.scrollCopy}`} data-home-project-link data-information-window="home-invitation" data-information-motion-surface="plane" data-home-scroll-window="invitation"><InformationSkin/>
+        <a href="/projects/" className={`${styles.projectInvitation} ${styles.scrollCopy}`} data-home-project-link data-information-window="home-invitation" data-information-motion-surface="plane" data-home-scroll-window="invitation"><InformationSkin/>
           <span className={styles.invitationCopy}><span className={styles.invitationLabel}>SELECTED WORK / {String(projects.length).padStart(2,'0')}</span><span className={styles.invitationTitle} data-display-type>Between physical and digital.</span><span className={styles.invitationAction}>Explore the projects</span></span>
           <span className={styles.invitationArrow}><Arrow/></span>
         </a>
@@ -135,7 +135,7 @@ export default function PortfolioHome({section='home'}){
       {section==='about'&&<><About standalone/><Contact/></>}
       {section==='projects'&&<><Projects standalone/><Contact/></>}
       {section==='contact'&&<Contact standalone/>}
-      <footer className={styles.footer}><span>JosHsuan Chao</span><span>DESIGN TECHNOLOGY / FABRICATION / SPATIAL INTERACTION</span><a href="#portfolio-main">Back to top <span aria-hidden="true">↑</span></a></footer>
+      <footer className={styles.footer}><span>JosHsuan Chao</span><span>DESIGN TECHNOLOGY / FABRICATION / SPATIAL INTERACTION</span></footer>
     </main>
   </div>;
 }

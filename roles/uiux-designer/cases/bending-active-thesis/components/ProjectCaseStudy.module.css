@@ -116,7 +116,7 @@
 }
 @media(max-width:360px){.chapterInner{padding-inline:1.25rem}.panel{padding:1.25rem}.evidenceBand{padding-inline:1.25rem}.sourceLinks{gap:0 1rem}}
 @media(max-height:560px) and (min-width:800px){.page{--study-source-top:7rem;--study-source-height:max(10rem,calc(100svh - 13rem))}.chapterInner{padding-bottom:3rem}}
-@media(prefers-reduced-motion:reduce){.page:global([data-home-scrolling-ready]) :global([data-information-window][data-information-ready]){transform:none!important}}
+
 @media(forced-colors:active){.page{color:CanvasText}.panel,.sourcePanel,.evidenceImage,.evidence figcaption{border-color:CanvasText}.primaryFigure{background:Canvas}.imageFailure{background:Canvas;color:CanvasText}.page :focus-visible{outline-color:Highlight}.motionControls button,.sourceAction{color:ButtonText;border-color:ButtonText;background:ButtonFace}}
 @media print{
  .modelStage,.modelTarget,.modelState,.modelHelp,.sourceAction{display:none!important}

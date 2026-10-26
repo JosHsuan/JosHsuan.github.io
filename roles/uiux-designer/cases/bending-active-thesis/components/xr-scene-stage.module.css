@@ -28,7 +28,7 @@
 .controls[hidden]{display:none}
 @media(max-width:799px){.modelPoster{left:3%;top:16%;width:94%;height:45%}.nativePhone{left:3%;top:15%;width:94%;height:76%}.screen{height:95%;border-width:8px;border-radius:24px}.controls{gap:8px}.controls button{min-width:80px;min-height:44px;font-size:.66rem}}
 @media(prefers-contrast:more){.controls{background:#152127;border-color:#bdc9c9;color:#fff}}
-@media(forced-colors:active){.stage{display:none}.controls{background:Canvas;border-color:CanvasText;color:CanvasText}}
+@media(forced-colors:active){.controls{background:Canvas;border-color:CanvasText;color:CanvasText}}
 @media print{.stage,.controls{display:none}}
 
 .inspectionHint{font-size:var(--type-size-label);line-height:var(--type-leading-label);letter-spacing:var(--type-tracking-label)}

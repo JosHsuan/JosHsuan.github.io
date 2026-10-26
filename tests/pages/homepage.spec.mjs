@@ -29,18 +29,19 @@ test('all portfolio categories and selected projects have direct readable no-Jav
    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href','https://joshsuan.github.io'+route);
    await expect(page.locator('canvas')).toHaveCount(1);
    await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);
-   await expect(page.locator('[data-animation-toggle]')).toBeHidden();
+   await expect(page.locator('[data-animation-toggle],button')).toHaveCount(0);
   }
   await page.goto('http://127.0.0.1:4186/');
-  await page.locator('[data-home-project-link]').click();await expect(page).toHaveURL(/\/#projects$/);
+  await expect(page.locator('[data-home-project-link]')).toHaveAttribute('href','/projects/');await page.locator('[data-project-grid]').evaluate(node=>node.scrollIntoView({block:'start',behavior:'instant'}));
   await expect(page.locator('[data-project-grid]')).toBeInViewport();
   await expect(page.locator('[data-project-card]')).toHaveCount(cardCount);
   await page.locator('[data-project-card="xr-bending-active"]').click();
   await expect(page.locator('[data-xr-study]')).toBeVisible();
-  await expect(page.locator('[data-xr-scene-controls]')).toBeHidden();
-  const nativeRecordings=page.locator('[data-xr-recording] a[href$="-interface.mp4"]');
-  expect(await nativeRecordings.evaluateAll(links=>links.map(link=>link.getAttribute('href')).sort())).toEqual(['/assets/xr/adapt-interface.mp4','/assets/xr/assemble-interface.mp4','/assets/xr/join-interface.mp4']);
-  for(const link of await nativeRecordings.all())await expect(link).toBeVisible();
+  await expect(page.locator('[data-xr-scene-controls]')).toHaveCount(0);
+  const nativeRecordings=page.locator('[data-xr-recording] noscript img');
+  expect(await nativeRecordings.evaluateAll(images=>images.map(image=>image.getAttribute('src')).sort())).toEqual(['/assets/xr/adapt-poster.webp','/assets/xr/assemble-poster.webp','/assets/xr/join-poster.webp']);
+  for(const image of await nativeRecordings.all())await expect(image).toBeVisible();
+  await expect(page.locator('[data-xr-study] :is(button,details,summary),a[href^="/assets/"]')).toHaveCount(0);
  }finally{await context.close();}
 });
 
@@ -65,7 +66,7 @@ test('Home prepares one original research hero and retains eight static native p
  expect((await page.evaluate(()=>window.__site.inspect())).readiness.previews).toEqual([{mode:'model',reason:''}]);
  const first=await page.evaluate(()=>scrollY);await page.mouse.wheel(0,130);
  await expect.poll(()=>page.evaluate(()=>scrollY)).toBeGreaterThan(first);
- await page.locator('[data-home-project-link]').click();await expect(page).toHaveURL(/\/#projects$/);
+ await expect(page.locator('[data-home-project-link]')).toHaveAttribute('href','/projects/');await page.locator('[data-project-grid]').evaluate(node=>node.scrollIntoView({block:'start',behavior:'instant'}));
  await expect(page.locator('[data-project-grid]')).toBeInViewport();
  const geometry=await page.locator('[data-project-grid]').evaluate(element=>{const css=getComputedStyle(element);return{columns:css.gridTemplateColumns.split(' ').length,rows:css.gridTemplateRows.split(' ').length};});
  expect(geometry.columns).toBe(isMobile?1:3);if(!isMobile)expect(geometry.rows).toBe(3);
@@ -102,7 +103,7 @@ test('Home prepares one original research hero and retains eight static native p
  expect(errors).toEqual([]);
 });
 
-test('Home native scrolling uses the shared material clock, settles, returns and respects Reduced Motion',async({page})=>{
+test('Home native scrolling uses one shared material clock, settles, returns and does not automatically switch motion off',async({page})=>{
  await page.goto('/');await entered(page);
  const introduction=page.locator('[data-home-scroll-window="introduction"]');
  const canvas=await page.locator('canvas[data-home-research-canvas]').elementHandle();
@@ -121,9 +122,9 @@ test('Home native scrolling uses the shared material clock, settles, returns and
   await expect.poll(()=>observation.evaluate(value=>value.samples.some(sample=>sample.y>0&&sample.displaced))).toBe(true);
   await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.informationWindows.settled)).toBe(true);
   expect(await observation.evaluate(value=>value.samples.every(sample=>sample.width<=sample.client))).toBe(true);
-  await page.locator('footer a[href="#portfolio-main"]').scrollIntoViewIfNeeded();
+  await page.locator('footer').scrollIntoViewIfNeeded();
   expect(await introduction.evaluate(node=>node.getBoundingClientRect().bottom<0)).toBe(true);
-  await page.locator('footer a[href="#portfolio-main"]').click();
+  await page.mouse.wheel(0,-await page.evaluate(()=>scrollY));
   await expect.poll(()=>page.evaluate(()=>scrollY)).toBe(0);
   await expect(introduction).toBeInViewport();
   await page.locator('[data-home-project-link]').focus();
@@ -131,13 +132,14 @@ test('Home native scrolling uses the shared material clock, settles, returns and
   expect(await canvas.evaluate(node=>node.isConnected&&node===document.querySelector('canvas[data-home-research-canvas]'))).toBe(true);
   expect(await page.locator('[data-home-research-host]').evaluate(node=>node.__homeResearch.inspect().acquisitions)).toBe(1);
   await page.emulateMedia({reducedMotion:'reduce'});
-  await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.policy.reduced)).toBe(true);
+  expect(await page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.policy.reduced)).toBe(false);
+  expect(await canvas.evaluate(node=>node.isConnected&&node===document.querySelector('canvas[data-home-research-canvas]'))).toBe(true);
+  const before=await page.evaluate(()=>window.__globalBackground.inspect().driver.frames);
+  await page.mouse.wheel(0,200);await expect.poll(()=>page.evaluate(()=>scrollY)).toBeGreaterThan(0);
   await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.informationWindows.settled)).toBe(true);
-  await expect(introduction).toHaveCSS('transform','none');
-  await frames(page,8);const before=await page.evaluate(()=>window.__globalBackground.inspect().driver.frames);
-  await page.mouse.wheel(0,200);await expect.poll(()=>page.evaluate(()=>scrollY)).toBeGreaterThan(0);await frames(page,8);
-  expect(await page.evaluate(()=>window.__globalBackground.inspect().driver.frames)).toBe(before);
-  expect(await page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.enabled)).toBe(false);
+  expect(await page.evaluate(()=>window.__globalBackground.inspect().driver.frames)).toBeGreaterThan(before);
+  expect(await page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.enabled)).toBe(true);
+  await expect(page.locator('button,a[href^="#"]')).toHaveCount(0);
  }finally{await observation.evaluate(value=>value.dispose());await observation.dispose();}
 });
 
@@ -224,7 +226,7 @@ test('site loading waits for actual critical images and same-page movement does 
    expect(animation.playState).toBe('finished');expect(animation.currentTime).toBe(720);
    expect(animation.localTime).toBe(720);expect(Math.abs(animation.progress-1)).toBeLessThanOrEqual(Number.EPSILON);
   }
-  await page.locator('[data-home-project-link]').click();
+  await page.locator('[data-project-grid]').evaluate(node=>node.scrollIntoView({block:'start',behavior:'instant'}));
   const after=await page.evaluate(()=>window.__site.inspect());expect(after.id).toBe(ready.id);expect(after.history).toEqual(ready.history);
   await expect(page.locator('[data-portfolio-root]')).not.toHaveAttribute('inert','');
  }finally{
@@ -287,15 +289,15 @@ test('XR detail preserves real evidence, shared authorship and a native related-
  await expect(page.locator('[data-xr-study] details')).toHaveCount(0);
  await expect(page.locator('[data-xr-opening-visual],[data-xr-hero]')).toHaveCount(0);
  const expectedImages=['adaptive-method.webp','physical-capture.webp','communication-system.webp','data-categories.webp','measuring-tools.webp','module-assembly.webp','physical-assembly.webp','physical-result.webp'].map(name=>'/assets/xr/'+name).sort();
- expect(await page.locator('[data-xr-study] figure img').evaluateAll(images=>images.map(image=>image.getAttribute('src')).sort())).toEqual(expectedImages);
- for(const image of await page.locator('[data-xr-study] figure img').all()){await image.scrollIntoViewIfNeeded();await expect.poll(()=>image.evaluate(element=>element.complete&&element.naturalWidth>0)).toBe(true);}
+ expect(await page.locator('[data-xr-study] figure[data-xr-evidence] img').evaluateAll(images=>images.map(image=>image.getAttribute('src')).sort())).toEqual(expectedImages);
+ for(const image of await page.locator('[data-xr-study] figure[data-xr-evidence] img').all()){await image.scrollIntoViewIfNeeded();await expect.poll(()=>image.evaluate(element=>element.complete&&element.naturalWidth>0)).toBe(true);}
  const entryId=await page.evaluate(()=>window.__site.inspect().id);
- await page.locator('[data-xr-chapter-link="context"]').click();
+ await page.locator('#xr-context').evaluate(node=>node.scrollIntoView({block:'start',behavior:'instant'}));
  await expect.poll(()=>page.locator('[data-xr-stage]').evaluate(node=>node.__xrStage.inspect().workspace.phase)).toBe('ready');
  const expectedWorkspace=viewport.width<800?xrWorkspace.image.mobile:xrWorkspace.image;
  await expect(page.locator('[data-xr-workspace-visual]')).toBeVisible();
  expect(await page.locator('[data-xr-workspace-visual]').evaluate(node=>({src:new URL(node.currentSrc).pathname,width:node.naturalWidth,height:node.naturalHeight,complete:node.complete,fit:getComputedStyle(node).objectFit}))).toEqual({src:expectedWorkspace.src,width:expectedWorkspace.width,height:expectedWorkspace.height,complete:true,fit:'contain'});
- await page.locator('[data-xr-chapter-link="adapt"]').click();
+ await page.locator('#xr-adapt').evaluate(node=>node.scrollIntoView({block:'start',behavior:'instant'}));
  await expect.poll(()=>page.evaluate(()=>{const heading=document.querySelector('#xr-adapt').getBoundingClientRect(),masthead=document.querySelector('[data-portfolio-navigation]').getBoundingClientRect();return heading.top>=masthead.bottom&&heading.top<innerHeight;})).toBe(true);
  expect(await page.evaluate(()=>window.__site.inspect().id)).toBe(entryId);
  await expect(page.locator('[data-xr-study] a[href="/projects/bending-active/"]')).toBeVisible();

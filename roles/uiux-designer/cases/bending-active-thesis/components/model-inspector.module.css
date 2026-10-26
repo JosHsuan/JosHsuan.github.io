@@ -97,3 +97,6 @@
  .positionSizer,.annotationSizer{display:grid;visibility:hidden;pointer-events:none;user-select:none}
  .positionSizer>span,.annotationSizer>span{grid-area:1/1;min-width:0}
 }
+
+/* Documentary geometry follows native scrolling; it never captures gestures. */
+.surface{pointer-events:none}

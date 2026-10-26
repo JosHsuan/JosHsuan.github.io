@@ -16,7 +16,7 @@ test('authored endpoints are exact, reverse is deterministic and absence span ne
  for(let i=700;i>=0;i--)assert.deepEqual(sample(path,i/700),forward[i]);
  for(let i=400;i<=600;i++)assert.deepEqual(sample(path,i/700),zero);
  assert.deepEqual(sample(path,-1),zero);assert.deepEqual(sample(path,2),zero);
- for(const pose of forward){assert.ok(Math.abs(pose.azimuthOffsetDeg)<=7);assert.ok(pose.elevationOffsetDeg>=0&&pose.elevationOffsetDeg<=3);}
+ for(const pose of forward){assert.ok(Math.abs(pose.azimuthOffsetDeg)<=48);assert.ok(pose.elevationOffsetDeg>=0&&pose.elevationOffsetDeg<=26);}
 });
 test('every key and semantic chapter join is continuous with no reset',()=>{
  for(const u of [...path.map(k=>k.at),...Array.from({length:6},(_,i)=>(i+1)/7)]){
@@ -62,10 +62,10 @@ test('fixed native orientation does not freeze independently advancing chapter i
   const playback={chapterWeights:[0,1,0,0,0,0,0],phases:Array(7).fill(phase),activeSeconds:phase*10},chapterScene=sampleChapterScene(playback);
   const args={playback,chapterScene,families,selection:resolveSourceSelection(playback,null,chapterScene),aspect:1.44,compositionMode:'viewport-stage',viewportWidth:1440};
   const original=sampleSourceScenePose(args),posed=sampleSourceScenePose({...args,scrollOrientation:sample(path,1.5/7)});
-  assert.equal(posed.azimuth,original.azimuth+7);return posed;
+  assert.equal(posed.azimuth,original.azimuth+46);return posed;
  });
  assert.notEqual(poses[0].azimuth,poses[1].azimuth);
 });
 test('direct source pose boundary rejects out-of-range offsets before fitting',()=>{
- for(const offset of [{azimuthOffsetDeg:30.01,elevationOffsetDeg:0},{azimuthOffsetDeg:-31,elevationOffsetDeg:0},{azimuthOffsetDeg:0,elevationOffsetDeg:10.01},{azimuthOffsetDeg:0,elevationOffsetDeg:-11},{azimuthOffsetDeg:1e308,elevationOffsetDeg:0}])assert.throws(()=>sampleSourceScenePose({scrollOrientation:offset}),RangeError);
+ for(const offset of [{azimuthOffsetDeg:60.01,elevationOffsetDeg:0},{azimuthOffsetDeg:-61,elevationOffsetDeg:0},{azimuthOffsetDeg:0,elevationOffsetDeg:28.01},{azimuthOffsetDeg:0,elevationOffsetDeg:-29},{azimuthOffsetDeg:1e308,elevationOffsetDeg:0}])assert.throws(()=>sampleSourceScenePose({scrollOrientation:offset}),RangeError);
 });

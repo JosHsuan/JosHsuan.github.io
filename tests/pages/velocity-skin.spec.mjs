@@ -35,7 +35,8 @@ test('Mode/s pilot responds to native scroll with whole-panel motion and finite 
   await panel.locator('a').first().focus();
   await expect(panel).toHaveCSS('transform','none');
   await page.emulateMedia({reducedMotion:'reduce'});
-  await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.enabled)).toBe(false);
+  await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.enabled)).toBe(true);
+  await expect(page.locator('[data-study-motion-toggle]')).toHaveCount(0);
   await expect(panel).toHaveAttribute('data-information-moving','false');
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  }finally{await observation.evaluate(value=>value.dispose());await observation.dispose();}

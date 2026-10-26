@@ -3,6 +3,7 @@ import {writeFile} from 'node:fs/promises';
 import {WAIT,frames,scenarioTimeout} from './case-helpers.mjs';
 test.use({video:'on'});
 const facts=page=>page.evaluate(()=>({y:scrollY,...document.querySelector('[data-xr-stage]').__xrStage.inspect()}));
+async function capture(page,name){const path=test.info().outputPath(name+'.png');await page.screenshot({path});await test.info().attach(name,{path,contentType:'image/png'});}
 async function nativeReading(page,progress,steps=1){
  const destination=await page.evaluate(progress=>{
   // Match the Director's cached natural-layout contract, not fractional transformed rects.
@@ -45,8 +46,10 @@ test('XR native scrolling directs the complete model while idle is compositor-on
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  expect((await page.goto('/projects/xr-bending-active/')).status()).toBe(200);
  await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});
- await page.mouse.click(8,page.viewportSize().height*.5);
- const a=await nativeReading(page,.15),b=await nativeReading(page,.8,6),reverse=await nativeReading(page,.15,6);
+ const a=await nativeReading(page,.15);await capture(page,'xr-camera-early');
+ const crane=await nativeReading(page,.5,6);await capture(page,'xr-camera-crane');
+ const b=await nativeReading(page,.90,6);await capture(page,'xr-camera-opposite');
+ const reverse=await nativeReading(page,.15,10);
  expect(b.camera.intent.yawRad-a.camera.intent.yawRad).toBeGreaterThan(.1);expect(reverse.camera.intent.yawRad).toBeCloseTo(a.camera.intent.yawRad,3);
  expect(reverse.camera.value).toEqual({azimuth:0,elevation:0});expect(reverse.gesture).toBeNull();expect(reverse.acquisitions).toBe(1);
  expect(reverse.resource.sourceRevision).toBe('82e9679c1e47e93cc1a7bbea588eb0f2c8af142d6f7facc6fe5ffaa6148fdc04');
@@ -57,21 +60,20 @@ test('XR native scrolling directs the complete model while idle is compositor-on
  for(const row of samples){expect(row.y).toBe(reverse.y);expect(row.intent).toEqual(reverse.camera.intent);expect(row.draws).toBe(reverse.resource.surface.draws);expect(row.fits).toBe(reverse.resource.surface.cameraFits);expect(row.pixels).toBeLessThanOrEqual(524288);expect(Math.abs(row.compositor.xPx)).toBeLessThanOrEqual(1.2);expect(Math.abs(row.compositor.yPx)).toBeLessThanOrEqual(1.2);expect(Math.abs(row.compositor.rollRad)).toBeLessThanOrEqual(.0012);}
  expect(new Set(samples.map(s=>s.transform)).size).toBeGreaterThan(1);expect(new Set(samples.map(s=>s.allocations)).size).toBe(1);
  const png=test.info().outputPath(`xr-scroll-camera-${page.viewportSize().width}.png`);await page.screenshot({path:png});await test.info().attach('xr-authored-camera',{path:png,contentType:'image/png'});
- const toggle=page.locator('[data-xr-motion-toggle]');await expect(toggle).toHaveText('Pause motion');await toggle.click();await expect(toggle).toHaveAttribute('aria-pressed','true');await frames(page,2);
- const paused=await facts(page);await frames(page,8);const still=await facts(page);expect(still.camera.intent).toEqual(paused.camera.intent);expect(still.camera.activeSeconds).toBe(paused.camera.activeSeconds);expect(still.resource.surface.compositor).toEqual(paused.resource.surface.compositor);expect(still.resource.surface.draws).toBe(paused.resource.surface.draws);
- await toggle.click();await page.mouse.click(8,page.viewportSize().height*.5);const neutral=await nativeReading(page,.45);
- const control=page.locator('[data-xr-model-control]');await control.evaluate(node=>node.focus({preventScroll:true}));expect(await page.evaluate(()=>scrollY)).toBe(neutral.y);await control.press('ArrowRight');await page.waitForFunction(()=>document.querySelector('[data-xr-stage]').__xrStage.inspect().camera.settled,null,{timeout:WAIT});
- expect((await facts(page)).camera.value.azimuth).toBeLessThan(0);await control.press('Home');await page.waitForFunction(intent=>{const s=document.querySelector('[data-xr-stage]').__xrStage.inspect();return s.camera.settled&&s.camera.value.azimuth===0&&s.camera.value.elevation===0&&!s.scene.paintPending&&JSON.stringify(s.camera.intent)===JSON.stringify(intent)&&JSON.stringify(s.resource.view.cameraIntent)===JSON.stringify(intent);},neutral.camera.intent,{timeout:WAIT});
- const returned=await facts(page);expect(returned.camera.modelProgress).toBeCloseTo(.45,2);expect(returned.resource.view.cameraIntent).toEqual(neutral.camera.intent);expect(returned.camera.intent).toEqual(neutral.camera.intent);
- await expect(page.locator('[data-xr-model-guidance]')).toContainText('current scroll view');
- await page.setViewportSize({width:320,height:844});await page.mouse.click(8,400);await nativeReading(page,.45);
- const targets=await page.locator('[data-xr-motion-toggle]').evaluateAll(nodes=>nodes.map(node=>{const r=node.getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom};}));
- expect(targets).toHaveLength(1);for(const r of targets){expect(r.width).toBeGreaterThanOrEqual(44);expect(r.height).toBeGreaterThanOrEqual(44);expect(r.x).toBeGreaterThanOrEqual(0);expect(r.right).toBeLessThanOrEqual(320);expect(r.y).toBeGreaterThanOrEqual(0);expect(r.bottom).toBeLessThanOrEqual(844);}
+ await expect(page.locator('[data-xr-motion-toggle],[data-xr-model-control],[data-xr-reading-tools]')).toHaveCount(0);
+ const keyboardStart=await page.evaluate(()=>scrollY);await page.keyboard.press('PageDown');
+ await expect.poll(()=>page.evaluate(()=>scrollY),{timeout:WAIT}).toBeGreaterThan(keyboardStart);
+ const returned=await nativeReading(page,.45);
+ expect(returned.camera.value).toEqual({azimuth:0,elevation:0});expect(returned.gesture).toBeNull();
+ await page.setViewportSize({width:320,height:844});const narrow=await nativeReading(page,.45);
+ expect(narrow.resource.successfulPaint).toBe(true);expect(narrow.acquisitions).toBe(1);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
- const chrome=await page.evaluate(()=>{const brand=document.querySelector('[data-home-link]').getBoundingClientRect(),tools=document.querySelector('[data-xr-reading-tools]').getBoundingClientRect();return {overlapX:Math.max(0,Math.min(brand.right,tools.right)-Math.max(brand.left,tools.left)),overlapY:Math.max(0,Math.min(brand.bottom,tools.bottom)-Math.max(brand.top,tools.top))};});
- expect(chrome.overlapX*chrome.overlapY,'Compact XR motion controls must not cover the brand/home target').toBe(0);
- const narrowPNG=test.info().outputPath('xr-scroll-camera-320.png');await page.screenshot({path:narrowPNG});await test.info().attach('xr-compact-controls',{path:narrowPNG,contentType:'image/png'});
- await page.emulateMedia({reducedMotion:'reduce'});await expect(page.locator('[data-xr-webgl-canvas]')).toHaveCount(0);const reduced=await facts(page);expect(reduced.reduced).toBe(true);expect(reduced.camera.idleActive).toBe(false);
+ const narrowPNG=test.info().outputPath('xr-scroll-camera-320.png');await page.screenshot({path:narrowPNG});await test.info().attach('xr-compact-source',{path:narrowPNG,contentType:'image/png'});
+ await page.emulateMedia({reducedMotion:'reduce'});await frames(page,2);
+ await expect(page.locator('[data-xr-webgl-canvas]')).toHaveCount(1);
+ const preference=await facts(page);expect(preference.reduced).toBe(false);expect(preference.resource.mode).toBe('webgl-model');
+ const afterPreference=await nativeReading(page,.8,4);expect(afterPreference.camera.intent.yawRad-preference.camera.intent.yawRad).toBeGreaterThan(.1);
+ expect(afterPreference.acquisitions).toBe(1);expect(afterPreference.resource.support).toMatchObject({disposed:false,points:96312,bytes:2311488});
  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);expect(errors).toEqual([]);
- const receipt=test.info().outputPath('xr-scroll-camera-receipt.json');await writeFile(receipt,JSON.stringify({a,b,reverse,samples,paused,returned,reduced},null,2));await test.info().attach('xr-scroll-camera-receipt',{path:receipt,contentType:'application/json'});
+ const receipt=test.info().outputPath('xr-scroll-camera-receipt.json');await writeFile(receipt,JSON.stringify({a,crane,b,reverse,samples,returned,narrow,preference,afterPreference},null,2));await test.info().attach('xr-scroll-camera-receipt',{path:receipt,contentType:'application/json'});
 });

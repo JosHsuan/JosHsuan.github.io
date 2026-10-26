@@ -49,7 +49,14 @@ export function prepareSourceFamilies(metadata, assembly) {
   return result;
 }
 
-export function resolveSourceSelection(playback, selection, sceneScore, heldSource = null) {
+/** Native chapter progress selects a source; elapsed idle time cannot change it. */
+export function sourceIndexForScroll(chapterIndex, count, nativeU) {
+  if (!Number.isInteger(chapterIndex) || chapterIndex < 0 || chapterIndex > 6 || !Number.isInteger(count) || count < 1 || !Number.isFinite(nativeU)) throw RangeError('Valid chapter, source count and finite scroll progress required');
+  return Math.min(count - 1, Math.floor(clamp(nativeU * 7 - chapterIndex) * count));
+}
+
+export function resolveSourceSelection(playback, selection, sceneScore, heldSource = null, nativeU) {
+  if (nativeU !== undefined && !Number.isFinite(nativeU)) throw RangeError('Finite native scroll progress required');
   const supplied = playback?.chapterWeights ?? [1,0,0,0,0,0,0];
   if (supplied.length !== 7 || supplied.some(v=>!Number.isFinite(v)||v<0) || !supplied.some(v=>v>0)) throw RangeError('Seven nonnegative chapter weights required');
   const chapterIndex = supplied.indexOf(Math.max(...supplied)), chapterId = CINEMATIC_CHAPTERS[chapterIndex];
@@ -60,7 +67,9 @@ export function resolveSourceSelection(playback, selection, sceneScore, heldSour
   const pinned = selection?.chapterId === chapterId && Number.isInteger(selection.index) && selection.index >= 0 && selection.index < ids.length && age >= 0 && age < SOURCE_COMPARISON_SECONDS && (!held || selection.index === heldSource.index);
   const phase = playback?.phases?.[chapterIndex] ?? playback?.chapters?.[chapterIndex]?.phase ?? 0;
   const slots = sceneScore?.representation?.sourceSlots?.find(record=>record.chapter === chapterId)?.slots;
-  const autoIndex = slots?.length === ids.length ? slots.indexOf(Math.max(...slots)) : Math.min(ids.length-1,Math.floor((((phase%1)+1)%1)*ids.length));
+  // Live reading traverses every original source without waiting or clicking.
+  // Legacy/debug fixtures omit nativeU and retain their explicit phase score.
+  const autoIndex = nativeU !== undefined ? sourceIndexForScroll(chapterIndex, ids.length, nativeU) : slots?.length === ids.length ? slots.indexOf(Math.max(...slots)) : Math.min(ids.length-1,Math.floor((((phase%1)+1)%1)*ids.length));
   const index = held ? heldSource.index : pinned ? selection.index : autoIndex;
   return {id:ids[index], index, chapterId, chapterIndex, held, pinned, pinSecondsRemaining:pinned ? SOURCE_COMPARISON_SECONDS-age : 0,
     family:ids === EXPERIMENT_IDS ? 'experiment' : ids === REPRESENTATION_IDS ? 'representation' : 'assembly'};
@@ -106,7 +115,7 @@ export function fitSourcePose({bounds, points, aspect, azimuth=30, elevation=30,
  * User angles are bounded offsets, not a second camera or independent clock.
  */
 export function sampleSourceScenePose({playback,chapterScene,families,selection,aspect,viewport,viewportWidth,weight=0,inspection,interactionChapter,pointer={x:0,y:0},reducedMotion=false,canvasLocal=false,compositionMode,scrollOrientation}) {
-  if(scrollOrientation!==undefined&&(!Number.isFinite(scrollOrientation?.azimuthOffsetDeg)||!Number.isFinite(scrollOrientation?.elevationOffsetDeg)||Math.abs(scrollOrientation.azimuthOffsetDeg)>30||Math.abs(scrollOrientation.elevationOffsetDeg)>10))throw RangeError('Finite scroll orientation offsets required');
+  if(scrollOrientation!==undefined&&(!Number.isFinite(scrollOrientation?.azimuthOffsetDeg)||!Number.isFinite(scrollOrientation?.elevationOffsetDeg)||Math.abs(scrollOrientation.azimuthOffsetDeg)>60||Math.abs(scrollOrientation.elevationOffsetDeg)>28))throw RangeError('Finite scroll orientation offsets required');
   const raw=playback?.chapterWeights ?? [1,0,0,0,0,0,0], total=raw.reduce((a,b)=>a+b,0), weights=raw.map(v=>v/total);
   const poses=weights.map((w,i)=>w>0?sampleCinematicPose((i+.5)/7,aspect,reducedMotion?{x:0,y:0}:pointer,
     {bounds:families[i===1||i===2?'representation':i===3?'experiment':'assembly'].bounds,sharedStage:true,reducedMotion:false}):null);

@@ -37,7 +37,7 @@ test('rapid opposite scrolling and repeated pause/resume remain inside authored 
   assert.deepEqual(advance(state,args({nativeU,presentedChapter,dt:0})).orientation,held);
   for(let frame=0;frame<3;frame++){
    const result=advance(state,args({nativeU:(frame%2?1.5:3.5)/7,presentedChapter:frame%2?'form':'pattern',dt:.06}));
-   assert.ok(Math.abs(result.orientation.azimuthOffsetDeg)<=7);assert.ok(result.orientation.elevationOffsetDeg>=0&&result.orientation.elevationOffsetDeg<=3);
+   assert.ok(Math.abs(result.orientation.azimuthOffsetDeg)<=48);assert.ok(result.orientation.elevationOffsetDeg>=0&&result.orientation.elevationOffsetDeg<=26);
   }
  }
  const result=advance(state,args({dt:.35}));assert.equal(result.needsFrame,false);assert.deepEqual(result.orientation,sample(path,1.5/7));
@@ -48,15 +48,20 @@ test('actual differing Canvas and native reading probes retain forward/reverse c
  const anchors=Array.from({length:8},(_,i)=>i*1000),viewport={width:1440,height:1000};
  const plan=createReadingPlan({anchors,viewportHeight:viewport.height,maxScroll:7000});
  for(const boundary of [1,2,3])for(const direction of [1,-1]){
-  const state=create(),poses=[];
+  const state=create(),poses=[],inputs=[];
   for(const delta of [-.001*direction,.001*direction]){
    const docY=anchors[boundary]-.62*viewport.height+delta,canvas=sampleCanvasHold({anchors,docY,viewport});
    const nativeU=sampleReadingScore(createReadingState(docY),plan).nativeU;
    const result=advance(state,args({nativeU,presentedChapter:canvas.chapter}));
-   assert.equal(canvas.mode,'hold');assert.equal(result.needsFrame,false);assert.deepEqual(result.orientation,sample(path,nativeU));poses.push(result.orientation);
+   assert.equal(canvas.mode,'hold');assert.equal(result.needsFrame,false);assert.deepEqual(result.orientation,sample(path,nativeU));poses.push(result.orientation);inputs.push(nativeU);
   }
-  assert.ok(Math.abs(poses[1].azimuthOffsetDeg-poses[0].azimuthOffsetDeg)<.00003);
-  assert.ok(Math.abs(poses[1].elevationOffsetDeg-poses[0].elevationOffsetDeg)<.00001);
+  // A bold score has a larger legitimate derivative than the former 7-degree
+  // path. Bound by the exact smoothstep Lipschitz slope, not a looser arbitrary
+  // jump tolerance: a chapter clamp/reset would exceed this continuous bound.
+  for(const field of ['azimuthOffsetDeg','elevationOffsetDeg']){
+   const maxSlope=Math.max(...path.slice(1).map((key,i)=>1.5*Math.abs(key[field]-path[i][field])/(key.at-path[i].at)));
+   assert.ok(Math.abs(poses[1][field]-poses[0][field])<=maxSlope*Math.abs(inputs[1]-inputs[0])+1e-10);
+  }
  }
 });
 test('true outgoing Pattern caps at passage end; absent chapters neutral and presented Credits uses separate interval',()=>{

@@ -4,6 +4,7 @@ import {WAIT,frames,scenarioTimeout} from './case-helpers.mjs';
 const projects=JSON.parse(await readFile(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/project-studies.json',import.meta.url),'utf8')).projects.filter(project=>project.model);
 test.use({video:'on'});
 const facts=page=>page.evaluate(()=>{const d=window.__globalBackground.inspect().driver;return{scene:d.projectStudy.scene,chapters:d.projectStudy.chapters,activeSeconds:d.playback.activeSeconds,y:scrollY};});
+async function capture(page,name){const path=test.info().outputPath(name+'.png');await page.screenshot({path});await test.info().attach(name,{path,contentType:'image/png'});}
 async function nativeReading(page,chapter,progress,steps=1){
  const destination=await page.evaluate(({chapter,progress})=>{
   const nodes=[...document.querySelectorAll('[data-project-chapter]')],index=nodes.findIndex(n=>n.dataset.projectChapter===chapter),top=nodes[index].getBoundingClientRect().top+scrollY,end=(nodes[index+1]?.getBoundingClientRect().top??nodes[index].getBoundingClientRect().bottom)+scrollY;
@@ -18,9 +19,7 @@ async function nativeReading(page,chapter,progress,steps=1){
  await page.waitForFunction(({destination,chapter})=>{
   const s=window.__globalBackground?.inspect().driver.projectStudy?.scene,reading=s?.camera.reading;
   if(Math.abs(scrollY-destination)>1||reading?.chapter!==chapter||s.motion?.mode!=='hold'||!s.motion.settled||s.motion.chapter!==chapter||s.resource?.view.chapter!==chapter||!s.resource.successfulPaint)return false;
-  // Observe real native geometry and owner agreement; intrinsic control space
-  // is reserved before acquisition, not repaired by draining arbitrary frames.
-  const help=document.querySelector(`[data-project-model-help="${chapter}"]`);if(!help||help.hidden)return false;
+  // Observe real native geometry and owner agreement, not arbitrary frame drains.
   const nodes=[...document.querySelectorAll('[data-project-chapter]')],index=nodes.findIndex(node=>node.dataset.projectChapter===chapter),top=nodes[index].getBoundingClientRect().top+scrollY,end=(nodes[index+1]?.getBoundingClientRect().top??nodes[index].getBoundingClientRect().bottom)+scrollY;
   const expected=Math.max(0,Math.min(1,(scrollY+innerHeight*.5-top)/Math.max(1,end-top)));
   return reading.index===index&&Math.abs(reading.progress-expected)<=1e-9;
@@ -32,15 +31,17 @@ for(const project of projects)test(`${project.shortTitle} scrolls the authored 3
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
  expect((await page.goto(`/projects/${project.slug}/`)).status()).toBe(200);
  await page.waitForFunction(()=>window.__site?.inspect().phase==='entered'&&!!window.__globalBackground?.inspect().driver.projectStudy?.scene,null,{timeout:WAIT});
- await expect(page.locator('[data-project-model-stage]')).toHaveAttribute('data-project-model-controls-layout','reserved');
- const reserved=await page.evaluate(()=>[...document.querySelectorAll('[data-project-model-help],[data-project-model-reset]')].map(node=>({hidden:node.hidden,height:node.getBoundingClientRect().height,visibility:getComputedStyle(node).visibility})));
- expect(reserved).toHaveLength(project.model.chapters.length*2);for(const row of reserved){expect(row.hidden).toBe(true);expect(row.height).toBeGreaterThan(0);expect(row.visibility).toBe('hidden');}
- await page.mouse.click(8,page.viewportSize().height*.5); // native empty margin clears automatic entry focus
+ await expect(page.locator('[data-project-model-help],[data-project-model-reset],[data-study-motion-toggle]')).toHaveCount(0);
  const first=project.model.chapters[0],last=project.model.chapters.at(-1);
- const a=await nativeReading(page,first,.15),b=await nativeReading(page,first,.65,6);
+ const a=await nativeReading(page,first,.15);await capture(page,'camera-early-'+project.id);
+ const b=await nativeReading(page,first,.65,6);
  expect(Math.abs(b.scene.camera.intent.yawRad-a.scene.camera.intent.yawRad)).toBeGreaterThan(.02);
  expect(b.scene.camera.value).toEqual({azimuth:0,elevation:0});expect(b.scene.gesture).toBeNull();
- const c=await nativeReading(page,last,.65),reverse=await nativeReading(page,first,.15);
+ // Retained native video traverses early -> crane -> complementary side ->
+ // reverse -> stop. Screenshots identify matched photographic checkpoints.
+ const crane=await nativeReading(page,last,project.id==='dot-based-3d-printing'?.52:.03,6);await capture(page,'camera-crane-'+project.id);
+ const c=await nativeReading(page,last,.90,6);await capture(page,'camera-opposite-'+project.id);
+ const reverse=await nativeReading(page,first,.15,10);
  expect(c.scene.camera.intent.yawRad).toBeGreaterThan(a.scene.camera.intent.yawRad+.05);
  expect(reverse.scene.camera.intent.yawRad).toBeCloseTo(a.scene.camera.intent.yawRad,3); // only native pixel rounding; handheld does not alter 3D orientation
  expect(reverse.scene.acquisitions).toBe(1);expect(reverse.scene.disposals).toBe(0);expect(reverse.scene.resource.sourceRevision).toBe(project.model.sha256);
@@ -56,15 +57,18 @@ for(const project of projects)test(`${project.shortTitle} scrolls the authored 3
  for(const row of frameSamples){expect(row.compositor.kind).toBe('2d-pan-roll');expect(Math.abs(row.compositor.xPx)).toBeLessThanOrEqual(1.2);expect(Math.abs(row.compositor.yPx)).toBeLessThanOrEqual(1.2);expect(Math.abs(row.compositor.rollRad)).toBeLessThanOrEqual(.0012);expect(Number.isFinite(row.renderSubmit.lastMs)).toBe(true);}
  expect(new Set(frameSamples.map(row=>row.allocations)).size).toBe(1);for(const row of frameSamples)expect(row.pixels).toBeLessThanOrEqual(idle.scene.resource.pixelBudget);
  const screenshot=test.info().outputPath(`scroll-camera-${project.id}-${page.viewportSize().width}.png`);await page.screenshot({path:screenshot});await test.info().attach('authored-camera-source',{path:screenshot,contentType:'image/png'});
- const toggle=page.locator('[data-study-motion-toggle]');await toggle.click();await expect(toggle).toHaveAttribute('aria-pressed','true');await frames(page,2);
- const frozen=await facts(page);await frames(page,8);const still=await facts(page);
- expect(still.scene.camera.intent).toEqual(frozen.scene.camera.intent);expect(still.scene.resource.compositor).toEqual(frozen.scene.resource.compositor);expect(still.scene.resource.draws).toBe(frozen.scene.resource.draws);expect(still.activeSeconds).toBe(frozen.activeSeconds);
- await toggle.click();await expect(toggle).toHaveAttribute('aria-pressed','false');
- // Native empty-margin activation clears button focus without camera input.
- await page.mouse.click(8,page.viewportSize().height*.5);await nativeReading(page,first,.35);
- expect((await facts(page)).scene.camera.intent.yawRad).not.toBe(frozen.scene.camera.intent.yawRad);
- await page.emulateMedia({reducedMotion:'reduce'});await expect(page.locator('[data-project-study-canvas]')).toHaveCount(0);
- const reduced=await facts(page);expect(reduced.scene.arrivalStatic).toBe(true);expect(reduced.scene.resource).toBeNull();expect(reduced.scene.disposals).toBe(1);
+ // Native keyboard scrolling remains document reading, not an inspection mode.
+ const keyboardStart=await page.evaluate(()=>scrollY);await page.keyboard.press('PageDown');
+ await expect.poll(()=>page.evaluate(()=>scrollY),{timeout:WAIT}).toBeGreaterThan(keyboardStart);
+ const keyboardReturn=await nativeReading(page,first,.15);
+ expect(keyboardReturn.scene.camera.value).toEqual({azimuth:0,elevation:0});expect(keyboardReturn.scene.gesture).toBeNull();
+ // The owner explicitly rejects automatic static/motionless switching.
+ await page.emulateMedia({reducedMotion:'reduce'});await frames(page,2);
+ await expect(page.locator('[data-project-study-canvas]')).toHaveCount(1);
+ const preference=await facts(page);expect(preference.scene.arrivalStatic).toBe(false);expect(preference.scene.acquisitions).toBe(1);expect(preference.scene.disposals).toBe(0);
+ expect(preference.scene.resource.sourceRevision).toBe(project.model.sha256);
+ const afterPreference=await nativeReading(page,first,.65,4);
+ expect(Math.abs(afterPreference.scene.camera.intent.yawRad-preference.scene.camera.intent.yawRad)).toBeGreaterThan(.02);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);expect(errors).toEqual([]);
- const receipt=test.info().outputPath('camera-source-receipt.json');await writeFile(receipt,JSON.stringify({project:project.id,reserved,forward:a,advanced:b,last:c,reverse,idle,frameSamples,paused:frozen,reduced},null,2));await test.info().attach('camera-source-receipt',{path:receipt,contentType:'application/json'});
+ const receipt=test.info().outputPath('camera-source-receipt.json');await writeFile(receipt,JSON.stringify({project:project.id,forward:a,advanced:b,crane,last:c,reverse,idle,frameSamples,keyboardReturn,preference,afterPreference},null,2));await test.info().attach('camera-source-receipt',{path:receipt,contentType:'application/json'});
 });
