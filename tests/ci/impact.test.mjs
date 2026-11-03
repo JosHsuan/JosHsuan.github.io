@@ -50,14 +50,19 @@ test('core, scene, assets and unknown case modules require every browser spec', 
     const plan = classifyChanges([CASE_ROOT + file]);
     assert.equal(plan.framework, false); assert.deepEqual(plan.browserTests, ALL_BROWSER_TESTS);
     assert.deepEqual(plan.browserMatrix, [
-      {browser: 'chromium', engine: 'chromium', shard: '1/4'},
-      {browser: 'chromium', engine: 'chromium', shard: '2/4'},
-      {browser: 'chromium', engine: 'chromium', shard: '3/4'},
-      {browser: 'chromium', engine: 'chromium', shard: '4/4'},
-      {browser: 'webkit', engine: 'webkit', shard: '1/2'},
-      {browser: 'webkit', engine: 'webkit', shard: '2/2'},
-      {browser: 'mobile-chromium', engine: 'chromium', shard: '1/2'},
-      {browser: 'mobile-chromium', engine: 'chromium', shard: '2/2'},
+      {browser: 'chromium', engine: 'chromium', shard: '1/6'},
+      {browser: 'chromium', engine: 'chromium', shard: '2/6'},
+      {browser: 'chromium', engine: 'chromium', shard: '3/6'},
+      {browser: 'chromium', engine: 'chromium', shard: '4/6'},
+      {browser: 'chromium', engine: 'chromium', shard: '5/6'},
+      {browser: 'chromium', engine: 'chromium', shard: '6/6'},
+      {browser: 'webkit', engine: 'webkit', shard: '1/3'},
+      {browser: 'webkit', engine: 'webkit', shard: '2/3'},
+      {browser: 'webkit', engine: 'webkit', shard: '3/3'},
+      {browser: 'mobile-chromium', engine: 'chromium', shard: '1/4'},
+      {browser: 'mobile-chromium', engine: 'chromium', shard: '2/4'},
+      {browser: 'mobile-chromium', engine: 'chromium', shard: '3/4'},
+      {browser: 'mobile-chromium', engine: 'chromium', shard: '4/4'},
     ]);
   }
 });

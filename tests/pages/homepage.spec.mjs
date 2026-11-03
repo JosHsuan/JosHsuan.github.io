@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-import {readFile} from 'node:fs/promises';
+import {readFile,writeFile} from 'node:fs/promises';
 import {WAIT,scenarioTimeout} from './case-helpers.mjs';
 
 const xrWorkspace=JSON.parse(await readFile(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/xr-workspace.json',import.meta.url),'utf8'));
@@ -208,7 +208,7 @@ test('XR detail preserves real evidence, shared authorship and a native related-
  expect(errors).toEqual([]);
 });
 
-test('Bending page retains one original scene gate and publishes its terminal into site readiness',async({page})=>{
+test('Bending page retains one original scene gate and publishes its terminal into site readiness',async({page},info)=>{
  test.setTimeout(scenarioTimeout(120000));let release;const modelGate=new Promise(resolve=>{release=resolve;});
  await page.route('**/assets/source-layers.glb',async route=>{await modelGate;await route.continue();});
  try{
@@ -220,6 +220,24 @@ test('Bending page retains one original scene gate and publishes its terminal in
   await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered'&&window.__thesis?.inspect().ready,null,{timeout:WAIT});
   const state=await entered(page);expect(state.delegated).toBe(true);
   await expect(page.locator('[data-entry-loader]')).toBeHidden();await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);
-  await page.locator('[data-home-link]').click();await entered(page);await expect(page.locator('[data-home-showcase-surface] canvas')).toHaveCount(1);await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);
+  await page.locator('[data-home-link]').click();const home=await entered(page);expect(home.delegated).toBe(false);
+  // Home prepares its optional scene after readable entry, then exchanges one
+  // renderer at each shot boundary. Capture actual paint and ownership in the
+  // same frame; a later locator read may land in the next source acquisition.
+  const observation=await page.waitForFunction(()=>{
+   const state=window.__globalBackground?.inspect().driver.homeResearch,source=state?.resource;
+   if(!state?.failureReason&&!(state?.phase==='ready'&&source?.successfulPaint&&source.firstDraw?.completed))return false;
+   return{phase:state.phase,failureReason:state.failureReason,project:state.project,canvasCount:state.canvasCount,
+    successfulPaint:source?.successfulPaint,firstDraw:source?.firstDraw,sourceRevision:source?.sourceRevision,
+    showcaseCanvases:document.querySelectorAll('[data-home-showcase-surface] canvas').length,
+    backgroundCanvases:document.querySelectorAll('canvas[data-global-background-field]').length};
+  },null,{timeout:WAIT});
+  const receipt=await observation.jsonValue();await observation.dispose();
+  const receiptPath=info.outputPath('home-return-first-draw.json');await writeFile(receiptPath,JSON.stringify(receipt,null,2)+'\n');
+  await info.attach('home-return-first-draw',{path:receiptPath,contentType:'application/json'});
+  expect(receipt.phase).toBe('ready');expect(receipt.failureReason).toBe('');expect(receipt.successfulPaint).toBe(true);
+  expect(receipt.firstDraw.completed).toBe(true);expect(receipt.firstDraw.composition).toBe('authored-showcase');
+  expect(receipt.firstDraw.sourceRevision).toBe(receipt.sourceRevision);
+  expect(receipt.canvasCount).toBe(1);expect(receipt.showcaseCanvases).toBe(1);expect(receipt.backgroundCanvases).toBe(1);
  }finally{release();await page.unrouteAll({behavior:'wait'});}
 });

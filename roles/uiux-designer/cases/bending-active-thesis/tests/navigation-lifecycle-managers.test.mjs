@@ -143,17 +143,38 @@ function lifecycle({reduced=false,saveData=false,storageAvailable=true,previous=
  const records=new Map(previous?[[SCENE_RECOVERY_KEY,JSON.stringify(previous)]]:[]),storage={getItem:key=>records.get(key),setItem:(key,value)=>records.set(key,value)};
  const win=new EventTarget();win.matchMedia=()=>media;
  const flags=new Map(),doc={documentElement:{toggleAttribute:(key,value)=>flags.set(key,value)}},updates=[];
- const manager=createLifecycleManager({events:input.events,onSystemReduced:value=>updates.push(['reduced',value]),onHydrated:value=>updates.push(['hydrated',value]),onAutomaticEnable:()=>updates.push(['enable'])});
+ const manager=createLifecycleManager({events:input.events,onSystemReduced:value=>updates.push(['reduced',value]),onHydrated:value=>updates.push(['hydrated',value]),onAutomaticEnable:()=>updates.push(['enable']),onPolicy:value=>updates.push(['policy',value])});
  const disconnect=manager.initialize({window:win,document:doc,navigator:{connection:{saveData}},readStorage:()=>{if(!storageAvailable)throw Error('storage blocked');return storage;}});
  return {input,manager,media,win,records,updates,disconnect,flags};
 }
 
-test('activation stays continuous across preferences while storage and failure evidence remain optional',()=>{
- for(const options of [{},{storageAvailable:false},{reduced:true},{saveData:true},{previous:{status:'failed',at:Date.now()}}]){
-  const f=lifecycle(options),automatic=true;
-  assert.equal(f.updates.some(value=>value[0]==='enable'),automatic);
+test('activation stays continuous across preferences and unavailable or completed lease evidence',()=>{
+ for(const options of [{},{storageAvailable:false},{reduced:true},{saveData:true},{previous:{status:'ended',at:Date.now()}},{previous:{status:'active',at:Date.now()-31*60*1000}}]){
+  const f=lifecycle(options);
+  assert.equal(f.updates.some(value=>value[0]==='enable'),true);
+  assert.deepEqual(f.updates.filter(value=>value[0]==='policy'),[['policy','pending']]);
   f.media.matches=true;f.media.dispatchEvent(new Event('change'));assert.deepEqual(f.updates.filter(value=>value[0]==='reduced'),[['reduced',false]]);
   f.disconnect();assert.equal(f.input.events.inspect().nativeListeners,0);
+ }
+});
+
+test('failed and recent unfinished leases defer WebGL until an explicit new scene lease',()=>{
+ for(const previous of [{status:'failed',at:Date.now()},{status:'failed',at:Date.now()-31*60*1000},{status:'active',at:Date.now()}]){
+  const f=lifecycle({previous,reduced:true,saveData:true});
+  assert.equal(f.manager.inspect().recovery,true);
+  assert.equal(f.flags.get('data-scene-recovery'),true);
+  assert.equal(f.updates.some(value=>value[0]==='enable'),false);
+  assert.deepEqual(f.updates.filter(value=>value[0]==='policy'),[['policy','deferred']]);
+  assert.deepEqual(JSON.parse(f.records.get(SCENE_RECOVERY_KEY)),previous);
+  const deferred=f.manager.connectLease(f.win,{enabled:false,failed:false});
+  f.win.dispatchEvent(new Event('pageshow'));
+  assert.deepEqual(JSON.parse(f.records.get(SCENE_RECOVERY_KEY)),previous);
+  deferred();
+  const explicit=f.manager.connectLease(f.win,{enabled:true,failed:false});
+  assert.equal(JSON.parse(f.records.get(SCENE_RECOVERY_KEY)).status,'active');
+  f.win.dispatchEvent(new Event('pagehide'));
+  assert.equal(JSON.parse(f.records.get(SCENE_RECOVERY_KEY)).status,'ended');
+  explicit();f.disconnect();assert.equal(f.input.events.inspect().nativeListeners,0);
  }
 });
 

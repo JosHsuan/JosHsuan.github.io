@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "scope": "Continuous native field and source-plate reading across Chromium, WebKit and mobile Chromium",
+  "status": "26 distinct local cases pass across retained affected runs; Windows WebKit's native Tab policy prevents one complete Bending focus case. Its motion subchecks pass. Full Linux CI and live publication remain pending.",
+  "artifact": {
+    "digest": "d815c661ab0e1f7c4343890416a9d69237fd8bfd05f84e26a465e0edb4cddd73",
+    "provenance": "Local export with f85728b metadata plus reviewed recovery and visible-long-frame velocity corrections; no subsequent runtime changes."
+  },
+  "runtimeEvidence": {
+    "unitCasesPassed": 18,
+    "ciFailure": "Original f857 Chromium Bending receipt recorded native movement11→611px, Director frame deltas1.7833/1.7666s and every visible plane remaining at rest. The old elapsed>1 reset discarded actual visible input.",
+    "correction": "Velocity skins retain bounded elapsed-time input across slow visible frames. Real resume, seek, focus and offscreen synchronization remain explicit."
+  },
+  "attempts": [
+    {
+      "output": "pages-test-results/nov04-reading-field",
+      "log": ".runtime/nov03/reading-field-run.log",
+      "passed": 18,
+      "failed": 9,
+      "minutes": 5.6,
+      "passedCoverage": "All six shared-field cases, nine no-JavaScript plate cases, Chromium/mobile Bending and Chromium Dot plates.",
+      "failures": "Eight native image aspect-ratio samples occurred after an earlier neutral receipt but during a subsequent liquid response. WebKit Bending attributed a positioning tail to forward travel and the actual forward response to reverse travel."
+    },
+    {
+      "output": "pages-test-results/nov04-reading-field-atomic",
+      "log": ".runtime/nov03/reading-field-atomic-run.log",
+      "passed": 17,
+      "failed": 4,
+      "minutes": 9.9,
+      "passedCoverage": "All Dot/Special native geometry/caption cases and all nine no-JavaScript cases; Chromium/mobile Bending complete flow. WebKit Bending forward/reverse motion passed before its focus predicate failed.",
+      "failures": "All three Caschlatsch cases reached the ownerless editorial image, where the new helper incorrectly waited for a nonexistent image plane. WebKit's immediate post-Tab combined focus predicate returned false; actual activeElement and separate focus-visible state were not captured."
+    },
+    {
+      "output": "pages-test-results/nov04-native-editorial",
+      "passed": 2,
+      "failed": 1,
+      "minutes": 2.0,
+      "failures": "Chromium/mobile complete Caschlatsch five-plate flows pass. WebKit reaches fourth-plate geometry, then aggregate60s expires during duplicate native figure/caption travel; the first six captures cost23.94s and avoidable caption-to-figure legs16.38s."
+    },
+    {
+      "output": "pages-test-results/nov04-native-focus",
+      "passed": 0,
+      "failed": 1,
+      "failures": "Native single Tab chooses a BUTTON and scroll1469, not the Project anchor. This remains true through originalWAIT45; it is not an asynchronous focus convergence."
+    },
+    {
+      "output": "pages-test-results/nov04-native-editorial-final",
+      "log": ".runtime/nov03/native-editorial-final-run.log",
+      "passed": 3,
+      "failed": 0,
+      "minutes": 1.7,
+      "coverage": "Complete five-plate Caschlatsch source/caption/geometry journeys and ten captures per profile, with strict declared-owner readiness and original60s deadlines."
+    }
+  ],
+  "observerCorrections": [
+    "Image dimensions, full-span layout, caption text bounds and reading/chrome bounds are captured atomically with the owning planes' identity and moving=false state. Original source dimensions, less-than1px ratio/span limits, caption geometry, screenshots and native no-image-link checks remain.",
+    "A native travel phase now requires a visible nonzero-depth sample at its exact requested targetY and the matching rx sign before accepting neutral state. This prevents a tail at the old position from closing the next gesture. Original travel endpoints, direction, ownership, opacity, clipping, focus and forced-palette assertions remain.",
+    "The centered mobile grid requires acceleration-driven vertical stretch; desktop additionally requires horizontal stretch and opposing peripheral yaw. Both retain complete readable content and finite recovery.",
+    "Editorial SourceFigure intentionally has a native image and a sibling liquid caption. Only an explicit data-editorial-image with zero declared information-window ancestors/descendants may have no plane; a declared but unready window still fails. The caption and figure retain their actual-owner requirements. Caschlatsch's first two plates and four captures completed by15.2s; its third image incorrectly polled for43.9s, so no chapter split or deadline extension was warranted.",
+    "After one unchanged native Tab, the existing WAIT observes the same exact Project activeElement and focus-visible predicate. Bounded atomic focus diagnostics distinguish native focus from pseudo-class state; no asynchronous-cause claim is inferred from the original combined false result.",
+    "Figure source geometry and its full capture now share one native position, followed by the same centered caption reading and capture. All image/text/chrome assertions, screenshot counts, five-plate journey and60s deadline remain; no chapter split is introduced. Every declared owner must be ready as well as neutral."
+  ],
+  "localPlatformBoundary": {
+    "receipt": "windows-native-tab-probe-20261104.json",
+    "finding": "A minimal page with three anchors and a button, no application scripts/styles/handlers, reproduces About→button in Windows WebKit26.6 for ordinary and forced-colors contexts. Chromium153 advances About→Project. All links have tabIndex0/inertfalse; documentHasFocus is true. This isolates the local native keyboard policy from the application. No runtime tabindex workaround, changed Tab input, test skip or browser preference change is introduced; Linux WebKit remains mandatory."
+  },
+  "execution": {
+    "workers": 1,
+    "retries": 0,
+    "caseDeadlinesChanged": false,
+    "motionStopped": false,
+    "ciAccepted": false,
+    "liveAccepted": false
+  }
+}

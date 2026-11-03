@@ -11,6 +11,57 @@ const cases=[
  {id:'project-caschlatsch',truth:{system:'part of the shared research','xr-guidance':'My interface contributions sat within this collaborative CAD, cloud and XR system.'},plates:{system:['portfolio-voxel-framework','portfolio-module-infill'],'xr-guidance':['portfolio-xr-assembly-sequence','portfolio-xr-interface','portfolio-xr-data-exchange']}}
 ];
 
+// Read the settled state and its geometry in the same browser task. A separate
+// earlier identity receipt can precede a late native scroll/Director update.
+// Keep source pixels, real motion, original tolerances and case deadlines.
+async function settledReading(element,noJS,kind='state'){
+ let sample;
+ await expect.poll(async()=>{
+  sample=await element.evaluate((node,{noJS,kind})=>{
+   const selector='[data-information-window][data-information-ready][data-information-plane]';
+   const owners=new Set(node.querySelectorAll('[data-information-window]'));
+   for(let parent=node;parent;parent=parent.parentElement)if(parent.matches('[data-information-window]'))owners.add(parent);
+   const planes=[...owners].filter(owner=>owner.matches(selector)).map(owner=>{
+    const transform=getComputedStyle(owner).transform;
+    return{kind:owner.dataset.informationWindow,moving:owner.dataset.informationMoving,transform,identity:new DOMMatrix(transform==='none'?undefined:transform).isIdentity};
+   });
+   // Editorial SourceFigure intentionally keeps its image native; its sibling
+   // caption owns the liquid plane. This explicit ownerless image is distinct
+   // from a declared window whose presenter has not become ready.
+   const nativeImage=kind==='image'&&node.matches('[data-editorial-image]')&&owners.size===0;
+   if(!noJS&&((!planes.length&&!nativeImage)||planes.length!==owners.size||!planes.every(plane=>plane.moving==='false'&&plane.identity)))return null;
+   const rect=element=>{const r=element.getBoundingClientRect();return{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height};};
+   if(kind==='image'){
+    const box=node.getBoundingClientRect(),css=getComputedStyle(node),figure=node.closest('figure'),parent=figure.parentElement,parentCSS=getComputedStyle(parent);
+    const inset=['paddingLeft','paddingRight','borderLeftWidth','borderRightWidth'].reduce((sum,key)=>sum+parseFloat(parentCSS[key]),0);
+    return{planes,nativeImage,naturalWidth:node.naturalWidth,naturalHeight:node.naturalHeight,width:box.width,height:box.height,x:box.x,viewportWidth:innerWidth,fit:css.objectFit,opacity:css.opacity,clip:css.clipPath,scrollY,
+     fullSpan:{figureWidth:figure.getBoundingClientRect().width,gridContentWidth:parent.getBoundingClientRect().width-inset}};
+   }
+   if(kind==='caption'){
+    const css=getComputedStyle(node),box=rect(node);
+    const content={left:box.left+parseFloat(css.borderLeftWidth)+parseFloat(css.paddingLeft),right:box.right-parseFloat(css.borderRightWidth)-parseFloat(css.paddingRight),top:box.top+parseFloat(css.borderTopWidth)+parseFloat(css.paddingTop),bottom:box.bottom-parseFloat(css.borderBottomWidth)-parseFloat(css.paddingBottom)};
+    const runs=[...node.querySelectorAll(':scope > p,:scope > span:not([data-information-skin])')].map(element=>{
+     const range=document.createRange();range.selectNodeContents(element);
+     return{text:element.textContent.trim(),width:element.clientWidth,scrollWidth:element.scrollWidth,height:element.clientHeight,scrollHeight:element.scrollHeight,box:rect(element),lines:[...range.getClientRects()].filter(r=>r.width>0&&r.height>0).map(r=>({left:r.left,right:r.right,top:r.top,bottom:r.bottom}))};
+    });
+    const skin=node.querySelector(':scope > [data-information-skin]');let decoration=null;
+    if(skin){
+     const style=getComputedStyle(skin),before=getComputedStyle(skin,'::before');
+     decoration={visible:skin.checkVisibility({visibilityProperty:true,opacityProperty:true}),ariaHidden:skin.getAttribute('aria-hidden'),text:skin.textContent.trim(),children:skin.childElementCount,pointerEvents:style.pointerEvents,clip:style.clipPath,box:rect(skin),display:style.display,before:{inset:before.inset,top:before.top,right:before.right,bottom:before.bottom,left:before.left,width:before.width,height:before.height,clip:before.clipPath,content:before.content,pointerEvents:before.pointerEvents}};
+    }
+    return{planes,width:node.clientWidth,scrollWidth:node.scrollWidth,height:node.clientHeight,scrollHeight:node.scrollHeight,text:node.innerText,box,content,runs,decoration};
+   }
+   if(kind==='view'){
+    const chrome=[...document.querySelectorAll('[data-portfolio-masthead],[data-portfolio-navigation],[data-project-chapter-navigation],[data-study-motion-toggle]')].filter(element=>element.checkVisibility({visibilityProperty:true,opacityProperty:true})).map(element=>({tag:element.tagName,box:rect(element)}));
+    return{planes,box:rect(node),viewport:{width:innerWidth,height:innerHeight},y:scrollY,chrome};
+   }
+   return{planes};
+  },{noJS,kind});
+  return sample!==null;
+ },{timeout:WAIT}).toBe(true);
+ return sample;
+}
+
 async function inspectPlates(page,definition,info,{noJS=false}={}){
  const project=projects.find(item=>item.id===definition.id),receipt={project:project.id,noJS,viewport:page.viewportSize(),plates:[]};let primaryError;
  try{
@@ -24,30 +75,26 @@ async function inspectPlates(page,definition,info,{noJS=false}={}){
    const src=`/assets/projects/${project.id}/${name}.webp`,source=project.sections.find(section=>section.id===chapter).media.find(image=>image.src===src);
    expect(source,`${chapter}: reviewed source metadata`).toBeTruthy();
    const image=page.locator(`[data-project-chapter="${chapter}"] [data-project-evidence-image][src="${src}"]`);
+   const anchor=image.locator('..'),figure=image.locator('xpath=ancestor::figure[1]'),caption=figure.locator('figcaption');
    await expect(image).toHaveCount(1);
    // A source retained as a background anywhere must not also be promoted.
    await expect(page.locator(`[data-project-media-poster][src="${src}"]`)).toHaveCount(0);
-   await image.scrollIntoViewIfNeeded();
+   // Inspect and capture the complete figure at one native position, then
+   // inspect/capture its centered caption. Repeated figure→caption→figure→
+   // caption travel adds two liquid recoveries without additional evidence.
+   if(noJS)await image.scrollIntoViewIfNeeded();else await figure.scrollIntoViewIfNeeded();
    await expect.poll(()=>image.evaluate(node=>node.complete&&node.naturalWidth>0)).toBe(true);
    await expect(image).toBeVisible();await expect(image).toHaveAttribute('alt',source.alt);
-   const anchor=image.locator('..'),figure=image.locator('xpath=ancestor::figure[1]'),caption=figure.locator('figcaption');
    await expect(anchor).not.toHaveAttribute('href');
    await expect(image.locator('xpath=ancestor::a')).toHaveCount(0);
    await expect(caption.locator('p')).toHaveText(source.caption);
    await expect(caption.locator(':scope > span:not([data-information-skin])')).toHaveText(source.credit);
-   const geometry=await image.evaluate(node=>{
-    const box=node.getBoundingClientRect(),css=getComputedStyle(node);
-    return{naturalWidth:node.naturalWidth,naturalHeight:node.naturalHeight,width:box.width,height:box.height,x:box.x,viewportWidth:innerWidth,fit:css.objectFit,opacity:css.opacity,clip:css.clipPath,scrollY};
-   });
+   const geometry=await settledReading(image,noJS,'image');
    receipt.plates.push({chapter,src,caption:source.caption,credit:source.credit,geometry});
    if(source.purpose==='diagram'){
     await expect(figure).toHaveAttribute('data-study-evidence-role','technical-plate');
     await expect(figure).toHaveAttribute('data-study-evidence-layout','full');
-    const span=await figure.evaluate(node=>{
-     const parent=node.parentElement,css=getComputedStyle(parent);
-     const inset=['paddingLeft','paddingRight','borderLeftWidth','borderRightWidth'].reduce((sum,key)=>sum+parseFloat(css[key]),0);
-     return{figureWidth:node.getBoundingClientRect().width,gridContentWidth:parent.getBoundingClientRect().width-inset};
-    });
+    const span=geometry.fullSpan;
     receipt.plates.at(-1).fullSpan=span;
     expect(Math.abs(span.figureWidth-span.gridContentWidth)).toBeLessThan(1);
    }
@@ -56,22 +103,16 @@ async function inspectPlates(page,definition,info,{noJS=false}={}){
    expect(Math.abs(geometry.width-geometry.height*geometry.naturalWidth/geometry.naturalHeight)).toBeLessThan(1);
    expect(geometry.x).toBeGreaterThanOrEqual(0);expect(geometry.x+geometry.width).toBeLessThanOrEqual(geometry.viewportWidth);
    expect(geometry.fit).toBe('contain');expect(geometry.opacity).toBe('1');expect(geometry.clip).toBe('none');
-   await caption.scrollIntoViewIfNeeded();await expect(caption).toBeVisible();
-   const text=await caption.evaluate(node=>{
-    const rect=element=>{const r=element.getBoundingClientRect();return{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height};};
-    const css=getComputedStyle(node),box=rect(node);
-    const content={left:box.left+parseFloat(css.borderLeftWidth)+parseFloat(css.paddingLeft),right:box.right-parseFloat(css.borderRightWidth)-parseFloat(css.paddingRight),top:box.top+parseFloat(css.borderTopWidth)+parseFloat(css.paddingTop),bottom:box.bottom-parseFloat(css.borderBottomWidth)-parseFloat(css.paddingBottom)};
-    const runs=[...node.querySelectorAll(':scope > p,:scope > span:not([data-information-skin])')].map(element=>{
-     const range=document.createRange();range.selectNodeContents(element);
-     return{text:element.textContent.trim(),width:element.clientWidth,scrollWidth:element.scrollWidth,height:element.clientHeight,scrollHeight:element.scrollHeight,box:rect(element),lines:[...range.getClientRects()].filter(r=>r.width>0&&r.height>0).map(r=>({left:r.left,right:r.right,top:r.top,bottom:r.bottom}))};
-    });
-    const skin=node.querySelector(':scope > [data-information-skin]');let decoration=null;
-    if(skin){
-     const style=getComputedStyle(skin),before=getComputedStyle(skin,'::before');
-     decoration={visible:skin.checkVisibility({visibilityProperty:true,opacityProperty:true}),ariaHidden:skin.getAttribute('aria-hidden'),text:skin.textContent.trim(),children:skin.childElementCount,pointerEvents:style.pointerEvents,clip:style.clipPath,box:rect(skin),display:style.display,before:{inset:before.inset,top:before.top,right:before.right,bottom:before.bottom,left:before.left,width:before.width,height:before.height,clip:before.clipPath,content:before.content,pointerEvents:before.pointerEvents}};
-    }
-    return{width:node.clientWidth,scrollWidth:node.scrollWidth,height:node.clientHeight,scrollHeight:node.scrollHeight,text:node.innerText,box,content,runs,decoration};
-   });
+   if(!noJS){
+    // Full element capture preserves the complete source. Tall figures may
+    // extend behind fixed chrome; their captions are also captured separately.
+    await settledReading(figure,noJS);
+    const path=info.outputPath(`${project.id}-${chapter}-${name}.png`);
+    await figure.screenshot({path});await info.attach(`${chapter}-${name}`,{path,contentType:'image/png'});
+    await caption.evaluate(node=>node.scrollIntoView({block:'center',behavior:'instant'}));
+   }else await caption.scrollIntoViewIfNeeded();
+   await expect(caption).toBeVisible();
+   const text=await settledReading(caption,noJS,'caption');
    receipt.plates.at(-1).captionGeometry=text;
    expect(text.runs.map(run=>run.text)).toEqual([source.caption,source.credit]);
    for(const run of text.runs){
@@ -89,21 +130,9 @@ async function inspectPlates(page,definition,info,{noJS=false}={}){
     expect(text.decoration.clip).not.toBe('none');
    }else expect(noJS).toBe(true);
    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth)).toBe(true);
-   // Full element capture preserves the complete source, not a fabricated crop.
-   // A tall technical plate can exceed the native viewport; this does not claim
-   // every label is simultaneously visible or that fixed chrome is hidden.
    if(!noJS){
-    await figure.scrollIntoViewIfNeeded();
-    const path=info.outputPath(`${project.id}-${chapter}-${name}.png`);
-    await figure.screenshot({path});await info.attach(`${chapter}-${name}`,{path,contentType:'image/png'});
-    // The full tall figure can extend behind fixed chrome in its capture.
-    // Also retain its complete caption at a real, unobscured reading position.
-    await caption.evaluate(node=>node.scrollIntoView({block:'center',behavior:'instant'}));
-    const reading=await caption.evaluate(node=>{
-     const rect=element=>{const r=element.getBoundingClientRect();return{left:r.left,right:r.right,top:r.top,bottom:r.bottom};};
-     const chrome=[...document.querySelectorAll('[data-portfolio-masthead],[data-portfolio-navigation],[data-project-chapter-navigation],[data-study-motion-toggle]')].filter(element=>element.checkVisibility({visibilityProperty:true,opacityProperty:true})).map(element=>({tag:element.tagName,box:rect(element)}));
-     return{box:rect(node),viewport:{width:innerWidth,height:innerHeight},y:scrollY,chrome};
-    });
+    // Keep the complete caption at the same real centered reading position.
+    const reading=await settledReading(caption,noJS,'view');
     receipt.plates.at(-1).captionReading=reading;
     expect(reading.box.left).toBeGreaterThanOrEqual(0);expect(reading.box.right).toBeLessThanOrEqual(reading.viewport.width);
     expect(reading.box.top).toBeGreaterThanOrEqual(0);expect(reading.box.bottom).toBeLessThanOrEqual(reading.viewport.height);

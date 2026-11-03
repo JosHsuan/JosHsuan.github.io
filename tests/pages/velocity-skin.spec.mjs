@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {writeFile} from 'node:fs/promises';
 import {WAIT,scenarioTimeout} from './case-helpers.mjs';
 
 test.use({video:'on'});
@@ -39,7 +40,7 @@ test('Shared velocity field responds to native scroll with whole-panel motion an
  }finally{await observation.evaluate(value=>value.dispose());await observation.dispose();}
 });
 
-test('the shared field bends opposite desktop peripheries and stretches during acceleration without clipping content',async({page,isMobile})=>{
+test('the shared field bends opposite desktop peripheries and stretches during acceleration without clipping content',async({page,isMobile},info)=>{
  await page.goto('/projects/');await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});
  const cards=page.locator('[data-project-tile][data-information-plane]');await expect(cards).toHaveCount(8);
  const observation=await cards.first().evaluateHandle(()=>{
@@ -53,14 +54,24 @@ test('the shared field bends opposite desktop peripheries and stretches during a
   });observer.observe(document.querySelector('[data-project-grid]'),{subtree:true,attributes:true,attributeFilter:['style']});
   return{samples,dispose:()=>observer.disconnect()};
  });
+ let primaryError;
  try{
   await page.mouse.wheel(0,300);
-  await expect.poll(()=>observation.evaluate(o=>o.samples.some(rows=>rows.some(r=>r.visible&&r.sx>1&&r.sy>1))),{timeout:WAIT}).toBe(true);
+  // The phone grid is a centered single column: its cylindrical axis has no
+  // lateral stretch. Acceleration still stretches it vertically; the desktop
+  // peripheries additionally require horizontal stretch and opposing yaw.
+  await expect.poll(()=>observation.evaluate((o,mobile)=>o.samples.some(rows=>rows.some(r=>r.visible&&r.sy>1&&(mobile||r.sx>1))),isMobile),{timeout:WAIT}).toBe(true);
   if(!isMobile)await expect.poll(()=>observation.evaluate(o=>o.samples.some(rows=>{
    const left=rows.find(r=>r.visible&&r.x<innerWidth*.4),right=rows.find(r=>r.visible&&r.x>innerWidth*.6);
    return left&&right&&left.ry*right.ry<0&&left.rx*right.rx>0;
   })),{timeout:WAIT}).toBe(true);
   expect(await observation.evaluate(o=>o.samples.flat().every(r=>r.clip==='none'&&r.opacity==='1'))).toBe(true);
   await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.informationWindows.settled),{timeout:WAIT}).toBe(true);
- }finally{await observation.evaluate(o=>o.dispose());await observation.dispose();}
+ }catch(error){primaryError=error;throw error;}finally{
+  try{
+   const samples=await observation.evaluate(o=>o.samples),path=info.outputPath('peripheral-field.json');
+   await writeFile(path,JSON.stringify({viewport:page.viewportSize(),isMobile,samples},null,2));await info.attach('peripheral-field',{path,contentType:'application/json'});
+   await observation.evaluate(o=>o.dispose());await observation.dispose();
+  }catch(error){if(!primaryError)throw error;}
+ }
 });

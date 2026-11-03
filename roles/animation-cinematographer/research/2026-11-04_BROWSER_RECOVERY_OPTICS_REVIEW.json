@@ -1,0 +1,116 @@
+{
+  "date": "2026-11-04",
+  "scope": "Local built-artifact browser acceptance. Exact-commit CI and live publication are not accepted by this record.",
+  "ciAccepted": false,
+  "liveAccepted": false,
+  "releaseMetadataCommit": "f85728bd256b4d0e520c921057e1c72b35903b9d",
+  "builds": {
+    "recovery": {
+      "digest": "291e58db1bf92f1cb3c057a66522e6d7ba093dbd4a0c589a6ad79530b9c90cf2",
+      "changes": "Uncommitted genuine failed/unfinished WebGL lease recovery guard."
+    },
+    "continuousField": {
+      "digest": "d815c661ab0e1f7c4343890416a9d69237fd8bfd05f84e26a465e0edb4cddd73",
+      "changes": "Recovery guard plus preservation of visible native displacement across long Director frames."
+    }
+  },
+  "profiles": ["chromium", "webkit", "mobile-chromium"],
+  "execution": {
+    "workers": 1,
+    "retries": 0,
+    "testDeadlinesChanged": false,
+    "artifactRoot": ".pages-workspace/out",
+    "preview": "http://127.0.0.1:4186",
+    "timingLimit": "Elapsed CI/browser action durations and renderer submission timings are not GPU frame-rate measurements."
+  },
+  "results": {
+    "sceneRecovery": {
+      "status": "passed",
+      "build": "recovery",
+      "passed": 9,
+      "failed": 0,
+      "elapsed": "2.3m",
+      "spec": "tests/pages/scene-recovery.spec.mjs",
+      "assertionsChanged": false,
+      "evidence": ".runtime/nov03/cine/recovery-restored-run.log",
+      "coverage": "Context-loss disposal, zero automatic WebGL attempts after failed/unfinished lease reload, semantic navigation, explicit original-source recovery, and stable failure idleness.",
+      "focusedUnitTestsPassed": 18
+    },
+    "liquidGlassOpticsAndOpacity": {
+      "status": "passed",
+      "build": "continuousField",
+      "passed": 6,
+      "failed": 0,
+      "elapsed": "2.9m",
+      "spec": "tests/pages/liquid-glass.spec.mjs",
+      "evidence": "pages-test-results/cine-glass-optical-policy/",
+      "coverage": "Original source remains ready on one retained canvas in authored MAKE absence; Director frame/time advances while source draw count stays fixed. Original rim/core/refraction-direction, native 18px scroll, map-generation, opacity preference, rendered contrast and no-JavaScript assertions remain.",
+      "chromium": {"rimMean": 1.1188981868898151, "coreMean": 0, "topShift": -1, "bottomShift": 1},
+      "mobileChromium": {"rimMean": 1.4684449093444907, "coreMean": 0, "topShift": -1, "bottomShift": 1},
+      "webkit": {"mode": "reflective", "rimMean": 0, "coreMean": 0}
+    },
+    "homeSevenSourceLoop": {
+      "status": "passed",
+      "build": "continuousField",
+      "passed": 3,
+      "failed": 0,
+      "elapsed": "6.2m",
+      "spec": "tests/pages/home-research-entry.spec.mjs",
+      "evidence": "pages-test-results/cine-home-host-receipts/",
+      "sourceReceiptDeadlineMs": 40000,
+      "coverage": "All seven actual source identities/first draws, authored camera/lens/light progression, partial architectural framing, return to source zero, maximum one canvas, and zero source/page failures."
+    },
+    "modelInformationGeometry": {
+      "status": "passed",
+      "build": "continuousField",
+      "passed": 6,
+      "failed": 0,
+      "elapsed": "2.6m",
+      "spec": "tests/pages/model-inspection.spec.mjs",
+      "evidence": "pages-test-results/cine-model-information-geometry/",
+      "coverage": "Atomic resting native-label geometry before/after inspection with exact equality, an atomic identity baseline for the timed exit, and an independent full CSS spatial matrix oracle with original 0.01px projected-corner bounds."
+    }
+  },
+  "historicalFailures": [
+    {
+      "run": 41729151783,
+      "job": 126244464305,
+      "cases": "Three scene recovery cases",
+      "classification": "Production regression",
+      "evidence": "CI snapshots contain data-scene-recovery and a mounted three.js r186 source canvas inside the source stage. LifecycleManager computed recovery but unconditionally enabled WebGL.",
+      "correction": "Defer only genuine failed/recent unfinished leases; OS/data preferences and unavailable storage still allow continuous automatic startup."
+    },
+    {
+      "run": 41729151783,
+      "job": 126244464123,
+      "cases": "Liquid glass optical assay",
+      "classification": "Unnecessary simultaneous GPU workload in material assay",
+      "evidence": "Optical on/off pixels passed, but repeated live overview render/action costs exhausted the original 240s budget before final native-scroll screenshot.",
+      "correction": "Use the same fixed production controls in authored MAKE model absence; explicitly retain source readiness, canvas ownership and a live Director."
+    },
+    {
+      "run": 41729151783,
+      "job": 126244464170,
+      "cases": "Mobile liquid optics and opacity restoration",
+      "classification": "Obsolete visible-owner expectations",
+      "evidence": "The empty mobile reading-controls group is intentionally hidden after pause UI removal and has a reflective fallback with no displacement map. Identity and chapter navigation correctly restore refractive mode.",
+      "correction": "Assert the exact responsive owner set and every visible control's existing pixel/contrast thresholds, while retaining all three registered owner checks."
+    },
+    {
+      "run": 41729151783,
+      "job": 126244464109,
+      "cases": "Home seven-source loop",
+      "classification": "Queued observation false negative",
+      "evidence": "HC mid-source atomic receipt reached the existing host checkpoint at trace734031ms within index5's706978-746979ms budget. A second evaluate sampled false before the slow draw and returned at734028ms; its follow-up RPC never completed before the deadline.",
+      "correction": "Poll the same atomic browser receipt already delivered to the host; retain the original 40s budget and all source/visual assertions."
+    },
+    {
+      "run": 41729151783,
+      "jobs": [126244464117, 126244464170],
+      "cases": "Model information placement and timed exit",
+      "classification": "Unsettled native-label baseline and obsolete spatial matrix oracle",
+      "evidence": "WebKit baseline still had a small projected deformation while the comparison was identity. Mobile expected perspective3x and an older rotation-only matrix despite the current documented translation/scale field and max(850,2.7x) perspective.",
+      "correction": "Observe real identity/rest before exact comparisons; independently calculate current CSS transform order and bounded coefficients without importing the production sampler."
+    }
+  ]
+}

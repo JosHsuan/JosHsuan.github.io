@@ -98,16 +98,21 @@ test('source information uses desktop side placement or stable native mobile flo
   await page.setViewportSize({width,height});await centerStudy(page,'pattern');await surface(page,'pattern').press('Enter');await holdView(page,'pattern');
   const sample=()=>page.evaluate(()=>{
    const study=document.querySelector('[data-model-study][data-model-active="true"]'),label=document.querySelector(`[data-model-side-label][data-study-chapter="${study.dataset.studyChapter}"]`),panel=label.getBoundingClientRect(),model=study.querySelector('[data-model-viewport]').getBoundingClientRect();
+   const native=label.dataset.modelLabelPlacement==='native',style=getComputedStyle(label);
+   // Capture identity and geometry in one browser delivery. Separate waits and
+   // reads can straddle the next native-scroll update on a slow renderer.
+   if(native&&(label.dataset.informationMoving!=='false'||!new DOMMatrix(style.transform==='none'?undefined:style.transform).isIdentity))return null;
    const host=document.querySelector(`[data-model-study-host="${study.dataset.studyChapter}"]`),next=host.nextElementSibling.getBoundingClientRect();
    const r=window.__thesis.inspect().representation;
-   return {native:label.dataset.modelLabelPlacement==='native',position:getComputedStyle(label).position,inHost:label.parentElement===host.querySelector('[data-model-information-host]'),nextTop:next.top,documentY:panel.top+scrollY,documentHeight:document.documentElement.scrollHeight,panel:{left:panel.left,right:panel.right,top:panel.top,bottom:panel.bottom},model:{left:model.left,right:model.right,top:model.top,bottom:model.bottom},annotation:r.annotation,poseAzimuth:window.__thesis.inspect().pose.azimuth,source:r.id};
+   return {native,position:style.position,inHost:label.parentElement===host.querySelector('[data-model-information-host]'),nextTop:next.top,documentY:panel.top+scrollY,documentHeight:document.documentElement.scrollHeight,panel:{left:panel.left,right:panel.right,top:panel.top,bottom:panel.bottom},model:{left:model.left,right:model.right,top:model.top,bottom:model.bottom},annotation:r.annotation,poseAzimuth:window.__thesis.inspect().pose.azimuth,source:r.id};
   });
-  const before=await sample();expect(before.native).toBe(width<=780);
+  const restingSample=async()=>{let value;await expect.poll(async()=>{value=await sample();return value!==null;},{timeout:WAIT}).toBe(true);return value;};
+  const before=await restingSample();expect(before.native).toBe(width<=780);
   if(width<=780){expect(before.position).toBe('relative');expect(before.inHost).toBe(true);expect(before.panel.left).toBeGreaterThanOrEqual(0);expect(before.panel.right).toBeLessThanOrEqual(width);expect(before.panel.bottom).toBeLessThanOrEqual(before.nextTop);expect(before.panel.bottom-before.panel.top).toBeGreaterThan(0);}
   else{expect(before.panel.left).toBeGreaterThan(before.model.right);expect(before.panel.right).toBeLessThanOrEqual(width);expect(before.panel.top).toBeCloseTo(before.model.top,1);expect(before.panel.bottom).toBeLessThan(height-40);}
   await expect(page.locator('[data-model-study-host] header,[data-model-study-host] footer')).toHaveCount(0);
   await surface(page,'pattern').press('ArrowRight');await settle(page);await expectSourceInformation(page,'pattern');await fit(page);
-  const after=await sample();expect(after.panel).toEqual(before.panel);expect(after.documentY).toBe(before.documentY);expect(after.documentHeight).toBe(before.documentHeight);expect(after.poseAzimuth).not.toBe(before.poseAzimuth);
+  const after=await restingSample();expect(after.panel).toEqual(before.panel);expect(after.documentY).toBe(before.documentY);expect(after.documentHeight).toBe(before.documentHeight);expect(after.poseAzimuth).not.toBe(before.poseAzimuth);
   if(width<=780){expect(before.annotation).toBeNull();expect(after.annotation).toBeNull();}
   else{expect(after.annotation.index).toBe(before.annotation.index);expect(Math.abs(after.annotation.x-before.annotation.x)+Math.abs(after.annotation.y-before.annotation.y)).toBeGreaterThan(.1);}
   await surface(page,'pattern').press('Escape');await settle(page);
@@ -117,33 +122,36 @@ test('source information uses desktop side placement or stable native mobile flo
 // Native cards retain layout while the existing information presenter applies
 // the explicit perspective plane. Capture used layout and projected corners
 // synchronously; the fixed desktop annotation keeps its separate ink contract.
-function authoredPlaneMatrix({rx,ry,rz,skew,perspective},moving){
+function authoredPlaneMatrix({x,y,rx,ry,rz,skew,sx,sy,perspective},moving){
  const matrix=new Matrix4();if(!moving)return matrix.elements;
  matrix.elements[11]=-1/perspective;
+ matrix.multiply(new Matrix4().makeTranslation(x,y,0));
  const radians=angle=>angle*Math.PI/180;
  matrix.multiply(new Matrix4().makeRotationX(radians(rx)));
  matrix.multiply(new Matrix4().makeRotationY(radians(ry)));
  matrix.multiply(new Matrix4().makeRotationZ(radians(rz)));
  const shear=new Matrix4();shear.elements[1]=Math.tan(radians(skew));
- return matrix.multiply(shear).elements;
+ return matrix.multiply(shear).multiply(new Matrix4().makeScale(sx,sy,1)).elements;
 }
 async function nativeCardGeometry(panel,baseline=null){
  return panel.evaluate((el,baseline)=>{
   const style=getComputedStyle(el),host=el.parentElement,parent=host.getBoundingClientRect(),rect=el.getBoundingClientRect();
+  const matrix=new DOMMatrix(style.transform==='none'?undefined:style.transform),moving=el.dataset.informationMoving==='true';
+  if(baseline===null&&(el.dataset.informationMoving!=='false'||!matrix.isIdentity))return null;
   const number=value=>parseFloat(value)||0;
   const natural={x:0,y:0};for(let node=el;node;node=node.offsetParent){natural.x+=node.offsetLeft;natural.y+=node.offsetTop;}
   // Initial capture is permitted only after the presenter is genuinely neutral.
   // Native used layout can differ from serialized CSS padding by a layout unit.
   const box=baseline??{width:rect.width,height:rect.height,left:rect.left-parent.left,top:rect.top-parent.top};
   const {width,height}=box,left=parent.left+box.left,top=parent.top+box.top;
-  const origin=style.transformOrigin.split(' ').map(Number.parseFloat),matrix=new DOMMatrix(style.transform==='none'?undefined:style.transform);
+  const origin=style.transformOrigin.split(' ').map(Number.parseFloat);
   const points=[[0,0],[width,0],[width,height],[0,height]].map(([x,y])=>{
    const point=new DOMPoint(x-origin[0],y-origin[1]).matrixTransform(matrix);return {x:left+origin[0]+point.x/point.w,y:top+origin[1]+point.y/point.w,w:point.w};
   });
   const ancestors=[];for(let node=host;node;node=node.parentElement)ancestors.push(getComputedStyle(node).transform);
   return {box,computedSize:[style.width,style.height],natural,documentHeight:document.documentElement.scrollHeight,position:style.position,insets:[style.left,style.right,style.top,style.bottom],onlyChild:host.children.length===1,ancestors,
-   width,height,clientSize:[el.clientWidth,el.clientHeight],plane:el.hasAttribute('data-information-plane'),moving:el.dataset.informationMoving==='true',identity:matrix.isIdentity,
-   vars:Object.fromEntries(['x','y','rz','rx','ry','skew','perspective'].map(key=>[key,number(style.getPropertyValue('--information-'+key))])),
+   width,height,clientSize:[el.clientWidth,el.clientHeight],plane:el.hasAttribute('data-information-plane'),moving,identity:matrix.isIdentity,
+   vars:Object.fromEntries(['x','y','rz','rx','ry','skew','sx','sy','perspective'].map(key=>[key,number(style.getPropertyValue('--information-'+key))])),
    matrix:Array.from(matrix.toFloat64Array()),weights:points.map(point=>point.w),
    actual:{left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom},expected:{left:Math.min(...points.map(p=>p.x)),right:Math.max(...points.map(p=>p.x)),top:Math.min(...points.map(p=>p.y)),bottom:Math.max(...points.map(p=>p.y))}};
  },baseline);
@@ -152,13 +160,17 @@ function expectNativeCardGeometry(value){
  expect(value.position).toBe('relative');for(const inset of value.insets)expect(['auto','0px']).toContain(inset);expect(value.onlyChild).toBe(true);
  expect(value.ancestors.every(transform=>transform==='none')).toBe(true);
  expect(value.width).toBeGreaterThan(0);expect(value.height).toBeGreaterThan(0);
- expect(value.plane).toBe(true);expect(value.vars.x).toBe(0);expect(value.vars.y).toBe(0);
- for(const [key,limit] of [['rx',8],['ry',4],['rz',1.1],['skew',.7]])expect(Math.abs(value.vars[key])).toBeLessThanOrEqual(limit);
- expect(value.vars.perspective).toBeGreaterThanOrEqual(Math.max(800,...value.clientSize.map(size=>size*3)));
+ expect(value.plane).toBe(true);
+ // Independent oracle for the authored curved field's CSS transform order
+ // and bounds, including peripheral translation and liquid stretch.
+ for(const [key,limit] of [['x',5],['y',3],['rx',11],['ry',12],['rz',2.2],['skew',2.8]])expect(Math.abs(value.vars[key])).toBeLessThanOrEqual(limit);
+ for(const [key,limit] of [['sx',1.018],['sy',1.012]]){expect(value.vars[key]).toBeGreaterThanOrEqual(1);expect(value.vars[key]).toBeLessThanOrEqual(limit);}
+ expect(value.vars.perspective).toBeGreaterThanOrEqual(850);
+ expect(value.vars.perspective).toBeCloseTo(Math.max(850,...value.clientSize.map(size=>size*2.7)),1);
  const expected=authoredPlaneMatrix(value.vars,value.moving);
  for(let i=0;i<16;i++)expect(value.matrix[i]).toBeCloseTo(expected[i],6);
  for(const weight of value.weights){expect(Number.isFinite(weight)).toBe(true);expect(weight).toBeGreaterThan(0);}
- if(!value.moving){expect(value.identity).toBe(true);for(const key of ['x','y','rz','rx','ry','skew'])expect(value.vars[key]).toBe(0);}
+ if(!value.moving){expect(value.identity).toBe(true);for(const key of ['x','y','rz','rx','ry','skew'])expect(value.vars[key]).toBe(0);for(const key of ['sx','sy'])expect(value.vars[key]).toBe(1);}
  for(const side of ['left','right','top','bottom'])expect(Math.abs(value.actual[side]-value.expected[side]),`${side}: ${JSON.stringify(value)}`).toBeLessThanOrEqual(.01);
 }
 
@@ -168,12 +180,8 @@ test('side information and its leader follow the displayed Canvas throughout the
  const canvas=await page.locator('[data-cinematic-stage] canvas').elementHandle();
  const panel=page.locator('[data-model-side-label][data-study-chapter="pattern"]');
  const before=await panel.boundingBox(),native=await panel.getAttribute('data-model-label-placement')==='native';
- if(native)await page.waitForFunction(()=>{
-  const el=document.querySelector('[data-model-side-label][data-study-chapter="pattern"]'),style=getComputedStyle(el);
-  const matrix=new DOMMatrix(style.transform==='none'?undefined:style.transform);
-  return el.dataset.informationMoving==='false'&&['x','y','rz','rx','ry','skew'].every(key=>parseFloat(style.getPropertyValue('--information-'+key))===0)&&matrix.isIdentity;
- },null,{timeout:WAIT});
- const nativeBefore=native?await nativeCardGeometry(panel):null;
+ let nativeBefore=null;
+ if(native)await expect.poll(async()=>{nativeBefore=await nativeCardGeometry(panel);return nativeBefore!==null;},{timeout:WAIT}).toBe(true);
  if(native){expect(['x','y','rz','rx','ry','skew'].every(key=>nativeBefore.vars[key]===0)).toBe(true);expectNativeCardGeometry(nativeBefore);}
  const exit=await page.evaluate(()=>{const p=window.__story.inspect().canvasPlacement;return p.holdEnd+(p.end-p.holdEnd)*.4;});
  await page.clock.pauseAt(new Date(Date.now()+3600000));

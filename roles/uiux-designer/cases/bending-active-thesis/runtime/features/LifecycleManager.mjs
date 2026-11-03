@@ -9,7 +9,10 @@ export function createLifecycleManager({events,onSystemReduced,onHydrated,onAuto
   let storage;try{storage=readStorage();}catch{storage=null;}
   recovery=createSceneRecovery(storage);
   documentTarget.documentElement.toggleAttribute('data-scene-recovery',recovery.recovery);
-  onPolicy('pending');onAutomaticEnable();
+  // A failed or interrupted WebGL lease needs explicit recovery. This is
+  // separate from OS/data preferences, which never disable visible motion.
+  if(recovery.recovery)onPolicy('deferred');
+  else{onPolicy('pending');onAutomaticEnable();}
   return()=>scope.dispose();
  }
  function connectLease(windowTarget,{enabled,failed}){

@@ -2,6 +2,31 @@
 
 Reviewed: 20 October 2026 against the linked official Google Cloud DORA guidance and the checked-in workflows. Scope: this repository's reusable framework and selected public application. The owner requested research and Markdown planning. Current operations remain defined by [CI/CD operations](CI_CD.md), [decision 0009](decisions/0009-impact-selected-ci.md), and the exact-commit, same-artifact publication gate. The October 20 sections below are the historical planning baseline, not a description of current implementation. The [October 22 operational status](#operational-status--october-22-2026) supersedes their planned/current-state labels where explicitly noted.
 
+## Current capacity amendment — 4 November 2026
+
+The continuous-motion candidate `f85728bd256b4d0e520c921057e1c72b35903b9d`
+in [run 41729151783](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/41729151783)
+contained 615 public identities across the three profiles. Its mobile Chromium
+1/2 job reached only case 64 of 94 before the existing 45-minute job ceiling;
+Chromium 4/4 finished its 41 cases in 42.5 minutes but was cancelled during final
+job work. Both remain failed qualification, alongside the reported assertion
+failures. No missing execution or upload is accepted as a pass.
+
+Full candidates now use **6 Chromium / 3 WebKit / 4 mobile Chromium** whole-file
+shards. The historical placement weights and algorithm stay unchanged. This is
+a workload-capacity adjustment on the existing standard Linux runners, not an
+increase in individual scenario deadlines or a renderer-performance claim.
+One worker per runner, zero retries, the 45-minute job ceiling, pinned toolchain
+and browser image, exact-once test inventory and same-artifact gate remain.
+Scoped candidates retain one shard per profile. No paid runner or service is
+introduced. The new partition still requires actual complete CI acceptance;
+the old 4/2/2 measurements below remain historical evidence.
+
+This uses the repository's existing public standard Linux runners. GitHub's
+[runner documentation](https://docs.github.com/en/actions/how-tos/write-workflows/choose-where-workflows-run/choose-the-runner-for-a-job)
+states that standard hosted runners are free for public repositories; no larger
+runner, paid service or billing-plan change is part of this amendment.
+
 ## Historical planning decision — 20 October 2026
 
 Preserve the existing release protections and improve how quickly developers receive trustworthy feedback. First add timing and machine-readable coverage evidence; then use those observations to balance browser work and introduce a small native smoke stage. Keep each improvement independently reviewable. This amendment updates documentation only: no workflow, test selection, timeout, retry, deployment permission or product runtime changes.

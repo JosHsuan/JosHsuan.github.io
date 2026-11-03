@@ -131,13 +131,17 @@ export function createInformationWindowPresenter({publisher,root=globalThis.docu
       const active=item.fixed?!!canvasPlacement?.visible&&canvasPlacement.chapter===item.chapter:true;
       const visible=item.fixed?active:item.top+item.height>docY-64&&item.top<docY+viewportHeight+64;
       const target=item.fixed?clamp((Number(canvasPlacement?.y)||0)/viewportHeight,-.4,.4):targetAt(item.top,item.height,docY,viewportHeight);
-      const immediate=reduced||seek||resumed||gap||focused||!visible;
+      const immediate=reduced||seek||resumed||focused||!visible||(gap&&!item.velocitySkin);
       // A newly active fixed label has no native document displacement. Give it
       // the same finite fluid catch-up on the director clock, then follow placement.
       if(item.fixed&&active&&!item.active&&!immediate)setWindowScrollTarget(state,target-.16,{reduced:true});
       const energy=immediate?0:clamp(Math.abs(target-state.target)*2,0,.3);
       setWindowScrollTarget(state,target,{energy,reduced:!!immediate||!!item.velocitySkin});
-      if(item.velocitySkin)advanceVelocitySkin(item.velocitySkin,{docY,dt:seconds,viewportHeight,immediate});
+      // Visible slow frames still carry real native displacement. The bounded
+      // exponential velocity response remains stable with elapsed time above
+      // one second; a frame-rate threshold must not erase that input. Actual
+      // lifecycle resume/seek and offscreen/focus policies still resynchronize.
+      if(item.velocitySkin)advanceVelocitySkin(item.velocitySkin,{docY,dt:Math.max(0,elapsed),viewportHeight,immediate});
       else advanceWindowMotion(state,seconds,{reduced:!!immediate});
       item.active=active;item.visible=visible;item.vertical=clamp((item.top+item.height/2-docY-viewportHeight/2)/(viewportHeight/2),-1,1);
       const resting=item.velocitySkin?item.velocitySkin.resting:state.resting;

@@ -1,0 +1,482 @@
+{
+  "schemaVersion": 1,
+  "scope": "Bending/Home ownership, native Home card navigation and Bending inline disclosure across three browser profiles",
+  "status": "9/9 local focused cases passed; final candidate CI and publication remain separate.",
+  "artifact": {
+    "digest": "d815c661ab0e1f7c4343890416a9d69237fd8bfd05f84e26a465e0edb4cddd73",
+    "provenance": "Local Pages build with f85728b release metadata plus reviewed recovery and visible-long-frame velocity fixes; served unchanged on port4186."
+  },
+  "run": {
+    "output": "pages-test-results/media-quality-navigation",
+    "profiles": [
+      "chromium",
+      "webkit",
+      "mobile-chromium"
+    ],
+    "cases": 9,
+    "passed": 9,
+    "failed": 0,
+    "minutes": 4.0
+  },
+  "sourceReview": [
+    {
+      "artifactId": 13278955524,
+      "zipSHA256": "e5159aef2b5846a71ff49e0cb81aee977e9918040bf32fbf8206c23139b68369",
+      "finding": "Home was ready with Entrance at trace563320.435, normally exchanging at575618.914, and ready with Mode/s at583044.215. The old immediate5s canvas-count assertion crossed the sequential source exchange."
+    },
+    {
+      "artifactId": 13276769553,
+      "zipSHA256": "cdfd841fa953e96eb1771da4b2eabaa96cd2f1c6fd5a7018426dd39c71301f6a",
+      "finding": "Inline image click began at59956.6ms after goto; entry21.2s plus chapter click24.7s consumed most of the original60s scenario. Original card trace lacked actual event target/defaultPrevented receipts, so its cause is not claimed proved."
+    }
+  ],
+  "testChanges": [
+    "Capture successfulPaint, completed original-source firstDraw, source revision and one showcase canvas/one global field in one frame, using existing WAIT and original scenario budget. Explicit source failures still fail.",
+    "Enter the narrowly scoped disclosure/image scenario at the real#system deep link, retaining original60s and all native summary/image/no-inspector checks. Separate baseline still covers Home and chapter navigation.",
+    "Preserve native card click and original URL assertion; passively record actual trusted pointer/click capture and bubble targets without changing input or runtime."
+  ],
+  "validationLimits": [
+    "The final nine-case run used in-memory report attachments. Afterward the same diagnostics were made durable via outputPath/writeFile; syntax checked, assertion behavior unchanged.",
+    "The retained Chromium/WebKit native receipts show trusted A targets and no prevention. Mobile native route and all remaining baseline assertions passed; no separate raw mobile event receipt was harvested before successful trace cleanup.",
+    "No production changes or deadlines, source pins, media timing, geometry or screenshot comparison weakening were made by this scoped repair.",
+    "After the nine-case run, the bounded passive input observer was widened to any target while the Home deck exists, with compact elementFromPoint/composedPath identifiers; this records an actual miss instead of filtering it out. No input/assertion changes; ESLint passed, fresh CI remains required."
+  ],
+  "nativeCardReceipts": {
+    "chromium": [
+      {
+        "type": "pointerdown",
+        "phase": "capture",
+        "trusted": true,
+        "defaultPrevented": false,
+        "point": {
+          "x": 720,
+          "y": 545.010009765625
+        },
+        "target": "A",
+        "href": "/projects/bending-active/",
+        "card": "bending-active",
+        "active": true,
+        "docY": 1045,
+        "deck": {
+          "top": 1000,
+          "height": 6600,
+          "viewport": 1000,
+          "position": 0,
+          "target": 0,
+          "index": 0,
+          "count": 8,
+          "snap": null,
+          "transitions": 1,
+          "field": {
+            "strength": 0,
+            "acceleration": 0,
+            "surge": 0,
+            "resting": true
+          },
+          "disposed": false
+        },
+        "sitePhase": "entered"
+      },
+      {
+        "type": "pointerdown",
+        "phase": "bubble",
+        "trusted": true,
+        "defaultPrevented": false,
+        "point": {
+          "x": 720,
+          "y": 545.010009765625
+        },
+        "target": "A",
+        "href": "/projects/bending-active/",
+        "card": "bending-active",
+        "active": true,
+        "docY": 1045,
+        "deck": {
+          "top": 1000,
+          "height": 6600,
+          "viewport": 1000,
+          "position": 0,
+          "target": 0,
+          "index": 0,
+          "count": 8,
+          "snap": null,
+          "transitions": 1,
+          "field": {
+            "strength": 0,
+            "acceleration": 0,
+            "surge": 0,
+            "resting": true
+          },
+          "disposed": false
+        },
+        "sitePhase": "entered"
+      },
+      {
+        "type": "pointerup",
+        "phase": "capture",
+        "trusted": true,
+        "defaultPrevented": false,
+        "point": {
+          "x": 720,
+          "y": 545.010009765625
+        },
+        "target": "A",
+        "href": "/projects/bending-active/",
+        "card": "bending-active",
+        "active": true,
+        "docY": 1045,
+        "deck": {
+          "top": 1000,
+          "height": 6600,
+          "viewport": 1000,
+          "position": 0,
+          "target": 0,
+          "index": 0,
+          "count": 8,
+          "snap": null,
+          "transitions": 1,
+          "field": {
+            "strength": 0,
+            "acceleration": 0,
+            "surge": 0,
+            "resting": true
+          },
+          "disposed": false
+        },
+        "sitePhase": "entered"
+      },
+      {
+        "type": "pointerup",
+        "phase": "bubble",
+        "trusted": true,
+        "defaultPrevented": false,
+        "point": {
+          "x": 720,
+          "y": 545.010009765625
+        },
+        "target": "A",
+        "href": "/projects/bending-active/",
+        "card": "bending-active",
+        "active": true,
+        "docY": 1045,
+        "deck": {
+          "top": 1000,
+          "height": 6600,
+          "viewport": 1000,
+          "position": 0,
+          "target": 0,
+          "index": 0,
+          "count": 8,
+          "snap": null,
+          "transitions": 1,
+          "field": {
+            "strength": 0,
+            "acceleration": 0,
+            "surge": 0,
+            "resting": true
+          },
+          "disposed": false
+        },
+        "sitePhase": "entered"
+      },
+      {
+        "type": "click",
+        "phase": "capture",
+        "trusted": true,
+        "defaultPrevented": false,
+        "point": {
+          "x": 720,
+          "y": 545
+        },
+        "target": "A",
+        "href": "/projects/bending-active/",
+        "card": "bending-active",
+        "active": true,
+        "docY": 1045,
+        "deck": {
+          "top": 1000,
+          "height": 6600,
+          "viewport": 1000,
+          "position": 0,
+          "target": 0,
+          "index": 0,
+          "count": 8,
+          "snap": null,
+          "transitions": 1,
+          "field": {
+            "strength": 0,
+            "acceleration": 0,
+            "surge": 0,
+            "resting": true
+          },
+          "disposed": false
+        },
+        "sitePhase": "entered"
+      },
+      {
+        "type": "click",
+        "phase": "bubble",
+        "trusted": true,
+        "defaultPrevented": false,
+        "point": {
+          "x": 720,
+          "y": 545
+        },
+        "target": "A",
+        "href": "/projects/bending-active/",
+        "card": "bending-active",
+        "active": true,
+        "docY": 1045,
+        "deck": {
+          "top": 1000,
+          "height": 6600,
+          "viewport": 1000,
+          "position": 0,
+          "target": 0,
+          "index": 0,
+          "count": 8,
+          "snap": null,
+          "transitions": 1,
+          "field": {
+            "strength": 0,
+            "acceleration": 0,
+            "surge": 0,
+            "resting": true
+          },
+          "disposed": false
+        },
+        "sitePhase": "requested"
+      }
+    ],
+    "webkit": [
+      {
+        "type": "pointerdown",
+        "phase": "capture",
+        "trusted": true,
+        "defaultPrevented": false,
+        "point": {
+          "x": 719,
+          "y": 545
+        },
+        "target": "A",
+        "href": "/projects/bending-active/",
+        "card": "bending-active",
+        "active": true,
+        "docY": 1046,
+        "deck": {
+          "top": 1000,
+          "height": 6600,
+          "viewport": 1000,
+          "position": 0.0037083483606819797,
+          "target": 0.057499999999999996,
+          "index": 0,
+          "count": 8,
+          "snap": null,
+          "transitions": 1,
+          "field": {
+            "strength": 0.03898613119955565,
+            "acceleration": 0.9999999242797261,
+            "surge": 0.04195175249700411,
+            "resting": false
+          },
+          "disposed": false
+        },
+        "sitePhase": "entered"
+      },
+      {
+        "type": "pointerdown",
+        "phase": "bubble",
+        "trusted": true,
+        "defaultPrevented": false,
+        "point": {
+          "x": 719,
+          "y": 545
+        },
+        "target": "A",
+        "href": "/projects/bending-active/",
+        "card": "bending-active",
+        "active": true,
+        "docY": 1046,
+        "deck": {
+          "top": 1000,
+          "height": 6600,
+          "viewport": 1000,
+          "position": 0.0037083483606819797,
+          "target": 0.057499999999999996,
+          "index": 0,
+          "count": 8,
+          "snap": null,
+          "transitions": 1,
+          "field": {
+            "strength": 0.03898613119955565,
+            "acceleration": 0.9999999242797261,
+            "surge": 0.04195175249700411,
+            "resting": false
+          },
+          "disposed": false
+        },
+        "sitePhase": "entered"
+      },
+      {
+        "type": "pointerup",
+        "phase": "capture",
+        "trusted": true,
+        "defaultPrevented": false,
+        "point": {
+          "x": 719,
+          "y": 545
+        },
+        "target": "A",
+        "href": "/projects/bending-active/",
+        "card": "bending-active",
+        "active": true,
+        "docY": 1046,
+        "deck": {
+          "top": 1000,
+          "height": 6600,
+          "viewport": 1000,
+          "position": 0.0037083483606819797,
+          "target": 0.057499999999999996,
+          "index": 0,
+          "count": 8,
+          "snap": null,
+          "transitions": 1,
+          "field": {
+            "strength": 0.03898613119955565,
+            "acceleration": 0.9999999242797261,
+            "surge": 0.04195175249700411,
+            "resting": false
+          },
+          "disposed": false
+        },
+        "sitePhase": "entered"
+      },
+      {
+        "type": "pointerup",
+        "phase": "bubble",
+        "trusted": true,
+        "defaultPrevented": false,
+        "point": {
+          "x": 719,
+          "y": 545
+        },
+        "target": "A",
+        "href": "/projects/bending-active/",
+        "card": "bending-active",
+        "active": true,
+        "docY": 1046,
+        "deck": {
+          "top": 1000,
+          "height": 6600,
+          "viewport": 1000,
+          "position": 0.0037083483606819797,
+          "target": 0.057499999999999996,
+          "index": 0,
+          "count": 8,
+          "snap": null,
+          "transitions": 1,
+          "field": {
+            "strength": 0.03898613119955565,
+            "acceleration": 0.9999999242797261,
+            "surge": 0.04195175249700411,
+            "resting": false
+          },
+          "disposed": false
+        },
+        "sitePhase": "entered"
+      },
+      {
+        "type": "click",
+        "phase": "capture",
+        "trusted": true,
+        "defaultPrevented": false,
+        "point": {
+          "x": 719,
+          "y": 545
+        },
+        "target": "A",
+        "href": "/projects/bending-active/",
+        "card": "bending-active",
+        "active": true,
+        "docY": 1046,
+        "deck": {
+          "top": 1000,
+          "height": 6600,
+          "viewport": 1000,
+          "position": 0.0037083483606819797,
+          "target": 0.057499999999999996,
+          "index": 0,
+          "count": 8,
+          "snap": null,
+          "transitions": 1,
+          "field": {
+            "strength": 0.03898613119955565,
+            "acceleration": 0.9999999242797261,
+            "surge": 0.04195175249700411,
+            "resting": false
+          },
+          "disposed": false
+        },
+        "sitePhase": "entered"
+      },
+      {
+        "type": "click",
+        "phase": "bubble",
+        "trusted": true,
+        "defaultPrevented": false,
+        "point": {
+          "x": 719,
+          "y": 545
+        },
+        "target": "A",
+        "href": "/projects/bending-active/",
+        "card": "bending-active",
+        "active": true,
+        "docY": 1046,
+        "deck": {
+          "top": 1000,
+          "height": 6600,
+          "viewport": 1000,
+          "position": 0.0037083483606819797,
+          "target": 0.057499999999999996,
+          "index": 0,
+          "count": 8,
+          "snap": null,
+          "transitions": 1,
+          "field": {
+            "strength": 0.03898613119955565,
+            "acceleration": 0.9999999242797261,
+            "surge": 0.04195175249700411,
+            "resting": false
+          },
+          "disposed": false
+        },
+        "sitePhase": "requested"
+      }
+    ]
+  },
+  "originalCardActivationBoundary": {
+    "locator": "A[href=\"/projects/bending-active/\"]",
+    "plannedPoint": {
+      "x": 715.46,
+      "y": 543.8
+    },
+    "clickActionDoneTraceMs": 1237098.405,
+    "postClickSnapshotTraceMs": [
+      1237189.994,
+      1237235.631,
+      1242270.587
+    ],
+    "postClickURL": "http://127.0.0.1:4186/#projects",
+    "postClickSiteState": "entered",
+    "homeContentInert": false,
+    "bendingDocumentChunkOrModelRequests": 0,
+    "lastNetworkRequest": "Home machine-materials.glb at2026-11-03T22:42:56.732Z, before pointer action22:42:59.121Z",
+    "nativeScrollSnapshots": {
+      "beforeCardLocator": 1000,
+      "atPointerAction": 1045,
+      "afterURLTimeout": 1045
+    },
+    "limits": "The original trace records the planned locator target, not the actual trusted event target/defaultPrevented or scrollend. There is no evidence of navigation in progress; the cause of missing native activation remains unproved."
+  }
+}

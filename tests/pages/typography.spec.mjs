@@ -1,10 +1,24 @@
 import {test,expect} from '@playwright/test';
-import {readFile} from 'node:fs/promises';
+import {readFile,writeFile} from 'node:fs/promises';
 import {WAIT} from './case-helpers.mjs';
 
 const studies=JSON.parse(await readFile(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/project-studies.json',import.meta.url),'utf8')).projects;
 const routes=['/','/about/','/projects/','/contact/','/projects/bending-active/','/projects/xr-bending-active/',...studies.map(project=>`/projects/${project.slug}/`),'/404.html'];
 const families={body:'Roboto Mono',display:'Roboto Mono'};
+const FONT_QUERY_CONCURRENCY=8;
+// WebKit serializes 19.2/38.4px as 19.200001/38.400002px. Normalize only
+// font-size boundary comparisons, far below a layout pixel; keep raw receipts.
+const fontPixels=value=>Math.round(value*10000)/10000;
+
+// Retain every native platform-font query while bounding protocol concurrency.
+// Independent observations need not wait for a new animated frame one by one.
+async function queryFonts(session,nodeIds){
+ const usages=new Array(nodeIds.length);let next=0;
+ await Promise.all(Array.from({length:Math.min(FONT_QUERY_CONCURRENCY,nodeIds.length)},async()=>{
+  while(next<nodeIds.length){const index=next++;usages[index]=await session.send('CSS.getPlatformFontsForNode',{nodeId:nodeIds[index]});}
+ }));
+ return usages;
+}
 
 // A separate native document per route keeps the existing 60-second scenario
 // budget. OS motion preference is deliberately enabled to verify continuous presentation.
@@ -33,7 +47,7 @@ for(const route of routes)test(`the published ${route} document renders a cohere
    if(scrollable(node))continue;
    for(const child of node.childNodes){if(child.nodeType!==Node.TEXT_NODE||!child.textContent.trim())continue;const range=document.createRange();range.selectNodeContents(child);for(const rect of range.getClientRects())if(rect.width>2&&(rect.left<-.5||rect.right>document.documentElement.clientWidth+.5))clipped.push({tag:node.tagName,text:child.textContent.trim().slice(0,80),left:rect.left,right:rect.right});}
   }
-  const spacing=node=>{const css=getComputedStyle(node),size=parseFloat(css.fontSize);return{tag:node.tagName,homeIntro:node.matches('[data-home-introduction] h1'),deck:!!node.closest('[data-home-deck]'),featured:!!node.closest('[data-home-introduction]'),text:node.textContent.trim().slice(0,80),size,leading:parseFloat(css.lineHeight)/size,tracking:(css.letterSpacing==='normal'?0:parseFloat(css.letterSpacing))/size};};
+  const spacing=node=>{const css=getComputedStyle(node),size=parseFloat(css.fontSize);return{tag:node.tagName,homeIntro:node.matches('[data-home-introduction] #home-title'),deck:!!node.closest('[data-home-deck]'),featured:!!node.closest('[data-home-introduction]'),text:node.textContent.trim().slice(0,80),size,leading:parseFloat(css.lineHeight)/size,tracking:(css.letterSpacing==='normal'?0:parseFloat(css.letterSpacing))/size};};
   // About's three approach titles keep their compact subheading role when
   // standalone-page semantics promote their native elements from h3 to h2.
   const proseSelector='main[data-study-presentation="hybrid-scenes"] [data-project-native-source] [data-information-window="editorial"]>p,main[data-study-presentation="editorial-scenes"] [data-project-chapter="overview"]>p,main[data-study-presentation="editorial-scenes"] [data-information-window="editorial"]>p,main p[data-editorial-copy],main p[class*="_prose__"],main p[class*="_description__"],main p[class*="_statement__"],main p[class*="_sectionIntro__"],main p[class*="_openingText__"],main p[class*="_subtitle__"],main p[class*="_closingSummary__"],main [class*="_approaches__"] article>p:last-child,main [class*="_panel__"]>p';
@@ -54,22 +68,24 @@ for(const route of routes)test(`the published ${route} document renders a cohere
  const scale=page.viewportSize().width>=1000?.8:1;expect(reading.rootSize).toBeCloseTo(16*scale,2);
  expect(reading.roles.body.size,`${route}: responsive body scale`).toBeCloseTo(16*scale,2);
  for(const prose of reading.roles.prose){
-  if(prose.featured&&route==='/'){expect(prose.size).toBeGreaterThanOrEqual(14*scale);expect(prose.size).toBeLessThanOrEqual(24*scale);}
+  if(prose.featured&&route==='/'){expect(fontPixels(prose.size)).toBeGreaterThanOrEqual(fontPixels(14*scale));expect(fontPixels(prose.size)).toBeLessThanOrEqual(fontPixels(24*scale));}
   else{expect(prose.size,`${route}: semantic primary prose size`).toBeCloseTo(16*scale,2);expect(prose.measure,`${route}: 60ch reading measure`).toBeCloseTo(prose.expectedMeasure,0);}
   expect(prose.leading,`${route}: prose leading`).toBeCloseTo(1.5,2);expect(prose.tracking,`${route}: prose tracking`).toBeCloseTo(0,3);
   expect(prose.width,`${route}: prose within readable measure`).toBeLessThanOrEqual(Math.min(prose.measure,prose.expectedMeasure)+.5);
  }
  // Source annotations remain caption-role text when their single card moves
  // into native mobile flow; ancestry must not silently promote them to prose.
- for(const caption of reading.roles.sourceCaptions){expect(caption.size,`${route}: source caption size`).toBe(12);spacing(caption,20/13,0);}
+ // Model annotations use the 12px label role with an explicit 11px CSS floor;
+ // desktop's 80% root scale must not silently remove that reading floor.
+ for(const caption of reading.roles.sourceCaptions){expect(caption.size,`${route}: source caption size`).toBe(Math.max(12*scale,11));spacing(caption,20/13,0);}
  for(const caption of reading.roles.measuredCaptions){expect(caption.measure,`${route}: caption measure`).toBeLessThanOrEqual(caption.expectedMeasure+.5);expect(caption.width,`${route}: caption within measure`).toBeLessThanOrEqual(caption.measure+.5);}
  const mainTitle=reading.roles.display.find(role=>role.tag==='H1');
  expect(mainTitle,`${route}: primary heading`).toBeTruthy();
  const hero=route==='/'||route==='/projects/bending-active/';
- expect(mainTitle.size,`${route}: compact primary heading maximum`).toBeLessThanOrEqual((route==='/'?64:hero?48:40)*scale);
- expect(mainTitle.size,`${route}: primary heading remains distinct`).toBeGreaterThanOrEqual((route==='/'?28.8:hero?32:30)*scale);
+ expect(fontPixels(mainTitle.size),`${route}: compact primary heading maximum`).toBeLessThanOrEqual(fontPixels((route==='/'?64:hero?48:40)*scale));
+ expect(fontPixels(mainTitle.size),`${route}: primary heading remains distinct`).toBeGreaterThanOrEqual(fontPixels((route==='/'?28.8:hero?32:30)*scale));
  for(const role of reading.roles.display.filter(role=>role.tag==='H2')){
-  expect(role.size,`${route}: compact chapter/card heading ${role.text}`).toBeLessThanOrEqual((role.deck?40:28)*scale);
+  expect(fontPixels(role.size),`${route}: compact chapter/card heading ${role.text}`).toBeLessThanOrEqual(fontPixels((role.deck?40:28)*scale));
  }
  for(const role of reading.roles.display)spacing(role,role.homeIntro?1.15:role.deck?1.3:role.tag==='H1'?1.2:role.tag==='H2'&&!role.compact?1.3:1.4,role.homeIntro?-.05:role.deck&&role.tag==='H2'?-.03:['H1','H2'].includes(role.tag)&&!role.compact?-.025:0);
  for(const [kind,leading,tracking]of [['controls',10/7,0],['captions',20/13,0],['labels',1.5,0]])for(const role of reading.roles[kind])spacing(role,leading,tracking);
@@ -81,13 +97,35 @@ for(const route of routes)test(`the published ${route} document renders a cohere
   // including heading spans/em/strong: a parent with no direct Text children
   // can return no platform-font usage. All levels use the same actual Latin face; system symbol fallbacks are explicit.
   const session=await page.context().newCDPSession(page);
+  const latinProbes=reading.fontProbes.flatMap((probe,index)=>{
+   const latin=probe.text.replace(/[^\x20-\x7e]/g,'');
+   return /[^\x20-\x7e]/.test(probe.subtreeText)&&latin.trim()?[{index,selector:probe.selector,latin}]:[];
+  });
+  const report={route,sourceProbes:reading.fontProbes.length,isolatedLatinProbes:latinProbes.length,concurrency:FONT_QUERY_CONCURRENCY,queries:[]};
+  let primary;
   try{
+   // One append/remove pair keeps font observation from repeatedly invalidating
+   // the live page's layout. Each direct Latin string retains its own source
+   // element's resolved font and its own actual platform-font report.
+   await page.evaluate(probes=>{
+    const container=document.createElement('div');container.id='type-latin-glyph-probes';container.style.cssText='position:fixed;inset:0 auto auto 0;opacity:0;pointer-events:none';
+    for(const probe of probes){const original=document.querySelector(probe.selector),span=document.createElement('span');span.dataset.typeLatinProbe=String(probe.index);span.textContent=probe.latin;span.style.cssText='display:block;white-space:pre';span.style.font=getComputedStyle(original).font;span.style.fontFamily=getComputedStyle(original).fontFamily;container.append(span);}
+    document.body.append(container);
+   },latinProbes);
    await session.send('DOM.enable');await session.send('CSS.enable');
-   const {root}=await session.send('DOM.getDocument'),{nodeIds}=await session.send('DOM.querySelectorAll',{nodeId:root.nodeId,selector:reading.fontProbes.map(probe=>probe.selector).join(',')});
+   const {root}=await session.send('DOM.getDocument');
+   const [{nodeIds},{nodeIds:latinIds}]=await Promise.all([
+    session.send('DOM.querySelectorAll',{nodeId:root.nodeId,selector:reading.fontProbes.map(probe=>probe.selector).join(',')}),
+    session.send('DOM.querySelectorAll',{nodeId:root.nodeId,selector:'#type-latin-glyph-probes [data-type-latin-probe]'}),
+   ]);
    expect(nodeIds).toHaveLength(reading.fontProbes.length);
+   expect(latinIds).toHaveLength(latinProbes.length);
+   const started=performance.now(),usages=await queryFonts(session,[...nodeIds,...latinIds]);report.queryElapsedMs=performance.now()-started;
+   report.queries=usages.map((usage,index)=>({kind:index<nodeIds.length?'source':'isolated-latin',index:index<nodeIds.length?index:latinProbes[index-nodeIds.length].index,fonts:usage.fonts}));
+   const latinUsageByIndex=new Map(latinProbes.map((probe,index)=>[probe.index,usages[nodeIds.length+index]]));
    let mainHeadingGlyphs=0;
    for(let index=0;index<nodeIds.length;index++){
-    const probe=reading.fontProbes[index],usage=await session.send('CSS.getPlatformFontsForNode',{nodeId:nodeIds[index]}),used=usage.fonts.filter(font=>font.glyphCount>0),expected=/Roboto Mono/i;
+    const probe=reading.fontProbes[index],usage=usages[index],used=usage.fonts.filter(font=>font.glyphCount>0),expected=/Roboto Mono/i;
     if(probe.mainHeading)mainHeadingGlyphs+=used.reduce((sum,font)=>sum+font.glyphCount,0);
     expect(used.filter(font=>font.isCustomFont&&!expected.test(font.familyName)),`${route}: unexpected custom font for ${probe.text}`).toEqual([]);
     const latin=probe.text.replace(/[^\x20-\x7e]/g,'');
@@ -99,20 +137,24 @@ for(const route of routes)test(`the published ${route} document renders a cohere
     const mixed=/[^\x20-\x7e]/.test(probe.subtreeText);
     if(!mixed)expect(used.filter(font=>!font.isCustomFont),`${route}: actual Latin font ${probe.text}`).toEqual([]);
     if(mixed&&latin.trim()){
-     await page.evaluate(({selector,latin})=>{const original=document.querySelector(selector),span=document.createElement('span');span.id='type-latin-glyph-probe';span.textContent=latin;span.style.cssText='position:fixed;inset:0 auto auto 0;opacity:0;pointer-events:none;white-space:pre';span.style.font=getComputedStyle(original).font;span.style.fontFamily=getComputedStyle(original).fontFamily;document.body.append(span);},{selector:probe.selector,latin});
-     const {nodeId:latinId}=await session.send('DOM.querySelector',{nodeId:root.nodeId,selector:'#type-latin-glyph-probe'});
-     const latinUsage=await session.send('CSS.getPlatformFontsForNode',{nodeId:latinId});
+     const latinUsage=latinUsageByIndex.get(index);
      expect(latinUsage.fonts.filter(font=>font.glyphCount>0&&(!font.isCustomFont||!expected.test(font.familyName))),`${route}: isolated Latin glyphs for ${probe.text}`).toEqual([]);
      expect(latinUsage.fonts.some(font=>font.isCustomFont&&font.glyphCount>0&&expected.test(font.familyName))).toBe(true);
-     await page.evaluate(()=>document.querySelector('#type-latin-glyph-probe').remove());
     }
    }
    expect(mainHeadingGlyphs).toBeGreaterThan(0);
-   const {nodeId}=await session.send('DOM.querySelector',{nodeId:root.nodeId,selector:reading.bodyProbeSelector});
-   const bodyUsage=await session.send('CSS.getPlatformFontsForNode',{nodeId});
+   const bodyIndex=reading.fontProbes.findIndex(probe=>probe.selector===reading.bodyProbeSelector);expect(bodyIndex).toBeGreaterThanOrEqual(0);
+   const bodyUsage=usages[bodyIndex];
    expect(bodyUsage.fonts.some(font=>font.isCustomFont&&font.glyphCount>0&&/Roboto Mono/i.test(font.familyName))).toBe(true);
    expect(bodyUsage.fonts.filter(font=>font.glyphCount>0&&(!font.isCustomFont||!/Roboto Mono/i.test(font.familyName)))).toEqual([]);
-  }finally{await session.detach();}
+  }catch(error){primary=error;throw error;}finally{
+   let cleanupError;
+   try{await page.evaluate(()=>document.querySelector('#type-latin-glyph-probes')?.remove());}catch(error){cleanupError??=error;}
+   try{await session.detach();}catch(error){cleanupError??=error;}
+   try{const path=test.info().outputPath('platform-fonts.json');await writeFile(path,JSON.stringify(report,null,2));await test.info().attach('platform-fonts',{path,contentType:'application/json'});}catch(error){cleanupError??=error;}
+   // A closed-page cleanup must not hide the original font assertion/timeout.
+   if(!primary&&cleanupError)throw cleanupError;
+  }
  }
  // Tag an existing semantic reading paragraph to exercise the real module
  // cascade, not an unattached style-token specimen. Restore it immediately.

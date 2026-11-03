@@ -8,7 +8,19 @@ import {WAIT,frames} from './case-helpers.mjs';
 const stage=page=>page.locator('[data-xr-stage]');
 const control=page=>page.locator('[data-xr-model-control]');
 const video=(page,id)=>stage(page).locator(`[data-xr-stage-video="${id}"]`);
-const facts=page=>stage(page).evaluate(node=>node.__xrStage.inspect());
+// Entry already establishes the static stage. Read it in one browser task;
+// repeated locator attachment roundtrips compete with native video draws.
+const facts=page=>page.evaluate(()=>{const hosts=document.querySelectorAll('[data-xr-stage]');if(hosts.length!==1)throw Error('Expected exactly one XR stage');return hosts[0].__xrStage.inspect();});
+async function retainPhoneNodes(page){
+ const bundle=await page.evaluateHandle(()=>{
+  const hosts=document.querySelectorAll('[data-xr-stage]');if(hosts.length!==1)throw Error('Expected exactly one XR stage');
+  const host=hosts[0],canvases=host.querySelectorAll('canvas');if(canvases.length!==1)throw Error('Expected exactly one retained XR canvas');
+  const nodes={host,canvas:canvases[0]};
+  for(const id of ['adapt','assemble','join']){const videos=host.querySelectorAll(`[data-xr-stage-video="${id}"]`);if(videos.length!==1)throw Error(`Expected exactly one ${id} recording`);nodes[id]=videos[0];}
+  return nodes;
+ });
+ try{return Object.fromEntries(await bundle.getProperties());}finally{await bundle.dispose();}
+}
 const workspace=JSON.parse(await readFile(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/xr-workspace.json',import.meta.url),'utf8'));
 const studies=JSON.parse(await readFile(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/project-studies.json',import.meta.url),'utf8')).projects;
 const phoneDiagnostics=new WeakMap();
@@ -47,7 +59,7 @@ async function observePhoneLifecycle(page){
 test.afterEach(async({page},info)=>{
  const receipt=phoneDiagnostics.get(page);if(!receipt)return;
  receipt.dispose();phoneDiagnostics.delete(page);
- try{await info.attach('xr-phone-lifecycle',{body:JSON.stringify(receipt.entries,null,2),contentType:'application/json'});}catch{/* Diagnostic attachment cannot replace the original test outcome. */}
+ try{const path=info.outputPath('xr-phone-lifecycle.json');await writeFile(path,JSON.stringify(receipt.entries,null,2)+'\n');await info.attach('xr-phone-lifecycle',{path,contentType:'application/json'});}catch{/* Diagnostic attachment cannot replace the original test outcome. */}
 });
 async function openingVisible(page){
  await expect(stage(page)).toHaveAttribute('data-xr-opening','true');
@@ -121,7 +133,7 @@ async function settled(page,chapter){
  await frames(page,2);
 }
 async function scrollChapter(page,chapter){
- await page.locator(`[data-xr-chapter="${chapter}"]`).evaluate(node=>node.scrollIntoView({block:'start',behavior:'instant'}));
+ await page.evaluate(id=>{const chapters=document.querySelectorAll(`[data-xr-chapter="${id}"]`);if(chapters.length!==1)throw Error(`Expected exactly one ${id} chapter`);chapters[0].scrollIntoView({block:'start',behavior:'instant'});},chapter);
  await settled(page,chapter);
  await viewportFits(page);
 }
@@ -265,7 +277,7 @@ test('one project background stage preserves source geometry, stays idle, and fo
 test('native scrolling selects all three native-resolution recordings in one continuously playing scene',async({page})=>{
  await observePhoneLifecycle(page);
  const errors=[];page.on('pageerror',error=>errors.push(error.message));await enter(page);await modelReady(page);
- const originalCanvas=await stage(page).locator('canvas').elementHandle();
+ const {host,canvas:originalCanvas,join}=await retainPhoneNodes(page);
  // Keep the same retained canvas and native screenshot action. Batch related
  // observations at one instant instead of resolving the same locator for each
  // assertion while the recording and the real scene clock continue to run.
@@ -273,7 +285,7 @@ test('native scrolling selects all three native-resolution recordings in one con
   const hosts=document.querySelectorAll('[data-xr-stage]');if(hosts.length!==1)throw Error('Expected exactly one XR stage');
   return hosts[0].__xrStage.inspect().resource.media.frames;
  });
-  let continuity;
+  let continuity,primaryError;
   try{
  await expect(page.locator('[data-phone-stage],[data-phone-front-toggle]')).toHaveCount(0);
  for(const [id,duration]of[['adapt',13],['assemble',24.96],['join',20.3]]){
@@ -291,11 +303,13 @@ test('native scrolling selects all three native-resolution recordings in one con
   expect({left:state.resource.surface.viewport.left,top:state.resource.surface.viewport.top,width:state.resource.surface.viewport.width,height:state.resource.surface.viewport.height}).toEqual({left:0,top:0,...sample.viewport});
   expect(state.resource.surface.budget.budget.pixels).toBeLessThanOrEqual(1600000);expect(sample.nativePlaying).toBe(true);expect(sample.duration).toBeCloseTo(duration,2);expect([sample.sourceWidth,sample.sourceHeight]).toEqual([888,1920]);
   expect(sample.currentSource).toBe(`/assets/xr/${id}-interface-hd.mp4`);expect(sample.readyState).toBeGreaterThanOrEqual(2);expect(sample.error).toBeNull();expect(state.paused).toBe(false);expect(state.resource.paused).toBe(false);
-  await test.info().attach(`native-${id}-recording`,{body:JSON.stringify({source:sample.currentSource,width:sample.sourceWidth,height:sample.sourceHeight,duration:sample.duration,readyState:sample.readyState,error:sample.error,playing:sample.nativePlaying,sameCanvas:sample.originalCanvas,canvasCount:sample.canvasCount,activeVideoSources:sample.videoSources,budget:state.resource.surface.budget.budget,media:state.resource.media},null,2),contentType:'application/json'});
+  const receiptPath=test.info().outputPath(`native-${id}-recording.json`);
+  await writeFile(receiptPath,JSON.stringify({source:sample.currentSource,width:sample.sourceWidth,height:sample.sourceHeight,duration:sample.duration,readyState:sample.readyState,error:sample.error,playing:sample.nativePlaying,sameCanvas:sample.originalCanvas,canvasCount:sample.canvasCount,activeVideoSources:sample.videoSources,budget:state.resource.surface.budget.budget,media:state.resource.media},null,2)+'\n');
+  await test.info().attach(`native-${id}-recording`,{path:receiptPath,contentType:'application/json'});
   const draw=state.resource.surface;expect(draw.sourceCalls).toBe(0);expect(draw.phoneBodyCalls).toBe(1);expect(draw.phoneScreenCalls).toBe(1);expect(draw.phoneCalls).toBe(2);expect(draw.stageCalls).toBeGreaterThan(0);expect(draw.calls).toBe(draw.sourceCalls+draw.phoneCalls+draw.stageCalls);
-  const first=await originalCanvas.screenshot(),count=await decodedFrames();
-  await expect.poll(decodedFrames).toBeGreaterThan(count+2);expect((await originalCanvas.screenshot()).equals(first)).toBe(false);
-   if(id==='adapt')continuity=await stage(page).evaluateHandle(host=>{
+  const first=await originalCanvas.screenshot({path:test.info().outputPath(`${id}-phone-before.png`)}),count=await decodedFrames();
+  await expect.poll(decodedFrames).toBeGreaterThan(count+2);expect((await originalCanvas.screenshot({path:test.info().outputPath(`${id}-phone-after.png`)})).equals(first)).toBe(false);
+   if(id==='adapt')continuity=await host.evaluateHandle(host=>{
     let running=true,raf;const samples=[];
     const read=()=>{if(!running)return;const s=host.__xrStage.inspect(),canvas=host.querySelector('canvas');samples.push({chapter:s.chapter,mode:s.scene.mode,opacity:s.scene.opacity,cssOpacity:Number(getComputedStyle(host.querySelector('[data-xr-scene-surface]')).opacity),painted:s.resource?.successfulPaint,rendering:s.resource?.mode,phoneCalls:s.resource?.surface?.phoneCalls,connected:!!canvas?.isConnected});raf=requestAnimationFrame(read);};read();
     return{samples,dispose(){running=false;cancelAnimationFrame(raf);}};
@@ -304,11 +318,16 @@ test('native scrolling selects all three native-resolution recordings in one con
   const continuous=await continuity.evaluate(value=>value.samples);expect(continuous.length).toBeGreaterThan(2);
   expect(continuous.some(value=>value.chapter==='assemble')).toBe(true);expect(continuous.some(value=>value.chapter==='join')).toBe(true);
   for(const value of continuous){expect(value.opacity).toBe(1);expect(value.cssOpacity).toBe(1);expect(value.painted).toBe(true);expect(value.rendering).toBe('webgl-phone');expect(value.phoneCalls).toBe(2);expect(value.connected).toBe(true);expect(['entry','exit']).not.toContain(value.mode);}
-  await test.info().attach('continuous-native-phone-passages',{body:JSON.stringify(continuous),contentType:'application/json'});
-  }finally{if(continuity){await continuity.evaluate(value=>value.dispose());await continuity.dispose();}}
+  const continuityPath=test.info().outputPath('continuous-native-phone-passages.json');await writeFile(continuityPath,JSON.stringify(continuous)+'\n');
+  await test.info().attach('continuous-native-phone-passages',{path:continuityPath,contentType:'application/json'});
+  }catch(error){primaryError=error;throw error;}
+  finally{
+   try{if(continuity){try{await continuity.evaluate(value=>value.dispose());}finally{await continuity.dispose();}}}
+   catch(error){if(!primaryError)throw error;}
+  }
  await continuousPresentationControls(page);
- const position=await video(page,'join').evaluate(node=>node.currentTime);
- await expect.poll(()=>video(page,'join').evaluate((node,before)=>Math.abs(node.currentTime-before),position)).toBeGreaterThan(.03);
+ const position=await join.evaluate(node=>node.currentTime);
+ await expect.poll(()=>join.evaluate((node,before)=>Math.abs(node.currentTime-before),position)).toBeGreaterThan(.03);
  await expect(page.locator('[data-xr-scene-controls] button')).toHaveCount(0);
  await scrollChapter(page,'overview');await modelReady(page);await openingVisible(page);
  const returned=await originalCanvas.evaluate(()=>{const hosts=document.querySelectorAll('[data-xr-stage]');if(hosts.length!==1)throw Error('Expected exactly one XR stage');return{state:hosts[0].__xrStage.inspect(),videoSources:hosts[0].querySelectorAll('video[src]').length};});
@@ -324,13 +343,13 @@ test('a genuinely delayed recording preserves its paused native frame through a 
  await observePhoneLifecycle(page);
  let release;const held=new Promise(resolve=>{release=resolve;});let waiting=false;
  await page.route('**/assets/xr/assemble-interface-hd.mp4',async route=>{waiting=true;await held;await route.continue();});
- let continuity,primaryError,advancementBaseline;const advancement=[];
+ let continuity,primaryError,advancementBaseline,retainedNodes;const advancement=[];
  const saveAdvancement=async outcome=>{
   const path=test.info().outputPath('delayed-recording-advance-diagnostic.json');
   await writeFile(path,JSON.stringify({outcome,baseline:advancementBaseline,advancement,lifecycle:phoneDiagnostics.get(page)?.entries??[]},null,2));
   await test.info().attach('delayed-recording-advance-diagnostic',{path,contentType:'application/json'});
  };
- const nativeFrame=()=>video(page,'adapt').evaluate(async node=>{
+ const nativeFrame=()=>retainedNodes.adapt.evaluate(async node=>{
   if(node.readyState<2||!node.videoWidth||!node.videoHeight)throw Error('Retained native frame is unavailable');
   const sample=document.createElement('canvas');sample.width=node.videoWidth;sample.height=node.videoHeight;
   const context=sample.getContext('2d');context.drawImage(node,0,0);const pixels=context.getImageData(0,0,sample.width,sample.height).data;
@@ -342,19 +361,19 @@ test('a genuinely delayed recording preserves its paused native frame through a 
  });
  const frameIdentity=({sha256,width,height,contrast,alphaMin,alphaMax,position,decodedFrames,paused})=>({sha256,width,height,contrast,alphaMin,alphaMax,position,decodedFrames,paused});
  try{
-  await enter(page);await phoneReady(page,'adapt');const canvas=stage(page).locator('canvas'),original=await canvas.elementHandle();
+  await enter(page);await phoneReady(page,'adapt');retainedNodes=await retainPhoneNodes(page);const {host,canvas,adapt,assemble}=retainedNodes,original=canvas;
   const active=await nativeFrame();
   await test.info().attach('active-native-frame-facts',{body:JSON.stringify(active),contentType:'application/json'});
   await test.info().attach('active-phone-composition',{body:await canvas.screenshot(),contentType:'image/png'});
-  continuity=await stage(page).evaluateHandle(host=>{
+  continuity=await host.evaluateHandle(host=>{
    let running=true,raf;const samples=[];
    const read=()=>{if(!running)return;const s=host.__xrStage.inspect();samples.push({chapter:s.chapter,mode:s.scene.mode,opacity:s.scene.opacity,cssOpacity:Number(getComputedStyle(host.querySelector('[data-xr-scene-surface]')).opacity),painted:s.resource?.successfulPaint,phoneCalls:s.resource?.surface?.phoneCalls});raf=requestAnimationFrame(read);};read();
    return{samples,dispose(){running=false;cancelAnimationFrame(raf);}};
   });
-  await page.locator('[data-xr-chapter="assemble"]').evaluate(node=>node.scrollIntoView({block:'start',behavior:'instant'}));
+  await page.evaluate(()=>{const chapters=document.querySelectorAll('[data-xr-chapter="assemble"]');if(chapters.length!==1)throw Error('Expected exactly one assemble chapter');chapters[0].scrollIntoView({block:'start',behavior:'instant'});});
   await expect.poll(()=>waiting).toBe(true);
   await page.waitForFunction(()=>{const s=document.querySelector('[data-xr-stage]').__xrStage.inspect();return s.chapter==='assemble'&&s.scene.mode==='waiting'&&s.resource.media.pending;},null,{timeout:WAIT});
-  await expect(video(page,'adapt')).toHaveAttribute('src',/adapt-interface-hd\.mp4$/);expect(await video(page,'adapt').evaluate(node=>node.paused)).toBe(true);
+  await expect(video(page,'adapt')).toHaveAttribute('src',/adapt-interface-hd\.mp4$/);expect(await adapt.evaluate(node=>node.paused)).toBe(true);
   // The transparent WebGL surface is composited with moving native reading
   // and Layer 1. Compare the retained decoded source pixels directly instead
   // of treating a screenshot of that whole composition as a paused frame.
@@ -366,24 +385,24 @@ test('a genuinely delayed recording preserves its paused native frame through a 
   expect(active.contrast).toBeGreaterThan(32);expect(frozen.contrast).toBeGreaterThan(32);expect(frameIdentity(retained)).toEqual(frameIdentity(frozen));expect(retained.contrast).toBeGreaterThan(32);expect(retained.paused).toBe(true);
   for(const sample of [active,frozen,retained]){expect(sample.wrapper.textureSource).toBe('true');expect(sample.wrapper.display).not.toBe('none');}
   const pending=await facts(page);expect(pending.scene.opacity).toBe(1);expect(pending.resource.successfulPaint).toBe(true);expect(pending.resource.mode).toBe('webgl-phone');expect(pending.resource.surface.phoneCalls).toBe(2);
-  await expect(video(page,'adapt')).toHaveAttribute('src',/adapt-interface-hd\.mp4$/);expect(await video(page,'adapt').evaluate(node=>node.paused)).toBe(true);
+  await expect(video(page,'adapt')).toHaveAttribute('src',/adapt-interface-hd\.mp4$/);expect(await adapt.evaluate(node=>node.paused)).toBe(true);
   // Reverse while the target HTTP response is still held. The retained video
   // must become the current owner again; a superseded handle cannot clear it.
   await phoneReady(page,'adapt');await expect(video(page,'adapt')).toHaveAttribute('src',/adapt-interface-hd\.mp4$/);
   expect(await original.evaluate(node=>node===document.querySelector('[data-xr-stage] canvas'))).toBe(true);
   await expect(stage(page).locator('video[src]')).toHaveCount(1);
-  const restoredTime=await video(page,'adapt').evaluate(node=>node.currentTime);
-  await expect.poll(()=>video(page,'adapt').evaluate((node,before)=>Math.abs(node.currentTime-before),restoredTime)).toBeGreaterThan(.03);
+  const restoredTime=await adapt.evaluate(node=>node.currentTime);
+  await expect.poll(()=>adapt.evaluate((node,before)=>Math.abs(node.currentTime-before),restoredTime)).toBeGreaterThan(.03);
   const restored=await facts(page);expect(restored.scene.opacity).toBe(1);expect(restored.resource.mode).toBe('webgl-phone');expect(restored.resource.media).toMatchObject({stage:'adapt',pending:false,reason:null});
   await test.info().attach('pending-reverse-restored-source',{body:JSON.stringify(restored),contentType:'application/json'});
   release();await frames(page,8);expect((await facts(page)).chapter).toBe('adapt');await expect(video(page,'adapt')).toHaveAttribute('src',/adapt-interface-hd\.mp4$/);
   await phoneReady(page,'assemble');expect(await original.evaluate(node=>node===document.querySelector('[data-xr-stage] canvas'))).toBe(true);
   await expect(video(page,'adapt')).not.toHaveAttribute('src');await expect(stage(page).locator('video[src]')).toHaveCount(1);
-  const before=await video(page,'assemble').evaluate(node=>node.currentTime);advancementBaseline=before;
+  const before=await assemble.evaluate(node=>node.currentTime);advancementBaseline=before;
   await expect.poll(async()=>{
    // Observe the same native read as the original predicate: no extra roundtrip,
    // wait, playback request or clock. Keep only bounded diagnostic history.
-   const snapshot=await video(page,'assemble').evaluate(node=>{
+   const snapshot=await assemble.evaluate(node=>{
     const currentTime=node.currentTime,state=document.querySelector('[data-xr-stage]')?.__xrStage?.inspect();
     const range=value=>Array.from({length:Math.min(value.length,4)},(_,index)=>[value.start(index),value.end(index)]);
     const native=Array.from(document.querySelectorAll('[data-xr-stage-video]')).slice(0,4).map(video=>{

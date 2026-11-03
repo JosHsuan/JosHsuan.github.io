@@ -12,6 +12,21 @@ async function staticPage(page){
  await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);
 }
 
+async function visibleControlKinds(page){
+ const rows=await page.locator('[data-liquid-glass]').evaluateAll(elements=>elements.map(element=>{
+  const rect=element.getBoundingClientRect(),style=getComputedStyle(element);
+  return{kind:element.dataset.liquidGlass,visible:rect.width>0&&rect.height>0&&style.display!=='none'&&style.visibility!=='hidden',map:element.querySelector('[data-liquid-map]').getAttribute('href')};
+ }));
+ expect(rows.map(row=>row.kind).sort()).toEqual(['chapter-navigation','identity','reading-controls']);
+ const compact=page.viewportSize().width<=780;
+ const kinds=rows.filter(row=>row.visible).map(row=>row.kind).sort();
+ expect(kinds).toEqual(compact?['chapter-navigation','identity']:['chapter-navigation','identity','reading-controls']);
+ // The empty mobile counter disappeared with the pause control. Its retained
+ // decorative registry entry owns neither pixels nor a displacement map.
+ for(const row of rows.filter(row=>!row.visible)){expect(row.kind).toBe('reading-controls');expect(row.map).toBe('');}
+ return kinds;
+}
+
 // A synthetic background goes behind the real, built identity surface. Its
 // React skin, SVG filter, normal map, CSS material and Director stay untouched.
 async function backdropFixture(page,{pattern=false,geometry=false}={}){
@@ -111,8 +126,24 @@ function controlMaterialDiagnostic(element){
 
 test('built glass bends the real background only at its rim and leaves foreground geometry intact',async({page,browserName},testInfo)=>{
  test.setTimeout(scenarioTimeout(120000));await staticPage(page);
+ // Fixed controls retain the same material in MAKE's authored model absence.
+ // Keep the original source acquired and the Director live while testing DOM
+ // optics; concurrent offscreen WebGL draws are not part of this pixel assay.
+ // CI action durations diagnose host throughput, not GPU frame rate.
+ await page.locator('#make').evaluate(element=>element.scrollIntoView({block:'start',behavior:'instant'}));await settle(page);
+ const readingStage=()=>page.evaluate(()=>{
+  const story=window.__story.inspect(),scene=window.__thesis.inspect();
+  return{ready:scene.ready,renderSuspended:scene.renderSuspended,sceneFrames:scene.frames,source:scene.source,placement:{chapter:story.canvasPlacement.chapter,mode:story.canvasPlacement.mode,visible:story.canvasPlacement.visible},controllerFrame:story.controllerFrame,activeSeconds:story.playback.activeSeconds};
+ });
+ const readingBefore=await readingStage();
+ expect(readingBefore).toMatchObject({ready:true,renderSuspended:true,source:{vertices:172789,triangles:227521,sourceObjects:51},placement:{chapter:'make',mode:'absent',visible:false}});
+ await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);
+ await frames(page,6);const readingLive=await readingStage();
+ expect(readingLive.controllerFrame).toBeGreaterThan(readingBefore.controllerFrame);expect(readingLive.activeSeconds).toBeGreaterThan(readingBefore.activeSeconds);
+ expect(readingLive.sceneFrames).toBe(readingBefore.sceneFrames);
  await page.screenshot({path:testInfo.outputPath('actual-liquid-controls.png'),animations:'disabled'});
- for(const kind of ['identity','chapter-navigation','reading-controls'])await page.locator(`[data-liquid-glass="${kind}"]`).screenshot({path:testInfo.outputPath('actual-'+kind+'.png'),animations:'disabled'});
+ const visibleKinds=await visibleControlKinds(page);
+ for(const kind of visibleKinds)await page.locator(`[data-liquid-glass="${kind}"]`).screenshot({path:testInfo.outputPath('actual-'+kind+'.png'),animations:'disabled'});
  const surfaces=await page.locator('[data-liquid-glass]').evaluateAll(elements=>elements.map(element=>{
   const skin=element.querySelector(':scope > [data-liquid-skin]'),style=getComputedStyle(element),paint=getComputedStyle(skin);
   return{kind:element.dataset.liquidGlass,mode:element.dataset.liquidMode,skins:element.querySelectorAll(':scope > [data-liquid-skin]').length,parentBackdrop:style.backdropFilter||style.webkitBackdropFilter,skinBackdrop:paint.backdropFilter||paint.webkitBackdropFilter};
@@ -170,6 +201,9 @@ test('built glass bends the real background only at its rim and leaves foregroun
  const afterScroll=await surface.screenshot({animations:'disabled'}),scrollPixels=await comparePixels(page,beforeScroll,afterScroll,size);
  expect(positionAfter.scroll-positionBefore.scroll).toBe(18);expect(positionAfter.background-positionBefore.background).toBe(-18);
  expect(scrollPixels.totalMean).toBeGreaterThan(1);expect((await liquid(page)).mapGenerations).toBe(mapGenerationBefore);
+ const readingAfter=await readingStage();expect(readingAfter).toMatchObject({ready:true,renderSuspended:true,placement:{chapter:'make',mode:'absent',visible:false}});
+ expect(readingAfter.controllerFrame).toBeGreaterThan(readingLive.controllerFrame);expect(readingAfter.activeSeconds).toBeGreaterThan(readingLive.activeSeconds);
+ await writeFile(testInfo.outputPath('optical-reading-stage.json'),JSON.stringify({readingBefore,readingLive,readingAfter},null,2)+'\n');
  await writeFile(testInfo.outputPath('native-scroll-optical-pixels.json'),JSON.stringify({positionBefore,positionAfter,mapGenerationBefore,mapGenerationAfter:(await liquid(page)).mapGenerations,pixels:scrollPixels},null,2)+'\n');
  await expect(page.locator('[data-global-background-field]')).toHaveCount(1);
  await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);
@@ -239,30 +273,35 @@ test('pointer lighting and press share the Director clock and cancel, focus and 
 
 test('native opacity preferences and no-JavaScript navigation retain readable materials',async({page,browser,baseURL,context,browserName},testInfo)=>{
  test.setTimeout(scenarioTimeout(120000));await staticPage(page);
+ const visibleKinds=await visibleControlKinds(page);
  const modes=()=>page.locator('[data-liquid-glass]').evaluateAll(elements=>elements.map(element=>{
-  const skin=element.querySelector(':scope > [data-liquid-skin]'),style=getComputedStyle(skin);return{mode:element.dataset.liquidMode,backdrop:style.backdropFilter||style.webkitBackdropFilter,background:style.backgroundColor,transform:style.transform,before:getComputedStyle(skin,'::before').display,after:getComputedStyle(skin,'::after').display,map:skin.querySelector('[data-liquid-map]').getAttribute('href')};
+  const skin=element.querySelector(':scope > [data-liquid-skin]'),style=getComputedStyle(skin);return{kind:element.dataset.liquidGlass,mode:element.dataset.liquidMode,backdrop:style.backdropFilter||style.webkitBackdropFilter,background:style.backgroundColor,transform:style.transform,before:getComputedStyle(skin,'::before').display,after:getComputedStyle(skin,'::after').display,map:skin.querySelector('[data-liquid-map]').getAttribute('href')};
  }));
+ const restored=async()=>{
+  await expect.poll(async()=>(await modes()).every(row=>row.mode===(browserName==='chromium'&&visibleKinds.includes(row.kind)?'refractive':'reflective')),{timeout:WAIT}).toBe(true);
+  expect(await visibleControlKinds(page)).toEqual(visibleKinds);
+ };
  const opaque=async()=>{await expect.poll(async()=>(await modes()).every(row=>row.mode==='opaque'),{timeout:WAIT}).toBe(true);for(const row of await modes()){expect(row.backdrop).toBe('none');expect(row.transform).toBe('none');expect(row.before).toBe('none');expect(row.after).toBe('none');expect(row.map).toBe('');}expect((await liquid(page)).mapPixels).toBe(0);};
  await page.emulateMedia({reducedMotion:'reduce',contrast:'more'});await opaque();
  await page.emulateMedia({reducedMotion:'reduce',contrast:'no-preference',forcedColors:'active'});await opaque();
  await page.emulateMedia({reducedMotion:'reduce',contrast:'no-preference',forcedColors:'none'});
- await expect.poll(async()=>(await modes()).every(row=>row.mode=== (browserName==='chromium'?'refractive':'reflective')),{timeout:WAIT}).toBe(true);
+ await restored();
  if(browserName==='chromium'){
   const cdp=await context.newCDPSession(page);
   try{await cdp.send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'},{name:'prefers-reduced-transparency',value:'reduce'}]});await opaque();}
   finally{await cdp.send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'},{name:'prefers-reduced-transparency',value:'no-preference'}]});await cdp.detach();}
  }else testInfo.annotations.push({type:'coverage-limit',description:'Native prefers-contrast and forced-colors covered. WebKit reduced-transparency emulation is unavailable.'});
- await expect.poll(async()=>(await modes()).every(row=>row.mode=== (browserName==='chromium'?'refractive':'reflective')),{timeout:WAIT}).toBe(true);
+ await restored();
  await settle(page);
  // Measure the built material's resting gray transfer and maximum authored
  // response, rather than an opaque accessibility replacement.
  // Freeze the Director so Reduced Motion cannot reset these test inputs.
- const contrastFixture=await page.evaluate(()=>{
+ const contrastFixture=await page.evaluate(visibleKinds=>{
   window.dispatchEvent(new Event('pagehide'));
   const background=document.createElement('div');background.dataset.liquidContrastBackground='';
   Object.assign(background.style,{position:'fixed',inset:'0',zIndex:'2147483000',pointerEvents:'none',background:'#fff'});document.body.appendChild(background);
   const owners=[document.querySelector('[data-page-masthead]'),document.querySelector('[data-story-navigation]'),document.querySelector('[data-reading-tools]')];
-  const surfaces=[...document.querySelectorAll('[data-liquid-glass]')];
+  const surfaces=[...document.querySelectorAll('[data-liquid-glass]')].filter(element=>visibleKinds.includes(element.dataset.liquidGlass));
   const saved=Array.from(new Set([...owners,...surfaces])).map(element=>({element,style:element.getAttribute('style')}));
   for(const owner of owners)owner.style.zIndex='2147483001';
   const samples=surfaces.map(element=>{
@@ -280,7 +319,7 @@ test('native opacity preferences and no-JavaScript navigation retain readable ma
   });
   window.__liquidContrastCleanup=()=>{background.remove();for(const {element,style} of saved){if(style===null)element.removeAttribute('style');else element.setAttribute('style',style);}delete window.__liquidContrastCleanup;window.dispatchEvent(new Event('pageshow'));};
   return samples;
- });
+ },visibleKinds);
  const renderedContrast=[],normalCurve=[],transferMetrics=[],grayStops=['#000000','#404040','#808080','#c0c0c0','#ffffff'];
  try{
   for(const background of grayStops){

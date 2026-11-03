@@ -15,7 +15,7 @@ test('whole-file balancing is deterministic, exhaustive, disjoint, and conservat
  assert.throws(()=>partitionFiles(['a','a'],'chromium',2,weights));
 });
 function fixture(){
- const files=['a','b','c','d'].map(name=>`tests/pages/${name}.spec.mjs`);
+ const files=['a','b','c','d','e','f'].map(name=>`tests/pages/${name}.spec.mjs`);
  const plan={head:'a'.repeat(40),browserTests:files,fullCase:true,browserMatrix:browserMatrix(files,true)};
  const build={commit:plan.head,digest:'b'.repeat(64)};
  const context={runId:'123',runAttempt:'1'};
@@ -29,7 +29,7 @@ function fixture(){
  return {plan,build,context,inventory,receipts};
 }
 const verify=f=>verifyReceipts(f.plan,f.build,f.inventory,f.receipts,f.context);
-test('exact candidate test union succeeds across unchanged 4/2/2 runners',()=>assert.equal(verify(fixture()),true));
+test('exact candidate test union succeeds across 6/3/4 single-worker runners',()=>assert.equal(verify(fixture()),true));
 for(const [name,mutate] of Object.entries({
  'missing shard':f=>f.receipts.pop(),
  'duplicate shard':f=>f.receipts[1]=f.receipts[0],

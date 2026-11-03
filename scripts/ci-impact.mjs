@@ -27,7 +27,9 @@ export function browserMatrix(tests, fullCase) {
   if (!tests.length) return [];
   // Separate runners keep one software-GPU worker per machine. File sharding
   // preserves test-local sequences and does not increase concurrent GL clients.
-  return [['chromium','chromium',4],['webkit','webkit',2],['mobile-chromium','chromium',2]]
+  // The continuous-motion inventory outgrew the former 4/2/2 capacity. Keep
+  // individual deadlines, one worker and the exact-once artifact gate intact.
+  return [['chromium','chromium',6],['webkit','webkit',3],['mobile-chromium','chromium',4]]
     .flatMap(([browser,engine,fullShards])=>{
       const shards=fullCase?fullShards:1;
       return Array.from({length:shards},(_,i)=>({browser,engine,shard:`${i+1}/${shards}`}));

@@ -1,0 +1,383 @@
+{
+  "schemaVersion": 1,
+  "scope": "XR three native recordings and delayed reversal; HC documentary evidence at1280/390CSSpx",
+  "status": "10/12 local targeted cases passed: HC6/6 and Chromium/mobile XR4/4. Both Windows WebKit XR cases failed native media decoding; mandatory Linux WebKit CI remains required.",
+  "sourceCandidate": "f85728bd256b4d0e520c921057e1c72b35903b9d",
+  "ciRun": 41729151783,
+  "sourceReview": [
+    {
+      "artifactId": 13279615264,
+      "zipSHA256": "74a480cdac7142cfa60ba95e842858ab6eb0eeb41414369b77945568933a5157",
+      "findings": [
+        "The first four screenshot calls in the Chromium native-three-phone case took5176,5198,5547,5394ms. Repeated locator attachment to existing stage/chapter/video nodes took~1900ms each.",
+        "The Chromium delayed-reversal case had already passed frozen-native-pixel and restored-Adapt assertions; final Assemble readiness began near59s and the original60s scenario expired. The cleanup error in the three-phone case must not replace the original timeout."
+      ]
+    },
+    {
+      "artifactId": 13279745109,
+      "zipSHA256": "49ee9f36b40816494a97f349067dae1449985e3c4905e574e9b734b422ed079d",
+      "findings": [
+        "WebKit completed all six native-three-phone screenshot calls, each3485-4170ms, then exhausted60s during final absent-chapter checks.",
+        "WebKit delayed reversal passed with readyState4 native Assemble play/playing receipts and no media error."
+      ]
+    },
+    {
+      "artifactId": 13278777935,
+      "zipSHA256": "4f9246c11d9fdd66b744f9e32897c28540810b3fc83f35c55f29739209ecdd46",
+      "findings": [
+        "HC mobile preserved all8 settled chapter/source-readiness receipts for four images at1280 and390px. The last390px/results receipt was57895.8ms; the second viewport screenshot then hit the60s aggregate deadline."
+      ]
+    }
+  ],
+  "testChanges": [
+    "XR retains the exact existing stage, one canvas and all three video nodes once; subsequent source-pixel, currentTime and continuity observations reuse those real handles.",
+    "Known-stage facts and chapter scroll preparation use one strict exact-count browser task rather than a separate implicit attachment wait plus evaluation. Actual native scroll, source readiness,2/8RAF waits, six screenshots and their motion comparisons are unchanged.",
+    "XR preserves the complete single-canvas forward path, delayed/pending reverse, SHA256 decoded-frame identity, resumed native playback, atomic replacement and final overview/making/credits teardown within original60s cases.",
+    "HC1280 and390 evidence are independent60s cases with the viewport selected before entry. Every source identity, caption, factual limit, decode, width/overflow, no-link and screenshot assertion remains at each viewport. This adds three browser inventory cases across the three profiles.",
+    "Diagnostic JSON is written to test output files; cleanup preserves the original failure."
+  ],
+  "sourceChecks": {
+    "syntax": "passed",
+    "eslint": "passed",
+    "targetedList": 12,
+    "productionEdits": false,
+    "timeoutChanges": false,
+    "retriesAdded": false
+  },
+  "runs": [
+    {
+      "output": "pages-test-results/media-quality-xr-hc-final",
+      "cases": 12,
+      "passed": 10,
+      "failed": 2,
+      "minutes": 4.7,
+      "workers": 1,
+      "profiles": {
+        "chromium": {
+          "passed": 4,
+          "failed": 0
+        },
+        "webkit": {
+          "passed": 2,
+          "failed": 2
+        },
+        "mobile-chromium": {
+          "passed": 4,
+          "failed": 0
+        }
+      },
+      "retries": 0,
+      "deadlineSeconds": 60
+    }
+  ],
+  "artifact": {
+    "digest": "d815c661ab0e1f7c4343890416a9d69237fd8bfd05f84e26a465e0edb4cddd73",
+    "provenance": "Unchanged local4186 Pages build containing reviewed recovery and visible-long-frame velocity fixes; original f857 release metadata. This is not a publication receipt."
+  },
+  "nativeRecordings": [
+    {
+      "profile": "chromium",
+      "path": "pages-test-results/media-quality-xr-hc-final/xr-research-native-scrolli-cdeee--continuously-playing-scene-chromium/native-adapt-recording.json",
+      "source": "/assets/xr/adapt-interface-hd.mp4",
+      "width": 888,
+      "height": 1920,
+      "duration": 13,
+      "readyState": 4,
+      "error": null,
+      "playing": true,
+      "sameCanvas": true,
+      "canvasCount": 1,
+      "activeVideoSources": 1,
+      "renderPixels": 1440000
+    },
+    {
+      "profile": "chromium",
+      "path": "pages-test-results/media-quality-xr-hc-final/xr-research-native-scrolli-cdeee--continuously-playing-scene-chromium/native-assemble-recording.json",
+      "source": "/assets/xr/assemble-interface-hd.mp4",
+      "width": 888,
+      "height": 1920,
+      "duration": 24.96,
+      "readyState": 4,
+      "error": null,
+      "playing": true,
+      "sameCanvas": true,
+      "canvasCount": 1,
+      "activeVideoSources": 1,
+      "renderPixels": 1440000
+    },
+    {
+      "profile": "chromium",
+      "path": "pages-test-results/media-quality-xr-hc-final/xr-research-native-scrolli-cdeee--continuously-playing-scene-chromium/native-join-recording.json",
+      "source": "/assets/xr/join-interface-hd.mp4",
+      "width": 888,
+      "height": 1920,
+      "duration": 20.3,
+      "readyState": 4,
+      "error": null,
+      "playing": true,
+      "sameCanvas": true,
+      "canvasCount": 1,
+      "activeVideoSources": 1,
+      "renderPixels": 1440000
+    },
+    {
+      "profile": "mobile-chromium",
+      "path": "pages-test-results/media-quality-xr-hc-final/xr-research-native-scrolli-cdeee--continuously-playing-scene-mobile-chromium/native-adapt-recording.json",
+      "source": "/assets/xr/adapt-interface-hd.mp4",
+      "width": 888,
+      "height": 1920,
+      "duration": 13,
+      "readyState": 4,
+      "error": null,
+      "playing": true,
+      "sameCanvas": true,
+      "canvasCount": 1,
+      "activeVideoSources": 1,
+      "renderPixels": 513785
+    },
+    {
+      "profile": "mobile-chromium",
+      "path": "pages-test-results/media-quality-xr-hc-final/xr-research-native-scrolli-cdeee--continuously-playing-scene-mobile-chromium/native-assemble-recording.json",
+      "source": "/assets/xr/assemble-interface-hd.mp4",
+      "width": 888,
+      "height": 1920,
+      "duration": 24.96,
+      "readyState": 4,
+      "error": null,
+      "playing": true,
+      "sameCanvas": true,
+      "canvasCount": 1,
+      "activeVideoSources": 1,
+      "renderPixels": 513785
+    },
+    {
+      "profile": "mobile-chromium",
+      "path": "pages-test-results/media-quality-xr-hc-final/xr-research-native-scrolli-cdeee--continuously-playing-scene-mobile-chromium/native-join-recording.json",
+      "source": "/assets/xr/join-interface-hd.mp4",
+      "width": 888,
+      "height": 1920,
+      "duration": 20.3,
+      "readyState": 4,
+      "error": null,
+      "playing": true,
+      "sameCanvas": true,
+      "canvasCount": 1,
+      "activeVideoSources": 1,
+      "renderPixels": 513785
+    }
+  ],
+  "continuousPassages": [
+    {
+      "profile": "chromium",
+      "samples": 166,
+      "chapters": [
+        "adapt",
+        "assemble",
+        "join"
+      ],
+      "allOpaqueConnectedAndPainted": true,
+      "path": "pages-test-results/media-quality-xr-hc-final/xr-research-native-scrolli-cdeee--continuously-playing-scene-chromium/continuous-native-phone-passages.json"
+    },
+    {
+      "profile": "mobile-chromium",
+      "samples": 265,
+      "chapters": [
+        "adapt",
+        "assemble",
+        "join"
+      ],
+      "allOpaqueConnectedAndPainted": true,
+      "path": "pages-test-results/media-quality-xr-hc-final/xr-research-native-scrolli-cdeee--continuously-playing-scene-mobile-chromium/continuous-native-phone-passages.json"
+    }
+  ],
+  "hcEvidence": [
+    {
+      "profile": "chromium",
+      "width": 1280,
+      "samples": 4,
+      "chapters": [
+        "context",
+        "system",
+        "system",
+        "results"
+      ],
+      "lastReceiptMs": 11422.899999976158,
+      "allSettled": true,
+      "path": "pages-test-results/media-quality-xr-hc-final/hc3dp-narrative-HC3DP-pres-ac15e-simulation-limits-at-1280px-chromium/native-evidence-source-readiness.json"
+    },
+    {
+      "profile": "mobile-chromium",
+      "width": 1280,
+      "samples": 4,
+      "chapters": [
+        "context",
+        "system",
+        "system",
+        "results"
+      ],
+      "lastReceiptMs": 10929.299999952316,
+      "allSettled": true,
+      "path": "pages-test-results/media-quality-xr-hc-final/hc3dp-narrative-HC3DP-pres-ac15e-simulation-limits-at-1280px-mobile-chromium/native-evidence-source-readiness.json"
+    },
+    {
+      "profile": "webkit",
+      "width": 1280,
+      "samples": 4,
+      "chapters": [
+        "context",
+        "system",
+        "system",
+        "results"
+      ],
+      "lastReceiptMs": 14140,
+      "allSettled": true,
+      "path": "pages-test-results/media-quality-xr-hc-final/hc3dp-narrative-HC3DP-pres-ac15e-simulation-limits-at-1280px-webkit/native-evidence-source-readiness.json"
+    },
+    {
+      "profile": "chromium",
+      "width": 390,
+      "samples": 4,
+      "chapters": [
+        "context",
+        "system",
+        "system",
+        "results"
+      ],
+      "lastReceiptMs": 12806.900000095367,
+      "allSettled": true,
+      "path": "pages-test-results/media-quality-xr-hc-final/hc3dp-narrative-HC3DP-pres-fd851--simulation-limits-at-390px-chromium/native-evidence-source-readiness.json"
+    },
+    {
+      "profile": "mobile-chromium",
+      "width": 390,
+      "samples": 4,
+      "chapters": [
+        "context",
+        "system",
+        "system",
+        "results"
+      ],
+      "lastReceiptMs": 12556.299999952316,
+      "allSettled": true,
+      "path": "pages-test-results/media-quality-xr-hc-final/hc3dp-narrative-HC3DP-pres-fd851--simulation-limits-at-390px-mobile-chromium/native-evidence-source-readiness.json"
+    },
+    {
+      "profile": "webkit",
+      "width": 390,
+      "samples": 4,
+      "chapters": [
+        "context",
+        "system",
+        "system",
+        "results"
+      ],
+      "lastReceiptMs": 8781,
+      "allSettled": true,
+      "path": "pages-test-results/media-quality-xr-hc-final/hc3dp-narrative-HC3DP-pres-fd851--simulation-limits-at-390px-webkit/native-evidence-source-readiness.json"
+    }
+  ],
+  "localWebKitFailures": [
+    {
+      "case": "xr-research-a-genuinely-de-7b4d2-erse-and-atomic-replacement-webkit",
+      "path": "pages-test-results/media-quality-xr-hc-final/xr-research-a-genuinely-de-7b4d2-erse-and-atomic-replacement-webkit/xr-phone-lifecycle.json",
+      "nativeErrors": [
+        {
+          "event": "error",
+          "at": 2725,
+          "source": "adapt",
+          "native": {
+            "readyState": 0,
+            "networkState": 3,
+            "paused": true,
+            "seeking": false,
+            "time": 0,
+            "error": 4
+          },
+          "owner": {
+            "phase": "ready",
+            "chapter": "adapt",
+            "scene": "waiting",
+            "sceneSettled": false,
+            "paintPending": true,
+            "cameraSettled": true,
+            "windowsSettled": false,
+            "scheduled": true,
+            "rendering": "poster",
+            "mediaStage": "adapt",
+            "mediaPending": true,
+            "mediaFrames": 0,
+            "fallback": null,
+            "lastRenderFailure": null
+          }
+        }
+      ],
+      "trace": "pages-test-results/media-quality-xr-hc-final/xr-research-a-genuinely-de-7b4d2-erse-and-atomic-replacement-webkit/trace.zip"
+    },
+    {
+      "case": "xr-research-native-scrolli-cdeee--continuously-playing-scene-webkit",
+      "path": "pages-test-results/media-quality-xr-hc-final/xr-research-native-scrolli-cdeee--continuously-playing-scene-webkit/xr-phone-lifecycle.json",
+      "nativeErrors": [
+        {
+          "event": "error",
+          "at": 3426,
+          "source": "adapt",
+          "native": {
+            "readyState": 0,
+            "networkState": 3,
+            "paused": true,
+            "seeking": false,
+            "time": 0,
+            "error": 4
+          },
+          "owner": {
+            "phase": "ready",
+            "chapter": "adapt",
+            "scene": "waiting",
+            "sceneSettled": false,
+            "paintPending": true,
+            "cameraSettled": true,
+            "windowsSettled": false,
+            "scheduled": true,
+            "rendering": "poster",
+            "mediaStage": "adapt",
+            "mediaPending": true,
+            "mediaFrames": 0,
+            "fallback": null,
+            "lastRenderFailure": null
+          }
+        }
+      ],
+      "trace": "pages-test-results/media-quality-xr-hc-final/xr-research-native-scrolli-cdeee--continuously-playing-scene-webkit/trace.zip"
+    }
+  ],
+  "delayedReversal": [
+    {
+      "profile": "chromium",
+      "outcome": "passed",
+      "advancementSamples": 1,
+      "path": "pages-test-results/media-quality-xr-hc-final/xr-research-a-genuinely-de-7b4d2-erse-and-atomic-replacement-chromium/delayed-recording-advance-diagnostic.json"
+    },
+    {
+      "profile": "mobile-chromium",
+      "outcome": "passed",
+      "advancementSamples": 1,
+      "path": "pages-test-results/media-quality-xr-hc-final/xr-research-a-genuinely-de-7b4d2-erse-and-atomic-replacement-mobile-chromium/delayed-recording-advance-diagnostic.json"
+    },
+    {
+      "profile": "webkit",
+      "outcome": "failed",
+      "advancementSamples": 0,
+      "path": "pages-test-results/media-quality-xr-hc-final/xr-research-a-genuinely-de-7b4d2-erse-and-atomic-replacement-webkit/delayed-recording-advance-diagnostic.json"
+    }
+  ],
+  "retainedScreenshots": {
+    "xr": 12,
+    "hc": 6,
+    "note": "Canonical output files only; attachment copies excluded. Existing native captures were saved, not duplicated."
+  },
+  "limitations": [
+    "The local browser is the Windows Playwright WebKit port. Both XR cases receive Adapt HTTP206 then native error4(MEDIA_ERR_SRC_NOT_SUPPORTED),readyState0,networkState3 before any decoded frame. This is not the original Linux CI aggregate timeout.",
+    "Original f857 Linux WebKit successfully decoded all three exact HD sources and completed all six screenshot comparisons; its delayed reversal passed. The revised tests still require a fresh successful Linux CI run. No source edits, test skips or codec-environment retries were made.",
+    "Desktop Chromium Adapt screenshot was visually inspected at1440x1000: recorded interface detail is legible with no black phone frame or evident upscale blur. Device hardware and physical Safari were not tested."
+  ]
+}

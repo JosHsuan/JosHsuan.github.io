@@ -46,12 +46,15 @@ test('Home introduction cycles real source models on one bounded renderer with l
  await expect(page.locator('[data-home-introduction] h2,[data-home-research-pause],[data-project-grid]')).toHaveCount(0);
  await expect(page.locator('[data-home-introduction] [data-introduction-statement]')).toBeVisible();
  const sequence=['entrance-installation-art','mode-s-of-making','project-caschlatsch','dot-based-3d-printing','special-assemblies','hc3dp-caustics','mode-s-of-making'];
+ // Consume the same atomic browser receipts already delivered to the host.
+ // A second evaluate can queue behind a slow draw and return an older false
+ // after the required receipt has arrived; it adds no source-paint evidence.
  for(let index=0;index<sequence.length;index++){
-  await expect.poll(()=>page.evaluate(i=>!!window.__homeLoopEvidence.receipts[i]||window.__homeLoopEvidence.failures.length>0,index),{timeout:40000}).toBe(true);
-  expect(await page.evaluate(()=>window.__homeLoopEvidence.failures)).toEqual([]);
+  await expect.poll(()=>!!hostEvidence.checkpoint?.receipts[index]||!!hostEvidence.checkpoint?.failures.length,{timeout:40000}).toBe(true);
+  expect(hostEvidence.checkpoint.failures).toEqual([]);
  }
- await expect.poll(()=>page.evaluate(()=>window.__homeLoopEvidence.wrapped||window.__homeLoopEvidence.failures.length>0),{timeout:40000}).toBe(true);
- const evidence=await page.evaluate(()=>window.__homeLoopEvidence);
+ await expect.poll(()=>!!hostEvidence.checkpoint?.wrapped||!!hostEvidence.checkpoint?.failures.length,{timeout:40000}).toBe(true);
+ const evidence=hostEvidence.checkpoint;
  await writeFile(info.outputPath('home-authored-loop.json'),JSON.stringify(evidence,null,2)+'\n');
  expect(evidence.failures).toEqual([]);expect(evidence.wrapped).toBe(true);expect(evidence.maximumCanvases).toBe(1);expect(evidence.sequence).toEqual([0,1,2,3,4,5,6,0]);
  expect(evidence.first.kind).toBe('project-showcase');expect(evidence.first.project).toBe(sequence[0]);expect(evidence.first.canvasCount).toBe(1);

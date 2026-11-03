@@ -1,0 +1,305 @@
+{
+  "schemaVersion": 1,
+  "scope": "Complete typography.spec.mjs across Chromium, WebKit and emulated mobile Chromium",
+  "status": "48/48 local browser cases passed against the exact downloaded CI export; final candidate CI and publication remain separate.",
+  "artifact": {
+    "commit": "f85728bd256b4d0e520c921057e1c72b35903b9d",
+    "digest": "f329024c91c110b0f742071ac92c83d39772957d82a3ec8ab4f3a34a5b85bae5",
+    "provenance": "ci-build.json in the downloaded CI41729151783 build record; exported application was served unchanged on local port4187"
+  },
+  "sourceFailureReview": {
+    "artifactId": 13277118201,
+    "zipSHA256": "051f41bf836eb2d71426747b20f6a660ec42056da0143b4ee7b8a504f00ef376",
+    "findings": [
+      "About inherited data-home-introduction for lifecycle semantics but its general h1 correctly uses leading1.2; only Home #home-title uses1.15.",
+      "Bending source annotations explicitly use max(12px responsive label size,11px): desktop root80% resolves11px and mobile12px.",
+      "Serial native-font protocol queries and per-Latin-probe append/remove calls overlapped continuous rendering until the original60s deadline. Detach after page closure obscured the primary error."
+    ]
+  },
+  "testChanges": [
+    "Keep every original source font probe and each isolated Latin glyph report; create all isolated probes in one append/remove pair and issue at most8 independent native queries concurrently.",
+    "Preserve heading glyph presence, isolated Latin glyph presence, body actual-font verification and source/symbol-fallback classification.",
+    "Preserve the primary assertion/timeout if cleanup observes an already closed page.",
+    "Classify Home introduction by #home-title and retain explicit11px source annotation floor.",
+    "Normalize only font-size boundary comparisons to0.0001CSSpx; raw19.200001px and38.400002px WebKit values correspond to authored19.2px and38.4px bounds."
+  ],
+  "runs": [
+    {
+      "output": "pages-test-results/media-quality-typography-final",
+      "cases": 9,
+      "passed": 9,
+      "failed": 0,
+      "minutes": 2.0
+    },
+    {
+      "output": "pages-test-results/media-quality-typography-remaining",
+      "cases": 39,
+      "passed": 39,
+      "failed": 0,
+      "minutes": 2.9
+    }
+  ],
+  "nativeFontReports": [
+    {
+      "profile": "chromium",
+      "routes": 13,
+      "sourceProbes": 1097,
+      "isolatedLatinProbes": 124,
+      "actualQueries": 1221,
+      "queryElapsedMsSum": 18791.68
+    },
+    {
+      "profile": "mobile-chromium",
+      "routes": 13,
+      "sourceProbes": 1091,
+      "isolatedLatinProbes": 128,
+      "actualQueries": 1219,
+      "queryElapsedMsSum": 9648.24
+    }
+  ],
+  "routes": [
+    {
+      "profile": "chromium",
+      "route": "/",
+      "sourceProbes": 53,
+      "isolatedLatinProbes": 13,
+      "actualQueries": 66,
+      "queryElapsedMs": 6096.15,
+      "evidence": "pages-test-results/media-quality-typography-final/typography-the-published-d-b92e7--hierarchy-without-clipping-chromium/platform-fonts.json"
+    },
+    {
+      "profile": "chromium",
+      "route": "/404.html",
+      "sourceProbes": 12,
+      "isolatedLatinProbes": 1,
+      "actualQueries": 13,
+      "queryElapsedMs": 31.21,
+      "evidence": "pages-test-results/media-quality-typography-remaining/typography-the-published-4-b5ed7--hierarchy-without-clipping-chromium/platform-fonts.json"
+    },
+    {
+      "profile": "chromium",
+      "route": "/about/",
+      "sourceProbes": 38,
+      "isolatedLatinProbes": 7,
+      "actualQueries": 45,
+      "queryElapsedMs": 13.6,
+      "evidence": "pages-test-results/media-quality-typography-final/typography-the-published-a-6a161--hierarchy-without-clipping-chromium/platform-fonts.json"
+    },
+    {
+      "profile": "chromium",
+      "route": "/contact/",
+      "sourceProbes": 23,
+      "isolatedLatinProbes": 6,
+      "actualQueries": 29,
+      "queryElapsedMs": 34.94,
+      "evidence": "pages-test-results/media-quality-typography-remaining/typography-the-published-c-b5460--hierarchy-without-clipping-chromium/platform-fonts.json"
+    },
+    {
+      "profile": "chromium",
+      "route": "/projects/",
+      "sourceProbes": 35,
+      "isolatedLatinProbes": 6,
+      "actualQueries": 41,
+      "queryElapsedMs": 13.71,
+      "evidence": "pages-test-results/media-quality-typography-remaining/typography-the-published-p-a7680--hierarchy-without-clipping-chromium/platform-fonts.json"
+    },
+    {
+      "profile": "chromium",
+      "route": "/projects/bending-active/",
+      "sourceProbes": 259,
+      "isolatedLatinProbes": 16,
+      "actualQueries": 275,
+      "queryElapsedMs": 11840.4,
+      "evidence": "pages-test-results/media-quality-typography-final/typography-the-published-p-dd2e9--hierarchy-without-clipping-chromium/platform-fonts.json"
+    },
+    {
+      "profile": "chromium",
+      "route": "/projects/dot-based-3d-printing/",
+      "sourceProbes": 77,
+      "isolatedLatinProbes": 6,
+      "actualQueries": 83,
+      "queryElapsedMs": 111.73,
+      "evidence": "pages-test-results/media-quality-typography-remaining/typography-the-published-p-1c25e--hierarchy-without-clipping-chromium/platform-fonts.json"
+    },
+    {
+      "profile": "chromium",
+      "route": "/projects/entrance-installation-art/",
+      "sourceProbes": 113,
+      "isolatedLatinProbes": 15,
+      "actualQueries": 128,
+      "queryElapsedMs": 93.89,
+      "evidence": "pages-test-results/media-quality-typography-remaining/typography-the-published-p-54ca5--hierarchy-without-clipping-chromium/platform-fonts.json"
+    },
+    {
+      "profile": "chromium",
+      "route": "/projects/hc3dp-caustics/",
+      "sourceProbes": 75,
+      "isolatedLatinProbes": 4,
+      "actualQueries": 79,
+      "queryElapsedMs": 106.9,
+      "evidence": "pages-test-results/media-quality-typography-remaining/typography-the-published-p-45573--hierarchy-without-clipping-chromium/platform-fonts.json"
+    },
+    {
+      "profile": "chromium",
+      "route": "/projects/mode-s-of-making/",
+      "sourceProbes": 106,
+      "isolatedLatinProbes": 7,
+      "actualQueries": 113,
+      "queryElapsedMs": 114.36,
+      "evidence": "pages-test-results/media-quality-typography-remaining/typography-the-published-p-f2241--hierarchy-without-clipping-chromium/platform-fonts.json"
+    },
+    {
+      "profile": "chromium",
+      "route": "/projects/project-caschlatsch/",
+      "sourceProbes": 100,
+      "isolatedLatinProbes": 24,
+      "actualQueries": 124,
+      "queryElapsedMs": 86.97,
+      "evidence": "pages-test-results/media-quality-typography-remaining/typography-the-published-p-2094e--hierarchy-without-clipping-chromium/platform-fonts.json"
+    },
+    {
+      "profile": "chromium",
+      "route": "/projects/special-assemblies/",
+      "sourceProbes": 81,
+      "isolatedLatinProbes": 6,
+      "actualQueries": 87,
+      "queryElapsedMs": 109.38,
+      "evidence": "pages-test-results/media-quality-typography-remaining/typography-the-published-p-624da--hierarchy-without-clipping-chromium/platform-fonts.json"
+    },
+    {
+      "profile": "chromium",
+      "route": "/projects/xr-bending-active/",
+      "sourceProbes": 125,
+      "isolatedLatinProbes": 13,
+      "actualQueries": 138,
+      "queryElapsedMs": 138.44,
+      "evidence": "pages-test-results/media-quality-typography-remaining/typography-the-published-p-37c87--hierarchy-without-clipping-chromium/platform-fonts.json"
+    },
+    {
+      "profile": "mobile-chromium",
+      "route": "/",
+      "sourceProbes": 50,
+      "isolatedLatinProbes": 13,
+      "actualQueries": 63,
+      "queryElapsedMs": 4375.6,
+      "evidence": "pages-test-results/media-quality-typography-final/typography-the-published-d-b92e7--hierarchy-without-clipping-mobile-chromium/platform-fonts.json"
+    },
+    {
+      "profile": "mobile-chromium",
+      "route": "/404.html",
+      "sourceProbes": 10,
+      "isolatedLatinProbes": 1,
+      "actualQueries": 11,
+      "queryElapsedMs": 3.72,
+      "evidence": "pages-test-results/media-quality-typography-remaining/typography-the-published-4-b5ed7--hierarchy-without-clipping-mobile-chromium/platform-fonts.json"
+    },
+    {
+      "profile": "mobile-chromium",
+      "route": "/about/",
+      "sourceProbes": 35,
+      "isolatedLatinProbes": 7,
+      "actualQueries": 42,
+      "queryElapsedMs": 12.94,
+      "evidence": "pages-test-results/media-quality-typography-final/typography-the-published-a-6a161--hierarchy-without-clipping-mobile-chromium/platform-fonts.json"
+    },
+    {
+      "profile": "mobile-chromium",
+      "route": "/contact/",
+      "sourceProbes": 20,
+      "isolatedLatinProbes": 6,
+      "actualQueries": 26,
+      "queryElapsedMs": 9.22,
+      "evidence": "pages-test-results/media-quality-typography-remaining/typography-the-published-c-b5460--hierarchy-without-clipping-mobile-chromium/platform-fonts.json"
+    },
+    {
+      "profile": "mobile-chromium",
+      "route": "/projects/",
+      "sourceProbes": 40,
+      "isolatedLatinProbes": 7,
+      "actualQueries": 47,
+      "queryElapsedMs": 26.37,
+      "evidence": "pages-test-results/media-quality-typography-remaining/typography-the-published-p-a7680--hierarchy-without-clipping-mobile-chromium/platform-fonts.json"
+    },
+    {
+      "profile": "mobile-chromium",
+      "route": "/projects/bending-active/",
+      "sourceProbes": 280,
+      "isolatedLatinProbes": 19,
+      "actualQueries": 299,
+      "queryElapsedMs": 4816.84,
+      "evidence": "pages-test-results/media-quality-typography-final/typography-the-published-p-dd2e9--hierarchy-without-clipping-mobile-chromium/platform-fonts.json"
+    },
+    {
+      "profile": "mobile-chromium",
+      "route": "/projects/dot-based-3d-printing/",
+      "sourceProbes": 74,
+      "isolatedLatinProbes": 6,
+      "actualQueries": 80,
+      "queryElapsedMs": 35.14,
+      "evidence": "pages-test-results/media-quality-typography-remaining/typography-the-published-p-1c25e--hierarchy-without-clipping-mobile-chromium/platform-fonts.json"
+    },
+    {
+      "profile": "mobile-chromium",
+      "route": "/projects/entrance-installation-art/",
+      "sourceProbes": 110,
+      "isolatedLatinProbes": 15,
+      "actualQueries": 125,
+      "queryElapsedMs": 126.74,
+      "evidence": "pages-test-results/media-quality-typography-remaining/typography-the-published-p-54ca5--hierarchy-without-clipping-mobile-chromium/platform-fonts.json"
+    },
+    {
+      "profile": "mobile-chromium",
+      "route": "/projects/hc3dp-caustics/",
+      "sourceProbes": 72,
+      "isolatedLatinProbes": 4,
+      "actualQueries": 76,
+      "queryElapsedMs": 26.44,
+      "evidence": "pages-test-results/media-quality-typography-remaining/typography-the-published-p-45573--hierarchy-without-clipping-mobile-chromium/platform-fonts.json"
+    },
+    {
+      "profile": "mobile-chromium",
+      "route": "/projects/mode-s-of-making/",
+      "sourceProbes": 103,
+      "isolatedLatinProbes": 7,
+      "actualQueries": 110,
+      "queryElapsedMs": 40.29,
+      "evidence": "pages-test-results/media-quality-typography-remaining/typography-the-published-p-f2241--hierarchy-without-clipping-mobile-chromium/platform-fonts.json"
+    },
+    {
+      "profile": "mobile-chromium",
+      "route": "/projects/project-caschlatsch/",
+      "sourceProbes": 97,
+      "isolatedLatinProbes": 24,
+      "actualQueries": 121,
+      "queryElapsedMs": 69.35,
+      "evidence": "pages-test-results/media-quality-typography-remaining/typography-the-published-p-2094e--hierarchy-without-clipping-mobile-chromium/platform-fonts.json"
+    },
+    {
+      "profile": "mobile-chromium",
+      "route": "/projects/special-assemblies/",
+      "sourceProbes": 78,
+      "isolatedLatinProbes": 6,
+      "actualQueries": 84,
+      "queryElapsedMs": 22.51,
+      "evidence": "pages-test-results/media-quality-typography-remaining/typography-the-published-p-624da--hierarchy-without-clipping-mobile-chromium/platform-fonts.json"
+    },
+    {
+      "profile": "mobile-chromium",
+      "route": "/projects/xr-bending-active/",
+      "sourceProbes": 122,
+      "isolatedLatinProbes": 13,
+      "actualQueries": 135,
+      "queryElapsedMs": 83.08,
+      "evidence": "pages-test-results/media-quality-typography-remaining/typography-the-published-p-37c87--hierarchy-without-clipping-mobile-chromium/platform-fonts.json"
+    }
+  ],
+  "unchanged": [
+    "production CSS and runtime",
+    "continuous motion",
+    "original60s per-case deadline",
+    "actual native font coverage",
+    "leading/tracking precision",
+    "clipping and native viewport/header assertions"
+  ],
+  "limits": "Local Windows engine evidence on the exact CI export. Query durations describe test orchestration, not device performance or a product SLO. WebKit retains font-face/loading/CSS/spacing/clipping checks; platform-font CDP proof applies only to the two Chromium profiles."
+}

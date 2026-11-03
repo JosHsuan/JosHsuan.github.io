@@ -146,13 +146,28 @@ test('shared curved-field velocity pose reverses and resets with native content'
   assert.equal(f.nodes[0].attrs.get('data-information-moving'),'false');
   for(const key of ['rx','ry','rz','skew'])assert.equal(Number.parseFloat(f.nodes[0].styles.get('--information-'+key)),0);
   assert.equal(f.nodes[0].styles.get('--information-skin-path'),'inset(0 round 28px)');
-  for(const option of [{reduced:true},{seek:true},{resumed:true},{dt:1.1},{docY:3000}]){
+  for(const option of [{reduced:true},{seek:true},{resumed:true},{docY:3000}]){
     f.publish({docY:80});f.publish({docY:80,...option});
     assert.equal(f.presenter.inspect().settled,true);
     assert.equal(f.presenter.inspect().items[0].skinStrength,0);
   }
   f.publish({docY:80});f.root.activeElement={parentElement:f.nodes[0]};f.publish({docY:90});
   assert.equal(f.presenter.inspect().items[0].skinStrength,0);
+});
+
+test('visible slow source frames retain reversible bounded velocity response and natural recovery',()=>{
+ const f=fixture([{top:300,height:500}],{profile:'velocity-skin'});f.measure(11);f.publish({docY:11});
+ assert.equal(f.publish({docY:611,dt:1.8}),true);
+ let item=f.presenter.inspect().items[0];
+ assert(item.rx<0&&item.rx>=-11);assert(item.skinStrength>0);assert(item.edgeMaximum>0);
+ assert.equal(f.nodes[0].attrs.get('data-information-moving'),'true');
+ assert.equal(f.publish({docY:11,dt:1.8}),true);
+ item=f.presenter.inspect().items[0];assert(item.rx>0&&item.rx<=11);assert(item.skinStrength<0);
+ for(let index=0;index<12;index++)f.publish({docY:11,dt:1.8});
+ assert.equal(f.presenter.inspect().settled,true);assert(f.presenter.inspect().items[0].rx===0);
+ f.publish({docY:611,dt:1.8});f.publish({docY:11,dt:1.8,resumed:true});
+ item=f.presenter.inspect().items[0];assert.equal(item.skinStrength,0);assert(item.rx===0);
+ assert.equal(f.nodes[0].attrs.get('data-information-moving'),'false');
 });
 
 test('a native source label follows document geometry instead of the fixed Canvas passage',()=>{

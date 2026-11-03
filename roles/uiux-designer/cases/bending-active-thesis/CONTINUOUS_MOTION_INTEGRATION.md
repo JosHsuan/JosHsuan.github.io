@@ -14,7 +14,7 @@ initial portrait fan, generic Home orbit and uniform material assumptions.
 | --- | --- | --- |
 | 1 Continuous motion | Remove visible motion-pause controls and automatic preference/performance static selection. Keep native media time, hidden-page suspension and actual failure recovery. Trade geometry delivery, pixel count, lighting/shadow cost and material complexity for sustained visible motion. | Visible idle and scroll advance under ordinary, reduced-motion and Save Data emulation; hidden/resume/resource disposal; no pause UI. |
 | 2–3 Unified liquid cards | One InformationWindowPresenter owns all outer reading planes. Native velocity and acceleration drive a shared cylindrical field: forward depth, opposite peripheral shear, curved rims and damped liquid recovery. Original evidence pixels and text remain legible. | Forward/reverse, acceleration/deceleration, left/centre/right cards, keyboard focus, selection, narrow and wide layouts; no old mixed motion. |
-| 4 Entrance scale | Joint cinematography/scene review uses measured 7.85 m source height; low eye line, full-height reveal and restrained architectural lens progression. | Actual source framing, grounded scale, continuous joins, mobile crop. |
+| 4 Entrance scale | Joint cinematography/scene review uses measured 7.85 m source height; pedestrian approach, partial structural views and restrained architectural lens progression. | Actual source framing, grounded scale, continuous joins, mobile crop. |
 | 5 Mode/s machine | Find original machine CAD, export verified public geometry, add alongside existing design/fabrication evidence with proper credits. | Source identity, object/layer inclusion, bounds, transfer budget, actual browser draw. |
 | 6 Caschlatsch model | Use supplied original structure/site geometry and spatially appropriate camera path. | Same model provenance/framing checks; no invented geometry. |
 | 7 All model stages | Shared Bending-informed material/light principles with project-specific source scale and silhouette; continuous authored camera joins and independent idle. | Separate acceptance for Bending, XR and every generic model route; source geometry preserved. |
@@ -185,3 +185,91 @@ random-reward mechanics. All eight cards appear deterministically.
   check reverses after its first wheel because the compact desktop About page
   can already be at its bottom. All six route/background cases passed across
   the three profiles; the one-owner and continuous-clock requirements remain.
+
+## 4 November CI corrections
+
+The complete `f85728b` candidate run
+[41729151783](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/41729151783)
+failed qualification. Quality, build and framework jobs passed; public browser
+assertions failed and two browser jobs reached the 45-minute ceiling. The
+required gate rejected that candidate. No part of this run authorizes publishing
+its artifact, whose independently verified digest is
+`f329024c91c110b0f742071ac92c83d39772957d82a3ec8ab4f3a34a5b85bae5`.
+
+Two production defects were isolated from retained traces and source tests:
+
+- A visible 1.78-second frame erased a real 600-pixel scroll response through
+  the old gap reset. The velocity skin now consumes actual elapsed time through
+  its bounded exponential response. Real resume, seek, focus and offscreen
+  synchronization remain explicit; slow rendering cannot silently select a
+  static presentation. Forward/reverse slow-frame and actual-resume regressions
+  pass within the 18-case presenter/field unit set.
+- Failed or interrupted WebGL recovery was being automatically restarted.
+  Explicit recovery is restored for that actual failure state. Ordinary entry,
+  OS preferences and Save Data still keep motion enabled. The unchanged nine
+  recovery browser scenarios passed across all three profiles, with the original
+  source geometry and disposal checks.
+
+The remaining observer corrections preserve original assertions and scenario
+deadlines. Native image geometry is measured after its real outer liquid plane
+settles; mobile's centered single column requires vertical acceleration stretch
+while desktop also requires opposing peripheral yaw and horizontal stretch.
+Home consumes already-delivered atomic first-draw receipts instead of placing
+another browser query behind a model draw. Source cameras and native media
+continue throughout these checks. The [typography record](animation-review/typography-f85728b-qa.json)
+records 48/48 local cases, and the [navigation record](animation-review/navigation-f85728b-qa.json)
+records 9/9 local cases; neither substitutes for the fresh candidate's CI gate.
+
+The existing standard-runner partition is increased to 6 Chromium, 3 WebKit and
+4 mobile Chromium whole-file shards. One worker, zero retries, unchanged case
+deadlines and the exact-once, same-artifact gate remain. Historical placement
+weights are unchanged. See the [capacity amendment](../../../../docs/CI_DELIVERY_PLAN.md#current-capacity-amendment--4-november-2026).
+Final rebuilt acceptance, successful complete CI, publication and live byte/UI
+verification are still pending.
+
+The [cinematography browser review](../../../animation-cinematographer/research/2026-11-04_BROWSER_RECOVERY_OPTICS_REVIEW.json)
+records 24/24 local recovery, glass, full Home-loop and model-information cases.
+Glass optics run in MAKE's authored model absence while the Director and shared
+background remain live and the original model stays acquired. Mobile's removed
+pause/counter surface is correctly hidden; visible control optics, native opacity
+preferences and all retained registry owners remain checked. Model-label rest
+and geometry are read atomically; exact comparison and the 0.01-pixel independent
+projection bound remain unchanged.
+
+The [media review](animation-review/media-f85728b-qa.json) records 10/12 local
+XR/HC cases: all six HC viewport cases and both complete XR journeys on Chromium
+and mobile Chromium pass. Both Windows WebKit XR cases report native
+`MEDIA_ERR_SRC_NOT_SUPPORTED`, code 4, with no decoded Adapt frame. This is an
+explicit local engine limitation, not a pass or a reason to skip Linux WebKit.
+The original Linux `f85728b` review decoded all three recordings and captured six
+frames before its aggregate observation deadline; fresh complete Linux CI is
+still mandatory. No codec retry, source substitution or extended deadline is
+accepted in this local record.
+
+The [reading-field review](animation-review/reading-field-20261104-qa.json)
+retains failed observer attempts and their corrections. Native displacement and
+signed deformation must now agree at the requested endpoint. Source geometry
+and neutral-plane state are sampled atomically; explicitly native editorial
+images are distinguished from their liquid captions. Each complete figure is
+measured/captured once, then its caption is measured/captured at the same centered
+position, preserving every source, caption, screenshot and geometry assertion.
+
+A [minimal native-keyboard probe](animation-review/windows-native-tab-probe-20261104.json)
+without application scripts, styles or event handlers reproduces Windows
+WebKit 26.6 skipping native anchors for a button under ordinary and forced-color
+conditions. Chromium advances between the same anchors. The Bending WebKit
+direction/geometry checks pass before this local keyboard-policy failure. No
+runtime tabindex workaround, altered native input or test skip is introduced;
+the exact Linux WebKit keyboard assertion remains mandatory in final CI.
+
+Final local correction checks passed under Node 24.19.0 / pnpm 11.19.0:
+`pnpm check` includes 9 framework source checks, 162 CI-contract checks and the
+63-file empty-framework build audit. The complete application/role unit run has
+714 passes, zero failures and two pre-existing intentional skips (716 total).
+The final Caschlatsch three-profile run passes all five source plates, captions
+and ten captures per profile within unchanged 60-second deadlines. The selected
+application remains byte-identical to local digest
+`d815c661ab0e1f7c4343890416a9d69237fd8bfd05f84e26a465e0edb4cddd73`.
+The fresh complete candidate lists 618 browser identities in 40 files. Local
+Windows WebKit media/Tab limitations are retained above; they cannot waive any
+required Linux CI identity, same-artifact publication or live verification.

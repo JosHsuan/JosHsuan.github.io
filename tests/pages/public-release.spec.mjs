@@ -1,4 +1,5 @@
 import {test, expect} from '@playwright/test';
+import {writeFile} from 'node:fs/promises';
 import {WAIT, scenarioTimeout, centerStudy, holdModel, frames, settle, expectIdle} from './case-helpers.mjs';
 
 async function entered(page){await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered',null,{timeout:WAIT});}
@@ -22,9 +23,33 @@ test('published story, canonical metadata and every linked asset work without Ja
   await context.close();
 });
 
-test('public model initializes in Full and preserves native navigation with continuous motion and no pause control', async ({page,isMobile}) => {
+test('public model initializes in Full and preserves native navigation with continuous motion and no pause control', async ({page,isMobile},info) => {
   test.setTimeout(scenarioTimeout(120000));
-  const errors=[]; page.on('pageerror', error=>errors.push(error.message));
+  const errors=[],navigation=[]; page.on('pageerror', error=>errors.push(error.message));
+  page.on('console',message=>{const text=message.text();if(text.startsWith('__public-card-input__:'))navigation.push(JSON.parse(text.slice('__public-card-input__:'.length)));});
+  // Retain the actual trusted input target on both sides of native event
+  // dispatch; a moving card's earlier locator box does not prove activation.
+  await page.addInitScript(()=>{
+    let count=0;
+    const identify=node=>node?.nodeType===1?{tag:node.tagName,id:node.id||null,
+      card:node.getAttribute('data-project-card')??node.getAttribute('data-deck-card'),
+      information:node.getAttribute('data-information-window'),showcaseSurface:node.hasAttribute('data-home-showcase-surface'),backgroundField:node.hasAttribute('data-global-background-field')}:null;
+    const observe=(event,phase)=>{
+      // A missed native activation may target the scene or page underneath the
+      // deck. Retain that real target too, without collecting document text.
+      if(!document.querySelector('[data-home-deck]')||count>=48)return;count++;
+      const anchor=event.target.closest('a[href]'),card=event.target.closest('[data-deck-card]'),deck=window.__globalBackground?.inspect().driver.homeDeck;
+      console.debug('__public-card-input__:'+JSON.stringify({type:event.type,phase,trusted:event.isTrusted,defaultPrevented:event.defaultPrevented,
+        point:{x:event.clientX,y:event.clientY},target:event.target.tagName,href:anchor?.getAttribute('href')??null,card:card?.dataset.deckCard??null,
+        hit:identify(document.elementFromPoint(event.clientX,event.clientY)),path:event.composedPath().map(identify).filter(Boolean).slice(0,7),
+        active:card?.hasAttribute('data-deck-active')??false,docY:scrollY,deck,sitePhase:window.__site?.inspect().phase}));
+    };
+    for(const type of ['pointerdown','pointerup','click']){
+      window.addEventListener(type,event=>observe(event,'capture'),{capture:true,passive:true});
+      window.addEventListener(type,event=>observe(event,'bubble'),{passive:true});
+    }
+  });
+  try{
   // Exercise the visitor's real entry once in the public release baseline.
   // Other scene suites enter #overview directly to retain their focused scope.
   await page.goto('/');
@@ -82,12 +107,17 @@ test('public model initializes in Full and preserves native navigation with cont
   await holdModel(page);await expectIdle(page);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
   expect(errors).toEqual([]);
+  }finally{
+    const path=info.outputPath('public-card-native-input.json');await writeFile(path,JSON.stringify(navigation,null,2)+'\n');
+    await info.attach('public-card-native-input',{path,contentType:'application/json'});
+  }
 });
 
 test('inline evidence and method disclosure preserve native reading without an image inspection interface', async ({page}) => {
   await page.emulateMedia({reducedMotion:'reduce'});
-  await page.goto('/projects/bending-active/#overview');await entered(page);
-  await page.locator('[data-chapter-link="system"]').click();
+  // This scenario owns disclosure and image reading. Native chapter navigation
+  // is exercised above; enter this chapter directly within the same 60s bound.
+  await page.goto('/projects/bending-active/#system');await entered(page);
   const step=page.locator('#system details').first();
   await step.locator('summary').click();
   await expect(step).toHaveAttribute('open','');

@@ -1,10 +1,12 @@
 import {test,expect} from '@playwright/test';
 import {WAIT} from './case-helpers.mjs';
 import {settleEvidenceChapter,retainEvidenceReadiness} from './native-evidence-helpers.mjs';
-test('HC3DP presents observed light, readable path evidence and explicit simulation limits',async({page},info)=>{
+for(const width of [1280,390])test(`HC3DP presents observed light, readable path evidence and explicit simulation limits at ${width}px`,async({page},info)=>{
  const readiness=[];
  try{
- await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/projects/hc3dp-caustics/');
+ // Each independent viewport retains its complete native evidence and the
+ // original 60s deadline, without spending it on a second model-sized reflow.
+ await page.setViewportSize({width,height:900});await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/projects/hc3dp-caustics/');
  await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});
  await page.evaluate(()=>document.fonts.ready);
  await expect(page.locator('[data-project-native-source="overview"] [data-editorial-source="/assets/projects/hc3dp-caustics/caustic-observation.webp"] [data-editorial-image]')).toHaveAttribute('src','/assets/projects/hc3dp-caustics/caustic-observation.webp');
@@ -13,8 +15,6 @@ test('HC3DP presents observed light, readable path evidence and explicit simulat
  await expect(page.locator('[data-project-chapter="results"]')).toContainText('do not establish a quantified relation');
  const evidence=page.locator('[data-project-evidence-image]');
  expect(await evidence.evaluateAll(images=>images.map(img=>img.getAttribute('src')))).toEqual(['layer-system','path-logic','frame-arrangement','overinflation'].map(name=>`/assets/projects/hc3dp-caustics/${name}.webp`));
- for(const width of [1280,390]){
-  await page.setViewportSize({width,height:900});
   for(const img of await evidence.all()){
    await img.scrollIntoViewIfNeeded();readiness.push({width,...await settleEvidenceChapter(page,img)});
    await expect.poll(()=>img.evaluate(node=>node.complete&&node.naturalWidth>0)).toBe(true);
@@ -25,7 +25,6 @@ test('HC3DP presents observed light, readable path evidence and explicit simulat
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth)).toBe(true);
   const band=page.locator('[data-project-chapter="system"] [data-study-evidence-layout]').first().locator('..');
   const path=test.info().outputPath(`hc3dp-path-evidence-${width}.png`);await band.screenshot({path});await test.info().attach(`hc3dp-path-evidence-${width}`,{path,contentType:'image/png'});
- }
  }finally{await retainEvidenceReadiness(info,readiness);}
 });
 test('HC3DP evidence and truthful labels remain available without JavaScript',async({browser,baseURL})=>{

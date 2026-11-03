@@ -1,0 +1,213 @@
+{
+  "scope": "Native browser-only keyboard probe. No application scripts, styles or focus handlers.",
+  "rows": [
+    {
+      "engine": "chromium",
+      "version": "153.0.8010.12",
+      "platform": "win32",
+      "forcedColors": "none",
+      "before": {
+        "id": "about",
+        "tag": "A",
+        "focusVisible": true,
+        "hasFocus": true,
+        "links": [
+          {
+            "id": "about",
+            "tabIndex": 0,
+            "inert": false
+          },
+          {
+            "id": "project",
+            "tabIndex": 0,
+            "inert": false
+          },
+          {
+            "id": "contact",
+            "tabIndex": 0,
+            "inert": false
+          }
+        ]
+      },
+      "after": {
+        "id": "project",
+        "tag": "A",
+        "focusVisible": true,
+        "hasFocus": true,
+        "links": [
+          {
+            "id": "about",
+            "tabIndex": 0,
+            "inert": false
+          },
+          {
+            "id": "project",
+            "tabIndex": 0,
+            "inert": false
+          },
+          {
+            "id": "contact",
+            "tabIndex": 0,
+            "inert": false
+          }
+        ]
+      }
+    },
+    {
+      "engine": "chromium",
+      "version": "153.0.8010.12",
+      "platform": "win32",
+      "forcedColors": "active",
+      "before": {
+        "id": "about",
+        "tag": "A",
+        "focusVisible": true,
+        "hasFocus": true,
+        "links": [
+          {
+            "id": "about",
+            "tabIndex": 0,
+            "inert": false
+          },
+          {
+            "id": "project",
+            "tabIndex": 0,
+            "inert": false
+          },
+          {
+            "id": "contact",
+            "tabIndex": 0,
+            "inert": false
+          }
+        ]
+      },
+      "after": {
+        "id": "project",
+        "tag": "A",
+        "focusVisible": true,
+        "hasFocus": true,
+        "links": [
+          {
+            "id": "about",
+            "tabIndex": 0,
+            "inert": false
+          },
+          {
+            "id": "project",
+            "tabIndex": 0,
+            "inert": false
+          },
+          {
+            "id": "contact",
+            "tabIndex": 0,
+            "inert": false
+          }
+        ]
+      }
+    },
+    {
+      "engine": "webkit",
+      "version": "26.6",
+      "platform": "win32",
+      "forcedColors": "none",
+      "before": {
+        "id": "about",
+        "tag": "A",
+        "focusVisible": true,
+        "hasFocus": true,
+        "links": [
+          {
+            "id": "about",
+            "tabIndex": 0,
+            "inert": false
+          },
+          {
+            "id": "project",
+            "tabIndex": 0,
+            "inert": false
+          },
+          {
+            "id": "contact",
+            "tabIndex": 0,
+            "inert": false
+          }
+        ]
+      },
+      "after": {
+        "id": "inspection",
+        "tag": "BUTTON",
+        "focusVisible": true,
+        "hasFocus": true,
+        "links": [
+          {
+            "id": "about",
+            "tabIndex": 0,
+            "inert": false
+          },
+          {
+            "id": "project",
+            "tabIndex": 0,
+            "inert": false
+          },
+          {
+            "id": "contact",
+            "tabIndex": 0,
+            "inert": false
+          }
+        ]
+      }
+    },
+    {
+      "engine": "webkit",
+      "version": "26.6",
+      "platform": "win32",
+      "forcedColors": "active",
+      "before": {
+        "id": "about",
+        "tag": "A",
+        "focusVisible": true,
+        "hasFocus": true,
+        "links": [
+          {
+            "id": "about",
+            "tabIndex": 0,
+            "inert": false
+          },
+          {
+            "id": "project",
+            "tabIndex": 0,
+            "inert": false
+          },
+          {
+            "id": "contact",
+            "tabIndex": 0,
+            "inert": false
+          }
+        ]
+      },
+      "after": {
+        "id": "inspection",
+        "tag": "BUTTON",
+        "focusVisible": true,
+        "hasFocus": true,
+        "links": [
+          {
+            "id": "about",
+            "tabIndex": 0,
+            "inert": false
+          },
+          {
+            "id": "project",
+            "tabIndex": 0,
+            "inert": false
+          },
+          {
+            "id": "contact",
+            "tabIndex": 0,
+            "inert": false
+          }
+        ]
+      }
+    }
+  ]
+}

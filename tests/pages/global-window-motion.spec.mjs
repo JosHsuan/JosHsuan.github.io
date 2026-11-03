@@ -184,7 +184,10 @@ for(const [key,route] of routes)(recorded.has(key)?filmed:test)(`${key}: native 
    // commands. Endpoints and all actual direction/rest/policy guards stay exact.
    const steps=desktopBending||key==='projects'?1:4;
    for(let step=1;step<=steps;step++)await nativeY(page,Math.round(from+(to-from)*step/steps),nativeDiagnostics);
-   await expect.poll(()=>observation.evaluate((value,phase)=>value.state.samples.some(s=>s.phase===phase&&s.visible&&s.depth>1e-8&&s.rx!==0),phase),{timeout:WAIT}).toBe(true);
+   // A native scroll can arrive before the Director consumes it. Require the
+   // actual target position and direction before closing this phase; a tail
+   // from positioning at `from` must not be attributed to the next gesture.
+   await expect.poll(()=>observation.evaluate((value,{phase,from,to})=>value.state.samples.some(s=>s.phase===phase&&s.y===to&&s.visible&&s.depth>1e-8&&s.rx*Math.sign(to-from)<0),{phase,from,to}),{timeout:WAIT}).toBe(true);
    await neutral(page);
   };
   await travel('forward',chosen.start,chosen.start+chosen.step);
@@ -234,7 +237,12 @@ for(const [key,route] of routes)(recorded.has(key)?filmed:test)(`${key}: native 
     expect(await page.evaluate(()=>scrollY)).toBe(focusY);
     await page.keyboard.press('Tab');
     const focusedLink=navigation.nth(1);
-    expect(await focusedLink.evaluate(node=>document.activeElement===node&&node.matches(':focus-visible'))).toBe(true);
+    receipt.forcedColors.keyboardFocus=[];
+    await expect.poll(async()=>{
+     const state=await focusedLink.evaluate(node=>({activeTag:document.activeElement?.tagName,activeHref:document.activeElement?.getAttribute('href'),documentHasFocus:document.hasFocus(),targetActive:document.activeElement===node,targetFocusVisible:node.matches(':focus-visible'),scrollY}));
+     if(receipt.forcedColors.keyboardFocus.length<32)receipt.forcedColors.keyboardFocus.push(state);
+     return state.targetActive&&state.targetFocusVisible;
+    },{timeout:WAIT}).toBe(true);
     expect(await page.evaluate(()=>scrollY)).toBe(focusY);
     receipt.forcedColors.focusedNavigation={href:await focusedLink.getAttribute('href'),y:focusY,...await focusedLink.evaluate(forcedPalette)};
     await focusedLink.evaluate(node=>node.blur());
