@@ -23,8 +23,10 @@ test('all direct portfolio routes share exactly one background surface and one a
   await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);
   await expect(page.locator('[data-cinematic-background]')).toHaveCount(1);
   const sourceOwner=route==='/'?'[data-home-showcase-surface]':route==='/projects/'?'[data-project-model-preview]':route==='/projects/bending-active/'?'[data-cinematic-stage]':route==='/projects/xr-bending-active/'?'[data-xr-stage]':'[data-project-model-stage]';
-  const sources=await page.locator('canvas:not([data-global-background-field])').evaluateAll((nodes,owner)=>nodes.map(node=>({owned:!!node.closest(owner)})),sourceOwner);
-  expect(sources.length).toBeLessThanOrEqual(1);expect(sources.every(source=>source.owned)).toBe(true);
+  // Query and ownership must describe one instant. A locator's retained node
+  // array can cross Home's legitimate source disposal/acquisition boundary.
+  const sources=await page.evaluate(owner=>[...document.querySelectorAll('canvas:not([data-global-background-field])')].map(node=>({owned:!!node.closest(owner),connected:node.isConnected})),sourceOwner);
+  expect(sources.length).toBeLessThanOrEqual(1);expect(sources.every(source=>source.owned&&source.connected),`Current source canvas owner on ${route}`).toBe(true);
   if(['/about/','/contact/'].includes(route))expect(sources).toEqual([]);
   const state=await facts(page),bending=route==='/projects/bending-active/';
   expect(state.activeBindings).toBe(1);expect(state.acquisitions).toBe(1);expect(state.releases).toBe(0);
@@ -57,8 +59,10 @@ test('ordinary background animates from native time and input and retains native
  expect(await page.evaluate(()=>matchMedia('(prefers-reduced-motion: reduce)').matches)).toBe(true);
  const sample=()=>page.evaluate(()=>{const value=window.__globalBackground.inspect().driver;return{time:value.playback.activeSeconds,frames:value.frames,draws:value.pageField.draws};});
  const preferred=await sample(),reducedY=await page.evaluate(()=>scrollY);
- await page.mouse.move(screen.width*.25,screen.height*.2);await page.mouse.wheel(0,80);await page.mouse.move(-8,-8);
- await expect.poll(()=>page.evaluate(()=>scrollY)).toBeGreaterThan(reducedY);
+ // The compact desktop About page can already be at its native bottom after
+ // the first wheel. Reverse within its proven scroll range under the preference.
+ await page.mouse.move(screen.width*.25,screen.height*.2);await page.mouse.wheel(0,-80);await page.mouse.move(-8,-8);
+ await expect.poll(()=>page.evaluate(()=>scrollY)).toBeLessThan(reducedY);
  await expect.poll(async()=>(await sample()).draws,{timeout:WAIT}).toBeGreaterThan(preferred.draws);
  const continuous=await sample();expect(continuous.time).toBeGreaterThan(preferred.time);expect(continuous.frames).toBeGreaterThan(preferred.frames);
  expect((await facts(page)).driver.chapterScene.field.fieldWeight).toBeGreaterThan(0);

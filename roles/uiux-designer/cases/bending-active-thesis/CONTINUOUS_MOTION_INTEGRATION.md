@@ -179,3 +179,9 @@ random-reward mechanics. All eight cards appear deterministically.
   Its continuous camera, source ownership, comparison and buffer invariants
   remain required. All six pointer/inspection cases passed across the three
   browser profiles; no production motion was stopped for these checks.
+- Shared-background route ownership now queries current canvas nodes and their
+  owners in one browser evaluation. A retained locator array could span Home's
+  legitimate source exchange and inspect a disposed node. The native-scroll
+  check reverses after its first wheel because the compact desktop About page
+  can already be at its bottom. All six route/background cases passed across
+  the three profiles; the one-owner and continuous-clock requirements remain.
