@@ -56,6 +56,11 @@ Its own pose writer composes the compact hand with bounded peripheral shear,
 stretch and a liquid rim. Settled poses are cached so the ambient scene clock
 does not rebuild eight unchanged outlines every frame.
 
+On Project, the prepared model preview is content of its square tile and follows
+that tile's plane, like the neighboring images. Its renderer still owns source
+geometry and camera. Full-viewport model stages and navigation stay independent
+of reading-card transforms.
+
 At the two outer section boundaries, crossing half a viewport completes the
 native scroll transition. The seven intervals between eight cards remain fully
 reversible. Project retains its separate overview grid. No-JS and print retain

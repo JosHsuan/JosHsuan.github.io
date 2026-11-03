@@ -171,7 +171,9 @@ test('built glass bends the real background only at its rim and leaves foregroun
  expect(positionAfter.scroll-positionBefore.scroll).toBe(18);expect(positionAfter.background-positionBefore.background).toBe(-18);
  expect(scrollPixels.totalMean).toBeGreaterThan(1);expect((await liquid(page)).mapGenerations).toBe(mapGenerationBefore);
  await writeFile(testInfo.outputPath('native-scroll-optical-pixels.json'),JSON.stringify({positionBefore,positionAfter,mapGenerationBefore,mapGenerationAfter:(await liquid(page)).mapGenerations,pixels:scrollPixels},null,2)+'\n');
- expect(await page.locator('canvas').count()).toBe(1);
+ await expect(page.locator('[data-global-background-field]')).toHaveCount(1);
+ await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);
+ expect(await page.locator('canvas').count()).toBe(2);
 });
 
 test('pointer lighting and press share the Director clock and cancel, focus and page lifecycle close them',async({page,context,isMobile},testInfo)=>{

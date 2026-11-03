@@ -170,7 +170,6 @@ async function neutralReadingMaterials(page,testInfo){
      saved.push({child,style:child.getAttribute('style')});
      if(child.tagName.toLowerCase()==='svg')child.style.setProperty('visibility','hidden','important');
     }
-    const action=element.querySelector('[class*="mediaAction"]');if(action){saved.push({child:action,style:action.getAttribute('style')});action.style.setProperty('opacity','1','important');}
     window.__readingMaterialRestore=()=>{for(const row of saved){if(row.style===null)row.child.removeAttribute('style');else row.child.setAttribute('style',row.style);}for(const row of layout){if(row.style===null)row.node.removeAttribute('style');else row.node.setAttribute('style',row.style);}parent.insertBefore(element,next);if(style===null)element.removeAttribute('style');else element.setAttribute('style',style);delete window.__readingMaterialRestore;};
     return element.dataset.informationWindow;
    });
@@ -178,6 +177,12 @@ async function neutralReadingMaterials(page,testInfo){
     const result={kind,appearance:'neutral-dark',monotonicQuantizationTolerance:1,status:'measuring',samples:[]};results.push(result);
     const box=await owner.boundingBox();expect(box.width).toBeGreaterThan(60);expect(box.height).toBeGreaterThan(30);
     if(box.height+24>page.viewportSize().height)await page.setViewportSize({width:viewport.width,height:Math.ceil(box.height+24)});
+    if(kind==='evidence-image'){
+     // The image-opening UI was removed. This surface now contains the native
+     // source image; its separate caption still receives the full text assay.
+     await expect.poll(()=>owner.evaluate(element=>{const image=element.querySelector('img');return !!image?.complete&&image.naturalWidth>0;}),{timeout:WAIT}).toBe(true);
+     expect(await owner.evaluate(element=>element.querySelectorAll('a,button,summary').length)).toBe(0);
+    }
     if(kind==='source-diagram'){
      const geometry=await owner.evaluate(element=>{
       const choices=element.querySelector('[role="group"]'),caption=element.querySelector('[data-diagram-caption]')?.parentElement;
@@ -202,7 +207,8 @@ async function neutralReadingMaterials(page,testInfo){
     Object.assign(result,{brightness,transmission,status:'measured'});
     // Complete the five-point evidence before any numeric acceptance assertion.
     for(const [index,sample] of samples.entries()){
-     expect(sample.rows.length,kind+' visible UI text').toBeGreaterThan(0);
+     if(kind==='evidence-image')expect(sample.rows,kind+' has no image-opening UI text').toHaveLength(0);
+     else expect(sample.rows.length,kind+' visible UI text').toBeGreaterThan(0);
      for(const row of sample.rows)expect(row.ratio,`${kind} / ${sample.background} / ${row.text}`).toBeGreaterThanOrEqual(row.required);
      expect(sample.channelSpread,`${kind} / ${sample.background}: neutral core`).toBeLessThan(14);
      if(index)expect(sample.coreMean+1,`${kind}: gray transfer must increase within one-code quantization`).toBeGreaterThan(samples[index-1].coreMean);

@@ -98,7 +98,7 @@ function Projects({standalone=false,scrolling=true}){
       <p className={styles.projectCount}>{String(projects.length).padStart(2,'0')} projects<br/>Computation / fabrication / interaction</p>
     </div>
     <ul className={styles.projectGrid} style={{'--project-grid-rows':projectGridRows(projects.length)}} data-project-grid data-project-grid-cells={projectGridRows(projects.length)*3}>
-      {projects.map(project=><li key={project.id} className={project.id==='xr-bending-active'?`${styles.projectCard} ${styles.xrProjectCard}`:styles.projectCard} data-project-tile={project.id} data-information-window={scrolling?'home-project-card':undefined} data-information-motion-surface={scrolling&&project.id!=='bending-active'?'plane':undefined} data-home-scroll-window={scrolling?project.id:undefined}>
+      {projects.map(project=><li key={project.id} className={project.id==='xr-bending-active'?`${styles.projectCard} ${styles.xrProjectCard}`:styles.projectCard} data-project-tile={project.id} data-information-window={scrolling?'home-project-card':undefined} data-information-motion-surface={scrolling?'plane':undefined} data-home-scroll-window={scrolling?project.id:undefined}>
         {scrolling&&<InformationSkin/>}
         <div className={styles.projectImage}>
           {project.id==='bending-active'&&standalone

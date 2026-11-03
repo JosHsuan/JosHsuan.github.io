@@ -34,7 +34,14 @@ async function ownership(page){
   const panels=[...document.querySelectorAll(selector)];
   const external='canvas,video,[data-portfolio-masthead],[data-portfolio-navigation],[data-story-navigation],[data-project-chapter-navigation],[data-xr-chapter-navigation],nav[aria-label="Portfolio"],[data-cinematic-stage],[data-project-model-stage],[data-xr-stage],[data-model-viewport],[data-xr-model-control],[data-project-model-control],[data-xr-reading-tools],[data-bending-motion-toggle],[data-study-motion-toggle],[data-liquid-glass]';
   const problems=[];
-  for(const node of document.querySelectorAll(external))if(node.closest(selector))problems.push({reason:'independent source or chrome inside moving plane',tag:node.tagName,attributes:[...node.attributes].map(a=>a.name)});
+  for(const node of document.querySelectorAll(external))if(node.closest(selector)){
+   // The prepared model is content of its Project tile, just like the other
+   // tile images. Its renderer owns the source; the parent owns card motion.
+   const tile=node.closest('[data-project-tile="bending-active"]'),preview=node.closest('[data-project-model-preview]');
+   const view=preview?.__projectModelPreview?.inspect();
+   const cardSource=node.matches('canvas[data-project-model-canvas]')&&tile===node.closest(selector)&&tile.dataset.informationWindow==='home-project-card'&&view?.phase==='ready'&&view.resource?.firstDraw?.completed;
+   if(!cardSource)problems.push({reason:'independent source or chrome inside moving plane',tag:node.tagName,attributes:[...node.attributes].map(a=>a.name)});
+  }
   for(const node of panels){
    if(node.parentElement?.closest('[data-information-window][data-information-ready]'))problems.push({reason:'nested plane owner',kind:node.dataset.informationWindow});
    for(const child of node.querySelectorAll('[data-information-window]'))if(child.hasAttribute('data-information-ready')||child.hasAttribute('data-information-plane'))problems.push({reason:'nested active window',kind:child.dataset.informationWindow});

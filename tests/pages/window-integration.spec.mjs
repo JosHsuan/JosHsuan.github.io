@@ -1,6 +1,15 @@
 import {test,expect} from '@playwright/test';
 import {writeFile} from 'node:fs/promises';
-import {loadScene,centerStudy,settle,expectIdle,scenarioTimeout,WAIT} from './case-helpers.mjs';
+import {loadScene,centerStudy,settle,frames,scenarioTimeout,WAIT} from './case-helpers.mjs';
+
+async function expectReadingRestWithLiveScene(page){
+ await settle(page);
+ await page.waitForFunction(()=>[...document.querySelectorAll('[data-information-window][data-information-ready]')].every(node=>node.dataset.informationMoving!=='true'),null,{timeout:WAIT});
+ const before=await page.evaluate(()=>({time:window.__story.inspect().playback.activeSeconds,canvas:document.querySelector('[data-cinematic-stage] canvas')?.isConnected}));
+ await frames(page,8);
+ expect(await page.evaluate(()=>window.__story.inspect().playback.activeSeconds)).toBeGreaterThan(before.time);
+ expect(before.canvas).toBe(true);await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);
+}
 
 test('native scroll triggers a timed Canvas departure and completion follows the submitted frame',async({page})=>{
  // Pattern ends the continuous Overview-to-Pattern source passage. Internal
@@ -90,7 +99,7 @@ test('information windows share one fluid surface while native reading, focus an
  expect(movement.some(value=>value.path.includes('path('))).toBe(true);
  expect(movement.every(value=>value.opacity==='1')).toBe(true);
  const control=page.locator('[data-chapter-link="form"]');await control.focus();await expect(control).toBeFocused();
- await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(()=>window.__story.inspect().playback.reducedMotion===false,null,{timeout:WAIT});await settle(page);await expectIdle(page);
+ await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(()=>window.__story.inspect().playback.reducedMotion===false,null,{timeout:WAIT});await expectReadingRestWithLiveScene(page);
  const reducedState=await registered.evaluateAll(elements=>{const label=document.querySelector('[data-model-side-label][data-study-chapter="system"]');const box=node=>{if(!node)return null;const r=node.getBoundingClientRect();return{left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height,layoutWidth:node.offsetWidth,layoutHeight:node.offsetHeight};};const title=label?.querySelector('[data-source-label]'),position=label?.querySelector('[data-source-position]'),description=label?.querySelector('[data-source-description]'),callout=label?.querySelector('[data-model-annotation-label]'),annotation=label?.querySelector('[data-model-annotation-text]');const components=[['label',label],['title',title],['position',position],['description',description],['callout',callout]].map(([name,node])=>({name,box:box(node),text:node?.textContent?.trim().slice(0,1000)??null}));const range=document.createRange();if(title)range.selectNodeContents(title);const sizers=title?.parentElement.querySelectorAll(':scope > [aria-hidden="true"]')??[],sizer=sizers[0],font=node=>{if(!node)return null;const c=getComputedStyle(node);return{family:c.fontFamily,size:c.fontSize,weight:c.fontWeight,lineHeight:c.lineHeight,tracking:c.letterSpacing,wrap:c.overflowWrap};};const titleEnvelope={count:sizers.length,ariaHidden:sizer?.getAttribute('aria-hidden')??null,visibility:sizer?getComputedStyle(sizer).visibility:null,display:sizer?getComputedStyle(sizer).display:null,titles:sizer?[...sizer.children].map(node=>node.textContent):[],liveFont:font(title),sizerFont:font(sizer)};const geometry={titleEnvelope,placement:label?.dataset.modelLabelPlacement??null,labelCount:document.querySelectorAll('[data-model-side-label][data-study-chapter="system"]').length,componentCounts:['[data-source-label]','[data-source-position]','[data-source-description]','[data-model-annotation-label]','[data-model-annotation-text]'].map(selector=>label?.querySelectorAll(selector).length??0),components,titleTextRects:title?[...range.getClientRects()].slice(0,8).map(r=>({left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height})):[],slots:[box(title?.parentElement),box(position?.parentElement),box(annotation?.parentElement)],controls:[...label?.querySelectorAll('button,a,input')??[]].slice(0,4).map(node=>({box:box(node),text:node.textContent?.trim().slice(0,160)})),chrome:['[data-page-masthead]','[data-story-navigation]','[data-reading-tools]'].map(selector=>{const nodes=[...document.querySelectorAll(selector)],node=nodes[0];return{selector,count:nodes.length,visible:node?.checkVisibility({visibilityProperty:true,opacityProperty:true})??false,box:box(node)};}),viewport:{width:innerWidth,height:innerHeight},y:scrollY};return{rows:elements.map(el=>({moving:el.dataset.informationMoving,transform:getComputedStyle(el).transform})),geometry};});
  receipt.after=reducedState.geometry;const reduced=reducedState.rows;
  const png=info.outputPath('reduced-model-label-native.png');await page.screenshot({path:png,scale:'device'});await info.attach('reduced-model-label-native',{path:png,contentType:'image/png'});
@@ -122,5 +131,5 @@ test('all original evidence remains inline with one surface owner under OS motio
  const figures=page.locator('#system figure,#pattern figure');expect(await figures.count()).toBeGreaterThanOrEqual(2);
  for(const image of await figures.locator('img').all()){expect(await image.evaluate(n=>!!n.closest('a,button,summary'))).toBe(false);}
  expect(await page.locator('[data-information-ready] [data-information-ready]').count()).toBe(0);
- await expectIdle(page);
+ await expectReadingRestWithLiveScene(page);
 });
