@@ -112,10 +112,15 @@ random-reward mechanics. All eight cards appear deterministically.
 - A subsequent serial machine-camera run again reached its existing 180-second
   case deadline on Windows software rendering, after the source, camera,
   ownership and idle assertions and the actual screenshot. Reading-stage idle
-  lighting is therefore being changed to a stable photographic rig with
+  lighting is therefore changed to a stable photographic rig with
   camera-dependent fill/rim. Continuous compositor handheld remains active;
-  Home retains timed light/lens motion. The next built acceptance must verify
-  zero idle redraws with continuing motion and unchanged source geometry.
+  Home retains timed light/lens motion. The rebuilt `feb990d` Chromium run passed
+  all three existing scenarios within their unchanged deadlines: Home's complete
+  seven-source loop and wrap, the machine camera and the Caschlatsch camera.
+  Both reading stages recorded eight compositor updates, zero extra draws/fits,
+  advancing active time and the unchanged 503,822 / 61,362 source vertices.
+  The 21 appearance tests and scoped lint also passed. This is bounded local
+  acceptance, not a physical-device FPS measurement or a CI publication gate.
 - Remaining: the complete three-profile CI gate, same-artifact Pages deployment
   and independent live verification. Historical counts must not be reused as
   this candidate's evidence.
