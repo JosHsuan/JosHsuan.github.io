@@ -6,30 +6,36 @@ const deck=page=>page.evaluate(()=>window.__globalBackground?.inspect().driver.h
 const wheelTo=async(page,y)=>{await page.mouse.move(page.viewportSize().width-3,page.viewportSize().height/2);await page.mouse.wheel(0,y-await page.evaluate(()=>scrollY));};
 
 test('Home introduction cycles real source models on one bounded renderer with live lighting and lens changes',async({page},info)=>{
- test.setTimeout(scenarioTimeout(240000));const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ test.setTimeout(scenarioTimeout(240000));const errors=[],hostEvidence={checkpoint:null,heartbeats:[]};page.on('pageerror',e=>errors.push(e.message));
+ // Console delivery keeps the last completed observation outside the page. A
+ // blocked renderer/evaluate cannot prevent finally from preserving evidence.
+ page.on('console',message=>{const text=message.text();if(!text.startsWith('__home-loop-evidence__:'))return;const packet=JSON.parse(text.slice('__home-loop-evidence__:'.length));if(packet.checkpoint)hostEvidence.checkpoint=packet.checkpoint;hostEvidence.heartbeats.push(packet.sample);if(hostEvidence.heartbeats.length>256)hostEvidence.heartbeats.shift();});
+ try{
  // Observe from document creation. Each receipt is captured in one browser
  // frame, so a normal source exchange cannot invalidate a host-side poll.
  // This watcher only reads diagnostics; it never advances or holds site time.
  await page.addInitScript(()=>{
-  const record=window.__homeLoopEvidence={first:null,starts:[],lasts:[],receipts:[],sequence:[],maximumCanvases:0,failures:[],wrapped:false};let last=-Infinity,previousIndex=-1;
+  const record=window.__homeLoopEvidence={first:null,starts:[],lasts:[],receipts:[],sequence:[],maximumCanvases:0,failures:[],wrapped:false};let last=-Infinity,previousIndex=-1,lastHeartbeat=-Infinity,lastPhase='';
   const capture=state=>{
    const source=state.resource;
    return {kind:state.kind,index:state.index,project:state.project,time:state.time,duration:state.duration,canvasCount:state.canvasCount,
     successfulPaint:source.successfulPaint,sourceRevision:source.sourceRevision,vertices:source.vertices,triangles:source.triangles,
     drawnMeshes:source.drawnMeshes,expectedMeshes:source.expectedMeshes,sourceCalls:source.sourceCalls,pose:source.pose,shot:source.view.showcaseShot,firstDraw:source.firstDraw,
-    appearance:{profileID:source.appearance.profileID,kind:source.appearance.kind,lighting:source.appearance.lighting,lights:source.appearance.lights?.map(({role,intensity})=>({role,intensity}))}};
+    appearance:{profileID:source.appearance.profileID,kind:source.appearance.kind,opticalModel:source.appearance.opticalModel,materials:source.appearance.materials?.map(({type,ior,opacity,transmission,forceSinglePass,depthWrite})=>({type,ior,opacity,transmission,forceSinglePass,depthWrite})),lighting:source.appearance.lighting,lights:source.appearance.lights?.map(({role,intensity})=>({role,intensity}))}};
   };
   const observe=now=>{
    if(now-last>=150){
-    last=now;const state=window.__globalBackground?.inspect().driver.homeResearch;
+    last=now;const state=window.__globalBackground?.inspect().driver.homeResearch;let checkpoint=false;
     const canvases=document.querySelectorAll('[data-home-showcase-surface] canvas').length;record.maximumCanvases=Math.max(record.maximumCanvases,canvases);
-    if(state?.phase==='failed')record.failures.push({index:state.index,reason:state.failureReason});
+    if(state?.phase==='failed'){record.failures.push({index:state.index,reason:state.failureReason});checkpoint=true;}
     if(state?.phase==='ready'&&state.resource){
      const receipt=capture(state);record.first??=receipt;
-     if(previousIndex!==state.index){record.sequence.push(state.index);previousIndex=state.index;}
-     if(record.sequence.length<=7){record.starts[state.index]??=receipt;record.lasts[state.index]=receipt;if(state.time>state.duration*.55)record.receipts[state.index]??=receipt;}
-     if(record.receipts.filter(Boolean).length===7&&state.index===0&&record.sequence.length>=8){record.wrapped=true;record.wrap=receipt;}
+     if(previousIndex!==state.index){record.sequence.push(state.index);previousIndex=state.index;checkpoint=true;}
+     if(record.sequence.length<=7){record.starts[state.index]??=receipt;record.lasts[state.index]=receipt;if(state.time>state.duration*.55&&!record.receipts[state.index]){record.receipts[state.index]=receipt;checkpoint=true;}}
+     if(record.receipts.filter(Boolean).length===7&&state.index===0&&record.sequence.length>=8){record.wrapped=true;record.wrap=receipt;checkpoint=true;}
     }
+    const phase=`${state?.index}:${state?.phase}`;if(phase!==lastPhase){lastPhase=phase;checkpoint=true;}
+    if(checkpoint||now-lastHeartbeat>=1000){lastHeartbeat=now;const sample={at:now,index:state?.index,phase:state?.phase,time:state?.time,duration:state?.duration,failureReason:state?.failureReason,draws:state?.resource?.draws,renderSubmit:state?.resource?.renderSubmit,canvasCount:canvases,received:record.receipts.map(receipt=>receipt?.index??null)};console.debug('__home-loop-evidence__:'+JSON.stringify({sample,...checkpoint?{checkpoint:record}:{}}));}
    }
    if(!record.wrapped&&!record.failures.length)requestAnimationFrame(observe);
   };
@@ -55,8 +61,10 @@ test('Home introduction cycles real source models on one bounded renderer with l
   expect(source.shot.coverage).toBe('partial');expect(source.pose.compositionSpace).toBe('authored-showcase');expect(source.vertices).toBeGreaterThan(0);
   expect(evidence.lasts[index].pose.position).not.toEqual(evidence.starts[index].pose.position);expect(evidence.lasts[index].shot.focalLengthMm).not.toBe(evidence.starts[index].shot.focalLengthMm);
   if(source.appearance.kind!=='points')expect(evidence.lasts[index].appearance.lighting.revision).toBeGreaterThan(evidence.starts[index].appearance.lighting.revision);
+  if(source.project==='hc3dp-caustics'){expect(source.appearance.opticalModel).toBe('single-pass-clear-shell-alpha');expect(source.appearance.materials).toEqual([expect.objectContaining({transmission:0,forceSinglePass:true,depthWrite:false})]);expect(source.sourceCalls).toBe(source.expectedMeshes);}
  }
  expect(evidence.wrap.canvasCount).toBe(1);expect(evidence.wrap.successfulPaint).toBe(true);expect(errors).toEqual([]);
+ }finally{await writeFile(info.outputPath('home-loop-observation.json'),JSON.stringify({...hostEvidence,pageErrors:errors},null,2)+'\n');}
 });
 
 test('Home reveals all eight cards in native forward and reverse order with half-screen section joins',async({page},info)=>{

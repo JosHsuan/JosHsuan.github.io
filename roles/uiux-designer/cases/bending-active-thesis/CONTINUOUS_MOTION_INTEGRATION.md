@@ -91,7 +91,8 @@ random-reward mechanics. All eight cards appear deterministically.
   jobs. Quality records 712 passing application/role checks and two pre-existing
   intentional skips, plus 9/9 framework source checks. The pre-install suite is
   now dependency-free (162 checks); full decoded-geometry checks run after the
-  locked dependencies are installed. Browser jobs are a separate pending gate.
+  locked dependencies are installed. Its browser jobs were superseded; this run
+  is not publication evidence.
 - Rebuilt Chromium acceptance passed entry readiness and all five Project
   preview cases, including real first draw, hidden pending work, source failure
   and preference continuity. Connection figure dimensions now remain stable
@@ -121,6 +122,36 @@ random-reward mechanics. All eight cards appear deterministically.
   advancing active time and the unchanged 503,822 / 61,362 source vertices.
   The 21 appearance tests and scoped lint also passed. This is bounded local
   acceptance, not a physical-device FPS measurement or a CI publication gate.
+- The cancelled full-CI traces exposed remaining historical assumptions about
+  image-opening links and preference-driven freezing. The revised checks require
+  inline source images without actions, continuous background/library motion,
+  one shared background lease and at most one independently owned route canvas.
+  The mobile background/material/library set passed 6/6. The failed-script SSR
+  pixel audit and independent healthy renderer entry now have separate scenarios
+  with every original assertion retained; their Chromium run passed 4/4 within
+  existing individual deadlines. This also avoids keeping a live renderer beside
+  a separate no-JavaScript audit.
+- A WebKit machine round trip sent fractional native wheel deltas that truncated
+  to 3841 and 3842 CSS pixels in opposite directions. The camera correctly sampled
+  two different reading positions. Integer input targets now require the exact
+  same scroll coordinate and reading state, retaining the camera tolerance.
+  The actual WebKit machine sequence passed in 19.9 seconds.
+- HC3DP's initial transmission material blocked first-paint evaluations in both
+  Chromium CI profiles despite successful GLB downloads. The complete original
+  geometry now uses a single-pass clear-shell alpha approximation, documented in
+  the [material tradeoff](../../../animation-cinematographer/research/2026-11-03-HC_CLEAR_SHELL_TRADEOFF.md).
+  The first alpha-only appearance was rejected as too diffuse; the refined
+  filament/specular/edge-alpha version preserves visible transparency and source
+  contours. Its local first draw took 0.941 seconds, one source call and no page
+  errors. Chromium and mobile Chromium then passed both complete seven-source
+  loops and wraps within the unchanged per-source deadlines. Both retained one
+  maximum canvas, actual source draws, lens/light changes and no page errors.
+  This is not an optical-refraction or hardware-FPS claim; exact-artifact CI
+  acceptance remains a separate requirement.
 - Remaining: the complete three-profile CI gate, same-artifact Pages deployment
   and independent live verification. Historical counts must not be reused as
   this candidate's evidence.
+- The final local `pnpm check` passed content validation, lint, types, framework
+  source and CI-gate checks, the empty-framework build and its 63-file public
+  audit. This is separate from the 270-file selected application export and its
+  browser qualification.

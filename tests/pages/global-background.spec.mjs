@@ -13,8 +13,8 @@ async function entered(page){
 
 test('all direct portfolio routes share exactly one background surface and one active owner',async({page})=>{
  test.setTimeout(scenarioTimeout(180000));
- // Static policy avoids optional project models; it still exercises each real
- // exported layout, current-document entry and the delegated Bending Director.
+ // OS preferences retain the shared field and the independent route-owned
+ // scene. Verify their distinct owners without assuming a model-free page.
  await page.emulateMedia({reducedMotion:'reduce'});
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
  for(const route of ['/','/about/','/projects/','/contact/','/projects/xr-bending-active/','/projects/bending-active/',...studies.map(project=>`/projects/${project.slug}/`)]){
@@ -22,7 +22,10 @@ test('all direct portfolio routes share exactly one background surface and one a
   await expect(page.locator('[data-global-background]')).toHaveCount(1);
   await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);
   await expect(page.locator('[data-cinematic-background]')).toHaveCount(1);
-  await expect(page.locator('canvas:not([data-global-background-field])')).toHaveCount(0);
+  const sourceOwner=route==='/'?'[data-home-showcase-surface]':route==='/projects/'?'[data-project-model-preview]':route==='/projects/bending-active/'?'[data-cinematic-stage]':route==='/projects/xr-bending-active/'?'[data-xr-stage]':'[data-project-model-stage]';
+  const sources=await page.locator('canvas:not([data-global-background-field])').evaluateAll((nodes,owner)=>nodes.map(node=>({owned:!!node.closest(owner)})),sourceOwner);
+  expect(sources.length).toBeLessThanOrEqual(1);expect(sources.every(source=>source.owned)).toBe(true);
+  if(['/about/','/contact/'].includes(route))expect(sources).toEqual([]);
   const state=await facts(page),bending=route==='/projects/bending-active/';
   expect(state.activeBindings).toBe(1);expect(state.acquisitions).toBe(1);expect(state.releases).toBe(0);
   expect(state.owner).toBe(bending?'bending-director':'site');expect(state.delegated).toBe(bending);
@@ -33,7 +36,7 @@ test('all direct portfolio routes share exactly one background surface and one a
  expect(errors).toEqual([]);
 });
 
-test('ordinary background animates from native time and input, preserves scroll and freezes under live Reduced Motion',async({page})=>{
+test('ordinary background animates from native time and input and retains native scroll and motion under OS preferences',async({page})=>{
  await page.goto('/about/');await entered(page);
  await page.waitForFunction(()=>window.__globalBackground.inspect().driver.pageField.draws>0,null,{timeout:WAIT});
  const before=await facts(page);
@@ -51,14 +54,16 @@ test('ordinary background animates from native time and input, preserves scroll 
  await expect.poll(()=>page.evaluate(()=>scrollY),{timeout:WAIT}).toBeGreaterThan(y);
  await expect.poll(async()=>(await facts(page)).driver.playback.tempo,{timeout:WAIT}).toBeGreaterThan(1.01);
  await page.emulateMedia({reducedMotion:'reduce'});
- await page.waitForFunction(()=>{const value=window.__globalBackground.inspect().driver;return value.chapterScene.field.fieldWeight===0&&!value.lifecycle.scheduled;},null,{timeout:WAIT});
+ expect(await page.evaluate(()=>matchMedia('(prefers-reduced-motion: reduce)').matches)).toBe(true);
  const sample=()=>page.evaluate(()=>{const value=window.__globalBackground.inspect().driver;return{time:value.playback.activeSeconds,frames:value.frames,draws:value.pageField.draws};});
- const frozen=await sample(),reducedY=await page.evaluate(()=>scrollY);
+ const preferred=await sample(),reducedY=await page.evaluate(()=>scrollY);
  await page.mouse.move(screen.width*.25,screen.height*.2);await page.mouse.wheel(0,80);await page.mouse.move(-8,-8);
  await expect.poll(()=>page.evaluate(()=>scrollY)).toBeGreaterThan(reducedY);
- await page.evaluate(async()=>{for(let i=0;i<4;i++)await new Promise(requestAnimationFrame);});expect(await sample()).toEqual(frozen);
+ await expect.poll(async()=>(await sample()).draws,{timeout:WAIT}).toBeGreaterThan(preferred.draws);
+ const continuous=await sample();expect(continuous.time).toBeGreaterThan(preferred.time);expect(continuous.frames).toBeGreaterThan(preferred.frames);
+ expect((await facts(page)).driver.chapterScene.field.fieldWeight).toBeGreaterThan(0);
  await page.emulateMedia({reducedMotion:'no-preference'});
- await expect.poll(async()=>(await facts(page)).driver.pageField.draws,{timeout:WAIT}).toBeGreaterThan(frozen.draws);
+ await expect.poll(async()=>(await facts(page)).driver.pageField.draws,{timeout:WAIT}).toBeGreaterThan(continuous.draws);
  expect((await facts(page)).activeBindings).toBe(1);
 });
 

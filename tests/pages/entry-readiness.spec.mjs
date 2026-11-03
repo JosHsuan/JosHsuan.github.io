@@ -118,7 +118,7 @@ test('a native hash navigation relinquishes its chapter anchor before later layo
 
 for(const viewport of [{width:320,height:844},{width:844,height:390}])test(`canonical SSR entry remains readable at ${viewport.width}x${viewport.height} with failed scripts`,async({browser,baseURL},info)=>{
  let primary;const rows=[],requests=[],abortedScripts=[],failedScripts=[];
- const context=await browser.newContext({baseURL,viewport,reducedMotion:'no-preference'});let nojs,healthy;
+ const context=await browser.newContext({baseURL,viewport,reducedMotion:'no-preference'});let nojs;
  try{
   const page=await context.newPage();page.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)/.test(request.url()))requests.push(request.url());});
   page.on('requestfailed',request=>{if(request.resourceType()==='script')failedScripts.push({url:request.url(),error:request.failure()?.errorText});});
@@ -174,23 +174,31 @@ for(const viewport of [{width:320,height:844},{width:844,height:390}])test(`cano
   expect(policy.reduced).toBe(true);expect(policy.storyAbsent).toBe(true);expect(policy.context).toBeNull();expect(policy.loaderVisibility).toBe('hidden');expect(policy.bodyInert).toBe(false);
   await expect(page.locator('[data-project-content]')).toBeVisible();
   await expect(page.locator('[data-home-link]')).toHaveAttribute('href','/#about');await expect(page.locator('[data-home-link]')).toBeVisible();
-  const healthyViewport=page.viewportSize();
   await context.close();
-  // Independent healthy entry, not recovery of a context whose scripts failed.
-  healthy=await browser.newContext({baseURL,viewport:healthyViewport,reducedMotion:'reduce'});
-  const healthyPage=await healthy.newPage(),healthyRequests=[];
-  healthyPage.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)/.test(request.url()))healthyRequests.push(request.url());});
-  rows.push({phase:'independent-clean-reduced-entry',viewport:healthyViewport,requests:healthyRequests,coverage:'New clean context with original scripts; not failed-context recovery or delayed hydration.'});
-  await healthyPage.goto('/projects/bending-active/',{waitUntil:'load'});
-  await expect.poll(()=>healthyPage.evaluate(()=>window.__story?.inspect().entry.phase),{timeout:WAIT}).toBe('entered');
-  await expect(healthyPage.locator('[data-entry-loader]')).toBeHidden();await expect(healthyPage.locator('[data-project-content]')).not.toHaveAttribute('inert','');await expect(healthyPage.locator('[data-cinematic-stage] canvas')).toHaveCount(1);expect(healthyRequests.some(url=>url.includes('source-layers.glb'))).toBe(true);expect(await healthyPage.evaluate(()=>window.__thesis.inspect().ready)).toBe(true);expect(requests).toEqual([]);
-  rows.push({phase:'independent-clean-reduced-entered',url:healthyPage.url()});
+  expect(requests).toEqual([]);
   nojs=await browser.newContext({baseURL,viewport,javaScriptEnabled:false});const native=await nojs.newPage();await native.goto('/projects/bending-active/');
   await expect(native.locator('[data-entry-loader]')).toBeHidden();await expect(native.locator('[data-project-content]')).not.toHaveAttribute('inert','');await expect(native.locator('[data-project-content]')).toBeVisible();
   const home=native.locator('[data-home-link]');await expect(home).toHaveAttribute('href','/#about');await expect(home).toBeVisible();rows.push({phase:'no-js-native-body',url:native.url(),loaderHidden:true});
  }catch(error){primary=error;throw error;}finally{
   let cleanupError=primary;
-  for(const cleanup of [async()=>{const path=info.outputPath('direct-SSR-composition.json');await writeFile(path,JSON.stringify({viewport,coverage:"Failed-script SSR pixels plus independent clean-context Reduced entry; no failed-context recovery or same-document delayed-hydration visual claim.",abortedScripts,failedScripts,requests,rows},null,2));await info.attach('direct-SSR-composition',{path,contentType:'application/json'});},()=>context.close(),()=>healthy?.close(),()=>nojs?.close()])try{await cleanup();}catch(error){cleanupError??=error;}
+  for(const cleanup of [async()=>{const path=info.outputPath('direct-SSR-composition.json');await writeFile(path,JSON.stringify({viewport,coverage:"Failed-script SSR pixels and no-JavaScript reading. Independent healthy source entry has separate scenarios; no failed-context recovery or delayed-hydration claim.",abortedScripts,failedScripts,requests,rows},null,2));await info.attach('direct-SSR-composition',{path,contentType:'application/json'});},()=>context.close(),()=>nojs?.close()])try{await cleanup();}catch(error){cleanupError??=error;}
   if(!primary&&cleanupError)throw cleanupError;
  }
+});
+
+// A clean context is an independent entry, not recovery of a failed-script
+// document. Keep its real renderer separate from the SSR/no-JS pixel audit.
+// These are the two healthy viewport sizes previously reached by that audit.
+for(const viewport of [{width:900,height:900},{width:844,height:390}])test(`independent clean entry paints the original source at ${viewport.width}x${viewport.height} under OS motion preferences`,async({browser,baseURL},info)=>{
+ const context=await browser.newContext({baseURL,viewport,reducedMotion:'reduce'}),requests=[];
+ try{
+  const page=await context.newPage();page.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)/.test(request.url()))requests.push(request.url());});
+  await page.goto('/projects/bending-active/',{waitUntil:'load'});
+  await expect.poll(()=>page.evaluate(()=>window.__story?.inspect().entry.phase),{timeout:WAIT}).toBe('entered');
+  await expect(page.locator('[data-entry-loader]')).toBeHidden();await expect(page.locator('[data-project-content]')).not.toHaveAttribute('inert','');await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);
+  expect(requests.some(url=>url.includes('source-layers.glb'))).toBe(true);expect(await page.evaluate(()=>window.__thesis.inspect().ready)).toBe(true);
+  const before=await page.evaluate(()=>window.__story.inspect().playback.activeSeconds);
+  await expect.poll(()=>page.evaluate(()=>window.__story.inspect().playback.activeSeconds),{timeout:WAIT}).toBeGreaterThan(before);
+  await writeFile(info.outputPath('independent-continuous-entry.json'),JSON.stringify({viewport,requests,coverage:'Clean context with original scripts and real source paint; independent of failed-script SSR.',phase:'entered'},null,2)+'\n');
+ }finally{await context.close();}
 });

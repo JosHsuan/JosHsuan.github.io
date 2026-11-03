@@ -116,7 +116,7 @@ test('timber shader cache separates source-axis attributes from retained local-c
  }finally{a.dispose();b.dispose();}
 });
 
-test('Caustics uses photo-reviewed dielectric optics while retaining source maps, other channels and composed hooks',()=>{
+test('Caustics approximates a photographed clear shell in one transparent pass while retaining IOR, maps and original source restoration',()=>{
  let calls=0;const texture=new T.DataTexture(new Uint8Array([240,220,190,255]),1,1),hook=()=>{calls++;},cacheKey=()=>'original-material-hook';
  const material=new T.MeshPhysicalMaterial({color:new T.Color(1,1,1),metalness:.31024929881095886,roughness:.14681440591812134,transmission:1,opacity:.1052631139755249,transparent:false,side:T.DoubleSide,ior:1.5,thickness:.025,attenuationDistance:6.2,attenuationColor:new T.Color(.2,.3,.4),clearcoat:.21,clearcoatRoughness:.44,map:texture,normalMap:texture,bumpMap:texture,bumpScale:.19,envMapIntensity:.73});
  material.onBeforeCompile=hook;material.customProgramCacheKey=cacheKey;
@@ -124,10 +124,11 @@ test('Caustics uses photo-reviewed dielectric optics while retaining source maps
  assert.equal(clone.type,'MeshPhysicalMaterial');assert.equal(clone.ior,1.5700000524520874);assert.equal(material.ior,1.5);
  // Three serializes IOR through its derived reflectivity getter. This exact
  // dependency changes with IOR; it is not a second material reinterpretation.
- close(clone.reflectivity,2.5*(clone.ior-1)/(clone.ior+1));assert.equal(clone.metalness,0);assert.equal(clone.roughness,.12);assert.equal(clone.transmission,1);assert.equal(clone.opacity,1);assert.equal(clone.thickness,.0015);assert.equal(clone.transparent,false);
- after.uuid=before.uuid;after.reflectivity=before.reflectivity;for(const key of ['metalness','roughness','opacity','thickness'])after[key]=before[key];assert.deepEqual(after,before,'Only the reviewed dielectric optical channels differ; source maps and remaining physical fields stay exact');
- assert.notEqual(clone.onBeforeCompile,hook);assert.equal(clone.customProgramCacheKey(),'original-material-hook|photo-surface-v1:clear-print:hc3dp-caustics');assert.equal(clone.map,texture);assert.equal(clone.normalMap,texture);assert.equal(clone.bumpMap,texture);assert.equal(clone.envMapIntensity,.73,'The recipe is not multiplied into the material');
- const shader={vertexShader:T.ShaderLib.physical.vertexShader,fragmentShader:T.ShaderLib.physical.fragmentShader};clone.onBeforeCompile(shader,f.renderer);assert.equal(calls,1);assert.match(shader.fragmentShader,/filament=photoLine/);assert.match(shader.fragmentShader,/normal=photoBump/);assert.equal(material.onBeforeCompile,hook);assert.equal(material.customProgramCacheKey,cacheKey);
+ close(clone.reflectivity,2.5*(clone.ior-1)/(clone.ior+1));assert.equal(clone.metalness,0);assert.equal(clone.roughness,.12);assert.equal(clone.transmission,0);assert.equal(clone.opacity,.28);assert.equal(clone.thickness,.0015);assert.equal(clone.transparent,true);assert.equal(clone.depthWrite,false);assert.equal(clone.forceSinglePass,true);assert.equal(clone.side,T.DoubleSide);
+ assert.equal(lease.inspect().opticalModel,'single-pass-clear-shell-alpha');
+ after.uuid=before.uuid;after.reflectivity=before.reflectivity;for(const key of ['metalness','roughness','opacity','thickness','transmission','transparent','depthWrite','forceSinglePass']){if(Object.hasOwn(before,key))after[key]=before[key];else delete after[key];}assert.deepEqual(after,before,'Only the reviewed optical/pass channels differ; source maps and remaining physical fields stay exact');
+ assert.notEqual(clone.onBeforeCompile,hook);assert.equal(clone.customProgramCacheKey(),'original-material-hook|photo-surface-v2:clear-print:hc3dp-caustics');assert.equal(clone.map,texture);assert.equal(clone.normalMap,texture);assert.equal(clone.bumpMap,texture);assert.equal(clone.envMapIntensity,.73,'The recipe is not multiplied into the material');
+ const shader={vertexShader:T.ShaderLib.physical.vertexShader,fragmentShader:T.ShaderLib.physical.fragmentShader};clone.onBeforeCompile(shader,f.renderer);assert.equal(calls,1);assert.match(shader.fragmentShader,/filament=photoLine/);assert.match(shader.fragmentShader,/normal=photoBump/);assert.match(shader.fragmentShader,/totalDiffuse \* \.08 \+ totalSpecular/);assert.match(shader.fragmentShader,/diffuseColor\.a=clamp\(opacity\*\(\.5\+1\.8\*shellEdge\)/);assert.equal(material.onBeforeCompile,hook);assert.equal(material.customProgramCacheKey,cacheKey);
  assert.equal(f.scene.environmentIntensity,.7);assert.equal(f.renderer.transmissionResolutionScale,1);assert.deepEqual(lease.inspect().lights.map(light=>light.intensity),[.18,1.9,.25,1.2]);assert(lease.inspect().materials[0].sourceTextureReferencesPreserved);unchanged();
  lease.dispose();assert.equal(f.nodes[0].material,material);assert.deepEqual(material.toJSON(),before);unchanged();
 });

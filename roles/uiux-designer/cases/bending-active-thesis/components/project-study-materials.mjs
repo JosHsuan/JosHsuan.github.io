@@ -1,19 +1,6 @@
 // Photo-informed microstructure on the original PBR shader. These inexpensive
 // procedural finishes are visual approximations, not scanned material maps.
 // No position, normal buffer, topology, texture or source callback is rewritten.
-import {ShaderChunk} from 'three';
-
-// Three's transparent-canvas transmission target starts at white/alpha .5.
-// Remove only that fallback contribution, preserving opaque transmitted source
-// geometry (alpha 1) and the ordinary physical reflection/specular channels.
-const transmissionMarker='vec3 attenuatedColor = transmittance * transmittedLight.rgb;';
-if(!ShaderChunk.transmission_pars_fragment.includes(transmissionMarker))throw Error('Review transparent transmission integration for this Three revision');
-const transparentTransmission=ShaderChunk.transmission_pars_fragment.replace(transmissionMarker,/* glsl */`
- float transparentCanvasWeight=clamp((1.0-transmittedLight.a)*2.0,0.0,1.0);
- transmittedLight.rgb=max(vec3(0.0),transmittedLight.rgb-vec3(transparentCanvasWeight));
- transmittedLight.a=1.0-transparentCanvasWeight;
- ${transmissionMarker}
-`);
 const recipes={
  'mode-s-of-making':'eps', 'mode-s-machine':'machine',
  'entrance-installation-art':'satin-metal', 'special-assemblies':'timber',
@@ -108,7 +95,18 @@ export function installPhotoSurface(material,{projectId}){
   shader.vertexShader=shader.vertexShader.replace('#include <common>',`#include <common>\nvarying vec3 vPhotoPosition;\n${familyDeclaration}`)
    .replace('#include <begin_vertex>',`#include <begin_vertex>\nvPhotoPosition=(modelMatrix*vec4(position,1.0)).xyz;\n${recipe==='machine'?'vPhotoFamily=_surface_family;':recipe==='timber'?`vPhotoAxis=normalize(mat3(modelMatrix)*${projectId==='project-caschlatsch'?'_fiber_axis':'vec3(0,0,1)'});`:''}`);
   shader.fragmentShader=shader.fragmentShader.replace('#include <common>',`#include <common>\n${helpers}\n${recipe==='machine'?'varying float vPhotoFamily;':recipe==='timber'?'varying vec3 vPhotoAxis;':''}`);
-  if(recipe==='clear-print')shader.fragmentShader=shader.fragmentShader.replace('#include <transmission_pars_fragment>',transparentTransmission);
+  if(recipe==='clear-print'){
+   // This source is an alpha shell approximation, not a diffuse white solid.
+   // Keep the physical IOR/specular channels, attenuate only diffuse scattering
+   // and retain stronger grazing-edge coverage without an offscreen pass.
+   const outgoing='vec3 outgoingLight = totalDiffuse + totalSpecular + totalEmissiveRadiance;';
+   if(!shader.fragmentShader.includes(outgoing))throw Error('Review clear-shell integration for this Three revision');
+   shader.fragmentShader=shader.fragmentShader.replace(outgoing,/* glsl */`
+    vec3 outgoingLight = totalDiffuse * .08 + totalSpecular + totalEmissiveRadiance;
+    float shellEdge=pow(1.0-saturate(abs(dot(normal,geometryViewDir))),3.0);
+    diffuseColor.a=clamp(opacity*(.5+1.8*shellEdge),0.0,1.0);
+   `);
+  }
   const texture=recipe==='eps'?eps:recipe==='machine'?machine:recipe==='timber'?timber:recipe==='satin-metal'?/* glsl */`
     vec4 finishField=photoNoiseGradient(vPhotoPosition*700.0);float finish=finishField.x;
     surfaceColor*=.96+.04*finish;surfaceRoughness+=.035*(finish-.5);
@@ -124,6 +122,6 @@ export function installPhotoSurface(material,{projectId}){
    diffuseColor.rgb=surfaceColor;metalnessFactor=surfaceMetalness;roughnessFactor=surfaceRoughness;
   `).replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>\nnormal=photoBump(normal,surfaceGradient);`);
  };
- material.customProgramCacheKey=()=>`${key}|photo-surface-v1:${recipe}:${projectId}`;
+ material.customProgramCacheKey=()=>`${key}|photo-surface-${recipe==='clear-print'?'v2':'v1'}:${recipe}:${projectId}`;
  return Object.freeze({recipe,source:'reviewed-project-photographs',method:recipe==='point-samples'?'round-depth-cued-source-samples':'procedural-pbr-microstructure',geometryDisplacement:false,textureAllocations:0,extraDrawCalls:0});
 }

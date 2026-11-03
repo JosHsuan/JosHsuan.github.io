@@ -7,17 +7,20 @@ const facts=page=>page.evaluate(()=>{const d=window.__globalBackground.inspect()
 async function nativeReading(page,chapter,progress,steps=1){
  const destination=await page.evaluate(({chapter,progress})=>{
   const nodes=[...document.querySelectorAll('[data-project-chapter]')],index=nodes.findIndex(n=>n.dataset.projectChapter===chapter),top=nodes[index].getBoundingClientRect().top+scrollY,end=(nodes[index+1]?.getBoundingClientRect().top??nodes[index].getBoundingClientRect().bottom)+scrollY;
-  return Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,top+(end-top)*progress-innerHeight*.5));
+  // Deliver the same native CSS-pixel destination in both directions. Fractional
+  // wheel deltas can truncate differently by direction in WebKit (a one-pixel
+  // difference is a different authored camera sample, not camera hysteresis).
+  return Math.round(Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,top+(end-top)*progress-innerHeight*.5)));
  },{chapter,progress});
  const y=await page.evaluate(()=>scrollY);await page.mouse.move(page.viewportSize().width*.5,page.viewportSize().height*.55);
  for(let step=1;step<=steps;step++){
-  const goal=y+(destination-y)*step/steps,current=await page.evaluate(()=>scrollY);await page.mouse.wheel(0,goal-current);
-  await page.waitForFunction(goal=>Math.abs(scrollY-goal)<=1,goal,{timeout:WAIT});
+  const goal=Math.round(y+(destination-y)*step/steps),current=await page.evaluate(()=>scrollY);await page.mouse.wheel(0,goal-current);
+  await page.waitForFunction(goal=>scrollY===goal,goal,{timeout:WAIT});
   if(steps>1)await frames(page,2); // preserve native scroll while recording intermediate authored views
  }
  await page.waitForFunction(({destination,chapter})=>{
   const s=window.__globalBackground?.inspect().driver.projectStudy?.scene,reading=s?.camera.reading;
-  if(Math.abs(scrollY-destination)>1||reading?.chapter!==chapter||s.motion?.mode!=='hold'||!s.motion.settled||s.motion.chapter!==chapter||s.resource?.view.chapter!==chapter||!s.resource.successfulPaint)return false;
+  if(scrollY!==destination||reading?.chapter!==chapter||s.motion?.mode!=='hold'||!s.motion.settled||s.motion.chapter!==chapter||s.resource?.view.chapter!==chapter||!s.resource.successfulPaint)return false;
   // Observe real native geometry and owner agreement; intrinsic control space
   // is reserved before acquisition, not repaired by draining arbitrary frames.
   const help=document.querySelector(`[data-project-model-help="${chapter}"]`);if(!help||help.hidden)return false;
@@ -42,7 +45,8 @@ for(const project of projects)for(const model of [project.model,...project.addit
  expect(b.scene.camera.value).toEqual({azimuth:0,elevation:0});expect(b.scene.gesture).toBeNull();
  const c=await nativeReading(page,last,.65),reverse=await nativeReading(page,first,.15);
  expect(c.scene.camera.intent.yawRad).toBeGreaterThan(a.scene.camera.intent.yawRad+.05);
- expect(reverse.scene.camera.intent.yawRad).toBeCloseTo(a.scene.camera.intent.yawRad,3); // only native pixel rounding; handheld does not alter 3D orientation
+ expect(reverse.y).toBe(a.y);expect(reverse.scene.camera.reading).toEqual(a.scene.camera.reading);
+ expect(reverse.scene.camera.intent.yawRad).toBeCloseTo(a.scene.camera.intent.yawRad,3); // handheld does not alter the repeated native camera sample
  expect(reverse.scene.acquisitions).toBe(1);expect(reverse.scene.disposals).toBe(0);expect(reverse.scene.resource.sourceRevision).toBe(model.sha256);
  expect(reverse.scene.resource.supportPoints).toBe(8);expect(reverse.scene.resource.drawnMeshes).toBe(model.meshes);
  await page.waitForFunction(time=>window.__globalBackground.inspect().driver.projectStudy.scene.camera.activeSeconds>time+.15,reverse.scene.camera.activeSeconds,{timeout:WAIT});

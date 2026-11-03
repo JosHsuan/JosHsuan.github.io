@@ -11,7 +11,10 @@ const profiles={
  'special-assemblies':{kind:'photo-surface',color:[.38,.235,.12],metalness:0,roughness:.72,environment:.45,hemisphere:.3,key:2,fill:.34,rim:.8},
  'project-caschlatsch':{kind:'photo-surface',color:[.62,.40,.20],metalness:0,roughness:.76,environment:.5,hemisphere:.28,key:2.2,fill:.38,rim:.95,ground:true},
  'dot-based-3d-printing':{kind:'points',color:[.74,.79,.82],environment:0},
- 'hc3dp-caustics':{kind:'native-physical',ior:1.5700000524520874,optics:{metalness:0,roughness:.12,transmission:1,thickness:.0015,opacity:1,transparent:false},environment:.7,hemisphere:.18,key:1.9,fill:.25,rim:1.2},
+ // The photographed clear print keeps its dielectric highlights and filament
+ // finish. Alpha is a display approximation: no screen-space refraction or
+ // projected caustics, and no second/backface transmission render target.
+ 'hc3dp-caustics':{kind:'native-physical',opticalModel:'single-pass-clear-shell-alpha',ior:1.5700000524520874,optics:{metalness:0,roughness:.12,transmission:0,thickness:.0015,opacity:.28,transparent:true,depthWrite:false,forceSinglePass:true},environment:.7,hemisphere:.18,key:1.9,fill:.25,rim:1.2},
 };
 const directions={key:{color:'#fff4e6',direction:[2.8,3.7,4]},fill:{color:'#b5ccec',direction:[-3,1,2]},rim:{color:'#a9c8ed',direction:[-2,2.5,-4]}};
 const activeScenes=new WeakMap(),activeSources=new WeakMap();
@@ -34,7 +37,7 @@ function frameFor(bounds){
 }
 const scalar=value=>Number.isFinite(value)?value:String(value);
 function materialFacts(original,material,surface){
- const result={sourceType:original.type,type:material.type,color:material.color?.toArray()??null,opacity:material.opacity,transparent:material.transparent,side:material.side,toneMapped:material.toneMapped,depthTest:material.depthTest,depthWrite:material.depthWrite,blending:material.blending};
+ const result={sourceType:original.type,type:material.type,color:material.color?.toArray()??null,opacity:material.opacity,transparent:material.transparent,forceSinglePass:material.forceSinglePass,side:material.side,toneMapped:material.toneMapped,depthTest:material.depthTest,depthWrite:material.depthWrite,blending:material.blending};
  for(const key of ['metalness','roughness','ior','transmission','thickness','attenuationDistance','clearcoat','clearcoatRoughness','size','sizeAttenuation','flatShading','envMapIntensity'])if(material[key]!==undefined)result[key]=typeof material[key]==='number'?scalar(material[key]):material[key];
  for(const key of ['emissive','attenuationColor'])if(material[key]?.isColor)result[key]=material[key].toArray();
  const textures=Object.entries(original).filter(([,value])=>value?.isTexture);
@@ -56,7 +59,7 @@ export function installProjectStudyAppearance({scene,source,renderer,bounds,proj
  const sourceShadowFlags=[];
  let previous=null,frame=null,previousShadow=null;
  const ownership={sourceGeometry:false,sourceTextures:false,sourceMaterials:false,replacementMaterials:!!profile,environmentTarget:!!profile&&profile.kind!=='points',lightRig:!!profile&&profile.kind!=='points'};
- const inspect=()=>({profileID:profile?projectId:'source-only',kind:profile?.kind??'source-only',phase:disposed?'disposed':'installed',disposed,renderables,materialClones:createdClones,ownedMaterialClones:disposed?0:replacements.size,materialsRestored:disposed,materials:finalMaterials??[...replacements].map(([original,material])=>materialFacts(original,material,surfaces.get(material))),
+ const inspect=()=>({profileID:profile?projectId:'source-only',kind:profile?.kind??'source-only',opticalModel:profile?.opticalModel??null,phase:disposed?'disposed':'installed',disposed,renderables,materialClones:createdClones,ownedMaterialClones:disposed?0:replacements.size,materialsRestored:disposed,materials:finalMaterials??[...replacements].map(([original,material])=>materialFacts(original,material,surfaces.get(material))),
   environment:{kind:profile&&profile.kind!=='points'?'room-pmrem':'none',generations,size:generations?128:0,atlas:generations?[384,512]:null,intensity:profile?.environment??null,rotationY:profile&&profile.kind!=='points' ? .35 : null,owned:!!environmentTarget&&!disposed,released:disposed&&generations>0},
   frame:frame?{center:frame.center.toArray(),radius:frame.radius}:null,
   lighting:{revision:lightingRevision,clock:'caller-active-seconds',loopSeconds:24,cadenceHz:12,shadowKey:'fixed'},

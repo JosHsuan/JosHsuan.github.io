@@ -248,7 +248,7 @@ test('all information surfaces share one glass owner and preserve readable sourc
   expect(row.background).toBe(navigation[0].background);
   // Each refracting group has its own bounded map. Compare the common native
   // diffusion while keeping each unique SVG URL on its sole decorative owner.
-  const diffusion=value=>value.replace(/url\([^)]*\)\s*/g,'');
+  const diffusion=value=>value.replace(/url\([^)]*\)\s*/g,'').trim();
   expect(row.owners.map(owner=>diffusion(owner.value))).toEqual(navigation[0].owners.map(owner=>diffusion(owner.value)));
  }
  const papers=await page.locator('[data-source-diagram] [data-choreography="diagram"]').evaluateAll(readMaterial);

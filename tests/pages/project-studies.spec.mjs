@@ -37,7 +37,7 @@ function sourceDraw(state,model,viewport){
   const center=model.bounds.min.map((value,index)=>(value+model.bounds.max[index])*.5);
   for(const light of look.lights.filter(light=>light.type==='DirectionalLight')){expect(light.targetInScene).toBe(true);expect(light.target).toEqual(center);expect(light.castShadow).toBe(['entrance-installation-art','project-caschlatsch'].includes(id)&&light.role==='key');}
  }
- if(id==='hc3dp-caustics')expect(look.materials[0]).toMatchObject({type:'MeshPhysicalMaterial',ior:1.5700000524520874,metalness:0,roughness:.12,transmission:1,opacity:1,transparent:false,side:2,thickness:.0015});
+ if(id==='hc3dp-caustics')expect(look.materials[0]).toMatchObject({type:'MeshPhysicalMaterial',ior:1.5700000524520874,metalness:0,roughness:.12,transmission:0,opacity:.28,transparent:true,depthWrite:false,forceSinglePass:true,side:2,thickness:.0015});
  const intent=resource.view.cameraIntent;
  const view=intent?{yaw:intent.yawRad,pitch:intent.pitchRad,fov:intent.fovDeg}:model.views?.[resource.view.chapter];
  if(view){

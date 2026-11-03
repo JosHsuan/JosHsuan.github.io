@@ -20,7 +20,7 @@ async function source(page,info,receipt,image,id){
  const name=image.src.split('/').at(-1).replace('.webp',''),row={name,...await figure.evaluate(boxes),state:await facts(page)};receipt.rows.push(row);await page.screenshot({path:info.outputPath(`${name}.png`),scale:'device'});nativeGuard(row.state,id);
  expect(new URL(row.image.src).pathname).toBe(image.src);expect(row.image.width).toBe(image.width);expect(row.image.height).toBe(image.height);expect(row.image.fit).toBe('contain');if(id==='results')expect(row.image.rect.width).toBeLessThanOrEqual(1024);expect(Math.abs(row.image.rect.width/image.width-row.image.rect.height/image.height)).toBeLessThan(1/image.height);expect(row.documentWidth).toBeLessThanOrEqual(row.viewport.width);expect(row.image.rect.left).toBeGreaterThanOrEqual(0);expect(row.image.rect.right).toBeLessThanOrEqual(row.viewport.width);expect(row.image.rect.bottom).toBeGreaterThan(0);expect(row.image.rect.top).toBeLessThan(row.viewport.height);
  for(const plane of row.planes)expect(overlap(row.image.rect,plane.rect),`${name}: ${plane.kind}`).toBe(0);
- expect(row.caption.text).toBe(image.caption);expect(row.caption.credit).toBe(image.credit);expect(row.caption.rect.height).toBeGreaterThan(0);await expect(img).toHaveAttribute('alt',image.alt);await expect(img.locator('xpath=ancestor::a')).toHaveCount(0);await expect(figure.locator('figcaption > a')).toHaveCount(0);
+ expect(row.caption.text).toBe(image.caption);expect(row.caption.credit).toBe(image.credit);expect(row.caption.rect.height).toBeGreaterThan(0);await expect(img).toHaveAttribute('alt',image.alt);await expect(img.locator('xpath=ancestor::*[self::a or self::button]')).toHaveCount(0);await expect(figure.locator('figcaption a,figcaption button')).toHaveCount(0);
  await expect(page.locator('[data-project-media-active],[data-project-model-active]')).toHaveCount(0);
  const caption=figure.locator('figcaption'),cy=await caption.evaluate(n=>Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,n.getBoundingClientRect().top+scrollY-150)));await wheel(page,cy);await expect.poll(()=>page.locator('[data-information-moving="true"]').count(),{timeout:WAIT}).toBe(0);const reading={name:`${name}-caption`,...await figure.evaluate(boxes)};receipt.rows.push(reading);await page.screenshot({path:info.outputPath(`${name}-caption.png`),scale:'device'});
  for(const owner of reading.chrome)expect(owner.count).toBe(1);expect(reading.caption.rect.left).toBeGreaterThanOrEqual(0);expect(reading.caption.rect.right).toBeLessThanOrEqual(reading.viewport.width);if(reading.caption.rect.height<=reading.viewport.height-300){expect(reading.caption.rect.top).toBeGreaterThanOrEqual(0);expect(reading.caption.rect.bottom).toBeLessThanOrEqual(reading.viewport.height);for(const owner of reading.chrome)for(const box of owner.boxes)expect(overlap(reading.caption.rect,box)).toBe(0);}
@@ -53,13 +53,13 @@ test('Dot native prototypes and documentary reading remain complete with continu
   await source(page,info,receipt,project.hero,'overview');
   // Preserve the original System technical plate and separate form photograph roles.
   // Documentary source identity is checked without claiming offscreen pixel readability.
-  await expect(page.locator('[data-evidence-source-link]')).toHaveCount(3);
+  await expect(page.locator('[data-evidence-source-link]')).toHaveCount(0);
   for(const image of plates){
    const img=page.locator(`[data-project-evidence-image][src="${image.src}"]`),figure=img.locator('xpath=ancestor::figure[1]');
    await expect(img).toHaveCount(1);await expect(img).toHaveAttribute('alt',image.alt);await expect(img).toHaveAttribute('width',String(image.width));await expect(img).toHaveAttribute('height',String(image.height));
    await expect(figure).toHaveAttribute('data-study-evidence-layout',image.purpose==='diagram'?'full':'pair');await expect(figure).toHaveAttribute('data-study-evidence-role',image.purpose==='diagram'?'technical-plate':'photograph');
-   await expect(img.locator('xpath=ancestor::a')).toHaveCount(0);
-   await expect(figure.locator('figcaption > p')).toHaveText(image.caption);await expect(figure.locator('figcaption > span:not([data-information-skin])')).toHaveText(image.credit);await expect(figure.locator('[data-evidence-source-link]')).toHaveCount(0);
+   await expect(img.locator('xpath=ancestor::*[self::a or self::button]')).toHaveCount(0);
+   await expect(figure.locator('figcaption > p')).toHaveText(image.caption);await expect(figure.locator('figcaption > span:not([data-information-skin])')).toHaveText(image.credit);await expect(figure.locator('a,button')).toHaveCount(0);
   }
   for(const image of project.sections.find(s=>s.id==='results').media)await source(page,info,receipt,image,'results');
   await resultsReading(page,info,receipt);

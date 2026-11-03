@@ -29,7 +29,7 @@ integration contract. Implementation and acceptance remain separate records.
   performance principle to verified derivatives, source-appropriate materials,
   cached lighting and bounded GPU residency; it is not evidence that our
   different models share that project's size or performance.
-- Local `sites` and `r3f-animation` skills informed implementation. Keep the
+- Local `sites`, `r3f-animation` and `r3f-shaders` skills informed implementation. Keep the
   existing Three.js architecture: discrete events set goals, transient values
   stay outside React state, and one existing clock owns interpolation. No new
   Fiber dependency, second scheduler, hosted service or paid feature is needed.
@@ -98,6 +98,13 @@ strip direction. Surface roughness, colour variation and microstructure must
 describe the photographed material, not conceal it beneath a uniform clay
 shader. Do not invent CAD fixtures or convert point-path data into a solid.
 Original geometry and source asset bytes remain protected.
+
+HC3DP uses a photographed clear-print shell approximation: one transparent
+physical-material pass, restrained diffuse scattering, filament normals and
+stronger edge coverage. This preserves the complete dense source and dielectric
+highlights without a screen-space transmission target. It does not simulate
+optical refraction or projected caustics. See the
+[camera/material tradeoff](../../../animation-cinematographer/research/2026-11-03-HC_CLEAR_SHELL_TRADEOFF.md).
 
 ## Acceptance
 

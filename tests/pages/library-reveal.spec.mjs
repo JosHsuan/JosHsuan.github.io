@@ -33,7 +33,7 @@ test('the original library grows bottom-up in 60–160 mm order and stops after 
  }finally{await page.clock.resume();}
 });
 
-test('library departure closes its request, re-entry starts a fresh sequence and Reduced restores every source trace',async({page})=>{
+test('library departure closes its request and re-entry completes the source sequence under OS motion preferences',async({page})=>{
  test.setTimeout(scenarioTimeout(120000));await page.clock.install();await loadScene(page);await expect(library(page).locator('[data-library-trace]')).toHaveCount(11,{timeout:WAIT});
  await page.clock.pauseAt(new Date(Date.now()+3600000));
  try{
@@ -42,11 +42,13 @@ test('library departure closes its request, re-entry starts a fresh sequence and
   expect(cancelled.reveal.history.at(-1)).toMatchObject({id:first.reveal.items[0].id,status:'cancelled',reason:'offscreen'});expect(cancelled.paths.every(path=>path.dash==='none'&&path.visibility==='visible')).toBe(true);
   await show(page);await page.clock.runFor(160);const again=await sample(page);expect(again.reveal.items[0].id).toBeGreaterThan(first.reveal.items[0].id);expect(again.reveal.items[0].status).toBe('playing');
   await page.emulateMedia({reducedMotion:'reduce'});
-  // Media-query delivery and React publication can follow the emulation reply.
-  // Wait for the actual director acknowledgment while advancing its clock.
-  await expect.poll(async()=>{await page.clock.runFor(16);return page.evaluate(()=>window.__story.inspect().playback.reducedMotion);},{timeout:WAIT}).toBe(true);
-  const reduced=await sample(page);
-  expect(reduced.reveal.history.at(-1)).toMatchObject({id:again.reveal.items[0].id,status:'completed',reason:'reduced'});expect(reduced.paths.every(path=>path.dash==='none'&&path.visibility==='visible')).toBe(true);expect(reduced.reveal.open).toEqual([]);
-  expect(reduced.reveal.history.map(event=>event.status)).toEqual(['requested','cancelled','requested','completed']);
+  expect(await page.evaluate(()=>matchMedia('(prefers-reduced-motion: reduce)').matches)).toBe(true);
+  await page.clock.runFor(160);const preferred=await sample(page);
+  expect(await page.evaluate(()=>window.__story.inspect().playback.reducedMotion)).toBe(false);
+  expect(preferred.reveal.items[0].status).toBe('playing');expect(preferred.reveal.items[0].id).toBe(again.reveal.items[0].id);
+  expect(preferred.paths).not.toEqual(again.paths);
+  await page.clock.fastForward(4000);const complete=await sample(page);
+  expect(complete.reveal.history.at(-1)).toMatchObject({id:again.reveal.items[0].id,status:'completed',reason:'finished'});expect(complete.paths.every(path=>path.dash==='none'&&path.visibility==='visible')).toBe(true);expect(complete.reveal.open).toEqual([]);
+  expect(complete.reveal.history.map(event=>event.status)).toEqual(['requested','cancelled','requested','completed']);
  }finally{await page.clock.resume();}
 });
