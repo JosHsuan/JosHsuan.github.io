@@ -331,13 +331,13 @@ test('the original Dot source supports native drag and keyboard inspection, retu
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
  await page.goto(route(dot));await entered(page);const control=await modelChapter(page,dot);
  const chapter=dot.model.chapters[0],state=page.locator(`[data-project-model-state="${chapter}"]`),help=page.locator(`[data-project-model-help="${chapter}"]`),reset=page.locator(`[data-project-model-reset="${chapter}"]`),chapterOrder=['overview',...dot.sections.map(section=>section.id),'credits'];
- const semanticChapter=async(wanted,paused)=>{
+ const semanticChapter=async wanted=>{
   await expect.poll(()=>page.evaluate(()=>{
    const owner=window.__globalBackground.inspect().driver.projectStudy.chapters;
-   return{chapter:owner.chapter,paused:owner.paused,total:owner.chapters,disposed:owner.disposed,root:document.querySelector('[data-project-study]').dataset.projectActiveChapter,current:[...document.querySelectorAll('[data-project-chapter-link][aria-current="location"]')].map(node=>node.dataset.projectChapterLink),counter:document.querySelector('[data-project-chapter-count]').textContent};
-  }),{timeout:WAIT}).toEqual({chapter:wanted,paused,total:chapterOrder.length,disposed:false,root:wanted,current:[wanted],counter:`${String(chapterOrder.indexOf(wanted)+1).padStart(2,'0')} / ${String(chapterOrder.length).padStart(2,'0')}`});
+   return{chapter:owner.chapter,hasPauseControl:Object.hasOwn(owner,'paused'),total:owner.chapters,disposed:owner.disposed,root:document.querySelector('[data-project-study]').dataset.projectActiveChapter,current:[...document.querySelectorAll('[data-project-chapter-link][aria-current="location"]')].map(node=>node.dataset.projectChapterLink),counter:document.querySelector('[data-project-chapter-count]').textContent};
+  }),{timeout:WAIT}).toEqual({chapter:wanted,hasPauseControl:false,total:chapterOrder.length,disposed:false,root:wanted,current:[wanted],counter:`${String(chapterOrder.indexOf(wanted)+1).padStart(2,'0')} / ${String(chapterOrder.length).padStart(2,'0')}`});
  };
- await semanticChapter(chapter,false);await expect(state).toHaveAttribute('data-project-model-availability','ready');await expect(help).toBeVisible();await expect(reset).toBeHidden();
+ await semanticChapter(chapter);await expect(state).toHaveAttribute('data-project-model-availability','ready');await expect(help).toBeVisible();await expect(reset).toBeHidden();
  await control.evaluate(node=>node.focus({preventScroll:true}));await control.press('ArrowLeft');
  await expect.poll(async()=>(await facts(page)).camera.value.azimuth,{timeout:WAIT}).toBeGreaterThan(.01);
  await control.press('Home');await expect.poll(()=>inspection(page)).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});
@@ -353,8 +353,8 @@ test('the original Dot source supports native drag and keyboard inspection, retu
  await expect.poll(()=>inspection(page)).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});
  // Image captions are reading surfaces; model keyboard handlers must not own native links.
  const navigation=page.locator('[data-project-chapter-link="results"]');
- await navigation.focus();await navigation.press('Enter');await semanticChapter('results',false);
- await modelChapter(page,dot);await semanticChapter(chapter,false);
+ await navigation.focus();await navigation.press('Enter');await semanticChapter('results');
+ await modelChapter(page,dot);await semanticChapter(chapter);
  const point=await pressSource(page,control),dx=point.x<page.viewportSize().width*.6?60:-60;
  await page.mouse.move(point.x+dx,point.y+12,{steps:6});
  await expect.poll(async()=>Math.abs((await facts(page)).camera.value.azimuth),{timeout:WAIT}).toBeGreaterThan(.01);
@@ -389,7 +389,7 @@ test('the original Dot source supports native drag and keyboard inspection, retu
  const running=await facts(page);await page.emulateMedia({reducedMotion:'reduce'});await frames(page,8);
  await expect(stage(page).locator('canvas')).toHaveCount(1);sourceDraw(await facts(page),dot.model,page.viewportSize());
  expect((await facts(page)).camera.activeSeconds).toBeGreaterThan(running.camera.activeSeconds);
- await semanticChapter(chapter,false);await expect(state).toHaveAttribute('data-project-model-availability','ready');
+ await semanticChapter(chapter);await expect(state).toHaveAttribute('data-project-model-availability','ready');
  await page.emulateMedia({reducedMotion:'no-preference'});expect((await facts(page)).acquisitions).toBe(1);expect(errors).toEqual([]);
 
 });

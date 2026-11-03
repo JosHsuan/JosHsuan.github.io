@@ -155,3 +155,27 @@ random-reward mechanics. All eight cards appear deterministically.
   source and CI-gate checks, the empty-framework build and its 63-file public
   audit. This is separate from the 270-file selected application export and its
   browser qualification.
+- The rebuilt local application fingerprint is
+  `cca68624db7bf65b928d5f29e3a2ea59ae9f07e9170e9d767ddac66cbf1cd94c`.
+  Its release metadata predates the working HC material change; it is local
+  evidence only. The [native evidence QA record](animation-review/native-evidence-qa-20261103.json)
+  records 28 distinct passing conditions across Dot/HC hybrid media, HC narrative
+  and Entrance diagrams. Initial image-query failures overlapped a real model
+  acquisition even though the image responses had already completed. The checks
+  now observe actual current-chapter source paint before retaining the original
+  five-second image assertion. A WebKit control measurement occurred during
+  liquid deformation; it now observes the existing settled state before keeping
+  the unchanged 44-pixel minimum. Failed attempts remain in the record.
+- A Chromium failed-script SSR screenshot failed immediately despite complete
+  DOM/font/source checks. Its trace contained no model/HDR work or viewport
+  resize. Chromium now records native first-contentful-paint before its single
+  initial capture; WebKit retains its existing path. All six viewport/profile
+  cases passed with the original deadlines, source checks and screenshot count.
+  This adds actual paint evidence instead of retrying a failed capture.
+- Dot's semantic chapter assertion now requires the removed pause control to be
+  absent, while retaining chapter, navigation, keyboard, drag and touch checks.
+  The Bending source-click test chooses a five-point source interior within its
+  original ray budget and records/asserts the actual trusted pointerdown hit.
+  Its continuous camera, source ownership, comparison and buffer invariants
+  remain required. All six pointer/inspection cases passed across the three
+  browser profiles; no production motion was stopped for these checks.

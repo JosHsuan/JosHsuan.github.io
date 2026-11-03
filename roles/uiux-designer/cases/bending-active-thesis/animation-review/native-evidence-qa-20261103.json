@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-03",
+  "scope": "Dot and HC hybrid scenes, HC documentary narrative, and Entrance original diagram controls",
+  "status": "All 28 distinct scoped browser conditions have passing local evidence after test contract reconciliation; final candidate CI and publication verification remain separate.",
+  "artifact": {
+    "kind": "local-only integrated Pages build",
+    "artifactDigest": "cca68624db7bf65b928d5f29e3a2ea59ae9f07e9170e9d767ddac66cbf1cd94c",
+    "releaseMetadataCommit": "2152cac35272cac1af6dff545e080b96b68d67d0",
+    "workingChanges": "Includes the reviewed HC clear-shell material before its commit; this is not a deployed-artifact receipt."
+  },
+  "runs": [
+    {
+      "outputDirectory": "pages-test-results/media-quality-hybrid-final",
+      "profiles": ["chromium", "mobile-chromium"],
+      "tests": 24,
+      "passed": 22,
+      "failed": 2,
+      "durationMinutes": 4.4,
+      "failures": "Both HC narrative cases began their 5-second image assertion while the real model was still preparing. Downloads had completed; the first locator query was blocked. Retained traces preserve this failure."
+    },
+    {
+      "outputDirectory": "pages-test-results/media-quality-native-readiness",
+      "profiles": ["chromium", "webkit", "mobile-chromium"],
+      "tests": 12,
+      "passed": 11,
+      "failed": 1,
+      "durationMinutes": 2.5,
+      "failures": "WebKit Entrance measured a 43.532px label during whole-plane motion. Its snapshot reports data-information-moving=true and rotateX=0.781 degrees. All HC narrative cases and no-JavaScript checks passed."
+    },
+    {
+      "outputDirectory": "pages-test-results/media-quality-entrance-rest",
+      "profiles": ["chromium", "webkit", "mobile-chromium"],
+      "tests": 3,
+      "passed": 3,
+      "failed": 0,
+      "durationMinutes": 1.1,
+      "coverage": "Entrance primary keyboard, image, continuous-motion and 390/320-wide control checks, now measured after the actual information plane reports rest."
+    }
+  ],
+  "finalDistinctCoverage": {
+    "dotAndHcHybridDesktopAndMobile": 16,
+    "hcNarrativeAndNoJavaScriptAcrossThreeProfiles": 6,
+    "entrancePrimaryAndNoJavaScriptAcrossThreeProfiles": 6,
+    "passed": 28
+  },
+  "changes": [
+    "Removed stale expected image-opening link counts; verify zero image actions and no anchor/button wrappers while retaining exact pinned sources, dimensions, captions and credits.",
+    "After native scroll, await the actual current chapter and settled backdrop. A model chapter also requires ready, successfulPaint, completed firstDraw and matching source view chapter within the existing WAIT budget.",
+    "Retain the original 5-second native image assertion after source readiness.",
+    "Await the actual information-plane resting state before preserving the original minimum 44px control-height assertion."
+  ],
+  "unchanged": ["production implementation", "source bytes and geometry", "native wheel behavior", "15-second acquisition deadline", "45-second WAIT", "5-second image assertion", "original scenario deadlines", "minimum 44px control size"],
+  "evidenceLimits": "Local Windows Playwright Chromium, WebKit and emulated mobile Chromium. These checks do not establish physical-device performance, Linux CI acceptance or publication success. Passing source receipts are required by the tests; a subsequent artifact-output-only change persists their existing JSON attachment to the uploaded result directory."
+}

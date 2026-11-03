@@ -1,12 +1,16 @@
 import {test,expect} from '@playwright/test';
 import {WAIT} from './case-helpers.mjs';
+import {settleEvidenceChapter,retainEvidenceReadiness} from './native-evidence-helpers.mjs';
 const route='/projects/entrance-installation-art/';
-test('Entrance original plates support reversible keyboard focus, continuous motion and compact mobile reading',async({page})=>{
+test('Entrance original plates support reversible keyboard focus, continuous motion and compact mobile reading',async({page},info)=>{
+ const readiness=[];
+ try{
  await page.emulateMedia({reducedMotion:'reduce'});await page.goto(route);
  await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});
  const guides=page.locator('[data-entrance-diagram]');await expect(guides).toHaveCount(3);
  for(const guide of await guides.all()){
   await guide.scrollIntoViewIfNeeded();
+  readiness.push(await settleEvidenceChapter(page,guide));
   const image=guide.locator('[data-entrance-original]');await expect.poll(()=>image.evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
   const original=await image.getAttribute('src');await expect(guide.getByRole('link',{name:'Open complete source image'})).toHaveCount(0);
   const radios=guide.getByRole('radio');await radios.first().focus();await radios.first().press('ArrowRight');
@@ -27,10 +31,12 @@ test('Entrance original plates support reversible keyboard focus, continuous mot
  for(const width of [390,320]){
   await page.setViewportSize({width,height:844});
   const guide=guides.nth(1);await guide.scrollIntoViewIfNeeded();await guide.getByRole('radio').nth(2).check();
+  await expect(guide).toHaveAttribute('data-information-moving','false',{timeout:WAIT});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth)).toBe(true);
   for(const label of await guide.locator('label').all())expect((await label.boundingBox()).height).toBeGreaterThanOrEqual(44);
   if(width===390){const path=test.info().outputPath('entrance-joint-focus-mobile.png');await page.screenshot({path});await test.info().attach('entrance-joint-focus-mobile',{path,contentType:'image/png'});}
  }
+ }finally{await retainEvidenceReadiness(info,readiness);}
 });
 test('Entrance diagram choices and complete sources remain usable without JavaScript',async({browser,baseURL})=>{
  const context=await browser.newContext({baseURL,javaScriptEnabled:false,viewport:{width:390,height:844}});const page=await context.newPage();

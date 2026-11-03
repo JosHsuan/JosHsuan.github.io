@@ -116,7 +116,7 @@ test('a native hash navigation relinquishes its chapter anchor before later layo
  }finally{release();}
 });
 
-for(const viewport of [{width:320,height:844},{width:844,height:390}])test(`canonical SSR entry remains readable at ${viewport.width}x${viewport.height} with failed scripts`,async({browser,baseURL},info)=>{
+for(const viewport of [{width:320,height:844},{width:844,height:390}])test(`canonical SSR entry remains readable at ${viewport.width}x${viewport.height} with failed scripts`,async({browser,browserName,baseURL},info)=>{
  let primary;const rows=[],requests=[],abortedScripts=[],failedScripts=[];
  const context=await browser.newContext({baseURL,viewport,reducedMotion:'no-preference'});let nojs;
  try{
@@ -149,6 +149,17 @@ for(const viewport of [{width:320,height:844},{width:844,height:390}])test(`cano
    const fact=await frame.evaluate(readEntryComposition);rows.push({phase:forced?'forced-SSR':'normal-SSR',reducedMotion:'no-preference',fact});assertEntryComposition(fact);
    expect(await page.evaluate(()=>window.__story===undefined)).toBe(true);
    await expect(page.locator('[data-entry-return]')).toHaveAttribute('href','/#projects');
+   if(!forced&&browserName==='chromium'){
+    // A loaded DOM and fonts do not prove Chromium has submitted its initial
+    // content surface. Observe native paint before the single screenshot;
+    // this neither retries capture nor advances the page's own animations.
+    const paint=await page.evaluate(timeout=>new Promise((resolve,reject)=>{
+     let observer;const timer=setTimeout(()=>{observer?.disconnect();reject(Error('SSR first contentful paint was not observed'));},timeout);
+     observer=new PerformanceObserver(list=>{const entry=list.getEntries().find(item=>item.name==='first-contentful-paint');if(!entry)return;clearTimeout(timer);observer.disconnect();resolve({entry:entry.toJSON(),documentState:document.readyState,visibility:document.visibilityState,viewport:{width:innerWidth,height:innerHeight}});});
+     observer.observe({type:'paint',buffered:true});
+    }),WAIT);
+    rows.push({phase:'SSR-native-content-paint',paint});expect(paint.entry.name).toBe('first-contentful-paint');expect(paint.entry.entryType).toBe('paint');expect(paint.entry.startTime).toBeGreaterThan(0);expect(paint.documentState).toBe('complete');expect(paint.visibility).toBe('visible');expect(paint.viewport).toEqual(viewport);await expect(frame).toBeVisible();
+   }
    const path=info.outputPath(`direct-SSR-${forced?'forced':'normal'}.png`);await page.screenshot({path,scale:'device'});await info.attach(`direct-SSR-${forced?'forced':'normal'}`,{path,contentType:'image/png'});
    if(!forced&&fact.shortLandscape){
     await frame.locator('[data-research-entry-backdrop]').evaluate(node=>node.scrollIntoView({block:'center',behavior:'instant'}));

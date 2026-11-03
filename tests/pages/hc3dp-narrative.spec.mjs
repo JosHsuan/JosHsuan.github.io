@@ -1,6 +1,9 @@
 import {test,expect} from '@playwright/test';
 import {WAIT} from './case-helpers.mjs';
-test('HC3DP presents observed light, readable path evidence and explicit simulation limits',async({page})=>{
+import {settleEvidenceChapter,retainEvidenceReadiness} from './native-evidence-helpers.mjs';
+test('HC3DP presents observed light, readable path evidence and explicit simulation limits',async({page},info)=>{
+ const readiness=[];
+ try{
  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/projects/hc3dp-caustics/');
  await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});
  await page.evaluate(()=>document.fonts.ready);
@@ -13,7 +16,8 @@ test('HC3DP presents observed light, readable path evidence and explicit simulat
  for(const width of [1280,390]){
   await page.setViewportSize({width,height:900});
   for(const img of await evidence.all()){
-   await img.scrollIntoViewIfNeeded();await expect.poll(()=>img.evaluate(node=>node.complete&&node.naturalWidth>0)).toBe(true);
+   await img.scrollIntoViewIfNeeded();readiness.push({width,...await settleEvidenceChapter(page,img)});
+   await expect.poll(()=>img.evaluate(node=>node.complete&&node.naturalWidth>0)).toBe(true);
    await expect(img).toBeVisible();
    const box=await img.boundingBox();expect(box.x).toBeGreaterThanOrEqual(0);expect(box.x+box.width).toBeLessThanOrEqual(width);
    await expect(img.locator('xpath=ancestor::a')).toHaveCount(0);
@@ -22,6 +26,7 @@ test('HC3DP presents observed light, readable path evidence and explicit simulat
   const band=page.locator('[data-project-chapter="system"] [data-study-evidence-layout]').first().locator('..');
   const path=test.info().outputPath(`hc3dp-path-evidence-${width}.png`);await band.screenshot({path});await test.info().attach(`hc3dp-path-evidence-${width}`,{path,contentType:'image/png'});
  }
+ }finally{await retainEvidenceReadiness(info,readiness);}
 });
 test('HC3DP evidence and truthful labels remain available without JavaScript',async({browser,baseURL})=>{
  const context=await browser.newContext({baseURL,javaScriptEnabled:false,viewport:{width:390,height:844}});const page=await context.newPage();

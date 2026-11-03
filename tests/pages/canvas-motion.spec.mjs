@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {writeFile} from 'node:fs/promises';
 import {WAIT,scenarioTimeout,settle,centerStudy,frames,loadScene,expectIdle,surface} from './case-helpers.mjs';
 
 const stageCanvas='[data-cinematic-stage] canvas';
@@ -106,7 +107,17 @@ test('with OS Reduced, a real visible source hit still compares geometry through
   const writes=new WeakMap();window.__stageStorageWrites=canvas=>writes.get(canvas)??0;
   // Autonomous source playback may advance between a host snapshot and the
   // native click. Observe the source actually painted at pointer ownership.
-  window.addEventListener('pointerdown',()=>{const scene=window.__thesis?.inspect();if(scene)window.__sourcePointerReceipt={id:scene.representation.id,index:scene.representation.index};},{capture:true,passive:true});
+  window.__sourcePointerEvents=[];
+  const observePointer=(event,phase)=>{
+   const scene=window.__thesis?.inspect(),story=window.__story?.inspect();if(!scene)return;
+   const hit=window.__thesis.hitTest(event.clientX,event.clientY);
+   const receipt={id:scene.representation.id,index:scene.representation.index,hit,phase,type:event.type,at:event.timeStamp,point:{x:event.clientX,y:event.clientY},engaged:story.modelEngaged,selection:story.sourceSelection,held:story.modelHeldSource,pressure:scene.renderPressure,targetProtected:!!event.target.closest?.('button,a,select,input,summary,[data-protect],[data-feedback-plane]')};
+   window.__sourcePointerEvents.push(receipt);if(event.type==='pointerdown'&&phase==='capture')window.__sourcePointerReceipt=receipt;
+  };
+  for(const type of ['pointerdown','pointerup','pointercancel']){
+   window.addEventListener(type,event=>observePointer(event,'capture'),{capture:true,passive:true});
+   window.addEventListener(type,event=>observePointer(event,'bubble'),{passive:true});
+  }
   for(const axis of ['width','height']){
    const descriptor=Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype,axis);
    Object.defineProperty(HTMLCanvasElement.prototype,axis,{...descriptor,set(value){writes.set(this,(writes.get(this)??0)+1);descriptor.set.call(this,value);}});
@@ -136,7 +147,19 @@ test('with OS Reduced, a real visible source hit still compares geometry through
     candidates.push({x,y,distance:Math.hypot(u-.5,w-.5)});
    }
    candidates.sort((a,b)=>a.distance-b.distance);let found=null,used=0;
-   for(const candidate of candidates){if(used>=Math.min(remaining,60))break;used++;const hit=window.__thesis.hitTest(candidate.x,candidate.y);if(hit?.source&&hit.chapterId==='system'){found={x:candidate.x,y:candidate.y};break;}}
+   // The camera remains live between the ray observation and trusted input.
+   // Choose a small interior footprint, not a grazing edge that a subpixel
+   // handheld shift can move away before pointerdown. Keep the same ray budget.
+   for(const candidate of candidates){
+    let interior=true;
+    for(const [dx,dy] of [[0,0],[-3,0],[3,0],[0,-3],[0,3]]){
+     if(used>=Math.min(remaining,60)){interior=false;break;}
+     used++;const hit=window.__thesis.hitTest(candidate.x+dx,candidate.y+dy);
+     if(!hit?.source||hit.chapterId!=='system'){interior=false;break;}
+    }
+    if(interior){found={x:candidate.x,y:candidate.y};break;}
+    if(used>=Math.min(remaining,60))break;
+   }
    return {point:found,rays:used,eligible:candidates.length,docY:scrollY,chapter:story.canvasPlacement.chapter,mode:story.canvasPlacement.mode,presented:scene.canvasPresented,slot:{left:slot.left,right:slot.right,top:slot.top,bottom:slot.bottom}};
   },360-rays);
   rays+=result.rays;attempts.push(result);point=result.point;
@@ -162,7 +185,9 @@ test('with OS Reduced, a real visible source hit still compares geometry through
  expect(ownership).toMatchObject({targetPresent:true,ownsPoint:true,protected:false,active:'true',disabled:'false',source:true,chapter:'system'});
  const resources=()=>page.evaluate(()=>{const scene=window.__thesis.inspect(),canvas=document.querySelector('[data-cinematic-stage] canvas');return {id:scene.representation.id,index:scene.representation.index,source:scene.source,diagrams:scene.diagramSource,budget:scene.renderBudget,initialization:scene.initialization,native:[canvas.width,canvas.height],writes:window.__stageStorageWrites(canvas),docY:scrollY};});
  const before=await resources();await page.mouse.click(point.x,point.y);await settle(page);const after=await resources(),pressed=await page.evaluate(()=>window.__sourcePointerReceipt);
- expect(pressed).toBeTruthy();expect(after.id).not.toBe(pressed.id);expect(after.index).toBe((pressed.index+1)%4);
+ const clickPath=test.info().outputPath('native-source-click.json');await writeFile(clickPath,JSON.stringify({before,after,events:await page.evaluate(()=>window.__sourcePointerEvents)},null,2)+'\n');
+ await test.info().attach('native-source-click',{path:clickPath,contentType:'application/json'});
+ expect(pressed).toBeTruthy();expect(pressed.hit).toMatchObject({source:true,chapterId:'system',index:pressed.index});expect(after.id).not.toBe(pressed.id);expect(after.index).toBe((pressed.index+1)%4);
  expect(after.source).toEqual(before.source);expect(after.diagrams).toEqual(before.diagrams);expect(after.initialization).toEqual(before.initialization);
  expect(after.budget).toEqual(before.budget);expect(after.native).toEqual(before.native);expect(after.writes).toBe(before.writes);expect(after.docY).toBe(before.docY);
  expect(await page.evaluate(el=>document.querySelector('[data-cinematic-stage] canvas')===el,canvas)).toBe(true);
