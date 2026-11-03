@@ -49,7 +49,8 @@ for(const project of projects)for(const model of [project.model,...project.addit
  // Bounded observational receipts, not GPU duration or a physical-device FPS claim.
  const frameSamples=await page.evaluate(()=>new Promise(resolve=>{const rows=[];const read=now=>{const d=window.__globalBackground.inspect().driver,s=d.projectStudy.scene,r=s.resource;rows.push({now,draws:r.draws,cameraFits:r.cameraFits,activeSeconds:s.camera.activeSeconds,compositor:{...r.compositor},canvasTransform:document.querySelector('[data-project-study-canvas]').style.transform,renderSubmit:r.renderSubmit,allocations:r.budget.allocations,pixels:r.budget.budget.width*r.budget.budget.height});if(rows.length===9)resolve(rows);else requestAnimationFrame(read);};requestAnimationFrame(read);}));
  const idle=await facts(page);expect(idle.y).toBe(reverse.y);expect(idle.scene.camera.reading).toEqual(reverse.scene.camera.reading);
- if(model.primitive==='points')expect(idle.scene.resource.draws).toBe(reverse.scene.resource.draws);else expect(idle.scene.resource.draws).toBeGreaterThan(reverse.scene.resource.draws);expect(idle.scene.resource.cameraFits).toBe(reverse.scene.resource.cameraFits);
+ expect(idle.scene.resource.draws).toBe(reverse.scene.resource.draws);expect(idle.scene.resource.cameraFits).toBe(reverse.scene.resource.cameraFits);
+ expect(idle.scene.resource.appearance.lighting.revision).toBe(reverse.scene.resource.appearance.lighting.revision);
  expect(idle.scene.camera.intent).toEqual(reverse.scene.camera.intent);
  expect(new Set(frameSamples.map(row=>row.canvasTransform)).size).toBeGreaterThan(1);
  expect(frameSamples.at(-1).compositor.writes).toBeGreaterThan(frameSamples[0].compositor.writes);

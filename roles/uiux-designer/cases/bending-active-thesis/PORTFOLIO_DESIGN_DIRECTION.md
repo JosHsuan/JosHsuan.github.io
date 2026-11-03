@@ -83,6 +83,14 @@ Motion follows a continuous authored path and lighting has a specific key/rim
 purpose, rather than random changes. Transitions use the existing site clock
 and at most one resident showcase renderer.
 
+Home uses the authored light sweep. Project reading stages keep a stable
+photographic key and camera-dependent fill/rim; settled reading reuses the exact
+source render while the independent compositor handheld continues. This avoids
+re-shading dense CAD geometry for an idle light sweep and keeps native reading
+responsive. It is an explicit presentation tradeoff, not automatic motion
+suppression. Scroll, inspection and Home camera changes still draw the real
+geometry; source resolution and original bytes stay intact.
+
 For every material, record a source photograph or source material identity.
 Mode/s separates EPS workpieces from silver extrusions/rails, blue printed
 components, black drive parts and the cutting tool. XR bamboo follows its real

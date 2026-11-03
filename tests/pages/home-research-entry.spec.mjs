@@ -60,12 +60,26 @@ test('Home introduction cycles real source models on one bounded renderer with l
 });
 
 test('Home reveals all eight cards in native forward and reverse order with half-screen section joins',async({page},info)=>{
- test.setTimeout(scenarioTimeout(120000));await page.goto('/');await entered(page);
+ test.setTimeout(scenarioTimeout(120000));
+ // A rounded final scrollY can be observed before the compositor completes a
+ // smooth section join. Observe native completion before starting a new gesture;
+ // no delay, repeated wheel delivery or application-clock control is involved.
+ await page.addInitScript(()=>{
+  const evidence=window.__homeNativeScroll={last:null,end:null};
+  for(const type of ['scroll','scrollend'])window.addEventListener(type,()=>{
+   const sample={y:scrollY,time:performance.now()};if(type==='scroll')evidence.last=sample;else evidence.end=sample;
+  },{passive:true});
+ });
+ const joined=async y=>{
+  await expect.poll(()=>page.evaluate(()=>scrollY),{timeout:WAIT}).toBeCloseTo(y,0);
+  await page.waitForFunction(()=>{const {last,end}=window.__homeNativeScroll;return end&&end.y===scrollY&&end.time>=(last?.time??0);},null,{timeout:WAIT});
+ };
+ await page.goto('/');await entered(page);
  await expect(page.locator('[data-home-deck]')).toHaveAttribute('data-deck-ready','');
  const range=await deck(page);expect(range.count).toBe(8);
  await page.evaluate(()=>{window.__deckEvents=[];for(const type of ['portfolio:card-enter','portfolio:card-leave'])document.querySelector('[data-home-deck]').addEventListener(type,event=>window.__deckEvents.push({type,id:event.target.dataset.deckCard,index:event.detail.index}));});
  await wheelTo(page,Math.round(range.top-range.viewport*.49));
- await expect.poll(()=>page.evaluate(()=>scrollY),{timeout:WAIT}).toBeCloseTo(range.top,0);
+ await joined(range.top);
  const seen=[];
  for(const i of [...Array(8).keys(),...Array.from({length:8},(_,j)=>7-j)]){
   const y=Math.round(range.top+i*(range.height-range.viewport)/7);await wheelTo(page,y);
@@ -80,12 +94,12 @@ test('Home reveals all eight cards in native forward and reverse order with half
  const events=await page.evaluate(()=>window.__deckEvents);expect(events.filter(event=>event.type==='portfolio:card-enter').map(event=>event.index)).toEqual([1,2,3,4,5,6,7,6,5,4,3,2,1,0]);
  expect(events.length).toBe(28);
  const end=range.top+range.height-range.viewport;
- await wheelTo(page,end+range.viewport*.51);await expect.poll(()=>page.evaluate(()=>scrollY),{timeout:WAIT}).toBeCloseTo(end+range.viewport,0);
+ await wheelTo(page,end+range.viewport*.51);await joined(end+range.viewport);
  await expect(page.locator('[data-portfolio-contact]')).toBeInViewport();
- await wheelTo(page,end+range.viewport*.49);await expect.poll(()=>page.evaluate(()=>scrollY),{timeout:WAIT}).toBeCloseTo(end,0);
+ await wheelTo(page,end+range.viewport*.49);await joined(end);
  await expect.poll(async()=>(await deck(page)).index).toBe(7);
  await wheelTo(page,range.top);await expect.poll(async()=>(await deck(page)).index).toBe(0);
- await wheelTo(page,range.top-range.viewport*.51);await expect.poll(()=>page.evaluate(()=>scrollY),{timeout:WAIT}).toBe(0);
+ await wheelTo(page,range.top-range.viewport*.51);await joined(0);
  await page.screenshot({path:info.outputPath('home-returned.png')});
 });
 

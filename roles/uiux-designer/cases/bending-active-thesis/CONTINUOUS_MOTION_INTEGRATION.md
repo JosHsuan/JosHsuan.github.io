@@ -51,7 +51,7 @@ random-reward mechanics. All eight cards appear deterministically.
 - Three native 888 × 1920 XR recordings and their posters are integrated from
   the original footage/edit, with original GIF/MP4 bytes preserved separately.
   See [XR_PHONE_QUALITY_REVIEW.md](XR_PHONE_QUALITY_REVIEW.md).
-- `pnpm check` passed under the pinned toolchain. The final portable application/
+- `pnpm check` passed under the pinned toolchain. The initial portable application/
   role run passed 708 checks with two pre-existing intentional skips; the
   independent CI-contract suite passed 163/163. These are local source checks,
   not publication evidence.
@@ -84,7 +84,38 @@ random-reward mechanics. All eight cards appear deterministically.
   scroll camera and 320-pixel reflow. Inline-image motion and real source-click
   comparison passed. Later source fixes address hidden pending acquisition and
   Connection figure decode reflow; their rebuilt acceptance is still separate.
-- Remaining: serial affected browser checks,
-  all three browser profiles, exact-commit CI, commit/push, same-artifact Pages
-  deployment and independent live verification. Historical counts must not be
-  reused as this candidate's evidence.
+- The source implementation and subsequent corrections are committed and pushed
+  through `96c0706166b8fae770bac223e7faf6862b613910`. Its
+  [CI run 41718674490](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/41718674490)
+  passed planning, quality, the Pages build, and both framework root/subpath
+  jobs. Quality records 712 passing application/role checks and two pre-existing
+  intentional skips, plus 9/9 framework source checks. The pre-install suite is
+  now dependency-free (162 checks); full decoded-geometry checks run after the
+  locked dependencies are installed. Browser jobs are a separate pending gate.
+- Rebuilt Chromium acceptance passed entry readiness and all five Project
+  preview cases, including real first draw, hidden pending work, source failure
+  and preference continuity. Connection figure dimensions now remain stable
+  before and after native image decode. The affected glass/material and outer
+  reading-plane round passed six cases: Home, Project, shared material,
+  refraction, reading/focus, and inline evidence under OS motion preferences.
+- Home now snaps only on an actual half-screen threshold crossing. Eight source
+  regressions cover small reversals, interrupted joins, restoration, scoped
+  instance events and focus transfer. Browser testing exposed an observer race:
+  rounded final scroll coordinates can precede native `scrollend`. Waiting for
+  that completion event before the next gesture passed the complete eight-card
+  forward/reverse sequence and both joins in Chromium, WebKit and mobile Chromium.
+  No fixed sleep, repeated input, changed deadline or relaxed assertion is used.
+- The downloaded `96c0706` CI export independently hashes to
+  `a60a27d052812f6f4140da7258f889a5d3e8aa7d7f4eb01f89e7b57420c3e49d`;
+  its ZIP SHA-256 matches GitHub's artifact digest. This identifies the candidate,
+  not a completed browser qualification or a publication.
+- A subsequent serial machine-camera run again reached its existing 180-second
+  case deadline on Windows software rendering, after the source, camera,
+  ownership and idle assertions and the actual screenshot. Reading-stage idle
+  lighting is therefore being changed to a stable photographic rig with
+  camera-dependent fill/rim. Continuous compositor handheld remains active;
+  Home retains timed light/lens motion. The next built acceptance must verify
+  zero idle redraws with continuing motion and unchanged source geometry.
+- Remaining: the complete three-profile CI gate, same-artifact Pages deployment
+  and independent live verification. Historical counts must not be reused as
+  this candidate's evidence.

@@ -60,7 +60,12 @@ export async function acquireProjectStudyScene({host,model,signal,presentation='
   if(intent!=null&&(!Number.isFinite(intent.yawRad)||!Number.isFinite(intent.pitchRad)||!Number.isFinite(intent.fovDeg)||!Number.isFinite(intent.zoom)))throw RangeError('Finite composed project camera intent required');
   const yaw=intent?.yawRad??((view.yaw??.72)+state.azimuth),pitch=Math.max(minimumPitch,Math.min(1.15,intent?.pitchRad??((view.pitch??.3)+state.elevation))),fov=intent?.fovDeg??view.fov??36,zoom=intent?.zoom??view.zoom??1;
   const lightingYaw=authored?Math.atan2(authored.position[0]-authored.target[0],authored.position[2]-authored.target[2]):yaw;
-  if(appearance?.update({activeSeconds:state.activeSeconds??0,yawRad:lightingYaw,showcaseLighting:state.showcaseShot?.lighting}))appearanceRevision++;
+  // Home's film animates light time. Reading stages use a stable photographic
+  // rig whose fill/rim follows the authored scroll camera; their independent
+  // compositor handheld stays continuous without re-shading a dense CAD source
+  // during reading rest. This is a presentation choice, never a performance or
+  // OS-preference switch, and leaves original source geometry untouched.
+  if(appearance?.update({activeSeconds:authored?(state.activeSeconds??0):0,yawRad:lightingYaw,showcaseLighting:state.showcaseShot?.lighting}))appearanceRevision++;
   // Continuous generic handheld is an honest 2D pan/roll, without parallax.
   // Its canvas owns only this transform; the parent stage still owns entry/exit.
   const micro=state.handheld??ZERO_HANDHELD;
