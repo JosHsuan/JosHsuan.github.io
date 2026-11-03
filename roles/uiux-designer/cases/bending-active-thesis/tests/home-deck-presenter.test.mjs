@@ -59,6 +59,17 @@ test('resumption, suspension and keyboard focus never force a section jump; disp
  f.root.contains=()=>true;f.root.ownerDocument.activeElement={matches:()=>true};f.at(800);assert.equal(f.moves.length,0);
  f.presenter.dispose();assert.equal(f.presenter.inspect().disposed,true);assert(f.cards.every(c=>c.attrs.inert===null&&c.attrs['aria-hidden']===null));assert.equal(f.at(2000),false);
 });
+
+test('small reversals within a section do not snap until native input crosses its half-screen threshold',()=>{
+ const f=setup();
+ for(const y of [13,37,61,85,109,85,61,37,13])f.at(y);
+ assert.equal(f.moves.length,0);
+ f.at(510);assert.equal(f.moves.at(-1).top,1000);f.at(600);f.at(550);
+ assert.equal(f.moves.length,1);f.at(490);assert.equal(f.moves.at(-1).top,0);
+ f.at(7200,{resumed:true});const count=f.moves.length;
+ for(const y of [7300,7250,7200])f.at(y);assert.equal(f.moves.length,count);
+ f.at(7090);assert.equal(f.moves.at(-1).top,6600);
+});
 test('scrolling a focused card away transfers focus to the revealed project without a second focusable card',()=>{
  const f=setup();const links=f.cards.map(card=>{const link={focus:options=>{assert.equal(options.preventScroll,true);f.root.ownerDocument.activeElement=link;}};card.contains=node=>node===link;card.querySelector=()=>link;return link;});
  f.at(1000,{resumed:true});f.root.ownerDocument.activeElement=links[0];f.at(1800,{resumed:true});

@@ -27,16 +27,16 @@ export function createHomeDeckPresenter({root,window:win,publisher,listen}){
  }
  function input({docY,ready=true,suspended=false,resumed=false}){
   if(disposed||!ready||suspended||!cards.length)return;
-  const end=top+height-viewport,direction=Math.sign(docY-previousY);previousY=docY;
+  const end=top+height-viewport,from=previousY,direction=Math.sign(docY-from);previousY=docY;
   if(snap!==null&&(Math.abs(docY-snap)<2||direction&&direction*Math.sign(snap-docY)<0))snap=null;
   // Only the two section joins snap, using the same threshold in both directions.
   // Keyboard focus and history restoration preserve the browser's native position.
   if(snap===null&&direction&&!resumed&&!(root.contains(root.ownerDocument.activeElement)&&root.ownerDocument.activeElement?.matches?.(':focus-visible'))){
    let destination=null;
-   if(direction>0&&docY>top-viewport*.5&&docY<top-2)destination=top;
-   if(direction<0&&docY<top-viewport*.5&&docY>2)destination=0;
-   if(direction>0&&docY>end+viewport*.5&&docY<end+viewport-2)destination=end+viewport;
-   if(direction<0&&docY>end+2&&docY<end+viewport*.5)destination=end;
+   if(direction>0&&from<=top-viewport*.5&&docY>top-viewport*.5&&docY<top-2)destination=top;
+   if(direction<0&&from>=top-viewport*.5&&docY<top-viewport*.5&&docY>2)destination=0;
+   if(direction>0&&from<=end+viewport*.5&&docY>end+viewport*.5&&docY<end+viewport-2)destination=end+viewport;
+   if(direction<0&&from>=end+viewport*.5&&docY>end+2&&docY<end+viewport*.5)destination=end;
    if(destination!==null){snap=destination;win.scrollTo({top:destination,behavior:'smooth'});}
   }
   target=clamp((docY-top)/Math.max(1,height-viewport),0,1)*(cards.length-1);
