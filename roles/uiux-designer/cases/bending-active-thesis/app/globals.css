@@ -93,20 +93,20 @@ img{max-width:100%}
 ::selection{background:var(--accent);color:var(--ink)}
 html[data-model-inspection] [data-story-root],html[data-model-inspection] [data-story-navigation],html[data-model-inspection] [data-page-masthead],html[data-model-inspection] [data-reading-tools]{visibility:hidden}
 html[data-model-inspection] [data-cinematic-scrim],html[data-model-inspection] [data-cinematic-vignette]{opacity:0!important}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:0s!important}}
+
 @media print{:root{color-scheme:light;--paper:#151b17;--muted:#333b35;--bg:#fff;--accent:#92300c;background:#fff;color:#151b17}body{background:#fff}a{text-decoration:underline}button,canvas{display:none!important}img{break-inside:avoid}}
 
 /* Choreography never hides source content; no-JS and reduced-motion remain readable. */
 [data-choreography]{transform-origin:50% 65%}
 html[data-cinematic-ready] [data-choreography]{translate:var(--choreo-x,0px) var(--choreo-y,0px) var(--choreo-z,0px);rotate:var(--choreo-rz,0deg);scale:var(--choreo-scale,1)}
 html[data-cinematic-static] [data-choreography]{translate:none!important;rotate:none!important;scale:none!important}
-@media(prefers-reduced-motion:reduce){[data-choreography]{translate:none!important;rotate:none!important;scale:none!important}}
+
 @media print{[data-choreography]{translate:none!important;rotate:none!important;scale:none!important}}
 
 html[data-cinematic-ready] [data-choreography]:not([data-choreography="heading"]){transform:perspective(1100px) rotateX(calc(var(--choreo-rx,0deg) + var(--feedback-x,0deg))) rotateY(calc(var(--choreo-ry,0deg) + var(--feedback-y,0deg)))}
 html[data-cinematic-ready] :is([data-choreography="photo"],[data-choreography="diagram"],[data-choreography="metric"],[data-choreography="glyph"]){filter:drop-shadow(0 var(--choreo-shadow,0px) calc(var(--choreo-shadow,0px) * 1.4) #0005)}
 html[data-cinematic-static] [data-choreography]{transform:none!important;filter:none!important}
-@media(prefers-reduced-motion:reduce){[data-choreography]{transform:none!important;filter:none!important}}
+
 
 span[data-choreography="nav"],span[data-choreography="caption"]{display:inline-block}
 
@@ -175,10 +175,7 @@ html [data-information-window][data-information-ready]:focus-within>[data-inform
 html[data-cinematic-ready] body [data-information-window][data-information-ready][data-information-moving=false],
 html[data-cinematic-static] body [data-information-window][data-information-ready]:not([data-information-nested]){transform:none!important}
 html[data-cinematic-static] [data-information-window]>[data-information-skin]{clip-path:inset(0 round var(--information-radius,0px))!important}
-@media(prefers-reduced-motion:reduce){
-  html[data-cinematic-ready] body [data-information-window][data-information-ready]:not([data-information-nested]){transform:none!important}
-  html [data-information-window]>[data-information-skin]{clip-path:inset(0 round var(--information-radius,0px))!important}
-}
+
 @media print{
   :root{--glass-background:transparent;--glass-navigation-background:transparent;--glass-backdrop:none;--glass-navigation-backdrop:none;--glass-shadow:none;--glass-navigation-shadow:none;--glass-border:#68756d;--glass-control-background:transparent;--glass-control-hover:transparent;--glass-foreground:#151b17;--glass-muted:#333b35;--glass-control-accent:#92300c}
   html[data-cinematic-ready] body [data-information-window][data-information-ready]:not([data-information-nested]){transform:none!important}
@@ -246,7 +243,7 @@ html [data-liquid-glass][data-liquid-mode="opaque"]>[data-liquid-skin]{
 }
 html [data-liquid-glass][data-liquid-mode="opaque"]>[data-liquid-skin]::before,
 html [data-liquid-glass][data-liquid-mode="opaque"]>[data-liquid-skin]::after{display:none}
-@media(prefers-reduced-motion:reduce){html [data-liquid-glass][data-liquid-ready]>[data-liquid-skin]{transform:none}}
+
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
   :root{--liquid-fill:var(--material-control-fallback);--liquid-native-backdrop:none;--liquid-border:var(--material-control-border)}
   html [data-liquid-glass][data-liquid-ready]>[data-liquid-skin]{-webkit-backdrop-filter:none;backdrop-filter:none;transform:none}
@@ -262,20 +259,27 @@ html [data-liquid-glass][data-liquid-mode="opaque"]>[data-liquid-skin]::after{di
   html [data-liquid-glass]>[data-liquid-skin]{display:none!important}
 }
 
-/* One shared whole-plane writer. The runtime marker is granted only to explicit,
-   non-nested native surfaces; unmarked surfaces retain their existing ink path. */
+/* One shared whole-plane writer for every outer native reading surface. Fixed
+   model annotations retain their source-scene anchoring and finite ink path. */
 html body [data-information-window][data-information-ready][data-information-plane]:not([data-information-nested])[data-information-moving="true"]:not(:focus-within){
-  transform:perspective(var(--information-perspective,1200px)) rotateX(var(--information-rx,0deg)) rotateY(var(--information-ry,0deg)) rotateZ(var(--information-rz,0deg)) skewY(var(--information-skew,0deg))!important;
+  transform:perspective(var(--information-perspective,1200px)) translate3d(var(--information-x,0px),var(--information-y,0px),0) rotateX(var(--information-rx,0deg)) rotateY(var(--information-ry,0deg)) rotateZ(var(--information-rz,0deg)) skewY(var(--information-skew,0deg)) scale(var(--information-sx,1),var(--information-sy,1))!important;
   transform-origin:50% 50%;translate:none!important;rotate:none!important;scale:none!important;
 }
-html body [data-information-window][data-information-ready][data-information-plane]:not([data-information-nested]):is(:focus-within,:not([data-information-moving="true"])),
-html[data-cinematic-static] body [data-information-window][data-information-ready][data-information-plane]:not([data-information-nested])[data-information-moving="true"],
-html body [data-study-paused] [data-information-window][data-information-ready][data-information-plane]:not([data-information-nested])[data-information-moving="true"]{
-  transform:none!important;translate:none!important;rotate:none!important;scale:none!important;
+/* A light rim follows the same field as the plane. No extra backdrop sample,
+   text filter or screen-sized distortion pass is introduced. */
+html [data-information-window][data-information-ready]>[data-information-skin]::after{
+  content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(155deg,rgb(255 255 255 / .24),transparent 28%,transparent 65%,rgb(185 220 212 / .13));
+  box-shadow:inset 0 1px 0 rgb(255 255 255 / .3),inset 0 -1px 0 rgb(255 255 255 / .1);
+  opacity:calc(.2 + var(--information-flow,0)*.65);
 }
-@media(prefers-reduced-motion:reduce),(forced-colors:active){
-  html body [data-information-window][data-information-ready][data-information-plane]:not([data-information-nested])[data-information-moving="true"]:not(:focus-within){transform:none!important;translate:none!important;rotate:none!important;scale:none!important}
+html body [data-information-window][data-information-ready][data-information-plane]:not([data-information-nested]):is(:focus-within,:not([data-information-moving="true"])){
+  transform:none!important;translate:none!important;rotate:none!important;scale:none!important;
 }
 @media print{
   html body [data-information-window][data-information-ready][data-information-plane]:not([data-information-nested])[data-information-moving="true"]:not(:focus-within){transform:none!important;translate:none!important;rotate:none!important;scale:none!important}
 }
+
+/* The owner's 80% desktop reference is expressed through typography and rem
+   spacing, leaving native browser zoom and 44px touch/focus targets intact. */
+@media(min-width:1000px){html{font-size:80%}}

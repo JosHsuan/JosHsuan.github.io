@@ -7,6 +7,8 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {stageCameraPose,stageRenderView} from '../components/xr-stage-scene.mjs';
 import {collectResearchSupport,createResearchPhoneGeometry,RESEARCH_MODEL_PIXELS,RESEARCH_PHONE_PIXELS} from '../components/research-scene-geometry.mjs';
 import {resolveRenderBudget} from '../components/render-budget.mjs';
+import {XR_MODEL_CAMERA_PATH} from '../runtime/xr/XRStageDirector.mjs';
+import {sampleScrollCamera} from '../runtime/motion/scroll-camera-score.mjs';
 
 const viewports=[[1440,1000],[1920,1080],[800,600],[799,1000],[390,844],[320,700]];
 const modelChapters=['overview','context','method','model','making','contribution','limits','credits'];
@@ -90,6 +92,20 @@ test('every pinned assembly vertex fits the reading clear region at chapter pose
  assert.deepEqual(sourceState(),original,'Framing must preserve source positions, normals, topology, transforms and material');
 });
 
+test('the authored 38 to 32 degree XR lens progression keeps every original vertex in its desktop and mobile reading aperture',()=>{
+ const before=sourceState(),supportDigest=arrayDigest(sourceSupport);
+ for(const[width,height]of [[1440,1000],[390,844],[320,700]])for(const progress of[0,.25,.5,.75,1]){
+  const cameraIntent=sampleScrollCamera(XR_MODEL_CAMERA_PATH,progress);
+  assert(cameraIntent.fovDeg>=32&&cameraIntent.fovDeg<=38);
+  for(const[yaw,pitch]of [[0,0],[-.9,-.4],[.9,.5]]){
+   const intent={...cameraIntent,yawRad:cameraIntent.yawRad+yaw,pitchRad:cameraIntent.pitchRad+pitch};
+   const pose=stageCameraPose(sourceSupport,width,height,{chapter:'method',cameraIntent:intent});
+   assertProjected(sourceSupport,pose,width,height,false,`${width}×${height} lens ${cameraIntent.fovDeg} inspection ${yaw},${pitch}`);
+  }
+ }
+ assert.equal(arrayDigest(sourceSupport),supportDigest);assert.deepEqual(sourceState(),before);
+});
+
 test('all three full recorded screens and device bodies fit the phone clear region with sufficient depth precision',()=>{
  for(const stage of study.phoneStages){
   const phone=createResearchPhoneGeometry(stage.width/stage.height);
@@ -150,5 +166,24 @@ test('the real full-viewport canvas preserves every source point, reading-safe c
    assert(croppedBudget.pixels<=pixelBudget,'A full viewport cannot create an unbounded GPU attachment');
    assert.deepEqual(croppedBudget,fullBudget,'The renderer budget now applies to the real full viewport');
   }finally{phone?.dispose();}
+ }
+});
+
+test('desktop and 4K phone composition retains at least 600 vertical screen samples without enlarging the model budget',()=>{
+ assert.equal(RESEARCH_MODEL_PIXELS,524288);
+ for(const stage of study.phoneStages){
+  const phone=createResearchPhoneGeometry(stage.width/stage.height);
+  try{
+   phone.screen.computeBoundingBox();
+   for(const[width,height]of [[1440,1000],[1920,1080],[3840,2160]]){
+    const pose=stageCameraPose(phone.support,width,height,{chapter:stage.id});
+    const camera=cameraFor(pose,width,height);
+    const top=new T.Vector3(0,phone.dimensions.height/2,phone.screen.boundingBox.min.z).project(camera);
+    const bottom=new T.Vector3(0,-phone.dimensions.height/2,phone.screen.boundingBox.min.z).project(camera);
+    const budget=resolveRenderBudget({width,height,deviceDpr:2,maxTextureSize:4096,pixelBudget:RESEARCH_PHONE_PIXELS});
+    assert((top.y-bottom.y)*budget.height/2>=600,'Recorded interface labels must not be reduced to the former ~300-line desktop phone');
+    assert(budget.pixels<=1_600_000,'Phone clarity remains within the existing product allocation ceiling');
+   }
+  }finally{phone.dispose();}
  }
 });

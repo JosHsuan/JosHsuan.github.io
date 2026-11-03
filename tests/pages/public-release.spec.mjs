@@ -22,7 +22,7 @@ test('published story, canonical metadata and every linked asset work without Ja
   await context.close();
 });
 
-test('public model initializes in Full and preserves chapter navigation without quality controls and with accessible motion pause', async ({page,isMobile}) => {
+test('public model initializes in Full and preserves native navigation with continuous motion and no pause control', async ({page,isMobile}) => {
   test.setTimeout(scenarioTimeout(120000));
   const errors=[]; page.on('pageerror', error=>errors.push(error.message));
   // Exercise the visitor's real entry once in the public release baseline.
@@ -30,9 +30,9 @@ test('public model initializes in Full and preserves chapter navigation without 
   await page.goto('/');
   await expect(page.locator('[data-site-loader]')).toBeHidden({timeout:WAIT});
   await expect(page.locator('[data-home-introduction]')).toBeVisible();
-  const projectLink=page.locator('[data-home-project-link]');
+  const projectLink=page.getByRole('link',{name:'Discover the work'});
   await expect(projectLink).toHaveAttribute('href','#projects');await projectLink.click();
-  await expect(page.locator('[data-project-grid]')).toBeInViewport();
+  await expect(page.locator('[data-home-deck]')).toBeInViewport();
   await page.locator('[data-project-card="bending-active"]').click();
   await expect(page).toHaveURL(/\/projects\/bending-active\/$/);
   await page.waitForFunction(()=>window.__thesis?.inspect().ready&&window.__story?.inspect().entry.phase==='entered',null,{timeout:WAIT});
@@ -50,7 +50,7 @@ test('public model initializes in Full and preserves chapter navigation without 
   expect(initial.renderSuspended).toBe(false);
   await expect(page.getByRole('combobox',{name:'Visual detail',exact:true})).toHaveCount(0);
   const motion=page.locator('[data-bending-motion-toggle]');
-  await expect(motion).toHaveCount(1);await expect(motion).toHaveAccessibleName('Pause motion');await expect(motion).toBeEnabled();await expect(motion).toHaveAttribute('aria-pressed','false');
+  await expect(motion).toHaveCount(0);
   await page.locator('[data-chapter-link="system"]').click();
   // Native document input drives one visible reading plane and scene score.
   // Linux software rendering can exceed the default five-second assertion budget.
@@ -76,19 +76,15 @@ test('public model initializes in Full and preserves chapter navigation without 
   expect(await page.evaluate(()=>window.__thesis.inspect().frames)).toBeGreaterThan(resting);
   const runningTime=await page.evaluate(()=>window.__story.inspect().playback.activeSeconds);
   await expect.poll(()=>page.evaluate(()=>window.__story.inspect().playback.activeSeconds),{timeout:WAIT}).toBeGreaterThan(runningTime);
-  await motion.click();await expect(motion).toHaveAccessibleName('Resume motion');await expect(motion).toHaveAttribute('aria-pressed','true');await settle(page);await expectIdle(page);
-  const paused=await page.evaluate(()=>({time:window.__story.inspect().playback.activeSeconds,frames:window.__thesis.inspect().frames,y:scrollY,paused:window.__thesis.inspect().motionPaused}));
-  expect(paused.paused).toBe(true);await frames(page,5);
-  expect(await page.evaluate(()=>({time:window.__story.inspect().playback.activeSeconds,frames:window.__thesis.inspect().frames,y:scrollY,paused:window.__thesis.inspect().motionPaused}))).toEqual(paused);
-  await motion.click();await expect(motion).toHaveAccessibleName('Pause motion');await expect(motion).toHaveAttribute('aria-pressed','false');await settle(page);
-  await expect.poll(()=>page.evaluate(()=>window.__story.inspect().playback.activeSeconds),{timeout:WAIT}).toBeGreaterThan(paused.time);
-  expect(await page.evaluate(()=>({y:scrollY,paused:window.__thesis.inspect().motionPaused}))).toEqual({y:paused.y,paused:false});
+  const live=await page.evaluate(()=>({time:window.__story.inspect().playback.activeSeconds,y:scrollY}));await page.emulateMedia({reducedMotion:'reduce'});await settle(page);await frames(page,5);
+  expect(await page.evaluate(()=>({y:scrollY,paused:window.__thesis.inspect().motionPaused,reduced:window.__thesis.inspect().systemReduced}))).toEqual({y:live.y,paused:false,reduced:false});
+  expect(await page.evaluate(()=>window.__story.inspect().playback.activeSeconds)).toBeGreaterThan(live.time);
   await holdModel(page);await expectIdle(page);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
   expect(errors).toEqual([]);
 });
 
-test('evidence inspection and method disclosure preserve native reading and keyboard focus', async ({page}) => {
+test('inline evidence and method disclosure preserve native reading without an image inspection interface', async ({page}) => {
   await page.emulateMedia({reducedMotion:'reduce'});
   await page.goto('/projects/bending-active/#overview');await entered(page);
   await page.locator('[data-chapter-link="system"]').click();
@@ -96,30 +92,21 @@ test('evidence inspection and method disclosure preserve native reading and keyb
   await step.locator('summary').click();
   await expect(step).toHaveAttribute('open','');
   await expect(step).toContainText('desired surface geometry');
-  await page.getByText('Compare with the original thesis figure',{exact:true}).click();
-  const trigger=page.locator('[data-inspect-figure="0"]');
-  await trigger.focus();await page.keyboard.press('Enter');
-  const comparison=page.getByRole('region',{name:'Original source for FIG. 3–04'});
-  await expect(comparison).toBeVisible();
-  await expect(comparison.locator('img')).toHaveAttribute('src','/assets/cinematic/source-p024.webp');
-  await expect(page.locator('dialog[open]')).toHaveCount(0);
-  await comparison.getByRole('button',{name:'Close source comparison'}).focus();
-  await page.keyboard.press('Escape');
-  await expect(comparison).toHaveCount(0);
-  await expect(trigger).toBeFocused();
+  const evidence=page.locator('#system [data-story-media]').first();await expect(evidence).toHaveCount(1);await evidence.scrollIntoViewIfNeeded();await settle(page);await expect(evidence.locator('img')).toBeVisible();await evidence.locator('img').click();
+  await expect(page.locator('[data-inspect-figure],[data-source-comparison],dialog[open]')).toHaveCount(0);await expect(evidence.locator('button,a')).toHaveCount(0);expect(await evidence.getAttribute('tabindex')).toBeNull();
   expect(await page.evaluate(()=>document.body.style.overflow)).not.toBe('hidden');
   expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
 });
 
-test('reduced motion and unavailable model retain the public story', async ({browser}) => {
+test('OS preferences retain live presentation while an actually unavailable model keeps public reading usable', async ({browser}) => {
   const context = await browser.newContext({reducedMotion:'reduce'});
   const page = await context.newPage(); const sceneRequests=[];
   page.on('request', request=>{if(/\.(glb|hdr)(\?|$)/.test(request.url()))sceneRequests.push(request.url());});
   await page.goto('http://127.0.0.1:4186/projects/bending-active/#overview');
   await entered(page);
-  await expect(page.getByRole('button',{name:'Enable 3D',exact:true})).toBeVisible();
-  expect(await page.evaluate(()=>window.__story.inspect().entry.reason)).toBe('static-ready');
-  expect(sceneRequests).toEqual([]);
+  await expect(page.getByRole('button',{name:'Enable 3D',exact:true})).toHaveCount(0);
+  expect(await page.evaluate(()=>({reason:window.__story.inspect().entry.reason,ready:window.__thesis.inspect().ready,reduced:window.__thesis.inspect().systemReduced}))).toEqual({reason:'',ready:true,reduced:false});
+  expect(sceneRequests.some(url=>url.includes('source-layers.glb'))).toBe(true);
   await expect(page.locator('[data-story-chapter]')).toHaveCount(7);
   await context.close();
   const fallback = await browser.newContext(); const failedPage = await fallback.newPage();

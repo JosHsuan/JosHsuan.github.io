@@ -1,0 +1,248 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-03",
+  "status": "public handoff integrated; integrated Pages Chromium subset passed 5/5; final same-artifact CI, other engines and publication pending",
+  "browserAcceptance": {
+    "artifactPrefix": "ab5d1d",
+    "engine": "Chromium",
+    "passed": 5,
+    "failed": 0,
+    "serial": true,
+    "testDeadlinesChanged": false,
+    "evidenceDirectory": "pages-test-results/media-quality-final",
+    "verified": ["native 888x1920 decode for all three recordings", "native duration and continuous playback", "same canvas and resident source under preferences", "retained frame replacement and chapter reversal", "source geometry and bamboo shader draw", "38/34/32-degree scroll camera with 1440/320-wide captures"],
+    "limits": "Local Chromium evidence only; other engines, physical devices, final same-artifact CI and publication verification remain pending."
+  },
+  "sourceProject": {
+    "sourceProject": "T3/Presentation/documentation/premiere_projectfile/T3_documentation.prproj",
+    "sourceProjectSHA256": "8ce09e769e62bfde81d93bfb5702eb81bec69835880423807619a1d229d1ec55"
+  },
+  "encoder": {
+    "name": "libx264",
+    "ffmpegVersion": "7.1",
+    "crf": 26,
+    "preset": "slow",
+    "profile": "high",
+    "level": "4.0",
+    "pixelFormat": "yuv420p",
+    "colorPrimaries": "bt709",
+    "colorTransfer": "bt709",
+    "colorSpace": "bt709",
+    "colorRange": "limited",
+    "keyframeIntervalSeconds": 2,
+    "silent": true,
+    "faststart": true,
+    "metadataRemoved": true
+  },
+  "sourceBoundary": "These new derivatives reconstruct the original Premiere edit from full-resolution recordings. The same selected actions, authored speeds, output frame counts and delivered durations are retained; VFR decode and frame selection are not asserted pixel-identical to legacy GIF exports. No upscale, crop, generated interpolation or new authored action. Originals were read only and rehashed after conversion.",
+  "clips": [
+    {
+      "id": "adapt",
+      "width": 888,
+      "height": 1920,
+      "frameCount": 130,
+      "timescale": 10240,
+      "durationTicks": 133120,
+      "durationSeconds": 13,
+      "codec": "avc1",
+      "tracks": 1,
+      "bytes": 1491566,
+      "sha256": "7283443e88dc9bf23713630f2f0dbc0e0d3ff16f9eed8f7720f6ce76c4a8e1d3",
+      "sourceLocator": "T3/Presentation/documentation/0916_GlobalShapeDesign_VideoResource/XWBU4246.MP4",
+      "sourceSHA256": "758938298a5f9c5559f25855c49aa2b8582df952cd5dd0a4f0b4b8fd4530a1e4",
+      "sourceBytes": 195271471,
+      "sourceDimensions": [
+        888,
+        1920
+      ],
+      "posterBytes": 498038,
+      "posterSHA256": "f22304740628d0df05dc1129f70353e1f2e7d21059481f2bbd8c1d7a6e6993c6",
+      "posterDimensions": [
+        888,
+        1920
+      ],
+      "sourceIntervalsSeconds": [
+        [
+          53.06,
+          79.3
+        ],
+        [
+          86.7,
+          96.6
+        ]
+      ],
+      "authoredPlaybackSpeed": 2.78,
+      "outputFps": "10/1",
+      "legacyDimensions": [
+        666,
+        1440
+      ],
+      "videoFile": "adapt-interface-hd.mp4",
+      "posterFile": "adapt-poster-hd.webp",
+      "qualityReceipt": {
+        "id": "adapt",
+        "metric": "SSIM",
+        "comparedFrames": 130,
+        "allFramesCompared": true,
+        "mean": 0.9923376615384615,
+        "minimumFrame": 0.990908,
+        "maximumFrame": 0.994997,
+        "statsSHA256": "97cebd8f09267aba6331013ce9cf5489fce6f5e4aedf3753df981aa7af51e693",
+        "reference": "The same original native-resolution screen recording segments and authored timeline resampling, immediately before H264 compression; not a comparison to the palette-limited legacy GIF."
+      },
+      "legacyComparisonDiagnostic": {
+        "id": "adapt",
+        "frames": 130,
+        "rmseMean": 8.011431145598065,
+        "rmseMax": 14.151937809006935,
+        "sameFrameCorrelationMean": 0.9955574814279421,
+        "sameFrameCorrelationMinimum": 0.9813285833823987,
+        "nearestFrameOffsetMedian": 0,
+        "nearestFrameOffsetRange": [
+          -7,
+          2
+        ]
+      }
+    },
+    {
+      "id": "assemble",
+      "width": 888,
+      "height": 1920,
+      "frameCount": 312,
+      "timescale": 12800,
+      "durationTicks": 319488,
+      "durationSeconds": 24.96,
+      "codec": "avc1",
+      "tracks": 1,
+      "bytes": 9515706,
+      "sha256": "26ae07605057fb459195d099986184ce28b8530bf853939ed375a5d972c42e8f",
+      "sourceLocator": "T3/Presentation/documentation/0916_ModuleAssembly_VideoResource/AHQU8330.MP4",
+      "sourceSHA256": "ae92418a1f8b977b299482b45a5b32dadedb31952cabd08857cb9562954b7280",
+      "sourceBytes": 251958315,
+      "sourceDimensions": [
+        888,
+        1920
+      ],
+      "posterBytes": 559058,
+      "posterSHA256": "2947aeae26f8ec2033c6ba5ec78a5393346bd778cb51c1f358139194d8cb1a6f",
+      "posterDimensions": [
+        888,
+        1920
+      ],
+      "sourceIntervalsSeconds": [
+        [
+          70.07,
+          98.75444282407408
+        ],
+        [
+          229.08510625,
+          282.0968613425926
+        ],
+        [
+          288.6325571759259,
+          315.86462314814815
+        ]
+      ],
+      "authoredPlaybackSpeed": 4.352777777777778,
+      "outputFps": "25/2",
+      "legacyDimensions": [
+        534,
+        1152
+      ],
+      "videoFile": "assemble-interface-hd.mp4",
+      "posterFile": "assemble-poster-hd.webp",
+      "qualityReceipt": {
+        "id": "assemble",
+        "metric": "SSIM",
+        "comparedFrames": 312,
+        "allFramesCompared": true,
+        "mean": 0.9826367243589743,
+        "minimumFrame": 0.97483,
+        "maximumFrame": 0.992526,
+        "statsSHA256": "64090ffd3683075a3f16df79fe26f13eb2748bb7d202de905372a9a27f8c2c77",
+        "reference": "The same original native-resolution screen recording segments and authored timeline resampling, immediately before H264 compression; not a comparison to the palette-limited legacy GIF."
+      },
+      "legacyComparisonDiagnostic": {
+        "id": "assemble",
+        "frames": 312,
+        "rmseMean": 20.81038958977231,
+        "rmseMax": 45.26135265400839,
+        "sameFrameCorrelationMean": 0.9534186702077381,
+        "sameFrameCorrelationMinimum": 0.8123183542661125,
+        "nearestFrameOffsetMedian": -1,
+        "nearestFrameOffsetRange": [
+          -4,
+          6
+        ]
+      }
+    },
+    {
+      "id": "join",
+      "width": 888,
+      "height": 1920,
+      "frameCount": 203,
+      "timescale": 10240,
+      "durationTicks": 207872,
+      "durationSeconds": 20.3,
+      "codec": "avc1",
+      "tracks": 1,
+      "bytes": 5502261,
+      "sha256": "c325054d284dca22a20c3cf8f50b8b523ebbfb3cd601813f6ab74e82ab061935",
+      "sourceLocator": "T3/Presentation/documentation/0913_GlobalShapeAssembly_VideoResource/HASC0659.MP4",
+      "sourceSHA256": "ded5cd1bb9459fb25d0f624ce293f6d343af65610b6b7dbb7eb791f222ebc9db",
+      "sourceBytes": 2754354153,
+      "sourceDimensions": [
+        888,
+        1920
+      ],
+      "posterBytes": 735846,
+      "posterSHA256": "1b57e8b290f2aa03d00998f41deaa4576dfa4f483a9fae2c8286de9552ac50f8",
+      "posterDimensions": [
+        888,
+        1920
+      ],
+      "sourceIntervalsSeconds": [
+        [
+          4840.2587475,
+          4849.3161525
+        ],
+        [
+          4858.1887125,
+          4907.26506
+        ]
+      ],
+      "authoredPlaybackSpeed": 2.859090909090909,
+      "outputFps": "10/1",
+      "legacyDimensions": [
+        666,
+        1440
+      ],
+      "videoFile": "join-interface-hd.mp4",
+      "posterFile": "join-poster-hd.webp",
+      "qualityReceipt": {
+        "id": "join",
+        "metric": "SSIM",
+        "comparedFrames": 203,
+        "allFramesCompared": true,
+        "mean": 0.9884560985221675,
+        "minimumFrame": 0.982692,
+        "maximumFrame": 0.994447,
+        "statsSHA256": "af474a3099ad96b151bc75871f5cf8deaf611dd0ad44417415a0644cb96f6472",
+        "reference": "The same original native-resolution screen recording segments and authored timeline resampling, immediately before H264 compression; not a comparison to the palette-limited legacy GIF."
+      },
+      "legacyComparisonDiagnostic": {
+        "id": "join",
+        "frames": 203,
+        "rmseMean": 13.035037665024312,
+        "rmseMax": 48.32768517368481,
+        "sameFrameCorrelationMean": 0.9803426646082329,
+        "sameFrameCorrelationMinimum": 0.7801848709895128,
+        "nearestFrameOffsetMedian": -1,
+        "nearestFrameOffsetRange": [
+          -3,
+          1
+        ]
+      }
+    }
+  ]
+}

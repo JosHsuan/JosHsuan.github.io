@@ -3,7 +3,6 @@ import {FeatureRegistry} from './core/FeatureRegistry.ts';
 import {Registrar} from './core/Registrar.ts';
 import {createModelManager} from './features/ModelManager.mjs';
 import {createDiagramManager} from './features/DiagramManager.mjs';
-import {createEvidenceManager} from './features/EvidenceManager.mjs';
 import {createLifecycleManager} from './features/LifecycleManager.mjs';
 import {createReadingManager} from './features/ReadingManager.mjs';
 import {createEntryManager} from './features/EntryManager.mjs';
@@ -16,7 +15,7 @@ export function createRuntimeRoot(){
  input.scene={hitTest:(x,y)=>query?.(x,y)??null,bindHitTest(callback){query=callback;return()=>{if(query===callback)query=null;};}};
  registry.register({id:'kernel',create:()=>({input,dispose:kernelDispose})});
  registry.register({id:'entry',requires:['kernel'],create:()=>createEntryManager({input})});
- for(const [id,factory] of [['model',createModelManager],['diagram',createDiagramManager],['evidence',createEvidenceManager],['lifecycle',createLifecycleManager],['reading',createReadingManager],['director',createExperienceDirector]]){
+ for(const [id,factory] of [['model',createModelManager],['diagram',createDiagramManager],['lifecycle',createLifecycleManager],['reading',createReadingManager],['director',createExperienceDirector]]){
   registry.register({id,requires:['kernel'],create:(_context,services)=>options=>{
    const kernel=services.get('kernel').input;return factory({input:kernel,events:kernel.events,...options});
   }});

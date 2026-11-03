@@ -1,6 +1,6 @@
+/* eslint-disable @next/next/no-img-element, @next/next/no-html-link-for-pages -- Exact public evidence pixels and full-document navigation preserve source identity and renderer lifetime. */
 import CinematicExperience from './CinematicExperience';
 import EntryLoader from './EntryLoader';
-import EvidenceInspector from './EvidenceInspector';
 import SourceDiagram from './SourceDiagram';
 import InformationSkin from './InformationSkin';
 import LiquidGlassSkin from './LiquidGlassSkin';
@@ -33,11 +33,9 @@ function Heading({ number, label, lines, id, kind }) {
 
 function EvidenceImage({ item, className = '', kind = 'photo' }) {
   return <figure className={[styles.evidence, className].join(' ')} data-story-media data-media-kind={kind} style={{'--evidence-aspect-ratio':item.width/item.height}}>
-    <span id={`evidence-interaction-${evidence.indexOf(item)}`} hidden>Opens an inline source comparison when available; otherwise opens the original in a new tab.</span>
     <div className={styles.figureIndex} data-protect data-choreography="caption" aria-hidden="true"><span>Evidence / {String(evidence.indexOf(item)+1).padStart(2,'0')}</span><span>{kind === 'diagram' ? 'RESEARCH DRAWING' : 'PHYSICAL RECORD'}</span></div>
-    <a className={styles.mediaFrame} data-information-window="evidence-image" data-information-motion-surface="plane" data-inspect-figure={evidence.indexOf(item)} href={item.source} target="_blank" rel="noreferrer" aria-label={`Inspect evidence: ${item.figure}`} aria-describedby={`evidence-interaction-${evidence.indexOf(item)}`}><InformationSkin/><span className={styles.mediaPlane} data-protect data-choreography={kind === 'photo' ? 'photo' : 'diagram'} data-feedback-plane><span className={styles.frameCorner} aria-hidden="true"/><img src={item.src} width={item.width} height={item.height} alt={item.alt} loading="lazy" /></span><span className={styles.mediaAction}>Inspect evidence <span aria-hidden="true">↗</span></span></a>
+    <div className={styles.mediaFrame} data-information-window="evidence-image" data-information-motion-surface="plane"><InformationSkin/><span className={styles.mediaPlane} data-protect data-choreography={kind === 'photo' ? 'photo' : 'diagram'} data-feedback-plane><span className={styles.frameCorner} aria-hidden="true"/><img src={item.src} width={item.width} height={item.height} alt={item.alt} loading="lazy" /></span></div>
     <figcaption data-information-window="evidence-caption" data-information-motion-surface="plane" data-editorial-caption data-protect data-choreography="caption"><InformationSkin/><span>{item.figure}</span><p>{item.caption}</p></figcaption>
-    <div data-evidence-host={evidence.indexOf(item)} />
   </figure>;
 }
 
@@ -49,7 +47,6 @@ export default function Page() {
   return <ExperienceProvider>
     <EntryLoader />
     <CinematicExperience />
-    <EvidenceInspector items={evidence} />
     <a href="#main" className={styles.skip}>Skip to content</a>
     <header className={styles.masthead} data-protect data-page-masthead>
       <a href="/#about" className={styles.owner} data-home-link data-choreography="nav" data-liquid-glass="identity" aria-label={`${review.owner} — Home`}>{review.owner}<span aria-hidden="true"> / </span><span className={styles.discipline}>DESIGN + TECHNOLOGY</span><LiquidGlassSkin id="identity" /></a>
@@ -95,7 +92,7 @@ export default function Page() {
           </div>
           <div className={styles.inlineStudy} data-model-study-host="system"><div className={styles.nativeModelInformation} data-model-information-host="system"/></div>
           <div className={styles.diagramWide}><SourceDiagram kind="workflow" title="Read the design-to-fabrication sequence" />
-            <details className={styles.sourceComparison} data-information-window="source-details" data-information-motion-surface="plane"><InformationSkin/><summary data-protect>Compare with the original thesis figure</summary><EvidenceImage item={story.media.geometry} kind="diagram" /></details>
+            <EvidenceImage item={story.media.geometry} className={styles.sourceComparison} kind="diagram" />
           </div>
         </div>
       </section>
@@ -109,7 +106,7 @@ export default function Page() {
           </div>
           <div className={styles.inlineStudy} data-model-study-host="pattern"><div className={styles.nativeModelInformation} data-model-information-host="pattern"/></div>
           <div className={styles.diagramWide}><SourceDiagram kind="library" title="Follow the sampled function library" />
-            <details className={styles.sourceComparison} data-information-window="source-details" data-information-motion-surface="plane"><InformationSkin/><summary data-protect>Read the original library figure</summary><EvidenceImage item={story.media.library} kind="diagram" /></details>
+            <EvidenceImage item={story.media.library} className={styles.sourceComparison} kind="diagram" />
           </div>
         </div>
       </section>
@@ -146,9 +143,8 @@ export default function Page() {
             <p className={styles.smallNote} data-protect data-choreography="caption">{story.credits.collaboration}</p>
             <p className={styles.smallNote} data-protect data-choreography="caption">{story.credits.limitation}</p>
             <details className={styles.sourceNotes} data-protect data-choreography="credit">
-              <summary>Project credits & reference figures</summary>
+              <summary>Project credits</summary>
               <p>{review.credits.media}</p>
-              <div className={styles.sourceLinks} aria-label="Original research figures">{Object.values(story.media).map(item => <a key={item.figure} href={item.source} target="_blank" rel="noreferrer" aria-label={`${item.figure} (new tab)`}>{item.figure} <span aria-hidden="true">↗</span></a>)}</div>
             </details>
           </div>
           <footer className={styles.endnote} data-protect data-choreography="credit"><a href="/#projects">Back to Project ↑</a><span>FORM / SYSTEM / MAKE</span></footer>

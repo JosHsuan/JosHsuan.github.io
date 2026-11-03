@@ -3,10 +3,11 @@
 const documents=new WeakMap();
 export const SITE_READINESS_DEADLINE_MS=15000;
 
-export function acquireSiteReadiness(document,{setTimeout:setTimer=globalThis.setTimeout,clearTimeout:clearTimer=globalThis.clearTimeout,deadline=SITE_READINESS_DEADLINE_MS}={}){
+export function acquireSiteReadiness(document,{setTimeout:setTimer=globalThis.setTimeout,clearTimeout:clearTimer=globalThis.clearTimeout,now=()=>globalThis.performance?.now()??Date.now(),deadline=SITE_READINESS_DEADLINE_MS}={}){
  let task=documents.get(document);
  if(!task){
   let resolve,settled=false,timer=null,references=0;
+  let remaining=deadline,expiresAt=document.hidden?null:now()+deadline;
   const promise=new Promise(done=>{resolve=done;}),cleanups=new Set(),failures=[];
   const pending=new Set(['document','fonts','images']);
   const cleanup=()=>{for(const release of cleanups)release();cleanups.clear();if(timer!==null)clearTimer(timer);timer=null;};
@@ -14,8 +15,19 @@ export function acquireSiteReadiness(document,{setTimeout:setTimer=globalThis.se
    if(settled)return;settled=true;if(reason)failures.push(reason);cleanup();
    resolve(Object.freeze({ready:failures.length===0,failures:Object.freeze([...new Set(failures)]),pending:Object.freeze([...pending])}));
   };
-  const complete=(key,failure)=>{if(settled)return;if(failure)failures.push(failure);pending.delete(key);if(!pending.size)finish();};
+  const expired=()=>{if(expiresAt===null||now()<expiresAt)return false;finish('readiness-timeout');return true;};
+  const complete=(key,failure)=>{if(settled||expired())return;if(failure)failures.push(failure);pending.delete(key);if(!pending.size)finish();};
   const listen=(target,type,callback)=>{target.addEventListener(type,callback);const release=()=>target.removeEventListener(type,callback);cleanups.add(release);return release;};
+  const arm=()=>{if(settled||expiresAt===null)return;timer=setTimer(()=>{timer=null;if(!settled&&!expired())arm();},Math.max(0,Math.ceil(expiresAt-now())));};
+  listen(document,'visibilitychange',()=>{
+   if(settled)return;
+   if(document.hidden){
+    // Check before suspension: a throttled timeout cannot revive an expiry.
+    if(expiresAt===null||expired())return;
+    remaining=Math.max(0,expiresAt-now());expiresAt=null;
+    if(timer!==null)clearTimer(timer);timer=null;
+   }else if(expiresAt===null){expiresAt=now()+remaining;arm();}
+  });
   const images=()=>{
    if(settled)return;
    const marked=[...document.querySelectorAll('img[data-site-critical], [data-site-critical] img')];
@@ -58,7 +70,7 @@ export function acquireSiteReadiness(document,{setTimeout:setTimer=globalThis.se
   if(document.readyState==='loading'){
    const release=listen(document,'DOMContentLoaded',()=>{release();domReady();});
   }else domReady();
-  timer=setTimer(()=>finish('readiness-timeout'),deadline);
+  arm();
   task={promise,retain(){references++;},release(){if(--references<=0&&!settled){finish('readiness-cancelled');documents.delete(document);}}};
   documents.set(document,task);
  }

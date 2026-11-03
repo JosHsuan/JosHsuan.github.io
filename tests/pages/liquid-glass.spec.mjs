@@ -9,7 +9,7 @@ async function staticPage(page){
  await page.emulateMedia({reducedMotion:'reduce',contrast:'no-preference',forcedColors:'none'});await page.goto('/projects/bending-active/#overview');
  await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered'&&window.__story.inspect().liquidGlass.count===3,null,{timeout:WAIT});
  await page.evaluate(()=>document.fonts.ready);await settle(page);
- await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(0);
+ await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);
 }
 
 // A synthetic background goes behind the real, built identity surface. Its
@@ -231,7 +231,7 @@ test('pointer lighting and press share the Director clock and cancel, focus and 
  expect((await liquid(page)).items.every(item=>item.hover===0&&item.press===0)).toBe(true);
  expect((await liquid(page)).mapGenerations).toBe(maps);
  await page.emulateMedia({reducedMotion:'reduce'});await settle(page);await page.mouse.move(rect.x+rect.width*.8,rect.y+rect.height*.5);await frames(page,2);
- expect((await read()).hover).toBe(0);expect((await read()).press).toBe(0);
+ await expect.poll(async()=>(await read()).hover,{timeout:WAIT}).toBeGreaterThan(0);expect((await read()).press).toBe(0);
  await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);
 });
 

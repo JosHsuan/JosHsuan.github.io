@@ -6,17 +6,18 @@ import {projectStudyEvidence} from '../../roles/uiux-designer/cases/bending-acti
 import {projectStudyEvidenceLayout} from '../../roles/uiux-designer/cases/bending-active-thesis/components/project-study-layout.mjs';
 const projects=JSON.parse(await readFile(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/project-studies.json',import.meta.url),'utf8')).projects;
 const selected=["dot-based-3d-printing","special-assemblies","project-caschlatsch"];
-// Independently captured from live 86a6ce58c57f12a0e1ac2eb7fe48e2d632f0fc0b,
-// before narrative edits. No runtime git dependency and no refreshed source pins.
+// Independently derived from 86a6ce58c57f12a0e1ac2eb7fe48e2d632f0fc0b,
+// before narrative edits. The source projection excludes cameraPath, whose new
+// lens/scale contract is tested separately. No candidate-derived source pins.
 const preserved={
-  "dot-based-3d-printing": "5ff3051937015ec563e1eed097b53879869fb07fcdcee1fab6a0dd14a04ca103",
-  "special-assemblies": "798e3af5007b2a218044219ea948588d397f28cc5005465cae947c60232dab9e",
+  "dot-based-3d-printing": "0ef8e64d4e2c1d3913333fb4d844ae152b787f3c93fddb8dcaff8ed93592d7bc",
+  "special-assemblies": "8a2ab642ec6065ebab65b1cff28c012e0a1a91d5727afb95a06573756d510cc2",
   "project-caschlatsch": "e9b46cd71b5b8a4326fe1204db98215fc811185f245ed5a19a0df358b42080cd"
 };
 const untouched={
-  "mode-s-of-making": "771bd3d904aeb4fc5a51a42d783ea29d2e93fc2087bb8a3e7f11d2cbd674d0a3",
-  "entrance-installation-art": "e0e175c3ef29f32b5fb75bf9255d2c324e5cb18ecc8f4ee6ea8b1b2273beafb5",
-  "hc3dp-caustics": "e5c16d1871376c4733fcb95372224703307e1ae8524eb386a15b1055a878609b"
+  "mode-s-of-making": "f9fddd9ff143121d989f5d2d7bab34e3f6d5442aa648772aed1481bb8544e8e6",
+  "entrance-installation-art": "fae4716ed78f692062f483dcecfbb2085c02d8dcbfe536bf89a02c22a6110e66",
+  "hc3dp-caustics": "7f8858c96d92da4a40ceb4263cfb7738bec11ef300c1fdac6af533246bd84aa2"
 };
 const allowedDiagramSources=[
   "/assets/projects/dot-based-3d-printing/path-strategies.webp",
@@ -120,13 +121,22 @@ const expectedMedia={
 const hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const project=id=>projects.find(p=>p.id===id),section=(p,id)=>p.sections.find(s=>s.id===id);
 const asset=(id,name)=>'/assets/projects/'+id+'/'+name+'.webp';
-const protectedProject=p=>(()=>{const{sections,...rest}=p;return{...rest,chapters:sections.map(s=>({id:s.id,label:s.label,kind:s.kind}))};})();
+const originalSourceRecord=project=>{
+ const p=structuredClone(project);
+ // Only the explicitly added source chapter and new models are outside the
+ // earlier record. Their source hashes/selection have dedicated exact tests.
+ if(p.id==='mode-s-of-making'){delete p.additionalModels;p.sections=p.sections.filter(section=>section.id!=='mechanism');}
+ if(p.id==='project-caschlatsch')delete p.model;
+ if(p.model)delete p.model.cameraPath;
+ return p;
+};
+const protectedProject=p=>(()=>{const{sections,...rest}=originalSourceRecord(p);return{...rest,chapters:sections.map(s=>({id:s.id,label:s.label,kind:s.kind}))};})();
 const images=p=>[p.hero,...p.sections.flatMap(s=>s.media),...(p.model?[p.model.poster]:[]),...(p.motionMedia??[]).map(m=>m.poster)];
 
 function assertImmutableRecords(projects){
  const project=id=>projects.find(p=>p.id===id);
  assert.deepEqual(projects.map(p=>p.id),['mode-s-of-making','entrance-installation-art','dot-based-3d-printing','hc3dp-caustics','special-assemblies','project-caschlatsch']);
- for(const [id,digest] of Object.entries(untouched))assert.equal(hash(project(id)),digest,id+' whole case');
+ for(const [id,digest] of Object.entries(untouched))assert.equal(hash(originalSourceRecord(project(id))),digest,id+' original source/narrative record');
  for(const id of selected){
   assert.equal(hash(protectedProject(project(id))),preserved[id],id+' immutable source/chapter contract');
   for(const s of project(id).sections)assert.equal(hash(s.media),expectedMedia[id+'/'+s.id],id+'/'+s.id+' exact approved media placement');
@@ -140,10 +150,10 @@ function assertImmutableRecords(projects){
  assert.deepEqual([...seen].sort(),Object.entries(originalImages).flatMap(([src,hashes])=>hashes.map(h=>src+':'+h)).sort());
 }
 
-test('three-case prose preserves other cases and all original source/camera/credit identities',()=>assertImmutableRecords(projects));
-test('independent baseline pins reject source, chapter, camera and unrelated-case drift',()=>{
+test('three-case prose preserves original source, chapter and credit identities alongside reviewed additions',()=>assertImmutableRecords(projects));
+test('independent baseline pins reject source, chapter and unrelated narrative drift',()=>{
  for(const mutate of [
-  p=>{p.find(p=>p.id==='dot-based-3d-printing').model.cameraPath[0].yawRad+=.01;},
+  p=>{p.find(p=>p.id==='dot-based-3d-printing').model.vertices+=1;},
   p=>{p.find(p=>p.id==='special-assemblies').sections[1].media[1].caption+=' changed';},
   p=>{p.find(p=>p.id==='project-caschlatsch').sections.reverse();},
   p=>{p.find(p=>p.id==='special-assemblies').sections[0].media[0].purpose='diagram';},
@@ -179,5 +189,8 @@ test('narrative distinguishes point-path evidence and simulated planning from ph
  assert.match(prose(cas,'system'),/26-direction/i);
  assert.match(prose(cas,'system'),/occupied-voxel checks/i);
  assert.match(prose(cas,'xr-guidance'),/select and switch modules.*track beam IDs.*assembly sequence/i);
- assert.equal(cas.model,undefined);assert.equal(cas.motionMedia,undefined);
+ assert.equal(cas.model.sha256,'4cf15112d405619ec27bc82fb81738f12d2da222ac1b720fd79f970a53af3e93');
+ assert.deepEqual(cas.model.chapters,['context','system']);
+ assert.equal(cas.model.vertices,61362);assert.equal(cas.model.triangles,31152);
+ assert.equal(cas.model.webUnits,'meters');assert.equal(cas.motionMedia,undefined);
 });

@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
-import {readFile,writeFile} from 'node:fs/promises';
-import {WAIT,frames,scenarioTimeout} from './case-helpers.mjs';
+import {readFile} from 'node:fs/promises';
+import {WAIT,scenarioTimeout} from './case-helpers.mjs';
 
 const xrWorkspace=JSON.parse(await readFile(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/xr-workspace.json',import.meta.url),'utf8'));
 const studies=JSON.parse(await readFile(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/project-studies.json',import.meta.url),'utf8')).projects;
@@ -32,113 +32,16 @@ test('all portfolio categories and selected projects have direct readable no-Jav
    await expect(page.locator('[data-animation-toggle]')).toBeHidden();
   }
   await page.goto('http://127.0.0.1:4186/');
-  await page.locator('[data-home-project-link]').click();await expect(page).toHaveURL(/\/#projects$/);
-  await expect(page.locator('[data-project-grid]')).toBeInViewport();
+  await page.locator('[data-home-introduction] a[href="#projects"]').click();await expect(page).toHaveURL(/\/#projects$/);
+  await expect(page.locator('[data-home-deck]')).toBeInViewport();
   await expect(page.locator('[data-project-card]')).toHaveCount(cardCount);
   await page.locator('[data-project-card="xr-bending-active"]').click();
   await expect(page.locator('[data-xr-study]')).toBeVisible();
   await expect(page.locator('[data-xr-scene-controls]')).toBeHidden();
-  const nativeRecordings=page.locator('[data-xr-recording] a[href$="-interface.mp4"]');
-  expect(await nativeRecordings.evaluateAll(links=>links.map(link=>link.getAttribute('href')).sort())).toEqual(['/assets/xr/adapt-interface.mp4','/assets/xr/assemble-interface.mp4','/assets/xr/join-interface.mp4']);
+  const nativeRecordings=page.locator('[data-xr-recording] a[href$="-interface-hd.mp4"]');
+  expect(await nativeRecordings.evaluateAll(links=>links.map(link=>link.getAttribute('href')).sort())).toEqual(['/assets/xr/adapt-interface-hd.mp4','/assets/xr/assemble-interface-hd.mp4','/assets/xr/join-interface-hd.mp4']);
   for(const link of await nativeRecordings.all())await expect(link).toBeVisible();
  }finally{await context.close();}
-});
-
-test('Home prepares one original research hero and retains eight static native project cards',async({page,isMobile},info)=>{
- const modelRequests=[],errors=[];
- page.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)/.test(request.url()))modelRequests.push(request.url());});
- page.on('pageerror',error=>errors.push(error.message));
- await page.goto('/');await entered(page);
- await expect(page.locator('[data-home-introduction] h1')).toHaveText('Hi, I’m JosHsuan.');
- await expect(page.locator('[data-introduction-statement]')).toHaveText('I am a computational designer and developer working at the intersection of design technology, digital fabrication, and spatial interaction.');
- await expect(page.locator('[data-introduction-description]')).toHaveText('My work bridges the physical and digital through computational tools, interactive interfaces, and workflows that translate design and engineering information into fabrication-ready, machine-readable data.');
- expect(await page.locator('main>section').evaluateAll(sections=>sections.map(section=>section.id))).toEqual(['about','projects','contact']);
- await expect(page.locator('[data-cinematic-stage],[data-story-chapter]')).toHaveCount(0);
- await expect(page.locator('canvas[data-home-research-canvas]')).toHaveCount(1);
- await expect(page.locator('[data-project-grid] canvas,[data-project-model-preview]')).toHaveCount(0);
- await expect(page.locator('canvas')).toHaveCount(2);
- await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);
- await expect(page.locator('[data-global-background] img')).toHaveCount(0);
- expect(modelRequests.sort()).toEqual([new URL('/assets/source-layers.glb',page.url()).href,new URL('/assets/studio-small.hdr',page.url()).href].sort());
- const prepared=await page.locator('[data-home-research-host]').evaluate(node=>node.__homeResearch.inspect());
- expect(prepared.phase).toBe('ready');expect(prepared.resource.firstDraw.completed).toBe(true);expect(prepared.acquisitions).toBe(1);
- expect((await page.evaluate(()=>window.__site.inspect())).readiness.previews).toEqual([{mode:'model',reason:''}]);
- const first=await page.evaluate(()=>scrollY);await page.mouse.wheel(0,130);
- await expect.poll(()=>page.evaluate(()=>scrollY)).toBeGreaterThan(first);
- await page.locator('[data-home-project-link]').click();await expect(page).toHaveURL(/\/#projects$/);
- await expect(page.locator('[data-project-grid]')).toBeInViewport();
- const geometry=await page.locator('[data-project-grid]').evaluate(element=>{const css=getComputedStyle(element);return{columns:css.gridTemplateColumns.split(' ').length,rows:css.gridTemplateRows.split(' ').length};});
- expect(geometry.columns).toBe(isMobile?1:3);if(!isMobile)expect(geometry.rows).toBe(3);
- await expect(page.locator('[data-project-card]')).toHaveCount(cardCount);
- // During native scrolling a square layout intentionally has a non-square
- // perspective AABB. Preserve immediate source readiness, then verify that
- // the existing finite motion returns the original square projected surface.
- const measureCards=()=>page.locator('[data-project-tile]').evaluateAll(tiles=>tiles.map(tile=>{
-  const image=tile.querySelector('img'),css=getComputedStyle(tile),rect=tile.getBoundingClientRect();
-  const add=keys=>keys.reduce((sum,key)=>sum+parseFloat(css[key]),0);
-  const borderWidth=parseFloat(css.width)+(css.boxSizing==='border-box'?0:add(['paddingLeft','paddingRight','borderLeftWidth','borderRightWidth']));
-  const borderHeight=parseFloat(css.height)+(css.boxSizing==='border-box'?0:add(['paddingTop','paddingBottom','borderTopWidth','borderBottomWidth']));
-  return{id:tile.dataset.projectTile,loaded:image.complete&&image.naturalWidth>0,alt:image.alt,
-   boxSizing:css.boxSizing,borderWidth,borderHeight,offsetWidth:tile.offsetWidth,offsetHeight:tile.offsetHeight,
-   projectedWidth:rect.width,projectedHeight:rect.height,transform:css.transform,moving:tile.dataset.informationMoving,
-   plane:tile.hasAttribute('data-information-plane'),rx:tile.style.getPropertyValue('--information-rx'),ry:tile.style.getPropertyValue('--information-ry')};
- }));
- const geometryReceipt={immediate:await measureCards()};let geometryError;
- try{
-  expect(geometryReceipt.immediate.every(card=>card.loaded&&card.alt.length>15&&Number.isFinite(card.borderWidth+card.borderHeight)&&card.borderWidth>0&&card.borderHeight>0&&Math.abs(card.borderWidth-card.borderHeight)<1)).toBe(true);
-  await page.waitForFunction(()=>{
-   const cards=[...document.querySelectorAll('[data-project-tile]')];
-   return window.__globalBackground?.inspect().driver.homeScrolling.informationWindows.settled&&cards.length>0&&cards.every(card=>{
-    const transform=getComputedStyle(card).transform;
-    return card.dataset.informationMoving==='false'&&new DOMMatrix(transform==='none'?undefined:transform).isIdentity;
-   });
-  },null,{timeout:WAIT});
-  geometryReceipt.rest=await measureCards();
-  expect(geometryReceipt.rest.every(card=>card.loaded&&card.alt.length>15&&Math.abs(card.projectedWidth-card.projectedHeight)<1)).toBe(true);
- }catch(error){geometryError=error;throw error;}finally{
-  try{const path=info.outputPath('home-card-square-geometry.json');await writeFile(path,JSON.stringify(geometryReceipt,null,2));await info.attach('home-card-square-geometry',{path,contentType:'application/json'});}
-  catch(error){if(!geometryError)throw error;}
- }
- expect(errors).toEqual([]);
-});
-
-test('Home native scrolling uses the shared material clock, settles, returns and respects Reduced Motion',async({page})=>{
- await page.goto('/');await entered(page);
- const introduction=page.locator('[data-home-scroll-window="introduction"]');
- const canvas=await page.locator('canvas[data-home-research-canvas]').elementHandle();
- await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.enabled)).toBe(true);
- const observation=await introduction.evaluateHandle(node=>{
-  const samples=[];
-  const observer=new MutationObserver(()=>{
-   const moving=node.getAttribute('data-information-moving')==='true',transform=getComputedStyle(node).transform;
-   if(moving&&samples.length<64)samples.push({transform,displaced:transform!=='none'&&!new DOMMatrix(transform).isIdentity,y:scrollY,width:document.documentElement.scrollWidth,client:document.documentElement.clientWidth});
-  });
-  observer.observe(node,{attributes:true,attributeFilter:['style','data-information-moving']});
-  return{samples,dispose(){observer.disconnect();}};
- });
- try{
-  await page.mouse.wheel(0,260);
-  await expect.poll(()=>observation.evaluate(value=>value.samples.some(sample=>sample.y>0&&sample.displaced))).toBe(true);
-  await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.informationWindows.settled)).toBe(true);
-  expect(await observation.evaluate(value=>value.samples.every(sample=>sample.width<=sample.client))).toBe(true);
-  await page.locator('footer a[href="#portfolio-main"]').scrollIntoViewIfNeeded();
-  expect(await introduction.evaluate(node=>node.getBoundingClientRect().bottom<0)).toBe(true);
-  await page.locator('footer a[href="#portfolio-main"]').click();
-  await expect.poll(()=>page.evaluate(()=>scrollY)).toBe(0);
-  await expect(introduction).toBeInViewport();
-  await page.locator('[data-home-project-link]').focus();
-  await expect(page.locator('[data-home-project-link]')).toHaveCSS('transform','none');
-  expect(await canvas.evaluate(node=>node.isConnected&&node===document.querySelector('canvas[data-home-research-canvas]'))).toBe(true);
-  expect(await page.locator('[data-home-research-host]').evaluate(node=>node.__homeResearch.inspect().acquisitions)).toBe(1);
-  await page.emulateMedia({reducedMotion:'reduce'});
-  await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.policy.reduced)).toBe(true);
-  await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.informationWindows.settled)).toBe(true);
-  await expect(introduction).toHaveCSS('transform','none');
-  await frames(page,8);const before=await page.evaluate(()=>window.__globalBackground.inspect().driver.frames);
-  await page.mouse.wheel(0,200);await expect.poll(()=>page.evaluate(()=>scrollY)).toBeGreaterThan(0);await frames(page,8);
-  expect(await page.evaluate(()=>window.__globalBackground.inspect().driver.frames)).toBe(before);
-  expect(await page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.enabled)).toBe(false);
- }finally{await observation.evaluate(value=>value.dispose());await observation.dispose();}
 });
 
 test('the project grid retains aligned square cards without lines and supports complete rows of nine, twelve and fifteen',async({page,isMobile})=>{
@@ -224,7 +127,7 @@ test('site loading waits for actual critical images and same-page movement does 
    expect(animation.playState).toBe('finished');expect(animation.currentTime).toBe(720);
    expect(animation.localTime).toBe(720);expect(Math.abs(animation.progress-1)).toBeLessThanOrEqual(Number.EPSILON);
   }
-  await page.locator('[data-home-project-link]').click();
+  await page.locator('[data-home-introduction] a[href="#projects"]').click();
   const after=await page.evaluate(()=>window.__site.inspect());expect(after.id).toBe(ready.id);expect(after.history).toEqual(ready.history);
   await expect(page.locator('[data-portfolio-root]')).not.toHaveAttribute('inert','');
  }finally{
@@ -263,8 +166,8 @@ test('a failed image releases readable content with one explicit failure termina
  await page.route('**/assets/xr/portfolio-main-visual.webp',route=>route.abort());
  await page.goto('/');const state=await entered(page,{failed:true});expect(state.reason).toContain('critical-image-unavailable');
  await expect(page.locator('[data-portfolio-root]')).not.toHaveAttribute('inert','');
- await expect(page.locator('[data-home-project-link]')).toBeVisible();
- await page.locator('[data-home-project-link]').click();await expect(page.locator('[data-project-grid]')).toBeInViewport();
+ await expect(page.locator('[data-home-introduction] a[href="#projects"]')).toBeVisible();
+ await page.locator('[data-home-introduction] a[href="#projects"]').click();await expect(page.locator('[data-home-deck]')).toBeInViewport();
 });
 
 test('real unavailable webfonts settle to one explicit failure and readable system typography',async({page})=>{
@@ -317,6 +220,6 @@ test('Bending page retains one original scene gate and publishes its terminal in
   await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered'&&window.__thesis?.inspect().ready,null,{timeout:WAIT});
   const state=await entered(page);expect(state.delegated).toBe(true);
   await expect(page.locator('[data-entry-loader]')).toBeHidden();await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);
-  await page.locator('[data-home-link]').click();await entered(page);await expect(page.locator('canvas')).toHaveCount(2);await expect(page.locator('canvas[data-home-research-canvas]')).toHaveCount(1);await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);
+  await page.locator('[data-home-link]').click();await entered(page);await expect(page.locator('[data-home-showcase-surface] canvas')).toHaveCount(1);await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);
  }finally{release();await page.unrouteAll({behavior:'wait'});}
 });

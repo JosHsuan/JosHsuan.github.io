@@ -3,15 +3,16 @@ import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
 import * as T from 'three';
-import {acquireProjectStudyScene,projectStudyCanvasPoint} from '../components/project-study-scene.mjs';
+import {acquireProjectStudyScene,projectStudyCanvasPoint,projectStudyShowcasePose} from '../components/project-study-scene.mjs';
 import {fitResearchCamera} from '../components/research-scene-geometry.mjs';
 class Target {
  constructor(){this.dataset={};this.style={};}
  addEventListener(){} removeEventListener(){} setAttribute(){}
 }
-function sourceGLB(points=false){
+function sourceGLB(points=false,secondObject=false){
  const positions=new Float32Array([-1,0,0,1,0,0,0,1,0]),geometry=Buffer.from(positions.buffer);
  const json={asset:{version:'2.0'},scene:0,scenes:[{nodes:[0]}],nodes:[{mesh:0}],meshes:[{primitives:[{attributes:{POSITION:0},material:0,mode:points?0:4}]}],materials:[{pbrMetallicRoughness:{baseColorFactor:[.7,.8,.9,1]}}],buffers:[{byteLength:geometry.length}],bufferViews:[{buffer:0,byteOffset:0,byteLength:geometry.length}],accessors:[{bufferView:0,componentType:5126,count:3,type:'VEC3',min:[-1,0,0],max:[1,1,0]}]};
+ if(secondObject){json.scenes[0].nodes.push(1);json.nodes.push({mesh:0,translation:[12,0,0]});}
  let text=Buffer.from(JSON.stringify(json));text=Buffer.concat([text,Buffer.alloc((4-text.length%4)%4,32)]);
  const header=Buffer.alloc(12),jHeader=Buffer.alloc(8),bHeader=Buffer.alloc(8);header.writeUInt32LE(0x46546c67);header.writeUInt32LE(2,4);header.writeUInt32LE(12+8+text.length+8+geometry.length,8);jHeader.writeUInt32LE(text.length);jHeader.writeUInt32LE(0x4e4f534a,4);bHeader.writeUInt32LE(geometry.length);bHeader.writeUInt32LE(0x004e4942,4);
  return{bytes:Buffer.concat([header,jHeader,text,bHeader,geometry]),positions:[...positions]};
@@ -22,7 +23,7 @@ function rendererFixture({omitSource=false,lossDuringDraw=false}={}){
  const renderer={domElement:canvas,debug:{},info:{render:{calls:0}},capabilities:{maxTextureSize:4096},xr:{isPresenting:false},
   setClearColor(){},getContext:()=>({isContextLost:()=>report.contextLost}),setSize(){},setPixelRatio(){},setViewport(){},getPixelRatio:()=>dpr,getSize:value=>value.set(width,height),
   setDrawingBufferSize(w,h,ratio){width=w;height=h;dpr=ratio;canvas.width=Math.floor(w*ratio);canvas.height=Math.floor(h*ratio);},
-  render(scene,camera){report.renders++;this.info.render.calls=0;scene.traverse(node=>{if(!node.isMesh&&!node.isPoints)return;report.positions=[...node.geometry.getAttribute('position').array];report.primitive=node.isPoints?'points':'triangles';report.pointSize=node.material.size;report.attenuation=node.material.sizeAttenuation;if(!omitSource)node.onBeforeRender(this,scene,camera,node.geometry,node.material,null);this.info.render.calls++;});if(lossDuringDraw)report.contextLost=true;},
+  render(scene,camera){report.renders++;report.camera=camera.clone();this.info.render.calls=0;scene.updateMatrixWorld(true);const frustum=new T.Frustum().setFromProjectionMatrix(new T.Matrix4().multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse));scene.traverseVisible(node=>{if(!node.isMesh&&!node.isPoints||node.frustumCulled&&!frustum.intersectsObject(node))return;report.positions=[...node.geometry.getAttribute('position').array];report.primitive=node.isPoints?'points':'triangles';report.pointSize=node.material.size;report.attenuation=node.material.sizeAttenuation;if(!omitSource)node.onBeforeRender(this,scene,camera,node.geometry,node.material,null);this.info.render.calls++;});if(lossDuringDraw)report.contextLost=true;},
   dispose(){report.disposals++;},forceContextLoss(){report.losses++;},
  };
  const surface={appendChild(node){node.parentNode=this;}},host={ownerDocument:{defaultView:{location:{origin:'https://portfolio.test'},devicePixelRatio:2}},querySelector:()=>surface};
@@ -71,14 +72,52 @@ test('inverse handheld hit mapping preserves real canvas points across pan, roll
  }
 });
 
+test('Home waits for its authored first shot while the default project retains complete-source framing',async t=>{
+ const previous=globalThis.fetch;t.after(()=>{globalThis.fetch=previous;});const {bytes}=sourceGLB();
+ globalThis.fetch=async()=>({ok:true,arrayBuffer:async()=>bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength)});
+ const model={src:'/assets/projects/test/source.glb',sha256:createHash('sha256').update(bytes).digest('hex'),bytes:bytes.length,webUnits:'meters',upAxis:'Y',vertices:3,triangles:1,meshes:1,bounds:{min:[-1,0,0],max:[1,1,0]},chapters:['context']},support=[-1,0,0,-1,0,0,-1,1,0,-1,1,0,1,0,0,1,0,0,1,1,0,1,1,0];
+ for(const presentation of ['study','showcase']){
+  const f=rendererFixture(),controller=new AbortController(),scene=await acquireProjectStudyScene({host:f.host,model,signal:controller.signal,presentation,createRenderer:()=>f.renderer});t.after(()=>controller.abort());
+  for(const [width,height]of [[1440,900],[390,844]]){
+   const slot=width<800?{width:.94,height:.45}:{width:.51,height:.78};
+   if(presentation==='study'){scene.resize(width,height);assert.deepEqual(scene.inspect().pose,fitResearchCamera(support,width*slot.width/(height*slot.height),{yaw:.72,pitch:.3,fov:36,zoom:1}));}
+   else{
+    if(width===1440){scene.resize(width,height);assert.equal(scene.inspect().draws,0);assert.equal(scene.inspect().firstDraw,null);}
+    const shot={shot:'authored-first',position:[3,2,5],target:[0,.5,0],fovDeg:32,near:.01,far:50,frame:width<800?{x:.57,y:.3}:{x:.69,y:.49}};
+    const before=f.report.renders;scene.resize(width,height,{showcaseShot:shot});const report=scene.inspect();
+    assert.equal(f.report.renders,before+1,'A new responsive shot and viewport draw atomically, without an old-aspect intermediate paint');assert.equal(f.report.camera.aspect,width/height);
+    assert.deepEqual(report.pose,projectStudyShowcasePose(shot));assert.equal(report.firstDraw.composition,'authored-showcase');assert.equal(report.firstDraw.shot,'authored-first');
+    const target=new T.Vector3(...shot.target).project(f.report.camera);assert(Math.abs((target.x+1)/2-shot.frame.x)<1e-10);assert(Math.abs((1-target.y)/2-shot.frame.y)<1e-10);
+   }
+  }
+ }
+});
 
-test('all five authored source boxes remain inside the viewport under bounded handheld and inspection extremes',async()=>{
+test('Home partial shots require the actual visible source set; culled objects are legal and an empty/decorative paint fails',async t=>{
+ const previous=globalThis.fetch;t.after(()=>{globalThis.fetch=previous;});const {bytes}=sourceGLB(false,true);
+ globalThis.fetch=async()=>({ok:true,arrayBuffer:async()=>bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength)});
+ const model={src:'/assets/projects/test/source.glb',sha256:createHash('sha256').update(bytes).digest('hex'),bytes:bytes.length,webUnits:'meters',upAxis:'Y',vertices:6,triangles:2,meshes:2,bounds:{min:[-1,0,0],max:[13,1,0]},chapters:['context']};
+ const shot={shot:'first-part',position:[0,.5,5],target:[0,.5,0],fovDeg:32,near:.01,far:50,frame:{x:.5,y:.5}};
+ for(const omitSource of[false,true]){
+  const f=rendererFixture({omitSource}),controller=new AbortController(),scene=await acquireProjectStudyScene({host:f.host,model,signal:controller.signal,presentation:'showcase',createRenderer:()=>f.renderer});t.after(()=>controller.abort());
+  scene.present({showcaseShot:shot});
+  if(omitSource){assert.throws(()=>scene.resize(1440,1000),/Home source did not draw/);assert.equal(scene.inspect().successfulPaint,false);continue;}
+  scene.resize(1440,1000);assert.equal(scene.inspect().meshes,2);assert.equal(scene.inspect().expectedMeshes,1);assert.equal(scene.inspect().drawnMeshes,1);assert.equal(scene.inspect().successfulPaint,true);
+  assert.throws(()=>scene.present({showcaseShot:{...shot,target:[0,50,0]}}),/Home source did not draw/);
+ }
+ for(const bad of[{...shot,near:0},{...shot,position:[NaN,0,0]},{...shot,target:shot.position},{...shot,frame:{x:2,y:.5}}])assert.throws(()=>projectStudyShowcasePose(bad),/Finite source-space/);
+});
+
+
+test('all authored primary and additional source boxes remain inside the viewport under handheld and inspection extremes',async()=>{
  const {projects}=JSON.parse(await readFile(new URL('../release/project-studies.json',import.meta.url),'utf8'));
- for(const project of projects.filter(value=>value.model))for(const [width,height]of [[1440,1000],[390,844],[320,568]]){
+ const sources=projects.flatMap(project=>[project.model,...project.additionalModels??[]].filter(Boolean).map(model=>({id:project.id,model})));
+ for(const project of sources)for(const [width,height]of [[1440,1000],[390,844],[320,568]]){
   const model=project.model,slot=width<800?{x:.5,y:.42,width:.94,height:.45}:{x:.735,y:.53,width:.51,height:.78},support=[];
   for(const x of [model.bounds.min[0],model.bounds.max[0]])for(const y of [model.bounds.min[1],model.bounds.max[1]])for(const z of [model.bounds.min[2],model.bounds.max[2]])support.push(x,y,z);
   for(const key of model.cameraPath)for(const [azimuth,elevation]of [[0,0],[-.9,-.4],[-.9,.5],[.9,-.4],[.9,.5]]){
-   const pose=fitResearchCamera(support,width*slot.width/(height*slot.height),{yaw:key.yawRad+azimuth,pitch:Math.max(-.1,Math.min(1.15,key.pitchRad+elevation)),fov:key.fovDeg,zoom:key.zoom}),camera=new T.PerspectiveCamera();
+   const lower=['entrance-installation-art','project-caschlatsch'].includes(project.id)?-.16:-.1;
+   const pose=fitResearchCamera(support,width*slot.width/(height*slot.height),{yaw:key.yawRad+azimuth,pitch:Math.max(lower,Math.min(1.15,key.pitchRad+elevation)),fov:key.fovDeg,zoom:key.zoom}),camera=new T.PerspectiveCamera();
    camera.position.fromArray(pose.position);camera.up.fromArray(pose.up);camera.aspect=width/height;
    camera.fov=T.MathUtils.radToDeg(2*Math.atan(Math.tan(T.MathUtils.degToRad(pose.fov/2))/slot.height));camera.near=pose.near;camera.far=pose.far;
    camera.setViewOffset(width,height,width*(.5-slot.x),height*(.5-slot.y),width,height);camera.lookAt(...pose.target);camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
@@ -91,6 +130,22 @@ test('all five authored source boxes remain inside the viewport under bounded ha
     }
    }
   }
+ }
+});
+
+test('Entrance and Caschlatsch start at source-relative human eye lines and crane without losing the full structures',async()=>{
+ const {projects}=JSON.parse(await readFile(new URL('../release/project-studies.json',import.meta.url),'utf8'));
+ for(const id of ['entrance-installation-art','project-caschlatsch']){
+ const model=projects.find(project=>project.id===id).model,support=[];
+ for(const x of [model.bounds.min[0],model.bounds.max[0]])for(const y of [model.bounds.min[1],model.bounds.max[1]])for(const z of [model.bounds.min[2],model.bounds.max[2]])support.push(x,y,z);
+ for(const [width,height]of [[1440,900],[390,844],[320,568]]){
+  const slot=width<800?{width:.94,height:.45}:{width:.51,height:.78};let previousHeight=0;
+  model.cameraPath.forEach((key,index)=>{
+   const pose=fitResearchCamera(support,width*slot.width/(height*slot.height),{yaw:key.yawRad,pitch:key.pitchRad,fov:key.fovDeg,zoom:key.zoom}),eyeHeight=pose.position[1]-model.bounds.min[1];
+   if(index===0)assert(eyeHeight>1.5&&eyeHeight<1.75,`${id} eye ${eyeHeight}m at ${width}px must establish the source's architectural scale`);
+   assert(eyeHeight>previousHeight);assert(eyeHeight<4);assert(pose.position[1]<pose.target[1]);previousHeight=eyeHeight;
+  });
+ }
  }
 });
 

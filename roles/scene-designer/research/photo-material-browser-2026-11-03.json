@@ -1,0 +1,197 @@
+{
+  "passed": true,
+  "scope": "Serial standalone actual-source Chromium shader and visual review, 1200x800. Not the built Pages acceptance gate.",
+  "renderer": "Three 0.186.1",
+  "geometryAndSourceDrawCountsExact": true,
+  "cases": [
+    {
+      "projectId": "mode-s-of-making",
+      "src": "/assets/projects/mode-s-of-making/model.glb",
+      "sha256": "0a6963f5a206d0dc11b5fd9b0d9fc5e2a09085058d86bca62f3fb435a237cee0",
+      "vertices": 699860,
+      "triangles": 1026294,
+      "sourceDraws": 1,
+      "actualRender": {
+        "frame": 33,
+        "calls": 1,
+        "triangles": 1026294,
+        "points": 0,
+        "lines": 0
+      },
+      "recipes": [
+        {
+          "recipe": "eps",
+          "source": "reviewed-project-photographs",
+          "method": "procedural-pbr-microstructure",
+          "geometryDisplacement": false,
+          "textureAllocations": 0,
+          "extraDrawCalls": 0
+        }
+      ],
+      "errors": [],
+      "contextLost": false
+    },
+    {
+      "projectId": "mode-s-machine",
+      "src": "/assets/projects/mode-s-of-making/machine-materials.glb",
+      "sha256": "4b70d53fe51ed04e039285d797c1ead2babf027ffc05244b45080757a5877da9",
+      "vertices": 503822,
+      "triangles": 737282,
+      "sourceDraws": 1,
+      "actualRender": {
+        "frame": 33,
+        "calls": 1,
+        "triangles": 737282,
+        "points": 0,
+        "lines": 0
+      },
+      "recipes": [
+        {
+          "recipe": "machine",
+          "source": "reviewed-project-photographs",
+          "method": "procedural-pbr-microstructure",
+          "geometryDisplacement": false,
+          "textureAllocations": 0,
+          "extraDrawCalls": 0
+        }
+      ],
+      "errors": [],
+      "contextLost": false
+    },
+    {
+      "projectId": "entrance-installation-art",
+      "src": "/assets/projects/entrance-installation-art/model.glb",
+      "sha256": "cb7b5ea27a47c9451bd4220c835fb158aa3e65be19deff684f40eb076c43376c",
+      "vertices": 897015,
+      "triangles": 997599,
+      "sourceDraws": 1,
+      "actualRender": {
+        "frame": 33,
+        "calls": 3,
+        "triangles": 1995200,
+        "points": 0,
+        "lines": 0
+      },
+      "recipes": [
+        {
+          "recipe": "satin-metal",
+          "source": "reviewed-project-photographs",
+          "method": "procedural-pbr-microstructure",
+          "geometryDisplacement": false,
+          "textureAllocations": 0,
+          "extraDrawCalls": 0
+        }
+      ],
+      "errors": [],
+      "contextLost": false
+    },
+    {
+      "projectId": "dot-based-3d-printing",
+      "src": "/assets/projects/dot-based-3d-printing/model.glb",
+      "sha256": "60d49fe978cf0fb552c39f7188a9811dc39aa2e163b3a3388b192dbae502e891",
+      "vertices": 14810,
+      "triangles": 0,
+      "sourceDraws": 1,
+      "actualRender": {
+        "frame": 1,
+        "calls": 1,
+        "triangles": 0,
+        "points": 14810,
+        "lines": 0
+      },
+      "recipes": [
+        {
+          "recipe": "point-samples",
+          "source": "reviewed-project-photographs",
+          "method": "round-depth-cued-source-samples",
+          "geometryDisplacement": false,
+          "textureAllocations": 0,
+          "extraDrawCalls": 0
+        }
+      ],
+      "errors": [],
+      "contextLost": false
+    },
+    {
+      "projectId": "hc3dp-caustics",
+      "src": "/assets/projects/hc3dp-caustics/model.glb",
+      "sha256": "0dd22b441c422f2a9c2406d79288284ee7fc56f1f3028ae453015b3add40bb4a",
+      "vertices": 1894748,
+      "triangles": 2360266,
+      "sourceDraws": 1,
+      "actualRender": {
+        "frame": 33,
+        "calls": 2,
+        "triangles": 4720532,
+        "points": 0,
+        "lines": 0
+      },
+      "recipes": [
+        {
+          "recipe": "clear-print",
+          "source": "reviewed-project-photographs",
+          "method": "procedural-pbr-microstructure",
+          "geometryDisplacement": false,
+          "textureAllocations": 0,
+          "extraDrawCalls": 0
+        }
+      ],
+      "errors": [],
+      "contextLost": false
+    },
+    {
+      "projectId": "special-assemblies",
+      "src": "/assets/projects/special-assemblies/model.glb",
+      "sha256": "43de5ca2dd8095a125d7f29e58851b5a80dc9588625912918d75dbadae8e28df",
+      "vertices": 2040,
+      "triangles": 3840,
+      "sourceDraws": 60,
+      "actualRender": {
+        "frame": 33,
+        "calls": 60,
+        "triangles": 3840,
+        "points": 0,
+        "lines": 0
+      },
+      "recipes": [
+        {
+          "recipe": "timber",
+          "source": "reviewed-project-photographs",
+          "method": "procedural-pbr-microstructure",
+          "geometryDisplacement": false,
+          "textureAllocations": 0,
+          "extraDrawCalls": 0
+        }
+      ],
+      "errors": [],
+      "contextLost": false
+    },
+    {
+      "projectId": "project-caschlatsch",
+      "src": "/assets/projects/project-caschlatsch/model-materials.glb",
+      "sha256": "4cf15112d405619ec27bc82fb81738f12d2da222ac1b720fd79f970a53af3e93",
+      "vertices": 61362,
+      "triangles": 31152,
+      "sourceDraws": 1,
+      "actualRender": {
+        "frame": 33,
+        "calls": 3,
+        "triangles": 62306,
+        "points": 0,
+        "lines": 0
+      },
+      "recipes": [
+        {
+          "recipe": "timber",
+          "source": "reviewed-project-photographs",
+          "method": "procedural-pbr-microstructure",
+          "geometryDisplacement": false,
+          "textureAllocations": 0,
+          "extraDrawCalls": 0
+        }
+      ],
+      "errors": [],
+      "contextLost": false
+    }
+  ]
+}

@@ -94,8 +94,7 @@ test('lifecycle suspension releases mouse inspection and preserves native touch 
   await page.evaluate(() => window.dispatchEvent(new Event('pageshow'))); await settle(page);
   expect(await page.evaluate(() => ({angle: window.__story.inspect().inspection.value.azimuth, y: scrollY, detail:window.__thesis.inspect().detail}))).toEqual({angle: 30, y: held.y, detail:'full'});
   await expect.poll(()=>page.evaluate(()=>window.__story.inspect().playback.activeSeconds),{timeout:WAIT}).toBeGreaterThan(held.time);
-  const pause=page.getByRole('button',{name:'Pause motion',exact:true});
-  await expect(pause).toHaveCount(1);await expect(pause).toBeEnabled();await expect(pause).toHaveAttribute('aria-pressed','false');
+  await expect(page.getByRole('button',{name:/^(Pause|Resume) motion$/})).toHaveCount(0);
   await holdModel(page);await expectIdle(page);
   const keyboardY=await page.evaluate(()=>scrollY);await surface(page).press('Escape');await settle(page);
   expect(await page.evaluate(()=>{const s=window.__story.inspect();return {engaged:s.modelEngaged,held:s.modelHeldSource,angle:s.inspection.value.azimuth,y:scrollY};})).toEqual({engaged:false,held:null,angle:30,y:keyboardY});

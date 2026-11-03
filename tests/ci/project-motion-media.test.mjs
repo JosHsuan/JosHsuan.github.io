@@ -24,13 +24,13 @@ const originalPairs=[
 
 test('seven source motions and their posters have complete release provenance',()=>{
   const current=fixture(),images=validate(current);
-  // Existing Mode/s and HC placements plus four three-case narrative primaries
-  // reuse original sources: 60 placements, still 48 identities / 137 approvals.
-  assert.equal(images.length,60);
-  assert.equal(new Set(images.map(image=>image.src)).size,48);
+  // The restored source machine drawing adds one placement and one active
+  // identity; the original models plus additive machine-surface derivative stay pinned.
+  assert.equal(images.length,61);
+  assert.equal(new Set(images.map(image=>image.src)).size,49);
   assert.equal(current.assets.motionAssets.length,7);
   // The original Dot MP4 is retained alongside its smaller delivery derivative.
-  assert.equal(current.manifest.assets.length,137);
+  assert.equal(current.manifest.assets.filter(asset=>asset.path.startsWith('assets/projects/')).length,80);
   assert.equal(project(current,'project-caschlatsch').motionMedia,undefined);
   assert.doesNotThrow(()=>assertProjectAssetRecord(current.assets,images,current.manifest));
 });

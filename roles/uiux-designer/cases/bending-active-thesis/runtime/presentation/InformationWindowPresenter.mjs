@@ -7,7 +7,7 @@ import {createVelocitySkin,advanceVelocitySkin,sampleVelocitySkin} from '../moti
 
 const MARKER='[data-information-window]';
 const POINTS=['tl','tr','br','bl','et','er','eb','el'];
-const VARIABLES=['background','border-width','border-color','radius','shadow','x','y','rz','rx','ry','skew','perspective','skin-path'];
+const VARIABLES=['background','border-width','border-color','radius','shadow','x','y','rz','rx','ry','skew','sx','sy','flow','perspective','skin-path'];
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const number=value=>Number.parseFloat(value)||0;
 const targetAt=(top,height,docY,viewport)=>clamp((docY+viewport/2-top-height/2)*2/(viewport+height),-1,1);
@@ -24,7 +24,7 @@ function material(style){
 }
 
 function presentationPose(item){
-  if(item.velocitySkin)return sampleVelocitySkin(item.velocitySkin,item.width,item.height,item.radius);
+  if(item.velocitySkin)return sampleVelocitySkin(item.velocitySkin,item.width,item.height,item.radius,{horizontal:item.horizontal,vertical:item.vertical});
   const pose=sampleScrollingPose(item.effect,item.state);
   pose.x=clamp(pose.x,-12,12);pose.y=clamp(pose.y,-12,12);pose.rz=clamp(pose.rz,-1.5,1.5);pose.radius=item.radius;
   // Preserve relative follower positions with one common geometric gain.
@@ -40,7 +40,7 @@ function presentationPose(item){
  * every skin. The director owns measurement invalidation and active elapsed time;
  * this presenter creates no DOM, observer, native listener, timer or frame loop.
  */
-export function createInformationWindowPresenter({publisher,root=globalThis.document,profile='ink'}){
+export function createInformationWindowPresenter({publisher,root=globalThis.document,profile='velocity-skin'}){
   const document=root.ownerDocument??root;
   const recipe=getWindowMotionRecipe('ink');
   const registry=new Map(),materials=new WeakMap(),nested=new Set();
@@ -70,12 +70,16 @@ export function createInformationWindowPresenter({publisher,root=globalThis.docu
       const style=document.defaultView.getComputedStyle(element);
       const kind=element.getAttribute('data-information-window');
       const fixed=kind==='model-label'&&element.getAttribute('data-model-label-placement')!=='native';
-      const plane=velocityProfile&&!fixed&&element.getAttribute('data-information-motion-surface')==='plane';
+      const plane=velocityProfile&&!fixed;
+      // Read the native centre, independently of last frame's perspective.
+      let left=0;for(let node=element;node;node=node.offsetParent)left+=node.offsetLeft??0;
+      const viewportWidth=document.defaultView.innerWidth||width;
+      const horizontal=clamp((left+width/2-viewportWidth/2)/(viewportWidth/2),-1,1);
       const top=fixed?0:naturalY(element);
       const chapter=fixed?element.closest('[data-model-study]')?.dataset.studyChapter:null;
       const surface=materials.get(element)??material(style);
       materials.set(element,surface);
-      rows.push({element,width,height:windowHeight,top,kind,fixed,plane,chapter,surface,radius:number(style.borderTopLeftRadius)});
+      rows.push({element,width,height:windowHeight,top,kind,fixed,plane,chapter,surface,horizontal,vertical:0,radius:number(style.borderTopLeftRadius)});
     }
     const retained=new Set(rows.map(row=>row.element));
     for(const [element] of registry)if(!retained.has(element)){release(element);registry.delete(element);}
@@ -135,7 +139,7 @@ export function createInformationWindowPresenter({publisher,root=globalThis.docu
       setWindowScrollTarget(state,target,{energy,reduced:!!immediate||!!item.velocitySkin});
       if(item.velocitySkin)advanceVelocitySkin(item.velocitySkin,{docY,dt:seconds,viewportHeight,immediate});
       else advanceWindowMotion(state,seconds,{reduced:!!immediate});
-      item.active=active;item.visible=visible;
+      item.active=active;item.visible=visible;item.vertical=clamp((item.top+item.height/2-docY-viewportHeight/2)/(viewportHeight/2),-1,1);
       const resting=item.velocitySkin?item.velocitySkin.resting:state.resting;
       const isMoving=visible&&!resting;
       // Ambient 3D may keep the Director ticking. A settled unchanged skin must
@@ -143,13 +147,15 @@ export function createInformationWindowPresenter({publisher,root=globalThis.docu
       // invalidation marks it dirty; the first neutral frame is still published.
       const neutral=item.pose.x===0&&item.pose.y===0&&item.pose.rz===0&&item.pose.edgeMaximum===0;
       if(resting&&neutral&&!item.dirty&&item.publishedMoving===isMoving){moving ||= isMoving;continue;}
-      const {pose,edgeMaximum,perspective}=presentationPose(item);
+      const {pose,edgeMaximum,perspective,flow=0}=presentationPose(item);
       publisher.style(element,'--information-x',pose.x.toFixed(3)+'px');
       publisher.style(element,'--information-y',pose.y.toFixed(3)+'px');
       publisher.style(element,'--information-rz',pose.rz.toFixed(3)+'deg');
       if(item.velocitySkin){
         for(const key of ['rx','ry','skew'])publisher.style(element,'--information-'+key,pose[key].toFixed(3)+'deg');
         publisher.style(element,'--information-perspective',perspective.toFixed(1)+'px');
+        publisher.style(element,'--information-sx',pose.sx.toFixed(4));publisher.style(element,'--information-sy',pose.sy.toFixed(4));
+        publisher.style(element,'--information-flow',Math.abs(flow).toFixed(4));
       }
       publisher.style(element,'--information-skin-path',outline(item,pose));
       publisher.attribute(element,'data-information-moving',String(isMoving));item.publishedMoving=isMoving;

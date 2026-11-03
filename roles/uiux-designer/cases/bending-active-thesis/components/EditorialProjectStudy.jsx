@@ -8,20 +8,18 @@ import styles from './EditorialProjectStudy.module.css';
 export function ReadingRail({children}){
  return <div className={styles.rail} data-information-window="editorial" data-information-motion-surface="plane" data-home-scroll-window="project-narrative"><InformationSkin/>{children}</div>;
 }
-export function SourceAction({image,evidence=false}){
- return <a className={styles.sourceAction} data-evidence-source-link={evidence?'':undefined} href={image.src} target="_blank" rel="noopener noreferrer" aria-label={`Open full image (new tab): ${image.alt}`}>Open full image (new tab)</a>;
-}
+
 export function SourceReference({image}){
- return <div className={styles.reference} data-editorial-source-reference={image.src}><p>{image.caption}</p><span>{image.credit}</span><SourceAction image={image}/></div>;
+ return <div className={styles.reference} data-editorial-source-reference={image.src}><p>{image.caption}</p><span>{image.credit}</span></div>;
 }
 export function SourceFigure({image,evidence=false,eager=false}){
  const technical=image.purpose==='diagram';
  return <figure className={technical?styles.evidence:styles.scene} data-editorial-source={image.src} data-study-evidence-layout={evidence?'full':undefined} data-study-evidence-role={evidence?(technical?'technical-plate':'photograph'):undefined}>
-  <a className={styles.imageLink} href={image.src} target="_blank" rel="noreferrer" aria-label={`View full image (new tab): ${image.alt}`}>
+  <div className={styles.imageLink}>
    <img data-editorial-image data-project-evidence-image={evidence?'':undefined} src={image.src} width={image.width} height={image.height} alt={image.alt} loading={eager?'eager':'lazy'} decoding="async" data-site-critical={eager?'':undefined} style={{aspectRatio:`${image.width} / ${image.height}`}}/>
-  </a>
-  <span className={styles.imageFailure} role="status">Image unavailable. The source caption, original image link and project text remain available.</span>
-  <figcaption data-information-window="evidence-caption" data-information-motion-surface="plane" data-home-scroll-window="project-caption"><InformationSkin/><p>{image.caption}</p><span>{image.credit}</span><SourceAction image={image} evidence={evidence}/></figcaption>
+  </div>
+  <span className={styles.imageFailure} role="status">Image unavailable. The source caption and project text remain available.</span>
+  <figcaption data-information-window="evidence-caption" data-information-motion-surface="plane" data-home-scroll-window="project-caption"><InformationSkin/><p>{image.caption}</p><span>{image.credit}</span></figcaption>
  </figure>;
 }
 /** Native still-source roles for hybrid cases; model/video ownership stays with the caller. */

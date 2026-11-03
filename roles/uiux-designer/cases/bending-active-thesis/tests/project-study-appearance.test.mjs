@@ -9,11 +9,11 @@ function fixture({material=new T.MeshStandardMaterial({color:'#bdc1c6',metalness
  const scene=new T.Scene(),source=new T.Group(),geometry=new T.BufferGeometry();
  const positions=points?Float32Array.from({length:pointCount*3},(_,i)=>i*.00001):new Float32Array([0,0,0,1,0,0,0,1,0]);
  geometry.setAttribute('position',new T.BufferAttribute(positions,3));
- if(!points){geometry.setAttribute('normal',new T.Float32BufferAttribute([0,0,1,0,0,1,0,0,1],3));geometry.setAttribute('uv',new T.Float32BufferAttribute([0,0,1,0,0,1],2));geometry.setIndex([0,1,2]);}
+ if(!points){geometry.setAttribute('_fiber_axis',new T.Float32BufferAttribute([0,1,0,0,1,0,0,1,0],3));geometry.setAttribute('normal',new T.Float32BufferAttribute([0,0,1,0,0,1,0,0,1],3));geometry.setAttribute('uv',new T.Float32BufferAttribute([0,0,1,0,0,1],2));geometry.setIndex([0,1,2]);}
  source.position.set(3,5,-2);source.rotation.set(.2,.3,.1);source.scale.setScalar(.001);
  const nodes=[];for(let i=0;i<count;i++){const node=points?new T.Points(geometry,material):new T.Mesh(geometry,material);node.position.set(i*.01,i*.02,-i*.03);node.onBeforeRender=()=>{};source.add(node);nodes.push(node);}
  scene.add(source);source.updateWorldMatrix(true,true);
- const bounds={min:[-1,2,4],max:[2,6,9]},renderer={outputColorSpace:T.SRGBColorSpace,toneMapping:T.ACESFilmicToneMapping,toneMappingExposure:1,transmissionResolutionScale:1,shadowMap:{enabled:false},render(){throw Error('Appearance must not render or own a clock');}};
+ const bounds={min:[-1,2,4],max:[2,6,9]},renderer={outputColorSpace:T.SRGBColorSpace,toneMapping:T.ACESFilmicToneMapping,toneMappingExposure:1,transmissionResolutionScale:1,shadowMap:{enabled:false,type:T.PCFShadowMap,autoUpdate:true,needsUpdate:false},render(){throw Error('Appearance must not render or own a clock');}};
  let generations=0,environmentDisposals=0;const targets=[],options=[];
  const createEnvironment=option=>{generations++;options.push(option);const target={width:384,height:512,texture:new T.Texture(),dispose(){environmentDisposals++;}};targets.push(target);return target;};
  const install=(projectId,extra={})=>installProjectStudyAppearance({scene,source,renderer,bounds,projectId,createEnvironment,...extra});
@@ -31,28 +31,103 @@ function protectSource(f){
 }
 
 for(const [id,color,metalness,roughness,intensities]of [
- ['mode-s-of-making',[.76,.77,.74],0,.88,[.32,.4,2.2,.35,.55]],
- ['entrance-installation-art',[.58,.60,.62],.9,.36,[.85,.25,2.2,.3,1]],
- ['special-assemblies',[.49,.34,.20],0,.76,[.45,.35,2,.3,.65]],
-])test(`${id} installs its reviewed neutral finish without rewriting original geometry or renderer policy`,()=>{
- const f=fixture(),unchanged=protectSource(f),originalColor=f.material.color.clone(),settings={...f.renderer},lease=f.install(id),clone=f.nodes[0].material;
+ ['mode-s-of-making',[.85,.84,.81],0,.88,[.38,.32,2.2,.35,.7]],
+ ['mode-s-machine',[.59,.63,.68],.91,.29,[.72,.25,2.2,.38,1.1]],
+ ['entrance-installation-art',[.37,.40,.42],.52,.40,[.75,.2,2.3,.38,1.2]],
+ ['special-assemblies',[.38,.235,.12],0,.72,[.45,.3,2,.34,.8]],
+ ['project-caschlatsch',[.62,.40,.20],0,.76,[.5,.28,2.2,.38,.95]],
+])test(`${id} installs its photo-reviewed microstructure without rewriting original geometry or renderer policy`,()=>{
+ const f=fixture();if(id==='mode-s-machine')f.geometry.setAttribute('_surface_family',new T.Float32BufferAttribute([2,2,2],1));
+ const unchanged=protectSource(f),originalColor=f.material.color.clone(),settings={...f.renderer},lease=f.install(id),clone=f.nodes[0].material;
  assert.notEqual(clone,f.material);assert.equal(clone.type,'MeshStandardMaterial');vectorClose(clone.color.toArray(),color);assert.equal(clone.metalness,metalness);assert.equal(clone.roughness,roughness);assert.equal(clone.side,T.DoubleSide);
  assert(f.material.color.equals(originalColor));assert.equal(f.material.metalness,.3);assert.equal(f.material.roughness,.6);unchanged();assert.deepEqual(f.renderer,settings);
  const info=lease.inspect();assert.equal(info.profileID,id);assert.equal(info.environment.intensity,intensities[0]);assert.deepEqual(info.lights.map(light=>light.intensity),intensities.slice(1));assert.equal(info.environment.generations,1);assert.equal(info.environment.size,128);assert.deepEqual(info.environment.atlas,[384,512]);assert.equal(f.scene.environment,f.targets[0].texture);assert.equal(f.scene.background,null);assert.equal(f.scene.environmentRotation.y,.35);
+ assert.equal(info.materials[0].surface.source,'reviewed-project-photographs');assert.equal(info.materials[0].surface.extraDrawCalls,0);assert.equal(info.materials[0].surface.textureAllocations,0);assert.equal(info.materials[0].surface.geometryDisplacement,false);
  assert.deepEqual(f.options,[{renderer:f.renderer,size:128,sigma:.04,near:.1,far:100}]);assert.equal(lease.inspect().environment.generations,1,'Inspect and retained reading do not bake again');
  lease.dispose();unchanged();assert.equal(f.nodes[0].material,f.material);assert.equal(f.environmentDisposals,1);assert.equal(f.scene.children.length,1);assert.deepEqual(f.renderer,settings);
 });
 
-test('Caustics retains every native physical channel, alpha semantics, maps and hooks, correcting only the evidenced scalar IOR',()=>{
- const texture=new T.DataTexture(new Uint8Array([240,220,190,255]),1,1),hook=()=>{},cacheKey=()=>'original-material-hook';
+test('large-source contact receiver and cached shadow are owned, reversible, and never move the original base',()=>{
+ for(const id of ['entrance-installation-art','project-caschlatsch']){
+  const f=fixture({count:3}),unchanged=protectSource(f),shadowBefore={...f.renderer.shadowMap};
+  f.nodes[1].castShadow=true;f.nodes[2].receiveShadow=true;
+  const flags=f.nodes.map(node=>({castShadow:node.castShadow,receiveShadow:node.receiveShadow}));
+  const lease=f.install(id),receiver=f.scene.getObjectByName('editorial-contact-receiver'),key=f.scene.children.find(node=>node.isDirectionalLight&&node.castShadow);
+  assert(receiver?.isMesh);assert(receiver.material.isShadowMaterial);assert(receiver.receiveShadow);assert.equal(receiver.position.y,f.bounds.min[1]-.002);assert(receiver.position.y<f.bounds.min[1]);assert.equal(receiver.material.depthWrite,false);
+  assert.equal(lease.inspect().ground.kind,'editorial-source-relative-shadow-receiver');assert.equal(lease.inspect().ground.updates,'initial-source-draw');
+  assert.deepEqual(f.renderer.shadowMap,{enabled:true,type:T.PCFShadowMap,autoUpdate:false,needsUpdate:true});assert.deepEqual(key.shadow.mapSize.toArray(),[1024,1024]);assert(f.nodes.every(node=>node.castShadow&&node.receiveShadow));
+  let geometryDisposals=0,materialDisposals=0;receiver.geometry.addEventListener('dispose',()=>geometryDisposals++);receiver.material.addEventListener('dispose',()=>materialDisposals++);
+  const fixedKey=key.position.toArray();for(const activeSeconds of [0,6,12,18,24])lease.update({activeSeconds,yawRad:.6});
+  assert.deepEqual(key.position.toArray(),fixedKey);assert.equal(f.generations,1);unchanged();
+  lease.dispose();lease.dispose();assert.equal(geometryDisposals,1);assert.equal(materialDisposals,1);assert.equal(receiver.parent,null);assert.deepEqual(f.renderer.shadowMap,shadowBefore);
+  f.nodes.forEach((node,i)=>assert.deepEqual({castShadow:node.castShadow,receiveShadow:node.receiveShadow},flags[i]));unchanged();
+ }
+});
+
+test('caller time produces a closed light loop without rebaking, rendering or allocating another rig',()=>{
+ const f=fixture(),lease=f.install('mode-s-of-making'),objects=[...f.scene.children];
+ assert.equal(lease.update({activeSeconds:0,yawRad:.6}),true);const start=lease.inspect(),rotation=f.scene.environmentRotation.toArray();
+ assert.equal(lease.update({activeSeconds:0,yawRad:.6}),false);
+ lease.update({activeSeconds:6,yawRad:.6});const quarter=lease.inspect();
+ assert.notDeepEqual(quarter.lights.find(light=>light.role==='rim').position,start.lights.find(light=>light.role==='rim').position);
+ assert.deepEqual(quarter.lights.find(light=>light.role==='key').position,start.lights.find(light=>light.role==='key').position);
+ lease.update({activeSeconds:24,yawRad:.6});const end=lease.inspect();
+ assert.deepEqual(end.lights,start.lights);assert.deepEqual(f.scene.environmentRotation.toArray(),rotation);assert.deepEqual(f.scene.children,objects);assert.equal(f.generations,1);
+ for(const activeSeconds of [-1,NaN,Infinity])assert.throws(()=>lease.update({activeSeconds}),/Finite nonnegative/);
+ lease.dispose();assert.equal(lease.update({activeSeconds:25}),false);
+});
+
+test('light-only sweep draws at most twelve samples per second while camera yaw stays immediate',()=>{
+ const f=fixture(),lease=f.install('entrance-installation-art');
+ try{
+  assert.equal(lease.update({activeSeconds:0,yawRad:.6}),true);const initial=lease.inspect().lighting.revision;
+  for(let frame=1;frame<24;frame++)assert.equal(lease.update({activeSeconds:frame/24,yawRad:.6}),frame%2===0);
+  assert.equal(lease.inspect().lighting.revision,initial+11);assert.equal(lease.inspect().lighting.cadenceHz,12);
+  assert.equal(lease.update({activeSeconds:23/24,yawRad:.61}),true,'A new camera direction does not wait for the next light-time sample');
+  assert.equal(lease.update({activeSeconds:23/24,yawRad:.61}),false);
+ }finally{lease.dispose();}
+});
+
+test('authored showcase lighting is bounded, reversible and never moves or rebakes the cached shadow key',()=>{
+ const f=fixture(),lease=f.install('entrance-installation-art');
+ try{
+  lease.update({activeSeconds:0});const before=lease.inspect(),key=before.lights.find(light=>light.role==='key');
+  lease.update({activeSeconds:0,showcaseLighting:{keyScale:100,rimScale:-10,environmentScale:100,sweepRad:100}});
+  const after=lease.inspect();assert.equal(after.lights.find(light=>light.role==='key').intensity,key.intensity*1.15);assert.deepEqual(after.lights.find(light=>light.role==='key').position,key.position);assert.equal(after.lights.find(light=>light.role==='rim').intensity,before.lights.find(light=>light.role==='rim').intensity*.8);assert.equal(f.scene.environmentIntensity,.75*1.1);assert.equal(f.generations,1);
+  lease.update({activeSeconds:0});assert.deepEqual(lease.inspect().lights,before.lights);assert.equal(f.scene.environmentIntensity,.75);
+  assert.throws(()=>lease.update({showcaseLighting:{sweepRad:NaN}}),/Finite showcase/);
+ }finally{lease.dispose();}
+});
+
+test('missing reviewed per-source material attributes fail before source assignment and release the environment',()=>{
+ for(const [id,attribute]of [['mode-s-machine','_surface_family'],['project-caschlatsch','_fiber_axis']]){
+  const f=fixture();f.geometry.deleteAttribute(attribute);const original=f.nodes[0].material;
+  assert.throws(()=>f.install(id),/attribute required/);assert.equal(f.nodes[0].material,original);assert.equal(f.environmentDisposals,1);assert.equal(f.scene.children.length,1);
+ }
+});
+
+test('timber shader cache separates source-axis attributes from retained local-cylinder axes',()=>{
+ const cas=fixture(),special=fixture(),a=cas.install('project-caschlatsch'),b=special.install('special-assemblies');
+ try{assert.notEqual(cas.nodes[0].material.customProgramCacheKey(),special.nodes[0].material.customProgramCacheKey());
+  for(const [f,hasAttribute]of [[cas,true],[special,false]]){
+   const shader={vertexShader:T.ShaderLib.standard.vertexShader,fragmentShader:T.ShaderLib.standard.fragmentShader};f.nodes[0].material.onBeforeCompile(shader,f.renderer);
+   assert.equal(shader.vertexShader.includes('attribute vec3 _fiber_axis'),hasAttribute);assert.match(shader.fragmentShader,/photoNoiseGradient/);assert.match(shader.fragmentShader,/normal=photoBump\(normal,surfaceGradient\)/);assert(!/dFdx\(|dFdy\(/.test(shader.fragmentShader),'Analytic normal gradient never differentiates an AA derivative mask');
+  }
+ }finally{a.dispose();b.dispose();}
+});
+
+test('Caustics uses photo-reviewed dielectric optics while retaining source maps, other channels and composed hooks',()=>{
+ let calls=0;const texture=new T.DataTexture(new Uint8Array([240,220,190,255]),1,1),hook=()=>{calls++;},cacheKey=()=>'original-material-hook';
  const material=new T.MeshPhysicalMaterial({color:new T.Color(1,1,1),metalness:.31024929881095886,roughness:.14681440591812134,transmission:1,opacity:.1052631139755249,transparent:false,side:T.DoubleSide,ior:1.5,thickness:.025,attenuationDistance:6.2,attenuationColor:new T.Color(.2,.3,.4),clearcoat:.21,clearcoatRoughness:.44,map:texture,normalMap:texture,bumpMap:texture,bumpScale:.19,envMapIntensity:.73});
  material.onBeforeCompile=hook;material.customProgramCacheKey=cacheKey;
  const before=material.toJSON(),f=fixture({material}),unchanged=protectSource(f),lease=f.install('hc3dp-caustics'),clone=f.nodes[0].material,after=clone.toJSON();
  assert.equal(clone.type,'MeshPhysicalMaterial');assert.equal(clone.ior,1.5700000524520874);assert.equal(material.ior,1.5);
  // Three serializes IOR through its derived reflectivity getter. This exact
  // dependency changes with IOR; it is not a second material reinterpretation.
- close(clone.reflectivity,2.5*(clone.ior-1)/(clone.ior+1));after.uuid=before.uuid;after.reflectivity=before.reflectivity;assert.deepEqual(after,before,'Every other serialized native physical channel remains unchanged');
- assert.equal(clone.onBeforeCompile,hook);assert.equal(clone.customProgramCacheKey,cacheKey);assert.equal(clone.map,texture);assert.equal(clone.normalMap,texture);assert.equal(clone.bumpMap,texture);assert.equal(clone.envMapIntensity,.73,'The recipe is not multiplied into the material');
+ close(clone.reflectivity,2.5*(clone.ior-1)/(clone.ior+1));assert.equal(clone.metalness,0);assert.equal(clone.roughness,.12);assert.equal(clone.transmission,1);assert.equal(clone.opacity,1);assert.equal(clone.thickness,.0015);assert.equal(clone.transparent,false);
+ after.uuid=before.uuid;after.reflectivity=before.reflectivity;for(const key of ['metalness','roughness','opacity','thickness'])after[key]=before[key];assert.deepEqual(after,before,'Only the reviewed dielectric optical channels differ; source maps and remaining physical fields stay exact');
+ assert.notEqual(clone.onBeforeCompile,hook);assert.equal(clone.customProgramCacheKey(),'original-material-hook|photo-surface-v1:clear-print:hc3dp-caustics');assert.equal(clone.map,texture);assert.equal(clone.normalMap,texture);assert.equal(clone.bumpMap,texture);assert.equal(clone.envMapIntensity,.73,'The recipe is not multiplied into the material');
+ const shader={vertexShader:T.ShaderLib.physical.vertexShader,fragmentShader:T.ShaderLib.physical.fragmentShader};clone.onBeforeCompile(shader,f.renderer);assert.equal(calls,1);assert.match(shader.fragmentShader,/filament=photoLine/);assert.match(shader.fragmentShader,/normal=photoBump/);assert.equal(material.onBeforeCompile,hook);assert.equal(material.customProgramCacheKey,cacheKey);
  assert.equal(f.scene.environmentIntensity,.7);assert.equal(f.renderer.transmissionResolutionScale,1);assert.deepEqual(lease.inspect().lights.map(light=>light.intensity),[.18,1.9,.25,1.2]);assert(lease.inspect().materials[0].sourceTextureReferencesPreserved);unchanged();
  lease.dispose();assert.equal(f.nodes[0].material,material);assert.deepEqual(material.toJSON(),before);unchanged();
 });
@@ -60,7 +135,7 @@ test('Caustics retains every native physical channel, alpha semantics, maps and 
 test('all 14,810 native point samples remain points with one unlit graphic clone and no environment or light rig',()=>{
  const material=new T.PointsMaterial({color:'#92b3cc',size:7,sizeAttenuation:true}),f=fixture({material,points:true,pointCount:14810}),unchanged=protectSource(f),lease=f.install('dot-based-3d-printing'),clone=f.nodes[0].material;
  assert(f.nodes[0].isPoints);assert(clone.isPointsMaterial);assert.equal(f.geometry.getAttribute('position').count,14810);assert.equal(f.geometry.index,null);assert.equal(f.geometry.getAttribute('normal'),undefined);assert.equal(f.geometry.getAttribute('uv'),undefined);
- vectorClose(clone.color.toArray(),[.48,.68,.8]);assert.equal(clone.size,2);assert.equal(clone.sizeAttenuation,false);assert.equal(clone.toneMapped,false);assert.equal(material.size,7);assert.equal(material.sizeAttenuation,true);
+ vectorClose(clone.color.toArray(),[.74,.79,.82]);assert.equal(clone.size,2);assert.equal(clone.sizeAttenuation,false);assert.equal(clone.toneMapped,false);assert.equal(material.size,7);assert.equal(material.sizeAttenuation,true);
  assert.equal(f.generations,0);assert.equal(f.scene.environment,null);assert.equal(f.scene.environmentIntensity,0);assert.equal(f.scene.children.length,1);assert.deepEqual(lease.inspect().lights,[]);assert.equal(lease.inspect().environment.kind,'none');unchanged();
  lease.dispose();assert.equal(f.environmentDisposals,0);assert.equal(f.nodes[0].material,material);unchanged();
 });

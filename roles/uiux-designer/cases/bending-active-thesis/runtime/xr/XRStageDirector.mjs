@@ -9,7 +9,7 @@ import {createXRStageMotion,advanceXRStageMotion,cancelXRStageMotion} from './XR
 
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const BLOCKED='a,button,input,select,textarea,summary,[contenteditable]:not([contenteditable="false"]),[role="textbox"],[data-protect],[data-information-window]';
-const MODEL_CAMERA_PATH=createScrollCameraPath([{at:0,yawRad:.92,pitchRad:.28,fovDeg:36,zoom:1},{at:.5,yawRad:1.06,pitchRad:.32,fovDeg:36,zoom:1},{at:1,yawRad:1.16,pitchRad:.36,fovDeg:36,zoom:1}]);
+export const XR_MODEL_CAMERA_PATH=createScrollCameraPath([{at:0,yawRad:.92,pitchRad:.28,fovDeg:38,zoom:1.05},{at:.5,yawRad:1.06,pitchRad:.32,fovDeg:34,zoom:1.04},{at:1,yawRad:1.16,pitchRad:.36,fovDeg:32,zoom:1.05}]);
 const neutralHandheld=()=>({xPx:0,yPx:0,rollRad:0});
 const zero=()=>({azimuth:0,elevation:0});
 const naturalY=element=>{let top=0;for(let node=element;node;node=node.offsetParent)top+=node.offsetTop;return top;};
@@ -26,12 +26,11 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
    if(binding)throw Error('XR director is already connected');
    const events=new EventManager(),scope=events.createScope('xr-stage');
    const dom=new DOMPresenter(),publisher=dom.forOwner('xr-director');
-   const windows=createInformationWindowPresenter({root,profile:root.getAttribute('data-information-motion-profile')??'ink',publisher:dom.forOwner('xr-information')});
+   const windows=createInformationWindowPresenter({root,profile:'velocity-skin',publisher:dom.forOwner('xr-information')});
    const liquid=createLiquidGlassPresenter({root:doc,publisher:dom.forOwner('xr-liquid-glass')});
    const sceneMotion=createXRStageMotion(),sceneSurface=host.querySelector('[data-xr-scene-surface]')??host;
    const workspaceImage=host.querySelector('[data-xr-workspace-visual]');
    const workspace={phase:workspaceImage?'loading':'failed',reason:workspaceImage?null:'workspace-absent',width:0,height:0,source:null};
-   const reduced=win.matchMedia('(prefers-reduced-motion: reduce)'),connection=win.navigator?.connection;
    const glassPreferences=['(forced-colors: active)','(prefers-contrast: more)','(prefers-reduced-transparency: reduce)'].map(query=>win.matchMedia(query));
    const opaqueGlass=()=>glassPreferences.some(query=>query.matches);
    const observerList=[],observed=new Set(),gestureHistory=[];
@@ -42,17 +41,16 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
    let paintedChapter=null,paintPending=false,paintGeneration=0,workspaceGeneration=0,liquidKeyboardFocus=true;
    const scheduler=createFrameScheduler({request:fn=>win.requestAnimationFrame(fn),cancel:id=>win.cancelAnimationFrame(id),onFrame:tick});
    const listen=(node,type,fn,options)=>events.listen(scope,node,type,fn,options);
-   const policy=()=>({reduced:!!reduced.matches,saveData:!!connection?.saveData,hidden:!!doc.hidden,siteReady:doc.documentElement.getAttribute('data-site-entry-state')==='entered'});
+   const policy=()=>({reduced:false,saveData:false,hidden:!!doc.hidden,siteReady:doc.documentElement.getAttribute('data-site-entry-state')==='entered'});
     const canInspect=()=>{const p=policy(),painted=resource?.inspect();return chapter==='method'&&sceneMotion.chapter===chapter&&sceneMotion.mode==='hold'&&sceneMotion.settled&&!!resource&&painted?.mode==='webgl-model'&&painted.successfulPaint&&!disposed&&!scheduler.suspended&&!away&&visible&&!p.hidden&&!p.reduced&&!p.saveData&&!paused&&p.siteReady;};
    const state=()=>{const p=policy(),s=lifecycle.inspect();return{phase:s.phase,reason:s.reason,chapter,sceneChapter:sceneMotion.chapter,sceneMode:sceneMotion.mode,reduced:p.reduced,saveData:p.saveData,paused};};
    const notify=()=>{if(disposed)return;const next=state(),key=JSON.stringify(next);if(key!==lastState){lastState=key;onState(next);}};
-   const focusedReading=()=>!!doc.activeElement?.closest?.(BLOCKED+', [data-xr-model-control]');
    const modelMotionEligible=()=>{const p=policy();return!!(sceneMotion.chapter==='method'&&sceneMotion.pose.opacity>0&&resource?.inspect().mode==='webgl-model'&&!paused&&!p.hidden&&!p.reduced&&!p.saveData&&p.siteReady&&!away&&visible&&!scheduler.suspended&&!disposed);};
    const presentation=()=>{
     const next={chapter:sceneMotion.chapter,progress,azimuth:value.azimuth,elevation:value.elevation,paused,reduced:policy().reduced,cameraIntent:null,handheld:neutralHandheld()};
     if(sceneMotion.chapter!=='method'){cameraRecovery=null;cameraWasPaused=false;return next;}
     if(paused&&lastModelIntent){cameraWasPaused=true;cameraRecovery=null;return{...next,cameraIntent:lastModelIntent,handheld:lastHandheld};}
-    const desired=composeCameraIntent(sampleScrollCamera(MODEL_CAMERA_PATH,modelProgress),{inspection:{yawRad:value.azimuth,pitchRad:value.elevation}});
+    const desired=composeCameraIntent(sampleScrollCamera(XR_MODEL_CAMERA_PATH,modelProgress),{inspection:{yawRad:value.azimuth,pitchRad:value.elevation}});
     if(cameraWasPaused&&lastModelIntent){const yaw=lastModelIntent.yawRad-desired.yawRad,tau=Math.PI*2;cameraRecovery={elapsed:0,yawRad:Math.abs(yaw)<=Math.PI?yaw:((yaw+Math.PI)%tau+tau)%tau-Math.PI,pitchRad:lastModelIntent.pitchRad-desired.pitchRad};}
     cameraWasPaused=false;
     if(cameraRecovery){const t=clamp(cameraRecovery.elapsed/.35,0,1),weight=1-t*t*(3-2*t);desired.yawRad+=cameraRecovery.yawRad*weight;desired.pitchRad+=cameraRecovery.pitchRad*weight;}
@@ -167,15 +165,15 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
     const delta=resumed?0:Math.min(.1,Math.max(0,dt));
     if(cameraActive){
      activeSeconds+=delta;
-     const goal=focusedReading()?0:1,step=delta/.2;handheldGain=goal>handheldGain?Math.min(goal,handheldGain+step):Math.max(goal,handheldGain-step);
+     const goal=press?.locked?0:1,step=delta/.2;handheldGain=goal>handheldGain?Math.min(goal,handheldGain+step):Math.max(goal,handheldGain-step);
      if(cameraRecovery){cameraRecovery.elapsed=Math.min(.35,cameraRecovery.elapsed+delta);if(cameraRecovery.elapsed>=.35)cameraRecovery=null;}
     }
     if(p.reduced||p.saveData||lifecycle.inspect().phase==='failed'){handheldGain=0;cameraRecovery=null;cameraWasPaused=false;}
-    const informationNeutral=p.reduced||p.saveData||p.hidden||!p.siteReady||paused||away||!visible||glassPreferences[0].matches;
+    const informationNeutral=p.reduced||p.saveData||p.hidden||!p.siteReady||paused||away||!visible;
     const moving=windows.publish({docY:win.scrollY,dt,reduced:informationNeutral,seek:resumed,resumed});
     const glassMoving=liquid.publish({dt,reduced:informationNeutral,resumed,hidden:p.hidden,opaque:opaqueGlass(),keyboardFocus:liquidKeyboardFocus});
     resumed=false;paint();notify();
-    if(!settled||moving||glassMoving||sceneMotion.transition||cameraActive&&(!focusedReading()||handheldGain>0||cameraRecovery))scheduler.schedule();else previous=0;
+    if(!settled||moving||glassMoving||sceneMotion.transition||cameraActive)scheduler.schedule();else previous=0;
    }
    function invalidate(){if(disposed)return;dirty=true;scheduler.schedule();}
    function down(event){
@@ -221,8 +219,6 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
    listen(doc,'visibilitychange',()=>suspend('visibility',doc.hidden));listen(doc,'freeze',()=>{away=true;suspend('freeze',true);});listen(doc,'resume',()=>{away=false;suspend('freeze',false);});
    listen(win,'pagehide',event=>{away=true;if(event.persisted)suspend('page',true);else dispose();});
    listen(win,'pageshow',()=>{away=false;scheduler.suspend('visibility',doc.hidden);suspend('page',false);});
-   listen(reduced,'change',()=>{closeGesture('preference-change',true);previous=0;resumed=true;updateEligibility('preference-change');scheduler.schedule();});
-   if(connection?.addEventListener)listen(connection,'change',()=>{closeGesture('preference-change',true);updateEligibility('preference-change');scheduler.schedule();});
    for(const query of glassPreferences)listen(query,'change',()=>{liquid.reset();invalidate();});
    // Native image decoding is Context's own readiness fact. A prepared hidden
    // assembly cannot acknowledge the complete workspace still on its behalf.
@@ -247,19 +243,12 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
     publisher.attribute(root,'data-xr-director-ready',null);publisher.attribute(root,'data-xr-active-chapter',null);links.forEach(link=>publisher.attribute(link,'aria-current',null));
     publisher.style(sceneSurface,'transform','');publisher.style(sceneSurface,'opacity','');publisher.attribute(host,'data-xr-scene-mode',null);publisher.attribute(host,'data-xr-presented-chapter',null);publisher.attribute(host,'data-xr-workspace-phase',null);
    }
-   const inspect=()=>({...lifecycle.inspect(),chapter,progress,paused,...policy(),size:{...size},workspace:{...workspace},scene:{chapter:sceneMotion.chapter,requestedChapter:sceneMotion.requestedChapter,mode:sceneMotion.mode,settled:sceneMotion.settled,visible:sceneMotion.visible,...sceneMotion.pose,paintPending,paintedChapter,history:sceneMotion.history.map(item=>({...item}))},camera:{target:{...target},value:{...value},settled,idleActive:modelMotionEligible()&&!focusedReading(),needsFrame:modelMotionEligible()&&(!focusedReading()||handheldGain>0||!!cameraRecovery),modelProgress,activeSeconds,intent:lastModelIntent,handheld:lastHandheld,handheldGain,recovering:!!cameraRecovery},gesture:press?{id:press.id,pointerId:press.pointerId,locked:press.locked}:null,gestures:[...gestureHistory],frames,frameDelta,lifecycle:scheduler.inspect(),events:events.inspect(),informationWindows:windows.inspect(),liquidGlass:liquid.inspect(),domPublication:dom.inspect(),disposed});
-   binding={dispose,inspect,hitTest:(x,y)=>canInspect()&&[x,y].every(Number.isFinite)?resource.hitTest?.(x,y)??false:false,pause(value){
-    if(disposed||paused===value)return;paused=value;
-    // Native media commands acknowledge before the UI, independently of the
-    // next camera frame. A pending first paint reconciles this intent itself.
-    try{resource?.setPaused(paused);}catch(error){lifecycle.fail(error?.message||'render-unavailable');return;}
-    notify();if(!scheduler.suspended)scheduler.schedule();
-   }};
+   const inspect=()=>({...lifecycle.inspect(),chapter,progress,paused,...policy(),size:{...size},workspace:{...workspace},scene:{chapter:sceneMotion.chapter,requestedChapter:sceneMotion.requestedChapter,mode:sceneMotion.mode,settled:sceneMotion.settled,visible:sceneMotion.visible,...sceneMotion.pose,paintPending,paintedChapter,history:sceneMotion.history.map(item=>({...item}))},camera:{target:{...target},value:{...value},settled,idleActive:modelMotionEligible(),needsFrame:modelMotionEligible(),modelProgress,activeSeconds,intent:lastModelIntent,handheld:lastHandheld,handheldGain,recovering:!!cameraRecovery},gesture:press?{id:press.id,pointerId:press.pointerId,locked:press.locked}:null,gestures:[...gestureHistory],frames,frameDelta,lifecycle:scheduler.inspect(),events:events.inspect(),informationWindows:windows.inspect(),liquidGlass:liquid.inspect(),domPublication:dom.inspect(),disposed});
+   binding={dispose,inspect,hitTest:(x,y)=>canInspect()&&[x,y].every(Number.isFinite)?resource.hitTest?.(x,y)??false:false};
    publisher.attribute(root,'data-xr-director-ready','');scheduler.suspend('visibility',doc.hidden);measure();reading();updateEligibility('initial');scheduler.schedule();
    Promise.resolve(doc.fonts?.ready).then(()=>{if(!disposed)invalidate();},()=>{if(!disposed)invalidate();});
    return()=>dispose();
   },
-  setPaused(value){const next=!!value;if(binding)binding.pause(next);else paused=next;},
   hitTest:(x,y)=>binding?.hitTest(x,y)??false,
   inspect:()=>binding?.inspect()??{phase:'poster',reason:'not-connected',chapter:'overview',paused,disposed:false},
  };

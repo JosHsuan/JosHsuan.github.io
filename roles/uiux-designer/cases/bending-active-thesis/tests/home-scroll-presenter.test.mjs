@@ -67,8 +67,8 @@ test('native scrolling exits the viewport and returning resumes the same finite 
   assert(![...f.nodes[0].styles.keys()].some(key=>key.includes('opacity')));
 });
 
-test('Reduced Motion, Save Data, forced colors and document suspension all return Home to readable rest',()=>{
-  for(const option of [{reduced:true},{saveData:true},{forcedColors:true},{suspended:true},{ready:false}]){
+test('document suspension and incomplete entry return Home to readable rest',()=>{
+  for(const option of [{suspended:true},{ready:false}]){
     const f=fixture();f.measure();f.publish();f.publish({docY:350});
     assert.equal(f.presenter.inspect().informationWindows.moving,true);
     assert.equal(f.publish({docY:350,...option}),false);
@@ -78,6 +78,12 @@ test('Reduced Motion, Save Data, forced colors and document suspension all retur
     f.publish({docY:350,resumed:true});
     assert.equal(f.presenter.inspect().enabled,true);assert.equal(f.presenter.inspect().informationWindows.moving,false);
   }
+});
+
+test('OS motion, data and color preferences do not disable the continuous Home response',()=>{
+ for(const option of [{reduced:true},{saveData:true},{forcedColors:true}]){
+  const f=fixture();f.measure();f.publish();assert.equal(f.publish({docY:350,...option}),true);assert.equal(f.presenter.inspect().enabled,true);assert(f.presenter.inspect().informationWindows.items[0].edgeMaximum>0);f.presenter.dispose();
+ }
 });
 
 test('focused reading stays still; new layout measurements update native positions without replay',()=>{
@@ -103,8 +109,8 @@ test('disposal releases Home markers and all owned material properties; stale sa
 });
 
 
-test('ordinary page adapter applies existing static policies to explicit whole planes only',()=>{
- for(const option of [{reduced:true},{saveData:true},{forcedColors:true},{suspended:true},{ready:false},{resumed:true},{seek:true}]){
+test('ordinary page adapter resets entry and suspension while exposing the shared whole-plane grammar',()=>{
+ for(const option of [{suspended:true},{ready:false},{resumed:true},{seek:true}]){
   const f=fixture(createHomeScrollPresenter,{profile:'velocity-skin',plane:true});f.measure();f.publish();f.publish({docY:80});
   assert(f.presenter.inspect().informationWindows.items[0].skinStrength>0);
   f.publish({docY:80,...option});const item=f.presenter.inspect().informationWindows.items[0];
@@ -115,5 +121,5 @@ test('ordinary page adapter applies existing static policies to explicit whole p
   f.presenter.dispose();assert(!f.nodes[0].attrs.has('data-information-plane'));
  }
  const unmarked=fixture(createHomeScrollPresenter,{profile:'velocity-skin'});unmarked.measure();unmarked.publish({docY:80});
- assert.equal(unmarked.presenter.inspect().informationWindows.items[0].plane,false);
+ assert.equal(unmarked.presenter.inspect().informationWindows.items[0].plane,true);
 });

@@ -45,19 +45,17 @@ test('scroll and viewport selection reuse measured native anchors; late layout r
  assert.equal(f.read(800.625),'system');assert.equal(f.presenter.inspect().measurements,2);f.dispose();
 });
 
-test('pause is synchronous and derived from its one native intent, including externally restored policy',()=>{
+test('chapter ownership exposes no pause control and ignores legacy pause intent',()=>{
  const f=fixture({paused:true});f.measure();
- assert.equal(f.toggle.textContent,'Resume motion');assert.equal(f.toggle.getAttribute('aria-pressed'),'true');
- f.toggle.dispatchEvent(new Event('click'));assert.equal(f.root.hasAttribute('data-study-paused'),false);assert.equal(f.toggle.getAttribute('aria-pressed'),'false');assert.equal(f.toggle.textContent,'Pause motion');assert.equal(f.pauseChanges,1);
- assert.equal(f.presenter.syncPause(),false,'An observer receipt for the same click cannot restart presentation');
- f.root.setAttribute('data-study-paused','');assert.equal(f.presenter.syncPause(),true);assert.equal(f.toggle.textContent,'Resume motion');assert.equal(f.presenter.syncPause(),false);
- assert.equal(f.read(2500),'making','Pause controls motion, not native chapter reading');f.dispose();
+ assert.equal(f.presenter.syncPause,undefined);assert.equal(f.toggle.textContent,'');assert.equal(f.toggle.getAttribute('aria-pressed'),null);assert.equal(f.events.inspect().nativeListeners,0);
+ f.toggle.dispatchEvent(new Event('click'));assert.equal(f.pauseChanges,0);
+ assert.equal(f.read(2500),'making','Legacy attributes cannot interrupt native chapter reading');f.dispose();
 });
 
 test('true departure closes native pause and publication while disposal remains idempotent',()=>{
- const f=fixture();f.measure();f.read(2000);assert.equal(f.events.inspect().nativeListeners,1);f.dispose();f.dispose();
+ const f=fixture();f.measure();f.read(2000);assert.equal(f.events.inspect().nativeListeners,0);f.dispose();f.dispose();
  assert.equal(f.events.inspect().nativeListeners,0);assert.equal(f.root.hasAttribute('data-project-study-ready'),false);assert.equal(f.root.hasAttribute('data-project-active-chapter'),false);assert.equal(f.tools.hasAttribute('hidden'),true);assert(f.links.every(link=>!link.hasAttribute('aria-current')));
- const before=f.dom.inspect(),reads=f.reads;f.toggle.dispatchEvent(new Event('click'));f.presenter.measure();f.presenter.publish({docY:4000,viewportHeight:1000});f.presenter.syncPause();
+ const before=f.dom.inspect(),reads=f.reads;f.toggle.dispatchEvent(new Event('click'));f.presenter.measure();f.presenter.publish({docY:4000,viewportHeight:1000});
  assert.deepEqual(f.dom.inspect(),before);assert.equal(f.reads,reads);assert.equal(f.pauseChanges,0);assert.equal(f.presenter.inspect().disposed,true);
 });
 

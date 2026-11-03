@@ -13,9 +13,7 @@ import styles from './ProjectCaseStudy.module.css';
 function Panel({children,opening=false}){
  return <div className={`${styles.panel} ${opening?styles.openingPanel:''}`} data-information-window="editorial" data-information-motion-surface="plane" data-home-scroll-window="project-narrative"><InformationSkin/>{children}</div>;
 }
-function SourceLink({image}){
- return <a className={styles.sourceLink} href={image.src} target="_blank" rel="noreferrer" aria-label={`View full image (new tab): ${image.alt}`}>View full image <span aria-hidden="true">↗</span></a>;
-}
+
 function layoutAttributes(layout){
  return{'data-study-composition':layout.composition,'data-study-layout':layout.layout,'data-study-source-shape':layout.sourceShape,'data-study-source-role':layout.sourceRole,'data-study-reading-density':layout.readingDensity};
 }
@@ -42,13 +40,12 @@ function PrimaryVisual({image,chapter,prefix,opening=false,model,motion}){
    </>}
    <p id={`${prefix}-${chapter}-caption`} className={styles.sourceCaption}>{source.caption}</p>
    <p id={`${prefix}-${chapter}-credit`} className={styles.credit}>{source.credit}</p>
-   <div className={styles.sourceLinks}>{motion?<>
+   <div className={styles.sourceLinks}>{motion&&<>
     <a className={styles.sourceLink} data-project-motion-source href={motion.src} target="_blank" rel="noreferrer" aria-label={`${motion.kind==='recording'?'View recording':'View animation'} (new tab): ${motion.alt}`}>{motion.kind==='recording'?'View recording':'View animation'} <span aria-hidden="true">↗</span></a>
-    <SourceLink image={poster}/>
-   </>:<SourceLink image={image}/>}</div>
+
+   </>}</div>
    {motion&&<>
     <div className={styles.motionControls}>
-     <button type="button" data-project-motion-toggle={motion.id} aria-pressed="false" hidden>Play recording</button>
      <button type="button" data-project-motion-replay={motion.id} hidden>Replay recording</button>
     </div>
     <p className={styles.motionStatus} data-project-motion-status={motion.id} role="status"/>
@@ -58,8 +55,8 @@ function PrimaryVisual({image,chapter,prefix,opening=false,model,motion}){
 }
 function EvidenceFigure({image}){
  return <figure className={styles.evidence} data-study-evidence-layout={projectStudyEvidenceLayout(image)} data-study-evidence-role={image.purpose==='diagram'?'technical-plate':'photograph'}>
-  <a className={styles.evidenceImage} data-information-window="evidence-image" data-information-motion-surface="plane" data-home-scroll-window="project-evidence" href={image.src} target="_blank" rel="noreferrer" aria-label={`View full image (new tab): ${image.alt}`}><InformationSkin/><img data-project-evidence-image src={image.src} width={image.width} height={image.height} alt={image.alt} loading="lazy" decoding="async"/></a>
-  <figcaption data-information-window="evidence-caption" data-information-motion-surface="plane" data-home-scroll-window="project-caption"><InformationSkin/><p>{image.caption}</p><span>{image.credit}</span><a className={styles.sourceLink} data-evidence-source-link href={image.src} target="_blank" rel="noopener noreferrer" aria-label={`Open full image (new tab): ${image.alt}`}>Open full image (new tab)</a></figcaption>
+  <div className={styles.evidenceImage} data-information-window="evidence-image" data-information-motion-surface="plane" data-home-scroll-window="project-evidence"><InformationSkin/><img data-project-evidence-image src={image.src} width={image.width} height={image.height} alt={image.alt} loading="lazy" decoding="async"/></div>
+  <figcaption data-information-window="evidence-caption" data-information-motion-surface="plane" data-home-scroll-window="project-caption"><InformationSkin/><p>{image.caption}</p><span>{image.credit}</span></figcaption>
  </figure>;
 }
 
@@ -69,12 +66,13 @@ export default function ProjectCaseStudy({project}){
  const editorial=editorialProjectLayout(project);
  if(editorial)return <EditorialProjectStudy project={project} layout={editorial}/>;
  const hybrid=hybridProjectLayout(project);
+ const models=[project.model,...project.additionalModels??[]].filter(Boolean),modelAt=chapter=>models.find(model=>model.chapters.includes(chapter));
  const prefix=project.id,evidenceByChapter=projectStudyEvidence(project),chapters=[{id:'overview',label:'Overview'},...project.sections.map(section=>({id:section.id,label:section.label})),{id:'credits',label:'Credits'}];
  return <>
   <ProjectStudyChrome chapters={chapters} prefix={prefix} navigationLabel={`${project.shortTitle} project sections`} railClassName={styles.chapterRail}/>
   <ProjectCaseStudyControls projectId={project.id} chapterCount={chapters.length}/>
   <main id="portfolio-main" tabIndex={-1} className={styles.page} data-project-study={project.id} data-study-presentation={hybrid?'hybrid-scenes':undefined} data-information-motion-profile="velocity-skin" data-portfolio-root data-portfolio-section="project-study">
-   {project.model&&<ProjectCaseStudyStage projectId={project.id} model={project.model}/>}
+   {project.model&&<ProjectCaseStudyStage projectId={project.id} model={project.model} additionalModels={project.additionalModels}/>}
    <article aria-labelledby={`${prefix}-overview-heading`}>
     {hybrid?<NativeStudyOpening project={project}/>:<header id={`${prefix}-overview`} tabIndex={-1} className={`${styles.chapter} ${styles.opening}`} data-project-chapter="overview" {...layoutAttributes(projectStudyLayout(project,'overview'))}>
      <div className={styles.chapterInner}>
@@ -90,15 +88,17 @@ export default function ProjectCaseStudy({project}){
        </dl>
        <a className={styles.readingLink} href={`#${prefix}-${project.sections[0].id}`}>Follow the study <span aria-hidden="true">↓</span></a>
       </Panel>
-      <PrimaryVisual image={project.hero} chapter="overview" prefix={prefix} opening model={project.model} motion={project.motionMedia?.find(media=>media.chapter==='overview')}/>
+      <PrimaryVisual image={project.hero} chapter="overview" prefix={prefix} opening model={modelAt('overview')} motion={project.motionMedia?.find(media=>media.chapter==='overview')}/>
      </div>
     </header>}
     {project.sections.map((section,index)=>{
+     const nativeScene=hybrid?.nativeScenes?.find(row=>row.section===section);
+     if(nativeScene)return <NativeStudyChapter key={section.id} project={project} section={section} index={index} scene={nativeScene.scene} evidence={nativeScene.evidence}/>;
      if(hybrid?.results?.section===section)return <NativeStudyChapter key={section.id} project={project} section={section} index={index} scene={hybrid.results.scene} evidence={hybrid.results.evidence}/>;
      const motion=project.motionMedia?.find(media=>media.chapter===section.id),evidence=evidenceByChapter.get(section.id);
      return <section key={section.id} id={`${prefix}-${section.id}`} tabIndex={-1} className={styles.chapter} data-project-chapter={section.id} aria-labelledby={`${prefix}-${section.id}-heading`} {...layoutAttributes(projectStudyLayout(project,section.id))}>
      <div className={styles.chapterInner}>
-      {section.media[0]&&<PrimaryVisual image={section.media[0]} chapter={section.id} prefix={prefix} model={project.model} motion={motion}/>}
+      {section.media[0]&&<PrimaryVisual image={section.media[0]} chapter={section.id} prefix={prefix} model={modelAt(section.id)} motion={motion}/>}
       <Panel>
        <StudyLabel kind={section.kind}>{String(index+1).padStart(2,'0')} / {section.label}</StudyLabel>
        <h2 id={`${prefix}-${section.id}-heading`} tabIndex={-1}>{section.title}</h2>

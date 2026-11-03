@@ -3,7 +3,7 @@ import {WAIT,scenarioTimeout} from './case-helpers.mjs';
 
 test.use({video:'on'});
 
-test('Mode/s pilot responds to native scroll with whole-panel motion and finite readable rest',async({page})=>{
+test('Shared velocity field responds to native scroll with whole-panel motion and finite readable rest',async({page})=>{
  test.setTimeout(scenarioTimeout(120000));
  await page.goto('/projects/mode-s-of-making/');
  await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});
@@ -32,11 +32,35 @@ test('Mode/s pilot responds to native scroll with whole-panel motion and finite 
   expect(await panel.evaluate(node=>new DOMMatrix(getComputedStyle(node).transform==='none'?undefined:getComputedStyle(node).transform).isIdentity)).toBe(true);
   await page.mouse.wheel(0,-100);
   await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.informationWindows.settled)).toBe(true);
-  await panel.locator('a').first().focus();
-  await expect(panel).toHaveCSS('transform','none');
   await page.emulateMedia({reducedMotion:'reduce'});
-  await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.enabled)).toBe(false);
+  await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.enabled)).toBe(true);
   await expect(panel).toHaveAttribute('data-information-moving','false');
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  }finally{await observation.evaluate(value=>value.dispose());await observation.dispose();}
+});
+
+test('the shared field bends opposite desktop peripheries and stretches during acceleration without clipping content',async({page,isMobile})=>{
+ await page.goto('/projects/');await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});
+ const cards=page.locator('[data-project-tile][data-information-plane]');await expect(cards).toHaveCount(8);
+ const observation=await cards.first().evaluateHandle(()=>{
+  const samples=[];const observer=new MutationObserver(()=>{
+   if(samples.length>=100)return;
+   const rows=[...document.querySelectorAll('[data-project-tile][data-information-plane]')].map(node=>{
+    const rect=node.getBoundingClientRect(),css=getComputedStyle(node),value=name=>parseFloat(node.style.getPropertyValue('--information-'+name))||0;
+    return{x:rect.x+rect.width/2,y:rect.y,visible:rect.bottom>0&&rect.top<innerHeight,rx:value('rx'),ry:value('ry'),sx:value('sx'),sy:value('sy'),flow:value('flow'),clip:css.clipPath,opacity:css.opacity};
+   });
+   if(rows.some(row=>Math.abs(row.rx)>.01))samples.push(rows);
+  });observer.observe(document.querySelector('[data-project-grid]'),{subtree:true,attributes:true,attributeFilter:['style']});
+  return{samples,dispose:()=>observer.disconnect()};
+ });
+ try{
+  await page.mouse.wheel(0,300);
+  await expect.poll(()=>observation.evaluate(o=>o.samples.some(rows=>rows.some(r=>r.visible&&r.sx>1&&r.sy>1))),{timeout:WAIT}).toBe(true);
+  if(!isMobile)await expect.poll(()=>observation.evaluate(o=>o.samples.some(rows=>{
+   const left=rows.find(r=>r.visible&&r.x<innerWidth*.4),right=rows.find(r=>r.visible&&r.x>innerWidth*.6);
+   return left&&right&&left.ry*right.ry<0&&left.rx*right.rx>0;
+  })),{timeout:WAIT}).toBe(true);
+  expect(await observation.evaluate(o=>o.samples.flat().every(r=>r.clip==='none'&&r.opacity==='1'))).toBe(true);
+  await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.informationWindows.settled),{timeout:WAIT}).toBe(true);
+ }finally{await observation.evaluate(o=>o.dispose());await observation.dispose();}
 });

@@ -1,0 +1,61 @@
+{
+  "passed": true,
+  "original": {
+    "bytes": 1082556,
+    "sha256": "4623278f7d9148d0ccdfd0080eb3f44dac36adb07bd6b8283b2863a7b9ad8f27"
+  },
+  "derivative": {
+    "bytes": 1176628,
+    "sha256": "4cf15112d405619ec27bc82fb81738f12d2da222ac1b720fd79f970a53af3e93"
+  },
+  "originalGeometryViewsAndAccessorsUnchanged": true,
+  "originalCompressedBodyUnchanged": true,
+  "originalSourceUnchanged": true,
+  "addedAttribute": {
+    "name": "_FIBER_AXIS",
+    "count": 61362,
+    "bytes": 736344,
+    "encodedBytes": 93311,
+    "sha256": "4850ca0155ecf18db52cf64b678a39482657d769c02a58796523b5e17ac2b3c3",
+    "decodedByteExact": true
+  },
+  "buffers": [
+    {
+      "bufferView": 0,
+      "decodedSHA256": "8f158d9ba42ce3fb9a3aadc03e97f9f38096427f3f9b923197a255fb2eddd04d",
+      "compressedBytesUnchanged": true
+    },
+    {
+      "bufferView": 1,
+      "decodedSHA256": "42eec546cdd3e859d4882cca3c39944479b2f484a6ec094291c37d43d761dcbb",
+      "compressedBytesUnchanged": true
+    },
+    {
+      "bufferView": 2,
+      "decodedSHA256": "fcf994bb8b319670f1806d73f26099f5593f776a24398724936520684e23f44e",
+      "compressedBytesUnchanged": true
+    },
+    {
+      "bufferView": 3,
+      "decodedSHA256": "ad440f885dd69131764d6e804c359e99fe4ecf297e3ffb88ff441e469cea1c2a",
+      "compressedBytesUnchanged": true
+    }
+  ],
+  "sourceSHA256": "f488dfa8981d12c65fe604b0c04259cfd923485b5854f8bad9b5dd7e6ed9a414",
+  "vertices": 61362,
+  "attribute": {
+    "name": "_FIBER_AXIS",
+    "type": "VEC3",
+    "components": 3
+  },
+  "originalSHA256": "4623278f7d9148d0ccdfd0080eb3f44dac36adb07bd6b8283b2863a7b9ad8f27",
+  "fiberAxes": {
+    "objects": 2433,
+    "method": "Principal covariance axis of each original cached Brep member, using unique source vertices in metre Y-up coordinates. Canonical sign, no source position or topology modification.",
+    "longAxisVerified": true,
+    "axisLengthTolerance": 0.000001,
+    "minimumMajorToSecondVarianceRatio": 1.7563424774405008,
+    "nearIsotropicMembers": 0
+  },
+  "limits": "Member grain follows source geometry. Colour, pores and fibre variation are procedural photo-informed approximations, not measured species, scanned knots or as-built texture maps."
+}

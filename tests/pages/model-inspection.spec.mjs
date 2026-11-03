@@ -276,21 +276,21 @@ test('keyboard holds and returns a view; touch pan outside and across source geo
  else{const p=await hitPoint(page);await page.mouse.move(p.x,p.y);await expect(surface(page)).toHaveAttribute('data-model-hit','true');await page.mouse.down();await page.mouse.move(p.x+60,p.y-18,{steps:5});await frames(page);expect(await page.evaluate(()=>window.__story.inspect().inspection.target.azimuth)).toBeLessThan(30);await page.mouse.up();await settle(page);expect(await page.evaluate(()=>window.__story.inspect().inspection.value.azimuth)).toBe(30);}
  await centerStudy(page);await surface(page).press('ArrowRight');await page.locator('[data-chapter-link="make"]').click();await settle(page);await expect.poll(()=>page.evaluate(()=>window.__story.inspect().playback.activeSeconds)).toBeGreaterThan(time);expect(await page.evaluate(()=>document.body.style.overflow)).not.toBe('hidden');
 });
-test('Reduced requires activation and keeps Full source comparison accessible without autonomous motion',async({page,isMobile})=>{
- test.setTimeout(scenarioTimeout(120000));const models=[];page.on('request',r=>{if(/\.glb(?:\?|$)/.test(r.url()))models.push(r.url());});await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/projects/bending-active/#overview');await entered(page);await centerStudy(page,'form',{ready:false});expect(models).toHaveLength(0);await page.locator('[data-model-side-label][data-study-chapter="form"]').getByRole('button',{name:'Enable model'}).click();await page.waitForFunction(()=>window.__thesis?.inspect().ready,null,{timeout:WAIT});await centerStudy(page);await surface(page).press('Enter');await settle(page);await fit(page);await expectSourceInformation(page,'form');
+test('OS Reduced keeps automatic Full playback and native source comparison available',async({page,isMobile})=>{
+ test.setTimeout(scenarioTimeout(120000));const models=[];page.on('request',r=>{if(/\.glb(?:\?|$)/.test(r.url()))models.push(r.url());});await page.emulateMedia({reducedMotion:'reduce'});await loadScene(page);await centerStudy(page);expect(models.length).toBeGreaterThan(0);await expect(page.getByRole('button',{name:'Enable model',exact:true})).toHaveCount(0);
+ const before=await page.evaluate(()=>window.__story.inspect().playback.activeSeconds);await frames(page,5);expect(await page.evaluate(()=>window.__story.inspect().playback.activeSeconds)).toBeGreaterThan(before);
+ await surface(page).press('Enter');await settle(page);await fit(page);await expectSourceInformation(page,'form');
  await expect(page.getByRole('combobox',{name:'Visual detail',exact:true})).toHaveCount(0);
  const scene=await page.evaluate(()=>window.__thesis.inspect());
  expect(scene.detail).toBe('full');expect(scene.compositor.requestedSamples).toBe(isMobile?0:2);
- expect(scene.optics.maxBlurPx).toBe(0);expect(scene.optics.mistStrength).toBe(0);
- await expectIdle(page);
+ expect(scene.systemReduced).toBe(false);expect(scene.motionPaused).toBe(false);
+ const comparing=await page.evaluate(()=>window.__story.inspect().playback.activeSeconds);await frames(page,5);expect(await page.evaluate(()=>window.__story.inspect().playback.activeSeconds)).toBeGreaterThan(comparing);
 });
 test('load failure and context loss preserve fallback reading and release source gestures',async({page})=>{
  test.setTimeout(scenarioTimeout(150000));await page.route('**/source-layers.glb',r=>r.abort());await page.goto('/projects/bending-active/#overview');await entered(page);await centerStudy(page,'form',{ready:false});await expect(page.locator('[data-model-study][data-study-chapter="form"]')).toContainText('Interactive geometry unavailable');await expect(surface(page)).toHaveAttribute('aria-disabled','true');
  await page.unroute('**/source-layers.glb');await page.reload();await entered(page);
- // An intentional failed renderer leaves the same recovery record as an
- // interrupted process. Reload stays readable until the visitor chooses 3D.
- await expect(page.getByRole('button',{name:'Enable 3D',exact:true})).toBeVisible({timeout:WAIT});
- expect(await page.evaluate(()=>window.__thesis?.inspect().ready??false)).toBe(false);
- await page.getByRole('button',{name:'Enable 3D',exact:true}).click();await page.waitForFunction(()=>window.__thesis?.inspect().ready,null,{timeout:WAIT});
+ // A fresh document retries the real source after the failed request is gone.
+ // It must reach an actual paint before interaction can resume.
+ await page.waitForFunction(()=>window.__thesis?.inspect().ready,null,{timeout:WAIT});await expect(page.getByRole('button',{name:'Enable 3D',exact:true})).toHaveCount(0);
  await page.evaluate(()=>document.fonts.ready);await settle(page);await centerStudy(page);const p=await hitPoint(page);await page.mouse.move(p.x,p.y);await page.mouse.down();await page.evaluate(()=>window.__thesis.loseContext());await expect(surface(page)).toHaveAttribute('aria-disabled','true',{timeout:WAIT});await page.mouse.up();await expect(page.locator('[data-story-chapter]')).toHaveCount(7);expect(await page.evaluate(()=>document.body.style.overflow)).not.toBe('hidden');expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
 });

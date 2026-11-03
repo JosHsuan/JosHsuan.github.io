@@ -8,7 +8,6 @@ import styles from './ProjectCaseStudy.module.css';
 export default function ProjectCaseStudyControls({projectId,chapterCount}){
  return <div hidden className={`${cinematic.readingTools} ${styles.readingTools}`} data-project-reading-tools={projectId} data-protect data-liquid-glass="reading-controls">
   <span data-project-chapter-count aria-live="polite">01 / {String(chapterCount).padStart(2,'0')}</span>
-  <button type="button" data-study-motion-toggle aria-pressed="false">Pause motion</button>
   <LiquidGlassSkin id="reading-controls"/>
  </div>;
 }

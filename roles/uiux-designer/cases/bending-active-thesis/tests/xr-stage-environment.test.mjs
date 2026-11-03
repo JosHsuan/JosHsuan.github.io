@@ -58,6 +58,18 @@ test('one XR set follows model and original device bounds without owning the pho
  }finally{stage.dispose();phone.dispose();}
 });
 
+test('XR assembly light directions stay in the source frame while camera movement reveals different bamboo edges',()=>{
+ const stage=createXRStageEnvironment({bounds:study.model.bounds}),view=camera(study.model.bounds);
+ const lights=stage.group.children.filter(node=>node.isRectAreaLight),initial=lights.slice();
+ try{
+  const first=stage.update({camera:view,chapter:'method'}),positions=lights.map(light=>light.getWorldPosition(new T.Vector3()).toArray());
+  view.position.set(-4,3,6);view.updateMatrixWorld();const second=stage.update({camera:view,chapter:'method'});
+  assert.equal(first.lightFrame,'source');assert.equal(second.lightFrame,'source');assert.equal(second.extraShadowMaps,0);
+  lights.forEach((light,index)=>{assert.equal(light,initial[index]);const next=light.getWorldPosition(new T.Vector3()).toArray();next.forEach((value,axis)=>assert(Math.abs(value-positions[index][axis])<1e-10));});
+  const phone=stage.update({camera:view,chapter:'adapt'});assert.equal(phone.lightFrame,'camera');assert.equal(phone.areaLights,2);
+ }finally{stage.dispose();}
+});
+
 test('XR feathers only editorial shaders while preserving the original lighting and material extensions',()=>{
  const source=new T.MeshStandardMaterial(),screen=new T.MeshBasicMaterial({toneMapped:false});
  const sourceCompile=source.onBeforeCompile,screenCompile=screen.onBeforeCompile;

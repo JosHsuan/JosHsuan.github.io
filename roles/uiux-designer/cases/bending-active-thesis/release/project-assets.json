@@ -2447,6 +2447,74 @@
       },
       "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
       "authorStatus": "Source portfolio pages identify the project, owner, institution and cohort but do not establish separate photographers or sole authorship of all project work. Retain existing named team/research/project credits separately; do not inherit Wataru Nomura attribution from replaced ETH web photographs."
+    },
+    {
+      "id": "mode-s-of-making-machine-system",
+      "projectId": "mode-s-of-making",
+      "path": "assets/projects/mode-s-of-making/machine-system.webp",
+      "src": "/assets/projects/mode-s-of-making/machine-system.webp",
+      "width": 1783,
+      "height": 2606,
+      "bytes": 312024,
+      "sha256": "8695d585ea84fe7a317eb4709373d8c187adcb9389087da6034e0b82f20c14ff",
+      "source": {
+        "file": "JosHsuan_CV&Portfolio_2025_Print.pdf",
+        "bytes": 361589115,
+        "sha256": "fdaf47a2df174e73d698a72c362b0644240bfd39448042ffcb3f1024fd27bd71",
+        "locator": {
+          "physicalPage": 33,
+          "printedPage": 28,
+          "figure": "4-03"
+        },
+        "imageObject": {
+          "index": 0,
+          "name": "Im0.png",
+          "width": 2485,
+          "height": 3508,
+          "bytes": 947506,
+          "sha256": "4b33e5282d505995cb7697fe82bace66dda187e943207777db803b2902bca951"
+        },
+        "narrativeReference": {
+          "file": "JosHsuan_CV&Portfolio_2025.VerFacade.pdf",
+          "bytes": 22624290,
+          "sha256": "61f51b38fdccf712f3e9460c5fdde2b9d117d6d2bd14d6e94b4ae3f9aa08c290",
+          "locator": {
+            "physicalPage": 57,
+            "printedPage": 52,
+            "figure": "5-03"
+          }
+        },
+        "identityReview": "Same composition, geometry, diagram connections or photograph group as the primary reference. Selected only for higher native image resolution; no old copy adopted."
+      },
+      "processing": {
+        "method": "Source image decode / recorded figure selection / proportional downsize / WebP. No AI, retouching, colour grading or synthetic content.",
+        "inputPixels": [
+          2485,
+          3508
+        ],
+        "cropPixels": [
+          351,
+          133,
+          2134,
+          2739
+        ],
+        "preResizePixels": [
+          1783,
+          2606
+        ],
+        "maxLongEdge": 3200,
+        "upscaled": false,
+        "selectedFrame": null,
+        "encoding": {
+          "format": "WebP",
+          "quality": 95,
+          "lossless": true,
+          "method": 6
+        },
+        "metadata": "EXIF, XMP and private filesystem metadata omitted."
+      },
+      "credit": "Design study: Chia-Hsuan Chao / National Cheng Kung University.",
+      "authorStatus": "Project attribution and per-figure credits preserved; unrecorded individual media authors remain unidentified."
     }
   ],
   "highResolutionReferences": [
@@ -3044,6 +3112,199 @@
             "Experience director"
           ],
           "backdrop": "A project-local CSS radial darkening behind sparse points or sticks follows the existing model surface visibility. Shared background rendering and time ownership remain unchanged."
+        }
+      }
+    },
+    {
+      "projectId": "mode-s-of-making",
+      "src": "/assets/projects/mode-s-of-making/machine-materials.glb",
+      "bytes": 10309368,
+      "sha256": "4b70d53fe51ed04e039285d797c1ead2babf027ffc05244b45080757a5877da9",
+      "source": {
+        "file": "make2D用.3dm",
+        "bytes": 41537929,
+        "sha256": "07ea02951b22cf27ddee407211592b70fb64ad8fa24bc503fe9be1f83a752b2a"
+      },
+      "selection": "All 1500 visible normal-mode Breps and 15 extrusions in the clean assembled machine drawing source. Standalone 2D curves are excluded. No spatial crop, inferred component, remeshing or reconstruction.",
+      "credit": "Machine design and development: Chia-Hsuan Chao / National Cheng Kung University. Arduino and Marlin retain their third-party credit in the project narrative.",
+      "representation": "Original assembled rotary heat-cutting machine study, with the source frame, carriage, guides, motors, bearings and tool holder.",
+      "geometry": {
+        "vertices": 503822,
+        "triangles": 737282,
+        "renderables": 1,
+        "primitive": "triangles",
+        "bounds": {
+          "min": [
+            -0.2519393563270569,
+            0,
+            -0.24998979270458221
+          ],
+          "max": [
+            0.2519393563270569,
+            0.260502427816391,
+            0.24998979270458221
+          ]
+        },
+        "sourceUnits": "millimeters",
+        "webUnits": "meters",
+        "upAxis": "Y"
+      },
+      "processing": {
+        "decimation": false,
+        "deformation": false,
+        "maxFloat32PositionErrorMeters": 1.478195188475695e-08,
+        "compression": {
+          "encoding": "EXT_meshopt_compression v0",
+          "decodedByteExact": true,
+          "quantization": false,
+          "reorder": false
+        },
+        "method": "Complete original cached render meshes, positions, normals, UVs and face order. One translation to horizontal centre and lowest source vertex, mm-to-m conversion, positive-determinant (x,z,-y) axis mapping. No source mesh editing, procedural replacement or smoothing.",
+        "surfaceFamilies": {
+          "attribute": "_SURFACE_FAMILY",
+          "families": [
+            {
+              "id": 0,
+              "name": "aluminium",
+              "objects": 39,
+              "vertices": 39244
+            },
+            {
+              "id": 1,
+              "name": "steel",
+              "objects": 1414,
+              "vertices": 356698
+            },
+            {
+              "id": 2,
+              "name": "blue-printed-polymer",
+              "objects": 36,
+              "vertices": 74494
+            },
+            {
+              "id": 3,
+              "name": "black-motor",
+              "objects": 12,
+              "vertices": 3033
+            },
+            {
+              "id": 4,
+              "name": "rubber-belt",
+              "objects": 1,
+              "vertices": 394
+            },
+            {
+              "id": 5,
+              "name": "teal-tool-holder",
+              "objects": 2,
+              "vertices": 4755
+            },
+            {
+              "id": 6,
+              "name": "bronze-bushing",
+              "objects": 8,
+              "vertices": 17632
+            },
+            {
+              "id": 7,
+              "name": "heated-copper-tool",
+              "objects": 1,
+              "vertices": 1196
+            },
+            {
+              "id": 8,
+              "name": "white-eps",
+              "objects": 1,
+              "vertices": 24
+            },
+            {
+              "id": 9,
+              "name": "heat-darkened-steel",
+              "objects": 1,
+              "vertices": 6352
+            }
+          ],
+          "originalGeometryViewsAndAccessorsUnchanged": true,
+          "originalCompressedBodyUnchanged": true,
+          "originalDerivative": {
+            "src": "/assets/projects/mode-s-of-making/machine.glb",
+            "bytes": 10276504,
+            "sha256": "3dbd3909d3eca07c765aa77f070231d3b0830b5de534f6520cce79138d86d382"
+          },
+          "referenceImages": [
+            "/assets/projects/mode-s-of-making/machine-prototype.webp",
+            "/assets/projects/mode-s-of-making/prototype-cutting-operation-poster.webp",
+            "/assets/projects/mode-s-of-making/film-physical-cutting-poster.webp"
+          ],
+          "limits": "Photo-informed surface families, not measured optical coefficients. The long foreground rail overrides its broad printed-part layer using the photographed aluminium member; the solder shaft is heat-darkened steel and only the knife is copper. EPS blank association is inferred from its unique rotary-workpiece geometry and cutting photographs. The unexposed underbed plate remains a source-layer material inference. No CAD layer display colors were copied."
+        }
+      }
+    },
+    {
+      "projectId": "project-caschlatsch",
+      "src": "/assets/projects/project-caschlatsch/model-materials.glb",
+      "bytes": 1176628,
+      "sha256": "4cf15112d405619ec27bc82fb81738f12d2da222ac1b720fd79f970a53af3e93",
+      "source": {
+        "file": "just structure.3dm",
+        "bytes": 55648912,
+        "sha256": "f488dfa8981d12c65fe604b0c04259cfd923485b5854f8bad9b5dd7e6ed9a414"
+      },
+      "selection": "All 2433 visible normal-mode Breps in the finalized structure-only CAD source; five reference points are excluded. Every stored render-mesh face is retained. This source contains the timber structure, not a reconstructed site or terrain.",
+      "credit": "MAS DFAB 2023–24 cohort / ETH Zurich. Project Caschlatsch is a collective project; JosHsuan Chao contributed to the COMPAS XR module workflow and assembly-data preparation.",
+      "representation": "Original full-size CAD structure of Project Caschlatsch, including the complete timber assembly in its source relative arrangement.",
+      "geometry": {
+        "vertices": 61362,
+        "triangles": 31152,
+        "renderables": 1,
+        "primitive": "triangles",
+        "bounds": {
+          "min": [
+            -2.1165409088134766,
+            0,
+            -2.1111583709716797
+          ],
+          "max": [
+            2.1165409088134766,
+            7.785984516143799,
+            2.1111583709716797
+          ]
+        },
+        "sourceUnits": "millimeters",
+        "webUnits": "meters",
+        "upAxis": "Y"
+      },
+      "processing": {
+        "decimation": false,
+        "deformation": false,
+        "maxFloat32PositionErrorMeters": 2.3651123104428962e-07,
+        "compression": {
+          "encoding": "EXT_meshopt_compression v0",
+          "decodedByteExact": true,
+          "quantization": false,
+          "reorder": false
+        },
+        "method": "Complete original cached render meshes, positions, normals, UVs and face order. One translation to horizontal centre and lowest source vertex, mm-to-m conversion, positive-determinant (x,z,-y) axis mapping. No source mesh editing, procedural replacement or smoothing.",
+        "fiberAxes": {
+          "objects": 2433,
+          "method": "Principal covariance axis of each original cached Brep member, using unique source vertices in metre Y-up coordinates. Canonical sign, no source position or topology modification.",
+          "longAxisVerified": true,
+          "axisLengthTolerance": 1e-06,
+          "minimumMajorToSecondVarianceRatio": 1.7563424774405008,
+          "nearIsotropicMembers": 0,
+          "attribute": "_FIBER_AXIS",
+          "originalGeometryViewsAndAccessorsUnchanged": true,
+          "originalCompressedBodyUnchanged": true,
+          "originalDerivative": {
+            "src": "/assets/projects/project-caschlatsch/model.glb",
+            "bytes": 1082556,
+            "sha256": "4623278f7d9148d0ccdfd0080eb3f44dac36adb07bd6b8283b2863a7b9ad8f27"
+          },
+          "referenceImages": [
+            "/assets/projects/project-caschlatsch/portfolio-timber-interior.webp",
+            "/assets/projects/project-caschlatsch/portfolio-tower-on-site.webp"
+          ],
+          "limits": "Member grain follows source geometry. Colour, pores and fibre variation are procedural photo-informed approximations, not measured species, scanned knots or as-built texture maps."
         }
       }
     }

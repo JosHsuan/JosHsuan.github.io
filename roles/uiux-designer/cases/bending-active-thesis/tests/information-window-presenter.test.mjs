@@ -22,7 +22,7 @@ function fixture(specs,options={}){
     nodes.push(node);
   }
   const publisher={style(element,key,value){operations.push('write:'+key);if(value==='')element.styles.delete(key);else element.styles.set(key,String(value));},attribute(element,key,value){operations.push('write:'+key);if(value===null)element.attrs.delete(key);else element.attrs.set(key,String(value));}};
-  const presenter=createInformationWindowPresenter({root,publisher,...options});
+  const presenter=createInformationWindowPresenter({root,publisher,profile:'ink',...options});
   const measure=(docY=0)=>presenter.measure({naturalY:element=>{operations.push('read:top');return element.top;},viewportHeight:800,docY});
   const publish=(args={})=>presenter.publish({docY:0,dt:1/60,...args});
   return {root,nodes,operations,presenter,measure,publish};
@@ -132,12 +132,12 @@ test('settled skins skip outline work on the ambient clock but remeasure and scr
   f.publish({docY:200});assert(f.presenter.inspect().outlineSamples>measured);
 });
 
-test('opt-in full-panel velocity pose reverses and resets with native content',()=>{
+test('shared curved-field velocity pose reverses and resets with native content',()=>{
   const f=fixture([{}],{profile:'velocity-skin'});f.nodes[0].attrs.set('data-information-motion-surface','plane');f.measure();f.publish();
   assert.equal(f.publish({docY:80}),true);
   let item=f.presenter.inspect().items[0];
   assert(item.skinStrength>0);assert(item.edgeMaximum>0&&item.edgeMaximum<=9);
-  assert.equal(item.x,0);assert.equal(item.y,0);assert(item.rz<0);assert(item.rx<0);assert(item.ry>0);
+  assert.equal(item.x,0);assert(item.rx<0);assert(item.ry===0);assert(Math.abs(item.y)<=3);
   assert.match(f.nodes[0].styles.get('--information-skin-path'),/^path\('/);
   for(let i=0;i<8;i++)f.publish({docY:80-(i+1)*10});
   assert(f.presenter.inspect().items[0].skinStrength<0);
@@ -165,19 +165,19 @@ test('a native source label follows document geometry instead of the fixed Canva
  assert.equal(f.presenter.inspect().items[0].visible,false);
 });
 
-test('mixed explicit planes preserve unmarked and fixed ink trajectories and exclude nested skins',()=>{
+test('all native planes share one velocity field while fixed labels retain source anchoring',()=>{
  const f=fixture([{}, {}, {kind:'model-label',chapter:'form'}, {parent:0}],{profile:'velocity-skin'});
  for(const i of [0,2,3])f.nodes[i].attrs.set('data-information-motion-surface','plane');
  const legacy=fixture([{}, {kind:'model-label',chapter:'form'}]);
  f.measure();legacy.measure();
- assert.deepEqual(f.presenter.inspect().items.map(x=>x.plane),[true,false,false]);
+ assert.deepEqual(f.presenter.inspect().items.map(x=>x.plane),[true,true,false]);
  assert(f.nodes[0].attrs.has('data-information-plane'));
- for(const i of [1,2,3])assert(!f.nodes[i].attrs.has('data-information-plane'));
+ for(const i of [2,3])assert(!f.nodes[i].attrs.has('data-information-plane'));
  for(const docY of [0,80,120,40]){
   const args={docY,canvasPlacement:{chapter:'form',visible:true,y:20}};f.publish(args);legacy.publish(args);
   const items=f.presenter.inspect().items,old=legacy.presenter.inspect().items;
   for(const key of ['progress','velocity','x','y','rz','edgeMaximum']){
-   assert.equal(items[1][key],old[0][key],`unmarked ${key}`);
+   assert.equal(items[1].skinStrength,items[0].skinStrength,'unmarked native card shares the same flow');
    assert.equal(items[2][key],old[1][key],`fixed ${key}`);
   }
  }
@@ -202,8 +202,8 @@ test('same-node native/fixed portal reclassification clears plane state and rest
  assert(node.attrs.has('data-information-plane'));assert.equal(f.presenter.inspect().items[0].skinStrength,0);
  f.publish({docY:100});assert(f.presenter.inspect().items[0].skinStrength>0);
  node.attrs.delete('data-information-motion-surface');f.measure(100);
- assert(!node.attrs.has('data-information-plane'));assert.equal(f.presenter.inspect().items[0].skinStrength,0);
- assert(!node.styles.has('--information-rx'));
+ assert(node.attrs.has('data-information-plane'));assert(f.presenter.inspect().items[0].skinStrength>0);
+ assert(node.styles.has('--information-rx'));
 });
 
 test('reparenting an active plane beneath another information owner releases its transform ownership',()=>{

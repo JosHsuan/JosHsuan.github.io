@@ -1,0 +1,335 @@
+{
+  "date": "2026-11-03",
+  "status": "source and derivative review complete; public route integration and exact-artifact CI pending",
+  "tools": {
+    "python": "3.11.4",
+    "rhino3dm": "8.17.0",
+    "node": "24.19.0",
+    "meshoptimizer": "1.1.1",
+    "three": "0.186.1"
+  },
+  "models": [
+    {
+      "kind": "machine",
+      "metadata": {
+        "projectId": "mode-s-of-making",
+        "src": "/assets/projects/mode-s-of-making/machine.glb",
+        "bytes": 10276504,
+        "sha256": "3dbd3909d3eca07c765aa77f070231d3b0830b5de534f6520cce79138d86d382",
+        "source": {
+          "file": "make2D用.3dm",
+          "bytes": 41537929,
+          "sha256": "07ea02951b22cf27ddee407211592b70fb64ad8fa24bc503fe9be1f83a752b2a"
+        },
+        "selection": "All 1500 visible normal-mode Breps and 15 extrusions in the clean assembled machine drawing source. Standalone 2D curves are excluded. No spatial crop, inferred component, remeshing or reconstruction.",
+        "credit": "Machine design and development: Chia-Hsuan Chao / National Cheng Kung University. Arduino and Marlin retain their third-party credit in the project narrative.",
+        "representation": "Original assembled rotary heat-cutting machine study, with the source frame, carriage, guides, motors, bearings and tool holder.",
+        "geometry": {
+          "vertices": 503822,
+          "triangles": 737282,
+          "renderables": 1,
+          "primitive": "triangles",
+          "bounds": {
+            "min": [
+              -0.2519393563270569,
+              0,
+              -0.24998979270458221
+            ],
+            "max": [
+              0.2519393563270569,
+              0.260502427816391,
+              0.24998979270458221
+            ]
+          },
+          "sourceUnits": "millimeters",
+          "webUnits": "meters",
+          "upAxis": "Y"
+        },
+        "processing": {
+          "decimation": false,
+          "deformation": false,
+          "maxFloat32PositionErrorMeters": 1.478195188475695e-08,
+          "compression": {
+            "encoding": "EXT_meshopt_compression v0",
+            "decodedByteExact": true,
+            "quantization": false,
+            "reorder": false
+          },
+          "method": "Complete original cached render meshes, positions, normals, UVs and face order. One translation to horizontal centre and lowest source vertex, mm-to-m conversion, positive-determinant (x,z,-y) axis mapping. No source mesh editing, procedural replacement or smoothing."
+        }
+      },
+      "sourceValidation": {
+        "sourceUnchanged": true,
+        "selectedObjects": 1515,
+        "excludedObjects": 2549,
+        "axisDeterminant": 1,
+        "maxFloat32PositionErrorMeters": 1.478195188475695e-08,
+        "allSerializedPositionNormalIndexBytesExact": true
+      },
+      "compression": {
+        "passed": true,
+        "encoder": "meshoptimizer 1.1.1",
+        "decoder": "Three 0.186.1 bundled MeshoptDecoder",
+        "originalBytes": 24970908,
+        "compressedBytes": 10276504,
+        "sha256": "3dbd3909d3eca07c765aa77f070231d3b0830b5de534f6520cce79138d86d382",
+        "noQuantization": true,
+        "noReorder": true,
+        "buffers": [
+          {
+            "bufferView": 0,
+            "mode": "ATTRIBUTES",
+            "bytes": 6045864,
+            "encodedBytes": 2674514,
+            "decodedByteExact": true,
+            "sha256": "76ea35027a9cb97a7558e113881cde0ec978b8b5d91981a3a3a8f1d817fee73d"
+          },
+          {
+            "bufferView": 1,
+            "mode": "ATTRIBUTES",
+            "bytes": 6045864,
+            "encodedBytes": 3724356,
+            "decodedByteExact": true,
+            "sha256": "38903696e0d2ec27add9c5340a0785565e87ef9f909e8bf3528227c816910333"
+          },
+          {
+            "bufferView": 2,
+            "mode": "INDICES",
+            "bytes": 8847384,
+            "encodedBytes": 2260897,
+            "decodedByteExact": true,
+            "sha256": "cd2e22b86cb5e87472d85b04077e83660a2bdd01ce53edfe7d494887ffae7bd2"
+          },
+          {
+            "bufferView": 3,
+            "mode": "ATTRIBUTES",
+            "bytes": 4030576,
+            "encodedBytes": 1614753,
+            "decodedByteExact": true,
+            "sha256": "374668e7fbc7c9042373fbaed9389a419abb7da3a16fc8e77c04ebc59f087c27"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "caschlatsch",
+      "metadata": {
+        "projectId": "project-caschlatsch",
+        "src": "/assets/projects/project-caschlatsch/model.glb",
+        "bytes": 1082556,
+        "sha256": "4623278f7d9148d0ccdfd0080eb3f44dac36adb07bd6b8283b2863a7b9ad8f27",
+        "source": {
+          "file": "just structure.3dm",
+          "bytes": 55648912,
+          "sha256": "f488dfa8981d12c65fe604b0c04259cfd923485b5854f8bad9b5dd7e6ed9a414"
+        },
+        "selection": "All 2433 visible normal-mode Breps in the finalized structure-only CAD source; five reference points are excluded. Every stored render-mesh face is retained. This source contains the timber structure, not a reconstructed site or terrain.",
+        "credit": "MAS DFAB 2023–24 cohort / ETH Zurich. Project Caschlatsch is a collective project; JosHsuan Chao contributed to the COMPAS XR module workflow and assembly-data preparation.",
+        "representation": "Original full-size CAD structure of Project Caschlatsch, including the complete timber assembly in its source relative arrangement.",
+        "geometry": {
+          "vertices": 61362,
+          "triangles": 31152,
+          "renderables": 1,
+          "primitive": "triangles",
+          "bounds": {
+            "min": [
+              -2.1165409088134766,
+              0,
+              -2.1111583709716797
+            ],
+            "max": [
+              2.1165409088134766,
+              7.785984516143799,
+              2.1111583709716797
+            ]
+          },
+          "sourceUnits": "millimeters",
+          "webUnits": "meters",
+          "upAxis": "Y"
+        },
+        "processing": {
+          "decimation": false,
+          "deformation": false,
+          "maxFloat32PositionErrorMeters": 2.3651123104428962e-07,
+          "compression": {
+            "encoding": "EXT_meshopt_compression v0",
+            "decodedByteExact": true,
+            "quantization": false,
+            "reorder": false
+          },
+          "method": "Complete original cached render meshes, positions, normals, UVs and face order. One translation to horizontal centre and lowest source vertex, mm-to-m conversion, positive-determinant (x,z,-y) axis mapping. No source mesh editing, procedural replacement or smoothing."
+        }
+      },
+      "sourceValidation": {
+        "sourceUnchanged": true,
+        "selectedObjects": 2433,
+        "excludedObjects": 5,
+        "axisDeterminant": 1,
+        "maxFloat32PositionErrorMeters": 2.3651123104428962e-07,
+        "allSerializedPositionNormalIndexBytesExact": true
+      },
+      "compression": {
+        "passed": true,
+        "encoder": "meshoptimizer 1.1.1",
+        "decoder": "Three 0.186.1 bundled MeshoptDecoder",
+        "originalBytes": 2338620,
+        "compressedBytes": 1082556,
+        "sha256": "4623278f7d9148d0ccdfd0080eb3f44dac36adb07bd6b8283b2863a7b9ad8f27",
+        "noQuantization": true,
+        "noReorder": true,
+        "buffers": [
+          {
+            "bufferView": 0,
+            "mode": "ATTRIBUTES",
+            "bytes": 736344,
+            "encodedBytes": 439058,
+            "decodedByteExact": true,
+            "sha256": "8f158d9ba42ce3fb9a3aadc03e97f9f38096427f3f9b923197a255fb2eddd04d"
+          },
+          {
+            "bufferView": 1,
+            "mode": "ATTRIBUTES",
+            "bytes": 736344,
+            "encodedBytes": 205518,
+            "decodedByteExact": true,
+            "sha256": "42eec546cdd3e859d4882cca3c39944479b2f484a6ec094291c37d43d761dcbb"
+          },
+          {
+            "bufferView": 2,
+            "mode": "INDICES",
+            "bytes": 373824,
+            "encodedBytes": 93461,
+            "decodedByteExact": true,
+            "sha256": "fcf994bb8b319670f1806d73f26099f5593f776a24398724936520684e23f44e"
+          },
+          {
+            "bufferView": 3,
+            "mode": "ATTRIBUTES",
+            "bytes": 490896,
+            "encodedBytes": 342561,
+            "decodedByteExact": true,
+            "sha256": "ad440f885dd69131764d6e804c359e99fe4ecf297e3ffb88ff441e469cea1c2a"
+          }
+        ]
+      }
+    }
+  ],
+  "browserReviews": [
+    {
+      "kind": "machine",
+      "vertices": 503822,
+      "triangles": 737282,
+      "meshes": 1,
+      "finite": true,
+      "bounds": {
+        "min": [
+          -0.2519393563270569,
+          0,
+          -0.24998979270458221
+        ],
+        "max": [
+          0.2519393563270569,
+          0.260502427816391,
+          0.24998979270458221
+        ]
+      },
+      "drawCalls": 1,
+      "renderedTriangles": 737282,
+      "contextLost": false,
+      "size": [
+        1440,
+        900
+      ],
+      "errors": [],
+      "profile": "desktop"
+    },
+    {
+      "kind": "machine",
+      "vertices": 503822,
+      "triangles": 737282,
+      "meshes": 1,
+      "finite": true,
+      "bounds": {
+        "min": [
+          -0.2519393563270569,
+          0,
+          -0.24998979270458221
+        ],
+        "max": [
+          0.2519393563270569,
+          0.260502427816391,
+          0.24998979270458221
+        ]
+      },
+      "drawCalls": 1,
+      "renderedTriangles": 737282,
+      "contextLost": false,
+      "size": [
+        390,
+        844
+      ],
+      "errors": [],
+      "profile": "mobile"
+    },
+    {
+      "kind": "caschlatsch",
+      "vertices": 61362,
+      "triangles": 31152,
+      "meshes": 1,
+      "finite": true,
+      "bounds": {
+        "min": [
+          -2.1165409088134766,
+          0,
+          -2.1111583709716797
+        ],
+        "max": [
+          2.1165409088134766,
+          7.785984516143799,
+          2.1111583709716797
+        ]
+      },
+      "drawCalls": 1,
+      "renderedTriangles": 31152,
+      "contextLost": false,
+      "size": [
+        1440,
+        900
+      ],
+      "errors": [],
+      "profile": "desktop"
+    },
+    {
+      "kind": "caschlatsch",
+      "vertices": 61362,
+      "triangles": 31152,
+      "meshes": 1,
+      "finite": true,
+      "bounds": {
+        "min": [
+          -2.1165409088134766,
+          0,
+          -2.1111583709716797
+        ],
+        "max": [
+          2.1165409088134766,
+          7.785984516143799,
+          2.1111583709716797
+        ]
+      },
+      "drawCalls": 1,
+      "renderedTriangles": 31152,
+      "contextLost": false,
+      "size": [
+        390,
+        844
+      ],
+      "errors": [],
+      "profile": "mobile"
+    }
+  ],
+  "limitations": [
+    "Standalone derivative previews establish decoded geometry and complete visible silhouette at the recorded sizes, not final production materials, camera choreography, route interaction or physical-device frame rate.",
+    "Original source CAD is retained unchanged. Display materials are editorial; no calibrated material finish, construction certification or new structural result is implied."
+  ]
+}

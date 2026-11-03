@@ -141,6 +141,11 @@ export function assertProjectMotionEncoding(processing,spec){
 }
 
 /** Selected public records only. The build never traverses preparation sources. */
+export function projectStudyModels(project){
+  assert(Array.isArray(project.additionalModels??[]),'Additional project models must be an array');
+  return [project.model,...(project.additionalModels??[])].filter(Boolean);
+}
+
 export function assertProjectStudies(record,manifest){
   assert.equal(record.schemaVersion,1);
   assert.deepEqual(record.projects.map(project=>project.slug),PROJECT_SLUGS,'Exactly the six owner-selected studies, in their requested order');
@@ -150,7 +155,7 @@ export function assertProjectStudies(record,manifest){
   for(const project of record.projects){
     assert.equal(project.id,project.slug);
     for(const key of ['title','shortTitle','subtitle','summary','category','metadataTitle','metadataDescription','context','yearLabel','role','sourceNote'])text(project[key],key);
-    assert(project.sections.length>=4&&project.sections.length<=6,'Four to six source-backed story chapters plus opening and credits');
+    assert(project.sections.length>=4&&project.sections.length<=(project.id==='mode-s-of-making'?7:6),'Four to seven reviewed source-backed story chapters plus opening and credits');
     const ids=project.sections.map(section=>section.id);
     assert.equal(new Set(ids).size,ids.length);
     for(const section of project.sections){
@@ -208,9 +213,17 @@ export function assertProjectStudies(record,manifest){
     assert(project.credits.length>0);
     for(const credit of project.credits){text(credit.role,'credit role');text(credit.names,'credit names');}
     assert.match(project.related.href,/^\/projects\/[a-z0-9-]+\/$/);text(project.related.title,'related title');
-    if(project.model){
-      const model=project.model;
-      assert.equal(model.src,`/assets/projects/${project.slug}/model.glb`);
+    const models=projectStudyModels(project),claimedModelChapters=new Set();
+    assert.equal(new Set(models.map(model=>model.src)).size,models.length,'Distinct project model sources');
+    assert((project.additionalModels??[]).length<=1,'Only the reviewed additional machine assembly is selected');
+    for(const model of models){
+      if(model===project.model)assert.equal(model.src,`/assets/projects/${project.slug}/${project.id==='project-caschlatsch'?'model-materials':'model'}.glb`);
+      else{
+        assert.equal(project.id,'mode-s-of-making','Additional assembly belongs to the reviewed machine project');
+        assert(project.model,'The original unit model remains selected');
+        assert.equal(model.id,'machine');
+        assert.equal(model.src,`/assets/projects/${project.slug}/machine-materials.glb`);
+      }
       const pin=pins.get(model.src);assert(pin&&pin.bytes===model.bytes&&pin.sha256===model.sha256,'Approved project geometry: '+model.src);
       assert(['triangles','points'].includes(model.primitive??'triangles'));
       assert.equal(model.webUnits,'meters');assert.equal(model.upAxis,'Y');text(model.sourceUnits,'source units');text(model.alt,'model description');
@@ -221,11 +234,13 @@ export function assertProjectStudies(record,manifest){
       model.chapters.forEach(id=>assert(['overview',...ids,'credits'].includes(id),'Known model chapter'));
       const order=['overview',...ids,'credits'],positions=model.chapters.map(id=>order.indexOf(id));
       assert(positions.every((position,index)=>index===0||position===positions[index-1]+1),'A model has one ordered, continuous chapter interval; it cannot return after a different background');
+      for(const chapter of model.chapters){assert(!claimedModelChapters.has(chapter),'One model source owns each chapter');claimedModelChapters.add(chapter);}
+      const minimumPitch=['entrance-installation-art','project-caschlatsch'].includes(project.id)?-.16:-.1;
       if(model.views){
         assert.deepEqual(Object.keys(model.views).sort(),[...model.chapters].sort(),'Every model chapter has one reviewed camera view');
         for(const view of Object.values(model.views)){
           assert([view.yaw,view.pitch,view.fov,view.zoom].every(Number.isFinite),'Finite reviewed camera view');
-          assert(Math.abs(view.yaw)<=Math.PI&&view.pitch>=-.1&&view.pitch<=1.15&&view.fov>1&&view.fov<175);
+          assert(Math.abs(view.yaw)<=Math.PI&&view.pitch>=minimumPitch&&view.pitch<=1.15&&view.fov>1&&view.fov<175);
           assert(view.zoom>=1,'Reviewed camera fitting cannot crop the complete original source');
         }
       }
@@ -237,7 +252,7 @@ export function assertProjectStudies(record,manifest){
         assert(chapterIndex>=0&&Number.isFinite(key.progress)&&key.progress>=0&&key.progress<=1,'Camera keys stay inside the continuous model interval');
         const anchor=chapterIndex+key.progress;assert(anchor>previousCameraAnchor,'Strictly ordered camera anchors without duplicate chapter boundaries');previousCameraAnchor=anchor;
         assert([key.yawRad,key.pitchRad,key.fovDeg,key.zoom].every(Number.isFinite),'Finite authored camera intent');
-        assert(Math.abs(key.yawRad)<=Math.PI&&key.pitchRad>=-.1&&key.pitchRad<=1.15&&key.fovDeg>1&&key.fovDeg<175&&key.zoom>=1,'Camera paths preserve complete source framing');
+        assert(Math.abs(key.yawRad)<=Math.PI&&key.pitchRad>=minimumPitch&&key.pitchRad<=1.15&&key.fovDeg>1&&key.fovDeg<175&&key.zoom>=1,'Camera paths preserve complete source framing');
       }
       assert.equal(model.cameraPath[0].chapter,model.chapters[0]);assert.equal(model.cameraPath[0].progress,0);
       assert.equal(model.cameraPath.at(-1).chapter,model.chapters.at(-1));assert.equal(model.cameraPath.at(-1).progress,1);
@@ -285,10 +300,10 @@ export function assertProjectAssetRecord(record,images,manifest,studies){
     assert(!asset.processing.metadata.includes('retained'),'Native private metadata is omitted');
   }
   const models=record.models??[];
-  if(studies)assert.deepEqual(models.map(model=>model.src).sort(),studies.projects.filter(project=>project.model).map(project=>project.model.src).sort(),'Every selected model has provenance');
+  if(studies)assert.deepEqual(models.map(model=>model.src).sort(),studies.projects.flatMap(projectStudyModels).map(model=>model.src).sort(),'Every selected model has provenance');
   assert.equal(new Set(models.map(model=>model.src)).size,models.length);
   for(const model of models){
-    assert(PROJECT_SLUGS.includes(model.projectId));assert.equal(model.src,`/assets/projects/${model.projectId}/model.glb`);
+    assert(PROJECT_SLUGS.includes(model.projectId));assert([`/assets/projects/${model.projectId}/${model.projectId==='project-caschlatsch'?'model-materials':'model'}.glb`,...(model.projectId==='mode-s-of-making'?['/assets/projects/mode-s-of-making/machine-materials.glb']:[])].includes(model.src),'Reviewed project model path');
     const pin=pins.get(model.src.slice(1));assert(pin&&pin.bytes===model.bytes&&pin.sha256===model.sha256,'Model provenance matches pin');
     assert.match(model.source.sha256,/^[a-f0-9]{64}$/);text(model.selection,'geometry selection');text(model.credit,'geometry attribution');
     assert.equal(model.processing.decimation,false);assert.equal(model.processing.deformation,false);

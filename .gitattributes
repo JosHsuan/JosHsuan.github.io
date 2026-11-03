@@ -1,0 +1,9 @@
+# Source assertions and the Linux release build use identical line endings on
+# Windows. Pinned public assets and release JSON intentionally remain untouched.
+/.github/**/*.yml text eol=lf
+/scripts/**/*.mjs text eol=lf
+/tests/**/*.mjs text eol=lf
+/roles/uiux-designer/cases/bending-active-thesis/components/** text eol=lf
+/roles/uiux-designer/cases/bending-active-thesis/runtime/** text eol=lf
+/roles/uiux-designer/cases/bending-active-thesis/app/** text eol=lf
+/roles/uiux-designer/cases/bending-active-thesis/tests/**/*.mjs text eol=lf

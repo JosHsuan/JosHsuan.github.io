@@ -3,16 +3,15 @@ import {WAIT,scenarioTimeout,loadScene,settle,frames,centerStudy} from './case-h
 import {renderedTextContrast} from './reading-contrast.mjs';
 import {SOURCE_COMPARISON_SECONDS} from '../../roles/uiux-designer/cases/bending-active-thesis/components/source-scene-score.mjs';
 
-test('Roboto Mono headings and reading text and rounded orange-photo shadowboxes retain an accessible original',async({page,isMobile})=>{
+test('Roboto Mono typography and rounded inline evidence remain readable without image activation controls',async({page})=>{
  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/projects/bending-active/#overview');await page.waitForFunction(()=>window.__story?.inspect().entry?.phase==='entered',null,{timeout:WAIT});await page.evaluate(()=>document.fonts.ready);
  const fonts=await page.evaluate(async()=>{
   const faces=await Promise.all([document.fonts.load('400 16px "Roboto Mono"','Original source artwork 60° × 160 mm ↗'),document.fonts.load('400 16px "Roboto Mono"','Bending-Active Metal Panel Deformation')]);
   return{loaded:{body:document.fonts.check('400 16px "Roboto Mono"','Original source artwork 60° × 160 mm ↗'),display:document.fonts.check('400 16px "Roboto Mono"','Bending-Active Metal Panel Deformation')},faces:faces.flat().map(face=>({family:face.family.replaceAll(/['"]/g,''),status:face.status})),body:getComputedStyle(document.body).fontFamily,heading:getComputedStyle(document.querySelector('h1')).fontFamily,lastHeading:getComputedStyle(document.querySelector('h1 span:last-child')).fontFamily};
  });expect(fonts).toMatchObject({loaded:{body:true,display:true},faces:[{family:'Roboto Mono',status:'loaded'},{family:'Roboto Mono',status:'loaded'}]});expect(fonts.body).toContain('Roboto Mono');expect(fonts.heading).toContain('Roboto Mono');expect(fonts.lastHeading).toContain('Roboto Mono');
- const photo=page.locator('#make [data-media-kind="photo"] img'),link=page.locator('#make [data-inspect-figure]');await link.scrollIntoViewIfNeeded();
- expect(await photo.evaluate(el=>getComputedStyle(el).filter)).toContain('invert(1)');expect(await link.evaluate(el=>parseFloat(getComputedStyle(el).borderTopLeftRadius))).toBeGreaterThanOrEqual(16);
- if(!isMobile){await link.hover();expect(await photo.evaluate(el=>getComputedStyle(el).filter)).toBe('none');}else{await link.focus();expect(await photo.evaluate(el=>getComputedStyle(el).filter)).toBe('none');}
- await link.press('Enter');await expect(page.locator('[data-source-comparison] img')).toBeVisible();expect(await page.locator('[data-source-comparison] img').evaluate(el=>getComputedStyle(el).filter)).toBe('none');await page.getByRole('button',{name:'Close source comparison'}).click();await expect(link).toBeFocused();
+ const figure=page.locator('#make [data-media-kind="photo"]'),photo=figure.locator('img'),frame=figure.locator('[data-information-window="evidence-image"]');await photo.scrollIntoViewIfNeeded();await settle(page);
+ await expect.poll(()=>photo.evaluate(el=>el.complete&&el.naturalWidth>0)).toBe(true);expect(await frame.evaluate(el=>parseFloat(getComputedStyle(el).borderTopLeftRadius))).toBeGreaterThanOrEqual(16);
+ await photo.click();await expect(page.locator('[data-inspect-figure],[data-source-comparison]')).toHaveCount(0);await expect(figure.locator('button,a')).toHaveCount(0);expect(await figure.getAttribute('tabindex')).toBeNull();expect(await page.evaluate(()=>document.body.style.overflow)).not.toBe('hidden');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
 });
 
@@ -31,7 +30,7 @@ test('original SVG paths retain fold and workflow selections, a complete static 
  await page.route('**/assets/diagrams/*.json',r=>r.abort());await page.reload();await page.waitForFunction(()=>window.__story?.inspect().entry?.phase==='entered',null,{timeout:WAIT});for(const kind of ['miura','library','workflow']){const img=page.locator(`[data-source-diagram="${kind}"] img`);await img.scrollIntoViewIfNeeded();await expect.poll(()=>img.evaluate(el=>el.complete&&el.naturalWidth>0)).toBe(true);}
 });
 
-test('zero-wheel chapter loops advance field and workflow selections while OS Reduced stops autonomous time',async({page})=>{
+test('zero-wheel chapter loops advance field and workflow selections across OS motion preferences',async({page})=>{
  test.setTimeout(scenarioTimeout(180000));await page.clock.install({time:new Date('2026-01-01T00:00:00Z')});await loadScene(page);await page.locator('[data-chapter-link="system"]').click();await centerStudy(page,'system');await page.mouse.move(10,130);await frames(page,4);
  expect(await page.evaluate(()=>({visible:window.__story.inspect().canvasPlacement.visible,suspended:window.__thesis.inspect().renderSuspended}))).toEqual({visible:true,suspended:false});
  // Fixed sub-stale intervals verify autonomous behavior even when one software
@@ -68,7 +67,7 @@ test('zero-wheel chapter loops advance field and workflow selections while OS Re
  const selectionReceipt=await page.evaluate(()=>window.__testSourceSelectionReceipt);
  expect(selectionReceipt).toMatchObject({trusted:true,pressed:'true',diagram:'bending',selection:{chapterId:'system',index:2}});
  expect(Number.isFinite(selectionReceipt.activeSeconds)).toBe(true);expect(Number.isFinite(selectionReceipt.selection.selectedAt)).toBe(true);expect(Number.isFinite(selectionReceipt.age)).toBe(true);expect(selectionReceipt.age).toBeGreaterThanOrEqual(0);expect(selectionReceipt.age).toBeLessThan(SOURCE_COMPARISON_SECONDS);
- await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(()=>window.__story.inspect().playback.reducedMotion,null,{timeout:WAIT});await settle(page);const frozen=await page.evaluate(()=>window.__story.inspect().playback.activeSeconds);await frames(page,10);expect(await page.evaluate(()=>window.__story.inspect().playback.activeSeconds)).toBe(frozen);
+ await page.emulateMedia({reducedMotion:'reduce'});await settle(page);expect(await page.evaluate(()=>window.__story.inspect().playback.reducedMotion)).toBe(false);const live=await page.evaluate(()=>window.__story.inspect().playback.activeSeconds);await frames(page,10);expect(await page.evaluate(()=>window.__story.inspect().playback.activeSeconds)).toBeGreaterThan(live);
 });
 
 test('viewport source holds while information scrolls and workflow follows its presented shared phase',async({page})=>{

@@ -1,0 +1,691 @@
+{
+  "publishedCommit": "1ca10e7aeb823d6fa21cf1378cf9270ffcf8990b",
+  "manifestSHA256": "6bc10dfa18a7aafc828d9b39f1b046faddb7c8b514e9260a7d9adca0d46179e1",
+  "assets": [
+    {
+      "path": "assets/cinematic/built-prototype.webp",
+      "bytes": 923156,
+      "sha256": "cd9cf4f33263860a27145971c3a55af54275bcec7e2676f1b770344d0e876716"
+    },
+    {
+      "path": "assets/cinematic/connection-detail.webp",
+      "bytes": 332778,
+      "sha256": "4883b0385c4b3ff4d1c51a3d04831632e0aaf4cff1ef88ada186651d373299e2"
+    },
+    {
+      "path": "assets/cinematic/function-library.webp",
+      "bytes": 111610,
+      "sha256": "6f8668574ca7d682bc5fb6e7277ede8c5906949042d61673a090a14c9c90c532"
+    },
+    {
+      "path": "assets/cinematic/geometry-strip.webp",
+      "bytes": 122874,
+      "sha256": "1b08a1548aadc898ae3de22fb7b053ef6c3541c970c72f538d9e718a39a06577"
+    },
+    {
+      "path": "assets/cinematic/model-poster-mobile.webp",
+      "bytes": 7978,
+      "sha256": "b133e25443df7926f8b5b4fcf354765f371c3417e0662a0635b917f4546e8d24"
+    },
+    {
+      "path": "assets/cinematic/model-poster.webp",
+      "bytes": 26438,
+      "sha256": "931181ca2b0722d27f41bddbf60121c5d058d4297bd809aee9eb2fec68d377e7"
+    },
+    {
+      "path": "assets/cinematic/source-p024.webp",
+      "bytes": 208288,
+      "sha256": "95c18b8998ab782bec92b80a7a50efb4dcd6ca86f24dadc2a761e85cdf0071b3"
+    },
+    {
+      "path": "assets/cinematic/source-p025.webp",
+      "bytes": 226360,
+      "sha256": "2347e11dae9da3087a649bde6a6df9018dd6a9973433c4f037f5587ae68015c2"
+    },
+    {
+      "path": "assets/cinematic/source-p028.webp",
+      "bytes": 263510,
+      "sha256": "02270fc65939d3474873accec89dd0de29ad5773641d4374dec6d3f6da34b373"
+    },
+    {
+      "path": "assets/cinematic/source-p029.webp",
+      "bytes": 351798,
+      "sha256": "b1ad775ea95735566cb99090e3d201ee5fb5209c46ad70bb49dafb928cb9dab5"
+    },
+    {
+      "path": "assets/source-layers.glb",
+      "bytes": 6879848,
+      "sha256": "ff112b90be104cca7e3705b5eee481ba3973d25e2f3d4a7350faa2f732cae47e"
+    },
+    {
+      "path": "assets/source-layers.json",
+      "bytes": 5471,
+      "sha256": "355633399d5cb38d8b340fe96a53314dca6d1f88b87cbdb6b3167a5ad81610ea"
+    },
+    {
+      "path": "assets/studio-small.hdr",
+      "bytes": 1615248,
+      "sha256": "e7cfda5f4e98e623db12b8bfd0184e048488e4855d9c83e2751fb44a32e80c45"
+    },
+    {
+      "path": "licenses/CC0-1.0.txt",
+      "bytes": 7048,
+      "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499"
+    },
+    {
+      "path": "licenses/webgl-noise-MIT.txt",
+      "bytes": 1145,
+      "sha256": "bdafce1bb01517c9ae6c4f3620c01340790b5e9d039ae9e356347d1174250916"
+    },
+    {
+      "path": "assets/fonts/ibm-plex-sans-variable.woff2",
+      "bytes": 230108,
+      "sha256": "ae4c9e3027b5b4453bd0b87ef1015e19d2e1ab9047b2dbbbfe17cd4f2b72fbc6"
+    },
+    {
+      "path": "assets/fonts/ibm-plex-mono-regular.woff2",
+      "bytes": 39128,
+      "sha256": "7221189d2813dafe998d43ef063ace70d729d63444d077f165902eb77f299fcc"
+    },
+    {
+      "path": "assets/fonts/ibm-plex-serif-italic.woff2",
+      "bytes": 73852,
+      "sha256": "ba5feed9ebae36e3b6ae3486052c90f4f42a294fa67a7c9415985175d19c4c82"
+    },
+    {
+      "path": "licenses/ibm-plex-OFL.txt",
+      "bytes": 4456,
+      "sha256": "7e6b2818edbd8f6a01ae80641cc8f16a51080d08fb4e532be3a0b6f74adb07da"
+    },
+    {
+      "path": "assets/thesis/source-diagrams.glb",
+      "bytes": 3467136,
+      "sha256": "13fbd10da48e6aa71fe6bfb8c7711741293833f7bba33611f394f9b1543e505a"
+    },
+    {
+      "path": "assets/thesis/source-diagrams.json",
+      "bytes": 208057,
+      "sha256": "b2cddb846c2b8b92dc77364e126ae90d15b47a779857b7e6539c098c9ac1546e"
+    },
+    {
+      "path": "assets/diagrams/library.json",
+      "bytes": 731424,
+      "sha256": "2f52607547c6b6cbfc144771e6c3de3c8586e64f815d4961d379be3a94aa9e52"
+    },
+    {
+      "path": "assets/diagrams/library.svg",
+      "bytes": 677728,
+      "sha256": "395060b45c80ecaad8401901b5818c629b9ac75da0242aa91ce11279d3d91c2c"
+    },
+    {
+      "path": "assets/diagrams/miura-context-1530.png",
+      "bytes": 82971,
+      "sha256": "fd3e4fba9512186395efcee8dc7557ad778f98ec15e4933a7fe8428baf9d9f3e"
+    },
+    {
+      "path": "assets/diagrams/miura.json",
+      "bytes": 162766,
+      "sha256": "3a1e9a639c92cd0823502f88686b2701d6c2a38575854396e7ef0cc002a6bc25"
+    },
+    {
+      "path": "assets/diagrams/miura.svg",
+      "bytes": 227326,
+      "sha256": "f7a8d3ade63c014d11f6f6236808eef778759f31d5a86df2786f9216191dbbb4"
+    },
+    {
+      "path": "assets/diagrams/workflow-context-8378.png",
+      "bytes": 82971,
+      "sha256": "fd3e4fba9512186395efcee8dc7557ad778f98ec15e4933a7fe8428baf9d9f3e"
+    },
+    {
+      "path": "assets/diagrams/workflow-context-8379.png",
+      "bytes": 69488,
+      "sha256": "c0c4561998778530c424bd9b9e69a8912524d46d19e49fc10f68a0d166bf2652"
+    },
+    {
+      "path": "assets/diagrams/workflow-context-8382.png",
+      "bytes": 164044,
+      "sha256": "4f190c3a57562184e7468a2a6265314b3b3a296908e1d9734d4b7c6a3b772a21"
+    },
+    {
+      "path": "assets/diagrams/workflow-context-8383.png",
+      "bytes": 16490,
+      "sha256": "e29a4382a4a040ce8edc56aecfc6f39e209675fb210794fd13294e1b0d8241b5"
+    },
+    {
+      "path": "assets/diagrams/workflow-context-8384.png",
+      "bytes": 39964,
+      "sha256": "35cae46ee521ab46e785b1d22583bfc314f3a8e897882f52c4fced2709b9e896"
+    },
+    {
+      "path": "assets/diagrams/workflow-context-8385.png",
+      "bytes": 24005,
+      "sha256": "22478102ae26a7b024787701c924712ee308ca2501ade0713826635cd06b54c9"
+    },
+    {
+      "path": "assets/diagrams/workflow-context-8386.png",
+      "bytes": 81857,
+      "sha256": "a8bb28e4455ae0ca4056d77835dd964a03138c2ce1483769ab8ec26858d62fe9"
+    },
+    {
+      "path": "assets/diagrams/workflow-context-8387.png",
+      "bytes": 227046,
+      "sha256": "d80aae755de876741485c086f2efd6d4462ea89e5fefdcfdfe79e920c3a75c7f"
+    },
+    {
+      "path": "assets/diagrams/workflow.json",
+      "bytes": 666555,
+      "sha256": "787d9cb5ade52e662f7b004bf4405f17ccb63c0ad24c00a095e108be3233858a"
+    },
+    {
+      "path": "assets/diagrams/workflow.svg",
+      "bytes": 1701097,
+      "sha256": "f57cea2e41531d3172bad08a11d2229d20663c20952d84ab853a317dc52a23ad"
+    },
+    {
+      "path": "assets/xr/research-environment.webp",
+      "bytes": 137514,
+      "sha256": "063cbbef1b648a6377034f1e97429aad98b0b6da34d7a809522c87b7b99f1557"
+    },
+    {
+      "path": "assets/xr/measuring-tools.webp",
+      "bytes": 23516,
+      "sha256": "4d8cb7cd124de8cecbb1700cf201ab029491ca9d07c502110397671064454bec"
+    },
+    {
+      "path": "assets/xr/module-assembly.webp",
+      "bytes": 12380,
+      "sha256": "b67d3f7a7940227bd7bf760c02a448396ce32d47961894d4550c11b06609945c"
+    },
+    {
+      "path": "assets/xr/module-selection.png",
+      "bytes": 637446,
+      "sha256": "ffdbee5f6bdae697601be8a0465e3746966f97ca7422a5a6189d0fbc3da237f0"
+    },
+    {
+      "path": "assets/xr/background-preview.mp4",
+      "bytes": 959385,
+      "sha256": "2c9efd96634395452d71cd9f7fd800529dae5dc838f8c4b6c597fb3ee94afa29"
+    },
+    {
+      "path": "assets/xr/background-poster.webp",
+      "bytes": 338694,
+      "sha256": "96b3d295f576ceb1d66bceb4ec510d3c2521ce6f27465183b68265b067a9607c"
+    },
+    {
+      "path": "assets/xr/portfolio-main-visual.webp",
+      "bytes": 262832,
+      "sha256": "ad0cd748e71afefeb67b79b33f28f08620619875117dc2ef4e45f7cafee179ec"
+    },
+    {
+      "path": "assets/xr/physical-capture.webp",
+      "bytes": 129352,
+      "sha256": "181907c832fd046c645ba7ee7b9a4294bdf3dc1d792a825328d4b44167f79f0a"
+    },
+    {
+      "path": "assets/xr/physical-assembly.webp",
+      "bytes": 721236,
+      "sha256": "c07f14152ca297d668b1dfdafbac41d2ffef134d1583753e4c66669208d84b6d"
+    },
+    {
+      "path": "assets/xr/physical-result.webp",
+      "bytes": 363456,
+      "sha256": "0885013c40cb9215c6995bd4d7ed7952e1cd878f755fec53bd6e74645c7c73a7"
+    },
+    {
+      "path": "assets/xr/adaptive-method.webp",
+      "bytes": 175870,
+      "sha256": "d5f92adf7db6f7bbd65664e92c309a4d031846cf7eab9944a464c62b36afe267"
+    },
+    {
+      "path": "assets/xr/communication-system.webp",
+      "bytes": 109466,
+      "sha256": "990a20f06e48b4cee051ae263a586e4b24d886b1826c84aad7439b0db63744de"
+    },
+    {
+      "path": "assets/xr/data-categories.webp",
+      "bytes": 112744,
+      "sha256": "9bb49c60a316df522c5bd05ad842f4a6a279a2479f0fb4a36c14694c6ffb7c9a"
+    },
+    {
+      "path": "assets/xr/adapt-interface.mp4",
+      "bytes": 793477,
+      "sha256": "c7a3ae4da483fe24830463d57882e8723b2a557b21732db2358d07587a2db845"
+    },
+    {
+      "path": "assets/xr/adapt-poster.webp",
+      "bytes": 442954,
+      "sha256": "24bb4ab66d4fdd30650a0fc9f7704241de66012f3941692e5e0479fb58b5e428"
+    },
+    {
+      "path": "assets/xr/assemble-interface.mp4",
+      "bytes": 2143502,
+      "sha256": "6bd92eb307fb65f17c71ce1b6196c7ddf4d834dd1fd924ce67050867ce62d2e8"
+    },
+    {
+      "path": "assets/xr/assemble-poster.webp",
+      "bytes": 336200,
+      "sha256": "b65ec1fd919863e94b5ce757d624eb86535d07ba840ba80a224b801076e78ede"
+    },
+    {
+      "path": "assets/xr/join-interface.mp4",
+      "bytes": 2475241,
+      "sha256": "360ecc723f6b2adeeb919a8dd580b69ea6e34d7ec1877c3bca7d0c8a9903911c"
+    },
+    {
+      "path": "assets/xr/join-poster.webp",
+      "bytes": 576204,
+      "sha256": "1e7b1f6482616c1ef47661c9155c43b70fc8030053367ced0cbb19ea2aaf28c0"
+    },
+    {
+      "path": "assets/xr/xr-research-assembly.glb",
+      "bytes": 4597000,
+      "sha256": "82e9679c1e47e93cc1a7bbea588eb0f2c8af142d6f7facc6fe5ffaa6148fdc04"
+    },
+    {
+      "path": "assets/xr/xr-research-assembly-poster.webp",
+      "bytes": 101448,
+      "sha256": "c5297673fdbe7316157e1b21b76127c05eb9129fc3f3298d30bbb3ba329f4c59"
+    },
+    {
+      "path": "assets/xr/research-workspace.webp",
+      "bytes": 3715044,
+      "sha256": "d691463248ac34d7dd71c7f8211363f9dd51a46e55cfa22a90006d7e400b27da"
+    },
+    {
+      "path": "assets/xr/research-workspace-mobile.webp",
+      "bytes": 1248596,
+      "sha256": "937e8d388a3b4156bc19671ad7d614bee12fbbe3c54d79e9669d9fbe67ef135e"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/hero.webp",
+      "bytes": 422762,
+      "sha256": "9a0beb28153b96b9b2f8e074fb7091e3e2043033494d5ceb3245d7ac3cb1c7e4"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/design-workflow.webp",
+      "bytes": 1354306,
+      "sha256": "8330a0695b738831254982f3c3ec8246f70ec7619d6279bb84d8d1294fe2a82b"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/machine-system.webp",
+      "bytes": 312024,
+      "sha256": "8695d585ea84fe7a317eb4709373d8c187adcb9389087da6034e0b82f20c14ff"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/fabrication-assembly-spread.webp",
+      "bytes": 602486,
+      "sha256": "543ce2861130c670bafa729e188de2c819abe805a0e81a1f1fd4d0c125bc169c"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/machine-prototype.webp",
+      "bytes": 949594,
+      "sha256": "e047c663c1fdc0698b73a39a0c71a62f4b4fd2e340207f131d4059cf257104a2"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/toolpath-textures.webp",
+      "bytes": 1248488,
+      "sha256": "548932813915ed78445d1e7030313029da5da8d1c4e4b8e707cff3e48522fa35"
+    },
+    {
+      "path": "assets/projects/entrance-installation-art/hero.webp",
+      "bytes": 984646,
+      "sha256": "b71730a977ec934fb1303ab3f7504b3c37f5a62db0c6da4d9663ce238c2d794f"
+    },
+    {
+      "path": "assets/projects/entrance-installation-art/pattern-development.webp",
+      "bytes": 36404,
+      "sha256": "819dcb41ba6bf72d0eaf2afe855c1741f01052018c3a4720d2ebaea0ee1fa6f7"
+    },
+    {
+      "path": "assets/projects/entrance-installation-art/pattern-variations.webp",
+      "bytes": 137766,
+      "sha256": "b54277be32b54b8eaaf210c81d8e0e95f6e8e64ab3e1db1eaf405203e1bbc43d"
+    },
+    {
+      "path": "assets/projects/entrance-installation-art/panel-system.webp",
+      "bytes": 504240,
+      "sha256": "aafe7ac58b3781dd9becb4c73f43232dcec1534b388c2b9912149fb5eabe051f"
+    },
+    {
+      "path": "assets/projects/entrance-installation-art/fabrication-drawings.webp",
+      "bytes": 56288,
+      "sha256": "cd8226c55a9aa1707771b8800f78e54d5b928ba7a7ab6e3333c1a4dc47c374c9"
+    },
+    {
+      "path": "assets/projects/entrance-installation-art/workshop-assembly.webp",
+      "bytes": 370062,
+      "sha256": "7b3d5717c8f033001b8660d5b222a35a92e8009b2bb77e176549337a3b674ffe"
+    },
+    {
+      "path": "assets/projects/entrance-installation-art/built-installation.webp",
+      "bytes": 476318,
+      "sha256": "13edd67d75e4b5065b1b5af7b63d9782eccfa31fd76cfd1abf8737bdd99be3bc"
+    },
+    {
+      "path": "assets/projects/dot-based-3d-printing/hero.webp",
+      "bytes": 398830,
+      "sha256": "486a4538294f2c81c6c1fb41a97820bdb71c73d18d817b8fb32f17ee24e82fb2"
+    },
+    {
+      "path": "assets/projects/dot-based-3d-printing/parameter-study.webp",
+      "bytes": 206750,
+      "sha256": "637ac3c6df780e54f9a0304d750ff1cb4baf94a5f6f6f2c6f54a917fdeeeac61"
+    },
+    {
+      "path": "assets/projects/dot-based-3d-printing/path-strategies.webp",
+      "bytes": 338560,
+      "sha256": "0026b91b1b92baa0736eaec6bce2b21417feb3135f2b2ea91f0c5f974b955c94"
+    },
+    {
+      "path": "assets/projects/dot-based-3d-printing/form-development.webp",
+      "bytes": 326368,
+      "sha256": "11433df85f98278619196f8f139b371b27573d46bfc5d97d852892efbf6361c4"
+    },
+    {
+      "path": "assets/projects/dot-based-3d-printing/printing-process.webp",
+      "bytes": 734890,
+      "sha256": "29ea28ffa3f66bc89daf382228e659bcbd4a6464c578cb8bc7eef73b48c9503e"
+    },
+    {
+      "path": "assets/projects/dot-based-3d-printing/prototype-family.webp",
+      "bytes": 88518,
+      "sha256": "1dc30086d8489d679e72c3da104fce77fd728f69d7dac52942ad63f37bdec7e0"
+    },
+    {
+      "path": "assets/projects/dot-based-3d-printing/translucent-prototypes.webp",
+      "bytes": 95912,
+      "sha256": "f1979a54f373e549fd2db99907d0dd5cac9689c3e2ec3f3f48461876a0d8ab2d"
+    },
+    {
+      "path": "assets/projects/hc3dp-caustics/hero.webp",
+      "bytes": 426206,
+      "sha256": "21ea5094ba8cc606ceb5aa8a73cbda033161de2435a28c5baff04c7e29cbc70e"
+    },
+    {
+      "path": "assets/projects/hc3dp-caustics/layer-system.webp",
+      "bytes": 183954,
+      "sha256": "90bd8534db57a6a3c2d978e2b0fcc92bdaaac07859ed4483ab39efcfa198b747"
+    },
+    {
+      "path": "assets/projects/hc3dp-caustics/path-logic.webp",
+      "bytes": 232146,
+      "sha256": "76206f25664bbe61fd9e42835b931a5fab196e3eb6ca52e884c4f601af0a625b"
+    },
+    {
+      "path": "assets/projects/hc3dp-caustics/frame-arrangement.webp",
+      "bytes": 288180,
+      "sha256": "d0a12edb61da1511e92630daf06454ecd3a1bb0a2f15fcf88bb0c941e7a8b4d0"
+    },
+    {
+      "path": "assets/projects/hc3dp-caustics/fabrication-path.webp",
+      "bytes": 191362,
+      "sha256": "0300d66baa974306d3bf0d9c206ed11c517545951bc9cc8977b33a4fb6c14770"
+    },
+    {
+      "path": "assets/projects/hc3dp-caustics/caustic-observation.webp",
+      "bytes": 218704,
+      "sha256": "03f8efd3fe37bf149315440165dfde62a539234ec1293238e293a5eb8705152d"
+    },
+    {
+      "path": "assets/projects/hc3dp-caustics/overinflation.webp",
+      "bytes": 251744,
+      "sha256": "ad49b67a1a9239998866509ed213d3f1321d26d6635c4ade987e5335fb5539cf"
+    },
+    {
+      "path": "assets/projects/special-assemblies/hero.webp",
+      "bytes": 944918,
+      "sha256": "ff6f2b328f37319aca763c5d45e44f87d2958a5458f410f2049aef4116157adb"
+    },
+    {
+      "path": "assets/projects/special-assemblies/prototype-study.webp",
+      "bytes": 826826,
+      "sha256": "be723b3d9c0b3c0fbce65a3f0c0c0b5a594b4af3c41d07eb01ba9af5b526e51d"
+    },
+    {
+      "path": "assets/projects/special-assemblies/module-aggregation.webp",
+      "bytes": 449804,
+      "sha256": "0d23984e36aed538890bdba95c4d0178718a728b671165a40b0e864b37d535c2"
+    },
+    {
+      "path": "assets/projects/special-assemblies/planning-workflow.webp",
+      "bytes": 100558,
+      "sha256": "efbd1a82556bb41fe531059ab73e2c483b36ae2c6b5691867d1e5a2b085b1154"
+    },
+    {
+      "path": "assets/projects/special-assemblies/robot-trajectories.webp",
+      "bytes": 299612,
+      "sha256": "07dddc5c9e56279e7c9e639a9779d44904305a5e748b12875f6e8ad7c792c97e"
+    },
+    {
+      "path": "assets/projects/special-assemblies/front-prototype.webp",
+      "bytes": 977090,
+      "sha256": "66d0aa1d9fa8509e0966c24c942d1d4eb5d8fa621a431d560ad31c97c295fd1f"
+    },
+    {
+      "path": "assets/projects/special-assemblies/assembly-detail.webp",
+      "bytes": 872982,
+      "sha256": "b84c385c3016218bc31a55e8e6adef40dc4f1c0bc922d3ecd56f21c651207fb9"
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/hero.webp",
+      "bytes": 1277128,
+      "sha256": "b25f15cdec11b036cbab780d8d80002c15610116f24a62ed4b1e8bc463efcdd6"
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/cnc-fabrication.webp",
+      "bytes": 253756,
+      "sha256": "34504a98da70ddff2b2af2ddd4ef48bc3b8bae038aa2d7202233f517151705f1"
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/mountain-setting.webp",
+      "bytes": 930516,
+      "sha256": "66ddc65f11127f75b59f772cc36c39c3de729ad8066dcb5ef353394ac70555f2"
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/module-assembly.webp",
+      "bytes": 579684,
+      "sha256": "c4593f2996c2afef769e859d7577c3e70503bde5ba6832e09c60fd104f093734"
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/timber-steps.webp",
+      "bytes": 876108,
+      "sha256": "087549f8dfbe26639e4f9e3ff091b670a6c55f2dcc39ee918a03492632105e54"
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/timber-interior.webp",
+      "bytes": 314530,
+      "sha256": "253f17805bf21c443ab63db679db12cbe0cba9660d0068bc07d2ea838be53257"
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/workflow.webp",
+      "bytes": 34108,
+      "sha256": "25a1b8b7dcedb07b9b4a8ad853917753389ef22877b974005a8a8f4b38318d0a"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/model.glb",
+      "bytes": 13987056,
+      "sha256": "0a6963f5a206d0dc11b5fd9b0d9fc5e2a09085058d86bca62f3fb435a237cee0"
+    },
+    {
+      "path": "assets/projects/entrance-installation-art/model.glb",
+      "bytes": 18828876,
+      "sha256": "cb7b5ea27a47c9451bd4220c835fb158aa3e65be19deff684f40eb076c43376c"
+    },
+    {
+      "path": "assets/projects/dot-based-3d-printing/model.glb",
+      "bytes": 122884,
+      "sha256": "60d49fe978cf0fb552c39f7188a9811dc39aa2e163b3a3388b192dbae502e891"
+    },
+    {
+      "path": "assets/projects/hc3dp-caustics/model.glb",
+      "bytes": 50438508,
+      "sha256": "0dd22b441c422f2a9c2406d79288284ee7fc56f1f3028ae453015b3add40bb4a"
+    },
+    {
+      "path": "assets/projects/special-assemblies/model.glb",
+      "bytes": 117672,
+      "sha256": "43de5ca2dd8095a125d7f29e58851b5a80dc9588625912918d75dbadae8e28df"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/rotary-cutting-motion.mp4",
+      "bytes": 16358510,
+      "sha256": "8a4d94866d3daffc4b75ef6d2d5782a5e5fa6d647de4da3e2965f1452afac15b"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/rotary-cutting-motion-poster.webp",
+      "bytes": 103120,
+      "sha256": "d3a2b8c079cb3ebd63075069974a515fecb8ecf17b7d14a15d1ba47577dd2a53"
+    },
+    {
+      "path": "assets/projects/entrance-installation-art/installation-lighting-motion.mp4",
+      "bytes": 4987684,
+      "sha256": "d90cade4251751ade9297067e2825f32180c560e118839d71345097836881369"
+    },
+    {
+      "path": "assets/projects/entrance-installation-art/installation-lighting-motion-poster.webp",
+      "bytes": 120554,
+      "sha256": "ab2815c0967be14c8675566dc1e43d698417a83833bbf8f03ab2372710917a77"
+    },
+    {
+      "path": "assets/projects/dot-based-3d-printing/printing-process-motion.mp4",
+      "bytes": 24383755,
+      "sha256": "1d9014c6bc56e57e6dd80c8d47fb76c7e696ba6c1d7b4d1b1e04444c6b8d6821"
+    },
+    {
+      "path": "assets/projects/hc3dp-caustics/fabrication-path-motion.mp4",
+      "bytes": 983144,
+      "sha256": "f4f24c57fe236709c3580008ea39d429edcdb1e0d51e02bef4d61f4c90fab1ee"
+    },
+    {
+      "path": "assets/projects/special-assemblies/robot-assembly-motion.mp4",
+      "bytes": 2313223,
+      "sha256": "fd47359165c6270aa250030b89d290b004f6ebe745f00e456d6ed33a378f62a9"
+    },
+    {
+      "path": "assets/projects/special-assemblies/robot-assembly-motion-poster.webp",
+      "bytes": 60084,
+      "sha256": "1c1f330356c6fd00f4e3666ee6a997068e36653b73ccd24c970eece3ba03371b"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/film-assembly-hero.webp",
+      "bytes": 742318,
+      "sha256": "c78e51847b64c1bf5d6a465f901d98da13f8e701833371dc0ccc68d3862bd1bc"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/film-unit-geometry.webp",
+      "bytes": 474092,
+      "sha256": "932bb6258c9bb79636487354d54542b3f92f87c9675d4cbbd2888d024ba654f1"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/film-corexy-system.webp",
+      "bytes": 230462,
+      "sha256": "02cddda238fcb71e4452e417094d5817f526b4f3e474315e1c267a30862d766b"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/film-rotary-system.webp",
+      "bytes": 702740,
+      "sha256": "796eac47f8bd2ae9a9b1af18291afb718edb455d464e39c7846fe02b3409810a"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/film-design-workflow.webp",
+      "bytes": 225544,
+      "sha256": "aef3852c59c529fe6a18e01c41da01419ba6d943791ae02ae14e576e6aca0549"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/film-machine-motion-poster.webp",
+      "bytes": 571200,
+      "sha256": "d059423c2fa4ce63eaad53f8630a7eab7c6a8442fce3822700ea73dc53a7b8e0"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/film-machine-simulation.mp4",
+      "bytes": 498303,
+      "sha256": "522911028b4c3956b2376b1dad470534813f2d12c4ae20c7b73a4cc3ad3877eb"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/film-physical-cutting-poster.webp",
+      "bytes": 336130,
+      "sha256": "69ac4d151f485784a6a56a3c9029fb1caf5c5a08a199842309c2acdf5264f6f9"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/film-physical-cutting.mp4",
+      "bytes": 3167168,
+      "sha256": "6e520ca2063a839d7ec4fcd27011301971af0f587f737cb28b5814ee964b4ac1"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/prototype-cutting-operation-poster.webp",
+      "bytes": 602534,
+      "sha256": "5aa9e9845fee86fbfc1f9ee90279a63d908d47118ab51445cc705844294eec2b"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/prototype-cutting-operation.mp4",
+      "bytes": 3176212,
+      "sha256": "dd5ad72944afc12d00fa6ab3456cf7369e003455ee242d0d7f4c0f9813e0209d"
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/portfolio-timber-model.webp",
+      "bytes": 500284,
+      "sha256": "f5d80276bccf8b0c823f835ac2ada293866855d2caa8ae62dcbf421b8c026698"
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/portfolio-tower-on-site.webp",
+      "bytes": 1824666,
+      "sha256": "23984c6d3b2efb0c6c221608a6d4ff81e7291f348418a63799592e1725affa98"
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/portfolio-voxel-framework.webp",
+      "bytes": 809408,
+      "sha256": "5b8d6b5b0e2267d12c2fa0081064b51b0eedbc951bc4df01b4b49ac074e38195"
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/portfolio-module-infill.webp",
+      "bytes": 478560,
+      "sha256": "ca38db6694ef4c59cfecd5051a9888d2318062ab8f28a8e210b6c0265a937303"
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/portfolio-xr-assembly-sequence.webp",
+      "bytes": 1404140,
+      "sha256": "ea94c71833464b0abf3a78ac1106ac5e46b0b9cffb2bef70b534d76e22f59493"
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/portfolio-xr-data-exchange.webp",
+      "bytes": 140750,
+      "sha256": "5694aa51d8854868d9d562fa8052ab53b1247fe4fb157cae2d9e8973e0e5b9bb"
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/portfolio-xr-interface.webp",
+      "bytes": 596350,
+      "sha256": "3e2dd587a011960317ce1c67e12406236951d33f7e94bc3819cf4611082cf3c5"
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/portfolio-xr-workshop.webp",
+      "bytes": 209742,
+      "sha256": "8af6a5b6d80a6f0205fe3a203c1cd6550307e2d3a6999f307162aafb74b3e4a0"
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/portfolio-robotic-assembly.webp",
+      "bytes": 603292,
+      "sha256": "a8a5fc30e52a2d5b2196ed28a256faea852bfdd93ae909f25ce62c39d1a3ae72"
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/portfolio-timber-interior.webp",
+      "bytes": 418822,
+      "sha256": "26ec566d90605d45930d2175d68925aa584f0b8fbfd586eaa58bbac4062e31f0"
+    },
+    {
+      "path": "assets/fonts/roboto-mono-variable.woff2",
+      "bytes": 105204,
+      "sha256": "aafaa5d57a7180d02d1c6a5925523e06b3bcde4b182544a4d793d5ee87e61817"
+    },
+    {
+      "path": "licenses/roboto-mono-OFL.txt",
+      "bytes": 4395,
+      "sha256": "50ab8dd54680d3473f649c9db86fece88434d097c7834475c1c72d2f8c429215"
+    },
+    {
+      "path": "assets/projects/dot-based-3d-printing/printing-process-motion-web.mp4",
+      "bytes": 13211595,
+      "sha256": "2d6931de3caac7d44b6e02206e90556d695d8d763ac8d26ecc7fa8773a9f28e3"
+    }
+  ]
+}

@@ -26,8 +26,7 @@
 .guide:has(input[value="3"]:checked) [data-focus-description="3"]{visibility:visible}
 .guide:has(input[value="4"]:checked) [data-focus-region="4"]{opacity:1;stroke-dashoffset:0}
 .guide:has(input[value="4"]:checked) [data-focus-description="4"]{visibility:visible}
-:global([data-study-paused]) .overlay rect{transition:none}
-@media(prefers-reduced-motion:reduce){.overlay rect{transition:none}}
+
 @media print{.choices,.overlay{display:none}.descriptions{display:block}.descriptions p{visibility:visible;margin:1em 0}}
 
 .guide figcaption{font:400 var(--type-size-caption)/var(--type-leading-caption) var(--ocr)}

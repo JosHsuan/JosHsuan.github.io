@@ -4,7 +4,7 @@ const registryFor=document=>{
  if(!registry){registry={current:null,listeners:new Set()};documents.set(document,registry);}
  return registry;
 };
-/** A document has one research specimen. Registration is not a render clock. */
+/** A document has one Home stage owner. Registration is not a render clock. */
 export function registerHomeResearchStage(document,descriptor){
  const registry=registryFor(document),entry={...descriptor};
  if(registry.current)throw Error('A document already owns a Home research stage');

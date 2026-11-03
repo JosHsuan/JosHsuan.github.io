@@ -13,7 +13,7 @@ boundaries are recorded in the [architecture README](../README.md).
 |---|---|
 | Owner | JosHsuan Chao |
 | Audience | The owner, collaborating developers, and coding agents |
-| Revision | **2.23 — 20 October 2026; source-first study refinement, chapter ownership and explicit document closure** |
+| Revision | **2.24 — 3 November 2026; continuous motion, shared spatial reading and sequential model ownership** |
 | Language | English for project documentation and future website content; Traditional Chinese for discussion with the owner |
 | Scope | Portfolio, Research & Development, About/CV, Contact, and selected interactive project stories |
 | Delivery baseline | Next.js static export to GitHub Pages; no paid domain, paid storage, or continuously running backend required for the initial release |
@@ -103,6 +103,21 @@ This follows Theatre's documented framework-agnostic integration model, but the 
 | Check the evidence and remaining uncertainties | [Section 22](#22-sources-evidence-boundaries-and-unresolved-verification) |
 
 ---
+
+## Current selected-application amendment
+
+[Decision 0021](decisions/0021-continuous-motion-portfolio.md) supersedes older
+static-preference, user-pause, image-inspection and Home presentation proposals
+within its owner-authorized scope. The selected application continuously moves
+visible scenes; hidden document lifecycle and actual failure remain distinct.
+HomeShowcasePresenter and HomeDeckPresenter consume SiteBackgroundDriver frames;
+they create no independent frame loop. InformationWindowPresenter owns the
+shared velocity/acceleration field, with fixed source labels retaining their
+native placement. Camera, light and source resource ownership remain inside each
+existing Bending, generic and XR adapter. Model collections allow sequential
+original sources with at most one live renderer, and new public derivatives use
+provenance and immutable byte pins. See the [current acceptance contract](../roles/uiux-designer/cases/bending-active-thesis/CONTINUOUS_MOTION_INTEGRATION.md)
+for evidence and outstanding checks. The framework proposal below remains empty.
 
 ## 00. Current project baseline and source authority
 

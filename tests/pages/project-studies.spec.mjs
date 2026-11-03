@@ -14,14 +14,6 @@ const dot=studies.find(project=>project.id==='dot-based-3d-printing');
 const inspection=async page=>{const {target,value,settled}= (await facts(page)).camera;return{target,value,settled};};
 function closed(state){
  for(const id of new Set(state.history.map(fact=>fact.id))){const own=state.history.filter(fact=>fact.id===id);expect(own.filter(fact=>fact.phase==='requested')).toHaveLength(1);expect(own.filter(fact=>['ready','failed','cancelled'].includes(fact.phase))).toHaveLength(1);}
- if(state.motion===null){
-  // Initial Reduced Motion can settle arrival before the ordinary driver's
-  // first source publication. No model acquisition or motion request exists.
-  expect(state).toMatchObject({externalStage:true,phase:'poster',reason:'reduced-motion',arrivalStatic:true,staticReason:'reduced-motion',active:false,pending:false,id:null,acquisitions:0,disposals:0,renders:0,resource:null,paintedChapter:null,preparedChapter:null,sharedStage:null});
-  expect(state.history).toEqual([]);expect(state.resourceFailures).toEqual([]);
-  expect(state.posterPreparation).toMatchObject({requested:false,pending:false});
-  return;
- }
  for(const id of new Set(state.motion.history.map(fact=>fact.id))){const own=state.motion.history.filter(fact=>fact.id===id);expect(own.filter(fact=>fact.status==='requested')).toHaveLength(1);expect(own.filter(fact=>['completed','cancelled','failed'].includes(fact.status))).toHaveLength(1);}
 }
 function sourceDraw(state,model,viewport){
@@ -34,7 +26,7 @@ function sourceDraw(state,model,viewport){
  expect(resource.firstDraw).toMatchObject({completed:true,sourceRevision:model.sha256,meshes:model.meshes,...viewport});
  expect(resource.firstDraw.sourceCalls).toBeGreaterThanOrEqual(model.meshes);expect(resource.draws).toBeGreaterThan(0);expect(resource.canvasCount).toBe(1);
  expect(resource.size).toEqual(viewport);expect(resource.budget.budget.width*resource.budget.budget.height).toBeLessThanOrEqual(resource.pixelBudget);
- const id=model.src.split('/')[3],look=resource.appearance;
+ const id=model.src.endsWith('/machine-materials.glb')?'mode-s-machine':model.src.split('/')[3],look=resource.appearance;
  expect(look.profileID).toBe(id);expect(look.phase).toBe('installed');expect(look.disposed).toBe(false);expect(look.renderables).toBe(model.meshes);
  expect(look.materialClones).toBe(1);expect(look.materials).toHaveLength(1);expect(look.materials[0].sourceTextureReferencesPreserved).toBe(true);
  if(model.primitive==='points'){
@@ -43,15 +35,15 @@ function sourceDraw(state,model,viewport){
  }else{
   expect(look.environment).toMatchObject({kind:'room-pmrem',generations:1,size:128,atlas:[384,512],owned:true});expect(look.lights).toHaveLength(4);
   const center=model.bounds.min.map((value,index)=>(value+model.bounds.max[index])*.5);
-  for(const light of look.lights.filter(light=>light.type==='DirectionalLight')){expect(light.targetInScene).toBe(true);expect(light.target).toEqual(center);expect(light.castShadow).toBe(false);}
+  for(const light of look.lights.filter(light=>light.type==='DirectionalLight')){expect(light.targetInScene).toBe(true);expect(light.target).toEqual(center);expect(light.castShadow).toBe(['entrance-installation-art','project-caschlatsch'].includes(id)&&light.role==='key');}
  }
- if(id==='hc3dp-caustics')expect(look.materials[0]).toMatchObject({type:'MeshPhysicalMaterial',ior:1.5700000524520874,metalness:.31024929881095886,roughness:.14681440591812134,transmission:1,opacity:.1052631139755249,transparent:false,side:2,thickness:0});
+ if(id==='hc3dp-caustics')expect(look.materials[0]).toMatchObject({type:'MeshPhysicalMaterial',ior:1.5700000524520874,metalness:0,roughness:.12,transmission:1,opacity:1,transparent:false,side:2,thickness:.0015});
  const intent=resource.view.cameraIntent;
  const view=intent?{yaw:intent.yawRad,pitch:intent.pitchRad,fov:intent.fovDeg}:model.views?.[resource.view.chapter];
  if(view){
   const direction=resource.pose.position.map((value,index)=>value-resource.pose.target[index]);
   expect(Math.atan2(direction[0],direction[2])).toBeCloseTo(view.yaw+(intent?0:resource.view.azimuth),10);
-  expect(Math.atan2(direction[1],Math.hypot(direction[0],direction[2]))).toBeCloseTo(Math.max(-.1,Math.min(1.15,view.pitch+(intent?0:resource.view.elevation))),10);
+  expect(Math.atan2(direction[1],Math.hypot(direction[0],direction[2]))).toBeCloseTo(Math.max(['entrance-installation-art','project-caschlatsch'].includes(id)?-.16:-.1,Math.min(1.15,view.pitch+(intent?0:resource.view.elevation))),10);
   expect(resource.pose.fov).toBe(view.fov);
  }
 }
@@ -98,36 +90,19 @@ async function fullCanvas(page){
  if(['dot-based-3d-printing','special-assemblies'].includes(sample.project))expect(sample.surround).toContain('radial-gradient');else expect(sample.surround).toBe('none');
 }
 async function decodeSource(chapter,image){
+ const root=chapter.locator('xpath=ancestor::main[@data-project-study]');
+ let element=chapter.locator(`img[src="${image.src}"]`).first();
+ if(await element.count()===0)element=root.locator(`img[src="${image.src}"]`).first();
+ await expect(element).toHaveCount(1);await element.evaluate(node=>node.scrollIntoView({block:'center',behavior:'instant'}));
+ const actual=await element.evaluate(async node=>{await node.decode();return{width:node.naturalWidth,height:node.naturalHeight,fit:getComputedStyle(node).objectFit,alt:node.alt};});
+ expect(actual.width).toBe(image.width);expect(actual.height).toBe(image.height);expect(actual.fit).toBe('contain');
+ // One source image can serve as both a model poster and a native opening.
+ // Its documentary caption remains in the actual source owner; no viewer link.
  const identity=await chapter.evaluate(node=>({project:node.closest('[data-project-study]').dataset.projectStudy,chapter:node.dataset.projectChapter}));
- if(identity.project==='project-caschlatsch'||['special-assemblies','hc3dp-caustics','dot-based-3d-printing'].includes(identity.project)&&['overview','results'].includes(identity.chapter)||['entrance-installation-art','mode-s-of-making'].includes(identity.project)&&identity.chapter==='overview'){
-  const root=chapter.locator('xpath=ancestor::main[@data-project-study]'),canonical=root.locator(`[data-editorial-source="${image.src}"]`);await expect(canonical).toHaveCount(1);
-  const owner=await canonical.evaluate(node=>node.closest('[data-project-chapter]').dataset.projectChapter);
-  if(owner!==identity.chapter&&identity.chapter!=='overview'){
-   const reference=chapter.locator(`[data-editorial-source-reference="${image.src}"]`);await expect(reference).toHaveCount(1);await expect(reference).toContainText(image.caption);await expect(reference).toContainText(image.credit);await expect(reference.locator('a')).toHaveAttribute('href',image.src);await expect(reference.locator('a')).toHaveAttribute('target','_blank');
-  }
-  if(identity.chapter==='overview')expect(owner).toBe(identity.project==='project-caschlatsch'?'system':'overview');
-  if(['special-assemblies','hc3dp-caustics','dot-based-3d-printing','entrance-installation-art','mode-s-of-making'].includes(identity.project))expect(owner).toBe(identity.chapter);
-  const original=canonical.locator('[data-editorial-image]');await expect(original).toHaveCount(1);await original.scrollIntoViewIfNeeded();
-  expect(await original.evaluate(async node=>{await node.decode();return{src:node.getAttribute('src'),width:node.naturalWidth,height:node.naturalHeight,fit:getComputedStyle(node).objectFit,alt:node.alt};})).toEqual({src:image.src,width:image.width,height:image.height,fit:'contain',alt:image.alt});
-  await expect(canonical.locator('figcaption > p')).toHaveText(image.caption);await expect(canonical.locator('figcaption > span:not([data-information-skin])')).toHaveText(image.credit);await expect(canonical.locator('figcaption > a')).toHaveAttribute('href',image.src);await expect(original.locator('xpath=ancestor::a[1]')).toHaveAttribute('href',image.src);await expect(original.locator('xpath=ancestor::a[1]')).toHaveAttribute('target','_blank');return;
- }
- const project=studies.find(item=>item.id===identity.project),motion=project.motionMedia?.find(item=>item.chapter===identity.chapter&&item.poster.src===image.src);
- const element=chapter.locator(`img[src="${image.src}"]`).first();
- if(await element.count()===0){
-  // This exact image is intentionally shown once by another chapter's
-  // background. That owning chapter performs its native decode below; the
-  // duplicate placement must not be recreated just to satisfy an old fixture.
-  const root=chapter.locator('xpath=ancestor::main[@data-project-study]');
-  expect(await root.locator(`[data-project-media-poster][src="${image.src}"]`).count()).toBeGreaterThan(0);
-  await expect(root.locator(`a[href="${image.src}"]`).first()).toHaveAttribute('target','_blank');
-  await expect(chapter.locator(`[data-project-evidence-image][src="${image.src}"]`)).toHaveCount(0);
-  return;
- }
- await expect(element).toHaveAttribute('src',image.src);
- await element.scrollIntoViewIfNeeded();
- expect(await element.evaluate(async node=>{await node.decode();return{width:node.naturalWidth,height:node.naturalHeight,fit:getComputedStyle(node).objectFit,alt:node.alt};})).toEqual({width:image.width,height:image.height,fit:'contain',alt:motion?.alt??image.alt});
- await expect(chapter.locator(`a[href="${image.src}"]`).first()).toHaveAttribute('target','_blank');
- await expect(chapter).toContainText(motion?.caption??image.caption);await expect(chapter).toContainText(motion?.credit??image.credit);
+ const motion=studies.find(project=>project.id===identity.project).motionMedia?.find(media=>media.chapter===identity.chapter&&media.poster.src===image.src);
+ await expect(root).toContainText(motion?.caption??image.caption);await expect(root).toContainText(motion?.credit??image.credit);
+ await expect(root.locator(`a[href="${image.src}"]`)).toHaveCount(0);
+ await expect(element.locator('xpath=ancestor::a')).toHaveCount(0);
 }
 
 async function observeContinuousModel(page,chapter){
@@ -214,7 +189,7 @@ for(const project of studies)test(`${project.shortTitle} has native evidence cha
  await expect(page.locator('canvas')).toHaveCount(project.model?2:1);
  await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);
  await expect(page.locator('[data-xr-stage],[data-cinematic-stage]')).toHaveCount(0);
- let sourceCanvas;
+ let sourceCanvas,selectedModel=project.model;
  if(project.model){
   expect(project.model.chapters.length).toBeGreaterThan(0);expect(project.model.chapters.every(chapter=>['overview',...project.sections.map(section=>section.id),'credits'].includes(chapter))).toBe(true);
   sourceDraw(await facts(page),project.model,page.viewportSize());closed(await facts(page));
@@ -241,11 +216,14 @@ for(const project of studies)test(`${project.shortTitle} has native evidence cha
   try{
   await page.locator(`[data-project-chapter-link="${section.id}"]`).click();
   if(project.model){
-   await settled(page,section.id,project.model);
-   const state=await facts(page);sourceDraw(state,project.model,page.viewportSize());closed(state);
-   if(project.model.chapters.includes(section.id)){await expect(stage(page)).toHaveAttribute('data-project-model-active','');await expect(stage(page)).toHaveAttribute('data-project-model-rendering','webgl-model');await fullCanvas(page);}
+   const nextModel=[project.model,...project.additionalModels??[]].find(model=>model.chapters.includes(section.id));
+   if(nextModel)selectedModel=nextModel;
+   await settled(page,section.id,selectedModel);
+   const state=await facts(page);sourceDraw(state,selectedModel,page.viewportSize());closed(state);
+   if(nextModel){await expect(stage(page)).toHaveAttribute('data-project-model-active','');await expect(stage(page)).toHaveAttribute('data-project-model-rendering','webgl-model');await fullCanvas(page);}
    else await expect(stage(page)).not.toHaveAttribute('data-project-model-active','');
-   expect(await sourceCanvas.evaluate(node=>node===document.querySelector('[data-project-study-canvas]'))).toBe(true);
+   if(!project.additionalModels?.length)expect(await sourceCanvas.evaluate(node=>node===document.querySelector('[data-project-study-canvas]'))).toBe(true);
+   await expect(page.locator('[data-project-study-canvas]')).toHaveCount(1);
   }
   if(continuity){
    const outcome=await continuity.result;if(outcome.error)throw outcome.error;
@@ -265,17 +243,12 @@ for(const project of studies)test(`${project.shortTitle} has native evidence cha
  await page.locator('[data-project-chapter-link="credits"]').click();
  if(project.model){await settled(page,'credits',project.model);closed(await facts(page));await expect(stage(page)).not.toHaveAttribute('data-project-model-active','');}
  for(const credit of project.credits)await expect(page.locator('[data-project-chapter="credits"]')).toContainText(credit.names);
- const toggle=page.locator('[data-study-motion-toggle]');await toggle.click();
- await expect(toggle).toHaveAttribute('aria-pressed','true');
- await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.projectStudy.paused)).toBe(true);
- await frames(page,8);const frozen=await page.evaluate(()=>window.__globalBackground.inspect().driver.playback.activeSeconds);
- await page.mouse.wheel(0,-160);await frames(page,8);
- expect(await page.evaluate(()=>window.__globalBackground.inspect().driver.playback.activeSeconds)).toBe(frozen);
- await toggle.click();await expect(toggle).toHaveAttribute('aria-pressed','false');
- await page.emulateMedia({reducedMotion:'reduce'});
- await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.enabled)).toBe(false);
- if(project.model){await expect(stage(page).locator('canvas')).toHaveCount(0);expect((await facts(page)).resource).toBeNull();expect((await facts(page)).disposals).toBe((await facts(page)).acquisitions);closed(await facts(page));}
- expect(models).toEqual(project.model?[new URL(project.model.src,page.url()).href]:[]);
+ await expect(page.locator('[data-study-motion-toggle],[data-project-motion-toggle]')).toHaveCount(0);
+ const running=await page.evaluate(()=>window.__globalBackground.inspect().driver.playback.activeSeconds);
+ await page.emulateMedia({reducedMotion:'reduce'});await frames(page,8);
+ expect(await page.evaluate(()=>window.__globalBackground.inspect().driver.playback.activeSeconds)).toBeGreaterThan(running);
+ if(project.model){await expect(stage(page).locator('canvas')).toHaveCount(1);sourceDraw(await facts(page),selectedModel,page.viewportSize());closed(await facts(page));}
+ expect([...new Set(models)]).toEqual([project.model,...project.additionalModels??[]].filter(Boolean).map(model=>new URL(model.src,page.url()).href));
  expect(errors).toEqual([]);
 });
 
@@ -317,11 +290,7 @@ for(const project of studies)test(`${project.shortTitle} preserves every source 
    await expect(page.locator('[data-site-loader]')).toBeHidden();
    await expect(page.locator('[data-project-chapter]')).toHaveCount(project.sections.length+2);await expect(page.locator('canvas')).toHaveCount(1);await expect(page.locator('[data-project-study-canvas]')).toHaveCount(0);
    await decodeSource(page.locator('[data-project-chapter="overview"]'),project.hero);
-   const fullSource=['project-caschlatsch','special-assemblies','hc3dp-caustics','dot-based-3d-printing','entrance-installation-art','mode-s-of-making'].includes(project.id)?page.locator(`[data-editorial-source="${project.hero.src}"] figcaption > a`):page.locator(`[data-project-chapter="overview"] a[href="${project.hero.src}"]`);
-   await readNative(fullSource);
-   const [sourcePage]=await Promise.all([context.waitForEvent('page'),fullSource.click()]);
-   await sourcePage.waitForURL(new URL(project.hero.src,page.url()).href);await sourcePage.waitForLoadState('domcontentloaded');expect(new URL(sourcePage.url()).pathname).toBe(project.hero.src);
-   await expect(sourcePage.locator('img')).toHaveJSProperty('naturalWidth',project.hero.width);await sourcePage.close();
+   await expect(page.locator('a[href$=".webp"],a[href$=".png"],a[href$=".jpg"]')).toHaveCount(0);
    for(const section of project.sections){
     const chapter=page.locator(`[data-project-chapter="${section.id}"]`),heading=chapter.locator('h2');
     await page.locator(`[data-project-chapter-link="${section.id}"]`).click();
@@ -330,7 +299,7 @@ for(const project of studies)test(`${project.shortTitle} preserves every source 
     // A native chapter link enters the source-first section; its heading can
     // follow a complete image/caption instead of sharing the initial viewport.
     await expect(chapter).toBeInViewport();
-    if(project.id==='project-caschlatsch'||['special-assemblies','hc3dp-caustics','dot-based-3d-printing'].includes(project.id)&&section.id==='results'){const native=chapter.locator('[data-editorial-image]').first();await native.scrollIntoViewIfNeeded();await expect(native).toBeInViewport();}else await expect(chapter.locator('[data-project-media] img')).toBeInViewport();
+    if(project.id==='project-caschlatsch'&&['xr-guidance','making','results'].includes(section.id)||['special-assemblies','hc3dp-caustics','dot-based-3d-printing'].includes(project.id)&&section.id==='results'){const native=chapter.locator('[data-editorial-image]').first();await native.scrollIntoViewIfNeeded();await expect(native).toBeInViewport();}else await expect(chapter.locator('[data-project-media] img')).toBeInViewport();
     await expect(heading).toHaveText(section.title);await readNative(heading);
     for(const paragraph of section.paragraphs)await readNative(chapter.getByText(paragraph,{exact:true}));
     for(const image of section.media)await decodeSource(chapter,image);
@@ -357,7 +326,7 @@ test('a failed documentary image ends entry once and keeps the source narrative 
  await expect(page.locator('[data-project-chapter="credits"]')).toBeInViewport();
 });
 
-test('the original Dot source supports native drag and keyboard inspection, returns exactly, and closes on pause and Reduced Motion',async({page,isMobile,browserName})=>{
+test('the original Dot source supports native drag and keyboard inspection, returns exactly, and continues through preference changes',async({page,isMobile,browserName})=>{
  test.setTimeout(scenarioTimeout(120000));expect(dot.model.primitive).toBe('points');
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
  await page.goto(route(dot));await entered(page);const control=await modelChapter(page,dot);
@@ -382,27 +351,9 @@ test('the original Dot source supports native drag and keyboard inspection, retu
  await modelChapter(page,dot);await control.evaluate(node=>node.focus({preventScroll:true}));await control.press('ArrowLeft');
  await expect.poll(async()=>(await facts(page)).camera.value.azimuth,{timeout:WAIT}).toBeGreaterThan(.01);await control.press('Escape');
  await expect.poll(()=>inspection(page)).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});
- const source=page.locator(`[data-project-source-caption="${chapter}"] a`).first(),sourceKeys=await page.evaluateHandle(()=>{
-  const events=[],read=event=>{if(event.target.closest('[data-project-source-caption]'))events.push({key:event.key,trusted:event.isTrusted,prevented:event.defaultPrevented});};
-  addEventListener('keydown',read);return{events,dispose:()=>removeEventListener('keydown',read)};
- });
- try{
-  for(const key of ['ArrowLeft','Home']){
-   await modelChapter(page,dot);await source.evaluate(node=>node.focus({preventScroll:true}));await source.press(key);
-   expect(await sourceKeys.evaluate(probe=>probe.events.at(-1))).toEqual({key,trusted:true,prevented:false});
-   expect((await facts(page)).camera.target).toEqual({azimuth:0,elevation:0});
-   if(key==='Home'){
-    // Native Home keyup precedes the browser's default scroll completion.
-    // Observe that real operation and source exit before issuing another
-    // chapter command, rather than racing it or relaxing viewport geometry.
-    await page.waitForFunction(()=>{
-     const study=window.__globalBackground?.inspect().driver.projectStudy,scene=study?.scene,source=study?.backdrop.stage;
-     return scrollY===0&&study?.chapters.chapter==='overview'&&document.querySelector('[data-project-study]')?.dataset.projectActiveChapter==='overview'&&scene?.chapter==='overview'&&scene.motion.mode==='absent'&&scene.motion.settled&&!scene.motion.transition&&source?.chapter==='overview'&&source.kind==='native'&&source.key==='native:overview'&&source.mode==='absent'&&source.pose.opacity===0&&source.request?.absent===true&&source.settled&&!source.transition;
-    },null,{timeout:WAIT});
-    await semanticChapter('overview',false);
-   }
-  }
- }finally{try{await sourceKeys.evaluate(probe=>probe.dispose());}finally{await sourceKeys.dispose();}}
+ // Image captions are reading surfaces; model keyboard handlers must not own native links.
+ const navigation=page.locator('[data-project-chapter-link="results"]');
+ await navigation.focus();await navigation.press('Enter');await semanticChapter('results',false);
  await modelChapter(page,dot);await semanticChapter(chapter,false);
  const point=await pressSource(page,control),dx=point.x<page.viewportSize().width*.6?60:-60;
  await page.mouse.move(point.x+dx,point.y+12,{steps:6});
@@ -433,22 +384,14 @@ test('the original Dot source supports native drag and keyboard inspection, retu
  }
  await control.evaluate(node=>node.focus({preventScroll:true}));await control.press('ArrowDown');
  await expect.poll(async()=>(await facts(page)).camera.value.elevation,{timeout:WAIT}).toBeGreaterThan(.01);
- const toggle=page.locator('[data-study-motion-toggle]');await toggle.click();await expect(toggle).toHaveAttribute('aria-pressed','true');
- await expect.poll(()=>inspection(page)).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});
- await semanticChapter(chapter,true);await expect(state).toHaveAttribute('data-project-model-availability','paused');await expect(help).toBeHidden();await expect(reset).toBeHidden();
- // Native reading/selection remains live while source motion is paused. The
- // one semantic owner must update rail and counter on forward and reverse.
- await page.locator('[data-project-chapter-link="results"]').click();await semanticChapter('results',true);
- await page.locator(`[data-project-chapter-link="${chapter}"]`).click();await settled(page,chapter,dot.model);await semanticChapter(chapter,true);await expect(state).toHaveAttribute('data-project-model-availability','paused');
- await frames(page,2);const frozen=await page.evaluate(()=>{const driver=window.__globalBackground.inspect().driver;return{time:driver.playback.activeSeconds,draws:driver.projectStudy.scene.resource.draws};});
- await control.evaluate(node=>node.focus({preventScroll:true}));await control.press('ArrowLeft');await frames(page,8);
- expect(await page.evaluate(()=>{const driver=window.__globalBackground.inspect().driver;return{time:driver.playback.activeSeconds,draws:driver.projectStudy.scene.resource.draws};})).toEqual(frozen);
- await toggle.click();await expect(toggle).toHaveAttribute('aria-pressed','false');await settled(page,dot.model.chapters[0],dot.model);await semanticChapter(chapter,false);await expect(state).toHaveAttribute('data-project-model-availability','ready');await expect(help).toBeVisible();
- const y=await page.evaluate(()=>scrollY);await page.mouse.wheel(0,80);await expect.poll(()=>page.evaluate(()=>scrollY)).toBeGreaterThan(y);
- await modelChapter(page,dot);await pressSource(page,control);await page.emulateMedia({reducedMotion:'reduce'});await page.mouse.up();
- await expect(stage(page).locator('canvas')).toHaveCount(0);const reduced=await facts(page);closed(reduced);closedGestures(reduced);expect(reduced.resource).toBeNull();expect(reduced.disposals).toBe(reduced.acquisitions);expect(reduced.staticReason).toBe('reduced-motion');
- await expect(state).toHaveAttribute('data-project-model-availability','static');await expect(help).toBeHidden();await expect(reset).toBeHidden();
- await page.emulateMedia({reducedMotion:'no-preference'});await frames(page,8);await expect(stage(page).locator('canvas')).toHaveCount(0);expect((await facts(page)).acquisitions).toBe(reduced.acquisitions);expect(errors).toEqual([]);
+ await control.press('Escape');await expect.poll(()=>inspection(page)).toEqual({target:{azimuth:0,elevation:0},value:{azimuth:0,elevation:0},settled:true});
+ await expect(page.locator('[data-study-motion-toggle]')).toHaveCount(0);
+ const running=await facts(page);await page.emulateMedia({reducedMotion:'reduce'});await frames(page,8);
+ await expect(stage(page).locator('canvas')).toHaveCount(1);sourceDraw(await facts(page),dot.model,page.viewportSize());
+ expect((await facts(page)).camera.activeSeconds).toBeGreaterThan(running.camera.activeSeconds);
+ await semanticChapter(chapter,false);await expect(state).toHaveAttribute('data-project-model-availability','ready');
+ await page.emulateMedia({reducedMotion:'no-preference'});expect((await facts(page)).acquisitions).toBe(1);expect(errors).toEqual([]);
+
 });
 
 test('an actual HTTP source failure settles once, preserves native sources, and never upgrades after the server recovers',async({page})=>{
@@ -468,26 +411,25 @@ test('an actual HTTP source failure settles once, preserves native sources, and 
  }finally{await page.goto('about:blank');server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
 });
 
-test('Reduced Motion during a real pending source request latches its static arrival before the delayed response is released',async({page})=>{
- let release,held=false,continued;const gate=new Promise(resolve=>{release=resolve;}),delivery=new Promise(resolve=>{continued=resolve;});
- await page.route('**'+dot.model.src,async request=>{held=true;await gate;try{await request.continue();}finally{continued();}});
+test('a preference change during a pending source preserves the real acquisition and its first draw',async({page})=>{
+ let release,held=false;const gate=new Promise(resolve=>{release=resolve;});
+ await page.route('**'+dot.model.src,async request=>{held=true;await gate;await request.continue();});
  try{
-  await page.goto(route(dot),{waitUntil:'domcontentloaded'});await expect.poll(()=>held,{timeout:WAIT}).toBe(true);await expect(page.locator('[data-site-loader]')).toBeVisible();
-  await page.emulateMedia({reducedMotion:'reduce'});await entered(page);
-  const reduced=await facts(page);closed(reduced);expect(reduced.arrivalStatic).toBe(true);expect(reduced.staticReason).toBe('reduced-motion');expect(reduced.resource).toBeNull();expect(reduced.pending).toBe(false);
-  release();await delivery;await page.emulateMedia({reducedMotion:'no-preference'});
-  await page.locator(`[data-project-chapter-link="${dot.model.chapters[0]}"]`).click();await settled(page,dot.model.chapters[0],dot.model);await frames(page,8);
-  await expect(page.locator('canvas')).toHaveCount(1);await expect(stage(page)).toHaveAttribute('data-project-model-rendering','poster');
-  expect((await facts(page)).history).toEqual(reduced.history);expect((await facts(page)).acquisitions).toBe(reduced.acquisitions);expect((await facts(page)).resource).toBeNull();closed(await facts(page));
+  await page.goto(route(dot),{waitUntil:'domcontentloaded'});await expect.poll(()=>held,{timeout:WAIT}).toBe(true);
+  await expect(page.locator('[data-site-loader]')).toBeVisible();await page.emulateMedia({reducedMotion:'reduce'});
+  expect((await facts(page)).arrivalStatic).toBe(false);release();await entered(page);await modelChapter(page,dot);
+  sourceDraw(await facts(page),dot.model,page.viewportSize());closed(await facts(page));
+  await expect(page.locator('[data-project-study-canvas]')).toHaveCount(1);
  }finally{release();}
 });
-
-test('an initially reduced documentary page makes no source request and keeps the same static arrival after preference changes',async({page})=>{
- const models=[];page.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)/.test(request.url()))models.push(request.url());});
- await page.emulateMedia({reducedMotion:'reduce'});await page.goto(route(dot));await entered(page);
- const reduced=await facts(page);expect(reduced.acquisitions).toBe(0);expect(reduced.arrivalStatic).toBe(true);expect(reduced.staticReason).toBe('reduced-motion');expect(reduced.resource).toBeNull();closed(reduced);
- await page.emulateMedia({reducedMotion:'no-preference'});await page.locator(`[data-project-chapter-link="${dot.model.chapters[0]}"]`).click();await settled(page,dot.model.chapters[0],dot.model);await frames(page,8);
- await expect(page.locator('canvas')).toHaveCount(1);expect(models).toEqual([]);expect((await facts(page)).acquisitions).toBe(0);await expect(stage(page)).toHaveAttribute('data-project-model-rendering','poster');
+test('initial reduced-motion preference retains the same continuously animated source after a preference change',async({page})=>{
+ const requests=[];page.on('request',request=>{if(/\.glb(?:\?|$)/.test(request.url()))requests.push(request.url());});
+ await page.emulateMedia({reducedMotion:'reduce'});await page.goto(route(dot));await entered(page);await modelChapter(page,dot);
+ const before=await facts(page);sourceDraw(before,dot.model,page.viewportSize());
+ await page.emulateMedia({reducedMotion:'no-preference'});await frames(page,8);
+ const after=await facts(page);expect(after.camera.activeSeconds).toBeGreaterThan(before.camera.activeSeconds);
+ expect(after.acquisitions).toBe(1);expect(after.disposals).toBe(0);expect(after.history).toEqual(before.history);
+ expect(requests).toEqual([new URL(dot.model.src,page.url()).href]);await expect(page.locator('[data-project-study-canvas]')).toHaveCount(1);
 });
 
 test('native WebGL context loss releases the painted source exactly once and retains truthful documentary reading',async({page})=>{
@@ -529,4 +471,21 @@ test('native document departure suspends or disposes the source and a real histo
  if(restored.pageShow.persisted){expect(departure.persisted).toBe(true);expect(restored.id).toBe(departure.documentId);expect(models).toEqual([new URL(dot.model.src,page.url()).href]);}
  else if(departure.persisted)test.info().annotations.push({type:'native-page-lifecycle',description:'The engine evicted its retained departure before history return; the real new document prepared and painted its source again.'});
  await expect(page.locator('canvas')).toHaveCount(2);
+});
+
+
+test('Mode/s switches exact original unit and machine sources in both directions with one live canvas',async({page},info)=>{
+ test.setTimeout(scenarioTimeout(180000));const project=studies.find(item=>item.id==='mode-s-of-making'),machine=project.additionalModels[0],rows=[];
+ await page.addInitScript(()=>{window.__modelCanvasPeak=0;new MutationObserver(()=>{window.__modelCanvasPeak=Math.max(window.__modelCanvasPeak,document.querySelectorAll('[data-project-study-canvas]').length);}).observe(document,{subtree:true,childList:true});});
+ await page.goto(route(project));await entered(page);
+ let previousCanvas=await page.locator('[data-project-study-canvas]').elementHandle(),lastRevision=project.model.sha256;
+ for(const [chapter,model,switches] of [['context',project.model,0],['system',project.model,0],['mechanism',machine,1],['making',machine,1],['mechanism',machine,1],['system',project.model,2],['context',project.model,2]]){
+  await page.locator(`[data-project-chapter-link="${chapter}"]`).click();await settled(page,chapter,model);
+  const sample=await facts(page);sourceDraw(sample,model,page.viewportSize());expect(sample.switches).toBe(switches);expect(sample.sourceCount).toBe(2);expect(sample.sourceModelSha).toBe(model.sha256);
+  await expect(page.locator('[data-project-study-canvas]')).toHaveCount(1);expect(await page.evaluate(()=>window.__modelCanvasPeak)).toBe(1);
+  if(lastRevision!==model.sha256){expect(await previousCanvas.evaluate(node=>({connected:node.isConnected,contextLost:node.getContext('webgl2')?.isContextLost()}))).toEqual({connected:false,contextLost:true});await previousCanvas.dispose();previousCanvas=await page.locator('[data-project-study-canvas]').elementHandle();lastRevision=model.sha256;}else expect(await previousCanvas.evaluate(node=>node===document.querySelector('[data-project-study-canvas]'))).toBe(true);
+  rows.push({chapter,sample});if(chapter==='mechanism'&&switches===1&&rows.filter(row=>row.chapter==='mechanism').length===1)await page.screenshot({path:info.outputPath('Mode-machine-first-draw.png')});
+ }
+ await previousCanvas.dispose();expect(await page.evaluate(()=>window.__globalBackground.inspect().activeBindings)).toBe(1);
+ await import('node:fs/promises').then(({writeFile})=>writeFile(info.outputPath('Mode-source-exchange.json'),JSON.stringify(rows,null,2)));
 });

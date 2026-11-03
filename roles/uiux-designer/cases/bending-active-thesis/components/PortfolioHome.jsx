@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element -- Approved documentary preview pixels use native images with exact public asset identity. */
 import PortfolioNavigation from './PortfolioNavigation';
 import ProjectModelPreview from './ProjectModelPreview';
-import HomeResearchStage from './HomeResearchStage';
+import HomeShowcaseStage from './HomeShowcaseStage';
 import InformationSkin from './InformationSkin';
 import {projectGridRows} from './project-grid-layout.mjs';
 import introduction from '../release/introduction.json';
@@ -33,38 +33,40 @@ const approaches=[
 
 function Arrow({diagonal=false}){return <span aria-hidden="true">{diagonal?'↗':'↘'}</span>;}
 
+// Begin at human architectural scale, then change subject and lens language.
+const showcaseOrder=['entrance-installation-art','mode-s-machine','project-caschlatsch','dot-based-3d-printing','special-assemblies','hc3dp-caustics','mode-s-of-making'];
+const showcaseModels=projectStudies.projects.flatMap(project=>[project.model,...project.additionalModels??[]].filter(Boolean).map(model=>({id:project.id,model}))).sort((a,b)=>{
+ const key=item=>item.id==='mode-s-of-making'&&item.model.id==='machine'?'mode-s-machine':item.id;
+ return showcaseOrder.indexOf(key(a))-showcaseOrder.indexOf(key(b));
+});
+
 function Introduction(){
-  return <section id="about" tabIndex={-1} className={`${styles.introduction} ${styles.researchStory}`} data-home-introduction data-home-research-story aria-labelledby="home-title">
-    <div className={`${styles.introductionInner} ${styles.researchLayout}`}>
-      <div className={styles.introductionCopy} data-home-research-origin>
-        <div className={styles.scrollCopy} data-information-window="home-introduction" data-information-motion-surface="plane" data-home-scroll-window="introduction"><InformationSkin/>
-          <p className={styles.eyebrow}>{introduction.discipline}</p>
-          <h1 id="home-title" className={styles.homeTitle}><span>{introduction.greeting}{' '}</span><span>{introduction.name}<span className={styles.period}>.</span></span></h1>
-        </div>
-      </div>
-      <div className={styles.researchVisual} data-home-research-visual>
-        <HomeResearchStage poster={projects[0].image} className={styles.researchStage}/>
-        <p className={styles.researchCaption}><span data-portfolio-signature>ORIGINAL RESEARCH GEOMETRY</span><span data-portfolio-notation>FORM / SYSTEM / MAKE</span></p>
-      </div>
-      <div className={styles.researchEntry} data-home-research-entry>
-        <p className={styles.eyebrow}>FEATURED RESEARCH / BENDING-ACTIVE</p>
-        <h2>{review.title}</h2>
-        <p>Geometric representation, metal-panel openings and physical assembly.</p>
-        <a href="/projects/bending-active/" className={styles.researchLink} data-home-research-link><span>Explore Bending-Active</span><Arrow diagonal/></a>
-        <p className={styles.researchNote}>An original digital model of the research assembly. Scroll to examine its form, then enter the project.</p>
-      </div>
-      <div className={styles.researchProse}>
-        <div className={styles.scrollCopy} data-information-window="home-research-prose" data-information-motion-surface="plane" data-home-scroll-window="research-prose"><InformationSkin/>
-          <p className={styles.statement} data-introduction-statement>{introduction.statement}</p>
-          <p className={styles.description} data-introduction-description>{introduction.description}</p>
-        </div>
-        <a href="#projects" className={`${styles.projectInvitation} ${styles.scrollCopy}`} data-home-project-link data-information-window="home-invitation" data-information-motion-surface="plane" data-home-scroll-window="invitation"><InformationSkin/>
-          <span className={styles.invitationCopy}><span className={styles.invitationLabel}>SELECTED WORK / {String(projects.length).padStart(2,'0')}</span><span className={styles.invitationTitle} data-display-type>Between physical and digital.</span><span className={styles.invitationAction}>Explore the projects</span></span>
-          <span className={styles.invitationArrow}><Arrow/></span>
-        </a>
-      </div>
-    </div>
-  </section>;
+ return <section id="about" tabIndex={-1} className={styles.showcaseIntro} data-home-introduction aria-labelledby="home-title">
+  <HomeShowcaseStage models={showcaseModels}/>
+  <div className={styles.showcaseCopy} data-information-window="home-introduction" data-information-motion-surface="plane"><InformationSkin/>
+   <p className={styles.eyebrow}>01 / ABOUT</p>
+   <h1 id="home-title" className={styles.showcaseTitle}>{"Hi, I'm JosHsuan"}<span className={styles.period}>.</span></h1>
+   <p className={styles.statement} data-introduction-statement>{introduction.statement}</p>
+   <p className={styles.description} data-introduction-description>{introduction.description}</p>
+  </div>
+  <a className={styles.showcaseScroll} href="#projects">Discover the work <Arrow/></a>
+ </section>;
+}
+
+function ProjectDeck(){
+ return <section id="projects" className={styles.deckSection} style={{'--deck-count':projects.length}} data-home-deck data-portfolio-projects aria-labelledby="deck-title">
+  <div className={styles.deckSticky}>
+   <header className={styles.deckHeading}><div><p className={styles.eyebrow}>02 / DISCOVER</p><h2 id="deck-title">A different perspective.</h2></div><p data-deck-count>01 / {String(projects.length).padStart(2,'0')}</p></header>
+   <ol className={styles.deckCards}>{projects.map((project,index)=><li key={project.id} className={styles.deckCard} data-deck-card={project.id}>
+    <div className={styles.deckImage}><img src={project.image.src} width={project.image.width} height={project.image.height} alt={project.image.alt} loading="eager" decoding="async" data-site-critical/></div>
+    <a href={project.href} className={styles.deckLink} data-project-card={project.id} aria-labelledby={`deck-title-${project.id}`}>
+     <span className={styles.deckSerial}>{String(index+1).padStart(2,'0')} / {String(projects.length).padStart(2,'0')}</span>
+     <div className={styles.deckCopy}><p>{project.category}</p><h3 id={`deck-title-${project.id}`}>{project.title}</h3><span>Explore project <Arrow diagonal/></span></div>
+    </a>
+   </li>)}</ol>
+   <footer className={styles.deckFooter}><span>Scroll to reveal / Reverse to revisit</span><a href="/projects/">View all projects <Arrow diagonal/></a><a href="#contact">Contact <Arrow/></a></footer>
+  </div>
+ </section>;
 }
 
 function About({standalone=false}){
@@ -131,7 +133,7 @@ export default function PortfolioHome({section='home'}){
   return <div className={styles.portfolio}>
     <PortfolioNavigation current={section}/>
     <main id="portfolio-main" tabIndex={-1} className={styles.main} data-portfolio-root data-information-motion-profile="velocity-skin" data-portfolio-section={section}>
-      {section==='home'&&<><Introduction/><Projects scrolling/><Contact scrolling/></>}
+      {section==='home'&&<><Introduction/><ProjectDeck/><Contact scrolling/></>}
       {section==='about'&&<><About standalone/><Contact/></>}
       {section==='projects'&&<><Projects standalone/><Contact/></>}
       {section==='contact'&&<Contact standalone/>}

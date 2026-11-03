@@ -4,11 +4,12 @@ import {createFrameScheduler} from '../../components/runtime-scheduler.mjs';
 import {createChapterPlayback,advanceChapterPlayback,sampleChapterPlayback} from '../../components/chapter-playback.mjs';
 import {sampleChapterScene} from '../../components/chapter-scene-score.mjs';
 import {observeHomeResearchStage} from '../site/HomeResearchStageRegistry.mjs';
-import {createHomeResearchPresenter} from '../site/HomeResearchPresenter.mjs';
+import {createHomeDeckPresenter} from '../site/HomeDeckPresenter.mjs';
+import {createHomeShowcasePresenter} from '../site/HomeShowcasePresenter.mjs';
 import {createHomeScrollPresenter} from '../site/HomeScrollPresenter.mjs';
 import {createLiquidGlassPresenter} from '../presentation/LiquidGlassPresenter.mjs';
 import {observeProjectStudyStage} from '../site/ProjectStudyStageRegistry.mjs';
-import {createProjectStudyScenePresenter} from '../site/ProjectStudyScenePresenter.mjs';
+import {createProjectStudyScenePresenter,createProjectStudyModelCollection} from '../site/ProjectStudyScenePresenter.mjs';
 import {createProjectStudyBackdropPresenter} from '../site/ProjectStudyBackdropPresenter.mjs';
 import {createProjectStudyChapterPresenter} from '../site/ProjectStudyChapterPresenter.mjs';
 
@@ -22,7 +23,7 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
   const dom=new DOMPresenter(),publisher=dom.forOwner('global-background');
   const binding=runtime.acquire({owner:'site',canvas,backdrop,publisher});
   const playback=createChapterPlayback('overview');
-  const reduced=win.matchMedia('(prefers-reduced-motion: reduce)');
+  const reduced={matches:false};
   const fine=win.matchMedia('(hover: hover) and (pointer: fine)');
   const studyRoot=doc.querySelector?.('[data-project-study]')??null;
   const editorialStudy=studyRoot?.getAttribute('data-study-presentation')==='editorial-scenes';
@@ -32,10 +33,11 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
   // their independent Directors and must never acquire a second window owner.
   const homeRoot=['home','about','projects','contact'].map(section=>doc.querySelector?.(`[data-portfolio-root][data-portfolio-section="${section}"]`)).find(Boolean)??studyRoot;
   const home=homeRoot?createHomeScrollPresenter({root:homeRoot,publisher:dom.forOwner('home-information')}):null;
+  const deck=homeRoot?.getAttribute('data-portfolio-section')==='home'?createHomeDeckPresenter({root:homeRoot,window:win,publisher:dom.forOwner('home-deck'),listen:(...args)=>events.listen(scope,...args)}):null;
   const liquid=studyRoot?createLiquidGlassPresenter({root:doc,publisher:dom.forOwner('project-liquid-glass')}):null;
   const glassPreferences=studyRoot?['(forced-colors: active)','(prefers-contrast: more)','(prefers-reduced-transparency: reduce)'].map(query=>win.matchMedia(query)):[];
   const opaqueGlass=()=>glassPreferences.some(query=>query.matches);
-  const studyPaused=()=>!!studyRoot?.hasAttribute('data-study-paused');
+  const studyPaused=()=>false;
   const forced=home?win.matchMedia('(forced-colors: active)'):null,connection=home?win.navigator?.connection:null;
   const naturalY=element=>{let top=0;for(let node=element;node;node=node.offsetParent)top+=node.offsetTop;return top;};
   let homeResearch=null,releaseHomeResearch=()=>{};
@@ -48,8 +50,8 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
   const listen=(target,type,handler,options)=>events.listen(scope,target,type,handler,options);
   const ready=()=>['entered','failed'].includes(doc.documentElement.getAttribute('data-site-entry-state'));
   const motionAllowed=()=>!scheduler.suspended&&ready()&&!reduced.matches&&!studyPaused();
-  const homePolicy=()=>({ready:ready(),reduced:reduced.matches||studyPaused(),suspended:scheduler.suspended,saveData:!!connection?.saveData,forcedColors:!!forced?.matches});
-  const projectPolicy=()=>({hidden:doc.hidden||scheduler.suspended,reduced:reduced.matches,saveData:!!connection?.saveData,paused:studyPaused(),siteReady:doc.documentElement.getAttribute('data-site-entry-state')==='entered'});
+  const homePolicy=()=>({ready:ready(),reduced:reduced.matches||studyPaused(),suspended:scheduler.suspended,saveData:false,forcedColors:!!forced?.matches});
+  const projectPolicy=()=>({hidden:doc.hidden||scheduler.suspended,reduced:reduced.matches,saveData:false,paused:studyPaused(),siteReady:doc.documentElement.getAttribute('data-site-entry-state')==='entered'});
   if(studyRoot&&!editorialStudy)projectBackdrop=createProjectStudyBackdropPresenter({root:studyRoot,window:win,document:doc,publisher:dom.forOwner('project-study-backdrop'),schedule:()=>scheduler.schedule(),policy:projectPolicy});
   // Documentary scenes keep their actual images in native chapter flow. They
   // never acquire a second fixed copy or the background transition transport.
@@ -73,7 +75,7 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
     if(disposed||scheduler.suspended)return;
     const dt=previous?(now-previous)/1000:1/60;previous=now;frames++;
     const wasResumed=resumed;
-    if(homeDirty){homeResearch?.measure({naturalY,viewportHeight:win.innerHeight});projectChapters?.measure({docY:win.scrollY});home.measure({naturalY,viewportHeight:win.innerHeight,docY:win.scrollY});projectScene?.measure(win.innerWidth,win.innerHeight);projectBackdrop?.measure(win.innerWidth,win.innerHeight);homeDirty=false;}
+    if(homeDirty){deck?.measure({naturalY,viewportHeight:win.innerHeight});homeResearch?.measure({naturalY,viewportHeight:win.innerHeight});projectChapters?.measure({docY:win.scrollY});home.measure({naturalY,viewportHeight:win.innerHeight,docY:win.scrollY});projectScene?.measure(win.innerWidth,win.innerHeight);projectBackdrop?.measure(win.innerWidth,win.innerHeight);homeDirty=false;}
     const reading=projectChapters?.publish({docY:win.scrollY,viewportHeight:win.innerHeight});
     if(glassDirty){liquid.measure({opaque:opaqueGlass()});glassDirty=false;}
     const impulse=pendingImpulse;pendingImpulse=0;
@@ -83,11 +85,12 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
     const uv=[pointer.x/win.innerWidth,1-pointer.y/win.innerHeight];
     latest=sampleChapterScene(score,{reducedMotion:reduced.matches,aspect:size.width/size.height,pointer:{uv,active:fine.matches&&pointer.active&&!reduced.matches&&uv.every(value=>value>=0&&value<=1),strength:.35}});
     binding.present(latest,{frameTimeMs:now,paused:!ready()||studyPaused(),hidden:doc.hidden,systemReduced:reduced.matches},size.width,size.height);
-    homeResearch?.publish({...homePolicy(),docY:win.scrollY});
+    const showcaseMoving=homeResearch?.publish({...homePolicy(),dt,docY:win.scrollY})??false;
+    const deckMoving=deck?.publish({...homePolicy(),dt,docY:win.scrollY,resumed:wasResumed})??false;
     const moving=home?.publish({...homePolicy(),dt,docY:win.scrollY,resumed:wasResumed,seek:wasResumed})??false;
     const glassMoving=liquid?.publish({dt,reduced:reduced.matches||studyPaused()||!ready(),resumed:wasResumed,hidden:doc.hidden,opaque:opaqueGlass(),keyboardFocus})??false;
     const sceneMoving=projectBackdrop?.publish({dt,resumed:wasResumed,reading,activeSeconds:score.activeSeconds})??false;
-    if(moving||glassMoving||sceneMoving||score.needsFrame&&binding.inspect().ready&&!binding.inspect().failed)scheduler.schedule();
+    if(showcaseMoving||deckMoving||moving||glassMoving||sceneMoving||score.needsFrame&&binding.inspect().ready&&!binding.inspect().failed)scheduler.schedule();
     else previous=0;
   }
   const reset=()=>{pointer={x:0,y:0,active:false};pendingImpulse=0;touchY=null;liquid?.reset();if(motionAllowed())scheduler.schedule();};
@@ -122,18 +125,17 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
     pointer={x:event.clientX,y:event.clientY,active:fine.matches&&!reduced.matches};scheduler.schedule();
   },{passive:true});
   listen(doc.documentElement,'pointerleave',reset);listen(win,'blur',reset);listen(fine,'change',reset);
-  listen(reduced,'change',()=>{reset();previous=0;resumed=true;scheduler.schedule();});
   listen(win,'resize',()=>{if(measure())scheduler.schedule();homeInvalidate();},{passive:true});
   if(home){
     // Native scrolling, including keyboard and anchor movement, invalidates the
     // same demand scheduler. Home never starts a second frame clock.
-    listen(win,'scroll',()=>{if(projectChapters||ready()&&!scheduler.suspended&&!reduced.matches&&!connection?.saveData&&!forced?.matches)scheduler.schedule();},{passive:true});
+    listen(win,'scroll',()=>{deck?.input({docY:win.scrollY,...homePolicy()});if(projectChapters||ready()&&!scheduler.suspended)scheduler.schedule();},{passive:true});
     if(projectChapters)listen(win,'hashchange',()=>scheduler.schedule(),{passive:true});
     listen(homeRoot,'load',homeInvalidate,{capture:true});
     listen(homeRoot,'focusin',()=>{if(!scheduler.suspended)scheduler.schedule();});
     listen(homeRoot,'focusout',()=>{if(!scheduler.suspended)scheduler.schedule();});
-    listen(forced,'change',()=>{resumed=true;scheduler.schedule();});
-    if(connection?.addEventListener)listen(connection,'change',()=>{resumed=true;scheduler.schedule();});
+    listen(forced,'change',()=>scheduler.schedule());
+    if(connection?.addEventListener)listen(connection,'change',()=>scheduler.schedule());
     if(win.ResizeObserver){const observer=new win.ResizeObserver(homeInvalidate);observer.observe(homeRoot);for(const element of homeRoot.querySelectorAll('[data-home-scroll-window],[data-information-window]'))observer.observe(element);if(liquid)for(const element of doc.querySelectorAll('[data-liquid-glass]'))observer.observe(element);scope.add(()=>observer.disconnect());}
     if(win.MutationObserver){const observer=new win.MutationObserver(homeInvalidate);observer.observe(homeRoot,{childList:true,subtree:true});scope.add(()=>observer.disconnect());}
     Promise.resolve(doc.fonts?.ready).then(homeInvalidate,homeInvalidate);
@@ -145,7 +147,6 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
     for(const type of ['pointermove','pointerdown','pointerup','pointercancel'])listen(doc,type,event=>{if(type==='pointerdown')keyboardFocus=false;pointerGlass(event);},{passive:true});
     listen(doc,'keydown',()=>{keyboardFocus=true;liquid.reset();if(!scheduler.suspended)scheduler.schedule();});
     for(const query of glassPreferences)listen(query,'change',siteState);
-    if(win.MutationObserver){const observer=new win.MutationObserver(()=>{if(!projectChapters||projectChapters.syncPause())siteState();});observer.observe(studyRoot,{attributes:true,attributeFilter:['data-study-paused']});scope.add(()=>observer.disconnect());}
   }
   listen(doc,'visibilitychange',visibility);
   // A retained BFCache document may resume the same resource. A real document
@@ -157,18 +158,18 @@ export function createSiteBackgroundDriver({window:win,document:doc,runtime,canv
   if(win.MutationObserver){const observer=new win.MutationObserver(siteState);observer.observe(doc.documentElement,{attributes:true,attributeFilter:['data-site-entry-state']});scope.add(()=>observer.disconnect());}
   if(studyRoot&&!editorialStudy)releaseStage=observeProjectStudyStage(doc,descriptor=>{
     if(disposed)return;projectBackdrop?.setScene(null);projectScene?.dispose();projectScene=null;
-    if(descriptor&&descriptor.root===studyRoot){projectScene=createProjectStudyScenePresenter({...descriptor,externalStage:true,window:win,document:doc,publisher:dom.forOwner('project-study-scene'),schedule:()=>scheduler.schedule(),policy:projectPolicy});projectBackdrop?.setScene({actor:projectScene,host:descriptor.host,model:descriptor.model});}
+    if(descriptor&&descriptor.root===studyRoot){projectScene=(descriptor.additionalModels?.length?createProjectStudyModelCollection:createProjectStudyScenePresenter)({...descriptor,externalStage:true,window:win,document:doc,publisher:dom.forOwner('project-study-scene'),schedule:()=>scheduler.schedule(),policy:projectPolicy});projectBackdrop?.setScene({actor:projectScene,host:descriptor.host,model:descriptor.model});}
     homeDirty=!!home;scheduler.schedule();
   });
   if(homeRoot?.getAttribute('data-portfolio-section')==='home')releaseHomeResearch=observeHomeResearchStage(doc,descriptor=>{
     if(disposed)return;homeResearch?.dispose();homeResearch=null;
-    if(descriptor)homeResearch=createHomeResearchPresenter({...descriptor,publisher:dom.forOwner('home-research'),schedule:()=>scheduler.schedule()});
+    if(descriptor?.kind==='showcase')homeResearch=createHomeShowcasePresenter({...descriptor,publisher:dom.forOwner('home-research'),schedule:()=>scheduler.schedule()});
     homeDirty=!!home;scheduler.schedule();
   });
   measure();scheduler.schedule();
-  function dispose(){if(disposed)return;disposed=true;releaseHomeResearch();homeResearch?.dispose();releaseStage();projectBackdrop?.dispose();projectScene?.dispose();projectScene=null;projectChapters?.dispose();scheduler.dispose();home?.dispose();liquid?.dispose();scope.dispose();events.dispose();binding.dispose();}
+  function dispose(){if(disposed)return;disposed=true;releaseHomeResearch();homeResearch?.dispose();releaseStage();projectBackdrop?.dispose();projectScene?.dispose();projectScene=null;projectChapters?.dispose();scheduler.dispose();deck?.dispose();home?.dispose();liquid?.dispose();scope.dispose();events.dispose();binding.dispose();}
   return {
-    inspect:()=>({owner:'site',frames,playback:sampleChapterPlayback(playback),chapterScene:latest,size:{...size},lifecycle:scheduler.inspect(),events:events.inspect(),pageField:binding.inspect(),homeScrolling:home?.inspect()??null,homeResearch:homeResearch?.inspect()??null,projectStudy:studyRoot?{paused:studyPaused(),chapters:projectChapters?.inspect()??null,liquidGlass:liquid?.inspect(),scene:projectScene?.inspect()??null,backdrop:projectBackdrop?.inspect()??null,media:projectBackdrop?.inspect().media??[],...(editorialStudy||hybridStudy?{presentation:editorialStudy?'editorial-scenes':'hybrid-scenes',nativeImages:nativeImages.map(row=>({...row}))}:{})}:null,domPublication:publisher.inspect(),disposed}),
+    inspect:()=>({owner:'site',frames,playback:sampleChapterPlayback(playback),chapterScene:latest,size:{...size},lifecycle:scheduler.inspect(),events:events.inspect(),pageField:binding.inspect(),homeScrolling:home?.inspect()??null,homeResearch:homeResearch?.inspect()??null,homeDeck:deck?.inspect()??null,projectStudy:studyRoot?{paused:studyPaused(),chapters:projectChapters?.inspect()??null,liquidGlass:liquid?.inspect(),scene:projectScene?.inspect()??null,backdrop:projectBackdrop?.inspect()??null,media:projectBackdrop?.inspect().media??[],...(editorialStudy||hybridStudy?{presentation:editorialStudy?'editorial-scenes':'hybrid-scenes',nativeImages:nativeImages.map(row=>({...row}))}:{})}:null,domPublication:publisher.inspect(),disposed}),
     dispose,
   };
 }

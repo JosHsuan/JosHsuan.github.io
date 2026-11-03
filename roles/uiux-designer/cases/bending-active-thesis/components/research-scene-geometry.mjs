@@ -1,7 +1,11 @@
 import * as T from 'three';
 
 export const RESEARCH_MODEL_PIXELS=524288;
-export const RESEARCH_PHONE_PIXELS=393216;
+// A recorded interface needs enough physical pixels for its original labels.
+// The phone has only two meshes, so use the existing product allocation cap
+// instead of spreading the former 393k budget across an entire desktop screen.
+// The much heavier source assembly retains its separate lower budget.
+export const RESEARCH_PHONE_PIXELS=1_600_000;
 
 /** A display camera fit. Any verified source-unit/axis conversion belongs to
  * the pinned derivative; camera fitting never rescales or reorients geometry. */

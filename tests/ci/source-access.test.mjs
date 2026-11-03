@@ -1,65 +1,24 @@
-// Exact hybrid additions are independently reversed to d3 in hybrid-scenes.test.mjs.
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
 import test from 'node:test';
-
 const root=new URL('../../roles/uiux-designer/cases/bending-active-thesis/',import.meta.url);
 const hash=value=>createHash('sha256').update(value).digest('hex');
-// Independently captured from deployed 33215722b196f4184028e0ad6ae18934fabc6e7a.
-// Deliberately bounded to this additive source-access slice. No runtime git or
-// generated baseline: future source changes require a separately reviewed pin.
-// Four JSX pins include the separately reviewed name/hidden-description delta;
-// link-announcements.test.mjs independently reverses its twelve exact substitutions
-// to the deployed ce12 six-file baseline. Asset/data/CSS pins remain unchanged.
-// Cas-only dispatcher is independently reversed by editorial-scenes.test.mjs.
-const baseline={
-  "release/manifest.json": "6bc10dfa18a7aafc828d9b39f1b046faddb7c8b514e9260a7d9adca0d46179e1",
-  "release/project-assets.json": "83f51a9847419f66f9ddde151b135fd3c2c58d4744d01631579497aad2916244",
-  "release/xr-assets.json": "33692e7a4a4be11e19e1cce804c5d5421f417aca6c0e6d7b51a60561692b45ad",
-  "release/project-studies.json": "c222cdcec3fd5ff5f040f1db5a7c30f52a9871c6dc92b76dbb288e068e17341c",
-  "release/xr-study.json": "3605cb7ed9abefc0721091d7883fdc765d0f0471af1b7d4db49f326228a68001",
-  "release/xr-workspace.json": "41c48db687e71332240a002e0892141a7eac887c94740ef4c175cc4ccc4e1211",
-  "release/story.json": "250c0853d8d5f9d993bc89b8a563eef5717300c1772a8c5da04647d165c740da",
-  "components/ProjectCaseStudy.jsx": "e4e6b4c4430ecc47e9949f353afaf95c0446d17d5db351093aac2e249e996375",
-  "components/XRProject.jsx": "946f16f178bc4d2ddc13c12066cb9670f0d63fbb7df8bb3a47ff3397cc0b1fae",
-  "components/ProjectCaseStudy.module.css": "2d2bab984ea7c78fefa0909d900224c9f626539fe995573e8ed99aa12a25a432",
-  "components/XRProject.module.css": "49e7c3d770d87c3d4d7eea5cec6c01421b5e998fcc82bff5a33e0c6b829f9cc5",
-  "components/BendingProject.jsx": "585b055ff08bb0c8451d1780b6cf1268088b2ec46ded4661a2da46bca7b97970",
-  "components/EntranceDiagramFocus.jsx": "e774fd4d6b6cb072834d4f8e3a269f0319d5aceaa360200a822f0ae6d085c146",
-  "components/EntranceDiagramFocus.module.css": "e011224777e05129db70b2042006f5eb57998cae788d63f008ff1d35bd83b64f"
-};
 const read=path=>readFile(new URL(path,root),'utf8');
-const components=[['ProjectCaseStudy.jsx','image','sourceLink'],['XRProject.jsx','item','recordingLink']];
-function action(variable,style){return `<a className={styles.${style}} data-evidence-source-link href={${variable}.src} target="_blank" rel="noopener noreferrer" aria-label={\`Open full image (new tab): \${${variable}.alt}\`}>Open full image (new tab)</a>`;}
-// Exact optional Results dispatcher is independently anchored in entrance-hybrid-scenes.test.mjs.
-const entranceBefore="     </div>\n    </header>}\n    {project.sections.map((section,index)=>{\n     if(hybrid?.results.section===section)return <NativeStudyChapter key={section.id} project={project} section={section} index={index} scene={hybrid.results.scene} evidence={hybrid.results.evidence}/>;\n     const motion=project.motionMedia?.find(media=>media.chapter===section.id),evidence=evidenceByChapter.get(section.id);\n     return <section key={section.id} id={`${prefix}-${section.id}`} tabIndex={-1} className={styles.chapter} data-project-chapter={section.id} aria-labelledby={`${prefix}-${section.id}-heading`} {...layoutAttributes(projectStudyLayout(project,section.id))}>\n     <div className={styles.chapterInner}>\n",entranceAfter="     </div>\n    </header>}\n    {project.sections.map((section,index)=>{\n     if(hybrid?.results?.section===section)return <NativeStudyChapter key={section.id} project={project} section={section} index={index} scene={hybrid.results.scene} evidence={hybrid.results.evidence}/>;\n     const motion=project.motionMedia?.find(media=>media.chapter===section.id),evidence=evidenceByChapter.get(section.id);\n     return <section key={section.id} id={`${prefix}-${section.id}`} tabIndex={-1} className={styles.chapter} data-project-chapter={section.id} aria-labelledby={`${prefix}-${section.id}-heading`} {...layoutAttributes(projectStudyLayout(project,section.id))}>\n     <div className={styles.chapterInner}>\n";
-function verifyMarkup(source,name,variable,style){
- if(name==='ProjectCaseStudy.jsx'){assert.equal(source.split(entranceAfter).length,2);source=source.replace(entranceAfter,entranceBefore);}
- const anchor=action(variable,style);
- assert.equal(source.split(anchor).length,2,'Exactly one plain native action template');
- assert.ok(source.includes(`<p>{${variable}.caption}</p><span>{${variable}.credit}</span>${anchor}</figcaption>`),'Append after intact direct caption and credit, outside the original image anchor');
- // Exact allowed markup excludes handlers, nested planes, modal logic and any
- // changes to original image anchors, lazy loading, primary visuals or sources.
- assert.equal(hash(source.replace(anchor,'')),baseline[`components/${name}`],'Only the reviewed native anchor may differ from the deployed component');
+const components=['ProjectCaseStudy.jsx','EditorialProjectStudy.jsx','XRProject.jsx','BendingProject.jsx','EntranceDiagramFocus.jsx'];
+function imageReading(source){
+ assert.doesNotMatch(source,/<a[^>]+href=\{(?:image|item)\.(?:src|source)\}/);
+ assert.doesNotMatch(source,/data-inspect-figure|data-evidence-source-link|<EvidenceInspector|View full image|Open full image|Open complete source image/);
+ assert.match(source,/<img|<image/);assert.match(source,/caption/);
 }
-
-test('source-access preserves source JSON, asset pins, existing controls and all reused CSS',async()=>{
- for(const [path,expected]of Object.entries(baseline)){
-  if(components.some(([name])=>path===`components/${name}`))continue;
-  assert.equal(hash(await readFile(new URL(path,root))),expected,path);
- }
+test('all project images stay in native reading without enlargement or new-tab affordances',async()=>{
+ for(const name of components)imageReading(await read('components/'+name));
+ const runtime=await read('runtime/RuntimeRoot.mjs');assert.doesNotMatch(runtime,/createEvidenceManager/);
 });
-test('generic and XR actions are additive native links with label-in-name and secure new-tab semantics',async()=>{
- for(const [name,variable,style]of components)verifyMarkup(await read(`components/${name}`),name,variable,style);
+test('image-reading contract rejects a restored image anchor or inspection trigger',async()=>{
+ const source=await read('components/ProjectCaseStudy.jsx');
+ for(const added of ['<a href={image.src}>View</a>','<div data-inspect-figure="0"/>','<a data-evidence-source-link>Open full image</a>'])assert.throws(()=>imageReading(source+added));
 });
-test('source-access markup contract rejects changed targets, handlers and nested ownership',async()=>{
- for(const [name,variable,style]of components){
-  const source=await read(`components/${name}`),anchor=action(variable,style);
-  for(const changed of [anchor.replace(`href={${variable}.src}`,'href="https://example.invalid/"'),anchor.replace('noopener noreferrer','noreferrer'),anchor.replace('data-evidence-source-link','data-evidence-source-link onClick={openModal}'),anchor.replace('data-evidence-source-link','data-evidence-source-link data-information-motion-surface="plane"'),anchor.replace('Open full image (new tab):','Image:')])assert.throws(()=>verifyMarkup(source.replace(anchor,changed),name,variable,style));
- }
-});
-
 // Literal foreground inventory, not the production evidence/dedup helper.
 const foreground={
  'mode-s-of-making':['film-design-workflow','film-rotary-system','film-corexy-system'],

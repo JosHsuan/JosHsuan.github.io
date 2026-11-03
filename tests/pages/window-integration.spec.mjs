@@ -90,7 +90,7 @@ test('information windows share one fluid surface while native reading, focus an
  expect(movement.some(value=>value.path.includes('path('))).toBe(true);
  expect(movement.every(value=>value.opacity==='1')).toBe(true);
  const control=page.locator('[data-chapter-link="form"]');await control.focus();await expect(control).toBeFocused();
- await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(()=>window.__story.inspect().playback.reducedMotion,null,{timeout:WAIT});await settle(page);await expectIdle(page);
+ await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(()=>window.__story.inspect().playback.reducedMotion===false,null,{timeout:WAIT});await settle(page);await expectIdle(page);
  const reducedState=await registered.evaluateAll(elements=>{const label=document.querySelector('[data-model-side-label][data-study-chapter="system"]');const box=node=>{if(!node)return null;const r=node.getBoundingClientRect();return{left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height,layoutWidth:node.offsetWidth,layoutHeight:node.offsetHeight};};const title=label?.querySelector('[data-source-label]'),position=label?.querySelector('[data-source-position]'),description=label?.querySelector('[data-source-description]'),callout=label?.querySelector('[data-model-annotation-label]'),annotation=label?.querySelector('[data-model-annotation-text]');const components=[['label',label],['title',title],['position',position],['description',description],['callout',callout]].map(([name,node])=>({name,box:box(node),text:node?.textContent?.trim().slice(0,1000)??null}));const range=document.createRange();if(title)range.selectNodeContents(title);const sizers=title?.parentElement.querySelectorAll(':scope > [aria-hidden="true"]')??[],sizer=sizers[0],font=node=>{if(!node)return null;const c=getComputedStyle(node);return{family:c.fontFamily,size:c.fontSize,weight:c.fontWeight,lineHeight:c.lineHeight,tracking:c.letterSpacing,wrap:c.overflowWrap};};const titleEnvelope={count:sizers.length,ariaHidden:sizer?.getAttribute('aria-hidden')??null,visibility:sizer?getComputedStyle(sizer).visibility:null,display:sizer?getComputedStyle(sizer).display:null,titles:sizer?[...sizer.children].map(node=>node.textContent):[],liveFont:font(title),sizerFont:font(sizer)};const geometry={titleEnvelope,placement:label?.dataset.modelLabelPlacement??null,labelCount:document.querySelectorAll('[data-model-side-label][data-study-chapter="system"]').length,componentCounts:['[data-source-label]','[data-source-position]','[data-source-description]','[data-model-annotation-label]','[data-model-annotation-text]'].map(selector=>label?.querySelectorAll(selector).length??0),components,titleTextRects:title?[...range.getClientRects()].slice(0,8).map(r=>({left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height})):[],slots:[box(title?.parentElement),box(position?.parentElement),box(annotation?.parentElement)],controls:[...label?.querySelectorAll('button,a,input')??[]].slice(0,4).map(node=>({box:box(node),text:node.textContent?.trim().slice(0,160)})),chrome:['[data-page-masthead]','[data-story-navigation]','[data-reading-tools]'].map(selector=>{const nodes=[...document.querySelectorAll(selector)],node=nodes[0];return{selector,count:nodes.length,visible:node?.checkVisibility({visibilityProperty:true,opacityProperty:true})??false,box:box(node)};}),viewport:{width:innerWidth,height:innerHeight},y:scrollY};return{rows:elements.map(el=>({moving:el.dataset.informationMoving,transform:getComputedStyle(el).transform})),geometry};});
  receipt.after=reducedState.geometry;const reduced=reducedState.rows;
  const png=info.outputPath('reduced-model-label-native.png');await page.screenshot({path:png,scale:'device'});await info.attach('reduced-model-label-native',{path:png,contentType:'image/png'});
@@ -111,18 +111,16 @@ test('information windows share one fluid surface while native reading, focus an
   for(const key of ['layoutWidth','layoutHeight']){expect(Number.isFinite(after[key])&&Number.isFinite(prior[key])).toBe(true);expect(Math.abs(after[key]-prior[key])).toBeLessThanOrEqual(1);}
  }
  }
- for(const row of reduced){expect(row.moving).not.toBe('true');expect(row.transform).toBe('none');}
+ for(const row of reduced){expect(row.moving).not.toBe('true');expect(['none','matrix(1, 0, 0, 1, 0, 0)']).toContain(row.transform);}
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);expect(errors).toEqual([]);
  }catch(error){primaryError=error;throw error;}finally{try{const file=info.outputPath('model-label-reserve.json');await writeFile(file,JSON.stringify(receipt,null,2));await info.attach('model-label-reserve',{path:file,contentType:'application/json'});}catch(error){if(!primaryError)throw error;}}
 });
 
-test('dynamic evidence windows join and leave the shared presenter without duplicate surfaces under OS Reduced',async({page})=>{
- test.setTimeout(scenarioTimeout(120000));await loadScene(page);await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(()=>window.__story.inspect().playback.reducedMotion,null,{timeout:WAIT});await settle(page);
- const trigger=page.locator('[data-inspect-figure]').filter({visible:true}).first();
- await trigger.scrollIntoViewIfNeeded();await settle(page);await trigger.click();
- const portal=page.locator('[data-source-comparison]');await expect(portal).toBeVisible();
- await expect(portal).toHaveAttribute('data-information-ready',/.*/,{timeout:WAIT});
- await expect(portal.locator(':scope > [data-information-skin]')).toHaveCount(1);
- await page.getByRole('button',{name:'Close source comparison'}).click();await expect(portal).toHaveCount(0);
- await expect(trigger).toBeFocused();await expectIdle(page);
+test('all original evidence remains inline with one surface owner under OS motion preferences',async({page})=>{
+ test.setTimeout(scenarioTimeout(120000));await loadScene(page);await page.emulateMedia({reducedMotion:'reduce'});await settle(page);
+ await expect(page.locator('[data-inspect-figure],[data-source-comparison]')).toHaveCount(0);
+ const figures=page.locator('#system figure,#pattern figure');expect(await figures.count()).toBeGreaterThanOrEqual(2);
+ for(const image of await figures.locator('img').all()){expect(await image.evaluate(n=>!!n.closest('a,button,summary'))).toBe(false);}
+ expect(await page.locator('[data-information-ready] [data-information-ready]').count()).toBe(0);
+ await expectIdle(page);
 });

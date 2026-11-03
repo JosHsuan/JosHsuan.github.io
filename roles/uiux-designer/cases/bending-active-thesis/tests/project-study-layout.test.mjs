@@ -25,7 +25,7 @@ test('all six real studies resolve every native chapter without changing source 
 });
 
 test('every eligible model keeps the spatial split; movies use actual motion dimensions',()=>{
- for(const project of studies)for(const chapter of project.model?.chapters??[]){
+ for(const project of studies)for(const model of [project.model,...project.additionalModels??[]].filter(Boolean))for(const chapter of model.chapters){
   const result=projectStudyLayout(project,chapter);
   assert.equal(result.composition,'model');assert.equal(result.layout,'split');assert.equal(result.sourceRole,'model');
  }
@@ -40,7 +40,7 @@ test('every eligible model keeps the spatial split; movies use actual motion dim
  }
 });
 
-test('Caschlatsch documentary primaries remain distinct from five full-width foreground technical plates',()=>{
+test('Caschlatsch model and documentary primaries remain distinct from five full-width foreground technical plates',()=>{
  const project=study('project-caschlatsch'),evidence=projectStudyEvidence(project);
  const expected=[
   {chapter:'system',primary:project.hero,shape:'balanced',layout:'split',plates:['portfolio-voxel-framework','portfolio-module-infill']},
@@ -50,7 +50,7 @@ test('Caschlatsch documentary primaries remain distinct from five full-width for
   const section=project.sections.find(section=>section.id===chapter);
   assert.deepEqual(section.media[0],primary,'Narrative primaries reuse the approved documentary photographs');
   assert.equal(section.paragraphs.length,3);
-  assert.deepEqual(projectStudyLayout(project,chapter),{composition:'documentary',sourceRole:'photograph',layout,readingDensity:'normal',sourceShape:shape});
+  assert.deepEqual(projectStudyLayout(project,chapter),{composition:chapter==='system'?'model':'documentary',sourceRole:chapter==='system'?'model':'photograph',layout,readingDensity:'normal',sourceShape:shape});
   const foreground=evidence.get(chapter);
   assert.deepEqual(foreground.map(image=>image.src),plates.map(name=>`/assets/projects/project-caschlatsch/${name}.webp`));
   for(const image of foreground){

@@ -10,6 +10,20 @@ This document translates the portfolio proposal into implementation rules. It is
 
 Read this alongside the latest project architecture document and the existing repository. This file governs presentation, content hierarchy, interaction behavior, and visual acceptance. The architecture document governs dependency choices, delivery, and integration. Do not silently replace the agreed stack or rewrite a working foundation to satisfy an aesthetic preference.
 
+### Current selected-application direction — 3 November 2026
+
+The owner's current implementation is governed by
+[decision 0021](decisions/0021-continuous-motion-portfolio.md) and the
+[portfolio design direction](../roles/uiux-designer/cases/bending-active-thesis/PORTFOLIO_DESIGN_DIRECTION.md).
+That amendment defines compact square discovery cards, instance-event selection,
+one shared acceleration/liquid response, scale-aware partial architectural shots,
+photograph-based materials, continuous visible motion, native inline images and
+the introduction → discovery → contact sequence. It records the consulted Apple
+and Lusion sources and their deliberate adaptations. The exact approved
+introduction in the public snapshot governs identity copy. Earlier concepts and
+implementation phases below remain reference material where they do not conflict
+with this owner direction; they do not populate the empty reusable framework.
+
 ---
 
 ## 1. Positioning and priorities

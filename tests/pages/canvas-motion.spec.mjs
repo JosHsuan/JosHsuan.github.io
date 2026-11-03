@@ -7,7 +7,7 @@ const sample=page=>page.evaluate(()=>{
  return {placement:story.canvasPlacement,informationChapter:story.informationChapter,pose:scene.pose,frames:scene.frames,time:story.playback.activeSeconds,field:story.pageField,rect:{x:r.x,y:r.y,width:r.width,height:r.height},surface:story.canvasSurface,screen:{width:innerWidth,height:innerHeight},native:[canvas.width,canvas.height],budget:scene.renderBudget,pressure:scene.renderPressure,suspended:scene.renderSuspended,informationTop:document.querySelector('#system [data-story-heading]').getBoundingClientRect().top};
 });
 const scrollTo=async(page,y)=>{await page.evaluate(top=>window.scrollTo({top,behavior:'instant'}),y);await settle(page);};
-const reduce=async page=>{await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(()=>window.__story.inspect().playback.reducedMotion,null,{timeout:WAIT});};
+const reduce=async page=>{await page.emulateMedia({reducedMotion:'reduce'});await settle(page);expect(await page.evaluate(()=>window.__story.inspect().playback.reducedMotion)).toBe(false);};
 
 test('one viewport scene holds its cinematic scale while information scrolls independently',async({page})=>{
  test.setTimeout(scenarioTimeout(120000));
@@ -44,9 +44,9 @@ test('one viewport scene holds its cinematic scale while information scrolls ind
  await expect(page.locator('[data-chapter-link="form"]')).toHaveAttribute('aria-current','location');
  expect(await page.evaluate(el=>document.querySelector('[data-cinematic-stage] canvas')===el,canvas)).toBe(true);
  await expect(page.locator(stageCanvas)).toHaveCount(1);await expect(page.locator('canvas[data-ascii-field]')).toHaveCount(1);await expect(page.locator('canvas')).toHaveCount(2);
- await reduce(page);await expectIdle(page);
+ await reduce(page);
  const reduced=await sample(page);await frames(page,8);const still=await sample(page);
- expect(still.time).toBe(reduced.time);expect(still.pose.position).toEqual(reduced.pose.position);expect(errors).toEqual([]);
+ expect(still.time).toBeGreaterThan(reduced.time);expect(still.pose.position).not.toEqual(reduced.pose.position);expect(errors).toEqual([]);
 });
 
 test('keyboard inspection across the information and scene gap presents its requested chapter before freezing',async({page})=>{
@@ -96,7 +96,7 @@ test('absent evidence scenes sleep WebGL while the independent page ASCII keeps 
  }
  await centerStudy(page,'system');const returned=await sample(page);expect(returned.suspended).toBe(false);expect(returned.placement.visible).toBe(true);
  await expect.poll(()=>page.evaluate(()=>window.__thesis.inspect().frames),{timeout:WAIT}).toBeGreaterThan(returned.frames);
- await reduce(page);await expectIdle(page);
+ await reduce(page);const live=await sample(page);await frames(page,4);expect((await sample(page)).time).toBeGreaterThan(live.time);
  await expect(page.locator(stageCanvas)).toHaveCount(1);await expect(page.locator('canvas[data-ascii-field]')).toHaveCount(1);
 });
 
@@ -104,6 +104,9 @@ test('with OS Reduced, a real visible source hit still compares geometry through
  test.setTimeout(scenarioTimeout(150000));await page.setViewportSize({width:390,height:844});
  await page.addInitScript(()=>{
   const writes=new WeakMap();window.__stageStorageWrites=canvas=>writes.get(canvas)??0;
+  // Autonomous source playback may advance between a host snapshot and the
+  // native click. Observe the source actually painted at pointer ownership.
+  window.addEventListener('pointerdown',()=>{const scene=window.__thesis?.inspect();if(scene)window.__sourcePointerReceipt={id:scene.representation.id,index:scene.representation.index};},{capture:true,passive:true});
   for(const axis of ['width','height']){
    const descriptor=Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype,axis);
    Object.defineProperty(HTMLCanvasElement.prototype,axis,{...descriptor,set(value){writes.set(this,(writes.get(this)??0)+1);descriptor.set.call(this,value);}});
@@ -158,12 +161,13 @@ test('with OS Reduced, a real visible source hit still compares geometry through
  await test.info().attach('reduced-source-hit-ownership',{body:JSON.stringify({point,ownership}),contentType:'application/json'});
  expect(ownership).toMatchObject({targetPresent:true,ownsPoint:true,protected:false,active:'true',disabled:'false',source:true,chapter:'system'});
  const resources=()=>page.evaluate(()=>{const scene=window.__thesis.inspect(),canvas=document.querySelector('[data-cinematic-stage] canvas');return {id:scene.representation.id,index:scene.representation.index,source:scene.source,diagrams:scene.diagramSource,budget:scene.renderBudget,initialization:scene.initialization,native:[canvas.width,canvas.height],writes:window.__stageStorageWrites(canvas),docY:scrollY};});
- const before=await resources();await page.mouse.click(point.x,point.y);await settle(page);const after=await resources();
- expect(after.id).not.toBe(before.id);expect(after.index).toBe((before.index+1)%4);
+ const before=await resources();await page.mouse.click(point.x,point.y);await settle(page);const after=await resources(),pressed=await page.evaluate(()=>window.__sourcePointerReceipt);
+ expect(pressed).toBeTruthy();expect(after.id).not.toBe(pressed.id);expect(after.index).toBe((pressed.index+1)%4);
  expect(after.source).toEqual(before.source);expect(after.diagrams).toEqual(before.diagrams);expect(after.initialization).toEqual(before.initialization);
  expect(after.budget).toEqual(before.budget);expect(after.native).toEqual(before.native);expect(after.writes).toBe(before.writes);expect(after.docY).toBe(before.docY);
  expect(await page.evaluate(el=>document.querySelector('[data-cinematic-stage] canvas')===el,canvas)).toBe(true);
- await expect(page.locator(stageCanvas)).toHaveCount(1);await expect(page.locator('canvas[data-ascii-field]')).toHaveCount(1);await expectIdle(page);
+ await expect(page.locator(stageCanvas)).toHaveCount(1);await expect(page.locator('canvas[data-ascii-field]')).toHaveCount(1);
+ const live=await page.evaluate(()=>window.__story.inspect().playback.activeSeconds);await frames(page,5);expect(await page.evaluate(()=>window.__story.inspect().playback.activeSeconds)).toBeGreaterThan(live);
 });
 
 test('the continuous source block exits only at Pattern and an interrupted scroll reverses without scaling or remounting',async({page})=>{

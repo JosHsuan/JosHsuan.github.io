@@ -9,7 +9,8 @@ const root=new URL('../../roles/uiux-designer/cases/bending-active-thesis/',impo
 const read=path=>readFile(new URL(path,root),'utf8');
 const hash=value=>createHash('sha256').update(value).digest('hex');
 // Independent exact 9394233 baseline. Only these reviewed metadata declarations
-// and imports may change; visible JSX, layout/error policy and source data cannot.
+// and imports stay exact. Decision 0021 content changes are validated by the
+// project schema, independent original-asset fixture and XR source handoff suite.
 const pages=[
   {
     "path": "app/about/page.jsx",
@@ -122,10 +123,7 @@ const pages=[
   }
 ];
 const pins={
-  "release/manifest.json": "6bc10dfa18a7aafc828d9b39f1b046faddb7c8b514e9260a7d9adca0d46179e1",
   "release/introduction.json": "ab0fa9933275c22bad9f24fb79c27f7307d469ba570d9cd4a78f6f9fd3a6751b",
-  "release/project-studies.json": "c222cdcec3fd5ff5f040f1db5a7c30f52a9871c6dc92b76dbb288e068e17341c",
-  "release/xr-study.json": "3605cb7ed9abefc0721091d7883fdc765d0f0471af1b7d4db49f326228a68001",
   "app/layout.jsx": "d810313efd7e235b6c511264150f9c45705e5d322c9eae6b55d317684e37ca82",
   "app/not-found.jsx": "457c40aea33af217eead30592c9f9441e0ad6f00cc80b01dfe80e0f2d4ac0479"
 };

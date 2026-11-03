@@ -72,12 +72,11 @@ test('preview preparation consumes the existing arrival budget instead of receiv
  native.owned.forEach(item=>item.finish());await flush();assert.equal(manager.inspect().phase,'entered');
 });
 
-test('explicit static preview policy still waits for critical poster decoding before static entry',async t=>{
+test('a genuine static source fallback still waits for its poster and the normal motion reveal',async t=>{
  const poster=new Element(),decoded=deferred(),node=new Element();Object.assign(poster,{complete:true,naturalWidth:100,decode:()=>decoded.promise});
  const f=environment({previews:[node],images:[poster]}),native=nativeReveal(f);f.media.matches=true;const manager=connect(t,f);
- registerPagePreviewReadiness(f.doc,node).report({mode:'static',reason:'reduced-motion'});await flush();assert.deepEqual(phases(manager),['requested']);assert.equal(f.content.hasAttribute('inert'),true);
- decoded.resolve();await flush();assert.deepEqual(phases(manager),['requested','ready','revealing','entered']);assert.deepEqual(manager.inspect().readiness.previews,[{mode:'static',reason:'reduced-motion'}]);
- assert.equal(native.calls.length,0);assert.equal(native.requested.length,0);
+ registerPagePreviewReadiness(f.doc,node).report({mode:'static',reason:'render-unavailable'});await flush();assert.deepEqual(phases(manager),['requested']);assert.equal(f.content.hasAttribute('inert'),true);
+ decoded.resolve();await flush();assert.deepEqual(phases(manager),['requested']);assert.equal(native.frames.size,1);await presented(native);assert.equal(manager.inspect().phase,'revealing');native.owned.forEach(item=>item.finish());await flush();assert.equal(manager.inspect().phase,'entered');assert.deepEqual(manager.inspect().readiness.previews,[{mode:'static',reason:'render-unavailable'}]);assert.equal(native.calls.length,2);
 });
 
 test('unknown preview markers fail open at the original startup endpoint without fabricating ready or entered',async t=>{
@@ -183,8 +182,8 @@ test('every interrupted presentation barrier cancels its sole pending frame and 
  }
 });
 
-test('Reduced or hidden before presentation or during the effects closes the existing visual owner statically',async t=>{
- for(const delivered of [0,1])for(const mode of ['reduced','hidden']){
+test('Hidden before presentation or during effects closes the existing visual owner statically',async t=>{
+ for(const delivered of [0,1])for(const mode of ['hidden']){
   const f=environment(),native=nativeReveal(f),manager=connect(t,f);await flush();if(delivered){native.frame();await flush();}const pending=native.requested.at(-1);
   if(mode==='reduced'){f.media.matches=true;f.media.dispatchEvent(new Event('change'));}else{f.doc.hidden=true;f.doc.dispatchEvent(new Event('visibilitychange'));}
   assert.deepEqual(phases(manager),['requested','ready','revealing','entered']);assert.equal(manager.inspect().reason,mode==='reduced'?'reduced-motion':'hidden-static');
@@ -205,7 +204,7 @@ test('overdue preparation, native completions, CSS events and policy changes can
   if(signal==='presentation-frame')native.frame();
   else if(signal==='post-presentation-policy'||signal==='preparation-policy'){f.doc.hidden=true;f.doc.dispatchEvent(new Event('visibilitychange'));}
   else if(signal==='css-event')f.loader.dispatchEvent(new Event('animationend'));
-  else if(signal==='reduced'){f.media.matches=true;f.media.dispatchEvent(new Event('change'));}
+  else if(signal==='reduced'){f.media.matches=true;f.media.dispatchEvent(new Event('change'));assert.equal(manager.inspect().phase,'revealing','Preference changes do not settle a reveal');f.advance(0);}
   await flush();assert.equal(manager.inspect().phase,'failed',signal);assert.equal(manager.inspect().reason,preparing?'presentation-timeout':'reveal-timeout',signal);
   assert.equal(phases(manager).includes('entered'),false);assert.equal(f.timers.size,0);if(native)assert.equal(native.frames.size,0);
  }
@@ -265,16 +264,49 @@ test('two fulfilled effects cannot bypass a withheld, rejected or missing second
  }
 });
 
-test('Reduced and hidden policies cannot bypass unfinished or expired document resources',async t=>{
- for(const mode of ['reduced','hidden'])for(const expired of [false,true]){
+test('hidden acquisition excludes background time but cannot revive an already expired document',async t=>{
+ for(const expired of [false,true]){
   const font=deferred(),f=environment({fonts:font.promise}),native=nativeReveal(f),manager=connect(t,f);await flush();
-  if(mode==='reduced'){f.media.matches=true;f.media.dispatchEvent(new Event('change'));}else{f.doc.hidden=true;f.doc.dispatchEvent(new Event('visibilitychange'));}
-  assert.deepEqual(phases(manager),['requested']);assert.equal(f.content.hasAttribute('inert'),true);
-  if(expired)f.elapse(15000);else f.advance(4000);font.resolve();await flush();
+  if(expired)f.elapse(15000);
+  f.doc.hidden=true;f.doc.dispatchEvent(new Event('visibilitychange'));
+  assert.deepEqual(phases(manager),expired?['requested','failed']:['requested']);assert.equal(f.content.hasAttribute('inert'),!expired);
+  f.advance(60000);font.resolve();await flush();
   assert.deepEqual(phases(manager),expired?['requested','failed']:['requested','ready','revealing','entered']);
-  assert.equal(manager.inspect().reason,expired?'presentation-timeout':mode==='hidden'?'hidden-static':'');
+  assert.equal(manager.inspect().reason,expired?'readiness-timeout':'hidden-static');
   assert.equal(native.calls.length,0);assert.equal(native.requested.length,0);assert.equal(f.timers.size,0);assert.equal(f.content.hasAttribute('inert'),false);
+  f.doc.hidden=false;f.doc.dispatchEvent(new Event('visibilitychange'));await flush();assert.equal(f.timers.size,0);
  }
+});
+
+test('pending preview and font acquisition resumes the remaining visible budget across repeated background intervals',async t=>{
+ for(const initialHidden of [false,true]){
+  const font=deferred(),node=new Element(),f=environment({fonts:font.promise,previews:[node]});f.doc.hidden=initialHidden;
+  const native=nativeReveal(f),manager=connect(t,f),fallbacks=[];
+  const registration=registerPagePreviewReadiness(f.doc,node,{onFallback:reason=>fallbacks.push(reason)});t.after(()=>registration.release());await flush();
+  const visibility=hidden=>{f.doc.hidden=hidden;f.doc.dispatchEvent(new Event('visibilitychange'));};
+  if(initialHidden){assert.equal(f.timers.size,0);f.advance(60000);visibility(false);}
+  f.advance(6000);visibility(true);assert.equal(f.timers.size,0);f.advance(60000);
+  assert.deepEqual(phases(manager),['requested']);assert.deepEqual(fallbacks,[]);visibility(false);
+  assert.equal(f.timers.size,2);for(const timer of f.timers.values())assert.equal(timer.at,f.now()+9000);
+  f.advance(4000);visibility(true);f.advance(60000);visibility(false);
+  for(const timer of f.timers.values())assert.equal(timer.at,f.now()+5000);
+  // The document can settle while its model remains pending, without granting
+  // that model a new budget or allowing a late completion after the terminal.
+  font.resolve();await flush();assert.equal(f.timers.size,1);assert.equal(native.frames.size,0);
+  f.advance(4999);assert.equal(manager.inspect().phase,'requested');f.advance(1);await flush();
+  assert.equal(manager.inspect().reason,'readiness-timeout');assert.deepEqual(fallbacks,['readiness-timeout']);assert.equal(f.timers.size,0);
+  assert.equal(registration.report({mode:'model'}),false);visibility(true);f.advance(60000);visibility(false);
+  assert.deepEqual(phases(manager),['requested','failed']);assert.equal(f.timers.size,0);
+ }
+});
+
+test('resumed preview can complete inside its remaining budget and use the existing native reveal',async t=>{
+ const node=new Element(),f=environment({previews:[node]}),native=nativeReveal(f),manager=connect(t,f);await flush();
+ const registration=registerPagePreviewReadiness(f.doc,node);t.after(()=>registration.release());
+ f.advance(14000);f.doc.hidden=true;f.doc.dispatchEvent(new Event('visibilitychange'));f.advance(60000);
+ f.doc.hidden=false;f.doc.dispatchEvent(new Event('visibilitychange'));f.advance(999);registration.report({mode:'model'});await presented(native);
+ assert.equal(manager.inspect().phase,'revealing');native.owned.forEach(item=>item.finish());await flush();
+ assert.equal(manager.inspect().phase,'entered');assert.equal(f.timers.size,0);
 });
 
 test('native pending-play handles release before any ready fact on cancellation and ignore all late promises',async t=>{
@@ -292,7 +324,7 @@ test('native pending-play handles release before any ready fact on cancellation 
 });
 
 test('static policy during native pending play closes only the resource-ready request and cancels both owned effects',async t=>{
- for(const mode of ['reduced','hidden']){
+ for(const mode of ['hidden']){
   const f=environment(),native=nativeReveal(f,{manualReady:true}),manager=connect(t,f);await presented(native);assert.equal(manager.inspect().phase,'requested');
   if(mode==='reduced'){f.media.matches=true;f.media.dispatchEvent(new Event('change'));}else{f.doc.hidden=true;f.doc.dispatchEvent(new Event('visibilitychange'));}
   assert.deepEqual(phases(manager),['requested','ready','revealing','entered']);assert.equal(manager.inspect().reason,mode==='reduced'?'reduced-motion':'hidden-static');
@@ -374,8 +406,8 @@ test('queued native completion cannot escape supersession, pagehide, disposal or
  }
 });
 
-test('native-capable Reduced and hidden arrivals stay static and live policy changes release both effects',async t=>{
- for(const mode of ['reduced','hidden']){
+test('native-capable hidden arrivals stay static and visibility changes release both effects',async t=>{
+ for(const mode of ['hidden']){
   const initial=environment(),available=nativeReveal(initial);if(mode==='reduced')initial.media.matches=true;else initial.doc.hidden=true;
   const staticManager=connect(t,initial);await flush();assert.equal(staticManager.inspect().phase,'entered');assert.equal(available.calls.length,0);assert.equal(available.requested.length,0);assert.equal(initial.timers.size,0);
   const f=environment(),native=nativeReveal(f),manager=connect(t,f);await presented(native);
@@ -418,10 +450,10 @@ test('font/image failure and readiness deadline fail open with one failed termin
  }
 });
 
-test('missing animation completion is failed rather than synthetic entered; Reduced and hidden arrivals do not animate',async t=>{
+test('missing animation completion fails rather than fabricating entry; hidden arrivals do not animate',async t=>{
  const f=environment(),manager=connect(t,f);await flush();assert.equal(manager.inspect().phase,'revealing');f.advance(1600);
  assert.deepEqual(phases(manager),['requested','ready','revealing','failed']);assert.equal(manager.inspect().reason,'reveal-timeout');
- for(const mode of ['reduced','hidden']){
+ for(const mode of ['hidden']){
   const next=environment();if(mode==='reduced')next.media.matches=true;else next.doc.hidden=true;
   const current=connect(t,next);await flush();assert.deepEqual(phases(current),['requested','ready','revealing','entered']);assert.equal(next.timers.size,0);
  }
@@ -480,10 +512,37 @@ test('readiness is shared by document, reference-counted, and releases native im
  const image=new Element();Object.assign(image,{complete:false,naturalWidth:0});const f=environment({images:[image],fonts:new Promise(()=>{})});
  let loads=0,removals=0;const add=image.addEventListener.bind(image),remove=image.removeEventListener.bind(image);
  image.addEventListener=(...args)=>{loads++;return add(...args);};image.removeEventListener=(...args)=>{removals++;return remove(...args);};
- const options={setTimeout:f.win.setTimeout,clearTimeout:f.win.clearTimeout};
+ const options={setTimeout:f.win.setTimeout,clearTimeout:f.win.clearTimeout,now:f.now};
  const one=acquireSiteReadiness(f.doc,options),two=acquireSiteReadiness(f.doc,options);
  assert.equal(one.promise,two.promise);assert.equal(loads,2);one.release();assert.equal(f.timers.size,1);two.release();
  const result=await two.promise;assert.deepEqual(result.failures,['readiness-cancelled']);assert.equal(removals,2);assert.equal(f.timers.size,0);
+});
+
+test('document readiness pauses its one shared timer for hidden critical images and cleans visibility listeners',async()=>{
+ const image=new Element();Object.assign(image,{complete:false,naturalWidth:0});const f=environment({images:[image]});f.doc.hidden=true;
+ let listeners=0;const add=f.doc.addEventListener.bind(f.doc),remove=f.doc.removeEventListener.bind(f.doc);
+ f.doc.addEventListener=(type,...args)=>{if(type==='visibilitychange')listeners++;return add(type,...args);};
+ f.doc.removeEventListener=(type,...args)=>{if(type==='visibilitychange')listeners--;return remove(type,...args);};
+ const options={setTimeout:f.win.setTimeout,clearTimeout:f.win.clearTimeout,now:f.now};
+ const one=acquireSiteReadiness(f.doc,options),two=acquireSiteReadiness(f.doc,options);await flush();
+ assert.equal(one.promise,two.promise);assert.equal(listeners,1);assert.equal(f.timers.size,0);f.advance(60000);
+ f.doc.hidden=false;f.doc.dispatchEvent(new Event('visibilitychange'));assert.equal(f.timers.size,1);
+ f.advance(14000);f.doc.hidden=true;f.doc.dispatchEvent(new Event('visibilitychange'));f.advance(60000);
+ one.release();assert.equal(listeners,1);assert.equal(f.timers.size,0);
+ f.doc.hidden=false;f.doc.dispatchEvent(new Event('visibilitychange'));assert.equal([...f.timers.values()][0].at,f.now()+1000);
+ f.advance(999);image.naturalWidth=888;image.dispatchEvent(new Event('load'));
+ assert.equal((await two.promise).ready,true);assert.equal(listeners,0);assert.equal(f.timers.size,0);two.release();
+});
+
+test('document deadline cannot revive through hidden transitions or late font completion before timer delivery',async()=>{
+ for(const signal of ['hidden','font']){
+  const font=deferred(),f=environment({fonts:font.promise}),options={setTimeout:f.win.setTimeout,clearTimeout:f.win.clearTimeout,now:f.now};
+  const task=acquireSiteReadiness(f.doc,options);await flush();f.elapse(15000);
+  if(signal==='hidden'){f.doc.hidden=true;f.doc.dispatchEvent(new Event('visibilitychange'));}else font.resolve();
+  const result=await task.promise;assert.equal(result.ready,false);assert.deepEqual(result.failures,['readiness-timeout']);assert.equal(f.timers.size,0);
+  f.doc.hidden=false;f.doc.dispatchEvent(new Event('visibilitychange'));font.resolve();await flush();
+  const reacquired=acquireSiteReadiness(f.doc,options);assert.equal(await reacquired.promise,result);assert.equal(f.timers.size,0);reacquired.release();task.release();
+ }
 });
 
 test('fulfilled FontFaceSet readiness reports requested error faces and accepts loaded or unused-unloaded faces without loading them',async t=>{
@@ -824,4 +883,17 @@ test('delegated Bending arrival does not inspect or adopt ordinary history prese
  let emit;const manager=connect(t,f,{subscribeScene:callback=>{emit=callback;return()=>{};}});await flush();
  for(const phase of ['ready','revealing','entered'])emit({id:'scene-history',phase});
  assert.equal(manager.inspect().phase,'entered');assert.notEqual(manager.inspect().reason,'history-static');
+});
+
+
+test('Reduced preference cannot bypass resources, native preparation or real animation completion',async t=>{
+ for(const nativeCapable of [false,true]){
+  const font=deferred(),f=environment({fonts:font.promise}),native=nativeCapable?nativeReveal(f,{manualReady:true}):null;f.media.matches=true;
+  const manager=connect(t,f);await flush();assert.equal(manager.inspect().phase,'requested');
+  f.media.matches=false;f.media.dispatchEvent(new Event('change'));f.media.matches=true;f.media.dispatchEvent(new Event('change'));assert.equal(manager.inspect().phase,'requested');
+  font.resolve();await flush();
+  if(native){assert.equal(native.frames.size,1);native.frame();await flush();assert.equal(manager.inspect().phase,'requested');f.media.dispatchEvent(new Event('change'));assert(native.owned.every(item=>item.cancels===0));native.owned.forEach(item=>item.accept());await flush();}
+  assert.equal(manager.inspect().phase,'revealing');f.media.dispatchEvent(new Event('change'));assert.equal(manager.inspect().phase,'revealing');assert.equal(f.content.hasAttribute('inert'),true);
+  if(native)native.owned.forEach(item=>item.finish());else f.loader.dispatchEvent(new Event('animationend'));await flush();assert.equal(manager.inspect().phase,'entered');assert.equal(f.timers.size,0);
+ }
 });

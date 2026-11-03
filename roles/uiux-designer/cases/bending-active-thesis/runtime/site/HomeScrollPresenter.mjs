@@ -5,7 +5,7 @@ import {createInformationWindowPresenter} from '../presentation/InformationWindo
  * this adapter creates no observer, listener, timer or animation frame.
  */
 export function createHomeScrollPresenter({root,publisher}){
-  const profile=root.getAttribute?.('data-information-motion-profile')==='velocity-skin'?'velocity-skin':'ink';
+  const profile='velocity-skin';
   const windows=createInformationWindowPresenter({root,publisher,profile});
   let disposed=false,enabled=false;
   let policy={ready:false,reduced:false,suspended:false,saveData:false,forcedColors:false};
@@ -14,7 +14,7 @@ export function createHomeScrollPresenter({root,publisher}){
     publish({dt,docY,reduced=false,suspended=false,ready=false,saveData=false,forcedColors=false,seek=false,resumed=false}){
       if(disposed)return false;
       policy={ready:!!ready,reduced:!!reduced,suspended:!!suspended,saveData:!!saveData,forcedColors:!!forcedColors};
-      enabled=policy.ready&&!policy.reduced&&!policy.suspended&&!policy.saveData&&!policy.forcedColors;
+      enabled=policy.ready&&!policy.suspended;
       // An unprepared page is measured in native flow and remains at rest. Its
       // transforms become eligible only after the destination's entry event.
       publisher.attribute(root,'data-home-scrolling-ready',policy.ready?'':null);

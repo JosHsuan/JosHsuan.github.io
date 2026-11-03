@@ -60,11 +60,11 @@ function duration(bytes,atom){
  const ticks=v===0?bytes.readUInt32BE(atom.body+16):Number(bytes.readBigUInt64BE(atom.body+24));
  assert(scale>0&&Number.isSafeInteger(ticks));return {scale,ticks,seconds:ticks/scale};
 }
-function inspectMp4(bytes){
+function inspectMp4(bytes,{level=32}={}){
  const top=atoms(bytes),moov=top.find(atom=>atom.type==='moov'),mdat=top.find(atom=>atom.type==='mdat');
  assert(moov&&mdat&&moov.offset<mdat.offset,'Native streaming requires moov before mdat');
  const movieDuration=duration(bytes,child(bytes,moov,'mvhd'));
- const tracks=atoms(bytes,moov.body,moov.end).filter(atom=>atom.type==='trak');assert.equal(tracks.length,1,'Selected original GIFs have one silent video track');
+ const tracks=atoms(bytes,moov.body,moov.end).filter(atom=>atom.type==='trak');assert.equal(tracks.length,1,'Selected demonstrations have one silent video track');
  const track=tracks[0],mdia=child(bytes,track,'mdia'),handler=child(bytes,mdia,'hdlr');
  assert.equal(bytes.toString('ascii',handler.body+8,handler.body+12),'vide');
  const mediaDuration=duration(bytes,child(bytes,mdia,'mdhd'));
@@ -75,7 +75,7 @@ function inspectMp4(bytes){
  const entries=atoms(bytes,stsd.body+8,stsd.end);assert.equal(entries.length,1);assert.equal(entries[0].type,'avc1');
  const entry=entries[0],width=bytes.readUInt16BE(entry.body+24),height=bytes.readUInt16BE(entry.body+26);
  assert.equal(width,trackWidth);assert.equal(height,trackHeight);
- const avc=atoms(bytes,entry.body+78,entry.end).find(atom=>atom.type==='avcC');assert(avc);assert.equal(bytes[avc.body+1],100);assert.equal(bytes[avc.body+3],32);
+ const avc=atoms(bytes,entry.body+78,entry.end).find(atom=>atom.type==='avcC');assert(avc);assert.equal(bytes[avc.body+1],100);assert.equal(bytes[avc.body+3],level);
  const stts=child(bytes,stbl,'stts'),count=bytes.readUInt32BE(stts.body+4),sampleDurations=[];let samples=0,ticks=0;
  for(let i=0;i<count;i++){const n=bytes.readUInt32BE(stts.body+8+i*8),delta=bytes.readUInt32BE(stts.body+12+i*8);assert(n>0&&delta>0);samples+=n;ticks+=n*delta;sampleDurations.push(delta/mediaDuration.scale);}
  const stsz=child(bytes,stbl,'stsz');assert.equal(bytes.readUInt32BE(stsz.body+8),samples);assert.equal(ticks,mediaDuration.ticks);
@@ -131,17 +131,51 @@ test('the complete CAD assembly has finite original topology, source proportions
  assert.equal(material.pbrMetallicRoughness.baseColorTexture,undefined);assert.equal(d.textures,undefined);
 });
 
-const originalClips=[{id:'adapt',width:666,height:1440,frames:130,seconds:13,frameSeconds:.1},{id:'assemble',width:534,height:1152,frames:312,seconds:24.96,frameSeconds:.08},{id:'join',width:666,height:1440,frames:203,seconds:20.3,frameSeconds:.1}];
-for(const original of originalClips)test(`${original.id} MP4 preserves complete source GIF timing, frame count and native screen dimensions`,async()=>{
- const stage=study.phoneStages.find(item=>item.id===original.id);assert(stage);
- const movie=inspectMp4(await readFile(publicPath(stage.src)));
+const originalClips=[
+ {id:'adapt',width:666,height:1440,frames:130,seconds:13,frameSeconds:.1,sha256:'c7a3ae4da483fe24830463d57882e8723b2a557b21732db2358d07587a2db845',posterSHA256:'24bb4ab66d4fdd30650a0fc9f7704241de66012f3941692e5e0479fb58b5e428'},
+ {id:'assemble',width:534,height:1152,frames:312,seconds:24.96,frameSeconds:.08,sha256:'6bd92eb307fb65f17c71ce1b6196c7ddf4d834dd1fd924ce67050867ce62d2e8',posterSHA256:'b65ec1fd919863e94b5ce757d624eb86535d07ba840ba80a224b801076e78ede'},
+ {id:'join',width:666,height:1440,frames:203,seconds:20.3,frameSeconds:.1,sha256:'360ecc723f6b2adeeb919a8dd580b69ea6e34d7ec1877c3bca7d0c8a9903911c',posterSHA256:'1e7b1f6482616c1ef47661c9155c43b70fc8030053367ced0cbb19ea2aaf28c0'},
+];
+for(const original of originalClips)test(`${original.id} historical GIF derivative preserves its pinned bytes, complete timing and screen dimensions`,async()=>{
+ const bytes=await readFile(publicPath(`/assets/xr/${original.id}-interface.mp4`));assert.equal(sha(bytes),original.sha256);
+ const movie=inspectMp4(bytes);
  assert.equal(movie.width,original.width);assert.equal(movie.height,original.height);assert.equal(movie.samples,original.frames);
  assert(Math.abs(movie.movieDuration.seconds-original.seconds)<.001);assert(Math.abs(movie.mediaDuration.seconds-original.seconds)<.001);
  assert(Math.abs(movie.mediaDuration.seconds/movie.samples-original.frameSeconds)<1e-9);
  assert(movie.sampleDurations.every(seconds=>Math.abs(seconds-original.frameSeconds)<1e-9),'Every encoded frame must retain its original GIF presentation duration');
- assert.equal(stage.width,original.width);assert.equal(stage.height,original.height);assert.equal(stage.durationSeconds,original.seconds);
- assert.deepEqual(webpDimensions(await readFile(publicPath(stage.poster.src))),[original.width,original.height]);
- assert.equal(stage.poster.width,original.width);assert.equal(stage.poster.height,original.height);
+ const poster=await readFile(publicPath(`/assets/xr/${original.id}-poster.webp`));assert.equal(sha(poster),original.posterSHA256);
+ assert.deepEqual(webpDimensions(poster),[original.width,original.height]);
+});
+
+const hdSources={
+ adapt:{source:'758938298a5f9c5559f25855c49aa2b8582df952cd5dd0a4f0b4b8fd4530a1e4',video:'7283443e88dc9bf23713630f2f0dbc0e0d3ff16f9eed8f7720f6ce76c4a8e1d3'},
+ assemble:{source:'ae92418a1f8b977b299482b45a5b32dadedb31952cabd08857cb9562954b7280',video:'26ae07605057fb459195d099986184ce28b8530bf853939ed375a5d972c42e8f'},
+ join:{source:'ded5cd1bb9459fb25d0f624ce293f6d343af65610b6b7dbb7eb791f222ebc9db',video:'c325054d284dca22a20c3cf8f50b8b523ebbfb3cd601813f6ab74e82ab061935'},
+};
+for(const original of originalClips)test(`${original.id} active HD reconstruction uses genuine native pixels while retaining delivered sequence timing`,async()=>{
+ const stage=study.phoneStages.find(item=>item.id===original.id),pins=hdSources[original.id];assert(stage);
+ assert.equal(stage.src,`/assets/xr/${original.id}-interface-hd.mp4`);
+ const bytes=await readFile(publicPath(stage.src)),movie=inspectMp4(bytes,{level:40});
+ assert.equal(sha(bytes),pins.video);assert.equal(stage.sha256,pins.video);assert.equal(stage.bytes,bytes.length);
+ assert.equal(movie.width,888);assert.equal(movie.height,1920);assert.equal(movie.samples,original.frames);
+ assert(Math.abs(movie.movieDuration.seconds-original.seconds)<.001);assert(Math.abs(movie.mediaDuration.seconds-original.seconds)<.001);
+ assert(movie.sampleDurations.every(seconds=>Math.abs(seconds-original.frameSeconds)<1e-9),'Every delivered sample retains the selected sequence cadence');
+ assert.deepEqual([stage.width,stage.height,stage.frameCount,stage.durationSeconds],[888,1920,original.frames,original.seconds]);
+ const poster=await readFile(publicPath(stage.poster.src));assert.equal(stage.poster.src,`/assets/xr/${original.id}-poster-hd.webp`);
+ assert.deepEqual(webpDimensions(poster),[888,1920]);assert.deepEqual([stage.poster.width,stage.poster.height],[888,1920]);
+ assert.equal(sha(poster),stage.poster.sha256);assert.equal(poster.length,stage.poster.bytes);
+ const assets=JSON.parse(await readFile(new URL('../release/xr-assets.json',import.meta.url),'utf8'));
+ const manifest=JSON.parse(await readFile(new URL('../release/manifest.json',import.meta.url),'utf8'));
+ const record=assets.provenance.find(item=>'/'+item.publicPath===stage.src);assert(record);
+ assert.equal(record.sourceSHA256,pins.source);assert.equal(record.derivativeSHA256,pins.video);
+ assert.equal(record.sourceProjectSHA256,'8ce09e769e62bfde81d93bfb5702eb81bec69835880423807619a1d229d1ec55');
+ assert.equal(record.sourceOriginalUnchanged,true);assert.equal(record.frameCount,original.frames);assert.equal(record.durationSeconds,original.seconds);
+ assert.deepEqual(record.dimensions,[888,1920]);assert.match(record.processing,/not claimed pixel-identical/);
+ assert.equal(record.qualityReceipt.allFramesCompared,true);assert.equal(record.qualityReceipt.comparedFrames,original.frames);
+ for(const media of [stage,stage.poster])for(const table of [manifest.assets,assets.assets]){
+  const pin=table.find(item=>'/'+item.path===media.src);assert(pin);assert.equal(pin.sha256,media.sha256);assert.equal(pin.bytes,media.bytes);
+ }
+ assert(!JSON.stringify(stage).match(/[A-Za-z]:[\\/]|sourceLocator|\.prproj/),'Runtime phone data excludes private preparation/source locators');
 });
 
 test('latest-portfolio visual and all selected full-frame research figures agree with their actual public image headers',async()=>{

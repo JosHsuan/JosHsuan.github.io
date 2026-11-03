@@ -15,6 +15,6 @@
 @keyframes site-reveal{from{opacity:1}to{opacity:0}}
 @keyframes site-lift{from{transform:translateY(0)}to{transform:translateY(-12px)}}
 @keyframes site-fail-open{to{visibility:hidden;pointer-events:none}}
-@media(prefers-reduced-motion:reduce){.loader [data-site-activity],.loader[data-site-phase=revealing],.loader[data-site-phase=revealing] [data-site-loader-content]{animation:none;transform:none}}
+
 @media(forced-colors:active){.backdrop{background:Canvas}}
 @media print{.loader{display:none}}

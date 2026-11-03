@@ -5,6 +5,7 @@ import {createRendererBudget} from './renderer-budget.mjs';
 import {collectResearchSupport,createResearchPhoneGeometry,fitResearchCamera,RESEARCH_MODEL_PIXELS,RESEARCH_PHONE_PIXELS} from './research-scene-geometry.mjs';
 import {acquireVideo} from '../runtime/site/video-resource.mjs';
 import {createXRStageEnvironment} from './xr-stage-environment.mjs';
+import {installXRBambooAppearance} from './xr-bamboo-appearance.mjs';
 
 const abortError=()=>new DOMException('XR stage released','AbortError');
 const boundedShaderLog=read=>{try{return String(read()??'').slice(0,2048);}catch(error){return String(error?.message??error).slice(0,2048);}};
@@ -20,8 +21,9 @@ export function xrStagePaintReady({phone=false,shaderError=false,calls,source,ph
   &&stage>=1&&stage<=3&&calls===source+phoneBody+phoneScreen+stage;
 }
 
-/** Camera presentation only: source positions, normals, units and materials are
- * untouched. The subject has a reading-safe composition inside a full viewport;
+/** Camera presentation only: source positions, normals and units are untouched.
+ * The separately owned bamboo material clone never changes source asset bytes.
+ * The subject has a reading-safe composition inside a full viewport;
  * that composition never limits the canvas or its project-owned surroundings. */
 function cameraOptions({chapter='overview',azimuth=0,elevation=0,cameraIntent=null}={}){
  const phone=phoneChapter(chapter),base=sourcePoses[chapter]??sourcePoses.overview,intent=chapter==='method'?cameraIntent:null;
@@ -67,7 +69,7 @@ function releaseObject(root){
 export async function acquireXRStage({host,signal,model,stages,videos,positions=new Map(),onMode=()=>{},createRenderer=options=>new T.WebGLRenderer(options),acquireMedia=acquireVideo}){
  if(signal.aborted)throw abortError();
  const win=host.ownerDocument.defaultView;
- let disposed=false,renderer=null,budget=null,scene=null,camera=null,gltf=null,support=null,phone=null,texture=null,environment=null;
+ let disposed=false,renderer=null,budget=null,scene=null,camera=null,gltf=null,support=null,phone=null,texture=null,environment=null,appearance=null;
   let mediaController=null,mediaHandle=null,frameCallback=null,mediaGeneration=0,mediaDeadline=null,activeStage=null,retainedMedia=null;
  let state={chapter:'overview',azimuth:0,elevation:0,paused:false},size={width:0,height:0},pose=null;
  let gpuReason=null,mediaReason=null,draws=0,mediaFrames=0,lastPaintKey='',revision=null,vertices=0,triangles=0,shaderError=false,mode='poster';
@@ -117,7 +119,7 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
  }
  function disposeGPU(){
   stopFrames();if(renderer){renderer.domElement.removeEventListener('webglcontextlost',contextListener);renderer.domElement.remove();budget?.dispose();renderer.dispose();renderer.forceContextLoss();}renderer=null;budget=null;
-   disposePhone();releaseRetainedMedia();environment?.dispose();environment=null;releaseObject(gltf?.scene);gltf=null;support?.dispose();support=null;lastFit=null;scene?.clear();scene=null;camera=null;successfulPaint=false;delete host.dataset.xrScenePainted;
+   disposePhone();releaseRetainedMedia();environment?.dispose();environment=null;appearance?.dispose();appearance=null;releaseObject(gltf?.scene);gltf=null;support?.dispose();support=null;lastFit=null;scene?.clear();scene=null;camera=null;successfulPaint=false;delete host.dataset.xrScenePainted;
  }
  function fallbackGPU(reason){
   if(disposed)return;gpuReason=reason;disposeGPU();announce(activeStage&&mediaHandle?'native-video':'poster',reason);
@@ -215,6 +217,10 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
    if(renderer){
      disposePhone();releaseRetainedMedia();
     const geometry=createResearchPhoneGeometry(stage.width/stage.height);texture=new T.VideoTexture(video);texture.colorSpace=T.SRGBColorSpace;texture.generateMipmaps=false;
+    // Preserve native recorded pixels: no tone mapping, frame interpolation or
+    // per-frame mipmap rebuild. Bounded anisotropy helps the oblique screen edge.
+    texture.minFilter=T.LinearFilter;texture.magFilter=T.LinearFilter;
+    texture.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy?.()??1);
     const group=new T.Group(),body=new T.Mesh(geometry.body,new T.MeshStandardMaterial({color:'#292e30',metalness:.65,roughness:.33})),screen=new T.Mesh(geometry.screen,new T.MeshBasicMaterial({map:texture,toneMapped:false}));
     group.add(body,screen);countDraws(body,'phoneBody');countDraws(screen,'phoneScreen');
     const phoneSupport=prepareResearchSupport(geometry.support);
@@ -246,6 +252,7 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
    const parsed=await new GLTFLoader(manager).parseAsync(bytes,'');if(disposed||signal.aborted){releaseObject(parsed.scene);throw abortError();}gltf=parsed;
    gltf.scene.traverse(node=>{if(node.isMesh){vertices+=node.geometry.getAttribute('position').count;triangles+=(node.geometry.index?.count??node.geometry.getAttribute('position').count)/3;}});
    if(vertices!==model.vertices||triangles!==model.triangles)throw Error('XR source geometry differs');support=prepareResearchSupport(collectResearchSupport(gltf.scene));countDraws(gltf.scene,'source');scene.add(gltf.scene);
+   appearance=installXRBambooAppearance(gltf.scene);
    environment=createXRStageEnvironment({bounds:model.bounds});countDraws(environment.group,'stage');scene.add(environment.group);
    (host.querySelector('[data-xr-scene-surface]')??host).appendChild(renderer.domElement);
   }
@@ -268,7 +275,7 @@ export async function acquireXRStage({host,signal,model,stages,videos,positions=
     const rect=renderer.domElement.getBoundingClientRect();if(clientX<rect.left||clientX>rect.right||clientY<rect.top||clientY>rect.bottom)return false;const local=xrStageCanvasPoint(clientX,clientY,rect,size,handheld);if(!local)return false;ndc.set(local.x/size.width*2-1,-local.y/size.height*2+1);raycaster.setFromCamera(ndc,camera);
     return raycaster.intersectObject(gltf.scene,true).length?{source:true,kind:'model'}:false;
    },
-   inspect:()=>({mode,chapter:state.chapter,successfulPaint,sourceRevision:revision,sourceUnits:model.sourceUnits,webUnits:model.webUnits,vertices,triangles,pose,view:{azimuth:state.azimuth,elevation:state.elevation,cameraIntent:state.cameraIntent??null},support:support?.inspect()??{disposed:true,points:0,bytes:0,bounds:null},sourceTransforms:gltf?.scene.children.map(node=>({position:node.position.toArray(),scale:node.scale.toArray(),quaternion:node.quaternion.toArray()})),surface:renderer?{draws,cameraFits,compositor:{...handheld,writes:compositorWrites,kind:'2d-pan-roll'},calls:renderer.info.render.calls,sourceCalls:drawCounts.source,phoneCalls:drawCounts.phoneBody+drawCounts.phoneScreen,phoneBodyCalls:drawCounts.phoneBody,phoneScreenCalls:drawCounts.phoneScreen,stageCalls:drawCounts.stage,environment:environment?.inspect()??null,viewport:renderView?{...renderView}:null,clearAlpha:renderer.getClearAlpha(),budget:budget.inspect(),pixelBudget:phoneChapter(state.chapter)?RESEARCH_PHONE_PIXELS:RESEARCH_MODEL_PIXELS}:null,media:{stage:activeStage?.id??null,pending:mediaPending,frames:mediaFrames,time:mediaTime,native:mediaHandle?.inspect()??null,reason:mediaReason,position:activeStage?videos[activeStage.id].currentTime:null},fallbackReason:gpuReason,lastRenderFailure,paused:state.paused,disposed}),
+   inspect:()=>({mode,chapter:state.chapter,successfulPaint,sourceRevision:revision,sourceUnits:model.sourceUnits,webUnits:model.webUnits,vertices,triangles,appearance:appearance?.inspect()??null,pose,view:{azimuth:state.azimuth,elevation:state.elevation,cameraIntent:state.cameraIntent??null},support:support?.inspect()??{disposed:true,points:0,bytes:0,bounds:null},sourceTransforms:gltf?.scene.children.map(node=>({position:node.position.toArray(),scale:node.scale.toArray(),quaternion:node.quaternion.toArray()})),surface:renderer?{draws,cameraFits,compositor:{...handheld,writes:compositorWrites,kind:'2d-pan-roll'},calls:renderer.info.render.calls,sourceCalls:drawCounts.source,phoneCalls:drawCounts.phoneBody+drawCounts.phoneScreen,phoneBodyCalls:drawCounts.phoneBody,phoneScreenCalls:drawCounts.phoneScreen,stageCalls:drawCounts.stage,environment:environment?.inspect()??null,viewport:renderView?{...renderView}:null,clearAlpha:renderer.getClearAlpha(),budget:budget.inspect(),pixelBudget:phoneChapter(state.chapter)?RESEARCH_PHONE_PIXELS:RESEARCH_MODEL_PIXELS}:null,media:{stage:activeStage?.id??null,pending:mediaPending,frames:mediaFrames,time:mediaTime,native:mediaHandle?.inspect()??null,reason:mediaReason,position:activeStage?videos[activeStage.id].currentTime:null},fallbackReason:gpuReason,lastRenderFailure,paused:state.paused,disposed}),
    dispose,
   };
  }catch(error){dispose();throw error;}

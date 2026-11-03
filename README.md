@@ -1,21 +1,24 @@
 # JosHsuan Chao — portfolio architecture
 
 A static portfolio with native editorial pages, source-backed project studies,
-and optional 3D/media presentation. The public site is
+and continuous 3D/media presentation with readable native fallbacks. The public site is
 [**joshsuan.github.io**](https://joshsuan.github.io/).
 
 This repository contains **two independent applications**. The selected public
 application lives in the Bending-Active case workspace; the reusable `src/`
 framework intentionally contains no personal projects or registered scenes.
-The latest refinement is governed by [decision 0019](docs/decisions/0019-portfolio-refinement-and-runtime.md)
-and its [integration and acceptance record](roles/uiux-designer/cases/bending-active-thesis/PORTFOLIO_REFINEMENT_INTEGRATION.md).
+The latest refinement is governed by [decision 0021](docs/decisions/0021-continuous-motion-portfolio.md)
+and its [integration and acceptance record](roles/uiux-designer/cases/bending-active-thesis/CONTINUOUS_MOTION_INTEGRATION.md).
+The [project design direction](roles/uiux-designer/cases/bending-active-thesis/PORTFOLIO_DESIGN_DIRECTION.md)
+records the Apple/Lusion references, square discovery cards, instance events,
+source-scale cinematography and photograph-informed material requirements.
 Implemented source, local acceptance and a deployed release are separate facts;
 the public [`release.json`](https://joshsuan.github.io/release.json) identifies
 the deployed commit and source revisions.
 
 The [site-wide refinement coverage matrix](roles/uiux-designer/cases/bending-active-thesis/PORTFOLIO_SITEWIDE_COVERAGE.md)
-tracks global typography, the bounded motion pilot, scroll-led camera plans and
-remaining narrative/route acceptance; individual case releases are rollout slices.
+retains historical rollout evidence. The current contract requires shared liquid
+card motion, all model adapters, Home discovery and complete route acceptance.
 
 ## System boundaries
 
@@ -28,7 +31,7 @@ remaining narrative/route acceptance; individual case releases are rollout slice
 Both applications use Next.js static export with trailing-slash routes. The
 public site needs no request-time Node server, database, CMS or account service.
 Native document links preserve direct loading, browser history and resource
-lifetimes. Text, captions, credits, source links and poster alternatives remain
+lifetimes. Text, captions, credits, project links and poster alternatives remain
 HTML; understanding a project does not require WebGL or completing an animation.
 
 The primary stack is Next.js/React and Three.js; Bending uses a demand-rendered
@@ -95,7 +98,7 @@ describe their boundaries.
 | `GlobalBackground` / `BackgroundRuntime` | One exclusive Layer 1 lease per document. The service owns no camera or clock. Bending delegates it to its existing Director; ordinary pages use `SiteBackgroundDriver`. |
 | `SiteNavigation`, `SiteReadiness`, preview readiness | Native document handoff and bounded font/image/required-preview readiness. A verified first draw or explicit static terminal precedes optional enhancement; timeout/failure never fabricates readiness. |
 | `SiteBackgroundDriver` | Existing ordinary-page demand scheduler for atmosphere, Home/six-case reading response, glass and generic project source presentation. No separate generic chapter or media animation loop. |
-| `ProjectStudyChapterPresenter` | One six-case semantic chapter owner. Layout invalidation caches fractional native section anchors; the current viewport midpoint selects chapter intent, rail and counter before source presentation. Native pause owns one intent and truthful controls. |
+| `ProjectStudyChapterPresenter` | One six-case semantic chapter owner. Layout invalidation caches fractional native section anchors; the current viewport midpoint selects chapter intent, rail and counter before source presentation. No user or preference-driven motion pause mode is exposed. |
 | `ProjectStudyBackdropPresenter` | One generic image/video/model source transaction: exit → prepare → enter → hold, with explicit supersession/failure closure and actual decode/paint gates. |
 | Stage registry / scene presenter / Three adapter | React registers a native host; the project owner manages preparation and inspection; the renderer alone writes the source model and final camera. Off-chapter ready resources are retained, then disposed on actual departure. |
 | Bending runtime / `ExperienceDirector` | Closed feature registration, validated commands/discrete state, native reading and its existing chapter/frame orchestration. Continuous values stay outside React state. |
@@ -113,16 +116,34 @@ One writer owns each camera/property. Each established presentation owner keeps
 its existing demand scheduler; Bending substitutes its Director for the ordinary
 background driver, and XR retains its separate project-stage ownership. No new
 clock is introduced by the six-case chapter refactor. **Native video owns media
-time**: scrolling chooses a source, not its playback position. Pause, finite
-end/replay and retained per-recording time remain native transport facts.
+time**: scrolling chooses a source, not its playback position. Finite end/replay
+and retained per-recording time remain native transport facts. User-facing motion
+pause controls and automatic reduced-motion/Save Data static selection are removed.
 
 Hidden/frozen and persisted pagehide states compose suspension reasons, cancel
 outstanding frame work and stop media without replaying elapsed hidden time.
 BFCache restoration reuses retained resources and refreshes native layout.
 Nonpersisted departure disposes listeners/observers, pending acquisition,
 callbacks/deadlines, native media sources, render resources and the background
-lease. Reduced motion, Save Data, failed WebGL/media and no-JavaScript reading
-retain meaningful static material.
+lease. Failed WebGL/media and no-JavaScript reading retain meaningful static
+material. Visible motion remains active across operating-system motion and data
+preferences; renderer pixel budgets, compression, cached environment lighting
+and bounded draw rates control cost instead.
+
+Home uses the ordinary-page scheduler for one sequential project-model showcase
+and a native-scroll card deck. Eight project cards appear in a fixed reversible
+order; section snapping applies only at the About/Discover/Contact boundaries.
+The separate Project page retains its grid. The shared information presenter
+uses scroll velocity and acceleration to curve a single field, including
+opposing peripheral distortion and liquid recovery. Original image pixels and
+captions stay inline; there is no image enlargement UI.
+
+Mode/s has separate unit and machine source intervals. Caschlatsch includes its
+original large structure. Generic scene collections dispose the outgoing model
+before acquiring another and preserve one live renderer. Architecture paths use
+source scale and low eye lines; source geometry remains immutable. XR phone
+recordings use native 888 × 1920 derivatives reconstructed from original footage,
+with a larger screen pixel budget independent of the assembly budget.
 
 ## Development and verification
 

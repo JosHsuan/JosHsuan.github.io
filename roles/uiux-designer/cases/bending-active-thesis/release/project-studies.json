@@ -72,6 +72,26 @@
           ]
         },
         {
+          "id": "mechanism",
+          "label": "Machine assembly",
+          "kind": "system",
+          "title": "Meet the machine behind the cut.",
+          "paragraphs": [
+            "I developed the machine setup around planar tool movement and a rotating holder for the polystyrene blank. The original CAD assembly shows the frame, guides, motors, belts, bearings and tool holder in their source arrangement.",
+            "The source drawing connects these components with the control workflow. Arduino and Marlin provided open-source foundations; the following simulation and recordings show how the study developed into cutting."
+          ],
+          "media": [
+            {
+              "src": "/assets/projects/mode-s-of-making/machine-system.webp",
+              "width": 1783,
+              "height": 2606,
+              "credit": "Design study: Chia-Hsuan Chao / National Cheng Kung University.",
+              "alt": "The original heat-cutting machine study shows its frame, movement system, rotating holder and tool.",
+              "caption": "Original studio machine-system drawing, relating the assembled frame to its movement and control components."
+            }
+          ]
+        },
+        {
           "id": "making",
           "label": "Tool and blank",
           "kind": "make",
@@ -243,15 +263,15 @@
             "progress": 0,
             "yawRad": 0.56,
             "pitchRad": 0.18,
-            "fovDeg": 36,
-            "zoom": 1.04
+            "fovDeg": 38,
+            "zoom": 1.06
           },
           {
             "chapter": "context",
             "progress": 0.6,
             "yawRad": 0.72,
             "pitchRad": 0.22,
-            "fovDeg": 36,
+            "fovDeg": 34,
             "zoom": 1.04
           },
           {
@@ -259,7 +279,7 @@
             "progress": 0,
             "yawRad": 0.84,
             "pitchRad": 0.26,
-            "fovDeg": 36,
+            "fovDeg": 32,
             "zoom": 1.04
           },
           {
@@ -268,7 +288,7 @@
             "yawRad": 0.98,
             "pitchRad": 0.3,
             "fovDeg": 36,
-            "zoom": 1.04
+            "zoom": 1.06
           }
         ]
       },
@@ -338,6 +358,79 @@
             "caption": "Original recording of the physical rotary-cutting prototype machining a polystyrene workpiece.",
             "credit": "Studio design and fabrication: Chia-Hsuan Chao / National Cheng Kung University."
           }
+        }
+      ],
+      "additionalModels": [
+        {
+          "src": "/assets/projects/mode-s-of-making/machine-materials.glb",
+          "sha256": "4b70d53fe51ed04e039285d797c1ead2babf027ffc05244b45080757a5877da9",
+          "bytes": 10309368,
+          "sourceUnits": "millimeters",
+          "webUnits": "meters",
+          "upAxis": "Y",
+          "vertices": 503822,
+          "triangles": 737282,
+          "primitive": "triangles",
+          "bounds": {
+            "min": [
+              -0.2519393563270569,
+              0,
+              -0.24998979270458221
+            ],
+            "max": [
+              0.2519393563270569,
+              0.260502427816391,
+              0.24998979270458221
+            ]
+          },
+          "meshes": 1,
+          "poster": {
+            "src": "/assets/projects/mode-s-of-making/machine-system.webp",
+            "width": 1783,
+            "height": 2606,
+            "credit": "Design study: Chia-Hsuan Chao / National Cheng Kung University.",
+            "alt": "The original heat-cutting machine study shows its frame, movement system, rotating holder and tool.",
+            "caption": "Original studio machine-system drawing, relating the assembled frame to its movement and control components."
+          },
+          "alt": "Original assembled rotary heat-cutting machine study, with the source frame, carriage, guides, motors, bearings and tool holder.",
+          "chapters": [
+            "mechanism"
+          ],
+          "views": {
+            "mechanism": {
+              "yaw": 0.56,
+              "pitch": 0.26,
+              "fov": 38,
+              "zoom": 1.06
+            }
+          },
+          "cameraPath": [
+            {
+              "chapter": "mechanism",
+              "progress": 0,
+              "yawRad": 0.56,
+              "pitchRad": 0.26,
+              "fovDeg": 38,
+              "zoom": 1.06
+            },
+            {
+              "chapter": "mechanism",
+              "progress": 0.5,
+              "yawRad": 0.82,
+              "pitchRad": 0.34,
+              "fovDeg": 34,
+              "zoom": 1.04
+            },
+            {
+              "chapter": "mechanism",
+              "progress": 1,
+              "yawRad": 1.02,
+              "pitchRad": 0.4,
+              "fovDeg": 32,
+              "zoom": 1.06
+            }
+          ],
+          "id": "machine"
         }
       ]
     },
@@ -674,15 +767,15 @@
             "chapter": "context",
             "progress": 0,
             "yawRad": 0.58,
-            "pitchRad": 0.16,
-            "fovDeg": 36,
-            "zoom": 1.04
+            "pitchRad": -0.14,
+            "fovDeg": 42,
+            "zoom": 1.06
           },
           {
             "chapter": "system",
             "progress": 0,
-            "yawRad": 0.9,
-            "pitchRad": 0.34,
+            "yawRad": 0.82,
+            "pitchRad": -0.09,
             "fovDeg": 36,
             "zoom": 1.04
           },
@@ -690,9 +783,9 @@
             "chapter": "system",
             "progress": 1,
             "yawRad": 1.08,
-            "pitchRad": 0.38,
-            "fovDeg": 36,
-            "zoom": 1.04
+            "pitchRad": -0.035,
+            "fovDeg": 32,
+            "zoom": 1.05
           }
         ]
       },
@@ -925,15 +1018,15 @@
             "progress": 0,
             "yawRad": 0.5,
             "pitchRad": 0.16,
-            "fovDeg": 36,
-            "zoom": 1.04
+            "fovDeg": 38,
+            "zoom": 1.05
           },
           {
             "chapter": "system",
             "progress": 0.5,
             "yawRad": 0.76,
             "pitchRad": 0.22,
-            "fovDeg": 36,
+            "fovDeg": 34,
             "zoom": 1.04
           },
           {
@@ -942,7 +1035,7 @@
             "yawRad": 1.02,
             "pitchRad": 0.28,
             "fovDeg": 36,
-            "zoom": 1.04
+            "zoom": 1.05
           }
         ]
       },
@@ -1177,24 +1270,24 @@
             "progress": 0,
             "yawRad": 0.72,
             "pitchRad": 0.14,
-            "fovDeg": 36,
-            "zoom": 1.04
+            "fovDeg": 40,
+            "zoom": 1.05
           },
           {
             "chapter": "system",
             "progress": 0,
             "yawRad": 0.92,
-            "pitchRad": 0.38,
-            "fovDeg": 36,
-            "zoom": 1.04
+            "pitchRad": 0.32,
+            "fovDeg": 34,
+            "zoom": 1.05
           },
           {
             "chapter": "system",
             "progress": 1,
             "yawRad": 1.08,
-            "pitchRad": 0.42,
-            "fovDeg": 36,
-            "zoom": 1.04
+            "pitchRad": 0.38,
+            "fovDeg": 30,
+            "zoom": 1.06
           }
         ]
       },
@@ -1436,24 +1529,24 @@
             "progress": 0,
             "yawRad": 0.6,
             "pitchRad": 0.16,
-            "fovDeg": 36,
-            "zoom": 1.04
+            "fovDeg": 38,
+            "zoom": 1.05
           },
           {
             "chapter": "system",
             "progress": 0,
             "yawRad": 0.92,
-            "pitchRad": 0.32,
-            "fovDeg": 36,
+            "pitchRad": 0.28,
+            "fovDeg": 34,
             "zoom": 1.04
           },
           {
             "chapter": "system",
             "progress": 1,
             "yawRad": 1.12,
-            "pitchRad": 0.36,
-            "fovDeg": 36,
-            "zoom": 1.04
+            "pitchRad": 0.32,
+            "fovDeg": 32,
+            "zoom": 1.05
           }
         ]
       },
@@ -1713,6 +1806,84 @@
       "related": {
         "href": "/projects/xr-bending-active/",
         "title": "Extended Reality for Bending-Active Structures"
+      },
+      "model": {
+        "src": "/assets/projects/project-caschlatsch/model-materials.glb",
+        "sha256": "4cf15112d405619ec27bc82fb81738f12d2da222ac1b720fd79f970a53af3e93",
+        "bytes": 1176628,
+        "sourceUnits": "millimeters",
+        "webUnits": "meters",
+        "upAxis": "Y",
+        "vertices": 61362,
+        "triangles": 31152,
+        "primitive": "triangles",
+        "bounds": {
+          "min": [
+            -2.1165409088134766,
+            0,
+            -2.1111583709716797
+          ],
+          "max": [
+            2.1165409088134766,
+            7.785984516143799,
+            2.1111583709716797
+          ]
+        },
+        "meshes": 1,
+        "poster": {
+          "src": "/assets/projects/project-caschlatsch/portfolio-timber-model.webp",
+          "width": 1141,
+          "height": 761,
+          "alt": "Timber tower model on a stepped white site model in front of a window.",
+          "caption": "The architectural timber-tower model.",
+          "credit": "Source publication: Chia-Hsuan Chao / ETH MAS DFab 2023–24.",
+          "purpose": "photograph"
+        },
+        "alt": "Original full-size CAD structure of Project Caschlatsch, including the complete timber assembly in its source relative arrangement.",
+        "chapters": [
+          "context",
+          "system"
+        ],
+        "views": {
+          "context": {
+            "yaw": 0.62,
+            "pitch": -0.14,
+            "fov": 42,
+            "zoom": 1.06
+          },
+          "system": {
+            "yaw": 0.9,
+            "pitch": -0.08,
+            "fov": 36,
+            "zoom": 1.04
+          }
+        },
+        "cameraPath": [
+          {
+            "chapter": "context",
+            "progress": 0,
+            "yawRad": 0.62,
+            "pitchRad": -0.14,
+            "fovDeg": 42,
+            "zoom": 1.06
+          },
+          {
+            "chapter": "system",
+            "progress": 0,
+            "yawRad": 0.9,
+            "pitchRad": -0.08,
+            "fovDeg": 36,
+            "zoom": 1.04
+          },
+          {
+            "chapter": "system",
+            "progress": 1,
+            "yawRad": 1.14,
+            "pitchRad": -0.025,
+            "fovDeg": 32,
+            "zoom": 1.05
+          }
+        ]
       }
     }
   ]

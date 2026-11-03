@@ -23,8 +23,9 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
  let active=null,serial=0,connected=false,disposed=false,deadlineTimer=null,revealTimer=null,resource=null,releaseScene=null;
  let handedOff=false,sceneId=null,documentResult=null,pendingScene=null,lastScenePhase='preparing',previewResource=null;
  let revealGeneration=0,revealMode=null,revealAnimations=[],revealFrame=null,revealExpiresAt=null,startupExpiresAt=null,completePreparation=null;
+ let startupRemaining=null,resumeStartup=null;
  const sceneRoute=path(win.location.pathname)===BENDING_ROUTE;
- const reduced=win.matchMedia?.('(prefers-reduced-motion: reduce)');
+ const reduced={matches:false};
  const monotonic=()=>win.performance?.now()??now();
  // Opt-in observation only: no new clock, scheduler or readiness prerequisite.
  const diagnosticEvents=win.__SITE_NAVIGATION_DIAGNOSTICS__===true?[]:null;
@@ -45,6 +46,7 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
  const clearDeadlines=()=>{if(deadlineTimer!==null)clearTimer(deadlineTimer);if(revealTimer!==null)clearTimer(revealTimer);deadlineTimer=revealTimer=null;};
  const releaseReveal=()=>{
   revealGeneration++;revealMode=null;
+  startupRemaining=null;resumeStartup=null;
   if(revealFrame!==null)win.cancelAnimationFrame(revealFrame);revealFrame=null;revealExpiresAt=startupExpiresAt=null;completePreparation=null;
   const owned=revealAnimations;revealAnimations=[];
   for(const animation of owned)try{animation.cancel();}catch{/* Continue releasing the other owned animation. */}
@@ -173,6 +175,11 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
    begin();
   });
  };
+ const pauseStartup=()=>{
+  if(startupExpiresAt===null||startupExpired())return;
+  startupRemaining=Math.max(0,startupExpiresAt-monotonic());startupExpiresAt=null;
+  if(deadlineTimer!==null)clearTimer(deadlineTimer);deadlineTimer=null;
+ };
  const applyScene=fact=>{
   if(!active||active.kind!=='arrival')return;
   if(sceneId!==null&&sceneId!==fact.id){cancel('scene-replaced');request('arrival',win.location.href);}
@@ -234,14 +241,17 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
    if(startupExpired())return;
    const armStartup=()=>{deadlineTimer=setTimer(()=>{
     if(disposed||current!==active?.id||active.phase!=='requested')return;
+    if(startupExpiresAt===null)return;
     // A fractional delay must not release a live prerequisite or lose the
     // bound if a host delivers its timer before the monotonic endpoint.
     if(monotonic()<startupExpiresAt){armStartup();return;}
     const pending=resource;resource=null;pending?.release();startupExpired();
    },Math.max(0,Math.ceil(startupExpiresAt-monotonic())));};
+   resumeStartup=armStartup;
    armStartup();
+   if(doc.hidden)pauseStartup();
   }
-  const documentResource=acquireReadiness(doc,{setTimeout:setTimer,clearTimeout:clearTimer,deadline:sceneRoute?deadline:Math.ceil(Math.max(0,startupExpiresAt-monotonic()))});
+  const documentResource=acquireReadiness(doc,{setTimeout:setTimer,clearTimeout:clearTimer,now:monotonic,deadline:sceneRoute?deadline:Math.ceil(Math.max(0,startupRemaining??startupExpiresAt-monotonic()))});
   if(diagnosticEvents)documentResource.promise.then(result=>diagnostic('document-promise-observed',readinessFacts(result),epoch),()=>diagnostic('document-promise-observed',{status:'rejected'},epoch));
   if(sceneRoute)resource=documentResource;
   else{
@@ -323,12 +333,16 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
     if(sceneRoute){releaseScene?.();releaseScene=subscribeScene(sceneFact);}
    });
    events.listen(scope,doc,'visibilitychange',()=>{
-    if(!doc.hidden||active?.kind!=='arrival'||sceneRoute||!documentResult?.ready)return;
+    if(active?.kind!=='arrival'||sceneRoute||terminal.has(active.phase))return;
+    // Only unfinished resource acquisition suspends its visible-time budget.
+    // Native play/reveal already has its existing hidden-static/expiry policy.
+    if(active.phase==='requested'&&!documentResult?.ready){
+     if(doc.hidden)pauseStartup();
+     else if(startupRemaining!==null){startupExpiresAt=monotonic()+startupRemaining;startupRemaining=null;resumeStartup?.();}
+     return;
+    }
+    if(!doc.hidden)return;
     if(active.phase==='requested')completePreparation?.('hidden-static');else if(['ready','revealing'].includes(active.phase))completeReveal('hidden-static');
-   });
-   if(reduced)events.listen(scope,reduced,'change',()=>{
-    if(!reduced.matches||active?.kind!=='arrival'||sceneRoute||!documentResult?.ready)return;
-    if(active.phase==='requested')completePreparation?.('reduced-motion');else if(['ready','revealing'].includes(active.phase))completeReveal('reduced-motion');
    });
    arrival();if(sceneRoute)releaseScene=subscribeScene(sceneFact);
    return dispose;

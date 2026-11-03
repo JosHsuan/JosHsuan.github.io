@@ -44,17 +44,17 @@ test('entry waits for actual scene paint and releases a deep-linked library only
  }finally{release();}
 });
 
-test('Reduced entry preserves reading when its deep-linked library hydrates after entry',async({page})=>{
+test('OS Reduced entry waits for actual scene paint and preserves reading when its library hydrates later',async({page})=>{
  let release;const libraryGate=new Promise(resolve=>{release=resolve;});
  await page.route('**/assets/diagrams/library.json',async route=>{await libraryGate;await route.continue();});
  try{
   await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/projects/bending-active/#pattern',{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered',null,{timeout:WAIT});
   const entry=await page.evaluate(()=>window.__story.inspect().entry);
-  expect(entry.reason).toBe('static-ready');expect(entry.progress).toBe(100);expect(entry.reveal).toBe(1);
+  expect(entry.reason).toBe('');expect(entry.progress).toBe(100);expect(entry.reveal).toBe(1);expect(entry.prerequisites.scene).toBe(true);expect(await page.evaluate(()=>window.__thesis.inspect().ready)).toBe(true);
   await expect(page.locator('[data-entry-loader]')).toBeHidden();await expect(page.locator('[data-project-content]')).not.toHaveAttribute('inert','');
-  await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(0);
-  await expect(page.getByRole('button',{name:'Enable 3D',exact:true})).toBeVisible();
+  await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);
+  await expect(page.getByRole('button',{name:'Enable 3D',exact:true})).toHaveCount(0);
   await expect(page.getByRole('combobox',{name:'Visual detail',exact:true})).toHaveCount(0);
   await expect(page.getByRole('button',{name:/^(Pause|Resume) motion$/})).toHaveCount(0);
   // Only the library is delayed in this regression. Let preceding diagrams
@@ -93,10 +93,12 @@ test('a native hash navigation relinquishes its chapter anchor before later layo
  await settle(page);
  const chapter=page.locator('[data-story-chapter="make"]');
  expect(await chapter.evaluate(element=>Math.abs(element.getBoundingClientRect().top-parseFloat(getComputedStyle(element).scrollMarginTop||0)))).toBeLessThan(1);
- const photo=chapter.locator('img[src$="connection-detail.webp"]'),reserved=await photo.boundingBox();
+ // Layout reservation is measured before the separate liquid-plane transform.
+ // A source decode must not reflow native reading, even while its card moves.
+ const photo=chapter.locator('img[src$="connection-detail.webp"]'),reserved=await photo.evaluate(element=>({width:element.offsetWidth,height:element.offsetHeight}));
  expect(reserved.width).toBeGreaterThan(100);expect(reserved.height).toBeGreaterThan(100);
  release();await photo.evaluate(element=>element.decode());await settle(page);
- const decoded=await photo.boundingBox();
+ const decoded=await photo.evaluate(element=>({width:element.offsetWidth,height:element.offsetHeight}));
  expect(decoded.width).toBeCloseTo(reserved.width,1);expect(decoded.height).toBeCloseTo(reserved.height,1);
  expect(await chapter.evaluate(element=>Math.abs(element.getBoundingClientRect().top-parseFloat(getComputedStyle(element).scrollMarginTop||0)))).toBeLessThan(1);
  await page.evaluate(()=>scrollBy({top:200,behavior:'instant'}));await settle(page);
@@ -163,11 +165,10 @@ for(const viewport of [{width:320,height:844},{width:844,height:390}])test(`cano
    const fact=await frame.evaluate(readEntryComposition);rows.push({phase:'SSR-responsive-breakpoint',width,height,fact});assertEntryComposition(fact);
    if(width!==780){const path=info.outputPath(`direct-SSR-boundary-${width}x${height}.png`);await page.screenshot({path,scale:'device'});await info.attach(`direct-SSR-boundary-${width}x${height}`,{path,contentType:'image/png'});}
   }
-  // The unchanged pre-hydration fail-open animation is intentionally shortened
-  // by Reduced motion. Measure visible SSR first, then verify that policy before
-  // an independent healthy entry; do not freeze the normal 30-second fallback.
+  // Failed scripts still need the bounded native fail-open path. OS preference
+  // does not substitute for source readiness in the independent healthy page.
   await page.emulateMedia({reducedMotion:'reduce'});
-  await expect(page.locator('[data-entry-loader]')).toBeHidden();
+  await expect(page.locator('[data-entry-loader]')).toBeHidden({timeout:WAIT});
   const policy=await page.evaluate(()=>({reduced:matchMedia('(prefers-reduced-motion: reduce)').matches,storyAbsent:window.__story===undefined,context:document.querySelector('[data-entry-loader]').getAttribute('data-entry-context'),loaderVisibility:getComputedStyle(document.querySelector('[data-entry-loader]')).visibility,bodyInert:document.querySelector('[data-project-content]').hasAttribute('inert')}));
   rows.push({phase:'reduced-unhydrated-fail-open',policy});
   expect(policy.reduced).toBe(true);expect(policy.storyAbsent).toBe(true);expect(policy.context).toBeNull();expect(policy.loaderVisibility).toBe('hidden');expect(policy.bodyInert).toBe(false);
@@ -182,7 +183,7 @@ for(const viewport of [{width:320,height:844},{width:844,height:390}])test(`cano
   rows.push({phase:'independent-clean-reduced-entry',viewport:healthyViewport,requests:healthyRequests,coverage:'New clean context with original scripts; not failed-context recovery or delayed hydration.'});
   await healthyPage.goto('/projects/bending-active/',{waitUntil:'load'});
   await expect.poll(()=>healthyPage.evaluate(()=>window.__story?.inspect().entry.phase),{timeout:WAIT}).toBe('entered');
-  await expect(healthyPage.locator('[data-entry-loader]')).toBeHidden();await expect(healthyPage.locator('[data-project-content]')).not.toHaveAttribute('inert','');await expect(healthyPage.locator('[data-cinematic-stage] canvas')).toHaveCount(0);expect(healthyRequests).toEqual([]);expect(requests).toEqual([]);
+  await expect(healthyPage.locator('[data-entry-loader]')).toBeHidden();await expect(healthyPage.locator('[data-project-content]')).not.toHaveAttribute('inert','');await expect(healthyPage.locator('[data-cinematic-stage] canvas')).toHaveCount(1);expect(healthyRequests.some(url=>url.includes('source-layers.glb'))).toBe(true);expect(await healthyPage.evaluate(()=>window.__thesis.inspect().ready)).toBe(true);expect(requests).toEqual([]);
   rows.push({phase:'independent-clean-reduced-entered',url:healthyPage.url()});
   nojs=await browser.newContext({baseURL,viewport,javaScriptEnabled:false});const native=await nojs.newPage();await native.goto('/projects/bending-active/');
   await expect(native.locator('[data-entry-loader]')).toBeHidden();await expect(native.locator('[data-project-content]')).not.toHaveAttribute('inert','');await expect(native.locator('[data-project-content]')).toBeVisible();

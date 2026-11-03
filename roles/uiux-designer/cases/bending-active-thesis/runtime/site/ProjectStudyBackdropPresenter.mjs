@@ -286,10 +286,11 @@ export function createProjectStudyBackdropPresenter({root,window:win,document:do
    if(!descriptors.has(key))descriptors.set(key,{key,chapter,kind:'native'});
    return descriptors.get(key);
   }
-  const modelState=scene?.actor.inspect(),modelUnavailable=modelState?.arrivalStatic&&modelState.posterFailed;
-   const modelKey=scene?`model:${scene.model.sha256}`:null;
+  const selectedModel=scene?(scene.actor.getModel?scene.actor.getModel(chapter):scene.model.chapters.includes(chapter)?scene.model:null):null;
+  const modelState=scene?.actor.inspect(),selectedState=!modelState?.sourceModelSha||modelState.sourceModelSha===selectedModel?.sha256,modelUnavailable=!!selectedModel&&selectedState&&modelState?.arrivalStatic&&modelState.posterFailed;
+   const modelKey=selectedModel?`model:${selectedModel.sha256}`:null;
    if(modelUnavailable)failProjectStudyBackdropMotion(motion,modelKey,modelState.posterFailureReason||modelState.staticReason||'model-poster-unavailable');
-  if(scene?.model.chapters.includes(chapter)&&!modelUnavailable){
+  if(selectedModel&&!modelUnavailable){
     if(!descriptors.has(modelKey))descriptors.set(modelKey,{key:modelKey,chapter,kind:'model'});
     const descriptor=descriptors.get(modelKey);descriptor.chapter=chapter;return descriptor;
   }

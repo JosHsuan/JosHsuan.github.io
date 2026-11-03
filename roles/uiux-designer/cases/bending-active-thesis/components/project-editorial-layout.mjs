@@ -7,7 +7,7 @@ const CAS_SCENES = Object.freeze({
  results: ['portfolio-timber-interior.webp', 'landscape'],
 });
 export function editorialProjectLayout(project) {
- if (project.id !== 'project-caschlatsch') return null;
+ if (project.id !== 'project-caschlatsch'||project.model) return null;
  if (project.model || project.motionMedia?.length) throw new Error('Editorial scenes require the reviewed Caschlatsch still-source policy.');
  return project.sections.map(section => {
   const role = CAS_SCENES[section.id];
@@ -21,6 +21,17 @@ export function editorialProjectLayout(project) {
 
 /** Reviewed mixed ownership: documentary stills leave the leased model/video intact. */
 export function hybridProjectLayout(project) {
+ if(project.id==='project-caschlatsch'&&project.model){
+  if(project.model.chapters.join(',')!=='context,system'||project.motionMedia?.length)throw new Error('Hybrid scenes require the reviewed Caschlatsch model and still-source roles.');
+  const nativeScenes=project.sections.filter(section=>!project.model.chapters.includes(section.id)).map(section=>{
+   const role=CAS_SCENES[section.id];
+   if(!role)throw new Error(`Unreviewed editorial chapter: ${section.id}`);
+   const scene=section.media.find(image=>image.src.endsWith('/'+role[0]));
+   if(!scene)throw new Error(`Missing original editorial source: ${role[0]}`);
+   return {section,scene,evidence:section.media.filter(image=>image.purpose==='diagram')};
+  });
+  return {nativeChapters:['overview',...nativeScenes.map(row=>row.section.id),'credits'],nativeScenes,results:null};
+ }
  if (project.id === 'mode-s-of-making') {
   const results = project.sections.find(section => section.id === 'results');
   const films = [['film-machine-simulation','making','simulation',4.8,120],['film-physical-cutting','fabrication','recording',8.008,240],['prototype-cutting-operation','cutting','recording',8,200]];

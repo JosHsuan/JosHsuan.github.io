@@ -12,6 +12,13 @@ const facts=page=>stage(page).evaluate(node=>node.__xrStage.inspect());
 const workspace=JSON.parse(await readFile(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/xr-workspace.json',import.meta.url),'utf8'));
 const studies=JSON.parse(await readFile(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/project-studies.json',import.meta.url),'utf8')).projects;
 const phoneDiagnostics=new WeakMap();
+async function continuousPresentationControls(page){
+ await expect(page.locator('[data-xr-motion-toggle],[data-phone-play-toggle]')).toHaveCount(0);
+ await expect(page.getByRole('button',{name:/pause|resume|play recording/i})).toHaveCount(0);
+ const imageLinks=await page.locator('[data-xr-study] a').evaluateAll(nodes=>nodes.filter(node=>/\.(?:avif|gif|jpe?g|png|svg|webp)(?:[?#]|$)/i.test(node.getAttribute('href')??'')||node.querySelector('img')).map(node=>node.getAttribute('href')));
+ expect(imageLinks).toEqual([]);
+ await expect(page.locator('[data-image-viewer],[data-image-lightbox],dialog')).toHaveCount(0);
+}
 async function observePhoneLifecycle(page){
  // Test-only, bounded event receipts survive an unresponsive page. No polling,
  // playback changes, extra animation clock, recovery or timeout extension.
@@ -206,6 +213,7 @@ test('one project background stage preserves source geometry, stays idle, and fo
  await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);await expect(page.locator('canvas')).toHaveCount(2);
  const initial=await facts(page),source=initial.resource;closed(initial);
  expect(source.sourceRevision).toBe('82e9679c1e47e93cc1a7bbea588eb0f2c8af142d6f7facc6fe5ffaa6148fdc04');expect(source.vertices).toBe(96312);expect(source.triangles).toBe(190320);
+ expect(source.appearance).toMatchObject({recipe:'source-sweep-bamboo-v1',sweeps:384,closedSweeps:96,coordinateBytes:1540992,materials:1,roughness:.61,metalness:0,sourceGeometryChanged:false,bitmapTextures:0,disposed:false});
  expect(source.sourceUnits).toBe('Millimeters');expect(source.webUnits).toBe('Metres');expect(source.sourceTransforms.every(value=>value.scale.every(n=>n===1))).toBe(true);
  expect(source.surface.sourceCalls).toBe(1);expect(source.surface.phoneCalls).toBe(0);expect(source.surface.phoneBodyCalls).toBe(0);expect(source.surface.phoneScreenCalls).toBe(0);expect(source.surface.stageCalls).toBeGreaterThan(0);
  expect(source.surface.calls).toBe(source.surface.sourceCalls+source.surface.phoneCalls+source.surface.stageCalls);expect(source.surface.clearAlpha).toBe(0);expect(source.surface.budget.budget.pixels).toBeLessThanOrEqual(524288);
@@ -254,7 +262,7 @@ test('one project background stage preserves source geometry, stays idle, and fo
  expect(final.acquisitions).toBe(1);expect(requests).toEqual([expect.stringContaining('/assets/xr/xr-research-assembly.glb')]);expect(errors).toEqual([]);
 });
 
-test('native scrolling selects all three complete recordings in the same scene and pause preserves native media time',async({page})=>{
+test('native scrolling selects all three native-resolution recordings in one continuously playing scene',async({page})=>{
  await observePhoneLifecycle(page);
  const errors=[];page.on('pageerror',error=>errors.push(error.message));await enter(page);await modelReady(page);
  const originalCanvas=await stage(page).locator('canvas').elementHandle();
@@ -265,11 +273,6 @@ test('native scrolling selects all three complete recordings in the same scene a
   const hosts=document.querySelectorAll('[data-xr-stage]');if(hosts.length!==1)throw Error('Expected exactly one XR stage');
   return hosts[0].__xrStage.inspect().resource.media.frames;
  });
- const frameSample=count=>originalCanvas.evaluate(async(_canvas,count)=>{
-  for(let index=0;index<count;index++)await new Promise(requestAnimationFrame);
-  const hosts=document.querySelectorAll('[data-xr-stage]');if(hosts.length!==1)throw Error('Expected exactly one XR stage');
-  return hosts[0].__xrStage.inspect();
- },count);
   let continuity;
   try{
  await expect(page.locator('[data-phone-stage],[data-phone-front-toggle]')).toHaveCount(0);
@@ -279,14 +282,16 @@ test('native scrolling selects all three complete recordings in the same scene a
    const hosts=document.querySelectorAll('[data-xr-stage]');if(hosts.length!==1)throw Error('Expected exactly one XR stage');
    const host=hosts[0],videos=host.querySelectorAll(`[data-xr-stage-video="${id}"]`);if(videos.length!==1)throw Error('Expected exactly one selected recording');
    const recording=videos[0];return{state:host.__xrStage.inspect(),canvasCount:host.querySelectorAll('canvas').length,videoSources:host.querySelectorAll('video[src]').length,
-    originalCanvas:canvas.isConnected&&canvas===host.querySelector('canvas'),nativePlaying:recording.muted&&recording.loop&&recording.playsInline&&!recording.paused,duration:recording.duration,
+    originalCanvas:canvas.isConnected&&canvas===host.querySelector('canvas'),nativePlaying:recording.muted&&recording.loop&&recording.playsInline&&!recording.paused,duration:recording.duration,sourceWidth:recording.videoWidth,sourceHeight:recording.videoHeight,readyState:recording.readyState,error:recording.error?.code??null,currentSource:new URL(recording.currentSrc).pathname,
     canvasBox:canvas.getBoundingClientRect().toJSON(),viewport:{width:innerWidth,height:innerHeight}};
   },id);
   const {state}=sample;closed(state);expect(state.acquisitions).toBe(1);expect(state.resource.media.reason).toBeNull();expect(state.resource.fallbackReason).toBeNull();
   expect(sample.canvasCount).toBe(1);expect(sample.videoSources).toBe(1);expect(sample.originalCanvas).toBe(true);
   expect(sample.canvasBox.x).toBeCloseTo(0,0);expect(sample.canvasBox.y).toBeCloseTo(0,0);expect(sample.canvasBox.width).toBeCloseTo(sample.viewport.width,0);expect(sample.canvasBox.height).toBeCloseTo(sample.viewport.height,0);
   expect({left:state.resource.surface.viewport.left,top:state.resource.surface.viewport.top,width:state.resource.surface.viewport.width,height:state.resource.surface.viewport.height}).toEqual({left:0,top:0,...sample.viewport});
-  expect(state.resource.surface.budget.budget.pixels).toBeLessThanOrEqual(393216);expect(sample.nativePlaying).toBe(true);expect(sample.duration).toBeCloseTo(duration,2);
+  expect(state.resource.surface.budget.budget.pixels).toBeLessThanOrEqual(1600000);expect(sample.nativePlaying).toBe(true);expect(sample.duration).toBeCloseTo(duration,2);expect([sample.sourceWidth,sample.sourceHeight]).toEqual([888,1920]);
+  expect(sample.currentSource).toBe(`/assets/xr/${id}-interface-hd.mp4`);expect(sample.readyState).toBeGreaterThanOrEqual(2);expect(sample.error).toBeNull();expect(state.paused).toBe(false);expect(state.resource.paused).toBe(false);
+  await test.info().attach(`native-${id}-recording`,{body:JSON.stringify({source:sample.currentSource,width:sample.sourceWidth,height:sample.sourceHeight,duration:sample.duration,readyState:sample.readyState,error:sample.error,playing:sample.nativePlaying,sameCanvas:sample.originalCanvas,canvasCount:sample.canvasCount,activeVideoSources:sample.videoSources,budget:state.resource.surface.budget.budget,media:state.resource.media},null,2),contentType:'application/json'});
   const draw=state.resource.surface;expect(draw.sourceCalls).toBe(0);expect(draw.phoneBodyCalls).toBe(1);expect(draw.phoneScreenCalls).toBe(1);expect(draw.phoneCalls).toBe(2);expect(draw.stageCalls).toBeGreaterThan(0);expect(draw.calls).toBe(draw.sourceCalls+draw.phoneCalls+draw.stageCalls);
   const first=await originalCanvas.screenshot(),count=await decodedFrames();
   await expect.poll(decodedFrames).toBeGreaterThan(count+2);expect((await originalCanvas.screenshot()).equals(first)).toBe(false);
@@ -301,25 +306,10 @@ test('native scrolling selects all three complete recordings in the same scene a
   for(const value of continuous){expect(value.opacity).toBe(1);expect(value.cssOpacity).toBe(1);expect(value.painted).toBe(true);expect(value.rendering).toBe('webgl-phone');expect(value.phoneCalls).toBe(2);expect(value.connected).toBe(true);expect(['entry','exit']).not.toContain(value.mode);}
   await test.info().attach('continuous-native-phone-passages',{body:JSON.stringify(continuous),contentType:'application/json'});
   }finally{if(continuity){await continuity.evaluate(value=>value.dispose());await continuity.dispose();}}
- const url=page.url();await page.getByRole('button',{name:'Pause recording',exact:true}).click();
- await expect.poll(()=>originalCanvas.evaluate(()=>{
-  const hosts=document.querySelectorAll('[data-xr-stage]');if(hosts.length!==1)throw Error('Expected exactly one XR stage');
-  const videos=hosts[0].querySelectorAll('[data-xr-stage-video="join"]');if(videos.length!==1)throw Error('Expected exactly one Join recording');return videos[0].paused;
- })).toBe(true);await settled(page,'join');const frozen=await frameSample(0),still=await frameSample(8);
- expect(still.resource.media.position).toBe(frozen.resource.media.position);expect(still.resource.media.frames).toBe(frozen.resource.media.frames);expect(still.resource.surface.draws).toBe(frozen.resource.surface.draws);
- const resume=await originalCanvas.evaluateHandle(()=>{
-  const hosts=document.querySelectorAll('[data-xr-stage]');if(hosts.length!==1)throw Error('Expected exactly one XR stage');
-  const videos=hosts[0].querySelectorAll('[data-xr-stage-video="join"]');if(videos.length!==1)throw Error('Expected exactly one Join recording');
-  const node=videos[0],events=[];const record=event=>events.push({time:node.currentTime,trusted:event.isTrusted,duration:node.duration});node.addEventListener('play',record,{once:true});return{events,dispose(){node.removeEventListener('play',record);}};
- });
- try{
-  await page.getByRole('button',{name:'Play recording',exact:true}).click();let played;
-  await expect.poll(async()=>{const events=await resume.evaluate(value=>value.events);if(events.length===1)played=events[0];return events.length;}).toBe(1);
-  const delta=Math.abs(played.time-frozen.resource.media.position);
-  expect(played.trusted).toBe(true);expect(Math.min(delta,Math.abs(played.duration-delta))).toBeLessThan(.3);await expect.poll(decodedFrames).toBeGreaterThan(frozen.resource.media.frames);expect(page.url()).toBe(url);
- }finally{await resume.evaluate(value=>value.dispose());await resume.dispose();}
- const controls=await originalCanvas.evaluate(()=>{const nodes=document.querySelectorAll('[data-xr-scene-controls]');if(nodes.length!==1)throw Error('Expected exactly one XR scene control group');const node=nodes[0];return{rect:node.getBoundingClientRect().toJSON(),buttons:[...node.querySelectorAll('button')].map(button=>button.getBoundingClientRect().toJSON())};}),viewport=page.viewportSize();
- expect(controls.rect.left).toBeGreaterThanOrEqual(0);expect(controls.rect.top).toBeGreaterThanOrEqual(0);expect(controls.rect.right).toBeLessThanOrEqual(viewport.width);expect(controls.rect.bottom).toBeLessThanOrEqual(viewport.height);expect(controls.buttons.every(rect=>rect.width>=44&&rect.height>=44)).toBe(true);
+ await continuousPresentationControls(page);
+ const position=await video(page,'join').evaluate(node=>node.currentTime);
+ await expect.poll(()=>video(page,'join').evaluate((node,before)=>Math.abs(node.currentTime-before),position)).toBeGreaterThan(.03);
+ await expect(page.locator('[data-xr-scene-controls] button')).toHaveCount(0);
  await scrollChapter(page,'overview');await modelReady(page);await openingVisible(page);
  const returned=await originalCanvas.evaluate(()=>{const hosts=document.querySelectorAll('[data-xr-stage]');if(hosts.length!==1)throw Error('Expected exactly one XR stage');return{state:hosts[0].__xrStage.inspect(),videoSources:hosts[0].querySelectorAll('video[src]').length};});
  expect(returned.videoSources).toBe(0);expect(returned.state.resource.media.stage).toBeNull();expect(returned.state.acquisitions).toBe(1);expect(errors).toEqual([]);
@@ -333,7 +323,7 @@ test('native scrolling selects all three complete recordings in the same scene a
 test('a genuinely delayed recording preserves its paused native frame through a pending reverse and atomic replacement',async({page})=>{
  await observePhoneLifecycle(page);
  let release;const held=new Promise(resolve=>{release=resolve;});let waiting=false;
- await page.route('**/assets/xr/assemble-interface.mp4',async route=>{waiting=true;await held;await route.continue();});
+ await page.route('**/assets/xr/assemble-interface-hd.mp4',async route=>{waiting=true;await held;await route.continue();});
  let continuity,primaryError,advancementBaseline;const advancement=[];
  const saveAdvancement=async outcome=>{
   const path=test.info().outputPath('delayed-recording-advance-diagnostic.json');
@@ -364,7 +354,7 @@ test('a genuinely delayed recording preserves its paused native frame through a 
   await page.locator('[data-xr-chapter="assemble"]').evaluate(node=>node.scrollIntoView({block:'start',behavior:'instant'}));
   await expect.poll(()=>waiting).toBe(true);
   await page.waitForFunction(()=>{const s=document.querySelector('[data-xr-stage]').__xrStage.inspect();return s.chapter==='assemble'&&s.scene.mode==='waiting'&&s.resource.media.pending;},null,{timeout:WAIT});
-  await expect(video(page,'adapt')).toHaveAttribute('src',/adapt-interface\.mp4$/);expect(await video(page,'adapt').evaluate(node=>node.paused)).toBe(true);
+  await expect(video(page,'adapt')).toHaveAttribute('src',/adapt-interface-hd\.mp4$/);expect(await video(page,'adapt').evaluate(node=>node.paused)).toBe(true);
   // The transparent WebGL surface is composited with moving native reading
   // and Layer 1. Compare the retained decoded source pixels directly instead
   // of treating a screenshot of that whole composition as a paused frame.
@@ -376,17 +366,17 @@ test('a genuinely delayed recording preserves its paused native frame through a 
   expect(active.contrast).toBeGreaterThan(32);expect(frozen.contrast).toBeGreaterThan(32);expect(frameIdentity(retained)).toEqual(frameIdentity(frozen));expect(retained.contrast).toBeGreaterThan(32);expect(retained.paused).toBe(true);
   for(const sample of [active,frozen,retained]){expect(sample.wrapper.textureSource).toBe('true');expect(sample.wrapper.display).not.toBe('none');}
   const pending=await facts(page);expect(pending.scene.opacity).toBe(1);expect(pending.resource.successfulPaint).toBe(true);expect(pending.resource.mode).toBe('webgl-phone');expect(pending.resource.surface.phoneCalls).toBe(2);
-  await expect(video(page,'adapt')).toHaveAttribute('src',/adapt-interface\.mp4$/);expect(await video(page,'adapt').evaluate(node=>node.paused)).toBe(true);
+  await expect(video(page,'adapt')).toHaveAttribute('src',/adapt-interface-hd\.mp4$/);expect(await video(page,'adapt').evaluate(node=>node.paused)).toBe(true);
   // Reverse while the target HTTP response is still held. The retained video
   // must become the current owner again; a superseded handle cannot clear it.
-  await phoneReady(page,'adapt');await expect(video(page,'adapt')).toHaveAttribute('src',/adapt-interface\.mp4$/);
+  await phoneReady(page,'adapt');await expect(video(page,'adapt')).toHaveAttribute('src',/adapt-interface-hd\.mp4$/);
   expect(await original.evaluate(node=>node===document.querySelector('[data-xr-stage] canvas'))).toBe(true);
   await expect(stage(page).locator('video[src]')).toHaveCount(1);
   const restoredTime=await video(page,'adapt').evaluate(node=>node.currentTime);
   await expect.poll(()=>video(page,'adapt').evaluate((node,before)=>Math.abs(node.currentTime-before),restoredTime)).toBeGreaterThan(.03);
   const restored=await facts(page);expect(restored.scene.opacity).toBe(1);expect(restored.resource.mode).toBe('webgl-phone');expect(restored.resource.media).toMatchObject({stage:'adapt',pending:false,reason:null});
   await test.info().attach('pending-reverse-restored-source',{body:JSON.stringify(restored),contentType:'application/json'});
-  release();await frames(page,8);expect((await facts(page)).chapter).toBe('adapt');await expect(video(page,'adapt')).toHaveAttribute('src',/adapt-interface\.mp4$/);
+  release();await frames(page,8);expect((await facts(page)).chapter).toBe('adapt');await expect(video(page,'adapt')).toHaveAttribute('src',/adapt-interface-hd\.mp4$/);
   await phoneReady(page,'assemble');expect(await original.evaluate(node=>node===document.querySelector('[data-xr-stage] canvas'))).toBe(true);
   await expect(video(page,'adapt')).not.toHaveAttribute('src');await expect(stage(page).locator('video[src]')).toHaveCount(1);
   const before=await video(page,'assemble').evaluate(node=>node.currentTime);advancementBaseline=before;
@@ -435,15 +425,27 @@ test('a genuinely delayed recording preserves its paused native frame through a 
  }
 });
 
-test('Reduced Motion preserves the selected source posters, native reading and recording links and cancels an active enhancement',async({page})=>{
- await page.emulateMedia({reducedMotion:'reduce'});const requests=[];page.on('request',request=>{if(/\.(glb|mp4)(?:\?|$)/.test(request.url()))requests.push(request.url());});
- await enter(page);await openingVisible(page);await expect(stage(page).locator('canvas')).toHaveCount(0);
- await scrollChapter(page,'method');await expect(stage(page).locator('[data-xr-model-poster]')).toBeVisible();await nativeArrowScroll(page);
- for(const id of ['adapt','assemble','join']){await scrollChapter(page,id);await expect(stage(page).locator(`[data-xr-native-phone="${id}"] img`)).toBeVisible();await expect(page.locator(`[data-xr-recording="${id}"] a[href="/assets/xr/${id}-interface.mp4"]`)).toBeVisible();}
- expect(requests).toEqual([]);await expect(stage(page).locator('video[src]')).toHaveCount(0);
- await page.emulateMedia({reducedMotion:'no-preference'});await phoneReady(page,'join');await page.emulateMedia({reducedMotion:'reduce'});
- await expect(stage(page).locator('canvas')).toHaveCount(0);await expect(stage(page).locator('video[src]')).toHaveCount(0);await expect(stage(page).locator('[data-xr-native-phone="join"] img')).toBeVisible();
- const state=await facts(page);expect(state.resource).toBeNull();expect(state.disposals).toBe(state.acquisitions);closed(state);
+test('OS motion and data preferences preserve the same active model and native recording owners',async({page})=>{
+ await page.emulateMedia({reducedMotion:'reduce'});
+ await page.addInitScript(()=>Object.defineProperty(navigator,'connection',{configurable:true,value:Object.assign(new EventTarget(),{saveData:true})}));
+ const requests=[],errors=[];page.on('request',request=>{if(/\.glb(?:\?|$)/.test(request.url()))requests.push(request.url());});page.on('pageerror',error=>errors.push(error.message));
+ await enter(page);await modelReady(page);await openingVisible(page);await continuousPresentationControls(page);
+ expect(await page.evaluate(()=>({reduced:matchMedia('(prefers-reduced-motion: reduce)').matches,saveData:navigator.connection.saveData}))).toEqual({reduced:true,saveData:true});
+ const original=await stage(page).locator('canvas').elementHandle();
+ await scrollChapter(page,'method');await modelReady(page,'method');const moving=await facts(page);await frames(page,8);const later=await facts(page);
+ expect(later.camera.idleActive).toBe(true);expect(later.camera.activeSeconds).toBeGreaterThan(moving.camera.activeSeconds);expect(later.resource.surface.compositor).not.toEqual(moving.resource.surface.compositor);
+ // Native reading outside the explicit model inspection aperture keeps its
+ // normal arrow-key behavior even when OS motion/data preferences are set.
+ await page.mouse.click(8,100);const scroll=await page.evaluate(()=>scrollY);await page.keyboard.press('ArrowDown');await expect.poll(()=>page.evaluate(()=>scrollY)).toBeGreaterThan(scroll);
+ await phoneReady(page,'join');const position=await video(page,'join').evaluate(node=>node.currentTime);
+ for(const reducedMotion of ['no-preference','reduce']){
+  await page.emulateMedia({reducedMotion});await frames(page,4);
+  expect(await original.evaluate(node=>node===document.querySelector('[data-xr-stage] canvas'))).toBe(true);
+  const state=await facts(page);expect(state).toMatchObject({reduced:false,saveData:false,paused:false,acquisitions:1,disposals:0});expect(state.resource).toMatchObject({mode:'webgl-phone',paused:false,media:{stage:'join',pending:false,reason:null}});closed(state);
+ }
+ await expect.poll(()=>video(page,'join').evaluate((node,before)=>Math.abs(node.currentTime-before),position)).toBeGreaterThan(.03);
+ const native=await video(page,'join').evaluate(node=>({width:node.videoWidth,height:node.videoHeight,paused:node.paused,error:node.error?.code??null}));expect(native).toEqual({width:888,height:1920,paused:false,error:null});
+ expect(requests).toEqual([expect.stringContaining('/assets/xr/xr-research-assembly.glb')]);expect(errors).toEqual([]);
 });
 
 test('unavailable WebGL and genuine context loss retain native recording playback and model fallback keeps reading keys native',async({page,browser})=>{
@@ -465,14 +467,14 @@ test('unavailable WebGL and genuine context loss retain native recording playbac
 
 test('actual HTTP model and recording failures remain readable, do not retry themselves and preserve native project navigation',async({page})=>{
  const denied={model:0,media:0};let denyModel=true,handler;
- const server=createServer((request,response)=>{const pathname=request.url.split('?')[0],kind=pathname==='/assets/xr/xr-research-assembly.glb'&&denyModel?'model':pathname==='/assets/xr/adapt-interface.mp4'?'media':null;if(kind){denied[kind]++;response.writeHead(404,{'Content-Type':'text/plain','Cache-Control':'no-store'}).end('Unavailable test source');return;}handler(request,response);});
+ const server=createServer((request,response)=>{const pathname=request.url.split('?')[0],kind=pathname==='/assets/xr/xr-research-assembly.glb'&&denyModel?'model':pathname==='/assets/xr/adapt-interface-hd.mp4'?'media':null;if(kind){denied[kind]++;response.writeHead(404,{'Content-Type':'text/plain','Cache-Control':'no-store'}).end('Unavailable test source');return;}handler(request,response);});
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const port=server.address().port;handler=createPagesPreviewHandler({root:fileURLToPath(new URL('../../.pages-workspace/out/',import.meta.url)),port});
  try{
   await enter(page,`http://127.0.0.1:${port}`);await expect(stage(page)).toHaveAttribute('data-research-phase','failed',{timeout:WAIT});await openingVisible(page);closed(await facts(page));const modelCount=denied.model;expect(modelCount).toBeGreaterThan(0);await frames(page,8);expect(denied.model).toBe(modelCount);
   denyModel=false;await enter(page,`http://127.0.0.1:${port}`);await modelReady(page);await scrollChapter(page,'adapt');
   await expect.poll(async()=>{const r=(await facts(page)).resource;return r?.media.stage==='adapt'&&!r.media.pending&&r.mode==='poster'&&!!r.media.reason;}).toBe(true);
   await expect(stage(page).locator('[data-xr-native-phone="adapt"] img')).toBeVisible();await expect(stage(page).locator('video[src]')).toHaveCount(0);closed(await facts(page));const mediaCount=denied.media;expect(mediaCount).toBeGreaterThan(0);await frames(page,8);expect(denied.media).toBe(mediaCount);
-  await expect(page.locator('#xr-adapt a[href="/assets/xr/adapt-interface.mp4"]')).toBeVisible();await scrollChapter(page,'overview');await modelReady(page);await page.getByRole('link',{name:'← All projects',exact:true}).click();
+  await expect(page.locator('#xr-adapt a[href="/assets/xr/adapt-interface-hd.mp4"]')).toBeVisible();await scrollChapter(page,'overview');await modelReady(page);await page.getByRole('link',{name:'← All projects',exact:true}).click();
   await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});await expect(page.locator('[data-project-card]')).toHaveCount(studies.length+2);
   await frames(page,2);await page.waitForFunction(()=>{const node=document.querySelector('[data-project-model-preview]');if(!node)return true;const state=node.__projectModelPreview?.inspect();return state&&!state.pending;},null,{timeout:WAIT});
  }finally{await page.goto('about:blank');server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}

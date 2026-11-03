@@ -16,7 +16,7 @@ test('HC3DP presents observed light, readable path evidence and explicit simulat
    await img.scrollIntoViewIfNeeded();await expect.poll(()=>img.evaluate(node=>node.complete&&node.naturalWidth>0)).toBe(true);
    await expect(img).toBeVisible();
    const box=await img.boundingBox();expect(box.x).toBeGreaterThanOrEqual(0);expect(box.x+box.width).toBeLessThanOrEqual(width);
-   await expect(img.locator('..')).toHaveAttribute('href',await img.getAttribute('src'));
+   await expect(img.locator('xpath=ancestor::a')).toHaveCount(0);
   }
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth)).toBe(true);
   const band=page.locator('[data-project-chapter="system"] [data-study-evidence-layout]').first().locator('..');

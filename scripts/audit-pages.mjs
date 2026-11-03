@@ -3,7 +3,7 @@ import {createHash} from 'node:crypto';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import assert from 'node:assert/strict';
-import {assertProjectStudies,assertProjectImage,assertProjectModel,assertProjectAssetRecord,PROJECT_SLUGS} from './project-studies.mjs';
+import {assertProjectStudies,assertProjectImage,assertProjectModel,assertProjectAssetRecord,projectStudyModels,PROJECT_SLUGS} from './project-studies.mjs';
 import {projectMotionMedia,assertProjectVideo} from './project-motion-media.mjs';
 import {assertShareMetadataHtml,assertNotFoundMetadataHtml,assertNoNativeBodySource} from './share-metadata.mjs';
 
@@ -144,7 +144,7 @@ export async function auditPages() {
       assert.equal(digest(bytes), asset.sha256, relative);
       const projectImage=projectImages.find(image=>image.src==='/'+relative);
       if(projectImage)assertProjectImage(bytes,projectImage);
-      const projectModel=records['project-studies'].projects.find(project=>project.model?.src==='/'+relative)?.model;
+      const projectModel=records['project-studies'].projects.flatMap(projectStudyModels).find(model=>model.src==='/'+relative);
       if(projectModel)assertProjectModel(bytes,projectModel);
       const projectVideo=projectVideos.find(media=>media.src==='/'+relative);
       if(projectVideo)assertProjectVideo(bytes,projectVideo);
@@ -225,17 +225,16 @@ export async function auditPages() {
   assert.equal((html.match(/data-story-chapter=/g) || []).length, 0, 'Home must not scroll into a case');
   assert.equal((html.match(/<h1[ >]/g) || []).length, 1, 'One personal introduction heading');
   assert(html.includes('data-home-introduction'), 'Public introduction is present');
-  assert(html.includes('data-home-project-link') && html.includes('href="#projects"'), 'Native introduction-to-project-index link');
+  assert(html.includes('href="#projects"'), 'Native introduction-to-project-discovery link');
   assert(!html.includes('data-cinematic-stage'), 'Home does not mount the case stage');
   const introduction=html.match(/<section id="about"[\s\S]*?<\/section>/)?.[0];
-  assert(introduction&&introduction.includes('data-home-research-story')&&introduction.includes('data-home-research-stage')&&introduction.includes('data-home-research-poster')&&!introduction.includes('data-project-model-preview'), 'Home introduction has one original research specimen and a native poster');
-  assert.equal((html.match(/data-home-research-stage/g)||[]).length,1,'Home owns exactly one research stage');
+  assert(introduction&&introduction.includes('data-home-showcase')&&introduction.includes("Hi, I")&&!introduction.includes('data-home-research-entry'), 'Home has only its greeting/introduction over a project showcase');
+  assert.equal((html.match(/data-home-showcase(?:=|[ >])/g)||[]).length,1,'Home owns exactly one project showcase stage');
   assert(!html.includes('data-project-model-preview'),'Home project grid cannot acquire a second model preview');
-  assert(introduction.includes('data-home-research-link')&&introduction.includes('href="/projects/bending-active/"'),'Research specimen has a native case entry');
   assert.equal((html.match(/data-project-card=/g)||[]).length,2+PROJECT_SLUGS.length,'The two existing and six newly selected evidence-backed projects');
-  assert.equal((html.match(/data-site-preview-required(?:=|[ >])/g)||[]).length,1,'Home declares its live card before component effects');
-  assert(html.includes('data-project-grid-cells="9"'),'Five projects occupy the existing minimum nine-cell index');
-  assert(html.includes('data-home-scroll-window="introduction"'),'Home declares its material scrolling owner');
+  assert.equal((html.match(/data-site-preview-required(?:=|[ >])/g)||[]).length,0,'Home optional background does not hold native introduction readiness');
+  assert(html.includes('data-home-deck')&&!html.includes('data-project-grid-cells'),'Home discovery is distinct from the Project index');
+  assert(html.includes('data-information-window="home-introduction"'),'Home declares its shared liquid material owner');
   for(const route of ['', 'about/']){
     const page=await readFile(path.join(out,route,'index.html'),'utf8');
     assert(page.includes(INTRO_STATEMENT)&&page.includes(INTRO_DESCRIPTION),`${route||'/'}: exact public introduction`);
@@ -316,7 +315,7 @@ export async function auditPages() {
   assert.equal(tagAttribute(tagWith(xr,'header','data-page-masthead'),'class'),tagAttribute(tagWith(bending,'header','data-page-masthead'),'class'),'XR and Bending use the same maintained masthead class');
   const bendingRail=tagAttribute(tagWith(bending,'nav','data-story-navigation'),'class');
   assert(tagAttribute(tagWith(xr,'nav','data-xr-chapter-navigation'),'class').split(/\s+/).includes(bendingRail),'XR keeps the original shared chapter-rail class');
-  for(const marker of ['data-xr-stage','data-xr-chapter','data-xr-model-control','data-information-window','data-xr-native-phone',study.model.poster.src,'adapt-interface.mp4','assemble-interface.mp4','join-interface.mp4'])assert(xr.includes(marker),`XR immersive integration: ${marker}`);
+  for(const marker of ['data-xr-stage','data-xr-chapter','data-xr-model-control','data-information-window','data-xr-native-phone',study.model.poster.src,'adapt-interface-hd.mp4','assemble-interface-hd.mp4','join-interface-hd.mp4'])assert(xr.includes(marker),`XR immersive integration: ${marker}`);
   assert(!xr.includes('data-phone-front-toggle')&&!xr.includes('data-phone-stage='),'XR recording chapters must not depend on view/stage buttons');
   assert(!xr.includes('<details'),'XR core evidence remains directly readable');
   const modelPin=manifest.assets.find(asset=>'/'+asset.path===study.model.src);

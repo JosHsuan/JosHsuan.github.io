@@ -1,11 +1,16 @@
 # Site-wide refinement coverage
 
+## Current 3 November scope
+
+The verified starting release for decision 0021 is `a46a65aebc5c69c805d6e9740d5366ab451d8e63`, matching local main, GitHub main and the public release record. The latest owner request requires a whole-site implementation, not the historical next-slice plan below. [CONTINUOUS_MOTION_INTEGRATION.md](CONTINUOUS_MOTION_INTEGRATION.md) maps all thirteen requirements and the wheel-field clarification to source, browser and publication evidence. Current source changes are implemented; browser qualification and publication remain pending. The earlier release IDs and tests below are retained historical evidence and must not be represented as this candidate's acceptance.
+
+
 Updated 25 October 2026. Refinements are planned and accepted across the whole
 site; a case delivery is one rollout slice, not completion of the website.
 Preserve source evidence, continuous ambient presentation, the single Director,
 native scrolling and the empty reusable framework.
 
-## Current delivery and bounded next slice
+## Historical delivery and bounded slices
 
 Current verified live is `1ca10e7aeb823d6fa21cf1378cf9270ffcf8990b`: [full validation 40234829110](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/40234829110) passed 585/585 public identities, 195 per profile, zero retries, plus 24 framework checks. [Pages #50 / 40237577447](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/40237577447) published the same accepted export. Independent live reconciliation matched all 264 files and 137 original source assets, release before/after and genuine 404/noindex. [Entrance's native portrait opening and Credits](ENTRANCE_HYBRID_SCENES.md) are delivered while its original model, 4/5/2-step source guides and real night recording remain intact. The prospective Full Bending harness policy preserves one complete native journey with a fixed 135-second outer limit and cooperative 60-second phase acceptance; it is not a latency repair or retroactive compliance with the old 60-second whole-test default. The earlier failed a89 gate remains retained. Large WebKit/mobile review streams retain verified selected members, not complete local ZIPs, as documented in the delivery record.
 

@@ -31,8 +31,8 @@ async function inspectPlates(page,definition,info,{noJS=false}={}){
    await expect.poll(()=>image.evaluate(node=>node.complete&&node.naturalWidth>0)).toBe(true);
    await expect(image).toBeVisible();await expect(image).toHaveAttribute('alt',source.alt);
    const anchor=image.locator('..'),figure=image.locator('xpath=ancestor::figure[1]'),caption=figure.locator('figcaption');
-   await expect(anchor).toHaveAttribute('href',src);
-   await expect(anchor).toHaveAttribute('aria-label',`View full image (new tab): ${source.alt}`);
+   await expect(anchor).not.toHaveAttribute('href');
+   await expect(image.locator('xpath=ancestor::a')).toHaveCount(0);
    await expect(caption.locator('p')).toHaveText(source.caption);
    await expect(caption.locator(':scope > span:not([data-information-skin])')).toHaveText(source.credit);
    const geometry=await image.evaluate(node=>{
@@ -119,7 +119,7 @@ async function inspectPlates(page,definition,info,{noJS=false}={}){
 }
 
 for(const definition of cases)test.describe(definition.id,()=>{
- test('promoted source plates retain complete static geometry, captions and full-source links',async({page},info)=>{
+ test('promoted source plates retain complete source geometry and captions without image-viewer links',async({page},info)=>{
   await inspectPlates(page,definition,info);
  });
  test.describe('without JavaScript',()=>{

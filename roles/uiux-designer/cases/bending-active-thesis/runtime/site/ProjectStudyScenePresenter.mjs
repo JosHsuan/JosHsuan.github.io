@@ -46,6 +46,35 @@ export function advanceProjectStudyStageMotion(state,dt,{chapter,chapters,modelC
  return state;
 }
 
+/** A project can have several independently pinned source models. The backdrop
+ * calls prepare only after the outgoing source exits, so replacing this one
+ * actor never exposes a source swap or retains a second WebGL context. Native
+ * chapter reading and the existing driver remain the only progression owners. */
+export function createProjectStudyModelCollection(options){
+ const models=[options.model,...options.additionalModels??[]],byChapter=new Map();
+ for(const model of models)for(const chapter of model.chapters){if(byChapter.has(chapter))throw Error('Project models require nonoverlapping chapter ownership');byChapter.set(chapter,model);}
+ const poster=options.host.querySelector('[data-project-model-poster]'),posterAttributes=poster?Object.fromEntries(['src','width','height','alt'].map(name=>[name,poster.getAttribute(name)])):null;
+ let selected=byChapter.get(options.root.dataset.projectActiveChapter)??models[0],actor=null,reading=null,activeSeconds=0,size=null,disposed=false,suspended=false,switches=0;
+ const publishPoster=model=>{if(!poster||!model.poster)return;for(const [key,value]of Object.entries({src:model.poster.src,width:model.poster.width,height:model.poster.height,alt:''}))options.publisher.attribute(poster,key,value);};
+ const acquireActor=()=>{publishPoster(selected);actor=createProjectStudyScenePresenter({...options,model:selected});if(size)actor.measure(...size);actor.setReading(reading,activeSeconds);if(suspended)actor.suspend('collection-suspended');};
+ acquireActor();
+ return{
+  getModel:chapter=>byChapter.get(chapter)??null,
+  setReading(next,seconds=0){if(disposed)return;reading=next;activeSeconds=seconds;actor.setReading(next,seconds);},
+  measure(width,height){if(disposed)return;size=[width,height];actor.measure(width,height);},
+  prepare(chapter){
+   if(disposed||suspended)return false;const model=byChapter.get(chapter);if(!model)return false;
+   if(model!==selected){actor.dispose();selected=model;switches++;acquireActor();}
+   return actor.prepare(chapter);
+  },
+  publish(frame){return disposed?false:actor.publish(frame);},
+  suspend(reason){if(disposed)return;suspended=true;actor.suspend(reason);},
+  resume(){if(disposed)return;suspended=false;actor.resume();},
+  inspect:()=>({...actor.inspect(),collection:true,sourceModelSha:selected.sha256,sourceModelSrc:selected.src,sourceCount:models.length,switches,disposed}),
+  dispose(){if(disposed)return;disposed=true;actor.dispose();if(posterAttributes)for(const [name,value]of Object.entries(posterAttributes))options.publisher.attribute(poster,name,value);},
+ };
+}
+
 /** One optional scene adapter on the ordinary-page driver's existing clock.
  * React supplies a host; this owner supplies intent/lifecycle; Three alone owns
  * source rendering and its camera. No RAF or autonomous animation is created. */
@@ -65,7 +94,7 @@ export function createProjectStudyScenePresenter({root,host,model,window:win,doc
  if(cameraKeys&&cameraKeys.at(-1)?.at<1)cameraKeys.push({...cameraKeys.at(-1),at:1});
  const cameraPath=cameraKeys?createScrollCameraPath(cameraKeys):null;
  let handheldGain=1,lastHandheld={xPx:0,yPx:0,rollRad:0};
- let reading=null,activeSeconds=0,lastCameraIntent=null,cameraWasPaused=false,cameraRecovery=null;
+ let reading=null,activeSeconds=0,lastLightingSeconds=0,lastCameraIntent=null,cameraWasPaused=false,cameraRecovery=null;
  const inspectionNodes=new Map(model.chapters.map(key=>[key,{target:null,state:null,help:null,reset:null,published:''}]));
  for(const [selector,field,data]of [['[data-project-model-target]','target','projectModelTarget'],['[data-project-model-state]','state','projectModelState'],['[data-project-model-help]','help','projectModelHelp'],['[data-project-model-reset]','reset','projectModelReset']])for(const node of root.querySelectorAll(selector)){const row=inspectionNodes.get(node.dataset[data]);if(row)row[field]=node;}
  for(const row of inspectionNodes.values())row.originalDescription=row.target?.getAttribute?.('aria-describedby')??null;
@@ -100,7 +129,7 @@ export function createProjectStudyScenePresenter({root,host,model,window:win,doc
   else if(state.phase==='failed'){arrivalStatic=true;staticReason=state.reason;staticReady();closeGesture('resource-unavailable',true);}
   announce();schedule();
  },start:async({signal,width,height})=>{
-  const handle=await acquire({host,model,signal,onFailure:reason=>lifecycle.fail(reason)});
+  const handle=await acquire({host,model,signal,onFailure:reason=>{if(!disposed&&!signal.aborted)lifecycle.fail(reason);}});
   if(disposed||signal.aborted){handle.dispose();throw new DOMException('Project study released','AbortError');}
   try{
    handle.present(cameraPresentation(model.chapters.includes(chapter)?chapter:model.chapters[0]));handle.resize(width,height);
@@ -115,15 +144,21 @@ export function createProjectStudyScenePresenter({root,host,model,window:win,doc
   if(disposed)return;const p=policy();
   if(p.hidden||p.reduced||p.saveData||p.paused||suspended)closeGesture(p.hidden?'hidden':p.reduced?'reduced-motion':p.saveData?'save-data':p.paused?'paused':'suspended',true);
   if(!arrivalStatic&&(p.reduced||p.saveData))settleStatic(p.reduced?'reduced-motion':'save-data');
-  if(!arrivalStatic&&(p.hidden||suspended)&&lifecycle.inspect().phase!=='ready')settleStatic(p.hidden?'hidden':'suspended');
+  // Visibility suspends preparation, not the source's eligibility for this
+  // document. The lifecycle aborts pending work and reacquires on return; a
+  // late cancelled generation must never turn that return into a static view.
   if(!arrivalStatic)lifecycle.setActive(!p.hidden&&!suspended,'hidden');
   syncPosterDeadline();
  }
  const activeMotion=()=>externalStage?sharedStage:motion;
  function cameraPresentation(forChapter){
-  const presentation={chapter:forChapter,azimuth:value.azimuth,elevation:value.elevation};
-  if(!cameraPath)return presentation;
   const p=policy();
+  // Light animation shares the ordinary-page clock. Quantizing only this
+  // render input caps light-only WebGL redraws while native camera and DOM
+  // gestures retain their continuous response; reading focus never stops it.
+  if(!p.paused&&!p.hidden&&!suspended)lastLightingSeconds=Math.floor(Math.max(0,activeSeconds)*24)/24;
+  const presentation={chapter:forChapter,azimuth:value.azimuth,elevation:value.elevation,activeSeconds:lastLightingSeconds};
+  if(!cameraPath)return presentation;
   if(p.paused&&lastCameraIntent){cameraWasPaused=true;cameraRecovery=null;}
   if((p.paused||p.hidden||suspended)&&lastCameraIntent)return{...presentation,cameraIntent:lastCameraIntent,handheld:lastHandheld};
   const native=reading?.chapter??forChapter,index=model.chapters.indexOf(native);
@@ -211,7 +246,7 @@ export function createProjectStudyScenePresenter({root,host,model,window:win,doc
    const p=policy(),snap=arrivalStatic||p.paused||p.reduced||p.saveData||resumed;
    if(p.reduced||p.saveData||arrivalStatic){cameraRecovery=null;cameraWasPaused=false;}
    if(p.reduced||p.saveData||arrivalStatic)handheldGain=0;
-   else if(!p.paused&&!p.hidden&&!suspended){const goal=doc.activeElement?.closest?.(BLOCKED)?0:1,step=Math.min(.1,Math.max(0,resumed?0:dt))/.2;handheldGain=goal>handheldGain?Math.min(goal,handheldGain+step):Math.max(goal,handheldGain-step);}
+   else if(!p.paused&&!p.hidden&&!suspended){const goal=press?.locked?0:1,step=Math.min(.1,Math.max(0,resumed?0:dt))/.2;handheldGain=goal>handheldGain?Math.min(goal,handheldGain+step):Math.max(goal,handheldGain-step);}
    if(cameraRecovery&&!p.paused&&!p.hidden&&!suspended&&!resumed){cameraRecovery.elapsed=Math.min(.35,cameraRecovery.elapsed+Math.min(.1,Math.max(0,dt)));if(cameraRecovery.elapsed>=.35)cameraRecovery=null;}
    if(snap||dt>1){value={...target};velocity=rest();settled=true;}
    else{const decay=Math.exp(-16*dt);settled=true;for(const key of Object.keys(value)){const distance=value[key]-target[key],coefficient=velocity[key]+16*distance;value[key]=target[key]+(distance+coefficient*dt)*decay;velocity[key]=(velocity[key]-16*coefficient*dt)*decay;if(Math.abs(value[key]-target[key])<.00001&&Math.abs(velocity[key])<.0001){value[key]=target[key];velocity[key]=0;}else settled=false;}}
@@ -224,8 +259,8 @@ export function createProjectStudyScenePresenter({root,host,model,window:win,doc
    if(!externalStage){publisher.attribute(host,'data-project-model-active',model.chapters.includes(motion.chapter)&&motion.pose.opacity>0?'':null);publisher.attribute(host,'data-project-model-mode',motion.mode);publisher.attribute(host,'data-project-model-chapter',motion.chapter);
     publisher.style(surface,'transform',`translate3d(${motion.pose.x*size.width}px,${motion.pose.y*size.height}px,0)`);publisher.style(surface,'opacity',motion.pose.opacity);}
    publishInspection();
-   const idleDemand=!!(cameraPath&&resource&&p.siteReady&&!arrivalStatic&&!suspended&&!p.hidden&&!p.paused&&!p.reduced&&!p.saveData&&displayed?.pose?.opacity>0&&(!externalStage||displayed.kind==='model')&&!doc.activeElement?.closest?.(BLOCKED));
-   return idleDemand||(handheldGain>0&&!!doc.activeElement?.closest?.(BLOCKED)||!!cameraRecovery)&&!!resource&&displayed?.pose?.opacity>0&&(!externalStage||displayed.kind==='model')&&!p.paused&&!p.hidden&&!suspended||!settled||!externalStage&&!!motion.transition;
+   const idleDemand=!!(cameraPath&&resource&&p.siteReady&&!arrivalStatic&&!suspended&&!p.hidden&&!p.paused&&!p.reduced&&!p.saveData&&displayed?.pose?.opacity>0&&(!externalStage||displayed.kind==='model'));
+   return idleDemand||!!cameraRecovery&&!!resource&&displayed?.pose?.opacity>0&&(!externalStage||displayed.kind==='model')&&!p.paused&&!p.hidden&&!suspended||!settled||!externalStage&&!!motion.transition;
   },
   suspend(reason){if(disposed)return;suspended=true;closeGesture(reason,true);cancelProjectStudyStageMotion(motion,reason);updatePolicy();},
   resume(){if(disposed)return;suspended=false;updatePolicy();},

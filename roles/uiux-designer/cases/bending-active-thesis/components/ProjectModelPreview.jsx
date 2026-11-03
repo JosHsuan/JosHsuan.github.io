@@ -27,15 +27,14 @@ export default function ProjectModelPreview({poster,className=''}){
    else if(snapshot.phase==='failed'){arrivalStatic=true;staticReason=snapshot.reason;staticReady(snapshot.reason);}
   },start:async({signal})=>{
    const preview=await import('./project-model-scene.mjs');if(signal.aborted)throw new DOMException('Preview aborted','AbortError');
-   return preview.acquireProjectModelScene({host:node,signal,onFailure:reason=>lifecycle.fail(reason)});
+   return preview.acquireProjectModelScene({host:node,signal,onFailure:reason=>{if(!signal.aborted)lifecycle.fail(reason);}});
   }});
   if(arrivalStatic)lifecycle.stop(staticReason);
   const eligibility=observePreviewEligibility({element:node,window,document,mode:'page',onChange:({active,reason,reduced,saveData})=>{
    if(arrivalStatic)return;
    if(reduced||saveData){lifecycle.stop(reason);staticReady(reason);return;}
-   // A page opened/hidden before preparation settles on its decoded SSR
-   // poster for this arrival; returning cannot introduce a late 2D-to-3D pop.
-   if(!active&&lifecycle.inspect().phase!=='ready'){settleStatic(reason);return;}
+   // Hidden pending work is cancelled by the lifecycle and can prepare again
+   // on return. Only an actual failure/startup deadline latches the poster.
    lifecycle.setActive(active,reason);
   },onSize:(width,height)=>lifecycle.resize(width,height)});
   const pagehide=event=>{if(!event.persisted){staticReady('page-exit');lifecycle.dispose();}};

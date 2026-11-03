@@ -17,10 +17,10 @@ function Heading({number,label,title,id,kind='system'}) {
 function EvidenceFigure({item,label,eager=false}) {
   return <figure className={styles.figure} data-xr-evidence={item.src}>
     <div className={styles.figureIndex}>{label}</div>
-    <a className={styles.mediaFrame} data-information-window="evidence-image" data-information-motion-surface="plane" href={item.src} target="_blank" rel="noreferrer" aria-label={`View full image (new tab): ${item.alt}`}>
+    <div className={styles.mediaFrame} data-information-window="evidence-image" data-information-motion-surface="plane">
       <InformationSkin/><span className={styles.mediaPlane}><img src={item.src} width={item.width} height={item.height} alt={item.alt} loading={eager?'eager':'lazy'} decoding="async" data-site-critical={eager?'':undefined}/></span>
-    </a>
-    <figcaption data-information-window="evidence-caption" data-information-motion-surface="plane"><InformationSkin/><p>{item.caption}</p><span>{item.credit}</span><a className={styles.recordingLink} data-evidence-source-link href={item.src} target="_blank" rel="noopener noreferrer" aria-label={`Open full image (new tab): ${item.alt}`}>Open full image (new tab)</a></figcaption>
+    </div>
+    <figcaption data-information-window="evidence-caption" data-information-motion-surface="plane"><InformationSkin/><p>{item.caption}</p><span>{item.credit}</span></figcaption>
   </figure>;
 }
 function SceneSlot({stage,inspect=false,context=false}) {

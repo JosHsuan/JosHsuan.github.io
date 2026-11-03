@@ -9,7 +9,10 @@ const mode=studies.find(project=>project.id==='mode-s-of-making');
 const section=id=>mode.sections.find(item=>item.id===id);
 
 test('Mode/s moves from unit and workflow through whole operation and detail to a truthful assembly close',()=>{
- assert.deepEqual(mode.sections.map(item=>item.id),['context','system','making','cutting','fabrication','results']);
+ assert.deepEqual(mode.sections.map(item=>item.id),['context','system','mechanism','making','cutting','fabrication','results']);
+ assert.equal(section('mechanism').media[0].src,'/assets/projects/mode-s-of-making/machine-system.webp');
+ assert.match(section('mechanism').paragraphs.join(' '),/original CAD assembly.*source arrangement/);
+ assert.match(section('mechanism').paragraphs.join(' '),/Arduino and Marlin.*open-source foundations/);
  assert.equal(section('system').media[0].src,section('context').media[0].src);
  assert.equal(section('system').media[1].src,'/assets/projects/mode-s-of-making/film-design-workflow.webp');
  assert.equal(section('making').media[1].src,'/assets/projects/mode-s-of-making/film-corexy-system.webp');
@@ -27,6 +30,8 @@ test('the design-to-code and mechanism plates remain visible supporting evidence
 
 test('narrative reordering preserves the continuous source model and all original motion identities',()=>{
  assert.deepEqual(mode.model.chapters,['context','system']);
+ assert.deepEqual(mode.additionalModels[0].chapters,['mechanism']);
+ assert.equal(mode.additionalModels[0].sha256,'4b70d53fe51ed04e039285d797c1ead2babf027ffc05244b45080757a5877da9');
  assert.equal(mode.model.sha256,'0a6963f5a206d0dc11b5fd9b0d9fc5e2a09085058d86bca62f3fb435a237cee0');
  for(const view of Object.values(mode.model.views))assert.deepEqual(view,{yaw:.56,pitch:.18,fov:36,zoom:1.04});
  assert.deepEqual(mode.motionMedia.map(({id,chapter,kind,durationSeconds,frameCount})=>({id,chapter,kind,durationSeconds,frameCount})),[

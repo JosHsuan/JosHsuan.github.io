@@ -46,7 +46,17 @@ export function createXRStageEnvironment({bounds}){
    }
    const mapped=chapters[chapter]??'overview',index=PLAYBACK_CHAPTERS.findIndex(item=>item.id===mapped);
    const backdrop=sampleChapterScene(sampleChapterPlayback(createChapterPlayback(mapped)),{aspect:camera.aspect,reducedMotion:true}).backdrop;
-   report={...stage.update({camera,bounds:sourceBounds,direction:sampleSceneDirection(SCENE_ANCHORS[index]),backdrop}),
+   const direction=sampleSceneDirection(SCENE_ANCHORS[index]);
+   if(chapter==='method'){
+    // Keep the borrowed set and original bamboo material. Source-fixed broad
+    // lamps let scroll-led orbit reveal changing edges and depth, without an
+    // extra lamp, texture, shadow map or GPU draw for compositor-only handheld.
+    direction.stage.lightFrame='source';
+    direction.exhibition.key.intensity*=.94;
+    direction.exhibition.key.size=direction.exhibition.key.size.map(value=>value*1.1);
+    direction.exhibition.rim.intensity*=1.12;
+   }
+   report={...stage.update({camera,bounds:sourceBounds,direction,backdrop}),
     edgeFeather:{owner:'xr-editorial-materials-only',cssPixels:cssFeather,drawingBuffer:buffer.value.toArray(),physicalPixels:feather.value.toArray()}};
    return report;
   },

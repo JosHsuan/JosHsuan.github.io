@@ -68,7 +68,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
     const links = [...document.querySelectorAll('[data-chapter-link]')];
     const planeMap = new Map(), publisher = input.dom.forOwner('director');
     const pageField=background.acquire({owner:'bending-director',canvas:fieldCanvas.current,backdrop,publisher});
-    const windowPresenter=createInformationWindowPresenter({profile:root.getAttribute('data-information-motion-profile')??'ink',publisher:input.dom.forOwner('information-windows')});
+    const windowPresenter=createInformationWindowPresenter({profile:'velocity-skin',publisher:input.dom.forOwner('information-windows')});
     const libraryPresenter=createLibraryDiagramPresenter({publisher:input.dom.forOwner('library-diagram'),emit:value=>input.events.emit('diagramReveal',value)});
     const liquidPresenter=createLiquidGlassPresenter({publisher:input.dom.forOwner('liquid-glass')});
     const informationObserved=new Set();
@@ -206,7 +206,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       let moving=Math.abs(pointer.x-next.x)+Math.abs(pointer.y-next.y)>.001;if(!moving)pointer={...next};
 
       moving=publishEditorial({choreography,stickyRects,reading,playbackScore,state,didSeek,didResume,sections,planes,hovered,focused,fine,dt,publisher,viewportHeight:innerHeight,chapter})||moving;
-      const informationNeutral=state.reduced||state.motionPaused||state.hidden||!!connection?.saveData||glassPreferences[2].matches||input.entry.inspect().phase!=='entered';
+      const informationNeutral=state.hidden||input.entry.inspect().phase!=='entered';
       moving=windowPresenter.publish({docY:scrollY,dt,reduced:informationNeutral,seek:didSeek,resumed:didResume,canvasPlacement})||moving;
       moving=input.entry.advance(dt,{resumed:didResume,hidden:state.hidden,systemReduced:state.systemReduced})||moving;
       presentNavigation();

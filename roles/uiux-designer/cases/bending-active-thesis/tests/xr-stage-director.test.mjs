@@ -51,7 +51,7 @@ function fixture({pending=false,firstPaintFailure=false,firstPaint,workspacePend
  if(plane){root.setAttribute('data-information-motion-profile','velocity-skin');info.setAttribute('data-information-motion-surface','plane');}
  root.querySelectorAll=selector=>selector==='[data-xr-chapter]'?chapters:selector==='a[href^="#"]'?links:selector==='[data-information-window]'?[info]:[];
  doc.getElementById=id=>chapters.find(node=>node.id===id)??null;
- const control=new Element(doc,{marker:'[data-xr-model-control]'});control.parentElement=root;doc.activeElement=control; // Default fixtures exercise focused, finite reading; idle is tested explicitly below.
+ const control=new Element(doc,{marker:'[data-xr-model-control]'});control.parentElement=root;doc.activeElement=control;
  const protectedNode=new Element(doc,{marker:'[data-protect]'});protectedNode.parentElement=root;
  const starts=[],handles=[],states=[],acquired=deferred();let hit={source:true,kind:'model'};
  const makeHandle=()=>{
@@ -61,7 +61,7 @@ function fixture({pending=false,firstPaintFailure=false,firstPaint,workspacePend
  const director=createXRStageDirector({root,host,window:win,document:doc,onState:value=>states.push(value),acquire:options=>{starts.push(options);return pending&&starts.length===1?acquired.promise:Promise.resolve(makeHandle());}});
  const cleanup=director.connect();
  const frame=(elapsed=16)=>{now+=elapsed;const work=[...raf.values()];raf.clear();for(const fn of work)fn(now);};
- const settle=async()=>{await flush();for(let i=0;i<240&&raf.size;i++){frame();await flush();}assert.equal(raf.size,0,'Finite scene and reading-skin work must settle');};
+ const settle=async()=>{await flush();for(let i=0;i<240&&raf.size;i++){frame();await flush();const state=director.inspect();if(state.camera.needsFrame&&state.camera.settled&&state.scene.settled&&state.informationWindows.settled&&state.liquidGlass.settled&&!state.camera.recovering)break;}assert.equal(raf.size,director.inspect().camera.needsFrame?1:0,'Finite transitions settle while the visible model keeps exactly one live frame');};
  const site=phase=>{doc.documentElement.setAttribute('data-site-entry-state',phase);for(const o of observers.filter(o=>o.kind==='mutation'))o.fn([]);};
  const scroll=key=>{win.scrollY=chapters.find(node=>node.dataset.xrChapter===key).offsetTop;win.fire('scroll');};
  const pointer=(type,overrides={})=>{const event={type,pointerId:1,pointerType:'mouse',isPrimary:true,button:0,clientX:600,clientY:400,target:control,prevented:0,preventDefault(){this.prevented++;},...overrides};doc.fire(type,event);return event;};
@@ -80,8 +80,8 @@ test('native XR chapters, real information presenter and first paint compose one
  f.win.fire('resize');f.pointer('pointermove');f.win.fire('wheel',{deltaY:300});await f.settle();
  assert.equal(f.director.inspect().frames,baseline.frames);assert.equal(f.handles[0].presents.length,draws);assert.equal(f.states.length,count);
  f.scroll('adapt');await f.settle();assert.equal(f.director.inspect().chapter,'adapt');assert.equal(f.handles[0].presents.at(-1).chapter,'adapt');assert.equal(f.links[3].getAttribute('aria-current'),'location');assert.equal(f.starts.length,1);
- f.director.setPaused(true);await f.settle();assert.equal(f.handles[0].presents.at(-1).paused,true);assert.equal(f.states.at(-1).paused,true);
- const pausedDraws=f.handles[0].presents.length;f.director.setPaused(true);await f.settle();assert.equal(f.handles[0].presents.length,pausedDraws);
+ assert.equal(f.director.setPaused,undefined);assert.equal(f.handles[0].presents.at(-1).paused,false);assert.equal(f.states.at(-1).paused,false);
+ assert.deepEqual(f.handles[0].pauseCalls,[]);
 });
 
 test('the model-free opening and full-workspace Context keep a prepared assembly inert; later chapters reuse it and returning closes inspection',async t=>{
@@ -119,7 +119,7 @@ test('source-hit gestures follow Bending camera direction, keep vertical touch n
  assert.equal(f.key('ArrowRight').prevented,1);await f.settle();assert.ok(f.director.inspect().camera.value.azimuth<0);assert.equal(f.key('Home').prevented,1);await f.settle();assert.deepEqual(f.director.inspect().camera.value,{azimuth:0,elevation:0});
  f.key('ArrowLeft');await f.settle();f.win.fire('blur');await f.settle();assert.deepEqual(f.director.inspect().camera.value,{azimuth:0,elevation:0});
  f.scroll('join');await f.settle();assert.equal(f.key('ArrowDown').prevented,0,'Phone reading does not inherit model arrow controls');
- f.scroll('method');await f.settle();f.handles[0].mode='poster';f.handles[0].successfulPaint=false;const fallbackFrames=f.director.inspect().frames;
+ f.scroll('method');await f.settle();f.handles[0].mode='poster';f.handles[0].successfulPaint=false;await f.settle();const fallbackFrames=f.director.inspect().frames;
  assert.equal(f.key('ArrowDown').prevented,0,'A prepared source fallback retains native keyboard scrolling');assert.equal(f.director.hitTest(600,400),false);f.pointer('pointerdown');assert.equal(f.director.inspect().gesture,null);await f.settle();assert.equal(f.director.inspect().frames,fallbackFrames);
  for(const id of new Set(f.director.inspect().gestures.map(s=>s.id))){const own=f.director.inspect().gestures.filter(s=>s.id===id);assert.equal(own.length,2);assert.equal(own[0].phase,'requested');assert.ok(['released','cancelled'].includes(own[1].phase));}
 });
@@ -134,17 +134,14 @@ test('hidden pending acquisition is cancelled once, late handles are disposed an
  f.win.fire('pageshow');await f.settle();assert.equal(f.starts.length,3);closed(f.director.inspect().history);
 });
 
-test('Reduced Motion and Save Data keep native reading usable, clear inspection and resume only legitimate scene eligibility',async t=>{
- const f=fixture();t.after(f.cleanup);const reduced=f.queries.get('(prefers-reduced-motion: reduce)');reduced.matches=true;reduced.fire('change');f.site('entered');await f.settle();
- assert.equal(f.starts.length,0);assert.equal(f.key('ArrowDown').prevented,0);const frames=f.director.inspect().frames;
- f.pointer('pointerdown');f.pointer('pointermove',{clientX:800});f.pointer('pointerup');f.win.fire('blur');f.win.fire('resize');await f.settle();assert.equal(f.director.inspect().frames,frames);
- f.scroll('method');await f.settle();assert.equal(f.director.inspect().chapter,'method');assert.equal(f.starts.length,0);
- reduced.matches=false;reduced.fire('change');await f.settle();assert.equal(f.starts.length,1);
- f.pointer('pointerdown');f.pointer('pointermove',{clientX:750});reduced.matches=true;reduced.fire('change');await f.settle();assert.equal(f.handles[0].disposed,1);assert.equal(f.director.inspect().resource,null);assert.equal(f.director.inspect().gesture,null);assert.deepEqual(f.director.inspect().camera.value,{azimuth:0,elevation:0});
- f.connection.saveData=true;f.connection.fire('change');reduced.matches=false;reduced.fire('change');await f.settle();assert.equal(f.starts.length,1);
- f.connection.saveData=false;f.connection.fire('change');await f.settle();assert.equal(f.starts.length,2);
- f.doc.fire('freeze');f.win.fire('pageshow');await flush();assert.equal(f.starts.length,2,'pageshow cannot reacquire while freeze suspension remains');
- f.doc.fire('resume');await f.settle();assert.equal(f.starts.length,3);closed(f.director.inspect().history);
+test('OS motion and data preferences preserve the live scene and held inspection while document suspension still releases it',async t=>{
+ const f=fixture();t.after(f.cleanup);const reduced=f.win.matchMedia('(prefers-reduced-motion: reduce)');reduced.matches=true;reduced.fire('change');f.connection.saveData=true;f.connection.fire('change');f.site('entered');f.scroll('method');await f.settle();
+ assert.equal(f.starts.length,1);assert.equal(f.director.inspect().camera.idleActive,true);assert.equal(f.raf.size,1);assert.equal(f.key('ArrowDown').prevented,1);
+ f.pointer('pointerdown');f.pointer('pointermove',{clientX:750});await f.settle();const gesture=f.director.inspect().gesture.id,clock=f.director.inspect().camera.activeSeconds;
+ for(const enabled of [false,true]){reduced.matches=enabled;reduced.fire('change');f.connection.saveData=enabled;f.connection.fire('change');f.frame();await flush();assert.equal(f.director.inspect().gesture.id,gesture);assert.equal(f.starts.length,1);assert.equal(f.handles[0].disposed,0);assert.equal(f.raf.size,1);}
+ assert(f.director.inspect().camera.activeSeconds>clock);f.pointer('pointerup');await f.settle();
+ f.doc.fire('freeze');f.win.fire('pageshow');await flush();assert.equal(f.starts.length,1,'pageshow cannot reacquire while freeze suspension remains');assert.equal(f.handles[0].disposed,1);assert.equal(f.raf.size,0);
+ f.doc.fire('resume');await f.settle();assert.equal(f.starts.length,2);assert.equal(f.director.inspect().camera.idleActive,true);closed(f.director.inspect().history);
 });
 
 test('real size changes reuse the scene; offscreen and document exit release all event, frame, material and renderer ownership',async()=>{
@@ -178,10 +175,10 @@ test('an asynchronous first phone paint stays requested, reconciles native chapt
   const paint=deferred(),f=fixture({firstPaint:paint.promise});t.after(f.cleanup);f.site('entered');f.scroll('adapt');await flush();
   assert.equal(f.director.inspect().phase,'requested');assert.equal(f.states.some(s=>s.phase==='ready'),false);assert.equal(f.handles[0].presents.length,1);
   if(cancelled){f.doc.hidden=true;f.doc.fire('visibilitychange');assert.equal(f.handles[0].disposed,1,'Cancellation releases the acquired scene while first paint is still awaiting native media');}
-  else{f.scroll('join');f.director.setPaused(true);f.host.clientWidth=700;f.win.innerWidth=700;f.win.fire('resize');f.frame();}
+  else{f.scroll('join');f.host.clientWidth=700;f.win.innerWidth=700;f.win.fire('resize');f.frame();}
   paint.resolve();await f.settle();
   if(cancelled){assert.equal(f.states.some(s=>s.phase==='ready'),false);assert.equal(f.handles[0].disposed,1);assert.equal(f.director.inspect().resource,null);}
-  else{assert.equal(f.director.inspect().phase,'ready');assert.equal(f.handles[0].presents.at(-1).chapter,'join');assert.equal(f.handles[0].presents.at(-1).paused,true,'An unbound first paint reconciles the latest pause intent before readiness');assert.deepEqual(f.handles[0].pauseCalls,[]);assert.deepEqual(f.handles[0].sizes.at(-1),[700,1000]);assert.equal(f.states.filter((s,index)=>s.phase==='ready'&&f.states[index-1]?.phase!=='ready').length,1,'Scene-mode UI updates do not create a second acquisition readiness transition');}
+  else{assert.equal(f.director.inspect().phase,'ready');assert.equal(f.handles[0].presents.at(-1).chapter,'join');assert.equal(f.handles[0].presents.at(-1).paused,false);assert.deepEqual(f.handles[0].pauseCalls,[]);assert.deepEqual(f.handles[0].sizes.at(-1),[700,1000]);assert.equal(f.states.filter((s,index)=>s.phase==='ready'&&f.states[index-1]?.phase!=='ready').length,1,'Scene-mode UI updates do not create a second acquisition readiness transition');}
   closed(f.director.inspect().history);
  }
 });
@@ -210,22 +207,12 @@ test('phone chapters keep the painted surface visible while the next source wait
  }
 });
 
-test('native pause commands acknowledge before UI state without waiting for a camera RAF and failures close the same resource',async t=>{
+test('XR exposes no pause command and native media draw failure still closes the same resource',async t=>{
  const f=fixture();t.after(f.cleanup);f.site('entered');f.scroll('adapt');await f.settle();
- const handle=f.handles[0],initial={frames:f.director.inspect().frames,presents:handle.presents.length},applyPause=handle.setPaused;
- handle.setPaused=next=>{assert.equal(f.states.at(-1).paused,!next,'The renderer receives the semantic command before the UI acknowledges it');applyPause(next);};
- f.director.setPaused(true);
- assert.equal(handle.nativePaused,true);assert.equal(f.states.at(-1).paused,true);assert.deepEqual(handle.pauseCalls,[true]);
- assert.equal(f.director.inspect().frames,initial.frames);assert.equal(handle.presents.length,initial.presents,'Native pause does not draw or await a demand frame');assert.equal(f.raf.size,1);
- const acknowledged=f.states.length;
- f.director.setPaused(true);assert.deepEqual(handle.pauseCalls,[true]);assert.equal(f.states.length,acknowledged);assert.equal(f.raf.size,1);
- f.director.setPaused(false);
- assert.equal(handle.nativePaused,false);assert.equal(f.states.at(-1).paused,false);assert.deepEqual(handle.pauseCalls,[true,false]);assert.equal(handle.presents.length,initial.presents);assert.equal(f.director.inspect().frames,initial.frames);
- await f.settle();assert.equal(handle.presents.length,initial.presents,'Coalesced semantic commands preserve the idle camera paint cache');
- handle.setPaused=()=>{throw Error('native-pause-unavailable');};
- f.director.setPaused(true);
- const failed=f.director.inspect();assert.equal(failed.phase,'failed');assert.equal(failed.reason,'native-pause-unavailable');assert.equal(failed.resource,null);assert.equal(handle.disposed,1);assert.equal(f.raf.size,0);assert.equal(handle.presents.length,initial.presents);closed(failed.history);
- assert.deepEqual(failed.resourceFailures,[{id:failed.id,phase:'resource-failed',reason:'native-pause-unavailable'}]);
+ const handle=f.handles[0];assert.equal(f.director.setPaused,undefined);assert.equal(f.states.at(-1).paused,false);assert.deepEqual(handle.pauseCalls,[]);
+ handle.present=()=>{throw Error('native-media-unavailable');};f.scroll('join');await f.settle();
+ const failed=f.director.inspect();assert.equal(failed.phase,'failed');assert.equal(failed.reason,'native-media-unavailable');assert.equal(failed.resource,null);assert.equal(handle.disposed,1);assert.equal(f.raf.size,0);closed(failed.history);
+ assert.deepEqual(failed.resourceFailures,[{id:failed.id,phase:'resource-failed',reason:'native-media-unavailable'}]);
 });
 
 test('a decoded full-workspace image owns Context entry even when the hidden assembly already painted, without another clock',async t=>{
@@ -289,27 +276,29 @@ test('model native progress drives genuine camera reversibly and outgoing model 
  f.scroll('method');await f.settle();f.scroll('context');f.frame();assert.equal(f.director.inspect().scene.chapter,'method');assert.equal(f.director.inspect().camera.modelProgress,0);assert.equal(handle.presents.at(-1).cameraIntent.yawRad,.92);await f.settle();assert.equal(handle.presents.at(-1).cameraIntent,null);
 });
 
-test('visible XR model idle changes only handheld intent on one scheduler; focus settles and pause resumes finitely',async t=>{
+test('visible XR model keeps idle motion during reading focus, attenuates a held gesture and suspends on hidden',async t=>{
  const f=fixture();t.after(f.cleanup);f.site('entered');f.scroll('method');await f.settle();const handle=f.handles[0];
  f.doc.activeElement=null;f.root.fire('focusout',{target:f.control});for(let i=0;i<30;i++){f.frame();await flush();assert(f.raf.size<=1);}
  const before=handle.presents.at(-1),clock=f.director.inspect().camera.activeSeconds;f.frame();await flush();const after=handle.presents.at(-1);
  assert.deepEqual(after.cameraIntent,before.cameraIntent);assert.notDeepEqual(after.handheld,before.handheld);assert(f.director.inspect().camera.activeSeconds>clock);assert.equal(f.raf.size,1);
- f.director.setPaused(true);await f.settle();const held=handle.presents.at(-1);f.win.scrollY+=250;f.win.fire('scroll');await f.settle();assert.deepEqual(handle.presents.at(-1).cameraIntent,held.cameraIntent);assert.deepEqual(handle.presents.at(-1).handheld,held.handheld);
- f.doc.activeElement=f.control;f.director.setPaused(false);f.frame();await flush();assert.equal(f.director.inspect().camera.recovering,true);await f.settle();assert.equal(f.director.inspect().camera.recovering,false);assert.deepEqual(handle.presents.at(-1).handheld,{xPx:0,yPx:0,rollRad:0});assert.notDeepEqual(handle.presents.at(-1).cameraIntent,held.cameraIntent);
+ f.doc.activeElement=f.control;f.root.fire('focusin',{target:f.control});f.frame();await flush();assert.equal(f.director.inspect().camera.idleActive,true);assert.equal(f.raf.size,1);assert.notDeepEqual(handle.presents.at(-1).handheld,after.handheld);
+ f.pointer('pointerdown');f.pointer('pointermove',{clientX:650});for(let i=0;i<20;i++){f.frame();await flush();}assert.deepEqual(handle.presents.at(-1).handheld,{xPx:0,yPx:0,rollRad:0});assert.equal(f.raf.size,1);
+ f.pointer('pointerup');for(let i=0;i<20;i++){f.frame();await flush();}assert.notDeepEqual(handle.presents.at(-1).handheld,{xPx:0,yPx:0,rollRad:0});
  const stopped=f.director.inspect().camera.activeSeconds;f.doc.hidden=true;f.doc.fire('visibilitychange');f.frame(10000);assert.equal(f.director.inspect().camera.activeSeconds,stopped);assert.equal(f.raf.size,0);
 });
 
 
-test('XR plane windows use the existing clock and neutralize Pause, entry, static preferences and suspension',async t=>{
+test('XR plane windows share the clock, keep motion across OS preferences and neutralize entry and suspension',async t=>{
  const f=fixture({plane:true});t.after(f.cleanup);await f.settle();
  const item=()=>f.director.inspect().informationWindows.items[0];
  assert.equal(item().plane,true);assert.equal(item().skinStrength,0);f.site('entered');f.scroll('context');await f.settle();
  const animate=()=>{f.win.scrollY=f.win.scrollY===1100?1180:1100;f.win.fire('scroll');f.frame();assert.notEqual(item().skinStrength,0);assert.equal(f.raf.size,1);};
- const policies=[
-  value=>f.director.setPaused(value),
-  value=>{const q=f.queries.get('(forced-colors: active)');q.matches=value;q.fire('change');},
+ for(const preference of [
+  value=>{const q=f.win.matchMedia('(forced-colors: active)');q.matches=value;q.fire('change');},
   value=>{f.connection.saveData=value;f.connection.fire('change');},
-  value=>{const q=f.queries.get('(prefers-reduced-motion: reduce)');q.matches=value;q.fire('change');},
+  value=>{const q=f.win.matchMedia('(prefers-reduced-motion: reduce)');q.matches=value;q.fire('change');},
+ ]){preference(true);animate();await f.settle();assert.equal(item().skinStrength,0);preference(false);await f.settle();}
+ const policies=[
   value=>f.site(value?'requested':'entered'),
   value=>{f.doc.hidden=value;f.doc.fire('visibilitychange');},
  ];

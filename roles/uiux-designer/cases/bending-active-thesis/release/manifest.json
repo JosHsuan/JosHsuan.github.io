@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "id": "joshsuan-selected-portfolio-v1",
-  "authorizedAt": "2026-10-18",
-  "authorization": "Owner authorizes the exact supplied computational-designer/developer introduction and theme, OCR typography on all published pages including Bending, Bending-aligned XR chrome, a full-viewport XR renderer, removal of the XR opening photograph, and a verified transparent capture of the complete source CAD workspace for Context; including tests, commit, push and same-artifact CI-gated deployment. Bending geometry, materials, lighting, camera, motion and native source assets remain protected. The empty framework and unrelated private materials remain outside scope. The latest owner direction requires retaining the architectural room and complete workspace in a level source-front, central-axis material-based native Rendered capture through Rhino 8/MCPStart. Restore the side/rear walls, ceiling, original floor/carpet, doors and acoustic fixtures; open only the obstructing front glass/window-frame assembly and hide the approved foreground speaker row/two cabinets. Produce genuine 4K-class native pixels with unchanged source geometry, TV screen vertices/UVs, materials and authored colours; temporary neutral/cool/warm native capture lights are removed afterward. Close Rhino when capture work is complete. The original CAD remains unchanged and private.",
+  "authorizedAt": "2026-11-03",
+  "authorization": "Owner authorizes site-wide continuous motion, unified liquid reading surfaces, compact square discovery cards with instance-event selection, a scale-aware multi-project Home film, photograph-informed material and lighting revisions, original Mode/s machine and Caschlatsch geometry derivatives, full-resolution XR recordings, native inline images without enlargement controls, responsive visual density, validation, commit, push and same-artifact GitHub Pages publication using free features. Original source geometry/assets and credits, one existing clock/final writer per established owner, exact toolchain, empty reusable framework and CI publication gates remain protected. See decision 0021 and the current portfolio design/integration contracts.",
   "origin": "https://joshsuan.github.io",
   "storySHA256": "250c0853d8d5f9d993bc89b8a563eef5717300c1772a8c5da04647d165c740da",
   "introductionSHA256": "ab0fa9933275c22bad9f24fb79c27f7307d469ba570d9cd4a78f6f9fd3a6751b",
@@ -770,6 +770,64 @@
       "bytes": 13211595,
       "sha256": "2d6931de3caac7d44b6e02206e90556d695d8d763ac8d26ecc7fa8773a9f28e3",
       "source": "Reviewed second-generation Dot web delivery; prior public MP4 and original GIF/container provenance retained; see DOT_WEB_DELIVERY.md"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/machine.glb",
+      "bytes": 10276504,
+      "sha256": "3dbd3909d3eca07c765aa77f070231d3b0830b5de534f6520cce79138d86d382",
+      "source": "Owner-authorized 3 November 2026 original model derivative; complete stored geometry and reversible compression."
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/model.glb",
+      "bytes": 1082556,
+      "sha256": "4623278f7d9148d0ccdfd0080eb3f44dac36adb07bd6b8283b2863a7b9ad8f27",
+      "source": "Owner-authorized 3 November 2026 original model derivative; complete stored geometry and reversible compression."
+    },
+    {
+      "path": "assets/xr/adapt-interface-hd.mp4",
+      "bytes": 1491566,
+      "sha256": "7283443e88dc9bf23713630f2f0dbc0e0d3ff16f9eed8f7720f6ce76c4a8e1d3",
+      "source": "Owner-authorized 3 November full-resolution Chao / Nomura XR screen-recording derivative; original authored edit reconstructed without GIF downsampling or palette loss"
+    },
+    {
+      "path": "assets/xr/adapt-poster-hd.webp",
+      "bytes": 498038,
+      "sha256": "f22304740628d0df05dc1129f70353e1f2e7d21059481f2bbd8c1d7a6e6993c6",
+      "source": "Lossless first decoded frame of the owner-authorized full-resolution XR screen-recording derivative"
+    },
+    {
+      "path": "assets/xr/assemble-interface-hd.mp4",
+      "bytes": 9515706,
+      "sha256": "26ae07605057fb459195d099986184ce28b8530bf853939ed375a5d972c42e8f",
+      "source": "Owner-authorized 3 November full-resolution Chao / Nomura XR screen-recording derivative; original authored edit reconstructed without GIF downsampling or palette loss"
+    },
+    {
+      "path": "assets/xr/assemble-poster-hd.webp",
+      "bytes": 559058,
+      "sha256": "2947aeae26f8ec2033c6ba5ec78a5393346bd778cb51c1f358139194d8cb1a6f",
+      "source": "Lossless first decoded frame of the owner-authorized full-resolution XR screen-recording derivative"
+    },
+    {
+      "path": "assets/xr/join-interface-hd.mp4",
+      "bytes": 5502261,
+      "sha256": "c325054d284dca22a20c3cf8f50b8b523ebbfb3cd601813f6ab74e82ab061935",
+      "source": "Owner-authorized 3 November full-resolution Chao / Nomura XR screen-recording derivative; original authored edit reconstructed without GIF downsampling or palette loss"
+    },
+    {
+      "path": "assets/xr/join-poster-hd.webp",
+      "bytes": 735846,
+      "sha256": "1b57e8b290f2aa03d00998f41deaa4576dfa4f483a9fae2c8286de9552ac50f8",
+      "source": "Lossless first decoded frame of the owner-authorized full-resolution XR screen-recording derivative"
+    },
+    {
+      "path": "assets/projects/mode-s-of-making/machine-materials.glb",
+      "bytes": 10309368,
+      "sha256": "4b70d53fe51ed04e039285d797c1ead2babf027ffc05244b45080757a5877da9"
+    },
+    {
+      "path": "assets/projects/project-caschlatsch/model-materials.glb",
+      "bytes": 1176628,
+      "sha256": "4cf15112d405619ec27bc82fb81738f12d2da222ac1b720fd79f970a53af3e93"
     }
   ],
   "limits": [
@@ -777,9 +835,9 @@
     "Publication of this presentation does not approve unrelated source documents or private audit records.",
     "Geometry and mobile transfer budgets remain above the earlier targets; no physical-phone performance certification."
   ],
-  "xrStudySHA256": "3605cb7ed9abefc0721091d7883fdc765d0f0471af1b7d4db49f326228a68001",
+  "xrStudySHA256": "8da15a2c4b8642b3df375420bfa47dae2f4a572fb2fb8faf7b8541a3613d419c",
   "contactSHA256": "c68b4bc45a3ecc13eeee55bae43f3cab75f2085a095a5084e1494f90c5695882",
   "xrWorkspaceSHA256": "41c48db687e71332240a002e0892141a7eac887c94740ef4c175cc4ccc4e1211",
-  "projectStudiesSHA256": "c222cdcec3fd5ff5f040f1db5a7c30f52a9871c6dc92b76dbb288e068e17341c",
-  "projectAssetsSHA256": "83f51a9847419f66f9ddde151b135fd3c2c58d4744d01631579497aad2916244"
+  "projectStudiesSHA256": "f321df1384132becccda78968ea01027e78a547d4b34e6207ac45080b703c34f",
+  "projectAssetsSHA256": "20cde4a14b46683c6a063bd871293aa3b45a09d3098ede26d7b84ac8bb497aa8"
 }

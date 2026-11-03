@@ -1,0 +1,109 @@
+{
+  "passed": true,
+  "original": {
+    "bytes": 10276504,
+    "sha256": "3dbd3909d3eca07c765aa77f070231d3b0830b5de534f6520cce79138d86d382"
+  },
+  "derivative": {
+    "bytes": 10309368,
+    "sha256": "4b70d53fe51ed04e039285d797c1ead2babf027ffc05244b45080757a5877da9"
+  },
+  "originalGeometryViewsAndAccessorsUnchanged": true,
+  "originalCompressedBodyUnchanged": true,
+  "originalSourceUnchanged": true,
+  "addedAttribute": {
+    "name": "_SURFACE_FAMILY",
+    "count": 503822,
+    "bytes": 2015288,
+    "encodedBytes": 31810,
+    "sha256": "a40892c1cb5fb81a174aff61460e39cc439918d617a87a8f0d79b26e214805bd",
+    "decodedByteExact": true
+  },
+  "buffers": [
+    {
+      "bufferView": 0,
+      "decodedSHA256": "76ea35027a9cb97a7558e113881cde0ec978b8b5d91981a3a3a8f1d817fee73d",
+      "compressedBytesUnchanged": true
+    },
+    {
+      "bufferView": 1,
+      "decodedSHA256": "38903696e0d2ec27add9c5340a0785565e87ef9f909e8bf3528227c816910333",
+      "compressedBytesUnchanged": true
+    },
+    {
+      "bufferView": 2,
+      "decodedSHA256": "cd2e22b86cb5e87472d85b04077e83660a2bdd01ce53edfe7d494887ffae7bd2",
+      "compressedBytesUnchanged": true
+    },
+    {
+      "bufferView": 3,
+      "decodedSHA256": "374668e7fbc7c9042373fbaed9389a419abb7da3a16fc8e77c04ebc59f087c27",
+      "compressedBytesUnchanged": true
+    }
+  ],
+  "sourceSHA256": "07ea02951b22cf27ddee407211592b70fb64ad8fa24bc503fe9be1f83a752b2a",
+  "vertices": 503822,
+  "families": [
+    {
+      "id": 0,
+      "name": "aluminium",
+      "objects": 39,
+      "vertices": 39244
+    },
+    {
+      "id": 1,
+      "name": "steel",
+      "objects": 1414,
+      "vertices": 356698
+    },
+    {
+      "id": 2,
+      "name": "blue-printed-polymer",
+      "objects": 36,
+      "vertices": 74494
+    },
+    {
+      "id": 3,
+      "name": "black-motor",
+      "objects": 12,
+      "vertices": 3033
+    },
+    {
+      "id": 4,
+      "name": "rubber-belt",
+      "objects": 1,
+      "vertices": 394
+    },
+    {
+      "id": 5,
+      "name": "teal-tool-holder",
+      "objects": 2,
+      "vertices": 4755
+    },
+    {
+      "id": 6,
+      "name": "bronze-bushing",
+      "objects": 8,
+      "vertices": 17632
+    },
+    {
+      "id": 7,
+      "name": "heated-copper-tool",
+      "objects": 1,
+      "vertices": 1196
+    },
+    {
+      "id": 8,
+      "name": "white-eps",
+      "objects": 1,
+      "vertices": 24
+    },
+    {
+      "id": 9,
+      "name": "heat-darkened-steel",
+      "objects": 1,
+      "vertices": 6352
+    }
+  ],
+  "limits": "Photo-informed surface families, not measured optical coefficients. The long foreground rail overrides its broad printed-part layer using the photographed aluminium member; the solder shaft is heat-darkened steel and only the knife is copper. EPS blank association is inferred from its unique rotary-workpiece geometry and cutting photographs. The unexposed underbed plate remains a source-layer material inference. No CAD layer display colors were copied."
+}

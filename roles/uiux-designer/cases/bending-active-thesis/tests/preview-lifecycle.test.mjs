@@ -91,8 +91,8 @@ test('eligibility composes true intersection, document/site/policy state and dis
  intersection.callback([{target:element,isIntersecting:true,intersectionRatio:1}]);assert.equal(states.at(-1).active,false);
  attributes.set('data-site-entry-state','entered');mutation.callback();assert.equal(states.at(-1).active,true);
  doc.hidden=true;doc.dispatchEvent(new Event('visibilitychange'));assert.equal(states.at(-1).reason,'hidden');doc.hidden=false;doc.dispatchEvent(new Event('visibilitychange'));
- media.matches=true;media.dispatchEvent(new Event('change'));assert.equal(states.at(-1).reason,'reduced-motion');media.matches=false;media.dispatchEvent(new Event('change'));
- connection.saveData=true;connection.dispatchEvent(new Event('change'));assert.equal(states.at(-1).reason,'save-data');connection.saveData=false;connection.dispatchEvent(new Event('change'));
+ media.matches=true;media.dispatchEvent(new Event('change'));assert.equal(states.at(-1).active,true,'Motion preference does not disable source preparation');media.matches=false;media.dispatchEvent(new Event('change'));
+ connection.saveData=true;connection.dispatchEvent(new Event('change'));assert.equal(states.at(-1).active,true,'Data preference does not disable source preparation');connection.saveData=false;connection.dispatchEvent(new Event('change'));
  win.dispatchEvent(new Event('pagehide'));assert.equal(states.at(-1).reason,'page-exit');win.dispatchEvent(new Event('pageshow'));assert.equal(states.at(-1).active,true);
  intersection.callback([{target:element,isIntersecting:true,intersectionRatio:0}]);assert.equal(states.at(-1).active,false);eligibility.dispose();assert(observers.every(value=>value.disconnected));
  const count=states.length;doc.dispatchEvent(new Event('visibilitychange'));assert.equal(states.length,count);
@@ -105,8 +105,8 @@ test('page preparation begins before entry and outside the viewport while docume
  const eligibility=observePreviewEligibility({element:{},window:win,document:doc,mode:'page',onChange:state=>states.push(state)});
  assert.equal(states.at(-1).active,true);assert.equal(states.at(-1).siteReady,false);assert.equal(states.at(-1).visible,false);assert.equal(states.at(-1).reason,'page-ready');
  doc.hidden=true;doc.dispatchEvent(new Event('visibilitychange'));assert.equal(states.at(-1).active,false);doc.hidden=false;doc.dispatchEvent(new Event('visibilitychange'));assert.equal(states.at(-1).active,true);
- media.matches=true;media.dispatchEvent(new Event('change'));assert.equal(states.at(-1).reason,'reduced-motion');media.matches=false;media.dispatchEvent(new Event('change'));
- connection.saveData=true;connection.dispatchEvent(new Event('change'));assert.equal(states.at(-1).reason,'save-data');connection.saveData=false;connection.dispatchEvent(new Event('change'));
+ media.matches=true;media.dispatchEvent(new Event('change'));assert.equal(states.at(-1).active,true,'Motion preference does not disable source preparation');media.matches=false;media.dispatchEvent(new Event('change'));
+ connection.saveData=true;connection.dispatchEvent(new Event('change'));assert.equal(states.at(-1).active,true,'Data preference does not disable source preparation');connection.saveData=false;connection.dispatchEvent(new Event('change'));
  win.dispatchEvent(new Event('pagehide'));assert.equal(states.at(-1).active,false);win.dispatchEvent(new Event('pageshow'));assert.equal(states.at(-1).active,true);
  eligibility.dispose();const count=states.length;doc.dispatchEvent(new Event('visibilitychange'));assert.equal(states.length,count);
 });

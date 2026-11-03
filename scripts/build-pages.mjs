@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 import assert from 'node:assert/strict';
 import {auditPages,assertXRWorkspaceRecord,assertXRWorkspaceImage} from './audit-pages.mjs';
 import {preparePagesWorkspace} from './prepare-pages-workspace.mjs';
-import {assertProjectStudies,assertProjectImage,assertProjectModel,assertProjectAssetRecord,PROJECT_SLUGS} from './project-studies.mjs';
+import {assertProjectStudies,assertProjectImage,assertProjectModel,assertProjectAssetRecord,projectStudyModels,PROJECT_SLUGS} from './project-studies.mjs';
 import {projectMotionMedia,assertProjectVideo} from './project-motion-media.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -59,7 +59,7 @@ for (const asset of manifest.assets) {
   if(workspaceImage)assertXRWorkspaceImage(bytes,workspaceImage);
   const projectImage=projectImages.find(image=>image.src==='/'+asset.path);
   if(projectImage)assertProjectImage(bytes,projectImage);
-  const projectModel=projectStudies.projects.find(project=>project.model?.src==='/'+asset.path)?.model;
+  const projectModel=projectStudies.projects.flatMap(projectStudyModels).find(model=>model.src==='/'+asset.path);
   if(projectModel)assertProjectModel(bytes,projectModel);
   const projectVideo=projectVideos.find(media=>media.src==='/'+asset.path);
   if(projectVideo)assertProjectVideo(bytes,projectVideo);
@@ -70,7 +70,7 @@ await preparePagesWorkspace(root);
 const sources = [
   'tsconfig.json', 'runtime/ExperienceProvider.jsx',
   'runtime/core/DisposableScope.ts', 'runtime/core/EventManager.ts',
-  'runtime/features/ModelManager.mjs', 'runtime/features/EvidenceManager.mjs',
+  'runtime/features/ModelManager.mjs',
   'runtime/features/DiagramManager.mjs',
   'runtime/features/LifecycleManager.mjs', 'runtime/features/DocumentLifetime.mjs',
   'runtime/features/EntryManager.mjs', 'runtime/motion/entry-motion.mjs',
@@ -107,15 +107,17 @@ const sources = [
   'runtime/site/ProjectStudyChapterPresenter.mjs',
   'runtime/site/ProjectStudyBackdropPresenter.mjs', 'runtime/site/ProjectStudyBackdropMotion.mjs',
   ...PROJECT_SLUGS.map(slug=>`app/projects/${slug}/page.jsx`),
-  'components/HomeResearchStage.jsx', 'runtime/site/HomeResearchStageRegistry.mjs', 'runtime/site/HomeResearchPresenter.mjs',
-  'runtime/site/home-research-scene.mjs', 'runtime/site/home-research-score.mjs',
+  'components/HomeShowcaseStage.jsx', 'runtime/site/HomeShowcasePresenter.mjs', 'runtime/site/HomeDeckPresenter.mjs',
+  'components/xr-bamboo-appearance.mjs',
+  'components/project-study-materials.mjs',
+  'runtime/site/HomeShowcaseShots.mjs',
+  'runtime/site/HomeResearchStageRegistry.mjs',
   'components/ProjectModelPreview.jsx', 'components/project-model-scene.mjs', 'components/project-model-recipe.mjs', 'components/project-grid-layout.mjs',
   'components/GlobalBackground.jsx', 'runtime/background/BackgroundRuntime.mjs', 'runtime/background/SiteBackgroundDriver.mjs',
-  'components/XRModelStudy.jsx', 'components/XRPhoneStudy.jsx', 'components/research-media.module.css',
   'components/research-scene.mjs', 'components/research-scene-geometry.mjs', 'components/prepared-research-support.mjs',
   'components/XRSceneStage.jsx', 'components/xr-stage-scene.mjs', 'components/xr-scene-stage.module.css',
   'runtime/xr/XRStageDirector.mjs', 'runtime/xr/XRStageMotion.mjs', 'components/xr-stage-environment.mjs',
-  'components/ProjectAnimationPreview.jsx', 'runtime/site/PreviewLifecycle.mjs', 'runtime/site/video-resource.mjs',
+  'runtime/site/PreviewLifecycle.mjs', 'runtime/site/video-resource.mjs',
   'components/XRProject.jsx', 'components/XRProject.module.css', 'release/xr-study.json', 'release/contact.json',
   'components/SiteExperience.jsx', 'components/site-experience.module.css',
   'runtime/site/SiteReadiness.mjs', 'runtime/site/SiteNavigation.mjs', 'runtime/site/site-entry-bridge.mjs',
@@ -125,7 +127,6 @@ const sources = [
   'components/LiquidGlassSkin.jsx',
   'components/EntryLoader.jsx', 'components/entry-loader.module.css',
   'components/ResearchEntryComposition.jsx', 'components/research-entry-composition.module.css',
-  'components/EvidenceInspector.jsx', 'components/evidence-inspector.module.css',
   'components/cinematic.module.css', 'components/story-input.js', 'components/story-response.mjs',
   'components/render-budget.mjs', 'components/runtime-scheduler.mjs', 'components/dom-publisher.mjs', 'components/scene-visibility.mjs',
   'components/renderer-budget.mjs', 'components/render-pressure.mjs',

@@ -37,7 +37,7 @@ async function staticStudy(page){
  await page.goto('/projects/bending-active/#overview');
  await page.waitForFunction(()=>window.__story?.inspect().entry.phase==='entered'&&window.__story.inspect().libraryDiagram.count===1,null,{timeout:WAIT});
  await page.evaluate(()=>document.fonts.ready);await settle(page);
- await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(0);
+ await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);
 }
 
 function expectSingleMaterial(row){
@@ -126,7 +126,7 @@ async function neutralReadingMaterials(page,testInfo){
  const selectors=[
   '#form [data-information-window="editorial"]','[data-source-diagram="miura"]',
   '#make [data-information-window="evidence-image"]','#make [data-information-window="evidence-caption"]',
-  '[data-model-side-label][data-study-chapter="form"]','#pattern [data-information-window="source-details"]','[data-source-comparison]',
+  '[data-model-side-label][data-study-chapter="form"]',
  ];
  const viewport=page.viewportSize(),results=[];
  await page.evaluate(()=>{
@@ -212,7 +212,7 @@ async function neutralReadingMaterials(page,testInfo){
     result.status='passed';
    }finally{await page.evaluate(()=>window.__readingMaterialRestore?.());await owner.dispose();}
   }
-  expect(results.map(row=>row.kind).sort()).toEqual(['editorial','evidence-caption','evidence-image','model-label','source-details','source-diagram','source-portal']);
+  expect(results.map(row=>row.kind).sort()).toEqual(['editorial','evidence-caption','evidence-image','model-label','source-diagram']);
   expect(await page.locator('[data-story-root]').evaluate(element=>({color:getComputedStyle(element).color,background:getComputedStyle(document.body).backgroundColor}))).toEqual(outside);
  }finally{
   const body=JSON.stringify({foregrounds,results},null,2)+'\n';
@@ -225,16 +225,11 @@ async function neutralReadingMaterials(page,testInfo){
 
 test('all information surfaces share one glass owner and preserve readable source paper',async({page},testInfo)=>{
  test.setTimeout(scenarioTimeout(120000));await staticStudy(page);
- const details=page.locator('#pattern [data-information-window="source-details"]');
- await details.locator(':scope > summary').click();await expect(details).toHaveJSProperty('open',true);await settle(page);
- const trigger=page.locator('#make [data-inspect-figure]');
- await trigger.scrollIntoViewIfNeeded();await settle(page);await trigger.click();
- const portal=page.locator('[data-source-comparison]');await expect(portal).toBeVisible();
- await expect(portal).toHaveAttribute('data-information-ready',/.*/,{timeout:WAIT});
- await expect.poll(()=>portal.locator('img').evaluate(image=>image.complete&&image.naturalWidth>0),{timeout:WAIT}).toBe(true);await settle(page);
+ await expect(page.locator('[data-inspect-figure],[data-source-comparison]')).toHaveCount(0);
  const surfaces=await page.locator('[data-information-window]').evaluateAll(readMaterial);
- expect([...new Set(surfaces.map(row=>row.kind))].sort()).toEqual(['editorial','evidence-caption','evidence-image','model-label','source-details','source-diagram','source-portal']);
- expect(surfaces.some(row=>row.nested)).toBe(true);expect(surfaces.some(row=>row.ready)).toBe(true);
+ expect([...new Set(surfaces.map(row=>row.kind))].sort()).toEqual(['editorial','evidence-caption','evidence-image','model-label','source-diagram']);
+ // Native inline images replace the former nested image disclosure windows.
+ expect(surfaces.some(row=>row.nested)).toBe(false);expect(surfaces.some(row=>row.ready)).toBe(true);
  for(const row of surfaces)expectSingleMaterial(row);
 
  await expect(page.locator('[data-liquid-glass][data-liquid-ready]')).toHaveCount(3,{timeout:WAIT});
@@ -262,7 +257,7 @@ test('all information surfaces share one glass owner and preserve readable sourc
  expect(content.length).toBeGreaterThan(6);
  for(const row of content){expect(row.filters.some(filter=>filter.includes('blur('))).toBe(false);expect(row.backdrop).toBe('none');}
  await neutralReadingMaterials(page,testInfo);
- await page.getByRole('button',{name:'Close source comparison'}).click();await expect(portal).toHaveCount(0);await expect(trigger).toBeFocused();
+
 });
 
 test('native transparency and contrast preferences update an already registered material',async({page,context,browserName},testInfo)=>{
@@ -274,7 +269,7 @@ test('native transparency and contrast preferences update an already registered 
  const fallback=async()=>{
   const row=await panel.evaluate(readMaterial);expect(row.owners).toEqual([]);expect(row.alpha).toBe(1);expect(row.opacity).toBe(1);
   expect(await panel.evaluate((element,original)=>element.querySelector(':scope > [data-information-skin]')===original,skin)).toBe(true);
-  await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(0);
+  await expect(page.locator('[data-cinematic-stage] canvas')).toHaveCount(1);
  };
  await page.emulateMedia({reducedMotion:'reduce',contrast:'more'});
  await expect.poll(()=>page.evaluate(()=>matchMedia('(prefers-contrast:more)').matches)).toBe(true);await fallback();
@@ -315,7 +310,5 @@ test('without JavaScript the reading material remains legible and original drawi
   await expect.poll(()=>original.evaluate(image=>image.complete&&image.naturalWidth>0),{timeout:WAIT}).toBe(true);
   expect((await drawing.evaluate(readMaterial)).alpha).toBe(1);
   expect(await original.evaluate(element=>getComputedStyle(element).filter)).not.toContain('blur(');
-  const details=page.locator('#pattern [data-information-window="source-details"]');await details.locator(':scope > summary').click();await expect(details).toHaveJSProperty('open',true);
-  await expect(details.locator('[data-inspect-figure]')).toHaveAttribute('href',/\/assets\/cinematic\/source-p\d+\.webp$/);
  }finally{await context.close();}
 });

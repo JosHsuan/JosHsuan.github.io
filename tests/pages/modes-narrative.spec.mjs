@@ -6,7 +6,7 @@ test('Mode/s preserves its causal chapter order and contains the complete mobile
  await page.goto('/projects/mode-s-of-making/');
  await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});
  await page.evaluate(()=>document.fonts.ready);
- expect(await page.locator('main [data-project-chapter]').evaluateAll(nodes=>nodes.map(node=>node.dataset.projectChapter))).toEqual(['overview','context','system','making','cutting','fabrication','results','credits']);
+ expect(await page.locator('main [data-project-chapter]').evaluateAll(nodes=>nodes.map(node=>node.dataset.projectChapter))).toEqual(['overview','context','system','mechanism','making','cutting','fabrication','results','credits']);
  await expect(page.locator('[data-project-chapter="system"] [data-project-evidence-image][src$="film-design-workflow.webp"]')).toHaveCount(1);
  await expect(page.locator('[data-project-chapter="making"] [data-project-evidence-image][src$="film-corexy-system.webp"]')).toHaveCount(1);
  await expect(page.locator('[data-project-chapter="results"]')).toContainText('does not establish a completed physical version');
