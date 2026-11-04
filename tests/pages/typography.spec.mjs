@@ -5,7 +5,10 @@ import {WAIT} from './case-helpers.mjs';
 const studies=JSON.parse(await readFile(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/project-studies.json',import.meta.url),'utf8')).projects;
 const routes=['/','/about/','/projects/','/contact/','/projects/bending-active/','/projects/xr-bending-active/',...studies.map(project=>`/projects/${project.slug}/`),'/404.html'];
 const families={body:'Roboto Mono',display:'Roboto Mono'};
-const FONT_QUERY_CONCURRENCY=8;
+// Platform-font calls are independent read-only CDP requests. A fixed 64-call
+// ceiling retains every source/Latin query while avoiding dozens of serial
+// renderer scheduling rounds on the longest continuously animated document.
+const FONT_QUERY_CONCURRENCY=64;
 // WebKit serializes 19.2/38.4px as 19.200001/38.400002px. Normalize only
 // font-size boundary comparisons, far below a layout pixel; keep raw receipts.
 const fontPixels=value=>Math.round(value*10000)/10000;
@@ -30,9 +33,9 @@ for(const route of routes)test(`the published ${route} document renders a cohere
  // New documentary openings show the complete source image before their glass
  // copy on mobile. Inspect actual reading glyphs after native movement to h1.
  if(await page.locator('[data-project-study]').count())await page.locator('h1').scrollIntoViewIfNeeded();
- for(const [family,href]of [[families.body,'/assets/fonts/roboto-mono-variable.woff2']])await expect(page.locator(`link[rel="preload"][as="font"][data-site-font-family="${family}"]`)).toHaveAttribute('href',href);
  const reading=await page.evaluate(async expected=>{
   await document.fonts.ready;
+  const preloads=[...document.querySelectorAll('link[rel="preload"][as="font"][data-site-font-family]')].map(node=>({family:node.dataset.siteFontFamily,href:node.getAttribute('href')}));
   const text=[...document.querySelectorAll('body *')].filter(node=>!['SCRIPT','STYLE','NOSCRIPT'].includes(node.tagName)&&[...node.childNodes].some(child=>child.nodeType===Node.TEXT_NODE&&child.textContent.trim()));
   const displaySelector='h1,h2,h3,h4,h5,h6,[data-display-type]';
   const wrong=text.filter(node=>{const css=getComputedStyle(node),role=node.closest(displaySelector)?'display':'body';return css.display!=='none'&&css.visibility!=='hidden'&&css.fontFamily.split(',')[0].replaceAll(/['"]/g,'').trim()!==expected[role];}).map(node=>({tag:node.tagName,role:node.closest(displaySelector)?'display':'body',text:node.textContent.slice(0,80),font:getComputedStyle(node).fontFamily}));
@@ -56,8 +59,14 @@ for(const route of routes)test(`the published ${route} document renders a cohere
   const measure=(node,ch)=>{const probe=document.createElement('span');probe.style.cssText='position:fixed;visibility:hidden;pointer-events:none';probe.style.font=getComputedStyle(node).font;probe.style.width=`${ch}ch`;document.body.append(probe);const width=probe.getBoundingClientRect().width;probe.remove();return width;};
   const roles={sourceCaptions:[...document.querySelectorAll('[data-model-side-label] [data-source-description]')].map(spacing),measuredCaptions:[...document.querySelectorAll('main[data-study-presentation="hybrid-scenes"] [data-project-native-source] figcaption>p,main[data-study-presentation="editorial-scenes"] figcaption>p,main [class*="_evidence__"] figcaption>p,main [class*="_figure__"] figcaption p,main [class*="_sourcePanel__"]>p')].map(node=>({...spacing(node),width:node.getBoundingClientRect().width,expectedMeasure:measure(node,68),measure:parseFloat(getComputedStyle(node).maxWidth)})),prose:primary.map(node=>({...spacing(node),width:node.getBoundingClientRect().width,expectedMeasure:measure(node,60),measure:parseFloat(getComputedStyle(node).maxWidth)})),body:spacing(document.body),display:[...document.querySelectorAll(displaySelector)].map(node=>({...spacing(node),compact:node.matches('[data-portfolio-about] article h2')})),controls:[...document.querySelectorAll('header nav a,button,input,select,textarea,summary')].map(spacing),captions:[...document.querySelectorAll('figcaption,[data-diagram-caption]')].map(spacing),labels:[...document.querySelectorAll('[data-project-section-label]')].map(spacing)};
   const fontProbes=text.filter(node=>node.checkVisibility({visibilityProperty:true,opacityProperty:true})&&node.getBoundingClientRect().width>0&&node.getBoundingClientRect().height>0).map(node=>({selector:selector(node),role:node.closest(displaySelector)?'display':'body',mainHeading:!!node.closest('h1'),subtreeText:[node,...node.querySelectorAll('*')].map(element=>[element===node?element.textContent:'',getComputedStyle(element,'::before').content,getComputedStyle(element,'::after').content].join('')).join(''),text:[...node.childNodes].filter(child=>child.nodeType===Node.TEXT_NODE).map(child=>child.textContent).join('').trim()}));
-  return{rootSize:parseFloat(getComputedStyle(document.documentElement).fontSize),faces:[...document.fonts].filter(face=>face.status==='loaded').map(face=>face.family.replaceAll(/['"]/g,'')),loaded:{body:document.fonts.check(`16px "${expected.body}"`,'Computational design fabrication-ready × 01'),display:document.fonts.check(`400 16px "${expected.display}"`,'Design technology and spatial interaction')},wrong,clipped,roles,fontProbes,textNodes:text.length,headingVisible:heading.checkVisibility({visibilityProperty:true,opacityProperty:true}),headingFamily:getComputedStyle(heading).fontFamily,bodyFamily:body?getComputedStyle(body).fontFamily:null,bodyProbeSelector:body?selector(body):null,clientWidth:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth};
+  // Observe the real CJK cascade in the same layout transaction, restoring
+  // the original language before returning or starting platform-font queries.
+  const cjkNode=document.querySelector('main p[data-editorial-copy],main p[class*="_prose__"],main [class*="_panel__"]>p:not([class*="_eyebrow__"]),main p[class*="_description__"]');let cjk=null;
+  if(cjkNode){const lang=cjkNode.getAttribute('lang');cjkNode.lang='zh-Hant';const css=getComputedStyle(cjkNode);cjk={leading:parseFloat(css.lineHeight)/parseFloat(css.fontSize),family:css.fontFamily};if(lang===null)cjkNode.removeAttribute('lang');else cjkNode.setAttribute('lang',lang);}
+  return{preloads,cjk,rootSize:parseFloat(getComputedStyle(document.documentElement).fontSize),faces:[...document.fonts].filter(face=>face.status==='loaded').map(face=>face.family.replaceAll(/['"]/g,'')),loaded:{body:document.fonts.check(`16px "${expected.body}"`,'Computational design fabrication-ready × 01'),display:document.fonts.check(`400 16px "${expected.display}"`,'Design technology and spatial interaction')},wrong,clipped,roles,fontProbes,textNodes:text.length,headingVisible:heading.checkVisibility({visibilityProperty:true,opacityProperty:true}),headingFamily:getComputedStyle(heading).fontFamily,bodyFamily:body?getComputedStyle(body).fontFamily:null,bodyProbeSelector:body?selector(body):null,clientWidth:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth};
  },families);
+ expect(reading.preloads.filter(row=>row.family===families.body)).toEqual([{family:families.body,href:'/assets/fonts/roboto-mono-variable.woff2'}]);
+ if(reading.cjk){expect(reading.cjk.leading).toBeCloseTo(1.65,2);expect(reading.cjk.family).toContain('Noto Sans CJK TC');}
  for(const family of Object.values(families))expect(reading.faces).toContain(family);
  expect(reading.loaded).toEqual({body:true,display:true});expect(reading.wrong).toEqual([]);expect(reading.clipped).toEqual([]);expect(reading.textNodes).toBeGreaterThan(10);expect(reading.headingVisible).toBe(true);expect(reading.headingFamily).toContain(families.display);expect(reading.bodyFamily).toContain(families.body);expect(reading.bodyProbeSelector).toBeTruthy();expect(reading.scrollWidth).toBeLessThanOrEqual(reading.clientWidth);
  const spacing=(value,leading,tracking)=>{const context=`${route}: ${value.tag} ${value.text}`;expect(value.leading,context+' leading').toBeCloseTo(leading,2);expect(value.tracking,context+' tracking').toBeCloseTo(tracking,3);};
@@ -156,10 +165,6 @@ for(const route of routes)test(`the published ${route} document renders a cohere
    if(!primary&&cleanupError)throw cleanupError;
   }
  }
- // Tag an existing semantic reading paragraph to exercise the real module
- // cascade, not an unattached style-token specimen. Restore it immediately.
- const cjk=await page.evaluate(()=>{const node=document.querySelector('main p[data-editorial-copy],main p[class*="_prose__"],main [class*="_panel__"]>p:not([class*="_eyebrow__"]),main p[class*="_description__"]');if(!node)return null;const lang=node.getAttribute('lang');node.lang='zh-Hant';const css=getComputedStyle(node),result={leading:parseFloat(css.lineHeight)/parseFloat(css.fontSize),family:css.fontFamily};if(lang===null)node.removeAttribute('lang');else node.setAttribute('lang',lang);return result;});
- if(cjk){expect(cjk.leading).toBeCloseTo(1.65,2);expect(cjk.family).toContain('Noto Sans CJK TC');}
  if(['/','/about/','/projects/bending-active/','/projects/xr-bending-active/','/projects/mode-s-of-making/'].includes(route)){
   const name='typography-native-'+(route.replaceAll('/','-')||'home'),path=test.info().outputPath(name+'.png');
   await page.screenshot({path,fullPage:false});
@@ -172,11 +177,14 @@ for(const route of routes)test(`the published ${route} document renders a cohere
 // They are not a source-level claim that the OCR header risks have passed.
 // Each route retains its own existing 60-second scenario deadline.
 const headerCases=[
- {route:'/',widths:[320,361,365,390]},
+ // Each Home resize owns a complete 60-second scenario. Its live film can
+ // redraw a different dense source at each width; an aggregate four-resize
+ // timeout does not establish any single responsive layout's failure.
+ ...[320,361,365,390].map(width=>({route:'/',widths:[width]})),
  {route:'/projects/bending-active/',widths:[781,900,1000]},
  {route:'/projects/xr-bending-active/',widths:[781,900,1000]},
 ];
-for(const {route,widths} of headerCases)test(`Monospace header controls stay separate and readable on ${route} at responsive boundaries`,async({page})=>{
+for(const {route,widths} of headerCases)test(`Monospace header controls stay separate and readable on ${route} at responsive boundaries${widths.length===1?' ('+widths[0]+'px)':''}`,async({page})=>{
  await page.emulateMedia({reducedMotion:'reduce'});
  const response=await page.goto(route);expect(response.status()).toBe(200);
  await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});

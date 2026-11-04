@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {SCENE_RECOVERY_KEY} from '../../roles/uiux-designer/cases/bending-active-thesis/components/scene-recovery.mjs';
 import {readFileSync} from 'node:fs';
 import {writeFile} from 'node:fs/promises';
 import {PerspectiveCamera,Vector3,Matrix4} from 'three';
@@ -13,24 +14,26 @@ async function holdView(page,chapter='form'){
 }
 async function entered(page){await page.waitForFunction(()=>window.__story?.inspect().entry?.phase==='entered',null,{timeout:WAIT});}
 async function expectSourceInformation(page,chapter) {
- const r=await page.evaluate(()=>window.__thesis.inspect().representation);
+ // The representation advances autonomously, including while comparison's
+ // bounded lease expires. Read its rendered label and source at one instant.
+ const observed=await page.evaluate(chapter=>{
+  const one=(root,selector)=>{const nodes=root.querySelectorAll(selector);if(nodes.length!==1)throw Error('Expected one '+selector);return nodes[0];};
+  const label=one(document,`[data-model-side-label][data-study-chapter="${chapter}"]`),study=one(document,`[data-model-study][data-study-chapter="${chapter}"]`);
+  const text=selector=>one(label,selector).textContent.replace(/\s+/g,' ').trim(),description=one(label,'[data-source-description]'),current=one(description,'[data-model-caption-current]'),box=label.getBoundingClientRect();
+  return{representation:window.__thesis.inspect().representation,label:text('[data-source-label]'),summary:text('[data-model-caption-current]'),position:text('[data-source-position]'),annotation:text('[data-model-annotation-text]'),placement:label.getAttribute('data-model-label-placement'),connector:one(study,'[data-model-connector]').getAttribute('data-annotation-visible'),visible:label.checkVisibility({visibilityProperty:true})&&box.width>0&&box.height>0,descriptionDisplay:getComputedStyle(description).display,captionFits:current.getBoundingClientRect().height<=description.getBoundingClientRect().height+.1};
+ },chapter);
+ const r=observed.representation;
  const record=catalog.representations.find(item=>item.id===r.id),count=chapter==='pattern'?3:4;
  const description=record.description+(r.id==='curvature'?' '+catalog.limits[0]:'');
- const study=page.locator(`[data-model-study][data-study-chapter="${chapter}"]`);
- const label=page.locator(`[data-model-side-label][data-study-chapter="${chapter}"]`);
- await expect(label).toHaveCount(1);
- await expect(label.locator('[data-source-label]')).toHaveText(record.label);
- await expect(label.locator('[data-model-caption-current]')).toHaveText(modelInformationSummary(record));
- await expect(label.locator('[data-source-position]')).toHaveText(`${chapter==='pattern'?'Experiment':'Representation'} ${r.index+1} / ${count}`);
+ expect(observed.label).toBe(record.label);
+ expect(observed.summary).toBe(modelInformationSummary(record));
+ expect(observed.position).toBe(`${chapter==='pattern'?'Experiment':'Representation'} ${r.index+1} / ${count}`);
  expect(r.description).toBe(description);expect(r.count).toBe(count);
- await expect(label).toBeVisible();
- await expect(study.locator('[data-model-connector]')).toHaveAttribute('data-annotation-visible',await label.getAttribute('data-model-label-placement')==='native'?'false':'true');
- if(await label.getAttribute('data-model-label-placement')==='native')expect(r.annotation).toBeNull();else expect(r.annotation).toBeTruthy();
- await expect(label.locator('[data-model-annotation-text]')).toHaveText(modelAnnotationLabel(r.id));
- await expect(label.locator('[data-source-description]')).toHaveCSS('display','grid');
- expect(await label.locator('[data-source-description]').evaluate(el=>{
-  const current=el.querySelector('[data-model-caption-current]');return current.getBoundingClientRect().height<=el.getBoundingClientRect().height+.1;
- })).toBe(true);
+ expect(observed.visible).toBe(true);
+ expect(observed.connector).toBe(observed.placement==='native'?'false':'true');
+ if(observed.placement==='native')expect(r.annotation).toBeNull();else expect(r.annotation).toBeTruthy();
+ expect(observed.annotation).toBe(modelAnnotationLabel(r.id));
+ expect(observed.descriptionDisplay).toBe('grid');expect(observed.captionFits).toBe(true);
 }
 async function fit(page,receipt){
  const observed=await page.evaluate(()=>{const canvas=document.querySelector('[data-cinematic-stage] canvas'),r=canvas.getBoundingClientRect();return {...window.__thesis.inspect(),width:canvas.clientWidth,height:canvas.clientHeight,display:{left:r.left,top:r.top,width:r.width,height:r.height}};});
@@ -296,9 +299,15 @@ test('OS Reduced keeps automatic Full playback and native source comparison avai
 });
 test('load failure and context loss preserve fallback reading and release source gestures',async({page})=>{
  test.setTimeout(scenarioTimeout(150000));await page.route('**/source-layers.glb',r=>r.abort());await page.goto('/projects/bending-active/#overview');await entered(page);await centerStudy(page,'form',{ready:false});await expect(page.locator('[data-model-study][data-study-chapter="form"]')).toContainText('Interactive geometry unavailable');await expect(surface(page)).toHaveAttribute('aria-disabled','true');
+  // Disabled inspection also describes a pending source. Require the actual
+  // failed terminal and persisted lease before reloading its recovery path.
+  await expect(page.locator('[data-scene-fallback]')).toHaveText('Source study available · 3D unavailable',{timeout:WAIT});
+  await expect.poll(()=>page.evaluate(key=>JSON.parse(sessionStorage.getItem(key))?.status,SCENE_RECOVERY_KEY),{timeout:WAIT}).toBe('failed');
  await page.unroute('**/source-layers.glb');await page.reload();await entered(page);
- // A fresh document retries the real source after the failed request is gone.
- // It must reach an actual paint before interaction can resume.
+  // A confirmed failure retains explicit recovery across reload. Activate the
+  // real control, then require actual source paint before inspection resumes.
+  await expect(page.getByRole('button',{name:'Enable 3D',exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'Enable 3D',exact:true}).click();
  await page.waitForFunction(()=>window.__thesis?.inspect().ready,null,{timeout:WAIT});await expect(page.getByRole('button',{name:'Enable 3D',exact:true})).toHaveCount(0);
  await page.evaluate(()=>document.fonts.ready);await settle(page);await centerStudy(page);const p=await hitPoint(page);await page.mouse.move(p.x,p.y);await page.mouse.down();await page.evaluate(()=>window.__thesis.loseContext());await expect(surface(page)).toHaveAttribute('aria-disabled','true',{timeout:WAIT});await page.mouse.up();await expect(page.locator('[data-story-chapter]')).toHaveCount(7);expect(await page.evaluate(()=>document.body.style.overflow)).not.toBe('hidden');expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
 });

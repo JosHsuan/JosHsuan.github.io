@@ -273,3 +273,12 @@ application remains byte-identical to local digest
 The fresh complete candidate lists 618 browser identities in 40 files. Local
 Windows WebKit media/Tab limitations are retained above; they cannot waive any
 required Linux CI identity, same-artifact publication or live verification.
+
+The ensuing `af995f1` full run
+[41742955325](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/41742955325)
+completed all thirteen browser shards, with 603 passes and 15 failures; the
+required gate rejected it. The [native-input and continuous-observation review](animation-review/af995f1-correction-review.md)
+records the actual shared-3D hit-plane defect, its native-input regression and
+the separate recovery, animation-observer, font and native-video corrections.
+The next inventory contains 630 identities in 40 files. This is a new candidate,
+not retroactive acceptance of either failed run. Publication remains pending.

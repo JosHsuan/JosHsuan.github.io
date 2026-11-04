@@ -5,6 +5,26 @@ display finish. The original CAD geometry, asset bytes, source credits and one
 renderer/clock remain protected. This review concerns the six generic project
 routes and the additional Mode/s machine. XR and Bending have separate owners.
 
+## Current runtime amendment — 4 November 2026
+
+The observations below preserve the original material review. Two later runtime
+decisions supersede its transmission and idle-light implementation descriptions:
+
+- HC3DP now uses the [single-pass clear-shell approximation](../../animation-cinematographer/research/2026-11-03-HC_CLEAR_SHELL_TRADEOFF.md):
+  transmission is zero, opacity is .28, depth writing is disabled, and the
+  original IOR, maps, hooks and complete source geometry remain. Filament normals,
+  restrained diffuse scattering and view-dependent edge coverage preserve the
+  photographed translucent appearance. This does not simulate refraction or
+  projected caustics; the early transmission-pass correction below is historical.
+- Project reading stages use a stable photographic key with camera-dependent
+  fill/rim and cached settled source draws. Their independent compositor handheld
+  continues. Home retains authored camera, focal-length and light sweeps on the
+  existing clock. The early 12 Hz idle-light description below is superseded by
+  this explicit material/rendering tradeoff, not a performance-triggered pause.
+
+The current integration and qualification record is
+[Continuous-motion portfolio integration](../../uiux-designer/cases/bending-active-thesis/CONTINUOUS_MOTION_INTEGRATION.md).
+
 ## Evidence and visual decisions
 
 All references below are already reviewed, pinned public derivatives under

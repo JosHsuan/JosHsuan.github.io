@@ -166,11 +166,15 @@ for(const [key,route] of routes)(recorded.has(key)?filmed:test)(`${key}: native 
    };
    if(observeNativeScroll)addEventListener('scroll',scroll,{passive:true});
    const observer=new MutationObserver(()=>{
-    if(state.samples.length>=120||(state.counts[state.phase]??0)>=32)return;
+    if(state.samples.length>=120&&(state.counts[state.phase]??0)<32)return;
     const css=getComputedStyle(node),matrix=new DOMMatrix(css.transform==='none'?undefined:css.transform),box=node.getBoundingClientRect();
     const rx=parseFloat(node.style.getPropertyValue('--information-rx'))||0,ry=parseFloat(node.style.getPropertyValue('--information-ry'))||0;
     if(node.dataset.informationMoving!=='true'||(!rx&&!ry))return;
-    state.counts[state.phase]=(state.counts[state.phase]??0)+1;
+    // Keep the latest bounded phase window. Four real wheel deliveries can
+    // produce over 32 decay frames before the requested endpoint; retaining
+    // only the first 32 would discard the very position the assertion owns.
+    if((state.counts[state.phase]??0)>=32){const oldest=state.samples.findIndex(sample=>sample.phase===state.phase);if(oldest>=0)state.samples.splice(oldest,1);}
+    else state.counts[state.phase]=(state.counts[state.phase]??0)+1;
     state.samples.push({phase:state.phase,y:scrollY,rx,ry,rz:parseFloat(node.style.getPropertyValue('--information-rz'))||0,skew:parseFloat(node.style.getPropertyValue('--information-skew'))||0,matrix:Array.from(matrix.toFloat64Array()),identity:matrix.isIdentity,depth:Math.abs(matrix.m13)+Math.abs(matrix.m23),visible:box.bottom>0&&box.top<innerHeight,opacity:css.opacity,clip:css.clipPath});
    });
    observer.observe(node,{attributes:true,attributeFilter:['style','data-information-moving']});
@@ -184,10 +188,12 @@ for(const [key,route] of routes)(recorded.has(key)?filmed:test)(`${key}: native 
    // commands. Endpoints and all actual direction/rest/policy guards stay exact.
    const steps=desktopBending||key==='projects'?1:4;
    for(let step=1;step<=steps;step++)await nativeY(page,Math.round(from+(to-from)*step/steps),nativeDiagnostics);
-   // A native scroll can arrive before the Director consumes it. Require the
-   // actual target position and direction before closing this phase; a tail
-   // from positioning at `from` must not be attributed to the next gesture.
-   await expect.poll(()=>observation.evaluate((value,{phase,from,to})=>value.state.samples.some(s=>s.phase===phase&&s.y===to&&s.visible&&s.depth>1e-8&&s.rx*Math.sign(to-from)<0),{phase,from,to}),{timeout:WAIT}).toBe(true);
+   // nativeY independently requires the exact endpoint. Direction belongs to
+   // actual displacement during this gesture: WebKit can deliver 589px then
+   // 11px, with the spring already rebounding at the final pixel. Exclude the
+   // starting position and any sample outside this excursion so a positioning
+   // tail cannot satisfy the next gesture's direction requirement.
+   await expect.poll(()=>observation.evaluate((value,{phase,from,to})=>value.state.samples.some(s=>s.phase===phase&&(s.y-from)*Math.sign(to-from)>0&&(to-s.y)*Math.sign(to-from)>=0&&s.visible&&s.depth>1e-8&&s.rx*Math.sign(to-from)<0),{phase,from,to}),{timeout:WAIT}).toBe(true);
    await neutral(page);
   };
   await travel('forward',chosen.start,chosen.start+chosen.step);
@@ -223,15 +229,20 @@ for(const [key,route] of routes)(recorded.has(key)?filmed:test)(`${key}: native 
     // Return to the actual selected reading card; XR Pause navigated to Method.
     await nativeY(page,chosen.start);await neutral(page);
     receipt.forcedColors=await panel.evaluate(forcedPalette);
-    receipt.forcedColors.fixedNavigation=[];
     const navigation=page.locator('nav[aria-label="Portfolio"] a[href],[data-portfolio-navigation] a[href]');
     await expect(navigation).toHaveCount(3);
-    for(const link of await navigation.all()){
-     await expect(link).toBeVisible();await expect(link).toBeInViewport();
-     const transition=await link.evaluate(node=>{const css=getComputedStyle(node);return{property:css.transitionProperty,duration:css.transitionDuration,delay:css.transitionDelay};});
+    // Fixed native controls are independent observations. Keep every visibility,
+    // viewport, transition and painted-contrast assertion, without serially
+    // placing each protocol read behind another live model draw.
+    receipt.forcedColors.fixedNavigation=await Promise.all((await navigation.all()).map(async link=>{
+     await Promise.all([expect(link).toBeVisible(),expect(link).toBeInViewport()]);
+     const [transition,href,palette]=await Promise.all([
+      link.evaluate(node=>{const css=getComputedStyle(node);return{property:css.transitionProperty,duration:css.transitionDuration,delay:css.transitionDelay};}),
+      link.getAttribute('href'),link.evaluate(forcedPalette),
+     ]);
      if(['home','about','projects','contact'].includes(key))expect(transition.duration.split(',').map(value=>value.trim()).every(value=>value==='0s'),'Ordinary forced-palette navigation must switch atomically').toBe(true);
-     receipt.forcedColors.fixedNavigation.push({href:await link.getAttribute('href'),transition,...await link.evaluate(forcedPalette)});
-    }
+     return{href,transition,...palette};
+    }));
     const focusY=await page.evaluate(()=>scrollY);
     await navigation.first().evaluate(node=>node.focus({preventScroll:true}));
     expect(await page.evaluate(()=>scrollY)).toBe(focusY);

@@ -245,7 +245,9 @@
 .deckFooter a{display:inline-flex;align-items:center;gap:1rem;min-height:44px;text-decoration:none;color:var(--paper)}
 .deckSection[data-deck-ready]{height:calc((var(--deck-count) * .7 + 1) * 100svh);padding:0}
 [data-deck-ready] .deckSticky{height:100svh;position:sticky;top:0;padding:8rem 6vw 2.5rem;display:flex;flex-direction:column;overflow:clip}
-[data-deck-ready] .deckCards{position:relative;display:block;flex:1;margin:1.5rem 0;perspective:1400px;transform-style:preserve-3d}
+/* Each card keeps its perspective projection and explicit stack order. A shared
+   preserve-3d context puts negative-depth cards behind the list's hit plane. */
+[data-deck-ready] .deckCards{position:relative;display:block;flex:1;margin:1.5rem 0;perspective:1400px}
 [data-deck-ready] .deckCard{position:absolute;top:50%;left:50%;width:min(49svh,38rem,58vw);height:auto;transform:translate(-50%,-50%) translate3d(var(--deck-x,0),var(--deck-y,0),var(--deck-z,0)) rotateX(var(--deck-pitch,0deg)) rotateY(var(--deck-yaw,0deg)) rotateZ(var(--deck-roll,0deg)) skewY(var(--deck-shear,0deg)) scale(var(--deck-scale,1)) scale(var(--deck-sx,1),var(--deck-sy,1));clip-path:var(--deck-rim,inset(0 round 24px));transform-origin:center}
 [data-deck-ready] .deckCard:not([data-deck-active]){pointer-events:none}
 .main[data-portfolio-section=home]>.contact{min-height:100svh;display:flex;flex-direction:column;justify-content:center;scroll-margin-top:0}

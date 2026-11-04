@@ -278,7 +278,7 @@ test('native scrolling selects all three native-resolution recordings in one con
  await observePhoneLifecycle(page);
  const errors=[];page.on('pageerror',error=>errors.push(error.message));await enter(page);await modelReady(page);
  const {host,canvas:originalCanvas,join}=await retainPhoneNodes(page);
- // Keep the same retained canvas and native screenshot action. Batch related
+ // Keep the same retained canvas and six native screenshots. Batch related
  // observations at one instant instead of resolving the same locator for each
  // assertion while the recording and the real scene clock continue to run.
  const decodedFrames=()=>page.evaluate(()=>{
@@ -307,8 +307,12 @@ test('native scrolling selects all three native-resolution recordings in one con
   await writeFile(receiptPath,JSON.stringify({source:sample.currentSource,width:sample.sourceWidth,height:sample.sourceHeight,duration:sample.duration,readyState:sample.readyState,error:sample.error,playing:sample.nativePlaying,sameCanvas:sample.originalCanvas,canvasCount:sample.canvasCount,activeVideoSources:sample.videoSources,budget:state.resource.surface.budget.budget,media:state.resource.media},null,2)+'\n');
   await test.info().attach(`native-${id}-recording`,{path:receiptPath,contentType:'application/json'});
   const draw=state.resource.surface;expect(draw.sourceCalls).toBe(0);expect(draw.phoneBodyCalls).toBe(1);expect(draw.phoneScreenCalls).toBe(1);expect(draw.phoneCalls).toBe(2);expect(draw.stageCalls).toBeGreaterThan(0);expect(draw.calls).toBe(draw.sourceCalls+draw.phoneCalls+draw.stageCalls);
-  const first=await originalCanvas.screenshot({path:test.info().outputPath(`${id}-phone-before.png`)}),count=await decodedFrames();
-  await expect.poll(decodedFrames).toBeGreaterThan(count+2);expect((await originalCanvas.screenshot({path:test.info().outputPath(`${id}-phone-after.png`)})).equals(first)).toBe(false);
+  // The original canvas above is exactly the full viewport. Capture that same
+  // native pixel rectangle directly: ElementHandle.screenshot additionally
+  // scrolls and measures an already fixed surface before every capture, placing
+  // redundant protocol steps behind continuously rendered video frames.
+  const first=await page.screenshot({path:test.info().outputPath(`${id}-phone-before.png`),fullPage:false}),count=await decodedFrames();
+  await expect.poll(decodedFrames).toBeGreaterThan(count+2);expect((await page.screenshot({path:test.info().outputPath(`${id}-phone-after.png`),fullPage:false})).equals(first)).toBe(false);
    if(id==='adapt')continuity=await host.evaluateHandle(host=>{
     let running=true,raf;const samples=[];
     const read=()=>{if(!running)return;const s=host.__xrStage.inspect(),canvas=host.querySelector('canvas');samples.push({chapter:s.chapter,mode:s.scene.mode,opacity:s.scene.opacity,cssOpacity:Number(getComputedStyle(host.querySelector('[data-xr-scene-surface]')).opacity),painted:s.resource?.successfulPaint,rendering:s.resource?.mode,phoneCalls:s.resource?.surface?.phoneCalls,connected:!!canvas?.isConnected});raf=requestAnimationFrame(read);};read();

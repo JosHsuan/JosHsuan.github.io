@@ -126,6 +126,30 @@ test('Home source failure leaves introduction and native project navigation usab
  await expect(page.locator('[data-deck-card]')).toHaveCount(8);
 });
 
+test('an active discovery card receives native input between exact card positions',async({page},info)=>{
+ await page.goto('/#projects');await entered(page);
+ const range=await deck(page),y=Math.round(range.top+45);
+ // The failed CI gesture left the first selected card 45 pixels into its
+ // interval. Its negative depth must not expose the list's own hit plane.
+ await wheelTo(page,y);
+ await expect.poll(()=>page.evaluate(()=>scrollY),{timeout:WAIT}).toBe(y);
+ await expect.poll(async()=>{const state=await deck(page);return Math.abs(state.position-state.target);},{timeout:WAIT}).toBeLessThan(.0001);
+ const facts=await page.locator('[data-deck-card][data-deck-active] a').evaluate(anchor=>{
+  const box=anchor.getBoundingClientRect(),points=[[.5,.5],[.35,.35],[.65,.35],[.35,.65],[.65,.65]];
+  return {href:anchor.getAttribute('href'),points:points.map(([u,v])=>{
+   const x=box.x+box.width*u,y=box.y+box.height*v,hit=document.elementFromPoint(x,y);
+   return {x,y,target:hit?.tagName,href:hit?.closest('a')?.getAttribute('href')??null};
+  })};
+ });
+ await writeFile(info.outputPath('between-card-native-hit.json'),JSON.stringify(facts,null,2)+'\n');
+ expect(facts.href).toBe('/projects/bending-active/');
+ expect(facts.points.every(point=>point.href===facts.href)).toBe(true);
+ // Use the real pointer at the observed centre, without locator scrolling,
+ // forced dispatch, event forwarding or a synthetic navigation fallback.
+ await page.mouse.click(facts.points[0].x,facts.points[0].y);
+ await expect(page).toHaveURL(/\/projects\/bending-active\/$/);
+});
+
 for(const viewport of [{name:'short landscape',width:844,height:390},{name:'200-percent desktop effective viewport',width:720,height:500}])test(`square discovery cards remain compact and usable in ${viewport.name}`,async({page},info)=>{
  // 1440x1000 at 200% exposes 720x500 CSS pixels. This verifies reflow at that
  // effective viewport; it does not claim to change physical browser chrome zoom.
