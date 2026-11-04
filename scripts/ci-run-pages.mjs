@@ -13,9 +13,13 @@ const provenance={version:1,commit:plan.head,runId:process.env.GITHUB_RUN_ID,run
 for(const [key,value] of Object.entries(provenance)) if(!value || inventory[key]!==value) throw Error('Stale inventory');
 const files=shardFiles(plan,browser,shard);
 if(!files.length) throw Error('Empty shard');
+// A native WebKit target can disappear before Playwright receives a page-crash
+// event. Retain its process exit/stderr alongside the normal trace and receipt;
+// do not retry, change launch options or substitute a browser outcome.
+const diagnosticEnv=browser==='webkit'?{DEBUG:[process.env.DEBUG,'pw:browser'].filter(Boolean).join(',')}:{};
 const result = spawnSync(process.execPath, ['node_modules/@playwright/test/cli.js', 'test', '--config', 'playwright.pages.config.mjs',
   '--project', browser, '--reporter','line,./scripts/ci-receipt-reporter.mjs', ...files],
-  {stdio: 'inherit',env:{...process.env,CI_RECEIPT_OUTPUT:'ci-shard-result.json'}});
+  {stdio: 'inherit',env:{...process.env,...diagnosticEnv,CI_RECEIPT_OUTPUT:'ci-shard-result.json'}});
 if (result.error) throw result.error;
 const receipt=JSON.parse(await readFile('ci-shard-result.json','utf8'));
 await writeFile(`ci-receipt-${browser}-${shard.replace('/','-')}.json`,JSON.stringify({...provenance,browser,shard,files,...receipt},null,2)+'\n');

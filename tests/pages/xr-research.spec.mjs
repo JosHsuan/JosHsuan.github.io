@@ -37,12 +37,13 @@ async function observePhoneLifecycle(page){
  // Test-only, bounded event receipts survive an unresponsive page. No polling,
  // playback changes, extra animation clock, recovery or timeout extension.
  const entries=[],prefix='xr-phone-lifecycle:',browser=page.context().browser();
- const push=value=>{if(entries.length<50)entries.push(value);};
+ const push=value=>{if(entries.length<56)entries.push(value);};
  const consoleEntry=message=>{const value=message.text();if(value.startsWith(prefix)){try{push(JSON.parse(value.slice(prefix.length)));}catch{/* Keep the original application/test failure. */}}};
  const crashed=()=>push({event:'page-crash',hostTime:Date.now()});
+ const closed=()=>push({event:'page-close',hostTime:Date.now()});
  const disconnected=()=>push({event:'browser-disconnected',hostTime:Date.now()});
- page.on('console',consoleEntry);page.on('crash',crashed);browser?.on('disconnected',disconnected);
- phoneDiagnostics.set(page,{entries,dispose(){page.off('console',consoleEntry);page.off('crash',crashed);browser?.off('disconnected',disconnected);}});
+ page.on('console',consoleEntry);page.on('crash',crashed);page.on('close',closed);browser?.on('disconnected',disconnected);
+ phoneDiagnostics.set(page,{entries,dispose(){page.off('console',consoleEntry);page.off('crash',crashed);page.off('close',closed);browser?.off('disconnected',disconnected);}});
  await page.addInitScript(({prefix})=>{
   let count=0;
   const record=event=>{
@@ -58,11 +59,12 @@ async function observePhoneLifecycle(page){
   for(const name of ['loadstart','loadedmetadata','loadeddata','canplay','play','playing','waiting','stalled','error','pause','seeking','seeked'])document.addEventListener(name,record,true);
  },{prefix});
 }
-test.afterEach(async({page},info)=>{
+async function retainPhoneLifecycle(page,info,label='xr-phone-lifecycle'){
  const receipt=phoneDiagnostics.get(page);if(!receipt)return;
  receipt.dispose();phoneDiagnostics.delete(page);
- try{const path=info.outputPath('xr-phone-lifecycle.json');await writeFile(path,JSON.stringify(receipt.entries,null,2)+'\n');await info.attach('xr-phone-lifecycle',{path,contentType:'application/json'});}catch{/* Diagnostic attachment cannot replace the original test outcome. */}
-});
+ try{const path=info.outputPath(label+'.json');await writeFile(path,JSON.stringify(receipt.entries,null,2)+'\n');await info.attach(label,{path,contentType:'application/json'});}catch{/* Diagnostic attachment cannot replace the original test outcome. */}
+}
+test.afterEach(async({page},info)=>{await retainPhoneLifecycle(page,info);});
 async function openingVisible(page){
  await expect(stage(page)).toHaveAttribute('data-xr-opening','true');
  await expect(stage(page).locator('[data-xr-opening-visual]')).toHaveCount(0);
@@ -486,7 +488,8 @@ test('OS motion and data preferences preserve the same active model and native r
  expect(requests).toEqual([expect.stringContaining('/assets/xr/xr-research-assembly.glb')]);expect(errors).toEqual([]);
 });
 
-test('unavailable WebGL and genuine context loss retain native recording playback and model fallback keeps reading keys native',async({page,browser})=>{
+test('unavailable WebGL and genuine context loss retain native recording playback and model fallback keeps reading keys native',async({page,browser},info)=>{
+ await observePhoneLifecycle(page);
  await page.addInitScript(()=>{const original=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,...args){return /^webgl/.test(type)?null:original.call(this,type,...args);};});
  const errors=[];page.on('pageerror',error=>errors.push(error.message));await enter(page);
  await expect.poll(async()=>(await facts(page)).phase).toBe('ready');expect((await facts(page)).resource.mode).toBe('poster');await expect(stage(page).locator('canvas')).toHaveCount(0);await openingVisible(page);
@@ -494,13 +497,14 @@ test('unavailable WebGL and genuine context loss retain native recording playbac
  await scrollChapter(page,'method');expect((await facts(page)).resource.mode).toBe('poster');await nativeArrowScroll(page);expect(errors).toEqual([]);
  // A fresh actual document obtains an unmodified native GPU context.
  const context=await browser.newContext({viewport:page.viewportSize()??{width:1440,height:1000}});
+ let native;
  try{
-  const native=await context.newPage();native.on('pageerror',error=>errors.push(error.message));await enter(native);await phoneReady(native,'adapt');
+  native=await context.newPage();await observePhoneLifecycle(native);native.on('pageerror',error=>errors.push(error.message));await enter(native);await phoneReady(native,'adapt');
   const lost=await stage(native).locator('canvas').evaluate(canvas=>{const extension=canvas.getContext('webgl2').getExtension('WEBGL_lose_context');if(!extension)return false;extension.loseContext();return true;});expect(lost).toBe(true);
   await expect.poll(async()=>(await facts(native)).resource.mode).toBe('native-video');expect((await facts(native)).resource.fallbackReason).toBe('context-lost');await expect(stage(native).locator('canvas')).toHaveCount(0);
   const position=await video(native,'adapt').evaluate(node=>node.currentTime);await expect.poll(()=>video(native,'adapt').evaluate(node=>node.currentTime)).toBeGreaterThan(position);closed(await facts(native));
   await scrollChapter(native,'method');expect((await facts(native)).resource.mode).toBe('poster');await expect(stage(native).locator('video[src]')).toHaveCount(0);await expect(stage(native).locator('[data-xr-model-poster]')).toBeVisible();await nativeArrowScroll(native);
- }finally{await context.close();}expect(errors).toEqual([]);
+ }finally{try{await context.close();}finally{if(native)await retainPhoneLifecycle(native,info,'xr-context-loss-lifecycle');}}expect(errors).toEqual([]);
 });
 
 test('actual HTTP model and recording failures remain readable, do not retry themselves and preserve native project navigation',async({page})=>{

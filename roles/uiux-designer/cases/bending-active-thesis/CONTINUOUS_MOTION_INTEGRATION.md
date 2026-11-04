@@ -316,3 +316,13 @@ deadline at the last PNG. The
 records both failed traces and the bounded observer corrections. Production
 motion, source geometry, raster/material policy and deadlines remain unchanged
 by those corrections. Fresh complete qualification is still required.
+
+The `d83826f` full run
+[41764327975](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/41764327975)
+finishes 629/630: Chromium and mobile each 210/210, WebKit 209/210. Both preceding
+Bending corrections pass. A WebKit native-video fallback target closes before
+its deadline, with no explanatory crash/process evidence. The
+[native-fallback review](animation-review/d83826f-native-fallback-review.md)
+records the rejected artifact, a passing isolated pinned-Linux reproduction,
+and added bounded lifecycle/process diagnostics. Its cause is not asserted to
+be fixed; complete fresh qualification remains required before publication.
