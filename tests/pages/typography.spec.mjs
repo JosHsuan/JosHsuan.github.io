@@ -32,7 +32,11 @@ for(const route of routes)test(`the published ${route} document renders a cohere
  await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});
  // New documentary openings show the complete source image before their glass
  // copy on mobile. Inspect actual reading glyphs after native movement to h1.
- if(await page.locator('[data-project-study]').count())await page.locator('h1').scrollIntoViewIfNeeded();
+ // The reviewed route inventory already identifies these six documents. A
+ // standalone count cost 13.3 seconds including trace observation beside the
+ // live Bending renderer; verify the actual marker in the layout snapshot.
+ const nativeStudy=studies.some(project=>route===`/projects/${project.slug}/`);
+ if(nativeStudy)await page.locator('h1').scrollIntoViewIfNeeded();
  const reading=await page.evaluate(async expected=>{
   await document.fonts.ready;
   const preloads=[...document.querySelectorAll('link[rel="preload"][as="font"][data-site-font-family]')].map(node=>({family:node.dataset.siteFontFamily,href:node.getAttribute('href')}));
@@ -63,8 +67,9 @@ for(const route of routes)test(`the published ${route} document renders a cohere
   // the original language before returning or starting platform-font queries.
   const cjkNode=document.querySelector('main p[data-editorial-copy],main p[class*="_prose__"],main [class*="_panel__"]>p:not([class*="_eyebrow__"]),main p[class*="_description__"]');let cjk=null;
   if(cjkNode){const lang=cjkNode.getAttribute('lang');cjkNode.lang='zh-Hant';const css=getComputedStyle(cjkNode);cjk={leading:parseFloat(css.lineHeight)/parseFloat(css.fontSize),family:css.fontFamily};if(lang===null)cjkNode.removeAttribute('lang');else cjkNode.setAttribute('lang',lang);}
-  return{preloads,cjk,rootSize:parseFloat(getComputedStyle(document.documentElement).fontSize),faces:[...document.fonts].filter(face=>face.status==='loaded').map(face=>face.family.replaceAll(/['"]/g,'')),loaded:{body:document.fonts.check(`16px "${expected.body}"`,'Computational design fabrication-ready × 01'),display:document.fonts.check(`400 16px "${expected.display}"`,'Design technology and spatial interaction')},wrong,clipped,roles,fontProbes,textNodes:text.length,headingVisible:heading.checkVisibility({visibilityProperty:true,opacityProperty:true}),headingFamily:getComputedStyle(heading).fontFamily,bodyFamily:body?getComputedStyle(body).fontFamily:null,bodyProbeSelector:body?selector(body):null,clientWidth:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth};
+  return{projectStudyCount:document.querySelectorAll('[data-project-study]').length,preloads,cjk,rootSize:parseFloat(getComputedStyle(document.documentElement).fontSize),faces:[...document.fonts].filter(face=>face.status==='loaded').map(face=>face.family.replaceAll(/['"]/g,'')),loaded:{body:document.fonts.check(`16px "${expected.body}"`,'Computational design fabrication-ready × 01'),display:document.fonts.check(`400 16px "${expected.display}"`,'Design technology and spatial interaction')},wrong,clipped,roles,fontProbes,textNodes:text.length,headingVisible:heading.checkVisibility({visibilityProperty:true,opacityProperty:true}),headingFamily:getComputedStyle(heading).fontFamily,bodyFamily:body?getComputedStyle(body).fontFamily:null,bodyProbeSelector:body?selector(body):null,clientWidth:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth};
  },families);
+ expect(reading.projectStudyCount).toBe(nativeStudy?1:0);
  expect(reading.preloads.filter(row=>row.family===families.body)).toEqual([{family:families.body,href:'/assets/fonts/roboto-mono-variable.woff2'}]);
  if(reading.cjk){expect(reading.cjk.leading).toBeCloseTo(1.65,2);expect(reading.cjk.family).toContain('Noto Sans CJK TC');}
  for(const family of Object.values(families))expect(reading.faces).toContain(family);

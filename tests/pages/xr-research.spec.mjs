@@ -25,11 +25,13 @@ const workspace=JSON.parse(await readFile(new URL('../../roles/uiux-designer/cas
 const studies=JSON.parse(await readFile(new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/project-studies.json',import.meta.url),'utf8')).projects;
 const phoneDiagnostics=new WeakMap();
 async function continuousPresentationControls(page){
- await expect(page.locator('[data-xr-motion-toggle],[data-phone-play-toggle]')).toHaveCount(0);
- await expect(page.getByRole('button',{name:/pause|resume|play recording/i})).toHaveCount(0);
- const imageLinks=await page.locator('[data-xr-study] a').evaluateAll(nodes=>nodes.filter(node=>/\.(?:avif|gif|jpe?g|png|svg|webp)(?:[?#]|$)/i.test(node.getAttribute('href')??'')||node.querySelector('img')).map(node=>node.getAttribute('href')));
+ const [,,imageLinks]=await Promise.all([
+  expect(page.locator('[data-xr-motion-toggle],[data-phone-play-toggle]')).toHaveCount(0),
+  expect(page.getByRole('button',{name:/pause|resume|play recording/i})).toHaveCount(0),
+  page.locator('[data-xr-study] a').evaluateAll(nodes=>nodes.filter(node=>/\.(?:avif|gif|jpe?g|png|svg|webp)(?:[?#]|$)/i.test(node.getAttribute('href')??'')||node.querySelector('img')).map(node=>node.getAttribute('href'))),
+  expect(page.locator('[data-image-viewer],[data-image-lightbox],dialog')).toHaveCount(0),
+ ]);
  expect(imageLinks).toEqual([]);
- await expect(page.locator('[data-image-viewer],[data-image-lightbox],dialog')).toHaveCount(0);
 }
 async function observePhoneLifecycle(page){
  // Test-only, bounded event receipts survive an unresponsive page. No polling,
@@ -113,9 +115,11 @@ async function fullCanvas(page){
  for(const key of ['x','y','width','height'])expect(sample.canvas[key]).toBeCloseTo(sample.expected[key],0);
  expect({left:sample.view.left,top:sample.view.top,width:sample.view.width,height:sample.view.height}).toEqual({left:0,top:0,...viewport});
 }
-async function viewportFits(page){
- const viewport=page.viewportSize(),actual=await page.evaluate(()=>({clientWidth:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth,innerWidth,innerHeight,visualWidth:visualViewport?.width,visualHeight:visualViewport?.height}));
+function expectViewportFits(actual,viewport){
  expect(actual.clientWidth).toBe(viewport.width);expect(actual.scrollWidth).toBeLessThanOrEqual(actual.clientWidth);expect(actual.innerWidth).toBe(viewport.width);expect(actual.innerHeight).toBe(viewport.height);expect(actual.visualWidth).toBeCloseTo(viewport.width,0);expect(actual.visualHeight).toBeCloseTo(viewport.height,0);
+}
+async function viewportFits(page){
+ expectViewportFits(await page.evaluate(()=>({clientWidth:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth,innerWidth,innerHeight,visualWidth:visualViewport?.width,visualHeight:visualViewport?.height})),page.viewportSize());
 }
 async function enter(page,origin='http://127.0.0.1:4186'){
  await page.goto(origin+'/projects/xr-bending-active/');
@@ -132,8 +136,9 @@ async function settled(page,chapter){
   await page.waitForFunction(chapter=>{const state=document.querySelector('[data-xr-stage]')?.__xrStage?.inspect();return state?.chapter===chapter&&state.scene.chapter===chapter&&state.scene.mode===(['overview','making','credits'].includes(chapter)?'absent':'hold')&&state.scene.settled&&!state.scene.paintPending&&state.camera.settled&&state.informationWindows.settled&&!state.camera.recovering&&(!state.lifecycle.scheduled||state.camera.idleActive&&state.resource?.mode==='webgl-model'&&state.scene.mode==='hold');},chapter,{timeout:WAIT});
  await frames(page,2);
 }
+const positionChapter=(page,chapter)=>page.evaluate(id=>{const chapters=document.querySelectorAll(`[data-xr-chapter="${id}"]`);if(chapters.length!==1)throw Error(`Expected exactly one ${id} chapter`);chapters[0].scrollIntoView({block:'start',behavior:'instant'});},chapter);
 async function scrollChapter(page,chapter){
- await page.evaluate(id=>{const chapters=document.querySelectorAll(`[data-xr-chapter="${id}"]`);if(chapters.length!==1)throw Error(`Expected exactly one ${id} chapter`);chapters[0].scrollIntoView({block:'start',behavior:'instant'});},chapter);
+ await positionChapter(page,chapter);
  await settled(page,chapter);
  await viewportFits(page);
 }
@@ -155,6 +160,17 @@ async function phoneReady(page,id,{native=false}={}){
  await scrollChapter(page,id);
  await page.waitForFunction(({id,native})=>{const state=document.querySelector('[data-xr-stage]')?.__xrStage?.inspect(),r=state?.resource;return state?.phase==='ready'&&r?.chapter===id&&r.media.stage===id&&!r.media.pending&&r.media.native?.ready&&r.mode===(native?'native-video':'webgl-phone')&&(native||r.successfulPaint&&r.media.frames>2);},{id,native},{timeout:WAIT});
  await frames(page,2);
+}
+async function paintedPhoneChapter(page,id){
+ await positionChapter(page,id);
+ // This complete journey needs both the settled chapter and its actual painted
+ // recording. Observe all original conditions together, rather than adding two
+ // fixed two-RAF waits after readiness. Native frame progression and all six
+ // captures remain independently required below.
+ await page.waitForFunction(id=>{
+  const s=document.querySelector('[data-xr-stage]')?.__xrStage?.inspect(),r=s?.resource;
+  return s?.phase==='ready'&&s.chapter===id&&s.scene.chapter===id&&s.scene.mode==='hold'&&s.scene.settled&&!s.scene.paintPending&&s.camera.settled&&s.informationWindows.settled&&!s.camera.recovering&&!s.lifecycle.scheduled&&r?.chapter===id&&r.media.stage===id&&!r.media.pending&&r.media.native?.ready&&r.mode==='webgl-phone'&&r.successfulPaint&&r.media.frames>2;
+ },id,{timeout:WAIT});
 }
 async function hitPoint(page){
  return page.evaluate(()=>{
@@ -289,14 +305,15 @@ test('native scrolling selects all three native-resolution recordings in one con
   try{
  await expect(page.locator('[data-phone-stage],[data-phone-front-toggle]')).toHaveCount(0);
  for(const [id,duration]of[['adapt',13],['assemble',24.96],['join',20.3]]){
-  await phoneReady(page,id);
+  await paintedPhoneChapter(page,id);
   const sample=await originalCanvas.evaluate((canvas,id)=>{
    const hosts=document.querySelectorAll('[data-xr-stage]');if(hosts.length!==1)throw Error('Expected exactly one XR stage');
    const host=hosts[0],videos=host.querySelectorAll(`[data-xr-stage-video="${id}"]`);if(videos.length!==1)throw Error('Expected exactly one selected recording');
    const recording=videos[0];return{state:host.__xrStage.inspect(),canvasCount:host.querySelectorAll('canvas').length,videoSources:host.querySelectorAll('video[src]').length,
     originalCanvas:canvas.isConnected&&canvas===host.querySelector('canvas'),nativePlaying:recording.muted&&recording.loop&&recording.playsInline&&!recording.paused,duration:recording.duration,sourceWidth:recording.videoWidth,sourceHeight:recording.videoHeight,readyState:recording.readyState,error:recording.error?.code??null,currentSource:new URL(recording.currentSrc).pathname,
-    canvasBox:canvas.getBoundingClientRect().toJSON(),viewport:{width:innerWidth,height:innerHeight}};
+    canvasBox:canvas.getBoundingClientRect().toJSON(),viewport:{width:innerWidth,height:innerHeight},documentViewport:{clientWidth:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth,innerWidth,innerHeight,visualWidth:visualViewport?.width,visualHeight:visualViewport?.height}};
   },id);
+  expectViewportFits(sample.documentViewport,page.viewportSize());
   const {state}=sample;closed(state);expect(state.acquisitions).toBe(1);expect(state.resource.media.reason).toBeNull();expect(state.resource.fallbackReason).toBeNull();
   expect(sample.canvasCount).toBe(1);expect(sample.videoSources).toBe(1);expect(sample.originalCanvas).toBe(true);
   expect(sample.canvasBox.x).toBeCloseTo(0,0);expect(sample.canvasBox.y).toBeCloseTo(0,0);expect(sample.canvasBox.width).toBeCloseTo(sample.viewport.width,0);expect(sample.canvasBox.height).toBeCloseTo(sample.viewport.height,0);
@@ -329,10 +346,8 @@ test('native scrolling selects all three native-resolution recordings in one con
    try{if(continuity){try{await continuity.evaluate(value=>value.dispose());}finally{await continuity.dispose();}}}
    catch(error){if(!primaryError)throw error;}
   }
- await continuousPresentationControls(page);
- const position=await join.evaluate(node=>node.currentTime);
+ const [,position]=await Promise.all([continuousPresentationControls(page),join.evaluate(node=>node.currentTime),expect(page.locator('[data-xr-scene-controls] button')).toHaveCount(0)]);
  await expect.poll(()=>join.evaluate((node,before)=>Math.abs(node.currentTime-before),position)).toBeGreaterThan(.03);
- await expect(page.locator('[data-xr-scene-controls] button')).toHaveCount(0);
  await scrollChapter(page,'overview');await modelReady(page);await openingVisible(page);
  const returned=await originalCanvas.evaluate(()=>{const hosts=document.querySelectorAll('[data-xr-stage]');if(hosts.length!==1)throw Error('Expected exactly one XR stage');return{state:hosts[0].__xrStage.inspect(),videoSources:hosts[0].querySelectorAll('video[src]').length};});
  expect(returned.videoSources).toBe(0);expect(returned.state.resource.media.stage).toBeNull();expect(returned.state.acquisitions).toBe(1);expect(errors).toEqual([]);

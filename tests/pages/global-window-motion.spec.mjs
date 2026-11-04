@@ -7,18 +7,29 @@ const routes=[['home','/'],['about','/about/'],['projects','/projects/'],['conta
 const filmed=test.extend({video:'on'}),plane='[data-information-window][data-information-ready][data-information-plane]';
 const recorded=new Set(['home','mode-s-of-making','bending','xr']);
 
-async function nativeY(page,target,diagnostics){
- const sample=()=>page.evaluate(()=>{
-  const s=window.__story?.inspect(),policy=window.__thesis?.inspect();
-  return{y:scrollY,controllerFrame:s?.controllerFrame,frameDelta:s?.frameDelta,entry:s?.entry?.phase,
-   informationWindows:s?{ticks:s.informationWindows.ticks,moving:s.informationWindows.moving,settled:s.informationWindows.settled,items:s.informationWindows.items.slice(0,32)}:null,policy:{reduced:policy?.reduced,motionPaused:policy?.motionPaused,hidden:document.hidden,saveData:!!navigator.connection?.saveData,forcedColors:matchMedia('(forced-colors: active)').matches,static:document.documentElement.hasAttribute('data-cinematic-static'),focused:document.activeElement?.tagName}};
+function nativePosition({target,timeout,diagnostics}){
+ // Observe an actual native scroll event (or an already-reached endpoint),
+ // capturing its diagnostic state in that same delivery. No extra RAF clock.
+ return new Promise((resolve,reject)=>{
+  let timer;
+  const cleanup=()=>{removeEventListener('scroll',read);clearTimeout(timer);};
+  const read=()=>{
+   if(target!==null&&scrollY!==target)return false;
+   const s=diagnostics?window.__story?.inspect():null,policy=diagnostics?window.__thesis?.inspect():null;
+   const sample=diagnostics?{y:scrollY,controllerFrame:s?.controllerFrame,frameDelta:s?.frameDelta,entry:s?.entry?.phase,
+    informationWindows:s?{ticks:s.informationWindows.ticks,moving:s.informationWindows.moving,settled:s.informationWindows.settled,items:s.informationWindows.items.slice(0,32)}:null,policy:{reduced:policy?.reduced,motionPaused:policy?.motionPaused,hidden:document.hidden,saveData:!!navigator.connection?.saveData,forcedColors:matchMedia('(forced-colors: active)').matches,static:document.documentElement.hasAttribute('data-cinematic-static'),focused:document.activeElement?.tagName}}:{y:scrollY};
+   cleanup();resolve(sample);return true;
+  };
+  if(read())return;
+  addEventListener('scroll',read,{passive:true});
+  timer=setTimeout(()=>{cleanup();reject(Error(`Native scroll did not reach ${target}; observed ${scrollY}`));},timeout);
  });
- const before=diagnostics?await sample():{y:await page.evaluate(()=>scrollY)},from=before.y;
- await page.mouse.move(page.viewportSize().width-4,page.viewportSize().height*.5);
- await page.mouse.wheel(0,target-from);
- await page.waitForFunction(y=>scrollY===y,target,{timeout:WAIT});
- if(!diagnostics)return page.evaluate(()=>scrollY);
- const after=await sample();if(diagnostics.length<32)diagnostics.push({target,before,after});return after.y;
+}
+async function nativeY(page,target,diagnostics){
+ const before=await page.evaluate(nativePosition,{target:null,timeout:WAIT,diagnostics:!!diagnostics}),from=before.y;
+ if(from!==target)await page.mouse.wheel(0,target-from);
+ const after=from===target?before:await page.evaluate(nativePosition,{target,timeout:WAIT,diagnostics:!!diagnostics});
+ if(diagnostics&&diagnostics.length<32)diagnostics.push({target,before,after});return after.y;
 }
 async function neutral(page,selector=plane){
  await page.waitForFunction(selector=>{
@@ -58,6 +69,7 @@ async function ownership(page){
 // Default emulated forced palette only: resolved opaque paint, not a claim
 // about every user-selected high-contrast theme or photographic source pixels.
 function forcedPalette(panel,{allowDecorativeHidden=false}={}){
+ if(Array.isArray(panel))return panel.map(node=>{const css=getComputedStyle(node);return{href:node.getAttribute('href'),transition:{property:css.transitionProperty,duration:css.transitionDuration,delay:css.transitionDelay},...forcedPalette(node)};});
  const rgba=value=>{const parts=value.match(/^rgba?\(([^)]+)\)$/)?.[1].replace('/',' ').split(/[,\s]+/).filter(Boolean).map(Number);if(!parts||parts.some(n=>!Number.isFinite(n)))throw Error('Unsupported computed color '+value);return[...parts.slice(0,3),parts[3]??1];};
  const luminance=rgb=>rgb.slice(0,3).map(c=>c/255).map(c=>c<=.04045?c/12.92:((c+.055)/1.055)**2.4).reduce((sum,c,i)=>sum+c*[.2126,.7152,.0722][i],0);
  const paintFacts=(element,css)=>({tag:element.tagName,class:(element.getAttribute('class')??'').slice(0,160),
@@ -113,10 +125,9 @@ for(const [key,route] of routes)(recorded.has(key)?filmed:test)(`${key}: native 
   // overflow. Exercise its real compact-height layout, never artificial space.
 
   const response=await page.goto(route);expect(response.status()).toBe(200);
-  await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});
-  await page.evaluate(()=>document.fonts.ready);
-  if(key==='bending')await page.waitForFunction(()=>window.__thesis?.inspect().ready&&!document.documentElement.hasAttribute('data-cinematic-static'),null,{timeout:WAIT});
-  await page.waitForFunction(selector=>document.querySelectorAll(selector).length>0,plane,{timeout:WAIT});
+  // All four independent readiness conditions belong to the same document.
+  // Separate protocol reads previously queued behind additional source draws.
+  await page.waitForFunction(({key,selector})=>window.__site?.inspect().phase==='entered'&&document.fonts.status==='loaded'&&(key!=='bending'||window.__thesis?.inspect().ready&&!document.documentElement.hasAttribute('data-cinematic-static'))&&document.querySelectorAll(selector).length>0,{key,selector:plane},{timeout:WAIT});
   if(key==='contact'){
    await neutral(page);
    receipt.originalContact=await page.evaluate(()=>({y:scrollY,height:innerHeight,scrollHeight:document.documentElement.scrollHeight,overflow:Math.max(0,document.documentElement.scrollHeight-innerHeight)}));
@@ -125,6 +136,10 @@ for(const [key,route] of routes)(recorded.has(key)?filmed:test)(`${key}: native 
    await neutral(page);
   }
   receipt.viewport=page.viewportSize();
+  // Every wheel in this scenario uses this same unobstructed document edge.
+  // Keyboard/focus/media checks do not move the pointer; do not redispatch an
+  // identical mouse move before each native wheel.
+  await page.mouse.move(receipt.viewport.width-4,receipt.viewport.height*.5);
   const desktopBending=key==='bending'&&!isMobile;
   const nativeDiagnostics=key==='bending'?(receipt.nativeDiagnostics=[]):undefined;
   receipt.ownership=await ownership(page);expect(receipt.ownership.problems).toEqual([]);expect(receipt.ownership.count).toBeGreaterThan(0);
@@ -230,34 +245,27 @@ for(const [key,route] of routes)(recorded.has(key)?filmed:test)(`${key}: native 
     await nativeY(page,chosen.start);await neutral(page);
     receipt.forcedColors=await panel.evaluate(forcedPalette);
     const navigation=page.locator('nav[aria-label="Portfolio"] a[href],[data-portfolio-navigation] a[href]');
-    await expect(navigation).toHaveCount(3);
+    const links=await navigation.all();expect(links).toHaveLength(3);
     // Fixed native controls are independent observations. Keep every visibility,
     // viewport, transition and painted-contrast assertion, without serially
     // placing each protocol read behind another live model draw.
-    receipt.forcedColors.fixedNavigation=await Promise.all((await navigation.all()).map(async link=>{
-     await Promise.all([expect(link).toBeVisible(),expect(link).toBeInViewport()]);
-     const [transition,href,palette]=await Promise.all([
-      link.evaluate(node=>{const css=getComputedStyle(node);return{property:css.transitionProperty,duration:css.transitionDuration,delay:css.transitionDelay};}),
-      link.getAttribute('href'),link.evaluate(forcedPalette),
-     ]);
-     if(['home','about','projects','contact'].includes(key))expect(transition.duration.split(',').map(value=>value.trim()).every(value=>value==='0s'),'Ordinary forced-palette navigation must switch atomically').toBe(true);
-     return{href,transition,...palette};
-    }));
-    const focusY=await page.evaluate(()=>scrollY);
-    await navigation.first().evaluate(node=>node.focus({preventScroll:true}));
-    expect(await page.evaluate(()=>scrollY)).toBe(focusY);
+    await Promise.all(links.flatMap(link=>[expect(link).toBeVisible(),expect(link).toBeInViewport()]));
+    receipt.forcedColors.fixedNavigation=await navigation.evaluateAll(forcedPalette);
+    for(const {transition}of receipt.forcedColors.fixedNavigation)if(['home','about','projects','contact'].includes(key))expect(transition.duration.split(',').map(value=>value.trim()).every(value=>value==='0s'),'Ordinary forced-palette navigation must switch atomically').toBe(true);
+    const focusStart=await navigation.first().evaluate(node=>{const before=scrollY;node.focus({preventScroll:true});return{before,after:scrollY,focused:document.activeElement===node};});
+    expect(focusStart.focused).toBe(true);expect(focusStart.after).toBe(focusStart.before);const focusY=focusStart.before;
     await page.keyboard.press('Tab');
     const focusedLink=navigation.nth(1);
-    receipt.forcedColors.keyboardFocus=[];
+    receipt.forcedColors.keyboardFocus=[];let focusedState;
     await expect.poll(async()=>{
      const state=await focusedLink.evaluate(node=>({activeTag:document.activeElement?.tagName,activeHref:document.activeElement?.getAttribute('href'),documentHasFocus:document.hasFocus(),targetActive:document.activeElement===node,targetFocusVisible:node.matches(':focus-visible'),scrollY}));
+     focusedState=state;
      if(receipt.forcedColors.keyboardFocus.length<32)receipt.forcedColors.keyboardFocus.push(state);
      return state.targetActive&&state.targetFocusVisible;
     },{timeout:WAIT}).toBe(true);
-    expect(await page.evaluate(()=>scrollY)).toBe(focusY);
-    receipt.forcedColors.focusedNavigation={href:await focusedLink.getAttribute('href'),y:focusY,...await focusedLink.evaluate(forcedPalette)};
-    await focusedLink.evaluate(node=>node.blur());
-    expect(await page.evaluate(()=>scrollY)).toBe(focusY);
+    expect(focusedState.scrollY).toBe(focusY);
+    receipt.forcedColors.focusedNavigation={href:focusedState.activeHref,y:focusedState.scrollY,...await focusedLink.evaluate(forcedPalette)};
+    const blurredY=await focusedLink.evaluate(node=>{node.blur();return scrollY;});expect(blurredY).toBe(focusY);
     receipt.forcedColors.decorative=[];
     const forcedPng=info.outputPath(`global-plane-${key}-forced-colors.png`);
     await page.screenshot({path:forcedPng});await info.attach('global-plane-forced-colors',{path:forcedPng,contentType:'image/png'});
@@ -272,7 +280,7 @@ for(const [key,route] of routes)(recorded.has(key)?filmed:test)(`${key}: native 
   receipt.finalOwnership=await ownership(page);expect(receipt.finalOwnership.problems).toEqual([]);
  }catch(error){primaryError=error;throw error;}finally{
   let receiptError;
-  try{if(observation){receipt.motion=await observation.evaluate(value=>value.state);await observation.evaluate(value=>value.dispose());await observation.dispose();}}catch(error){receiptError=error;/* Keep already collected fields after page closure. */}
+  try{if(observation){receipt.motion=await observation.evaluate(value=>{value.dispose();return value.state;});await observation.dispose();}}catch(error){receiptError=error;/* Keep already collected fields after page closure. */}
   try{const path=info.outputPath(`global-plane-${key}.json`);await writeFile(path,JSON.stringify(receipt,null,2));await info.attach('global-plane-receipt',{path,contentType:'application/json'});}catch(error){receiptError??=error;}
   // Successful acceptance requires its evidence; failed tests retain the
   // original assertion rather than replacing it with an attachment error.

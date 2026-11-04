@@ -282,3 +282,14 @@ records the actual shared-3D hit-plane defect, its native-input regression and
 the separate recovery, animation-observer, font and native-video corrections.
 The next inventory contains 630 identities in 40 files. This is a new candidate,
 not retroactive acceptance of either failed run. Publication remains pending.
+
+The next `c75d7e6` full run
+[41749077663](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/41749077663)
+passes 627/630 identities: all 210 Linux WebKit and all 210 mobile Chromium
+cases, plus 207 Chromium cases. Three Chromium observation journeys exceed
+their existing deadlines, so the required gate rejects this artifact too.
+The [native-event and atomic-observation review](animation-review/c75d7e6-observer-review.md)
+records complete trace hashes, preserved font/video/input evidence, and the
+removal of redundant protocol reads and fixed-frame waits. These corrections
+do not change production motion, source geometry/materials, test deadlines,
+retry counts or the 630-case inventory. Fresh qualification remains mandatory.
