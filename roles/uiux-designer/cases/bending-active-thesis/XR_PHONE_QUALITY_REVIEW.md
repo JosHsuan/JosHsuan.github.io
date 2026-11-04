@@ -2,7 +2,7 @@
 
 Date: 3 November 2026. Status: renderer, media and public handoff implemented;
 five serial Chromium checks pass on integrated Pages artifact `ab5d1d…`.
-Final same-artifact CI, other browser engines and publication remain pending.
+Current release: the [4 November full qualification and publication](CONTINUOUS_MOTION_RELEASE_20261104.md) includes all three browser profiles and independent live reconciliation. The local preparation evidence below remains distinct from that final release.
 
 The owner asks for the three Motion Capture phone demonstrations to remain clear
 on desktop and other viewport sizes. The investigation found two independent

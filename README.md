@@ -12,6 +12,7 @@ and its [integration and acceptance record](roles/uiux-designer/cases/bending-ac
 The [project design direction](roles/uiux-designer/cases/bending-active-thesis/PORTFOLIO_DESIGN_DIRECTION.md)
 records the Apple/Lusion references, square discovery cards, instance events,
 source-scale cinematography and photograph-informed material requirements.
+The [4 November release](roles/uiux-designer/cases/bending-active-thesis/CONTINUOUS_MOTION_RELEASE_20261104.md) passed all 630 public browser checks and 24 framework checks, then published the exact validated export.
 Implemented source, local acceptance and a deployed release are separate facts;
 the public [`release.json`](https://joshsuan.github.io/release.json) identifies
 the deployed commit and source revisions.

@@ -120,4 +120,4 @@ selections, single instance-event delivery, uninterrupted keyboard/native links,
 short landscape and 200% zoom. Review real model/material frames on desktop and
 phone, including architectural crops, lens changes, shadows, decode readiness
 and loop joins. Check shader compilation and disposal as well as appearance.
-Only the exact candidate artifact's successful checks can support publication.
+The [4 November release](CONTINUOUS_MOTION_RELEASE_20261104.md) completes this acceptance with 630/630 exact-once browser checks and same-artifact public verification. The explicit visual tradeoffs above remain part of the delivered design.

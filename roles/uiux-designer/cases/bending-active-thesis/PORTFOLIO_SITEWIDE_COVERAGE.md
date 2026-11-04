@@ -2,7 +2,7 @@
 
 ## Current 3 November scope
 
-The verified starting release for decision 0021 is `a46a65aebc5c69c805d6e9740d5366ab451d8e63`, matching local main, GitHub main and the public release record. The latest owner request requires a whole-site implementation, not the historical next-slice plan below. [CONTINUOUS_MOTION_INTEGRATION.md](CONTINUOUS_MOTION_INTEGRATION.md) maps all thirteen requirements and the wheel-field clarification to source, browser and publication evidence. Current source changes are implemented; browser qualification and publication remain pending. The earlier release IDs and tests below are retained historical evidence and must not be represented as this candidate's acceptance.
+The verified starting release for decision 0021 is `a46a65aebc5c69c805d6e9740d5366ab451d8e63`, matching local main, GitHub main and the public release record. The latest owner request requires a whole-site implementation, not the historical next-slice plan below. [CONTINUOUS_MOTION_INTEGRATION.md](CONTINUOUS_MOTION_INTEGRATION.md) maps all thirteen requirements and the wheel-field clarification to source, browser and publication evidence. Current scope is delivered in `0422797`: [release evidence](CONTINUOUS_MOTION_RELEASE_20261104.md) records 630/630 exact-once public checks, 24 framework checks, same-artifact deployment and public byte/UI reconciliation. The earlier release IDs and tests below are retained historical evidence and must not be represented as this candidate's acceptance.
 
 
 Updated 25 October 2026. Refinements are planned and accepted across the whole

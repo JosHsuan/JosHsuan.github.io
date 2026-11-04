@@ -1,7 +1,7 @@
 # Continuous-motion portfolio integration
 
 Owner direction: 3 November 2026. Starting release: `a46a65a` (verified remotely).
-This is a work/acceptance contract, not a claim that the changes are delivered.
+Current status: delivered as `0422797`. The [4 November release record](CONTINUOUS_MOTION_RELEASE_20261104.md) contains the successful full gate, same-artifact Pages deployment and independent live verification. The execution history below retains earlier pending and failed states.
 
 The owner's subsequent square-card, instance-event, scale-specific framing and
 photo-based material amendment is defined in

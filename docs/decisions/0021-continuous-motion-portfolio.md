@@ -1,7 +1,7 @@
 # 0021 — Continuous motion, spatial cards and project showcase
 
-Date: 3 November 2026 (Europe/Berlin). Status: authorized implementation;
-acceptance and publication remain pending for this revision.
+Date: 3 November 2026 (Europe/Berlin). Status: delivered 4 November 2026.
+The [release record](../../roles/uiux-designer/cases/bending-active-thesis/CONTINUOUS_MOTION_RELEASE_20261104.md) identifies the accepted application commit, complete CI gate, same-artifact deployment and independent live verification.
 
 The owner authorizes a systematic review, implementation, commit, push and
 GitHub Pages publication of the selected public application, using free tools

@@ -79,5 +79,4 @@ seconds respectively in those loops; both retained its single source pass and
 continued lens/light motion through the required midpoint and source return.
 The original 40-second per-source receipt deadline was not changed. Host-side
 observations and final receipts remain under `pages-test-results/hc-clear-home-loop/`.
-This qualifies the local rebuilt runtime; exact candidate CI is still required
-before publication.
+This qualifies the local rebuilt runtime. The subsequent [4 November release](../../uiux-designer/cases/bending-active-thesis/CONTINUOUS_MOTION_RELEASE_20261104.md) separately records successful full exact-artifact CI and publication; it does not turn these local timings into hardware performance claims.
