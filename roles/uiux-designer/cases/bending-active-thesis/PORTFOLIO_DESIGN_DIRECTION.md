@@ -91,6 +91,13 @@ responsive. It is an explicit presentation tradeoff, not automatic motion
 suppression. Scroll, inspection and Home camera changes still draw the real
 geometry; source resolution and original bytes stay intact.
 
+Bending's desktop scene uses a fixed 921,600-pixel raster ceiling while keeping
+2× MSAA, its HDR optics and cached 1024-pixel shadows. This bounds full-screen
+shading cost while continuous camera/idle motion remains intact. Native reading
+and the separate 1,600,000-pixel XR recording scene retain their own resolution.
+See the [raster and clock review](animation-review/a33fc87-raster-clock-review.md)
+for the deliberate detail tradeoff and qualification status.
+
 For every material, record a source photograph or source material identity.
 Mode/s separates EPS workpieces from silver extrusions/rails, blue printed
 components, black drive parts and the cutting tool. XR bamboo follows its real

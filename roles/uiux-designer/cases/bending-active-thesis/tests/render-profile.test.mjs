@@ -25,6 +25,11 @@ test('sustained phone high-DPR and orientation cycles stay under the touch cap b
 
 test('callers may reduce allocation policy but cannot bypass the product cap',()=>{
   for(const pixelBudget of [0,-1,Infinity,NaN,1_600_001])assert.throws(()=>resolveRenderBudget({width:430,height:932,pixelBudget}),RangeError);
-  assert.equal(resolveRenderProfile({}).pixelBudget,1_600_000);
+  const desktop=resolveRenderProfile({});
+  assert.equal(desktop.pixelBudget,921_600);
+  for(const [width,height]of[[1440,1000],[1920,1080],[3840,2160]]){
+    const raster=resolveRenderBudget({width,height,deviceDpr:2,pixelBudget:desktop.pixelBudget});
+    assert.ok(raster.pixels<=921_600);assert.equal(desktop.maxSamples,2);assert.equal(desktop.shadowMapSize,1024);
+  }
   assert.equal(resolveRenderBudget({width:430,height:932,pixelBudget:520_000}).pixelBudget,520_000);
 });

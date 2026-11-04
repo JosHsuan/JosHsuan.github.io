@@ -1,5 +1,15 @@
 import {expect,test} from '@playwright/test';
 export const WAIT = 45000;
+export function expectDiagnosticClock(diagnostic, nativeOrigin){
+ expect(diagnostic).toMatchObject({enabled:true,clock:'performance.now'});
+ expect(Number.isFinite(diagnostic.timeOrigin)&&diagnostic.timeOrigin>0).toBe(true);
+ expect(Number.isFinite(nativeOrigin)&&nativeOrigin>0).toBe(true);
+ // WebKit recomputes the monotonic-to-wall conversion on each getter; adjacent
+ // reads can straddle its 1ms quantum (WebKit bug 258572). This is clock metadata,
+ // never document identity, event timing tolerance or an application deadline.
+ const quantum=test.info().project.name==='webkit'?1:0;
+ expect(Math.abs(diagnostic.timeOrigin-nativeOrigin)).toBeLessThanOrEqual(quantum);
+}
 // Functional assertions keep their precision; shared Linux software-GPU runners
 // need a larger wall-clock budget than a local hardware-rendered browser.
 export const scenarioTimeout = milliseconds => process.env.CI ? milliseconds * 2 : milliseconds;

@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
-import {WAIT,frames,scenarioTimeout} from './case-helpers.mjs';
+import {WAIT,frames,scenarioTimeout,expectDiagnosticClock} from './case-helpers.mjs';
 const release=new URL('../../roles/uiux-designer/cases/bending-active-thesis/release/',import.meta.url);
 const project=JSON.parse(await readFile(new URL('project-studies.json',release),'utf8')).projects.find(p=>p.id==='dot-based-3d-printing');
 const plates=['path-strategies.webp','form-development.webp'].map(name=>project.sections.flatMap(s=>s.media).find(image=>image.src.endsWith('/'+name)));
@@ -101,7 +101,7 @@ async function enteredHistory(page,receipt,direction){
   // Failed entry stays the primary failure above; its already-retained ring is
   // evidence, not an alternate successful terminal or a new timing threshold.
   const diagnostic=terminal.site.startupDiagnostics;
-  expect(diagnostic).toMatchObject({enabled:true,clock:'performance.now',timeOrigin:terminal.timeOrigin});
+  expectDiagnosticClock(diagnostic,terminal.timeOrigin);
   expect(Number.isFinite(diagnostic.timeOrigin)).toBe(true);expect(Number.isInteger(diagnostic.epoch)).toBe(true);
   expect(Number.isInteger(diagnostic.dropped)&&diagnostic.dropped>=0).toBe(true);
   expect(diagnostic.events.length).toBeGreaterThan(0);expect(diagnostic.events.length).toBeLessThanOrEqual(48);
@@ -118,17 +118,17 @@ async function enteredHistory(page,receipt,direction){
   await expect(page.locator('[data-site-loader]')).toBeHidden();
  }catch(error){primary=error;throw error;}finally{try{await handle?.dispose();}catch(error){if(!primary)throw error;}}
 }
-function ownerFacts(){const background=window.__globalBackground.inspect();return{background,site:window.__site.inspect(),navigation:performance.getEntriesByType('navigation').map(entry=>({entryType:entry.entryType,type:entry.type})),documentId:performance.timeOrigin,y:scrollY,nativeCount:document.querySelectorAll('[data-editorial-image]').length,inert:document.querySelector('main').inert};}
+function ownerFacts(){const background=window.__globalBackground.inspect();return{background,site:window.__site.inspect(),navigation:performance.getEntriesByType('navigation').map(entry=>({entryType:entry.entryType,type:entry.type})),documentId:window.__hybridDocumentId,timeOrigin:performance.timeOrigin,y:scrollY,nativeCount:document.querySelectorAll('[data-editorial-image]').length,inert:document.querySelector('main').inert};}
 test('Dot hybrid document history closes native listeners and restores one original model lifetime',async({page},info)=>{
  test.setTimeout(scenarioTimeout(120000));
  const receipt={scope:'Actual original-point-source document history; retained BFCache is asserted only if observed. New-case orchestration budget 120s local/240s CI, not a user-latency SLO; original acquisition15s/WAIT45s unchanged.',rows:[]};let primary;
  try{
-  await page.addInitScript(()=>{window.__SITE_NAVIGATION_DIAGNOSTICS__=true;addEventListener('pageshow',event=>{window.__hybridPageShow={trusted:event.isTrusted,persisted:event.persisted};});});
+  await page.addInitScript(()=>{window.__SITE_NAVIGATION_DIAGNOSTICS__=true;Object.defineProperty(window,'__hybridDocumentId',{value:crypto.randomUUID()});addEventListener('pageshow',event=>{window.__hybridPageShow={trusted:event.isTrusted,persisted:event.persisted};});});
   await page.goto(`/projects/${project.slug}/`);await entered(page);await chapter(page,'system');await stage(page,'system','model');await page.waitForFunction(()=>{const resource=window.__globalBackground.inspect().driver.projectStudy.scene?.resource;return resource?.successfulPaint&&resource.view.chapter==='system';},null,{timeout:WAIT});
-  const before=await page.evaluate(ownerFacts);receipt.rows.push({phase:'before',...before});expect(before.navigation).toEqual([{entryType:'navigation',type:'navigate'}]);expect(before.site.reason).not.toBe('history-static');expect(before.nativeCount).toBe(3);modelGuard({project:before.background.driver.projectStudy},'system');
-  await page.evaluate(()=>addEventListener('pagehide',event=>sessionStorage.setItem('dot-hybrid-departure',JSON.stringify({trusted:event.isTrusted,persisted:event.persisted,documentId:performance.timeOrigin,background:window.__globalBackground.inspect(),canvasCount:document.querySelectorAll('[data-project-study-canvas]').length})),{once:true}));
+  const before=await page.evaluate(ownerFacts);receipt.rows.push({phase:'before',...before});expect(before.documentId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);expect(before.navigation).toEqual([{entryType:'navigation',type:'navigate'}]);expect(before.site.reason).not.toBe('history-static');expect(before.nativeCount).toBe(3);modelGuard({project:before.background.driver.projectStudy},'system');
+  await page.evaluate(()=>addEventListener('pagehide',event=>sessionStorage.setItem('dot-hybrid-departure',JSON.stringify({trusted:event.isTrusted,persisted:event.persisted,documentId:window.__hybridDocumentId,timeOrigin:performance.timeOrigin,background:window.__globalBackground.inspect(),canvasCount:document.querySelectorAll('[data-project-study-canvas]').length})),{once:true}));
   await page.locator('[data-portfolio-navigation] a[href="/contact/"]').click();await entered(page);
-  const departure=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('dot-hybrid-departure')));receipt.rows.push({phase:'departure',...departure});expect(departure.trusted).toBe(true);
+  const departure=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('dot-hybrid-departure')));receipt.rows.push({phase:'departure',...departure});expect(departure.trusted).toBe(true);expect(departure.documentId).toBe(before.documentId);
   if(departure.persisted){expect(departure.background.driver.lifecycle.suspended).toBe(true);expect(departure.background.activeBindings).toBe(1);expect(departure.canvasCount).toBe(1);const retained=departure.background.driver.projectStudy.scene;expect(retained.resource.successfulPaint).toBe(true);expect(retained.resource.sourceRevision).toBe(project.model.sha256);expect(retained.acquisitions).toBe(1);expect(retained.disposals).toBe(0);}
   else{expect(departure.background.driver.disposed).toBe(true);expect(departure.background.driver.events.nativeListeners).toBe(0);expect(departure.background.activeBindings).toBe(0);expect(departure.background.driver.pageField.disposed).toBe(true);expect(departure.background.driver.projectStudy.scene).toBeNull();expect(departure.canvasCount).toBe(0);}
   await page.goBack();await enteredHistory(page,receipt,'back');await page.waitForFunction(()=>{const study=window.__globalBackground.inspect().driver.projectStudy,scene=study.scene,resource=scene?.resource,source=study.backdrop?.stage;return resource?.successfulPaint&&resource.view.chapter==='system'&&scene.chapter==='system'&&scene.motion?.mode==='hold'&&scene.motion.settled&&!scene.motion.transition&&scene.motion.pose.opacity===1&&study.chapters.chapter==='system'&&document.querySelector('[data-project-study]')?.dataset.projectActiveChapter==='system'&&source?.chapter==='system'&&source.kind==='model'&&source.mode==='hold'&&source.settled&&!source.transition&&source.pose.opacity===1;},null,{timeout:WAIT});

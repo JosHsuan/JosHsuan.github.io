@@ -293,3 +293,14 @@ records complete trace hashes, preserved font/video/input evidence, and the
 removal of redundant protocol reads and fixed-frame waits. These corrections
 do not change production motion, source geometry/materials, test deadlines,
 retry counts or the 630-case inventory. Fresh qualification remains mandatory.
+
+Full run [41754878281](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/41754878281)
+at `a33fc87` also finishes 627/630: Chromium 208/210, WebKit 209/210 and mobile
+210/210. XR's complete native journey and Linux WebKit's native keyboard audits
+pass. Two Bending desktop journeys still exceed their original bounds, and a
+WebKit history diagnostic compares adjacent clock-origin readings differing by
+one millisecond. The [raster-policy and native-clock review](animation-review/a33fc87-raster-clock-review.md)
+records the rejected run, a fixed lower Bending desktop raster ceiling retaining
+full materials/2× MSAA/continuous motion, and independent document identities for
+history auditing. Fresh visual, browser and exact-artifact release qualification
+remains required; this failed artifact is not deployed.
