@@ -109,9 +109,10 @@ test('with OS Reduced, a real visible source hit still compares geometry through
   // native click. Observe the source actually painted at pointer ownership.
   window.__sourcePointerEvents=[];
   const observePointer=(event,phase)=>{
-   const scene=window.__thesis?.inspect(),story=window.__story?.inspect();if(!scene)return;
+   const scene=window.__thesis?.inspect(),story=window.__story?.inspect(),canvas=document.querySelector('[data-cinematic-stage] canvas');if(!scene||!canvas)return;
    const hit=window.__thesis.hitTest(event.clientX,event.clientY);
-   const receipt={id:scene.representation.id,index:scene.representation.index,hit,phase,type:event.type,trusted:event.isTrusted,at:event.timeStamp,observedAt:performance.now(),point:{x:event.clientX,y:event.clientY},engaged:story.modelEngaged,selection:story.sourceSelection,held:story.modelHeldSource,pressure:scene.renderPressure,targetProtected:!!event.target.closest?.('button,a,select,input,summary,[data-protect],[data-feedback-plane]')};
+   const receipt={id:scene.representation.id,index:scene.representation.index,hit,phase,type:event.type,trusted:event.isTrusted,at:event.timeStamp,observedAt:performance.now(),point:{x:event.clientX,y:event.clientY},engaged:story.modelEngaged,selection:story.sourceSelection,held:story.modelHeldSource,pressure:scene.renderPressure,pressureDecisions:scene.renderPressureDecisions,
+    resources:{budget:scene.renderBudget,native:[canvas.width,canvas.height],writes:window.__stageStorageWrites(canvas)},targetProtected:!!event.target.closest?.('button,a,select,input,summary,[data-protect],[data-feedback-plane]')};
    window.__sourcePointerEvents.push(receipt);if(event.type==='pointerdown'&&phase==='capture')window.__sourcePointerReceipt=receipt;
   };
   for(const type of ['pointerdown','pointerup','pointercancel']){
@@ -177,7 +178,7 @@ test('with OS Reduced, a real visible source hit still compares geometry through
     ownership={native,nativeChapter:nativeChapter??null,targetPresent:!!target,ownsPoint:!!surface&&(native||viewport===surface),protected:!!target?.closest('button,a,select,input,summary,[data-protect],[data-feedback-plane]'),target:target?.tagName??null,ancestors,
      active:surface?.closest('[data-model-study]')?.dataset.modelActive,disabled:surface?.getAttribute('aria-disabled'),source:foundHit.source,chapter};
     const canvas=document.querySelector('[data-cinematic-stage] canvas');
-    before={id:scene.representation.id,index:scene.representation.index,source:scene.source,diagrams:scene.diagramSource,budget:scene.renderBudget,initialization:scene.initialization,native:[canvas.width,canvas.height],writes:window.__stageStorageWrites(canvas),docY:scrollY};
+    before={id:scene.representation.id,index:scene.representation.index,source:scene.source,diagrams:scene.diagramSource,budget:scene.renderBudget,initialization:scene.initialization,native:[canvas.width,canvas.height],writes:window.__stageStorageWrites(canvas),pressure:scene.renderPressure,pressureDecisions:scene.renderPressureDecisions,docY:scrollY};
    }
    return {point:found,rays:used,eligible:candidates.length,probedAt:performance.now(),ownership,before,docY:scrollY,chapter:story.canvasPlacement.chapter,mode:story.canvasPlacement.mode,presented:scene.canvasPresented,slot:{left:slot.left,right:slot.right,top:slot.top,bottom:slot.bottom}};
   },360-rays);
@@ -199,11 +200,36 @@ test('with OS Reduced, a real visible source hit still compares geometry through
  expect(ownership).toMatchObject({targetPresent:true,ownsPoint:true,protected:false,active:'true',disabled:'false',source:true,chapter:'system'});
  const resources=()=>page.evaluate(()=>{const scene=window.__thesis.inspect(),canvas=document.querySelector('[data-cinematic-stage] canvas');return {id:scene.representation.id,index:scene.representation.index,source:scene.source,diagrams:scene.diagramSource,budget:scene.renderBudget,initialization:scene.initialization,native:[canvas.width,canvas.height],writes:window.__stageStorageWrites(canvas),docY:scrollY};});
  await settle(page);const after=await resources(),pressed=await page.evaluate(()=>window.__sourcePointerReceipt);
- const clickPath=test.info().outputPath('native-source-click.json');await writeFile(clickPath,JSON.stringify({before,after,events:await page.evaluate(()=>window.__sourcePointerEvents)},null,2)+'\n');
+ const events=await page.evaluate(()=>window.__sourcePointerEvents);
+ const clickPath=test.info().outputPath('native-source-click.json');await writeFile(clickPath,JSON.stringify({before,after,events},null,2)+'\n');
  await test.info().attach('native-source-click',{path:clickPath,contentType:'application/json'});
  expect(pressed).toBeTruthy();expect(pressed.trusted).toBe(true);expect(pressed.point).toEqual(point);expect(pressed.observedAt).toBeGreaterThanOrEqual(last.probedAt);expect(pressed.hit).toMatchObject({source:true,chapterId:'system',index:pressed.index});expect(after.id).not.toBe(pressed.id);expect(after.index).toBe((pressed.index+1)%4);
  expect(after.source).toEqual(before.source);expect(after.diagrams).toEqual(before.diagrams);expect(after.initialization).toEqual(before.initialization);
- expect(after.budget).toEqual(before.budget);expect(after.native).toEqual(before.native);expect(after.writes).toBe(before.writes);expect(after.docY).toBe(before.docY);
+ // The probe precedes trusted input. An autonomous pressure decision may land
+ // in that host/protocol gap; prove its precise cause/time, then require exact
+ // resource identity from pointerdown capture through release and settled paint.
+ // Do not disable pressure, wait for its floor, retry input or ignore writes.
+ expect(pressed.pressureDecisions.slice(0,before.pressureDecisions.length)).toEqual(before.pressureDecisions);
+ const between=pressed.pressureDecisions.slice(before.pressureDecisions.length);
+ expect(pressed.pressure.decisions-before.pressure.decisions).toBe(between.length);
+ for(const [index,decision] of between.entries()){
+  expect(decision.timestampMs).toBeGreaterThanOrEqual(last.probedAt);expect(decision.timestampMs).toBeLessThanOrEqual(pressed.observedAt);
+  expect(decision.stage).toBe(before.pressure.stage+index+1);expect(decision.scale).toBe([1,.8,.65,.5][decision.stage]);
+  expect(['sustained-slow-delivery','sustained-severe-delivery']).toContain(decision.reason);
+ }
+ const changing=['densityScale','dpr','width','height','pixels','bounded'];
+ expect(Object.fromEntries(Object.entries(pressed.resources.budget).filter(([key])=>!changing.includes(key))))
+  .toEqual(Object.fromEntries(Object.entries(before.budget).filter(([key])=>!changing.includes(key))));
+ expect(pressed.resources.budget.densityScale).toBe(pressed.pressure.scale);
+ const budget=pressed.resources.budget;
+ expect(budget.dpr).toBe(budget.baseDpr*budget.densityScale);expect(budget.bounded).toBe(budget.dpr<budget.requestedDpr);
+ expect(budget.width).toBe(Math.max(1,Math.floor(budget.viewportWidth*budget.dpr)));expect(budget.height).toBe(Math.max(1,Math.floor(budget.viewportHeight*budget.dpr)));
+ expect(budget.pixels).toBe(budget.width*budget.height);expect(budget.pixels).toBeLessThanOrEqual(budget.pixelBudget);
+ expect(pressed.resources.native).toEqual([pressed.resources.budget.width,pressed.resources.budget.height]);
+ expect(pressed.resources.writes-before.writes).toBe(between.length*2);
+ if(!between.length){expect(pressed.resources.budget).toEqual(before.budget);expect(pressed.resources.native).toEqual(before.native);}
+ for(const event of events){expect(event.resources).toEqual(pressed.resources);}
+ expect(after.budget).toEqual(pressed.resources.budget);expect(after.native).toEqual(pressed.resources.native);expect(after.writes).toBe(pressed.resources.writes);expect(after.docY).toBe(before.docY);
  expect(await page.evaluate(el=>document.querySelector('[data-cinematic-stage] canvas')===el,canvas)).toBe(true);
  await expect(page.locator(stageCanvas)).toHaveCount(1);await expect(page.locator('canvas[data-ascii-field]')).toHaveCount(1);
  const live=await page.evaluate(()=>window.__story.inspect().playback.activeSeconds);await frames(page,5);expect(await page.evaluate(()=>window.__story.inspect().playback.activeSeconds)).toBeGreaterThan(live);

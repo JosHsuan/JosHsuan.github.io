@@ -326,3 +326,13 @@ its deadline, with no explanatory crash/process evidence. The
 records the rejected artifact, a passing isolated pinned-Linux reproduction,
 and added bounded lifecycle/process diagnostics. Its cause is not asserted to
 be fixed; complete fresh qualification remains required before publication.
+
+Full run [41768188956](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/41768188956)
+at `c0c9ff2` finishes 627/630: Chromium 210/210, WebKit 209/210, mobile 208/210.
+The XR native fallback and all 59 cases in its WebKit shard pass. The
+[native-boundary review](animation-review/c0c9ff2-native-boundary-review.md)
+records three rejected journeys: a pre-input density change compared with an
+earlier host probe, a moving card's mixed-coordinate projection, and Special's
+final PNG exceeding its outer limit. Corrections retain actual native input,
+strict resource/geometry checks, all screenshots and existing deadlines.
+This artifact remains rejected; fresh complete qualification is required.

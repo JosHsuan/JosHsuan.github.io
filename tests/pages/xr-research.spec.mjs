@@ -526,8 +526,16 @@ test('the XR project tile centres both complete source phones inside a measured 
  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/projects/');await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});
  const tile=page.locator('[data-project-tile="xr-bending-active"]');await tile.scrollIntoViewIfNeeded();await tile.locator('img').evaluate(node=>node.decode());
  const projection=await tile.evaluate(tile=>{
-  const image=tile.querySelector('img'),clip=image.parentElement,css=getComputedStyle(image),tileCSS=getComputedStyle(tile),clipCSS=getComputedStyle(clip),box=clip.getBoundingClientRect(),outer=tile.getBoundingClientRect();
+  const image=tile.querySelector('img'),clip=image.parentElement,css=getComputedStyle(image),tileCSS=getComputedStyle(tile),clipCSS=getComputedStyle(clip);
   if(image.offsetParent!==clip)throw Error('Unexpected image offset owner');
+  if(clip.offsetParent!==tile||clipCSS.transform!=='none'||clipCSS.position!=='absolute')throw Error('Unexpected native image clipping owner');
+  for(const key of ['borderLeftWidth','borderRightWidth','borderTopWidth','borderBottomWidth','paddingLeft','paddingRight','paddingTop','paddingBottom'])if(parseFloat(clipCSS[key])!==0)throw Error('Unexpected image clipping box edge');
+  // The phone, its rounded mask and its inset share this local plane. The
+  // information presenter may perspective-transform their ancestor together.
+  // A viewport AABB is not that plane: combining its scaled bounds with local
+  // image offsets invents a centering error while a native scroll is settling.
+  const box={left:0,top:0,width:parseFloat(clipCSS.width),height:parseFloat(clipCSS.height)};box.right=box.width;box.bottom=box.height;
+  const viewport={clip:clip.getBoundingClientRect().toJSON(),tile:tile.getBoundingClientRect().toJSON(),tileTransform:tileCSS.transform};
   const w=parseFloat(css.width),h=parseFloat(css.height),nw=image.naturalWidth,nh=image.naturalHeight,fit=css.objectFit;
   let sx=w/nw,sy=h/nh;if(fit==='cover'||fit==='contain'||fit==='scale-down'){const scale=fit==='cover'?Math.max(sx,sy):Math.min(sx,sy,...(fit==='scale-down'?[1]:[]));sx=sy=scale;}else if(fit==='none')sx=sy=1;
   const [ox,oy]=css.objectPosition.split(' ').map((value,index)=>value.endsWith('%')?(index?h-nh*sy:w-nw*sx)*parseFloat(value)/100:parseFloat(value));
@@ -535,9 +543,10 @@ test('the XR project tile centres both complete source phones inside a measured 
   const project=(x,y)=>{const p=matrix.transformPoint(new DOMPoint(x*sx+ox-originX,y*sy+oy-originY));return{x:box.left+image.offsetLeft+originX+p.x,y:box.top+image.offsetTop+originY+p.y};};
   const corners=[[742,390],[1262,390],[1262,906],[742,906]].map(([x,y])=>project(x,y)),center=project(1002,648),radius=parseFloat(clipCSS.borderRadius)||0;
   const inside=point=>{const x=Math.max(box.left+radius,Math.min(box.right-radius,point.x)),y=Math.max(box.top+radius,Math.min(box.bottom-radius,point.y));return point.x>=box.left&&point.x<=box.right&&point.y>=box.top&&point.y<=box.bottom&&Math.hypot(point.x-x,point.y-y)<=radius;};
-  return{source:image.getAttribute('src'),natural:{width:nw,height:nh},box:box.toJSON(),outer:outer.toJSON(),fit,scale:{x:sx,y:sy},matrix:[matrix.a,matrix.b,matrix.c,matrix.d,matrix.e,matrix.f],corners,center,centerError:Math.hypot(center.x-(box.left+box.width/2),center.y-(box.top+box.height/2)),allSourcePhoneCornersInside:corners.every(inside),rim:[box.left-outer.left-parseFloat(tileCSS.borderLeftWidth),outer.right-box.right-parseFloat(tileCSS.borderRightWidth),box.top-outer.top-parseFloat(tileCSS.borderTopWidth),outer.bottom-box.bottom-parseFloat(tileCSS.borderBottomWidth)],clipBackdrop:clipCSS.backdropFilter,clipBackground:clipCSS.backgroundColor};
+  return{source:image.getAttribute('src'),natural:{width:nw,height:nh},coordinateSpace:'native-clipping-plane',box,viewport,fit,scale:{x:sx,y:sy},matrix:[matrix.a,matrix.b,matrix.c,matrix.d,matrix.e,matrix.f],corners,center,centerError:Math.hypot(center.x-box.width/2,center.y-box.height/2),allSourcePhoneCornersInside:corners.every(inside),rim:['left','right','top','bottom'].map(key=>parseFloat(clipCSS[key])),clipBackdrop:clipCSS.backdropFilter,clipBackground:clipCSS.backgroundColor};
  });
- await testInfo.attach('xr-source-phone-projection',{body:JSON.stringify(projection,null,2),contentType:'application/json'});
+ const projectionPath=testInfo.outputPath('xr-source-phone-projection.json');await writeFile(projectionPath,JSON.stringify(projection,null,2)+'\n');
+ await testInfo.attach('xr-source-phone-projection',{path:projectionPath,contentType:'application/json'});
  expect(projection.source).toBe('/assets/xr/portfolio-main-visual.webp');expect(projection.natural).toEqual({width:2000,height:1125});expect(projection.scale.x).toBeCloseTo(projection.scale.y,8);expect(projection.matrix[0]).toBeCloseTo(projection.matrix[3],8);expect(projection.matrix[1]).toBe(0);expect(projection.matrix[2]).toBe(0);
  expect(projection.allSourcePhoneCornersInside).toBe(true);expect(projection.centerError).toBeLessThan(.6);for(const inset of projection.rim){expect(inset).toBeGreaterThanOrEqual(7.9);expect(inset).toBeLessThanOrEqual(12.1);}expect(projection.clipBackdrop).toBe('none');
 });
