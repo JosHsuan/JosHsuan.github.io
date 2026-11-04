@@ -70,6 +70,7 @@ async function ownership(page){
 // about every user-selected high-contrast theme or photographic source pixels.
 function forcedPalette(panel,{allowDecorativeHidden=false}={}){
  if(Array.isArray(panel))return panel.map(node=>{const css=getComputedStyle(node);return{href:node.getAttribute('href'),transition:{property:css.transitionProperty,duration:css.transitionDuration,delay:css.transitionDelay},...forcedPalette(node)};});
+ if(!panel.isConnected)throw Error('Forced-palette observation lost its native paint owner');
  const rgba=value=>{const parts=value.match(/^rgba?\(([^)]+)\)$/)?.[1].replace('/',' ').split(/[,\s]+/).filter(Boolean).map(Number);if(!parts||parts.some(n=>!Number.isFinite(n)))throw Error('Unsupported computed color '+value);return[...parts.slice(0,3),parts[3]??1];};
  const luminance=rgb=>rgb.slice(0,3).map(c=>c/255).map(c=>c<=.04045?c/12.92:((c+.055)/1.055)**2.4).reduce((sum,c,i)=>sum+c*[.2126,.7152,.0722][i],0);
  const paintFacts=(element,css)=>({tag:element.tagName,class:(element.getAttribute('class')??'').slice(0,160),
@@ -119,7 +120,7 @@ function forcedPalette(panel,{allowDecorativeHidden=false}={}){
 
 for(const [key,route] of routes)(recorded.has(key)?filmed:test)(`${key}: native whole-plane motion has reversible feedback, readable rest and independent source ownership`,async({page,isMobile},info)=>{
  info.setTimeout(scenarioTimeout(120000));
- let observation,primaryError;const receipt={route,originalViewport:page.viewportSize()};
+ let observation,panelNode,primaryError;const navigationNodes=[],receipt={route,originalViewport:page.viewportSize()};
  try{
   // Tall Contact legitimately needs no decorative movement when it has no
   // overflow. Exercise its real compact-height layout, never artificial space.
@@ -164,7 +165,11 @@ for(const [key,route] of routes)(recorded.has(key)?filmed:test)(`${key}: native 
   const chosen=selection.chosen,panel=page.locator(plane).nth(chosen.index);
   await nativeY(page,chosen.start);await neutral(page);
   await expect(panel).toBeInViewport();
-  observation=await panel.evaluateHandle((node,{observeNativeScroll,top})=>{
+  // These native reading/chrome nodes persist for the document. Retain their
+  // actual handles once instead of re-resolving the same locator before every
+  // evaluation behind the live GPU queue. Connected-owner checks remain below.
+  panelNode=await panel.elementHandle();expect(panelNode).not.toBeNull();
+  observation=await panelNode.evaluateHandle((node,{observeNativeScroll,top})=>{
    const state={phase:'initial',samples:[],counts:{},...(observeNativeScroll?{nativeScroll:[],nativeScrollCounts:{},nativeScrollScope:'Native event delivery timestamps/displacement and observed presenter state; not internal velocitySkin speed/dt or a performance benchmark.'}:{})};
    const scroll=event=>{
     if(!observeNativeScroll||state.nativeScroll.length>=48||(state.nativeScrollCounts[state.phase]??0)>=16)return;
@@ -218,17 +223,18 @@ for(const [key,route] of routes)(recorded.has(key)?filmed:test)(`${key}: native 
   expect(motion.some(s=>s.phase==='reverse'&&s.rx>0)).toBe(true);
   for(const sample of motion){expect(sample.matrix.every(Number.isFinite)).toBe(true);expect(Math.abs(sample.rx)).toBeLessThanOrEqual(11);expect(Math.abs(sample.ry)).toBeLessThanOrEqual(12);expect(Math.abs(sample.rz)).toBeLessThanOrEqual(2.2);expect(Math.abs(sample.skew)).toBeLessThanOrEqual(2.8);expect(sample.opacity).toBe('1');expect(sample.clip).toBe('none');}
   if(chosen.linked){
-  const focus=await panel.evaluate(node=>{
+  const focus=await panelNode.evaluate(node=>{
+   if(!node.isConnected)throw Error('Reading focus lost its native plane');
    const link=node.matches('a[href]')?node:[...node.querySelectorAll('a[href]')].find(a=>a.checkVisibility({visibilityProperty:true,opacityProperty:true}));
    const before=scrollY;link.focus({preventScroll:true});return{before,after:scrollY,focused:document.activeElement===link,transform:getComputedStyle(node).transform,href:link.getAttribute('href')};
   });
   expect(focus.focused).toBe(true);expect(focus.transform).toBe('none');expect(focus.after).toBe(focus.before);receipt.focus=focus;
   await observation.evaluate(value=>{value.state.phase='focused';});
   await nativeY(page,chosen.start+chosen.step);
-  expect(await panel.evaluate(node=>getComputedStyle(node).transform)).toBe('none');
+  expect(await panelNode.evaluate(node=>{if(!node.isConnected)throw Error('Reading focus lost its native plane');return getComputedStyle(node).transform;})).toBe('none');
   await neutral(page);
   expect(await observation.evaluate(value=>value.state.samples.filter(sample=>sample.phase==='focused'))).toEqual([]);
-  await panel.evaluate(node=>{if(node.contains(document.activeElement)||node===document.activeElement)document.activeElement.blur();});
+  await panelNode.evaluate(node=>{if(node.contains(document.activeElement)||node===document.activeElement)document.activeElement.blur();});
   await nativeY(page,chosen.start);await neutral(page);
   }
   const png=info.outputPath(`global-plane-${key}.png`);await page.screenshot({path:png});await info.attach('global-plane-rest',{path:png,contentType:'image/png'});
@@ -243,25 +249,25 @@ for(const [key,route] of routes)(recorded.has(key)?filmed:test)(`${key}: native 
    if(media.forcedColors==='active'){
     // Return to the actual selected reading card; XR Pause navigated to Method.
     await nativeY(page,chosen.start);await neutral(page);
-    receipt.forcedColors=await panel.evaluate(forcedPalette);
+    receipt.forcedColors=await panelNode.evaluate(forcedPalette);
     const navigation=page.locator('nav[aria-label="Portfolio"] a[href],[data-portfolio-navigation] a[href]');
-    const links=await navigation.all();expect(links).toHaveLength(3);
+    navigationNodes.push(...await navigation.elementHandles());expect(navigationNodes).toHaveLength(3);
     // Fixed native controls are independent observations. Keep every visibility,
     // viewport, transition and painted-contrast assertion, without serially
     // placing each protocol read behind another live model draw.
-    await Promise.all(links.flatMap(link=>[expect(link).toBeVisible(),expect(link).toBeInViewport()]));
-    receipt.forcedColors.fixedNavigation=await navigation.evaluateAll(forcedPalette);
+    await Promise.all(navigationNodes.flatMap((_,index)=>[expect(navigation.nth(index)).toBeVisible(),expect(navigation.nth(index)).toBeInViewport()]));
+    receipt.forcedColors.fixedNavigation=await page.evaluate(forcedPalette,navigationNodes);
     for(const {transition}of receipt.forcedColors.fixedNavigation)if(['home','about','projects','contact'].includes(key))expect(transition.duration.split(',').map(value=>value.trim()).every(value=>value==='0s'),'Ordinary forced-palette navigation must switch atomically').toBe(true);
-    const focusStart=await navigation.first().evaluate(node=>{const before=scrollY;node.focus({preventScroll:true});return{before,after:scrollY,focused:document.activeElement===node};});
+    const focusStart=await navigationNodes[0].evaluate(node=>{if(!node.isConnected)throw Error('Navigation focus lost its native owner');const before=scrollY;node.focus({preventScroll:true});return{before,after:scrollY,focused:document.activeElement===node};});
     expect(focusStart.focused).toBe(true);expect(focusStart.after).toBe(focusStart.before);const focusY=focusStart.before;
     await page.keyboard.press('Tab');
-    const focusedLink=navigation.nth(1);
+    const focusedLink=navigationNodes[1];
     receipt.forcedColors.keyboardFocus=[];let focusedState;
     await expect.poll(async()=>{
-     const state=await focusedLink.evaluate(node=>({activeTag:document.activeElement?.tagName,activeHref:document.activeElement?.getAttribute('href'),documentHasFocus:document.hasFocus(),targetActive:document.activeElement===node,targetFocusVisible:node.matches(':focus-visible'),scrollY}));
+     const state=await focusedLink.evaluate(node=>({connected:node.isConnected,activeTag:document.activeElement?.tagName,activeHref:document.activeElement?.getAttribute('href'),documentHasFocus:document.hasFocus(),targetActive:document.activeElement===node,targetFocusVisible:node.matches(':focus-visible'),scrollY}));
      focusedState=state;
      if(receipt.forcedColors.keyboardFocus.length<32)receipt.forcedColors.keyboardFocus.push(state);
-     return state.targetActive&&state.targetFocusVisible;
+     return state.connected&&state.targetActive&&state.targetFocusVisible;
     },{timeout:WAIT}).toBe(true);
     expect(focusedState.scrollY).toBe(focusY);
     receipt.forcedColors.focusedNavigation={href:focusedState.activeHref,y:focusedState.scrollY,...await focusedLink.evaluate(forcedPalette)};
@@ -281,6 +287,7 @@ for(const [key,route] of routes)(recorded.has(key)?filmed:test)(`${key}: native 
  }catch(error){primaryError=error;throw error;}finally{
   let receiptError;
   try{if(observation){receipt.motion=await observation.evaluate(value=>{value.dispose();return value.state;});await observation.dispose();}}catch(error){receiptError=error;/* Keep already collected fields after page closure. */}
+  for(const handle of [panelNode,...navigationNodes].filter(Boolean))try{await handle.dispose();}catch(error){receiptError??=error;}
   try{const path=info.outputPath(`global-plane-${key}.json`);await writeFile(path,JSON.stringify(receipt,null,2));await info.attach('global-plane-receipt',{path,contentType:'application/json'});}catch(error){receiptError??=error;}
   // Successful acceptance requires its evidence; failed tests retain the
   // original assertion rather than replacing it with an attachment error.

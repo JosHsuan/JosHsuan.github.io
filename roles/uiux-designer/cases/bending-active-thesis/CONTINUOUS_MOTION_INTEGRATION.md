@@ -304,3 +304,15 @@ records the rejected run, a fixed lower Bending desktop raster ceiling retaining
 full materials/2× MSAA/continuous motion, and independent document identities for
 history auditing. Fresh visual, browser and exact-artifact release qualification
 remains required; this failed artifact is not deployed.
+
+The `660f4e1` full run
+[41760002127](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/41760002127)
+finishes 628/630: Chromium 209/210, WebKit 209/210 and mobile 210/210. Its gate
+rejects publication. Bending typography and the native clock/history corrections
+pass; a WebKit source-click probe does not match its eventual native integer
+pixel, and the long Chromium Bending reading/palette journey reaches its outer
+deadline at the last PNG. The
+[native-pixel and retained-owner review](animation-review/660f4e1-native-pixel-review.md)
+records both failed traces and the bounded observer corrections. Production
+motion, source geometry, raster/material policy and deadlines remain unchanged
+by those corrections. Fresh complete qualification is still required.

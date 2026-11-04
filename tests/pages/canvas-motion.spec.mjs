@@ -111,7 +111,7 @@ test('with OS Reduced, a real visible source hit still compares geometry through
   const observePointer=(event,phase)=>{
    const scene=window.__thesis?.inspect(),story=window.__story?.inspect();if(!scene)return;
    const hit=window.__thesis.hitTest(event.clientX,event.clientY);
-   const receipt={id:scene.representation.id,index:scene.representation.index,hit,phase,type:event.type,at:event.timeStamp,point:{x:event.clientX,y:event.clientY},engaged:story.modelEngaged,selection:story.sourceSelection,held:story.modelHeldSource,pressure:scene.renderPressure,targetProtected:!!event.target.closest?.('button,a,select,input,summary,[data-protect],[data-feedback-plane]')};
+   const receipt={id:scene.representation.id,index:scene.representation.index,hit,phase,type:event.type,trusted:event.isTrusted,at:event.timeStamp,observedAt:performance.now(),point:{x:event.clientX,y:event.clientY},engaged:story.modelEngaged,selection:story.sourceSelection,held:story.modelHeldSource,pressure:scene.renderPressure,targetProtected:!!event.target.closest?.('button,a,select,input,summary,[data-protect],[data-feedback-plane]')};
    window.__sourcePointerEvents.push(receipt);if(event.type==='pointerdown'&&phase==='capture')window.__sourcePointerReceipt=receipt;
   };
   for(const type of ['pointerdown','pointerup','pointercancel']){
@@ -137,57 +137,71 @@ test('with OS Reduced, a real visible source hit still compares geometry through
    const scene=window.__thesis.inspect(),story=window.__story.inspect(),r=document.querySelector('[data-cinematic-stage] canvas').getBoundingClientRect(),v=scene.pose.viewport;
    const slot=document.querySelector('[data-model-study-host="system"]').getBoundingClientRect(),candidates=[];
    for(let row=1;row<=13;row++)for(let column=1;column<=13;column++){
-    const u=column/14,w=row/14,x=r.left+r.width*(v.left+v.width*u),y=r.top+r.height*(v.top+v.height*w);
+    // WebKit native pointer coordinates are integral. Probe exactly the pixels
+    // the trusted event will use, rather than a nearby fractional coordinate.
+    const u=column/14,w=row/14,x=Math.round(r.left+r.width*(v.left+v.width*u)),y=Math.round(r.top+r.height*(v.top+v.height*w));
     if(x<16||x>innerWidth-16||y<100||y>innerHeight-90)continue;
-    const clear=[[-3,0],[3,0],[0,-3],[0,3],[0,0]].every(([dx,dy])=>{
+    const clear=[[-3,-3],[0,-3],[3,-3],[-3,0],[0,0],[3,0],[-3,3],[0,3],[3,3]].every(([dx,dy])=>{
      const under=document.elementFromPoint(x+dx,y+dy);
      return under&&!under.closest('button,a,select,input,summary,[data-protect],[data-feedback-plane]');
     });
     if(!clear)continue;
     candidates.push({x,y,distance:Math.hypot(u-.5,w-.5)});
    }
-   candidates.sort((a,b)=>a.distance-b.distance);let found=null,used=0;
+   candidates.sort((a,b)=>a.distance-b.distance);let found=null,foundHit=null,used=0;
    // The camera remains live between the ray observation and trusted input.
-   // Choose a small interior footprint, not a grazing edge that a subpixel
-   // handheld shift can move away before pointerdown. Keep the same ray budget.
+   // Include the footprint's corners as well as its axes: a perforated source
+   // can hit every arm of a cross while missing a nearby diagonal pixel.
+   // Keep the same total/per-position ray budgets and continuous source clock.
    for(const candidate of candidates){
-    let interior=true;
-    for(const [dx,dy] of [[0,0],[-3,0],[3,0],[0,-3],[0,3]]){
+    let interior=true,centerHit=null;
+    for(const [dx,dy] of [[0,0],[-3,0],[3,0],[0,-3],[0,3],[-3,-3],[3,-3],[-3,3],[3,3]]){
      if(used>=Math.min(remaining,60)){interior=false;break;}
      used++;const hit=window.__thesis.hitTest(candidate.x+dx,candidate.y+dy);
+     if(dx===0&&dy===0)centerHit=hit;
      if(!hit?.source||hit.chapterId!=='system'){interior=false;break;}
     }
-    if(interior){found={x:candidate.x,y:candidate.y};break;}
+    if(interior){found={x:candidate.x,y:candidate.y};foundHit=centerHit;break;}
     if(used>=Math.min(remaining,60))break;
    }
-   return {point:found,rays:used,eligible:candidates.length,docY:scrollY,chapter:story.canvasPlacement.chapter,mode:story.canvasPlacement.mode,presented:scene.canvasPresented,slot:{left:slot.left,right:slot.right,top:slot.top,bottom:slot.bottom}};
+   let ownership=null,before=null;
+   if(found){
+    // Sample ownership and resources in this same browser turn. Extra host
+    // round trips after choosing the pixel can outlive a moving source pose.
+    const chapter=foundHit.chapterId,selector=`[data-study-chapter="${CSS.escape(chapter)}"]`,target=document.elementFromPoint(found.x,found.y);
+    const surface=document.querySelector('[data-model-viewport]'+selector),viewport=target?.closest('[data-model-viewport]');
+    const label=document.querySelector('[data-model-side-label]'+selector),native=label?.dataset.modelLabelPlacement==='native';
+    const host=target?.closest('[data-model-information-host],[data-model-study-host]');
+    const nativeChapter=host?.dataset.modelInformationHost??host?.dataset.modelStudyHost;
+    const ancestors=[];for(let node=target;node&&ancestors.length<8;node=node.parentElement)ancestors.push({tag:node.tagName,chapter:node.dataset.studyChapter??null,informationHost:node.dataset.modelInformationHost??null,studyHost:node.dataset.modelStudyHost??null,viewport:node.hasAttribute('data-model-viewport')});
+    ownership={native,nativeChapter:nativeChapter??null,targetPresent:!!target,ownsPoint:!!surface&&(native||viewport===surface),protected:!!target?.closest('button,a,select,input,summary,[data-protect],[data-feedback-plane]'),target:target?.tagName??null,ancestors,
+     active:surface?.closest('[data-model-study]')?.dataset.modelActive,disabled:surface?.getAttribute('aria-disabled'),source:foundHit.source,chapter};
+    const canvas=document.querySelector('[data-cinematic-stage] canvas');
+    before={id:scene.representation.id,index:scene.representation.index,source:scene.source,diagrams:scene.diagramSource,budget:scene.renderBudget,initialization:scene.initialization,native:[canvas.width,canvas.height],writes:window.__stageStorageWrites(canvas),docY:scrollY};
+   }
+   return {point:found,rays:used,eligible:candidates.length,probedAt:performance.now(),ownership,before,docY:scrollY,chapter:story.canvasPlacement.chapter,mode:story.canvasPlacement.mode,presented:scene.canvasPresented,slot:{left:slot.left,right:slot.right,top:slot.top,bottom:slot.bottom}};
   },360-rays);
   rays+=result.rays;attempts.push(result);point=result.point;
  }
- await test.info().attach('outside-slot-native-hit-search',{body:JSON.stringify({range,rays,attempts}),contentType:'application/json'});
-  expect(point,'The narrow chapter hold must expose an unobscured real source hit through the transparent UI.').not.toBeNull();
- const last=attempts.at(-1);expect(last).toMatchObject({chapter:'system',mode:'hold',presented:true});
+ expect(point,'The narrow chapter hold must expose an unobscured real source hit through the transparent UI.').not.toBeNull();
+ const last=attempts.at(-1),{ownership,before}=last;
+ // The next browser command is the single real click. Persist and inspect
+ // observations afterwards; do not freeze, retry input or substitute hitTest.
+ try{await page.mouse.click(point.x,point.y);}
+ finally{
+  await test.info().attach('outside-slot-native-hit-search',{body:JSON.stringify({range,rays,attempts}),contentType:'application/json'});
+  await test.info().attach('reduced-source-hit-ownership',{body:JSON.stringify({point,ownership}),contentType:'application/json'});
+ }
+ expect(last).toMatchObject({chapter:'system',mode:'hold',presented:true});
  // Native information slots can be the transparent DOM target above the real
  // source. Production delegates that hit to its registered chapter surface;
  // the fixed overlay still requires the original viewport ancestry.
- const ownership=await page.evaluate(p=>{
-  const target=document.elementFromPoint(p.x,p.y),hit=window.__thesis.hitTest(p.x,p.y);
-  const chapter=hit?.chapterId,selector=`[data-study-chapter="${CSS.escape(chapter??'')}"]`;
-  const surface=document.querySelector('[data-model-viewport]'+selector),viewport=target?.closest('[data-model-viewport]');
-  const label=document.querySelector('[data-model-side-label]'+selector),native=label?.dataset.modelLabelPlacement==='native';
-  const host=target?.closest('[data-model-information-host],[data-model-study-host]');
-  const nativeChapter=host?.dataset.modelInformationHost??host?.dataset.modelStudyHost;
-  const ancestors=[];for(let node=target;node&&ancestors.length<8;node=node.parentElement)ancestors.push({tag:node.tagName,chapter:node.dataset.studyChapter??null,informationHost:node.dataset.modelInformationHost??null,studyHost:node.dataset.modelStudyHost??null,viewport:node.hasAttribute('data-model-viewport')});
-  return{native,nativeChapter:nativeChapter??null,targetPresent:!!target,ownsPoint:!!surface&&(native||viewport===surface),protected:!!target?.closest('button,a,select,input,summary,[data-protect],[data-feedback-plane]'),target:target?.tagName??null,ancestors,
-   active:surface?.closest('[data-model-study]')?.dataset.modelActive,disabled:surface?.getAttribute('aria-disabled'),source:hit?.source,chapter};
- },point);
- await test.info().attach('reduced-source-hit-ownership',{body:JSON.stringify({point,ownership}),contentType:'application/json'});
  expect(ownership).toMatchObject({targetPresent:true,ownsPoint:true,protected:false,active:'true',disabled:'false',source:true,chapter:'system'});
  const resources=()=>page.evaluate(()=>{const scene=window.__thesis.inspect(),canvas=document.querySelector('[data-cinematic-stage] canvas');return {id:scene.representation.id,index:scene.representation.index,source:scene.source,diagrams:scene.diagramSource,budget:scene.renderBudget,initialization:scene.initialization,native:[canvas.width,canvas.height],writes:window.__stageStorageWrites(canvas),docY:scrollY};});
- const before=await resources();await page.mouse.click(point.x,point.y);await settle(page);const after=await resources(),pressed=await page.evaluate(()=>window.__sourcePointerReceipt);
+ await settle(page);const after=await resources(),pressed=await page.evaluate(()=>window.__sourcePointerReceipt);
  const clickPath=test.info().outputPath('native-source-click.json');await writeFile(clickPath,JSON.stringify({before,after,events:await page.evaluate(()=>window.__sourcePointerEvents)},null,2)+'\n');
  await test.info().attach('native-source-click',{path:clickPath,contentType:'application/json'});
- expect(pressed).toBeTruthy();expect(pressed.hit).toMatchObject({source:true,chapterId:'system',index:pressed.index});expect(after.id).not.toBe(pressed.id);expect(after.index).toBe((pressed.index+1)%4);
+ expect(pressed).toBeTruthy();expect(pressed.trusted).toBe(true);expect(pressed.point).toEqual(point);expect(pressed.observedAt).toBeGreaterThanOrEqual(last.probedAt);expect(pressed.hit).toMatchObject({source:true,chapterId:'system',index:pressed.index});expect(after.id).not.toBe(pressed.id);expect(after.index).toBe((pressed.index+1)%4);
  expect(after.source).toEqual(before.source);expect(after.diagrams).toEqual(before.diagrams);expect(after.initialization).toEqual(before.initialization);
  expect(after.budget).toEqual(before.budget);expect(after.native).toEqual(before.native);expect(after.writes).toBe(before.writes);expect(after.docY).toBe(before.docY);
  expect(await page.evaluate(el=>document.querySelector('[data-cinematic-stage] canvas')===el,canvas)).toBe(true);
