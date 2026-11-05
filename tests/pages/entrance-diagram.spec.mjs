@@ -2,6 +2,15 @@ import {test,expect} from '@playwright/test';
 import {WAIT} from './case-helpers.mjs';
 import {settleEvidenceChapter,retainEvidenceReadiness} from './native-evidence-helpers.mjs';
 const route='/projects/entrance-installation-art/';
+
+// The Feed keeps its curved surface in motion. Activate the visible native
+// label at its current hit-tested centre instead of waiting for two identical
+// animation frames. This remains a trusted pointer action, not a forced check.
+async function chooseGuide(page,radio){
+ await radio.evaluate(node=>node.closest('label').scrollIntoView({block:'center',behavior:'instant'}));
+ const target=await radio.evaluate(node=>{const label=node.closest('label'),r=label.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;return{x,y,hit:label.contains(document.elementFromPoint(x,y))};});
+ expect(target.hit).toBe(true);await page.mouse.click(target.x,target.y);await expect(radio).toBeChecked();
+}
 test('Entrance original plates support reversible keyboard focus, continuous motion and compact mobile reading',async({page},info)=>{
  const readiness=[];
  try{
@@ -22,15 +31,15 @@ test('Entrance original plates support reversible keyboard focus, continuous mot
   await expect(image).toHaveAttribute('src',original);
  }
  await page.emulateMedia({reducedMotion:'no-preference'});
- await guides.first().getByRole('radio').nth(1).check();
+ await chooseGuide(page,guides.first().getByRole('radio').nth(1));
  await expect(guides.first().locator('[data-focus-region="0"]')).toHaveCSS('transition-duration','0.22s');
  await expect(guides.first().locator('[data-focus-region="0"]')).toHaveCSS('stroke-dashoffset','0px');
  await expect(page.getByRole('button',{name:/pause motion/i})).toHaveCount(0);
- await guides.first().getByRole('radio').nth(2).check();
+ await chooseGuide(page,guides.first().getByRole('radio').nth(2));
  await expect(guides.first().locator('[data-focus-region="1"]')).toHaveCSS('transition-duration','0.22s');
  for(const width of [390,320]){
   await page.setViewportSize({width,height:844});
-  const guide=guides.nth(1);await guide.scrollIntoViewIfNeeded();await guide.getByRole('radio').nth(2).check();
+  const guide=guides.nth(1);await chooseGuide(page,guide.getByRole('radio').nth(2));
   await expect(guide).toHaveAttribute('data-information-moving','false',{timeout:WAIT});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth)).toBe(true);
   for(const label of await guide.locator('label').all())expect((await label.boundingBox()).height).toBeGreaterThanOrEqual(44);

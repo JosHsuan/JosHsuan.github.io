@@ -62,7 +62,10 @@ for(const route of routes)test(`the published ${route} document renders a cohere
   const primary=[...document.querySelectorAll(proseSelector)].filter(node=>!auxiliary.test(node.className)&&!node.closest('[data-model-side-label]'));
   const measure=(node,ch)=>{const probe=document.createElement('span');probe.style.cssText='position:fixed;visibility:hidden;pointer-events:none';probe.style.font=getComputedStyle(node).font;probe.style.width=`${ch}ch`;document.body.append(probe);const width=probe.getBoundingClientRect().width;probe.remove();return width;};
   // Native CSS width governs line length; screen-space glyph clipping is checked separately.
-  const roles={sourceCaptions:[...document.querySelectorAll('[data-model-side-label] [data-source-description]')].map(spacing),measuredCaptions:[...document.querySelectorAll('main[data-study-presentation="hybrid-scenes"] [data-project-native-source] figcaption>p,main[data-study-presentation="editorial-scenes"] figcaption>p,main [class*="_evidence__"] figcaption>p,main [class*="_figure__"] figcaption p,main [class*="_sourcePanel__"]>p')].map(node=>({...spacing(node),width:parseFloat(getComputedStyle(node).width),expectedMeasure:measure(node,68),measure:parseFloat(getComputedStyle(node).maxWidth)})),prose:primary.map(node=>({...spacing(node),width:parseFloat(getComputedStyle(node).width),expectedMeasure:measure(node,60),measure:parseFloat(getComputedStyle(node).maxWidth)})),body:spacing(document.body),display:[...document.querySelectorAll(displaySelector)].map(node=>({...spacing(node),compact:node.matches('[data-portfolio-about] article h2')})),controls:[...document.querySelectorAll('header nav a,button,input,select,textarea,summary')].map(spacing),captions:[...document.querySelectorAll('figcaption,[data-diagram-caption]')].map(spacing),labels:[...document.querySelectorAll('[data-project-section-label]')].map(spacing)};
+  // Inactive source captions have no layout box and CSSOM legitimately returns
+  // width:auto. Their native width is zero; an invalid visible width still fails.
+  const nativeWidth=node=>node.getClientRects().length?parseFloat(getComputedStyle(node).width):0;
+  const roles={sourceCaptions:[...document.querySelectorAll('[data-model-side-label] [data-source-description]')].map(spacing),measuredCaptions:[...document.querySelectorAll('main[data-study-presentation="hybrid-scenes"] [data-project-native-source] figcaption>p,main[data-study-presentation="editorial-scenes"] figcaption>p,main [class*="_evidence__"] figcaption>p,main [class*="_figure__"] figcaption p,main [class*="_sourcePanel__"]>p')].map(node=>({...spacing(node),width:nativeWidth(node),expectedMeasure:measure(node,68),measure:parseFloat(getComputedStyle(node).maxWidth)})),prose:primary.map(node=>({...spacing(node),width:nativeWidth(node),expectedMeasure:measure(node,60),measure:parseFloat(getComputedStyle(node).maxWidth)})),body:spacing(document.body),display:[...document.querySelectorAll(displaySelector)].map(node=>({...spacing(node),compact:node.matches('[data-portfolio-about] article h2')})),controls:[...document.querySelectorAll('header nav a,button,input,select,textarea,summary')].map(spacing),captions:[...document.querySelectorAll('figcaption,[data-diagram-caption]')].map(spacing),labels:[...document.querySelectorAll('[data-project-section-label]')].map(spacing)};
   const fontProbes=text.filter(node=>node.checkVisibility({visibilityProperty:true,opacityProperty:true})&&node.getBoundingClientRect().width>0&&node.getBoundingClientRect().height>0).map(node=>({selector:selector(node),role:node.closest(displaySelector)?'display':'body',mainHeading:!!node.closest('h1'),subtreeText:[node,...node.querySelectorAll('*')].map(element=>[element===node?element.textContent:'',getComputedStyle(element,'::before').content,getComputedStyle(element,'::after').content].join('')).join(''),text:[...node.childNodes].filter(child=>child.nodeType===Node.TEXT_NODE).map(child=>child.textContent).join('').trim()}));
   // Observe the real CJK cascade in the same layout transaction, restoring
   // the original language before returning or starting platform-font queries.
@@ -171,11 +174,26 @@ for(const route of routes)test(`the published ${route} document renders a cohere
    if(!primary&&cleanupError)throw cleanupError;
   }
  }
- if(['/','/about/','/projects/bending-active/','/projects/xr-bending-active/','/projects/mode-s-of-making/'].includes(route)){
+ if(['/about/','/projects/bending-active/','/projects/xr-bending-active/','/projects/mode-s-of-making/'].includes(route)){
   const name='typography-native-'+(route.replaceAll('/','-')||'home'),path=test.info().outputPath(name+'.png');
   await page.screenshot({path,fullPage:false});
   await test.info().attach(name,{path,contentType:'image/png'});
  }
+ expect(errors).toEqual([]);
+});
+
+// CI's Home trace completes every font assertion but spends another 30.7s on
+// a software-GPU screenshot of the live model film. Preserve that native image
+// in its own 60-second scenario rather than exhausting the font assay's budget.
+test('Home retains a native typography capture beside the continuous model film',async({page})=>{
+ const errors=[];page.on('pageerror',error=>errors.push(error.message));
+ await page.emulateMedia({reducedMotion:'reduce'});
+ const response=await page.goto('/');expect(response.status()).toBe(200);
+ await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});
+ await page.evaluate(()=>document.fonts.ready);
+ const path=test.info().outputPath('typography-native--.png');
+ await page.screenshot({path,fullPage:false});
+ await test.info().attach('typography-native--',{path,contentType:'image/png'});
  expect(errors).toEqual([]);
 });
 

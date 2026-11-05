@@ -214,3 +214,30 @@ also passed their corrected assertions; the Windows native-media limitation
 above remains explicit. Final `pnpm check`, 720 case/tool checks (two existing
 source-only skips), lint and the 270-file / 147-asset public build audit passed.
 The next publication candidate still requires its own complete CI and live gate.
+
+Candidate `e3c3cc5` (CI 42028477554) exposed a regression in the revised typography
+assay: CSSOM reports `width:auto` for inactive source captions without a layout
+box, producing NaN when parsed as a used width. A boxless caption now measures
+zero; visible captions and prose still require a finite native used width, the
+same line-length limits and independent screen-space glyph clipping. This is a
+test-measurement correction, not a product typography change. The failed candidate
+remains ineligible; a fresh complete exact-commit run is required.
+The corrected complete typography suite passed all 57 local browser cases.
+The rejected run's Linux WebKit 1/3 shard completed 75 checks, including the
+original native-video advancement contract; its five failures were solely the
+boxless-caption NaN assertion. This narrows the local Windows media limitation
+without treating a partially failed CI as a publishable release.
+
+The same run's mobile Home trace completed its font assertions, then spent
+30.7 seconds capturing the continuously rendered model film and exhausted the
+combined scenario budget. Its unchanged native screenshot is retained as a
+separate 60-second scenario; all platform-font, measure and clipping assertions
+remain in the original scenario. Entrance's WebKit pointer check also waited
+for two identical frames on the continuously curved guide. It now scrolls the
+native label into view, verifies its current hit point and sends a trusted
+pointer click, retaining checked-state, source, reversal and 44px target gates.
+No timeout, retry, animation freeze or forced-click exception is introduced.
+All nine focused browser scenarios (Entrance input, Home font hierarchy and
+native Home capture in all three profiles) passed after these corrections;
+lint and diff validation also passed. The complete inventory is now 645 tests,
+215 per profile, pending the next immutable full CI run.
