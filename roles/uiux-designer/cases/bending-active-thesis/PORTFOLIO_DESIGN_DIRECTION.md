@@ -1,8 +1,10 @@
 # Portfolio design direction
 
-Owner amendment, 3 November 2026. This governs the current application, not the
-empty reusable framework. It extends decision 0021 and the continuous-motion
-integration contract. Implementation and acceptance remain separate records.
+Owner amendments, 3 and 5 November 2026. This governs the current application,
+not the empty reusable framework. Decision 0021 supplies the continuous-motion,
+source-scale and instance-event constraints; decision 0022 and the
+[Glass motion contract](GLASS_MOTION_REDESIGN.md) revise their motion language.
+Implementation and acceptance remain separate records.
 
 ## References and deliberate interpretation
 
@@ -15,8 +17,9 @@ integration contract. Implementation and acceptance remain separate records.
 - Apple's [Materials](https://developer.apple.com/design/human-interface-guidelines/materials)
   distinguishes floating functional glass from content materials. Keep reading
   cards sufficiently opaque; use their edge response and restrained deformation
-  for fluidity. Preserve stronger optical glass on the three floating control
-  groups. Native evidence images retain their own colour and sharpness.
+  for fluidity. Decision 0022 extends bounded optical deformation to reading/card
+  aperture edges while the central reading zone remains clear. Floating control
+  groups retain their functional glass. Native source image bytes remain unchanged.
 - Lusion's [Porsche: Dream Machine](https://lusion.co/projects/porsche_dream_machine/)
   is a directed, four-phase CG film. Its project page was inspected at desktop
   size: the media composition expands while title/body retreat during scroll.
@@ -37,9 +40,10 @@ integration contract. Implementation and acceptance remain separate records.
 ## Compact square discovery cards
 
 Each Home discovery card has a 1:1 outer silhouette. The active card sits at the
-front of an overlapping hand, with adjacent centres about 26% of a card width
-away. This ratio follows the card instance across screen sizes instead of
-spreading cards by viewport width. Adjacent cards suggest the sequence; only the
+front of an inward-facing cylindrical arc, with the nearest adjacent centres
+about 35% of a card width away. This ratio follows the card instance across screen
+sizes instead of spreading cards by viewport width. Decision 0022 replaces the
+preceding 26%-spaced hand and its paper-card roll. Adjacent cards suggest the sequence; only the
 active card receives navigation focus. Documentary imagery uses contain fitting
 inside the square so meaningful source details are not silently cropped.
 
@@ -52,12 +56,13 @@ history restoration and keyboard focus do not force section jumps. Every
 listener is scoped and removed with its instance owner.
 
 The deck samples the same native-velocity/acceleration field as reading cards.
-Its own pose writer composes the compact hand with bounded peripheral shear,
-stretch and a liquid rim. Settled poses are cached so the ambient scene clock
+Its own pose writer composes the cylindrical depth with bounded peripheral shear,
+stretch, optical edge response and a liquid rim. Settled poses are cached so the ambient scene clock
 does not rebuild eight unchanged outlines every frame.
 
 On Project, the prepared model preview is content of its square tile and follows
-that tile's plane, like the neighboring images. Its renderer still owns source
+that tile's plane, like the neighboring images. Three desktop columns counterflow
+over 24 seconds; the single-column layout uses the shared Feed field. Its renderer still owns source
 geometry and camera. Full-viewport model stages and navigation stay independent
 of reading-card transforms.
 

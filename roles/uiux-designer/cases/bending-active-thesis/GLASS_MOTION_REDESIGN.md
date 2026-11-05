@@ -156,3 +156,12 @@ These local results do not replace the required complete exact-commit CI,
 same-artifact deployment and independent public-byte/browser verification.
 Raw local logs and pixel receipts are retained under `.runtime/nov05/` and the
 test output workspace; the final release record will identify its immutable CI.
+
+The first candidate, `430f18d`, failed XR's browser lens assertion in CI
+42016446382 because that assertion still calculated the superseded cubic easing.
+The production path already used decision 0022's quintic joins. The assertion now
+independently computes the quintic 38° → 34° → 32° lens with the same nine-decimal
+precision; camera ownership, source pins, native media and idle checks are unchanged.
+The corrected complete XR journey passed locally in all three browser profiles.
+That failed candidate is not eligible for deployment; the correction requires a
+new complete exact-commit validation, without retry-only acceptance.

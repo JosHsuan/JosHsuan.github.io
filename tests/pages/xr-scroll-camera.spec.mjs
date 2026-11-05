@@ -49,9 +49,10 @@ test('XR native scrolling directs the complete model while idle is compositor-on
  const a=await nativeReading(page,.15),b=await nativeReading(page,.8,6),reverse=await nativeReading(page,.15,6);
  expect(b.camera.intent.yawRad-a.camera.intent.yawRad).toBeGreaterThan(.1);expect(reverse.camera.intent.yawRad).toBeCloseTo(a.camera.intent.yawRad,3);
  // The authored 38° → 34° → 32° lens is sampled by native document progress,
- // including reversal; handheld motion must never replace this camera intent.
+ // including reversal and decision 0022's zero-acceleration quintic joins;
+ // handheld motion must never replace this camera intent.
  for(const sample of [a,b,reverse]){
-  const progress=sample.camera.modelProgress,local=progress<=.5?progress*2:(progress-.5)*2,ease=local*local*(3-2*local),lens=progress<=.5?38-4*ease:34-2*ease;
+  const progress=sample.camera.modelProgress,local=progress<=.5?progress*2:(progress-.5)*2,ease=local*local*local*(10+local*(-15+6*local)),lens=progress<=.5?38-4*ease:34-2*ease;
   expect(sample.camera.intent.fovDeg).toBeCloseTo(lens,9);expect(sample.resource.view.cameraIntent).toEqual(sample.camera.intent);
  }
  expect(b.camera.intent.fovDeg).toBeLessThan(a.camera.intent.fovDeg);
