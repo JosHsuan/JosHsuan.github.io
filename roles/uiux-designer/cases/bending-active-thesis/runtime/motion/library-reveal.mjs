@@ -1,10 +1,11 @@
 export const LIBRARY_TRACE_COUNT=11;
-export const LIBRARY_TRACE_SECONDS=.28;
-export const LIBRARY_TRACE_GAP=.04;
+export const LIBRARY_TRACE_SECONDS=.46;
+// Overlap successive strokes like a feed entering the clear reading aperture.
+export const LIBRARY_TRACE_GAP=-.34;
 export const LIBRARY_REVEAL_SECONDS=LIBRARY_TRACE_COUNT*LIBRARY_TRACE_SECONDS+(LIBRARY_TRACE_COUNT-1)*LIBRARY_TRACE_GAP;
 
 const clamp=value=>Math.min(1,Math.max(0,value));
-const smooth=value=>value*value*(3-2*value);
+const smooth=value=>value*value*value*(10+value*(-15+6*value));
 const fact=(state,status,reason)=>({id:state.id,kind:'library',status,reason});
 
 /** Only the caller supplies active elapsed time; source geometry is never sampled here. */

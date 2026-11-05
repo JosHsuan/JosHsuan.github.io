@@ -71,7 +71,7 @@
 .projectImage [hidden]{display:none!important}
 .projectImage [data-project-model-preview] img{object-position:76% center}
 .projectLink{position:absolute;z-index:2;inset:0;display:block;text-decoration:none;outline-offset:-4px}
-.cardCopy{position:absolute;inset:auto 0 0;display:flex;flex-direction:column;padding:4rem 1.5rem 1.5rem;background:linear-gradient(transparent,#0b141cf0 47%,#0b141c);color:#f1f3ec;opacity:0;translate:0 8px;transition:opacity .22s,translate .22s}
+.cardCopy{position:absolute;inset:auto 0 0;display:flex;flex-direction:column;padding:4rem 1.5rem 1.5rem;background:linear-gradient(transparent,#0b141cf0 47%,#0b141c);color:#f1f3ec;opacity:0;translate:0 12px;transition:opacity .36s cubic-bezier(.22,1,.36,1),translate .42s cubic-bezier(.22,1,.36,1)}
 .projectCard:hover .cardCopy,.projectCard:focus-within .cardCopy{opacity:1;translate:0 0}
 .cardCategory{display:block;margin:0 0 .65rem;color:#d1ded8;font: .51rem/1.6 var(--mono);letter-spacing:.055em}
 .cardCopy :is(h2,h3){margin:0 0 1.2rem;font-size:clamp(1.2rem,1.7vw,1.7rem);font-weight:400;line-height:1.15;letter-spacing:-.035em;text-wrap:balance}
@@ -205,7 +205,6 @@
 /* Presentation-only idle: the source camera is scroll-authored, not a second
    animated 3D writer. Visibility, Pause, focus and policy stop this CSS sway. */
 .researchStory:global([data-home-research-motion=active]) .researchStage :global([data-home-research-host]){animation:research-specimen-breath 14s ease-in-out infinite}
-.researchStory:focus-within .researchStage :global([data-home-research-host]){animation-play-state:paused}
 @keyframes research-specimen-breath{0%,100%{transform:translateY(0) rotate(-.06deg)}50%{transform:translateY(-1.5px) rotate(.06deg)}}
 @media(forced-colors:active){.researchStory .researchStage :global([data-home-research-host]){animation:none!important}}
 
@@ -250,6 +249,10 @@
 [data-deck-ready] .deckCards{position:relative;display:block;flex:1;margin:1.5rem 0;perspective:1400px}
 [data-deck-ready] .deckCard{position:absolute;top:50%;left:50%;width:min(49svh,38rem,58vw);height:auto;transform:translate(-50%,-50%) translate3d(var(--deck-x,0),var(--deck-y,0),var(--deck-z,0)) rotateX(var(--deck-pitch,0deg)) rotateY(var(--deck-yaw,0deg)) rotateZ(var(--deck-roll,0deg)) skewY(var(--deck-shear,0deg)) scale(var(--deck-scale,1)) scale(var(--deck-sx,1),var(--deck-sy,1));clip-path:var(--deck-rim,inset(0 round 24px));transform-origin:center}
 [data-deck-ready] .deckCard:not([data-deck-active]){pointer-events:none}
+[data-deck-ready] .deckCard[data-glass-motion=carousel]{filter:var(--glass-field-filter,none);box-shadow:0 26px 70px #0006,inset 0 1px 0 #eafff450}
+[data-deck-ready] .deckCard[data-glass-motion=carousel]::after{background:linear-gradient(100deg,#b3f4f23d,transparent 13%,transparent 87%,#dcece83d);opacity:calc(.24 + var(--deck-edge,0)*.72)}
+[data-deck-ready] .deckCard:focus-within{filter:none!important}
+@media(forced-colors:active),print{[data-deck-ready] .deckCard[data-glass-motion=carousel]{filter:none!important}}
 .main[data-portfolio-section=home]>.contact{min-height:100svh;display:flex;flex-direction:column;justify-content:center;scroll-margin-top:0}
 @media(max-width:799px){
  .showcaseIntro{padding:48svh 5vw 6rem;min-height:100svh;align-items:flex-end}

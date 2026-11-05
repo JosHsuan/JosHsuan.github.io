@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHomeDeckPresenter} from '../runtime/site/HomeDeckPresenter.mjs';
 function setup(){
- const node=()=>Object.assign(new EventTarget(),{attrs:{},styles:{},offsetWidth:400,offsetHeight:400,contains:()=>false,getAttribute:key=>key==='data-deck-card'?'project':null});
+ const node=()=>Object.assign(new EventTarget(),{attrs:{},styles:{},offsetWidth:400,offsetHeight:400,contains:()=>false,querySelector:()=>null,getAttribute:key=>key==='data-deck-card'?'project':null});
  const cards=Array.from({length:8},node),counter=node(),contact=node();
  const deck={...node(),offsetHeight:6600,querySelectorAll:()=>cards,querySelector:()=>counter};
  const root={ownerDocument:{activeElement:null},contains:()=>false,querySelector:s=>s==='[data-home-deck]'?deck:contact};
@@ -57,7 +57,7 @@ test('half-screen section boundaries snap symmetrically without consuming the se
 test('resumption, suspension and keyboard focus never force a section jump; disposal restores native links',()=>{
  const f=setup();f.at(510,{resumed:true});f.at(700,{suspended:true});assert.equal(f.moves.length,0);
  f.root.contains=()=>true;f.root.ownerDocument.activeElement={matches:()=>true};f.at(800);assert.equal(f.moves.length,0);
- f.presenter.dispose();assert.equal(f.presenter.inspect().disposed,true);assert(f.cards.every(c=>c.attrs.inert===null&&c.attrs['aria-hidden']===null));assert.equal(f.at(2000),false);
+ f.presenter.dispose();assert.equal(f.presenter.inspect().disposed,true);assert(f.cards.every(c=>c.attrs.inert===null&&c.attrs['aria-hidden']===null));assert(f.cards.every(c=>Object.values(c.styles).every(value=>value==='')),'native fallback must not retain invisible or transformed cards');assert.equal(f.at(2000),false);
 });
 
 test('small reversals within a section do not snap until native input crosses its half-screen threshold',()=>{

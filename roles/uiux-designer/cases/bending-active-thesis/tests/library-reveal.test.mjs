@@ -18,20 +18,18 @@ test('eleven real source traces run from the bottom upward in ascending 60–160
  }
 });
 
-test('a visibility request draws each entire trace before starting the next and closes once',()=>{
+test('a visibility request overlaps ordered feed traces and closes once',()=>{
  const state=createLibraryReveal();
  assert.deepEqual(advanceLibraryReveal(state,10,{visible:false}),[]);
  assert.deepEqual(advanceLibraryReveal(state,10,{visible:true}).map(event=>event.status),['requested']);
  assert.deepEqual(sampleLibraryReveal(state),Array(11).fill(0),'time before the request never consumes the sequence');
- advanceLibraryReveal(state,.14,{visible:true});
+ advanceLibraryReveal(state,.23,{visible:true});
  assert(Math.abs(sampleLibraryReveal(state)[0]-.5)<1e-9);
- assert(sampleLibraryReveal(state).slice(1).every(progress=>progress===0));
- advanceLibraryReveal(state,.14,{visible:true});
+ assert(sampleLibraryReveal(state)[1]>0&&sampleLibraryReveal(state)[1]<.5);
+ assert(sampleLibraryReveal(state).slice(2).every(progress=>progress===0));
+ advanceLibraryReveal(state,.23,{visible:true});
  assert.equal(sampleLibraryReveal(state)[0],1);
- advanceLibraryReveal(state,.04,{visible:true});
- assert(sampleLibraryReveal(state).slice(1).every(progress=>progress===0));
- advanceLibraryReveal(state,.14,{visible:true});
- assert.equal(sampleLibraryReveal(state)[0],1);assert(Math.abs(sampleLibraryReveal(state)[1]-.5)<1e-9);
+ const overlap=sampleLibraryReveal(state);assert(overlap[1]>overlap[2]&&overlap[2]>overlap[3]&&overlap[3]>0);
  const completion=advanceLibraryReveal(state,LIBRARY_REVEAL_SECONDS,{visible:true});
  assert.deepEqual(completion,[{id:1,kind:'library',status:'completed',reason:'finished'}]);
  assert.deepEqual(sampleLibraryReveal(state),Array(11).fill(1));
@@ -90,10 +88,10 @@ function fixture({onEmit=()=>{}}={}){
 
 test('DOM presentation uses source order, preserves progress on remeasure and emits only after final paint',()=>{
  const f=fixture();assert(f.publish());assert.equal(f.element.attrs.get('data-diagram-reveal'),'playing');
- f.publish({dt:.14});
+ f.publish({dt:.23});
  assert.equal(f.paths.at(-1).styles.get('stroke-dashoffset'),'0.5');
  assert.equal(f.paths[0].styles.get('visibility'),'hidden');
- f.measure();assert(Math.abs(f.presenter.inspect().items[0].elapsed-.14)<1e-9);
+ f.measure();assert(Math.abs(f.presenter.inspect().items[0].elapsed-.23)<1e-9);
  f.publish({dt:4});
  assert.equal(f.events.at(-1).event.status,'completed');
  assert(f.events.at(-1).paint.every(styles=>Object.keys(styles).length===0),'completion observes restored original path paint');

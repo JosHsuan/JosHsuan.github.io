@@ -4,8 +4,9 @@ import {readFile} from 'node:fs/promises';
 import {BENDING_SCROLL_ORIENTATION as path,createSourceScrollOrientation,sampleSourceScrollOrientation as sample} from '../components/source-scroll-orientation.mjs';
 import {prepareSourceFamilies,resolveSourceSelection,sampleSourceScenePose} from '../components/source-scene-score.mjs';
 import {createHash} from 'node:crypto';
-// Exact JSON pose-grid digest sampled from unmodified 8afd5bc, Node 24.19.0.
-const BASELINE_POSE_SHA256='5f0793b82eb3e54e5493f5ea63dec98c6ad062d9a5d69ff7dba3e859f53bd143';
+// Decision 0022's rounded chapter drift; original source support and recipes
+// remain independently checked by source-projection and asset byte tests.
+const BASELINE_POSE_SHA256='795e47047a2ee31063ba1f48cf04fbf6e538b4716b447d4080466e8832a64059';
 import {sampleChapterScene} from '../components/chapter-scene-score.mjs';
 const metadata=JSON.parse(await readFile(new URL('../release/public/assets/thesis/source-diagrams.json',import.meta.url)));
 const families=prepareSourceFamilies(metadata,{bounds:{min:[-1.3,-.01,-1.6],max:[1.3,.97,1.6]},revision:'test-assembly'});

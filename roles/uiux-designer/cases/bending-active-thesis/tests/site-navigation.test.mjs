@@ -349,8 +349,8 @@ test('native reveal waits for both actual completions, ignores CSS events and re
   assert.equal(f.loader.getAttribute('data-site-reveal'),'native');assert.equal(native.calls.length,2);
   assert.equal(native.calls[0].target,f.loader);assert.equal(native.calls[1].target,native.content);
   for(const call of native.calls)assert.deepEqual(call.options,{duration:720,easing:'cubic-bezier(.45,0,.15,1)',fill:'both'});
-  assert.deepEqual(native.calls[0].keyframes,[{opacity:1},{opacity:0}]);
-  assert.deepEqual(native.calls[1].keyframes,[{transform:'translateY(0)'},{transform:'translateY(-12px)'}]);
+  assert.deepEqual(native.calls[0].keyframes,[{opacity:1,clipPath:'inset(0% 0% round 0px)'},{opacity:.9,clipPath:'inset(18% 0% round 36px)',offset:.48},{opacity:0,clipPath:'inset(50% 0% round 52px)'}]);
+  assert.deepEqual(native.calls[1].keyframes,[{transform:'translateY(0) scale(1)',filter:'blur(0px)'},{transform:'translateY(-18px) scale(1.035)',filter:'blur(3px)'}]);
   f.loader.dispatchEvent(new Event('animationend'));assert.equal(manager.inspect().phase,'revealing');
   native.owned[order[0]].finish();await flush();assert.equal(manager.inspect().phase,'revealing');
   native.owned[order[1]].finish();await flush();assert.deepEqual(phases(manager),['requested','ready','revealing','entered']);

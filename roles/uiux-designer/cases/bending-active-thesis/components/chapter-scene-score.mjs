@@ -25,7 +25,7 @@ const keys = [
 function slots(count, phase) {
   const values = Array(count).fill(0), p = phase * count, index = Math.floor(p) % count, next = (index + 1) % count;
   // Closed continuous source-view request, not interpolation of source topology.
-  const fraction = p - Math.floor(p), t = fraction * fraction * (3 - 2 * fraction);
+  const fraction = p - Math.floor(p), t = fraction ** 3 * (10 + fraction * (-15 + 6 * fraction));
   values[index] += 1 - t; values[next] += t; return values;
 }
 
@@ -42,7 +42,9 @@ export function sampleChapterScene(playback, {reducedMotion = false, aspect = 1,
   const mobile = clamp((1.1 - aspect) / .5), active = !reducedMotion;
   const scalar = (key, sampler = value => value) => keys.reduce((sum, value, i) => sum + weights[i] * sampler(value[key], i), 0);
   const phase = i => ((phases[i] % 1) + 1) % 1;
-  const wave = i => active ? Math.sin(phase(i) * TAU) : 0;
+  // Rounded primary drift and a small counterflow keep camera, focus and light
+  // in one coherent loop while avoiding a repeated mechanical pendulum.
+  const wave = i => active ? .84*Math.sin(phase(i)*TAU)+.16*Math.sin(phase(i)*TAU*2) : 0;
   const orbit = (value, i) => value * wave(i);
   const breathing = (value, i) => active ? value * (Math.cos(phase(i) * TAU) - 1) * .5 : 0;
   const pointerUv = pointer?.uv;
@@ -66,7 +68,7 @@ export function sampleChapterScene(playback, {reducedMotion = false, aspect = 1,
     layers: {foregroundMix: active ? scalar('foreground') : 0, semanticFeatherPx: 40 + mobile * 12},
     field: {
       fieldTime: reducedMotion ? 0 : time, fieldWeight: active ? scalar('field') * (1 - mobile * .18) : 0,
-      fieldSceneMix: scalar('sceneMix'), fieldFlow: [.035, -.018], fieldEnvelope: [mobile > .5 ? .5 : .65, .5, mobile > .5 ? .62 : .5, .62],
+      fieldSceneMix: scalar('sceneMix'), fieldFlow: [.018, -.028], fieldEnvelope: [mobile > .5 ? .5 : .65, .5, mobile > .5 ? .62 : .5, .62],
       fieldPointerUv: uv, fieldPointerStrength: active && pointer?.active === true ? clamp(pointer.strength ?? 1) : 0,
       fieldBlendMix: [0, 1, 2, 3].map(channel => keys.reduce((sum, key, i) => sum + key.blend[channel] * weights[i], 0)),
       asciiCellPx: 11 - mobile * 2, asciiTint: [.64, .29, .105],

@@ -46,7 +46,9 @@ export function sampleScrollCamera(path, progress, {static: staticPose = false} 
   while (index < path.length - 2 && u > path[index + 1].at) index++;
   const a = path[index], b = path[index + 1];
   const local = clamp((u - a.at) / (b.at - a.at));
-  const t = staticPose ? Number(local >= .5) : local * local * (3 - 2 * local);
+  // Broad clear viewing intervals, fluid acceleration through each shoulder.
+  // Quintic endpoints have zero acceleration as well as zero velocity.
+  const t = staticPose ? Number(local >= .5) : local * local * local * (10 + local * (-15 + 6 * local));
   return pose({
     yawRad: a.yawRad + (b.yawRad - a.yawRad) * t,
     pitchRad: a.pitchRad + (b.pitchRad - a.pitchRad) * t,
@@ -81,5 +83,6 @@ export function sampleHandheldSurface(activeSeconds, gain=1){
  finite(activeSeconds,'activeSeconds');finite(gain,'gain');
  if(activeSeconds<0||gain<0||gain>1)throw RangeError('Nonnegative active seconds and handheld gain within [0,1] required');
  if(gain===0)return{xPx:0,yPx:0,rollRad:0};
- return{xPx:Math.sin(activeSeconds*.61)*.8*gain,yPx:Math.sin(activeSeconds*.83)*.65*gain,rollRad:Math.sin(activeSeconds*.47)*.00065*gain};
+ const phase=activeSeconds*Math.PI*2/24;
+ return{xPx:(Math.sin(phase)*.72+Math.sin(phase*2)*.08)*gain,yPx:Math.sin(phase*2+.3)*.55*gain,rollRad:Math.sin(phase+.6)*.0005*gain};
 }

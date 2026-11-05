@@ -17,7 +17,7 @@ export function sampleSourceScrollOrientation(path,nativeU,{reducedMotion=false}
  if(reducedMotion)return {azimuthOffsetDeg:0,elevationOffsetDeg:0};
  const u=Math.max(0,Math.min(1,nativeU));let i=1;
  while(i<path.length-1&&u>path[i].at)i++;
- const a=path[i-1],b=path[i],t=(u-a.at)/(b.at-a.at),w=t*t*(3-2*t);
+ const a=path[i-1],b=path[i],t=(u-a.at)/(b.at-a.at),w=t*t*t*(10+t*(-15+6*t));
  return {azimuthOffsetDeg:a.azimuthOffsetDeg+(b.azimuthOffsetDeg-a.azimuthOffsetDeg)*w,elevationOffsetDeg:a.elevationOffsetDeg+(b.elevationOffsetDeg-a.elevationOffsetDeg)*w};
 }
 

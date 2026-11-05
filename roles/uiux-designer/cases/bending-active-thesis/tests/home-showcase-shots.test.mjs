@@ -23,8 +23,11 @@ test('Home source scores are deterministic, scale-aware and continuous across au
   assert(plan.shots.some(shot=>shot.coverage==='partial'));assert(new Set(plan.shots.map(shot=>shot.focalLengthMm)).size>=3);
   if(plan.architecture){assert(Math.abs(first.position[1]-source.model.bounds.min[1]-1.65)<1e-12);assert(first.target[1]>first.position[1]);}
   for(const {at}of plan.shots.slice(1,-1)){
-   const left=plan.sample({seconds:at-.0001,aspect:1.6}),right=plan.sample({seconds:at+.0001,aspect:1.6});
-   assert(Math.hypot(...left.position.map((value,i)=>value-right.position[i]))<.00001);assert(Math.hypot(...left.target.map((value,i)=>value-right.target[i]))<.00001);assert(Math.abs(left.focalLengthMm-right.focalLengthMm)<.00001);
+   const h=.00001,left=plan.sample({seconds:at-h,aspect:1.6}),center=plan.sample({seconds:at,aspect:1.6}),right=plan.sample({seconds:at+h,aspect:1.6});
+   // The new shot path crosses interior keys with continuous velocity rather
+   // than stopping at each key. Compare both derivatives, not a zero speed.
+   for(const field of ['position','target'])for(let i=0;i<3;i++)assert(Math.abs((center[field][i]-left[field][i])/h-(right[field][i]-center[field][i])/h)<.001);
+   assert(Math.abs((center.focalLengthMm-left.focalLengthMm)/h-(right.focalLengthMm-center.focalLengthMm)/h)<.001);
   }
   const mobile=plan.sample({seconds:plan.duration*.5,aspect:390/844});assert.deepEqual(mobile.frame,{x:.57,y:.3});assert(mobile.fovDeg>first.fovDeg||mobile.focalLengthMm>first.focalLengthMm);
   first.position[0]=999;assert.notEqual(plan.sample({seconds:0,aspect:1.6}).position[0],999);

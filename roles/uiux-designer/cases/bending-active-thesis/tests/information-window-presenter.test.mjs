@@ -6,7 +6,7 @@ const original={background:'linear-gradient(145deg, rgb(27,38,39), rgb(17,26,27)
 
 function fixture(specs,options={}){
   const operations=[],nodes=[];
-  const root={activeElement:null,querySelectorAll:()=>nodes,defaultView:{getComputedStyle(element){
+  const root={activeElement:null,querySelectorAll:()=>nodes,defaultView:{innerWidth:480,getComputedStyle(element){
     operations.push('read:style');
     return {...original,...element.computed,...(element.attrs.has('data-information-ready')?{background:'transparent',boxShadow:'none',borderTopColor:'transparent'}:{})};
   }}};
@@ -137,7 +137,7 @@ test('shared curved-field velocity pose reverses and resets with native content'
   assert.equal(f.publish({docY:80}),true);
   let item=f.presenter.inspect().items[0];
   assert(item.skinStrength>0);assert(item.edgeMaximum>0&&item.edgeMaximum<=9);
-  assert.equal(item.x,0);assert(item.rx<0);assert(item.ry===0);assert(Math.abs(item.y)<=3);
+  assert(item.x===0);assert(item.rx<0);assert(item.ry===0);assert(Math.abs(item.y)<=6);
   assert.match(f.nodes[0].styles.get('--information-skin-path'),/^path\('/);
   for(let i=0;i<8;i++)f.publish({docY:80-(i+1)*10});
   assert(f.presenter.inspect().items[0].skinStrength<0);
@@ -159,10 +159,10 @@ test('visible slow source frames retain reversible bounded velocity response and
  const f=fixture([{top:300,height:500}],{profile:'velocity-skin'});f.measure(11);f.publish({docY:11});
  assert.equal(f.publish({docY:611,dt:1.8}),true);
  let item=f.presenter.inspect().items[0];
- assert(item.rx<0&&item.rx>=-11);assert(item.skinStrength>0);assert(item.edgeMaximum>0);
+ assert(Math.abs(item.rx)<=22.2);assert(item.skinStrength>0);assert(item.edge>0);assert(item.edgeMaximum>0);
  assert.equal(f.nodes[0].attrs.get('data-information-moving'),'true');
  assert.equal(f.publish({docY:11,dt:1.8}),true);
- item=f.presenter.inspect().items[0];assert(item.rx>0&&item.rx<=11);assert(item.skinStrength<0);
+ item=f.presenter.inspect().items[0];assert(item.rx>0&&item.rx<=22.2);assert(item.skinStrength<0);
  for(let index=0;index<12;index++)f.publish({docY:11,dt:1.8});
  assert.equal(f.presenter.inspect().settled,true);assert(f.presenter.inspect().items[0].rx===0);
  f.publish({docY:611,dt:1.8});f.publish({docY:11,dt:1.8,resumed:true});

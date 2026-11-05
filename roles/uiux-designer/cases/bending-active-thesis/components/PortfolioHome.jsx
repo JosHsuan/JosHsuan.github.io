@@ -3,6 +3,7 @@ import PortfolioNavigation from './PortfolioNavigation';
 import ProjectModelPreview from './ProjectModelPreview';
 import HomeShowcaseStage from './HomeShowcaseStage';
 import InformationSkin from './InformationSkin';
+import GlassWarp from './GlassWarp';
 import {projectGridRows} from './project-grid-layout.mjs';
 import introduction from '../release/introduction.json';
 import contact from '../release/contact.json';
@@ -58,6 +59,7 @@ function ProjectDeck(){
   <div className={styles.deckSticky}>
    <header className={styles.deckHeading}><div><p className={styles.eyebrow}>02 / DISCOVER</p><h2 id="deck-title">A different perspective.</h2></div><p data-deck-count>01 / {String(projects.length).padStart(2,'0')}</p></header>
    <ol className={styles.deckCards}>{projects.map((project,index)=><li key={project.id} className={styles.deckCard} data-deck-card={project.id}>
+    <GlassWarp/>
     <div className={styles.deckImage}><img src={project.image.src} width={project.image.width} height={project.image.height} alt={project.image.alt} loading="eager" decoding="async" data-site-critical/></div>
     <a href={project.href} className={styles.deckLink} data-project-card={project.id} aria-labelledby={`deck-title-${project.id}`}>
      <span className={styles.deckSerial}>{String(index+1).padStart(2,'0')} / {String(projects.length).padStart(2,'0')}</span>

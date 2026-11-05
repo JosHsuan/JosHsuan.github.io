@@ -12,8 +12,8 @@
 /* JS-disabled pages use noscript; this is a separate hydration-failure escape. */
 .loader:not([data-site-connected]){animation:site-fail-open 30s step-end forwards}
 @keyframes site-activity{to{transform:rotate(360deg)}}
-@keyframes site-reveal{from{opacity:1}to{opacity:0}}
-@keyframes site-lift{from{transform:translateY(0)}to{transform:translateY(-12px)}}
+@keyframes site-reveal{0%{opacity:1;clip-path:inset(0% 0% round 0)}48%{opacity:.9;clip-path:inset(18% 0% round 36px)}100%{opacity:0;clip-path:inset(50% 0% round 52px)}}
+@keyframes site-lift{from{transform:translateY(0) scale(1);filter:blur(0)}to{transform:translateY(-18px) scale(1.035);filter:blur(3px)}}
 @keyframes site-fail-open{to{visibility:hidden;pointer-events:none}}
 
 @media(forced-colors:active){.backdrop{background:Canvas}}

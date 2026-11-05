@@ -13,6 +13,7 @@ import {expireSourceSelection} from '../features/ModelManager.mjs';
 import {modelInformationLayout} from '../../components/model-information.mjs';
 import {createCanvasTransitionEvents} from './CanvasTransitionEvents.mjs';
 import {createInformationWindowPresenter} from '../presentation/InformationWindowPresenter.mjs';
+import {glassPassageTransform} from '../motion/glass-motion.mjs';
 import {createLibraryDiagramPresenter} from '../presentation/LibraryDiagramPresenter.mjs';
 import {createLiquidGlassPresenter} from '../presentation/LiquidGlassPresenter.mjs';
 
@@ -241,7 +242,8 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
       const presented=input.getPresentation();
        const canvasFirstPaint=canvasActive&&presented.controllerFrame<canvasActivation;
       canvasAwaitingPaint=canvasActive&&(presented.controllerFrame<canvasActivation||presented.chapterId!==canvasChapter);
-      publisher.style(stage.current,'transform',`translate3d(${canvasPlacement.x}px,${canvasPlacement.y}px,0) scale(${canvasPlacement.scale})`);
+      const stageTransform=glassPassageTransform(canvasPlacement.x,canvasPlacement.y,canvasPlacement.opacity);
+      publisher.style(stage.current,'transform',stageTransform);
        // Keep the already painted source visible across the continuous chapter
        // block. Only a new surface activation needs an invisible first-draw gate.
        publisher.style(stage.current,'opacity',canvasFirstPaint?0:canvasPlacement.opacity);
@@ -249,7 +251,7 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
         // The information column is permanent; only its model aperture follows
         // the existing scene entry/exit. Source leader points use the real Canvas rect.
         publisher.style(modelOverlay,'opacity',canvasAwaitingPaint||!modelUIVisible?0:1);
-        modelOverlay.querySelectorAll('[data-model-viewport]').forEach(surface=>publisher.style(surface,'transform',`translate3d(${canvasPlacement.x}px,${canvasPlacement.y}px,0) scale(${canvasPlacement.scale})`));
+        modelOverlay.querySelectorAll('[data-model-viewport]').forEach(surface=>publisher.style(surface,'transform',stageTransform));
       }
       publisher.attribute(stage.current,'data-canvas-mode',canvasPlacement.mode);
       moving=moving||!canvasPlacement.settled||canvasAwaitingPaint;

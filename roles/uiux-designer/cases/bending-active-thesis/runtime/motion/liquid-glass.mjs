@@ -51,7 +51,7 @@ export function advanceLiquidResponse(state,dt,target={x:.5,y:.5,hover:0,press:0
   const next=clamp(Number.isFinite(target[key])?target[key]:(key==='x'||key==='y' ? .5 : 0),0,1);
   if(immediate){state.value[key]=next;state.velocity[key]=0;continue;}
   for(let index=0;index<steps;index++){
-   state.velocity[key]+=((next-state.value[key])*220-state.velocity[key]*26)*step;
+   state.velocity[key]+=((next-state.value[key])*184-state.velocity[key]*24)*step;
    state.value[key]=clamp(state.value[key]+state.velocity[key]*step,0,1);
   }
   if(Math.abs(next-state.value[key])<.0008&&Math.abs(state.velocity[key])<.006){state.value[key]=next;state.velocity[key]=0;}

@@ -63,7 +63,7 @@ test('native scrolling exits the viewport and returning resumes the same finite 
   assert.equal(item.visible,true);assert.equal(item.settled,false);
   for(let index=0;index<360;index++)f.publish({docY:200});
   item=f.presenter.inspect().informationWindows.items[0];
-  assert.equal(item.settled,true);assert.equal(item.y,0);assert.equal(item.edgeMaximum,0);
+  assert.equal(item.settled,true);assert.equal(item.skinStrength,0);assert(item.edge>0&&item.edgeMaximum<=20,'spatial glass shoulder persists without velocity');
   assert(![...f.nodes[0].styles.keys()].some(key=>key.includes('opacity')));
 });
 
@@ -93,7 +93,7 @@ test('focused reading stays still; new layout measurements update native positio
   f.document.activeElement=null;f.nodes[0].top=180;f.measure(350);
   assert.equal(f.presenter.inspect().informationWindows.items[0].top,180);
   f.publish({docY:350,seek:true});
-  assert.equal(f.presenter.inspect().informationWindows.items[0].y,0);
+  assert.equal(f.presenter.inspect().informationWindows.items[0].skinStrength,0);
 });
 
 test('disposal releases Home markers and all owned material properties; stale samples cannot publish',()=>{

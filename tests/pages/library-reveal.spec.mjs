@@ -20,10 +20,10 @@ test('the original library grows bottom-up in 60–160 mm order and stops after 
   await show(page);await page.clock.runFor(16);
   const start=await sample(page);expect(start.reveal.items[0].status).toBe('playing');expect(start.reveal.history.at(-1).status).toBe('requested');
   expect(start.paths.map(path=>path.id)).toEqual(Array.from({length:11},(_,index)=>`p${937-index}`));
-  await page.clock.runFor(144);const first=await sample(page);
-  expect(first.paths[0].offset).toBeGreaterThan(.25);expect(first.paths[0].offset).toBeLessThan(.75);expect(first.paths.slice(1).every(path=>path.visibility==='hidden')).toBe(true);
-  await page.clock.runFor(320);const second=await sample(page);
-  expect(second.paths[0].dash).toBe('none');expect(second.paths[1].offset).toBeGreaterThan(0);expect(second.paths[1].offset).toBeLessThan(1);expect(second.paths.slice(2).every(path=>path.visibility==='hidden')).toBe(true);
+  await page.clock.runFor(224);const first=await sample(page);
+  expect(first.paths[0].offset).toBeGreaterThan(.25);expect(first.paths[0].offset).toBeLessThan(.75);expect(first.paths[1].visibility).toBe('visible');expect(first.paths[1].offset).toBeGreaterThan(first.paths[0].offset);expect(first.paths.slice(2).every(path=>path.visibility==='hidden')).toBe(true);
+  await page.clock.runFor(240);const second=await sample(page);
+  expect(second.paths[0].dash).toBe('none');expect(second.paths[1].offset).toBeGreaterThan(0);expect(second.paths[1].offset).toBeLessThan(1);expect(second.paths[2].offset).toBeGreaterThan(second.paths[1].offset);expect(second.paths.slice(4).every(path=>path.visibility==='hidden')).toBe(true);
   // One slow foreground frame must still consume elapsed time and close the request.
   await page.clock.fastForward(4000);const complete=await sample(page);
   expect(complete.reveal.items[0].status).toBe('completed');expect(complete.reveal.open).toEqual([]);expect(complete.paths.every(path=>path.dash==='none'&&path.visibility==='visible')).toBe(true);

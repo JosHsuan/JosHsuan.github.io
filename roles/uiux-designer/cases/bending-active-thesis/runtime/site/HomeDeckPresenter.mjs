@@ -1,5 +1,7 @@
 import {createVelocitySkin,advanceVelocitySkin,sampleVelocitySkin} from '../motion/velocity-skin.mjs';
 import {getWindowMotionRecipe,sampleWindowOutline} from '../motion/window-motion-api.mjs';
+import {sampleGlassCarousel} from '../motion/glass-motion.mjs';
+import {createGlassFieldOptics} from '../presentation/GlassFieldOptics.mjs';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 /** Native scroll events choose the active card. Each instance receives its own
  * enter/leave event; the existing site clock only interpolates the shared pose.
@@ -11,6 +13,7 @@ export function createHomeDeckPresenter({root,window:win,publisher,listen}){
  const contact=root.querySelector('[data-portfolio-contact]');
  let top=0,height=1,viewport=1,previousY=win.scrollY,position=0,target=0,index=-1,snap=null,disposed=false,transitions=0;
  const field=createVelocitySkin(win.scrollY),recipe=getWindowMotionRecipe('ink'),sizes=[];
+ const optics=createGlassFieldOptics({document:root.ownerDocument,publisher,axis:'horizontal'}),optical=[];
  let paintDirty=true,lastPosition=NaN,lastStrength=NaN,lastSurge=NaN;
  const subscriptions=[];
  const emit=(card,type,detail)=>card.dispatchEvent(new win.CustomEvent(type,{bubbles:true,detail}));
@@ -63,6 +66,8 @@ export function createHomeDeckPresenter({root,window:win,publisher,listen}){
     const size={width:cards[i].offsetWidth||1,height:cards[i].offsetHeight||1,radius:Number.parseFloat(win.getComputedStyle?.(cards[i]).borderTopLeftRadius)||24};
     if(!sizes[i]||Object.keys(size).some(key=>sizes[i][key]!==size[key]))paintDirty=true;
     sizes[i]=size;
+    optical[i]=optics.measure(cards[i],size.width,size.height);
+    publisher.attribute(cards[i],'data-glass-motion','carousel');
    }
    // Counter text and canvas replacement also invalidate shared layout. They
    // must not turn an in-flight reveal into a seek when geometry is unchanged.
@@ -79,27 +84,38 @@ export function createHomeDeckPresenter({root,window:win,publisher,listen}){
    if(!paintDirty&&position===lastPosition&&field.strength===lastStrength&&field.surge===lastSurge)return false;
    paintDirty=false;lastPosition=position;lastStrength=field.strength;lastSurge=field.surge;
    for(let i=0;i<cards.length;i++){
-    const card=cards[i],d=i-position,spread=clamp(d,-3,3),distance=Math.abs(d);
+    const card=cards[i],d=i-position,distance=Math.abs(d);
     const size=sizes[i]??{width:1,height:1,radius:24},fluid=sampleVelocitySkin(field,size.width,size.height,size.radius,{horizontal:clamp(d*.4,-1,1)});
-    // A compact overlapping hand. Percentages follow each square's own size,
-    // keeping the same density across phone, desktop and zoomed layouts.
-    publisher.style(card,'--deck-x',spread*26+'%');
-    publisher.style(card,'--deck-y',distance*2.4+'%');
-    publisher.style(card,'--deck-z',-distance*64+'px');
-    publisher.style(card,'--deck-yaw',-spread*9+fluid.pose.ry+'deg');
-    publisher.style(card,'--deck-pitch',fluid.pose.rx+'deg');
+    const arc=sampleGlassCarousel(d,{width:size.width,strength:field.strength,surge:field.surge});
+    // An inward-facing ring: centre remains square, neighbours wrap around the
+    // viewer rather than fanning/rolling like a hand of paper cards.
+    publisher.style(card,'--deck-x',arc.x+'px');
+    publisher.style(card,'--deck-y',arc.y+'px');
+    publisher.style(card,'--deck-z',arc.z+'px');
+    publisher.style(card,'--deck-yaw',arc.yaw+'deg');
+    publisher.style(card,'--deck-pitch',arc.pitch+'deg');
     publisher.style(card,'--deck-shear',fluid.pose.skew+'deg');
-    publisher.style(card,'--deck-sx',String(fluid.pose.sx));publisher.style(card,'--deck-sy',String(fluid.pose.sy));
-    publisher.style(card,'--deck-flow',String(Math.abs(fluid.flow)));
+    publisher.style(card,'--deck-sx',String(arc.sx));publisher.style(card,'--deck-sy',String(arc.sy));
+    publisher.style(card,'--deck-flow',String(arc.edge*.6+Math.abs(arc.flow)*.4));
+    publisher.style(card,'--deck-edge',String(arc.edge));
     publisher.style(card,'--deck-rim',sampleWindowOutline(recipe,fluid.pose,size.width,size.height));
-    publisher.style(card,'--deck-roll',spread*4.5+'deg');
-    publisher.style(card,'--deck-scale',String(Math.max(.78,1-distance*.045)));
-    publisher.style(card,'opacity',String(clamp(1-(distance-1.4)/1.2,0,1)));
+    publisher.style(card,'--deck-roll',arc.roll+'deg');
+    publisher.style(card,'--deck-scale',String(arc.scale));
+    publisher.style(card,'opacity',String(arc.opacity));
     publisher.style(card,'z-index',String(20-Math.round(distance*3)));
+    optics.publish(optical[i],{width:size.width,height:size.height,scale:Math.min(36,size.width*.08)*arc.warp,enabled:arc.opacity>0&&i!==index});
    }
    return Math.abs(target-position)>.0001||!field.resting;
   },
-  inspect:()=>({top,height,viewport,position,target,index,count:cards.length,snap,transitions,field:{strength:field.strength,acceleration:field.acceleration,surge:field.surge,resting:field.resting},disposed}),
-  dispose(){disposed=true;for(const subscription of subscriptions)subscription.dispose();publisher.attribute(deck,'data-deck-ready',null);for(const card of cards){publisher.attribute(card,'inert',null);publisher.attribute(card,'aria-hidden',null);publisher.attribute(card,'data-deck-active',null);}},
+  inspect:()=>({design:'glass-carousel-v1',optics:optics.inspect(),top,height,viewport,position,target,index,count:cards.length,snap,transitions,field:{strength:field.strength,acceleration:field.acceleration,surge:field.surge,resting:field.resting},disposed}),
+  dispose(){
+   if(disposed)return;disposed=true;optics.dispose();for(const subscription of subscriptions)subscription.dispose();
+   publisher.attribute(deck,'data-deck-ready',null);
+   for(const card of cards){
+    for(const key of ['inert','aria-hidden','data-deck-active','data-glass-motion'])publisher.attribute(card,key,null);
+    for(const key of ['x','y','z','yaw','pitch','shear','sx','sy','flow','edge','rim','roll','scale'])publisher.style(card,'--deck-'+key,'');
+    publisher.style(card,'opacity','');publisher.style(card,'z-index','');
+   }
+  },
  };
 }

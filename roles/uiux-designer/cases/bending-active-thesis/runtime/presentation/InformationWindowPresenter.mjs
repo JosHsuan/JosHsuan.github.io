@@ -3,11 +3,13 @@ import {
   advanceWindowMotion, scrollingEffect, sampleScrollingPose, sampleWindowOutline,
 } from '../motion/window-motion-api.mjs';
 
-import {createVelocitySkin,advanceVelocitySkin,sampleVelocitySkin} from '../motion/velocity-skin.mjs';
+import {createVelocitySkin,advanceVelocitySkin} from '../motion/velocity-skin.mjs';
+import {sampleGlassFeed} from '../motion/glass-motion.mjs';
+import {createGlassFieldOptics} from './GlassFieldOptics.mjs';
 
 const MARKER='[data-information-window]';
 const POINTS=['tl','tr','br','bl','et','er','eb','el'];
-const VARIABLES=['background','border-width','border-color','radius','shadow','x','y','rz','rx','ry','skew','sx','sy','flow','perspective','skin-path'];
+const VARIABLES=['background','border-width','border-color','radius','shadow','x','y','rz','rx','ry','skew','sx','sy','flow','edge','perspective','skin-path'];
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const number=value=>Number.parseFloat(value)||0;
 const targetAt=(top,height,docY,viewport)=>clamp((docY+viewport/2-top-height/2)*2/(viewport+height),-1,1);
@@ -24,7 +26,7 @@ function material(style){
 }
 
 function presentationPose(item){
-  if(item.velocitySkin)return sampleVelocitySkin(item.velocitySkin,item.width,item.height,item.radius,{horizontal:item.horizontal,vertical:item.vertical});
+  if(item.velocitySkin)return sampleGlassFeed(item.velocitySkin,item.width,item.height,item.radius,{horizontal:item.horizontal,vertical:item.vertical,viewportHeight:item.viewportHeight,stream:item.stream,lane:item.lane,seconds:item.seconds??0,focused:item.focused});
   const pose=sampleScrollingPose(item.effect,item.state);
   pose.x=clamp(pose.x,-12,12);pose.y=clamp(pose.y,-12,12);pose.rz=clamp(pose.rz,-1.5,1.5);pose.radius=item.radius;
   // Preserve relative follower positions with one common geometric gain.
@@ -44,7 +46,8 @@ export function createInformationWindowPresenter({publisher,root=globalThis.docu
   const document=root.ownerDocument??root;
   const recipe=getWindowMotionRecipe('ink');
   const registry=new Map(),materials=new WeakMap(),nested=new Set();
-  let viewportHeight=1,disposed=false,ticks=0,moving=false,outlineSamples=0;
+  const optics=createGlassFieldOptics({document,publisher});
+  let viewportHeight=1,viewportWidth=1,activeSeconds=0,disposed=false,ticks=0,moving=false,outlineSamples=0;
   const velocityProfile=profile==='velocity-skin';
   function outline(item,pose){outlineSamples++;return sampleWindowOutline(recipe,pose,item.width,item.height);}
 
@@ -52,12 +55,16 @@ export function createInformationWindowPresenter({publisher,root=globalThis.docu
     publisher.attribute(element,'data-information-ready',null);
     publisher.attribute(element,'data-information-moving',null);
     publisher.attribute(element,'data-information-plane',null);
+    publisher.attribute(element,'data-glass-motion',null);
+    publisher.attribute(element,'data-glass-optics',null);
+    optics.release(registry.get(element)?.optics);
     for(const key of VARIABLES)publisher.style(element,'--information-'+key,'');
   }
 
   function measure({naturalY,viewportHeight:height,docY=0}){
     if(disposed)return;
     viewportHeight=Math.max(1,Number(height)||1);
+    viewportWidth=document.defaultView?.innerWidth||1;
     // Collect every layout/style read before publishing any mutation. Existing
     // material is cached because the activated parent intentionally paints clear.
     const rows=[],nextNested=new Set();
@@ -73,13 +80,13 @@ export function createInformationWindowPresenter({publisher,root=globalThis.docu
       const plane=velocityProfile&&!fixed;
       // Read the native centre, independently of last frame's perspective.
       let left=0;for(let node=element;node;node=node.offsetParent)left+=node.offsetLeft??0;
-      const viewportWidth=document.defaultView.innerWidth||width;
       const horizontal=clamp((left+width/2-viewportWidth/2)/(viewportWidth/2),-1,1);
       const top=fixed?0:naturalY(element);
       const chapter=fixed?element.closest('[data-model-study]')?.dataset.studyChapter:null;
       const surface=materials.get(element)??material(style);
       materials.set(element,surface);
-      rows.push({element,width,height:windowHeight,top,kind,fixed,plane,chapter,surface,horizontal,vertical:0,radius:number(style.borderTopLeftRadius)});
+      const stream=plane&&kind==='home-project-card'&&viewportWidth>900;
+      rows.push({element,width,height:windowHeight,left,top,kind,fixed,plane,chapter,surface,horizontal,vertical:0,stream,lane:Math.round(horizontal+1),radius:number(style.borderTopLeftRadius)});
     }
     const retained=new Set(rows.map(row=>row.element));
     for(const [element] of registry)if(!retained.has(element)){release(element);registry.delete(element);}
@@ -103,7 +110,8 @@ export function createInformationWindowPresenter({publisher,root=globalThis.docu
       }else{
         item.state.axis=[...effect.axis];item.state.path={key:effect.key,axis:item.state.axis};
       }
-      Object.assign(item,row,{effect});
+      Object.assign(item,row,{effect,viewportHeight});
+      item.optics=row.plane?optics.measure(row.element,row.width,row.height):null;
       publisher.style(row.element,'--information-background',row.surface.background);
       publisher.style(row.element,'--information-border-width',row.surface.borderWidth);
       publisher.style(row.element,'--information-border-color',row.surface.borderColor);
@@ -114,6 +122,7 @@ export function createInformationWindowPresenter({publisher,root=globalThis.docu
       publisher.style(row.element,'--information-skin-path',outline(item,presentationPose(item).pose));
       publisher.attribute(row.element,'data-information-ready','');
       publisher.attribute(row.element,'data-information-plane',row.plane?'':null);
+      publisher.attribute(row.element,'data-glass-motion',row.plane?(row.stream?'stream':'feed'):null);
       item.dirty=true;
     }
   }
@@ -125,6 +134,7 @@ export function createInformationWindowPresenter({publisher,root=globalThis.docu
     const elapsed=Number(dt)||0;
     const gap=elapsed>1;
     const seconds=gap?0:Math.max(0,elapsed);
+    if(!reduced&&!resumed&&!seek)activeSeconds+=Math.max(0,elapsed);
     for(const item of registry.values()){
       const {element,state}=item;
       const focused=activeElement&&(element===activeElement||element.contains(activeElement));
@@ -143,15 +153,17 @@ export function createInformationWindowPresenter({publisher,root=globalThis.docu
       // lifecycle resume/seek and offscreen/focus policies still resynchronize.
       if(item.velocitySkin)advanceVelocitySkin(item.velocitySkin,{docY,dt:Math.max(0,elapsed),viewportHeight,immediate});
       else advanceWindowMotion(state,seconds,{reduced:!!immediate});
-      item.active=active;item.visible=visible;item.vertical=clamp((item.top+item.height/2-docY-viewportHeight/2)/(viewportHeight/2),-1,1);
+      item.active=active;item.visible=visible;item.focused=focused||reduced||!visible;item.seconds=activeSeconds;
+      item.vertical=clamp((item.top+item.height/2-docY-viewportHeight/2)/(viewportHeight/2),-1.5,1.5);
       const resting=item.velocitySkin?item.velocitySkin.resting:state.resting;
-      const isMoving=visible&&!resting;
+      const streamMoving=item.stream&&visible&&!item.focused;
+      const isMoving=visible&&(!resting||streamMoving);
       // Ambient 3D may keep the Director ticking. A settled unchanged skin must
       // not regenerate Bezier strings on each of those frames. Measurement
       // invalidation marks it dirty; the first neutral frame is still published.
-      const neutral=item.pose.x===0&&item.pose.y===0&&item.pose.rz===0&&item.pose.edgeMaximum===0;
-      if(resting&&neutral&&!item.dirty&&item.publishedMoving===isMoving){moving ||= isMoving;continue;}
-      const {pose,edgeMaximum,perspective,flow=0}=presentationPose(item);
+      const streamStep=Math.floor(activeSeconds*24);
+      if(resting&&!item.dirty&&item.lastDocY===docY&&item.lastFocus===item.focused&&item.publishedMoving===isMoving&&(!streamMoving||streamStep===item.streamStep)){moving ||= isMoving;continue;}
+      const {pose,edgeMaximum,perspective,flow=0,edge=0,streamOffset=0}=presentationPose(item);
       publisher.style(element,'--information-x',pose.x.toFixed(3)+'px');
       publisher.style(element,'--information-y',pose.y.toFixed(3)+'px');
       publisher.style(element,'--information-rz',pose.rz.toFixed(3)+'deg');
@@ -160,19 +172,23 @@ export function createInformationWindowPresenter({publisher,root=globalThis.docu
         publisher.style(element,'--information-perspective',perspective.toFixed(1)+'px');
         publisher.style(element,'--information-sx',pose.sx.toFixed(4));publisher.style(element,'--information-sy',pose.sy.toFixed(4));
         publisher.style(element,'--information-flow',Math.abs(flow).toFixed(4));
+        publisher.style(element,'--information-edge',edge.toFixed(4));
+        const relativeTop=item.top-docY+streamOffset,relativeBottom=relativeTop+item.height;
+        const edgeVisible=relativeTop<viewportHeight*.25||relativeBottom>viewportHeight*.75;
+        optics.publish(item.optics,{x:-item.left,y:-relativeTop,width:viewportWidth,height:viewportHeight,scale:Math.min(48,viewportHeight*.052)*(1+Math.abs(flow)*.15),enabled:visible&&!item.focused&&edgeVisible});
       }
       publisher.style(element,'--information-skin-path',outline(item,pose));
       publisher.attribute(element,'data-information-moving',String(isMoving));item.publishedMoving=isMoving;
-      item.pose={x:pose.x,y:pose.y,rz:pose.rz,rx:pose.rx,ry:pose.ry,skew:pose.skew,edgeMaximum};item.dirty=false;
+      item.pose={x:pose.x,y:pose.y,rz:pose.rz,rx:pose.rx,ry:pose.ry,skew:pose.skew,edgeMaximum,edge,streamOffset};item.dirty=false;item.lastDocY=docY;item.lastFocus=item.focused;item.streamStep=streamStep;
       moving ||= isMoving;
     }
     return moving;
   }
 
   function inspect(){
-    return {recipe:recipe.key,profile,outlineSamples,count:registry.size,nested:nested.size,ticks,moving,settled:!moving,items:[...registry.values()].map(item=>({
+    return {recipe:recipe.key,profile,design:'glass-feed-stream-v1',optics:optics.inspect(),outlineSamples,count:registry.size,nested:nested.size,ticks,moving,settled:!moving,items:[...registry.values()].map(item=>({
       kind:item.kind,chapter:item.chapter,fixed:item.fixed,plane:!!item.velocitySkin,visible:item.visible,width:item.width,height:item.height,top:item.top,
-      progress:item.state.progress,target:item.state.target,velocity:item.state.velocity,resting:item.velocitySkin?item.velocitySkin.resting:item.state.resting,settled:item.velocitySkin?item.velocitySkin.resting:item.state.resting,skinStrength:item.velocitySkin?.strength??0,...item.pose,
+      motion:item.stream?'stream':'feed',lane:item.lane,progress:item.state.progress,target:item.state.target,velocity:item.state.velocity,resting:item.velocitySkin?item.velocitySkin.resting:item.state.resting,settled:item.velocitySkin?item.velocitySkin.resting:item.state.resting,skinStrength:item.velocitySkin?.strength??0,...item.pose,
     }))};
   }
 
@@ -181,7 +197,7 @@ export function createInformationWindowPresenter({publisher,root=globalThis.docu
     disposed=true;moving=false;
     for(const element of registry.keys())release(element);
     for(const element of nested)publisher.attribute(element,'data-information-nested',null);
-    registry.clear();nested.clear();
+    registry.clear();nested.clear();optics.dispose();
   }
 
   return {measure,publish,inspect,dispose};

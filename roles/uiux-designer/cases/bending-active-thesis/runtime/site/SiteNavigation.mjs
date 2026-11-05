@@ -145,7 +145,7 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
    effectsStarted=true;diagnostic('native-effects-begin',{},epoch);
    const preparations=[],completions=[];
    try{
-    for(const [target,keyframes] of [[element,[{opacity:1},{opacity:0}]],[content,[{transform:'translateY(0)'},{transform:'translateY(-12px)'}]]]){
+    for(const [target,keyframes] of [[element,[{opacity:1,clipPath:'inset(0% 0% round 0px)'},{opacity:.9,clipPath:'inset(18% 0% round 36px)',offset:.48},{opacity:0,clipPath:'inset(50% 0% round 52px)'}]],[content,[{transform:'translateY(0) scale(1)',filter:'blur(0px)'},{transform:'translateY(-18px) scale(1.035)',filter:'blur(3px)'}]]]){
      const animation=target.animate(keyframes,revealTiming);
      if(typeof animation?.cancel!=='function')throw Error('Native reveal cannot be released');
      revealAnimations.push(animation);diagnostic('animation-created',{index:revealAnimations.length},epoch);

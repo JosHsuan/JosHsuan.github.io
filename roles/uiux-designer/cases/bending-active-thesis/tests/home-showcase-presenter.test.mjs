@@ -21,7 +21,7 @@ test('a complete showcase loop uses authored elapsed time, varied lenses and at 
  assert.equal(f.presenter.inspect().index,0);assert.equal(maximum,1);assert.equal(live,1);
  assert.deepEqual(disposed,['unit','machine','structure']);assert(new Set(draws.map(row=>row.showcaseShot.focalLengthMm)).size>1);
  assert(draws.every(row=>Number.isFinite(row.activeSeconds)&&row.showcaseShot.fovDeg>5&&row.showcaseShot.fovDeg<120));
- f.presenter.dispose();assert.equal(live,0);
+ f.presenter.dispose();assert.equal(live,0);assert.equal(f.host.querySelector().style.transform,'');assert.equal(f.host.querySelector().style.opacity,'');
 });
 test('draw sampling stays bounded while hidden and offscreen time never advances the shot',async()=>{
  let draws=0;const f=setup(async()=>({resize(){},present(){draws++;},inspect:()=>({}),dispose(){}}));f.at(0);await flush();

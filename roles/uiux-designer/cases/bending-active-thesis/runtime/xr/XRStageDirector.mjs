@@ -1,4 +1,5 @@
 import {createScrollCameraPath,sampleScrollCamera,composeCameraIntent,sampleHandheldSurface} from '../motion/scroll-camera-score.mjs';
+import {glassPassageTransform} from '../motion/glass-motion.mjs';
 import {EventManager} from '../core/EventManager.ts';
 import {DOMPresenter} from '../presentation/DOMPresenter.ts';
 import {createInformationWindowPresenter} from '../presentation/InformationWindowPresenter.mjs';
@@ -146,7 +147,7 @@ export function createXRStageDirector({root,host,window:win,document:doc,acquire
     }
    }
    function publishScene(){
-    publisher.style(sceneSurface,'transform',`translate3d(${sceneMotion.pose.x*size.width}px,${sceneMotion.pose.y*size.height}px,0)`);
+    publisher.style(sceneSurface,'transform',glassPassageTransform(sceneMotion.pose.x*size.width,sceneMotion.pose.y*size.height,sceneMotion.pose.opacity));
     publisher.style(sceneSurface,'opacity',sceneMotion.pose.opacity);
     publisher.attribute(host,'data-xr-scene-mode',sceneMotion.mode);
     publisher.attribute(host,'data-xr-presented-chapter',sceneMotion.chapter);

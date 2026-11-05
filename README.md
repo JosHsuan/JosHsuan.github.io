@@ -13,6 +13,9 @@ The [project design direction](roles/uiux-designer/cases/bending-active-thesis/P
 records the Apple/Lusion references, square discovery cards, instance events,
 source-scale cinematography and photograph-informed material requirements.
 The [4 November release](roles/uiux-designer/cases/bending-active-thesis/CONTINUOUS_MOTION_RELEASE_20261104.md) passed all 630 public browser checks and 24 framework checks, then published the exact validated export.
+The next motion redesign is governed by [decision 0022](docs/decisions/0022-glass-motion-system.md)
+and the [Glass Feed / Carousel / Stream contract](roles/uiux-designer/cases/bending-active-thesis/GLASS_MOTION_REDESIGN.md).
+It is under qualification; the preceding release remains the publication baseline.
 Implemented source, local acceptance and a deployed release are separate facts;
 the public [`release.json`](https://joshsuan.github.io/release.json) identifies
 the deployed commit and source revisions.

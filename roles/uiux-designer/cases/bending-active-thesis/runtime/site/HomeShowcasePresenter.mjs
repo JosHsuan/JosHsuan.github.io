@@ -1,4 +1,5 @@
 import {createHomeShowcaseShotPlan} from './HomeShowcaseShots.mjs';
+import {glassPassageTransform} from '../motion/glass-motion.mjs';
 const smooth=v=>{const t=Math.max(0,Math.min(1,v));return t*t*(3-2*t);};
 /** A single sequential renderer, with at most one live context/source. The
  * current browser cache retains pinned transfer bytes; each acquisition checks
@@ -52,6 +53,8 @@ export function createHomeShowcasePresenter({root,host,models,publisher,schedule
    const duration=plan.duration,item=models[index];
    const opacity=smooth(time/1.2)*smooth((duration-time)/1.2);
    publisher.style(surface,'opacity',opacity.toFixed(4));
+   const direction=time<duration/2?1:-1;
+   publisher.style(surface,'transform',glassPassageTransform(0,direction*(1-opacity)*height*.045,opacity));
    // Cinematic light/lens motion is capped at 24 draws/s, on the site clock.
    // Native scrolling and glass keep their own smoother presentation cadence.
    if(elapsed-lastDraw>=1/24){
@@ -62,6 +65,6 @@ export function createHomeShowcasePresenter({root,host,models,publisher,schedule
    return true;
   },
   inspect:()=>({kind:'project-showcase',index,project:models[index]?.id,time,duration:plan?.duration,shot:plan?.sample({seconds:time,aspect:width/height}).shot,phase,failureReason,visible,canvasCount:resource?1:0,resource:resource?.inspect(),disposed}),
-  dispose(){if(disposed)return;disposed=true;generation++;controller?.abort();release();},
+  dispose(){if(disposed)return;disposed=true;generation++;controller?.abort();release();publisher.style(surface,'transform','');publisher.style(surface,'opacity','');},
  };
 }

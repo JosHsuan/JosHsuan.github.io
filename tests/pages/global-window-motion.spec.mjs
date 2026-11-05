@@ -36,7 +36,8 @@ async function neutral(page,selector=plane){
   const nodes=[...document.querySelectorAll(selector)];
   return nodes.length>0&&nodes.every(node=>{
    const transform=getComputedStyle(node).transform;
-   return node.dataset.informationMoving==='false'&&new DOMMatrix(transform==='none'?undefined:transform).isIdentity&&['rx','ry','rz','skew'].every(key=>parseFloat(node.style.getPropertyValue('--information-'+key))===0);
+   const matrix=new DOMMatrix(transform==='none'?undefined:transform),value=key=>parseFloat(node.style.getPropertyValue('--information-'+key));
+   return (node.dataset.informationMoving==='false'||node.dataset.glassMotion==='stream')&&Array.from(matrix.toFloat64Array()).every(Number.isFinite)&&value('flow')===0&&value('skew')===0&&Math.abs(value('rx'))<=19.001;
   });
  },selector,{timeout:WAIT});
 }
@@ -195,7 +196,9 @@ for(const [key,route] of routes)(recorded.has(key)?filmed:test)(`${key}: native 
     // only the first 32 would discard the very position the assertion owns.
     if((state.counts[state.phase]??0)>=32){const oldest=state.samples.findIndex(sample=>sample.phase===state.phase);if(oldest>=0)state.samples.splice(oldest,1);}
     else state.counts[state.phase]=(state.counts[state.phase]??0)+1;
-    state.samples.push({phase:state.phase,y:scrollY,rx,ry,rz:parseFloat(node.style.getPropertyValue('--information-rz'))||0,skew:parseFloat(node.style.getPropertyValue('--information-skew'))||0,matrix:Array.from(matrix.toFloat64Array()),identity:matrix.isIdentity,depth:Math.abs(matrix.m13)+Math.abs(matrix.m23),visible:box.bottom>0&&box.top<innerHeight,opacity:css.opacity,clip:css.clipPath});
+    const windows=window.__story?.inspect().informationWindows??document.querySelector('[data-xr-stage]')?.__xrStage?.inspect().informationWindows??window.__globalBackground?.inspect().driver?.homeScrolling?.informationWindows;
+    const strength=windows?.items.find(item=>item.kind===node.dataset.informationWindow&&Math.abs(item.top-top)<1)?.skinStrength??0;
+    state.samples.push({phase:state.phase,y:scrollY,rx,ry,strength,rz:parseFloat(node.style.getPropertyValue('--information-rz'))||0,skew:parseFloat(node.style.getPropertyValue('--information-skew'))||0,matrix:Array.from(matrix.toFloat64Array()),identity:matrix.isIdentity,depth:Math.abs(matrix.m13)+Math.abs(matrix.m23),visible:box.bottom>0&&box.top<innerHeight,opacity:css.opacity,clip:css.clipPath});
    });
    observer.observe(node,{attributes:true,attributeFilter:['style','data-information-moving']});
    return{state,dispose(){observer.disconnect();if(observeNativeScroll)removeEventListener('scroll',scroll);}};
@@ -213,15 +216,15 @@ for(const [key,route] of routes)(recorded.has(key)?filmed:test)(`${key}: native 
    // 11px, with the spring already rebounding at the final pixel. Exclude the
    // starting position and any sample outside this excursion so a positioning
    // tail cannot satisfy the next gesture's direction requirement.
-   await expect.poll(()=>observation.evaluate((value,{phase,from,to})=>value.state.samples.some(s=>s.phase===phase&&(s.y-from)*Math.sign(to-from)>0&&(to-s.y)*Math.sign(to-from)>=0&&s.visible&&s.depth>1e-8&&s.rx*Math.sign(to-from)<0),{phase,from,to}),{timeout:WAIT}).toBe(true);
+   await expect.poll(()=>observation.evaluate((value,{phase,from,to})=>value.state.samples.some(s=>s.phase===phase&&(s.y-from)*Math.sign(to-from)>0&&(to-s.y)*Math.sign(to-from)>=0&&s.visible&&s.depth>1e-8&&s.strength*Math.sign(to-from)>0),{phase,from,to}),{timeout:WAIT}).toBe(true);
    await neutral(page);
   };
   await travel('forward',chosen.start,chosen.start+chosen.step);
   await travel('reverse',chosen.start+chosen.step,chosen.start);
   const motion=await observation.evaluate(value=>value.state.samples);
-  expect(motion.some(s=>s.phase==='forward'&&s.rx<0)).toBe(true);
-  expect(motion.some(s=>s.phase==='reverse'&&s.rx>0)).toBe(true);
-  for(const sample of motion){expect(sample.matrix.every(Number.isFinite)).toBe(true);expect(Math.abs(sample.rx)).toBeLessThanOrEqual(11);expect(Math.abs(sample.ry)).toBeLessThanOrEqual(12);expect(Math.abs(sample.rz)).toBeLessThanOrEqual(2.2);expect(Math.abs(sample.skew)).toBeLessThanOrEqual(2.8);expect(sample.opacity).toBe('1');expect(sample.clip).toBe('none');}
+  expect(motion.some(s=>s.phase==='forward'&&s.strength>0)).toBe(true);
+  expect(motion.some(s=>s.phase==='reverse'&&s.strength<0)).toBe(true);
+  for(const sample of motion){expect(sample.matrix.every(Number.isFinite)).toBe(true);expect(Math.abs(sample.rx)).toBeLessThanOrEqual(22.201);expect(Math.abs(sample.ry)).toBeLessThanOrEqual(7.001);expect(Math.abs(sample.rz)).toBeLessThanOrEqual(.651);expect(Math.abs(sample.skew)).toBeLessThanOrEqual(1.301);expect(sample.opacity).toBe('1');expect(sample.clip).toBe('none');}
   if(chosen.linked){
   const focus=await panelNode.evaluate(node=>{
    if(!node.isConnected)throw Error('Reading focus lost its native plane');

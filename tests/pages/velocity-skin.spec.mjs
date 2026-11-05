@@ -30,7 +30,8 @@ test('Shared velocity field responds to native scroll with whole-panel motion an
   expect(await observation.evaluate(value=>value.samples.every(s=>s.clip==='none'&&s.opacity==='1'))).toBe(true);
   await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.informationWindows.settled)).toBe(true);
   await expect(panel).toHaveAttribute('data-information-moving','false');
-  expect(await panel.evaluate(node=>new DOMMatrix(getComputedStyle(node).transform==='none'?undefined:getComputedStyle(node).transform).isIdentity)).toBe(true);
+  expect(await panel.evaluate(node=>parseFloat(node.style.getPropertyValue('--information-flow')))).toBe(0);
+  expect(await panel.evaluate(node=>Math.abs(parseFloat(node.style.getPropertyValue('--information-rx'))))).toBeLessThanOrEqual(19.001);
   await page.mouse.wheel(0,-100);
   await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.informationWindows.settled)).toBe(true);
   await page.emulateMedia({reducedMotion:'reduce'});
@@ -66,7 +67,7 @@ test('the shared field bends opposite desktop peripheries and stretches during a
    return left&&right&&left.ry*right.ry<0&&left.rx*right.rx>0;
   })),{timeout:WAIT}).toBe(true);
   expect(await observation.evaluate(o=>o.samples.flat().every(r=>r.clip==='none'&&r.opacity==='1'))).toBe(true);
-  await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.informationWindows.settled),{timeout:WAIT}).toBe(true);
+  await expect.poll(()=>page.evaluate(()=>window.__globalBackground.inspect().driver.homeScrolling.informationWindows.items.every(item=>item.skinStrength===0)),{timeout:WAIT}).toBe(true);
  }catch(error){primaryError=error;throw error;}finally{
   try{
    const samples=await observation.evaluate(o=>o.samples),path=info.outputPath('peripheral-field.json');

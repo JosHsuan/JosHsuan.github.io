@@ -1,15 +1,15 @@
 // One-shot foreground choreography. Caller supplies elapsed active time from a
 // once-per-reveal timestamp; looping chapter phase must not restart body text.
 const PROFILES = Object.freeze({
-  heading: {duration: 1.25, stagger: .075, turn: .16, pop: .55, rest: .79, anticipation: 1.16, overshoot: -.14, echo: .025, x: -18, y: 38, z: -64, rx: -14, ry: 5, rz: -.8, scale: -.045, shadow: 16},
-  glyph: {duration: 1.42, stagger: .055, turn: .2, pop: .52, rest: .78, anticipation: 1.2, overshoot: -.21, echo: .055, x: 22, y: 12, z: -48, rx: 10, ry: -16, rz: 18, scale: -.14, shadow: 12},
-  prose: {duration: .98, stagger: .065, turn: .14, pop: .65, rest: .84, anticipation: 1.06, overshoot: -.055, echo: .006, x: 0, y: 7, z: -10, rx: 1.1, ry: -.4, rz: 0, scale: 0, shadow: 0},
-  diagram: {duration: 1.45, stagger: .095, turn: .18, pop: .58, rest: .81, anticipation: 1.15, overshoot: -.12, echo: .035, x: 24, y: 8, z: -72, rx: 3, ry: -15, rz: 0, scale: -.06, shadow: 22},
-  photo: {duration: 1.5, stagger: .08, turn: .18, pop: .62, rest: .84, anticipation: 1.1, overshoot: -.12, echo: .02, x: 0, y: 38, z: -92, rx: 11, ry: -6, rz: -1.2, scale: -.06, shadow: 26},
-  caption: {duration: .9, stagger: .07, turn: .12, pop: .6, rest: .83, anticipation: 1.08, overshoot: -.075, echo: .008, x: -16, y: 7, z: -20, rx: 3, ry: 0, rz: 0, scale: 0, shadow: 4},
-  metric: {duration: 1.1, stagger: .1, turn: .15, pop: .48, rest: .75, anticipation: 1.18, overshoot: -.18, echo: .04, x: 0, y: 22, z: -36, rx: -7, ry: 0, rz: 0, scale: -.08, shadow: 10},
-  credit: {duration: 1.12, stagger: .065, turn: .12, pop: .68, rest: .87, anticipation: 1.04, overshoot: -.04, echo: .005, x: 6, y: 11, z: -22, rx: 3, ry: 2, rz: 0, scale: -.01, shadow: 4},
-  nav: {duration: .58, stagger: .035, turn: .15, pop: .53, rest: .78, anticipation: 1.1, overshoot: -.13, echo: .02, x: -10, y: 0, z: -12, rx: 0, ry: -5, rz: 0, scale: -.025, shadow: 5},
+  heading: {duration: 1.05, stagger: .065, turn: .08, pop: .68, rest: .9, anticipation: 1.02, overshoot: -.025, echo: .002, x: 0, y: 26, z: -44, rx: -6, ry: 0, rz: 0, scale: -.025, shadow: 12},
+  glyph: {duration: 1.1, stagger: .055, turn: .08, pop: .65, rest: .9, anticipation: 1.025, overshoot: -.04, echo: .004, x: 9, y: 18, z: -40, rx: -5, ry: -5, rz: 2, scale: -.07, shadow: 9},
+  prose: {duration: .82, stagger: .045, turn: .06, pop: .72, rest: .92, anticipation: 1, overshoot: -.008, echo: 0, x: 0, y: 6, z: -8, rx: -.6, ry: 0, rz: 0, scale: 0, shadow: 0},
+  diagram: {duration: 1.18, stagger: .07, turn: .08, pop: .68, rest: .9, anticipation: 1.02, overshoot: -.025, echo: .003, x: 12, y: 24, z: -68, rx: -7, ry: -4, rz: 0, scale: -.035, shadow: 16},
+  photo: {duration: 1.2, stagger: .065, turn: .08, pop: .7, rest: .91, anticipation: 1.015, overshoot: -.025, echo: .002, x: 0, y: 30, z: -72, rx: -8, ry: 0, rz: 0, scale: -.04, shadow: 18},
+  caption: {duration: .78, stagger: .045, turn: .06, pop: .74, rest: .92, anticipation: 1, overshoot: -.008, echo: 0, x: 0, y: 9, z: -14, rx: -2, ry: 0, rz: 0, scale: 0, shadow: 2},
+  metric: {duration: .94, stagger: .08, turn: .07, pop: .65, rest: .9, anticipation: 1.02, overshoot: -.03, echo: .002, x: 0, y: 20, z: -40, rx: -5, ry: 0, rz: 0, scale: -.04, shadow: 8},
+  credit: {duration: .9, stagger: .045, turn: .06, pop: .76, rest: .93, anticipation: 1, overshoot: -.006, echo: 0, x: 0, y: 10, z: -16, rx: -2, ry: 0, rz: 0, scale: -.005, shadow: 2},
+  nav: {duration: .48, stagger: .025, turn: .06, pop: .7, rest: .91, anticipation: 1, overshoot: -.012, echo: 0, x: 0, y: 6, z: -10, rx: -2, ry: 0, rz: 0, scale: -.012, shadow: 3},
 });
 const ALIASES = Object.freeze({headingLine: 'heading', body: 'prose', method: 'diagram', media: 'photo', image: 'photo', credits: 'credit', navigation: 'nav'});
 export const CHOREOGRAPHY_KINDS = Object.freeze(Object.keys(PROFILES));

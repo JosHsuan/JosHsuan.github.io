@@ -5,7 +5,7 @@ import {sampleElementChoreography, CHOREOGRAPHY_KINDS} from '../components/eleme
 const transform = score => ['x', 'y', 'z', 'rotateX', 'rotateY', 'rotateZ', 'scale', 'shadowDepth'].map(key => score[key]);
 const identity = [0, 0, 0, 0, 0, 0, 1, 0];
 
-test('all nine content families anticipate, cross their resting plane and settle exactly without hiding content', () => {
+test('all nine content families have bounded liquid recovery and settle exactly without hiding content', () => {
   const signatures = new Set();
   for (const kind of CHOREOGRAPHY_KINDS) {
     const start = sampleElementChoreography({kind});
@@ -18,8 +18,8 @@ test('all nine content families anticipate, cross their resting plane and settle
       assert(score.scale > .8 && score.scale < 1.06);
       assert(transform(score).every(Number.isFinite));
     }
-    assert(Math.max(...values) > 1.02, `${kind} has a real anticipation, not just an ease-out`);
-    assert(Math.min(...values) < -.025, `${kind} crosses its resting plane before settling`);
+    assert(Math.max(...values) >= 1 && Math.max(...values) <= 1.03, `${kind} never recoils beyond the glass shoulder`);
+    assert(Math.min(...values) < 0 && Math.min(...values) >= -.041, `${kind} has a restrained liquid recovery`);
     const final = sampleElementChoreography({kind, elapsed: 10});
     assert.deepEqual(transform(final), identity);
     assert.equal(final.settled, true);
@@ -59,7 +59,7 @@ test('prose stays within a small legible plane while evidence and heading choreo
     headingDepth = Math.max(headingDepth, Math.abs(sampleElementChoreography({kind: 'heading', elapsed: t}).z));
   }
   assert(proseTravel <= 8 && proseRotation <= 1.2);
-  assert(photoDepth > 100 && headingDepth > 70, 'substantial shadowbox arrival is not a tiny hover effect');
+  assert(photoDepth >= 70 && photoDepth < 80 && headingDepth >= 40 && headingDepth < 50, 'evidence and headings enter from distinct bounded glass depths');
 });
 
 test('diagram and glyph branches separate in alternating directions, then rejoin; rule reveal is monotone', () => {

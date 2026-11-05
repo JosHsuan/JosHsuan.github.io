@@ -1,5 +1,6 @@
 import {EventManager} from '../core/EventManager.ts';
 import {createProjectStudyBackdropMotion,advanceProjectStudyBackdropMotion,cancelProjectStudyBackdropMotion,failProjectStudyBackdropMotion} from './ProjectStudyBackdropMotion.mjs';
+import {glassPassageTransform} from '../motion/glass-motion.mjs';
 
 const ARRIVAL_MS=15000;
 const STALL_MS=8000;
@@ -316,7 +317,7 @@ export function createProjectStudyBackdropPresenter({root,window:win,document:do
   return{ready:record.posterReady||record.posterFailed,failure:record.failed?record.reason:record.posterFailed?record.posterReason:''};
  };
  const render=()=>{
-  const displayed=descriptors.get(motion.key),displayedRecord=displayed?.record??displayed,visible=motion.pose.opacity>0,transform=`translate3d(${motion.pose.x*size.width}px,${motion.pose.y*size.height}px,0)`;
+  const displayed=descriptors.get(motion.key),displayedRecord=displayed?.record??displayed,visible=motion.pose.opacity>0,transform=glassPassageTransform(motion.pose.x*size.width,motion.pose.y*size.height,motion.pose.opacity);
   const requested=descriptors.get(motion.request?.key),requestedRecord=requested?.record??requested;
   for(const record of records){
    if(record!==requestedRecord||settings().hidden)closePosterTimer(record);

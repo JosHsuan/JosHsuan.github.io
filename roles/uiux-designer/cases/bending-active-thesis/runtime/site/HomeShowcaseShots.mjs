@@ -1,6 +1,18 @@
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
-const mix=(a,b,t)=>a+(b-a)*t;
-const ease=t=>t*t*t*(10+t*(-15+6*t));
+// Monotone Hermite interpolation carries momentum through interior shots.
+// Harmonic tangents cannot overshoot authored coordinates, lens or light values.
+function passage(keys,index,time,value){
+ const a=keys[index],b=keys[index+1];if(!b)return value(a);
+ const span=b.at-a.at,t=clamp((time-a.at)/span,0,1),v0=value(a),v1=value(b);
+ const tangent=i=>{
+  if(i===0||i===keys.length-1)return 0;
+  const h0=keys[i].at-keys[i-1].at,h1=keys[i+1].at-keys[i].at;
+  const d0=(value(keys[i])-value(keys[i-1]))/h0,d1=(value(keys[i+1])-value(keys[i]))/h1;
+  if(d0*d1<=0)return 0;
+  const w0=2*h1+h0,w1=h1+2*h0;return(w0+w1)/(w0/d0+w1/d1);
+ };
+ return(2*t**3-3*t*t+1)*v0+(t**3-2*t*t+t)*span*tangent(index)+(-2*t**3+3*t*t)*v1+(t**3-t*t)*span*tangent(index+1);
+}
 const neutralLight={keyScale:1,rimScale:1,environmentScale:1,sweepRad:0};
 const key=(at,shot,eye,target,focalLengthMm,coverage='partial',lighting={})=>({at,shot,eye,target,focalLengthMm,coverage,lighting:{...neutralLight,...lighting}});
 
@@ -78,12 +90,11 @@ export function createHomeShowcaseShotPlan({id,model}={}){
   sample({seconds=0,aspect=1}={}){
    if(!Number.isFinite(seconds)||!Number.isFinite(aspect)||aspect<=0)throw RangeError('Finite Home shot time and positive aspect required');
    const time=clamp(seconds,0,duration),index=Math.max(0,keys.findIndex((key,i)=>i<keys.length-1&&time>=key.at&&time<keys[i+1].at));
-   const first=time===duration?keys.at(-1):keys[index],last=time===duration?first:keys[index+1];
-   const t=first===last?0:ease((time-first.at)/(last.at-first.at));
-   const position=first.eye.map((value,i)=>mix(value,last.eye[i],t)),target=first.target.map((value,i)=>mix(value,last.target[i],t));
-   const focalLengthMm=mix(first.focalLengthMm,last.focalLengthMm,t),filmGaugeMm=36;
+   const first=time===duration?keys.at(-1):keys[index],sample=value=>passage(keys,time===duration?keys.length-1:index,time,value);
+   const position=first.eye.map((_,i)=>sample(key=>key.eye[i])),target=first.target.map((_,i)=>sample(key=>key.target[i]));
+   const focalLengthMm=sample(key=>key.focalLengthMm),filmGaugeMm=36;
    const fovDeg=2*Math.atan(filmGaugeMm/Math.max(1,aspect)/(2*focalLengthMm))*180/Math.PI;
-   const lighting=Object.fromEntries(Object.keys(neutralLight).map(key=>[key,mix(first.lighting[key],last.lighting[key],t)]));
+   const lighting=Object.fromEntries(Object.keys(neutralLight).map(key=>[key,sample(frame=>frame.lighting[key])]));
    const near=Math.max(.0001,Math.max(...span)*.002),far=Math.hypot(...position.map((value,i)=>value-center[i]))+diagonal*1.5;
    return {planId:planID,shot:first.shot,coverage:first.coverage,time,duration,position,target,focalLengthMm,filmGaugeMm,fovDeg,near,far,
     frame:aspect<.8?{x:.57,y:.30}:{x:.69,y:.49},lighting};
