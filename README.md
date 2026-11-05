@@ -7,15 +7,17 @@ and continuous 3D/media presentation with readable native fallbacks. The public 
 This repository contains **two independent applications**. The selected public
 application lives in the Bending-Active case workspace; the reusable `src/`
 framework intentionally contains no personal projects or registered scenes.
-The latest refinement is governed by [decision 0021](docs/decisions/0021-continuous-motion-portfolio.md)
+The continuous-motion foundation is governed by [decision 0021](docs/decisions/0021-continuous-motion-portfolio.md)
 and its [integration and acceptance record](roles/uiux-designer/cases/bending-active-thesis/CONTINUOUS_MOTION_INTEGRATION.md).
 The [project design direction](roles/uiux-designer/cases/bending-active-thesis/PORTFOLIO_DESIGN_DIRECTION.md)
 records the Apple/Lusion references, square discovery cards, instance events,
 source-scale cinematography and photograph-informed material requirements.
 The [4 November release](roles/uiux-designer/cases/bending-active-thesis/CONTINUOUS_MOTION_RELEASE_20261104.md) passed all 630 public browser checks and 24 framework checks, then published the exact validated export.
-The next motion redesign is governed by [decision 0022](docs/decisions/0022-glass-motion-system.md)
+The current motion redesign is governed by [decision 0022](docs/decisions/0022-glass-motion-system.md)
 and the [Glass Feed / Carousel / Stream contract](roles/uiux-designer/cases/bending-active-thesis/GLASS_MOTION_REDESIGN.md).
-It is under qualification; the preceding release remains the publication baseline.
+The [5 November release](roles/uiux-designer/cases/bending-active-thesis/GLASS_MOTION_RELEASE_20261105.md)
+passed all 645 public browser checks and 24 framework checks, published the same
+validated export, and reconciled all 268 public files before live desktop/mobile review.
 Implemented source, local acceptance and a deployed release are separate facts;
 the public [`release.json`](https://joshsuan.github.io/release.json) identifies
 the deployed commit and source revisions.

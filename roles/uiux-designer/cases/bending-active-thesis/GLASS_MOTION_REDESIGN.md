@@ -1,7 +1,9 @@
 # Glass motion redesign
 
 Owner direction: 5 November 2026. Baseline source: `efa376d`; preceding published
-application: `0422797`. Implementation is under qualification; publication remains pending.
+application: `0422797`. The redesign is now published as application `1e7a19b`;
+see the [5 November release and acceptance record](GLASS_MOTION_RELEASE_20261105.md).
+The qualification entries below retain their historical status and limits.
 
 ## Reference evidence and interpretation
 
@@ -258,3 +260,11 @@ The diagnostic XR journey passed twice in each of the three local browser
 profiles (six independent cases, including native reload). These diagnostic
 repetitions are not release retries or proof of the Linux failure's cause.
 All other twelve browser shards in the rejected CI completed successfully.
+
+Qualification closed with full CI 42037647616: all 645 identities passed exactly
+once across 13 shards, without retries or skips. Deployment 42042697431 used the
+same export; independent reconciliation matched all 268 public files. Actual
+public desktop/mobile review confirmed compact square discovery, reverse input,
+the native Mode/s route and source-specific machine materials without console
+errors. The release record retains the unclassified earlier completion delay
+and explicit rendering/environment limits rather than claiming an unsupported fix.

@@ -126,3 +126,8 @@ short landscape and 200% zoom. Review real model/material frames on desktop and
 phone, including architectural crops, lens changes, shadows, decode readiness
 and loop joins. Check shader compilation and disposal as well as appearance.
 The [4 November release](CONTINUOUS_MOTION_RELEASE_20261104.md) completes this acceptance with 630/630 exact-once browser checks and same-artifact public verification. The explicit visual tradeoffs above remain part of the delivered design.
+The subsequent [5 November Glass motion release](GLASS_MOTION_RELEASE_20261105.md)
+extends that acceptance to the redesigned Feed, Carousel, Stream, source passages
+and entry/control motion, with 645/645 exact-once browser checks and independent
+verification of the published export. The square-card, architectural-scale,
+material-identity and original-source requirements remain in force.

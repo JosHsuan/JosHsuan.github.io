@@ -1,6 +1,10 @@
 # 0022 — Glass Feed, Carousel and Stream motion system
 
-Date: 5 November 2026. Status: authorized implementation; qualification pending.
+Date: 5 November 2026. Status: implemented, fully validated and published.
+
+The [release evidence](../../roles/uiux-designer/cases/bending-active-thesis/GLASS_MOTION_RELEASE_20261105.md)
+records 645 exact-once browser checks, same-artifact publication and independent
+public-byte and desktop/mobile acceptance for application commit `1e7a19b`.
 
 The owner requests a major redesign of **all motion** in the selected public
 website, using the Glass Feed, Glass Carousel and Glass Stream examples at
