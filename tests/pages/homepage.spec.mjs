@@ -11,6 +11,11 @@ async function entered(page,{failed=false}={}){
  await page.waitForFunction(()=>['entered','failed'].includes(window.__site?.inspect().phase),null,{timeout:WAIT});
  await expect(loader(page)).toBeHidden();
  const state=await page.evaluate(()=>window.__site.inspect());
+ if(state.startupDiagnostics){
+  const native=await page.evaluate(()=>window.__xrEntryAnimationReceipts??null);
+  const path=test.info().outputPath(`entry-${state.id}.json`);await writeFile(path,JSON.stringify({state,native},null,2));
+  await test.info().attach('native-entry-lifecycle',{path,contentType:'application/json'});
+ }
  expect(state.phase).toBe(failed?'failed':'entered');
  const terminals=state.history.filter(fact=>fact.id===state.id&&['entered','failed','cancelled'].includes(fact.phase));
  expect(terminals).toHaveLength(1);
@@ -180,6 +185,26 @@ test('real unavailable webfonts settle to one explicit failure and readable syst
 });
 
 test('XR detail preserves real evidence, shared authorship and a native related-project route',async({page})=>{
+ // Retain original native animation identities/promises and observe only their
+ // timing. A rejected CI entry reached readiness but timed out during reveal;
+ // this receipt distinguishes pending play from delayed actual completion.
+ await page.addInitScript(()=>{
+  window.__SITE_NAVIGATION_DIAGNOSTICS__=true;
+  const receipts=[];window.__xrEntryAnimationReceipts=receipts;
+  const animate=Element.prototype.animate;
+  Element.prototype.animate=function(...args){
+   const animation=Reflect.apply(animate,this,args);
+   try{
+    if(this.matches('[data-site-loader],[data-site-loader-content]')){
+     const record={target:this.hasAttribute('data-site-loader')?'cover':'content',events:[]};
+     receipts.push(record);if(receipts.length>16)receipts.shift();
+     const observe=phase=>{try{record.events.push({phase,at:performance.now(),currentTime:animation.currentTime,startTime:animation.startTime,timelineTime:animation.timeline?.currentTime,playState:animation.playState,pending:animation.pending,endTime:animation.effect?.getComputedTiming().endTime});}catch{/* Observation cannot alter the native animation. */}};
+     observe('created');animation.ready.then(()=>observe('ready'),()=>observe('ready-rejected'));animation.finished.then(()=>observe('finished'),()=>observe('finished-rejected'));
+    }
+   }catch{/* Unsupported observation retains the original native result. */}
+   return animation;
+  };
+ });
  const requests=[],errors=[];page.on('request',request=>{if(/\.(glb|hdr)(?:\?|$)/.test(request.url()))requests.push(request.url());});page.on('pageerror',error=>errors.push(error.message));
  await page.goto('/projects/xr-bending-active/');await entered(page);
  const viewport=page.viewportSize(),xrViewport=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth,inner:innerWidth,visual:visualViewport?.width}));

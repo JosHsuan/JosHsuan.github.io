@@ -241,3 +241,20 @@ All nine focused browser scenarios (Entrance input, Home font hierarchy and
 native Home capture in all three profiles) passed after these corrections;
 lint and diff validation also passed. The complete inventory is now 645 tests,
 215 per profile, pending the next immutable full CI run.
+
+Candidate `b5abe0a` (CI 42032889105) is also ineligible. Its WebKit 1/3 shard
+passed 80 checks but one XR detail arrival reached `ready` and `revealing`, then
+closed as `failed: reveal-timeout`. The retained trace reports successful
+document/preview readiness with no pending or failed sources. It does not
+establish why the native reveal completion missed the existing 1600ms bound.
+The XR scenario now retains the existing opt-in startup diagnostics plus the
+actual native cover/content animation identities' creation, ready and finished
+times. Observation returns the same animations and promises; it does not retry,
+seek, pause, accelerate or extend them. Production code and all success criteria
+remain unchanged. This is diagnostic coverage, not a claimed fix for an
+unclassified native completion delay; publication still requires a new complete
+successful exact-commit run and independent live verification.
+The diagnostic XR journey passed twice in each of the three local browser
+profiles (six independent cases, including native reload). These diagnostic
+repetitions are not release retries or proof of the Linux failure's cause.
+All other twelve browser shards in the rejected CI completed successfully.
