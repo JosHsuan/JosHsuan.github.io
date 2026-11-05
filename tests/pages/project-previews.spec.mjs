@@ -61,7 +61,11 @@ test('square project cards retain the live model and inset XR image and reveal t
  await openGrid(page);
  const cards=page.locator('[data-project-tile]');await expect(cards).toHaveCount(studies.length+2);
  for(const card of await cards.all()){
-  const geometry=await card.evaluate(node=>{const rect=node.getBoundingClientRect(),image=node.querySelector('[data-project-card-image]'),media=(image?image.parentElement:node.querySelector('[data-project-model-preview]')).getBoundingClientRect(),css=getComputedStyle(node);return{xr:node.dataset.projectTile==='xr-bending-active',width:rect.width,height:rect.height,mediaWidth:media.width,mediaHeight:media.height,rim:[media.left-rect.left-parseFloat(css.borderLeftWidth),media.top-rect.top-parseFloat(css.borderTopWidth),rect.right-media.right-parseFloat(css.borderRightWidth),rect.bottom-media.bottom-parseFloat(css.borderBottomWidth)],radius:parseFloat(css.borderRadius)};});
+  const geometry=await card.evaluate(node=>{
+   // Measure the native square and source inset independently of its live arc.
+   const box=element=>{let left=0,top=0;for(let n=element;n;n=n.offsetParent){left+=n.offsetLeft;top+=n.offsetTop;}return{left,top,width:element.offsetWidth,height:element.offsetHeight,right:left+element.offsetWidth,bottom:top+element.offsetHeight};};
+   const rect=box(node),image=node.querySelector('[data-project-card-image]'),mediaNode=image?image.parentElement:node.querySelector('[data-project-model-preview]'),media=box(mediaNode),css=getComputedStyle(node);return{xr:node.dataset.projectTile==='xr-bending-active',width:rect.width,height:rect.height,mediaWidth:media.width,mediaHeight:media.height,rim:[mediaNode.offsetLeft,mediaNode.offsetTop,node.clientWidth-mediaNode.offsetLeft-mediaNode.offsetWidth,node.clientHeight-mediaNode.offsetTop-mediaNode.offsetHeight],radius:parseFloat(css.borderRadius)};
+  });
   expect(Math.abs(geometry.width-geometry.height)).toBeLessThan(1);expect(geometry.radius).toBeGreaterThan(0);
   if(geometry.xr){for(const inset of geometry.rim){expect(inset).toBeGreaterThanOrEqual(7.9);expect(inset).toBeLessThanOrEqual(12.1);}}
   else{expect(geometry.mediaWidth/geometry.width).toBeGreaterThan(.97);expect(geometry.mediaHeight/geometry.height).toBeGreaterThan(.97);}
@@ -70,7 +74,7 @@ test('square project cards retain the live model and inset XR image and reveal t
  await expect(link).toHaveAccessibleName('Bending-Active Metal Panel Deformation');
  if(!isMobile){
   await page.mouse.move(0,0);await expect(title).toHaveCSS('opacity','0');
-  await link.hover();await expect(title).toHaveCSS('opacity','1');
+  const target=await link.boundingBox();await page.mouse.move(target.x+target.width/2,target.y+target.height/2);await expect(title).toHaveCSS('opacity','1');
   await page.mouse.move(0,0);await expect(title).toHaveCSS('opacity','0');
  }
  await link.focus();await expect(title).toHaveCSS('opacity','1');
@@ -121,7 +125,7 @@ test('the real model paints behind loading before its project card is released, 
   expect(painted[0].loader.hidden).toBe(false);expect(painted[0].loader.display).not.toBe('none');expect(painted[0].loader.visibility).toBe('visible');expect(painted[0].loader.opacity).toBeGreaterThan(0);
   expect(painted[0].model.resource.firstDraw.completed).toBe(true);expect(painted[0].model.resource.firstDraw.environmentReady).toBe(true);expect(painted[0].model.resource.firstDraw.calls).toBeGreaterThan(0);
   await paintAssay.evaluate(assay=>assay.dispose());await paintAssay.dispose();paintAssay=null;
-  await expect(model(page)).toHaveAttribute('data-preview-phase','ready');await model(page).scrollIntoViewIfNeeded();
+  await expect(model(page)).toHaveAttribute('data-preview-phase','ready');await model(page).evaluate(node=>node.scrollIntoView({block:'center',behavior:'instant'}));
   await expect(model(page).locator('canvas')).toHaveCount(1);await expect(page.locator('canvas')).toHaveCount(2);
   await expect(page.locator('canvas[data-global-background-field]')).toHaveCount(1);await expect(page.locator('[data-cinematic-stage]')).toHaveCount(0);
   const first=await modelFacts(page),site=await page.evaluate(()=>window.__site.inspect());
@@ -129,7 +133,7 @@ test('the real model paints behind loading before its project card is released, 
   expect(first.acquisitions).toBe(1);expect(first.disposals).toBe(0);expect(first.resource.firstDraw.completed).toBe(true);
   expect(first.resource.firstDraw.sourceRevision).toBe(first.resource.sourceRevision);expect(first.resource.firstDraw.width).toBeGreaterThan(0);expect(first.resource.firstDraw.height).toBeGreaterThan(0);closedRequests(first);
   for(let visit=0;visit<2;visit++){
-   await model(page).scrollIntoViewIfNeeded();await expect(model(page)).toBeInViewport();
+   await model(page).evaluate(node=>node.scrollIntoView({block:'center',behavior:'instant'}));await expect(model(page)).toBeInViewport();
    await page.locator('footer').scrollIntoViewIfNeeded();await expect(model(page)).not.toBeInViewport();
    const retained=await modelFacts(page);expect(retained.phase).toBe('ready');expect(retained.acquisitions).toBe(first.acquisitions);expect(retained.disposals).toBe(0);expect(retained.resource.frames).toBe(first.resource.frames);
    await expect(model(page).locator('canvas')).toHaveCount(1);closedRequests(retained);
@@ -137,14 +141,14 @@ test('the real model paints behind loading before its project card is released, 
   for(const suffix of ['/assets/source-layers.glb','/assets/studio-small.hdr'])expect(requests.filter(url=>url.endsWith(suffix))).toHaveLength(1);
   // An idle observation is intentional: the retained static preview must sleep.
   const beforeIdle=await modelFacts(page);await page.waitForTimeout(500);const idle=await modelFacts(page);expect(idle.renders).toBe(beforeIdle.renders);expect(idle.resource.frames).toBe(beforeIdle.resource.frames);
-  await model(page).scrollIntoViewIfNeeded();await expect(model(page)).toBeInViewport();
+  await model(page).evaluate(node=>node.scrollIntoView({block:'center',behavior:'instant'}));await expect(model(page)).toBeInViewport();
   const contextLoss=await model(page).locator('canvas').evaluate(canvas=>{const extension=canvas.getContext('webgl2').getExtension('WEBGL_lose_context');if(!extension)return false;extension.loseContext();return true;});
   expect(contextLoss).toBe(true);await expect(model(page)).toHaveAttribute('data-preview-phase','failed');
   await expect(model(page).locator('canvas')).toHaveCount(0);await expect(page.locator('[data-model-poster]')).toBeVisible();
   const failed=await modelFacts(page);expect(failed.resourceFailures.some(fact=>fact.reason==='context-lost')).toBe(true);
   expect(failed.resource).toBeNull();expect(failed.disposals).toBe(failed.acquisitions);closedRequests(failed);
   await page.locator('footer').scrollIntoViewIfNeeded();await expect(model(page)).not.toBeInViewport();
-  await model(page).scrollIntoViewIfNeeded();await expect(model(page)).toBeInViewport();
+  await model(page).evaluate(node=>node.scrollIntoView({block:'center',behavior:'instant'}));await expect(model(page)).toBeInViewport();
   const stillFailed=await modelFacts(page);expect(stillFailed.phase).toBe('failed');expect(stillFailed.acquisitions).toBe(failed.acquisitions);expect(stillFailed.resource).toBeNull();
   await expect(model(page).locator('canvas')).toHaveCount(0);closedRequests(stillFailed);
   for(const suffix of ['/assets/source-layers.glb','/assets/studio-small.hdr'])expect(requests.filter(url=>url.endsWith(suffix))).toHaveLength(1);
@@ -240,7 +244,12 @@ test('failed model and video assets settle to explicit static fallbacks with nat
  expect(fallbackEntry.phase).toBe('entered');expect(fallbackEntry.previews.ready).toBe(true);expect(fallbackEntry.previews.pending).toEqual([]);
  expect(fallbackEntry.previews.previews).toEqual([{mode:'static',reason:failedModel.reason}]);
  expect(denied.model).toBeGreaterThan(0);
- await page.locator('[data-project-card="xr-bending-active"]').click();await entered(page);
+ // Stream deliberately never reaches Playwright's two-frame stability gate.
+ // Use a genuine pointer at the current hit-tested native link centre.
+ const xrLink=page.locator('[data-project-card="xr-bending-active"]');
+ await xrLink.evaluate(node=>node.scrollIntoView({block:'center',behavior:'instant'}));
+ const target=await xrLink.evaluate(node=>{const r=node.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;return{x,y,hit:node.contains(document.elementFromPoint(x,y))};});
+ expect(target.hit).toBe(true);await page.mouse.click(target.x,target.y);await entered(page);
  await expect(page.locator('h1')).toHaveText('An Extended-Reality App Using Motion Capture for Bending-Active Structure');
  await page.locator('[data-xr-chapter="adapt"]').evaluate(node=>node.scrollIntoView({block:'start',behavior:'instant'}));
  await page.waitForFunction(()=>{const state=document.querySelector('[data-xr-stage]')?.__xrStage?.inspect(),resource=state?.resource;return state?.chapter==='adapt'&&resource?.media.stage==='adapt'&&!resource.media.pending&&resource.mode==='poster'&&!!resource.media.reason;},null,{timeout:WAIT});

@@ -17,14 +17,14 @@ test('Roboto Mono typography and rounded inline evidence remain readable without
 
 test('original SVG paths retain fold and workflow selections, a complete static library and failure fallbacks',async({page})=>{
  test.setTimeout(scenarioTimeout(120000));await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/projects/bending-active/#overview');await page.waitForFunction(()=>window.__story?.inspect().entry?.phase==='entered',null,{timeout:WAIT});
- for(const [kind,count]of [['miura',3],['workflow',4]]){const diagram=page.locator(`[data-source-diagram="${kind}"]`);await diagram.scrollIntoViewIfNeeded();await expect(diagram.locator('svg')).toBeVisible({timeout:WAIT});expect(await diagram.locator('svg path').count()).toBeGreaterThan(10);const buttons=diagram.locator('button[data-diagram-index]');await expect(buttons).toHaveCount(count);await buttons.last().focus();await page.keyboard.press('Enter');await expect(buttons.last()).toHaveAttribute('aria-pressed','true');await expect(diagram.locator('[data-diagram-caption]')).not.toBeEmpty();
+ for(const [kind,count]of [['miura',3],['workflow',4]]){const diagram=page.locator(`[data-source-diagram="${kind}"]`);await diagram.scrollIntoViewIfNeeded();await expect(diagram.locator('svg:not([data-glass-warp])')).toBeVisible({timeout:WAIT});expect(await diagram.locator('svg path').count()).toBeGreaterThan(10);const buttons=diagram.locator('button[data-diagram-index]');await expect(buttons).toHaveCount(count);await buttons.last().focus();await page.keyboard.press('Enter');await expect(buttons.last()).toHaveAttribute('aria-pressed','true');await expect(diagram.locator('[data-diagram-caption]')).not.toBeEmpty();
   // Every authored caption must fit without changing the reading stop plan.
   // Selection shares the same paint path as autonomous presentation changes.
   await page.evaluate(()=>document.fonts.ready);
   const heights=await diagram.evaluate(async el=>{const values=[];for(const button of el.querySelectorAll('button[data-diagram-index]')){button.click();await new Promise(requestAnimationFrame);values.push({figure:el.getBoundingClientRect().height,document:document.documentElement.scrollHeight});}return values;});
   for(const value of heights){expect(Math.abs(value.figure-heights[0].figure)).toBeLessThan(.01);expect(value.document).toBe(heights[0].document);}
   await diagram.getByRole('button',{name:'Follow chapter'}).click();}
- const library=page.locator('[data-source-diagram="library"]');await library.locator('svg').scrollIntoViewIfNeeded();await settle(page);
+ const library=page.locator('[data-source-diagram="library"]');await library.locator('svg:not([data-glass-warp])').scrollIntoViewIfNeeded();await settle(page);
  await expect(library.locator('svg path')).toHaveCount(452);await expect(library.locator('svg text')).toHaveCount(27);await expect(library.locator('button')).toHaveCount(0);await expect(library).toHaveAttribute('data-diagram-reveal','completed');
  expect(await library.locator('[data-library-trace]').evaluateAll(paths=>paths.every(path=>getComputedStyle(path).strokeDasharray==='none'&&getComputedStyle(path).visibility==='visible'))).toBe(true);
  await page.route('**/assets/diagrams/*.json',r=>r.abort());await page.reload();await page.waitForFunction(()=>window.__story?.inspect().entry?.phase==='entered',null,{timeout:WAIT});for(const kind of ['miura','library','workflow']){const img=page.locator(`[data-source-diagram="${kind}"] img`);await img.scrollIntoViewIfNeeded();await expect.poll(()=>img.evaluate(el=>el.complete&&el.naturalWidth>0)).toBe(true);}
@@ -75,7 +75,7 @@ test('viewport source holds while information scrolls and workflow follows its p
  // The narrow stacked layout moves the original HTML source slot away. The
  // viewport scene must retain its own chapter hold while the SVG is read.
  await page.setViewportSize({width:390,height:844});await page.clock.install({time:new Date('2026-01-01T00:00:00Z')});await loadScene(page);await centerStudy(page,'system');
- const workflow=page.locator('[data-source-diagram="workflow"]'),svg=workflow.locator('svg');
+ const workflow=page.locator('[data-source-diagram="workflow"]'),svg=workflow.locator('svg:not([data-glass-warp])');
  await expect(workflow).toHaveAttribute('data-source-presented','true');
  const before=await page.evaluate(()=>({y:scrollY,viewport:window.__thesis.inspect().pose.viewport,surface:window.__story.inspect().canvasSurface}));
  await svg.scrollIntoViewIfNeeded();await settle(page);

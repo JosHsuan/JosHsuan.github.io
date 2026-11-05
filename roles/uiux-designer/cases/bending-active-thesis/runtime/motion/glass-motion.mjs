@@ -9,7 +9,7 @@ export const GLASS_MOTION=Object.freeze({version:1,readingHalf:.54,edgeEnd:1.18,
  * Seconds come from an existing owner, never a new clock or animation loop. */
 export function sampleGlassFeed(state,width,height,radius,{horizontal=0,vertical=0,viewportHeight=height*2,stream=false,lane=0,seconds=0,focused=false}={}){
  const pose={...WINDOW_REST_POSE,radius};
- if(focused)return{pose,edgeMaximum:0,perspective:1400,flow:0,edge:0,warp:0,streamOffset:0};
+ if(focused)return{pose,edgeMaximum:0,perspective:Math.max(1000,height*3,width*3),flow:0,edge:0,warp:0,streamOffset:0};
  const streamOffset=stream?Math.sin(seconds*Math.PI*2/GLASS_MOTION.streamPeriod)*(lane%2?-1:1)*Math.min(64,height*.12):0;
  const x=clamp(horizontal,-1,1),y=clamp(vertical+streamOffset*2/Math.max(1,viewportHeight),-1.5,1.5),speed=clamp(state.strength??0,-1,1),surge=clamp(state.surge??0,-1,1);
  const edge=smooth((Math.abs(y)-GLASS_MOTION.readingHalf)/(GLASS_MOTION.edgeEnd-GLASS_MOTION.readingHalf));
@@ -39,18 +39,17 @@ export function sampleGlassCarousel(distance,{width=400,strength=0,surge=0}={}){
 
 /** Source handoff: a clear focal plane opens out of a glass shoulder. Does not
  * write a camera, change source fitting or choose/read native media time. */
-export function sampleGlassPassage(opacity=1,direction=1){
- const open=smooth(clamp(opacity)),edge=1-open,sign=clamp(direction,-1,1);
- return{scale:1-edge*.075,rotateX:sign*edge*6,rotateY:-sign*edge*3.5};
+export function sampleGlassPassage(opacity=1){
+ const open=smooth(clamp(opacity));
+ return{scale:.925+open*.075};
 }
 
 export function glassPassageTransform(x,y,opacity){
  const base=`translate3d(${x}px,${y}px,0)`;
  if(opacity>=1)return base;
- // Rotation follows the currently painted position. A reversed request must
- // not flip a sign while an outgoing source is still halfway through glass.
- const pose=sampleGlassPassage(opacity,clamp(x/240+y/90,-1,1));
- return `${base} perspective(1800px) rotateX(${pose.rotateX.toFixed(4)}deg) rotateY(${pose.rotateY.toFixed(4)}deg) scale(${pose.scale.toFixed(5)})`;
+ // The source aperture opens isotropically. Its authored 3D camera owns real
+ // perspective; native pointer and annotation projections retain a planar map.
+ return `${base} scale(${sampleGlassPassage(opacity).scale.toFixed(5)})`;
 }
 
 /** Two channels encode a deterministic lens, not random turbulence. One 96²

@@ -25,7 +25,8 @@
 }
 @supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
   :root{
-    --material-reading-regular-fill:linear-gradient(145deg,rgb(255 255 255 / .025),rgb(255 255 255 / .005) 64%),rgb(24 29 30 / .72);
+    /* Reserve contrast headroom for Feed's moving highlights over white imagery. */
+    --material-reading-regular-fill:linear-gradient(145deg,rgb(255 255 255 / .025),rgb(255 255 255 / .005) 64%),rgb(24 29 30 / .78);
     --material-control-regular-fill:linear-gradient(145deg,rgb(255 255 255 / .025),rgb(255 255 255 / .005) 64%),rgb(25 30 31 / .72);
     --material-reading-range-fill:linear-gradient(145deg,rgb(255 255 255 / .025),rgb(255 255 255 / .005) 64%),rgb(24 29 30 / .14);
     --material-control-range-fill:linear-gradient(145deg,rgb(255 255 255 / .025),rgb(255 255 255 / .005) 64%),rgb(25 30 31 / .10);

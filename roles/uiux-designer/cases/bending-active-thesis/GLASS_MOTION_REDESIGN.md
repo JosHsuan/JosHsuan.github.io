@@ -91,7 +91,10 @@ shoulders reach 19 degrees; velocity adds at most 3.2 degrees and a small liquid
 stretch. The optical map is one original 96 × 96 RGBA field per presenter/axis,
 encoded once and reused across layout changes. It is not a source texture or a
 screen capture. Native layout dimensions, document text and source bytes remain
-unchanged. Focus flattens only the focused reading surface.
+unchanged. Keyboard-visible focus flattens only the focused reading surface.
+Pointer focus retains its pose, so a native radio/button cannot jump between
+pointer-down and pointer-up. Layout-dependent perspective remains consistent
+when a surface leaves the viewport or temporarily receives keyboard focus.
 
 Home uses an inward-facing cylinder without card roll. Adjacent centres are
 approximately 34% of a card width apart before perspective; the central card's
@@ -103,7 +106,9 @@ Project's desktop columns counterflow on a 24-second cycle, bounded to 12% of
 card height and at most 64 px. This is a deliberate finite-index interpretation:
 there are eight original links, no duplicated projects and no autoplay scroll.
 Single-column phone layouts use Feed. A stationary pointer/focused link retains
-normal activation and focused cards flatten immediately.
+normal activation and keyboard-focused cards flatten immediately. Browser tests
+use native scroll and hit-tested pointer coordinates for these continuously
+moving links, rather than waiting for two identical animation frames.
 
 Pixel qualification found WebKit's SVG displacement could alter and clip the
 clear centre. WebKit and unqualified engines therefore use the continuous
@@ -115,9 +120,17 @@ records that difference, bounds the affected area, and requires all non-edge
 central pixels to remain unchanged. It never independently registers image rows
 or treats a central spatial warp as acceptable antialiasing.
 
-Model passages use a bounded glass-shoulder perspective and settle to the exact
-native source transform. Rotation follows the painted position rather than a
-discrete request-direction sign, so reversal cannot abruptly flip its angle.
+Reading material reserves 78% dark substrate coverage under regular glass.
+An active SVG displacement plane uses this regular substrate instead of relying
+on backdrop color compression, which the filtered ancestor can prevent from
+painting. The actual, white and black backdrop contrast gate remains 4.5:1.
+
+Model passages open isotropically from 92.5% to the exact native source transform.
+The existing authored 3D camera owns architectural perspective; the outer source
+surface does not rotate as a poster. One uniform planar mapping keeps real source
+hits and annotation leaders aligned throughout departure and reversal. Bending's
+source hit apertures share the stage's top-left origin, including their authored
+slot offsets; native canvas and backing dimensions never change.
 Home's measured positions, human eye heights, targets,
 focal lengths and light cues remain, with monotone Hermite motion through shot
 joins. Tangents cannot overshoot authored coordinates or lens/light values.
@@ -165,3 +178,39 @@ precision; camera ownership, source pins, native media and idle checks are uncha
 The corrected complete XR journey passed locally in all three browser profiles.
 That failed candidate is not eligible for deployment; the correction requires a
 new complete exact-commit validation, without retry-only acceptance.
+
+The second candidate, `90343a0`, also failed its complete CI (42018634913) and
+was not deployed. Qualification exposed insufficient contrast under bright
+backgrounds, source hit-aperture origin drift during the redesigned passage,
+and assumptions that curved/continuously moving cards had identity transforms
+and stationary screen rectangles. Corrections preserve the original contrast,
+source, lifecycle and native-input gates: source geometry is measured before
+projection, projected corners use an independent matrix oracle, and native
+pointer actions target actual hit-tested positions. Decorative SVG definitions
+are excluded when selecting the original documentary SVG. Entrance's mobile
+radio labels reserve 56 native pixels so their projected targets remain at
+least 44 pixels. One Linux WebKit native video advancement also stalled in
+that rejected run; neither a poster nor a timeout/retry relaxation substitutes
+for a fresh complete successful playback check.
+
+Source-plate captures also wait until the existing presenter's sampled document
+target agrees with the current native scroll position. A settled pose from the
+preceding capture is not readiness for a new scroll event; viewport/chrome and
+text-line containment assertions remain unchanged.
+Complete plate captures are grouped by their native chapter, keeping every
+original source and screenshot under the unchanged per-case deadline instead
+of accumulating five plates and ten captures into one Caschlatsch case.
+
+The Windows WebKit native-media check reports `NotSupportedError` at readyState
+0 for Dot's original H.264 recording. Its rejection is retained as a local
+environment limitation, not a pass or evidence of the different Linux stall.
+The pinned Linux WebKit CI must still decode and advance this same recording
+successfully; no browser exclusion, retry or deadline change is added.
+
+The corrected source-plate chapters passed all 15 built-browser cases across
+Chromium, WebKit and mobile Chromium. Entrance's enlarged touch targets passed
+all three profiles. The targeted geometry/input/optics/contrast investigations
+also passed their corrected assertions; the Windows native-media limitation
+above remains explicit. Final `pnpm check`, 720 case/tool checks (two existing
+source-only skips), lint and the 270-file / 147-asset public build audit passed.
+The next publication candidate still requires its own complete CI and live gate.

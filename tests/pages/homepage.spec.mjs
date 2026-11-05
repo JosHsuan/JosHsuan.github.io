@@ -52,7 +52,8 @@ test('the project grid retains aligned square cards without lines and supports c
   const style=getComputedStyle(node),rect=node.getBoundingClientRect();
   return{width:rect.width,height:rect.height,columns:style.gridTemplateColumns.split(' ').length,rows:style.gridTemplateRows.split(' ').length,
    background:style.backgroundImage,borders:[style.borderTopColor,style.borderLeftColor],
-   cards:[...node.children].map(card=>{const r=card.getBoundingClientRect();return{x:r.left-rect.left,y:r.top-rect.top,width:r.width,height:r.height};})};
+   // The grid owns native square cells; Feed/Stream projects those cells in 3D.
+   cards:[...node.children].map(card=>({x:card.offsetLeft,y:card.offsetTop,width:card.offsetWidth,height:card.offsetHeight}))};
  });
  const base=await measure();expect(base.background).toBe('none');expect(base.borders).toEqual(['rgba(0, 0, 0, 0)','rgba(0, 0, 0, 0)']);
  expect(base.columns).toBe(isMobile?1:3);for(const card of base.cards)expect(Math.abs(card.width-card.height)).toBeLessThan(1);

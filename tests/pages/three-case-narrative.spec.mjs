@@ -23,19 +23,34 @@ async function settledReading(element,noJS,kind='state'){
    for(let parent=node;parent;parent=parent.parentElement)if(parent.matches('[data-information-window]'))owners.add(parent);
    const planes=[...owners].filter(owner=>owner.matches(selector)).map(owner=>{
     const transform=getComputedStyle(owner).transform;
-    return{kind:owner.dataset.informationWindow,moving:owner.dataset.informationMoving,transform,identity:new DOMMatrix(transform==='none'?undefined:transform).isIdentity};
+    return{kind:owner.dataset.informationWindow,moving:owner.dataset.informationMoving,transform,flow:Number(owner.style.getPropertyValue('--information-flow')),motion:owner.dataset.glassMotion};
    });
    // Editorial SourceFigure intentionally keeps its image native; its sibling
    // caption owns the liquid plane. This explicit ownerless image is distinct
    // from a declared window whose presenter has not become ready.
    const nativeImage=kind==='image'&&node.matches('[data-editorial-image]')&&owners.size===0;
-   if(!noJS&&((!planes.length&&!nativeImage)||planes.length!==owners.size||!planes.every(plane=>plane.moving==='false'&&plane.identity)))return null;
+   // Native scroll changes rectangles before its event reaches the existing
+   // Director. Require that owner's current document position, not a settled
+   // pose left over from the preceding source-image capture.
+   if(!noJS){
+    const field=window.__globalBackground?.inspect().driver.homeScrolling.informationWindows;
+    for(const owner of owners){
+     let top=0;for(let current=owner;current;current=current.offsetParent)top+=current.offsetTop;
+     const height=owner.clientHeight,width=owner.clientWidth;
+     const item=field?.items.find(row=>row.kind===owner.dataset.informationWindow&&row.top===top&&row.width===width&&row.height===height);
+     const target=Math.max(-1,Math.min(1,(scrollY+innerHeight/2-top-height/2)*2/(innerHeight+height)));
+     if(!item||Math.abs(item.target-target)>1e-9)return null;
+    }
+   }
+   // Settled input retains Feed's spatial shoulder. A perspective matrix alone
+   // is not identity even when all painted z=0 points are visually unchanged.
+   if(!noJS&&((!planes.length&&!nativeImage)||planes.length!==owners.size||!planes.every(plane=>plane.moving==='false'&&plane.flow===0&&plane.motion==='feed')))return null;
    const rect=element=>{const r=element.getBoundingClientRect();return{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height};};
    if(kind==='image'){
     const box=node.getBoundingClientRect(),css=getComputedStyle(node),figure=node.closest('figure'),parent=figure.parentElement,parentCSS=getComputedStyle(parent);
     const inset=['paddingLeft','paddingRight','borderLeftWidth','borderRightWidth'].reduce((sum,key)=>sum+parseFloat(parentCSS[key]),0);
-    return{planes,nativeImage,naturalWidth:node.naturalWidth,naturalHeight:node.naturalHeight,width:box.width,height:box.height,x:box.x,viewportWidth:innerWidth,fit:css.objectFit,opacity:css.opacity,clip:css.clipPath,scrollY,
-     fullSpan:{figureWidth:figure.getBoundingClientRect().width,gridContentWidth:parent.getBoundingClientRect().width-inset}};
+    return{planes,nativeImage,naturalWidth:node.naturalWidth,naturalHeight:node.naturalHeight,width:parseFloat(css.width),height:parseFloat(css.height),x:box.x,screenRight:box.right,viewportWidth:innerWidth,fit:css.objectFit,opacity:css.opacity,clip:css.clipPath,scrollY,
+     fullSpan:{figureWidth:parseFloat(getComputedStyle(figure).width),gridContentWidth:parseFloat(parentCSS.width)-inset}};
    }
    if(kind==='caption'){
     const css=getComputedStyle(node),box=rect(node);
@@ -53,7 +68,9 @@ async function settledReading(element,noJS,kind='state'){
    }
    if(kind==='view'){
     const chrome=[...document.querySelectorAll('[data-portfolio-masthead],[data-portfolio-navigation],[data-project-chapter-navigation],[data-study-motion-toggle]')].filter(element=>element.checkVisibility({visibilityProperty:true,opacityProperty:true})).map(element=>({tag:element.tagName,box:rect(element)}));
-    return{planes,box:rect(node),viewport:{width:innerWidth,height:innerHeight},y:scrollY,chrome};
+    let naturalTop=0;for(let current=node;current;current=current.offsetParent)naturalTop+=current.offsetTop;
+    const field=window.__globalBackground?.inspect().driver.homeScrolling.informationWindows;
+    return{planes,box:rect(node),native:{top:naturalTop,height:node.clientHeight},field:field?.items.filter(item=>item.kind===node.dataset.informationWindow),viewport:{width:innerWidth,height:innerHeight},y:scrollY,chrome};
    }
    return{planes};
   },{noJS,kind});
@@ -101,7 +118,7 @@ async function inspectPlates(page,definition,info,{noJS=false}={}){
    expect(geometry.naturalWidth).toBe(source.width);expect(geometry.naturalHeight).toBe(source.height);
    expect(geometry.width).toBeGreaterThan(0);expect(geometry.height).toBeGreaterThan(0);
    expect(Math.abs(geometry.width-geometry.height*geometry.naturalWidth/geometry.naturalHeight)).toBeLessThan(1);
-   expect(geometry.x).toBeGreaterThanOrEqual(0);expect(geometry.x+geometry.width).toBeLessThanOrEqual(geometry.viewportWidth);
+   expect(geometry.x).toBeGreaterThanOrEqual(0);expect(geometry.screenRight).toBeLessThanOrEqual(geometry.viewportWidth);
    expect(geometry.fit).toBe('contain');expect(geometry.opacity).toBe('1');expect(geometry.clip).toBe('none');
    if(!noJS){
     // Full element capture preserves the complete source. Tall figures may
@@ -125,7 +142,9 @@ async function inspectPlates(page,definition,info,{noJS=false}={}){
    }
    expect(text.decoration).not.toBeNull();
    if(text.decoration.visible){
-    expect(text.decoration.ariaHidden).toBe('true');expect(text.decoration.text).toBe('');expect(text.decoration.children).toBe(0);
+    expect(text.decoration.ariaHidden).toBe('true');expect(text.decoration.text).toBe('');expect(text.decoration.children).toBe(1);
+    await expect(caption.locator(':scope > [data-information-skin] > svg[data-glass-warp]')).toHaveAttribute('aria-hidden','true');
+    await expect(caption.locator(':scope > [data-information-skin] a,:scope > [data-information-skin] button')).toHaveCount(0);
     expect(text.decoration.pointerEvents).toBe('none');expect(text.decoration.before.pointerEvents).toBe('none');
     expect(text.decoration.clip).not.toBe('none');
    }else expect(noJS).toBe(true);
@@ -148,9 +167,14 @@ async function inspectPlates(page,definition,info,{noJS=false}={}){
 }
 
 for(const definition of cases)test.describe(definition.id,()=>{
- test('promoted source plates retain complete source geometry and captions without image-viewer links',async({page},info)=>{
-  await inspectPlates(page,definition,info);
- });
+ // Keep each native chapter's complete plates and captions within the existing
+ // case deadline. Every reviewed source remains mandatory; no longer timeout,
+ // disabled animation or omitted capture substitutes for event readiness.
+ for(const [chapter,plates] of Object.entries(definition.plates)){
+  test(`promoted source plates retain complete source geometry and captions without image-viewer links (${chapter})`,async({page},info)=>{
+   await inspectPlates(page,{...definition,plates:{[chapter]:plates}},info);
+  });
+ }
  test.describe('without JavaScript',()=>{
   test.use({javaScriptEnabled:false});
   test('promoted plates and source descriptions remain accessible in native flow',async({page},info)=>{

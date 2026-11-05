@@ -4,8 +4,9 @@ import {WAIT,scenarioTimeout,settle,centerStudy,frames,loadScene,expectIdle,surf
 
 const stageCanvas='[data-cinematic-stage] canvas';
 const sample=page=>page.evaluate(()=>{
- const scene=window.__thesis.inspect(),story=window.__story.inspect(),canvas=document.querySelector('[data-cinematic-stage] canvas'),r=canvas.getBoundingClientRect();
- return {placement:story.canvasPlacement,informationChapter:story.informationChapter,pose:scene.pose,frames:scene.frames,time:story.playback.activeSeconds,field:story.pageField,rect:{x:r.x,y:r.y,width:r.width,height:r.height},surface:story.canvasSurface,screen:{width:innerWidth,height:innerHeight},native:[canvas.width,canvas.height],budget:scene.renderBudget,pressure:scene.renderPressure,suspended:scene.renderSuspended,informationTop:document.querySelector('#system [data-story-heading]').getBoundingClientRect().top};
+ const scene=window.__thesis.inspect(),story=window.__story.inspect(),canvas=document.querySelector('[data-cinematic-stage] canvas'),r=canvas.getBoundingClientRect(),stage=document.querySelector('[data-cinematic-stage]');
+ const overlay=document.querySelector('[data-model-overlay]'),aperture=document.querySelector('[data-model-study][data-model-active="true"] [data-model-viewport]'),a=aperture?.getBoundingClientRect();
+ return {placement:story.canvasPlacement,informationChapter:story.informationChapter,pose:scene.pose,frames:scene.frames,time:story.playback.activeSeconds,field:story.pageField,rect:{x:r.x,y:r.y,width:r.width,height:r.height},layout:[canvas.offsetWidth,canvas.offsetHeight],transform:stage.style.transform,aperture:a?{x:a.x,y:a.y,width:a.width,height:a.height}:null,slot:overlay?Object.fromEntries(['left','top','width','height'].map(key=>[key,parseFloat(overlay.style.getPropertyValue('--model-slot-'+key))])):null,surface:story.canvasSurface,screen:{width:innerWidth,height:innerHeight},native:[canvas.width,canvas.height],budget:scene.renderBudget,pressure:scene.renderPressure,suspended:scene.renderSuspended,informationTop:document.querySelector('#system [data-story-heading]').getBoundingClientRect().top};
 });
 const scrollTo=async(page,y)=>{await page.evaluate(top=>window.scrollTo({top,behavior:'instant'}),y);await settle(page);};
 const reduce=async page=>{await page.emulateMedia({reducedMotion:'reduce'});await settle(page);expect(await page.evaluate(()=>window.__story.inspect().playback.reducedMotion)).toBe(false);};
@@ -235,7 +236,7 @@ test('with OS Reduced, a real visible source hit still compares geometry through
  const live=await page.evaluate(()=>window.__story.inspect().playback.activeSeconds);await frames(page,5);expect(await page.evaluate(()=>window.__story.inspect().playback.activeSeconds)).toBeGreaterThan(live);
 });
 
-test('the continuous source block exits only at Pattern and an interrupted scroll reverses without scaling or remounting',async({page})=>{
+test('the continuous source block exits only at Pattern and reverses its glass aperture without refitting or remounting',async({page})=>{
  test.setTimeout(scenarioTimeout(120000));await page.clock.install();await loadScene(page);await centerStudy(page,'pattern');
  const canvas=await page.locator(stageCanvas).elementHandle(),held=await sample(page);
  const start=held.placement.holdEnd-60,target=held.placement.holdEnd+(held.placement.end-held.placement.holdEnd)*.55;
@@ -246,11 +247,18 @@ test('the continuous source block exits only at Pattern and an interrupted scrol
   for(let i=0;i<8;i++){await page.clock.fastForward(50);forward.push(await sample(page));}
   expect(forward.some(s=>!s.placement.settled&&s.placement.mode==='exit')).toBe(true);
   expect(forward.some(s=>s.placement.x<-20&&s.placement.opacity<.99)).toBe(true);
-  for(const current of forward){expect(current.placement.chapter).toBe('pattern');expect(current.placement.scale).toBe(1);expect(current.rect.width).toBe(initial.rect.width);}
+  for(const current of forward){
+   expect(current.placement.chapter).toBe('pattern');expect(current.placement.scale).toBe(1);expect(current.layout).toEqual(initial.layout);expect(current.native).toEqual(initial.native);
+   const opacity=current.placement.opacity,ease=opacity**3*(10+opacity*(-15+6*opacity)),scale=Number((.925+.075*ease).toFixed(5));
+   expect(current.rect.width/initial.rect.width).toBeCloseTo(scale,5);expect(current.rect.height/initial.rect.height).toBeCloseTo(scale,5);
+   expect(current.aperture).not.toBeNull();
+   for(const [key,expected] of Object.entries({x:current.rect.x+current.slot.left*scale,y:current.rect.y+current.slot.top*scale,width:current.slot.width*scale,height:current.slot.height*scale}))expect(current.aperture[key],`source hit aperture ${key}`).toBeCloseTo(expected,1);
+  }
   await page.evaluate(top=>window.scrollTo({top,behavior:'instant'}),start);const reverse=[];
   for(let i=0;i<24;i++){await page.clock.fastForward(100);reverse.push(await sample(page));}
   expect(reverse.some(s=>!s.placement.settled&&s.placement.x>forward.at(-1).placement.x)).toBe(true);
   expect(reverse.at(-1).placement).toMatchObject({chapter:'pattern',x:0,y:0,scale:1,opacity:1,visible:true,settled:true,mode:'hold'});
+  expect(reverse.at(-1).rect).toEqual(initial.rect);
   expect(await page.evaluate(el=>document.querySelector('[data-cinematic-stage] canvas')===el,canvas)).toBe(true);
   await expect(page.locator(stageCanvas)).toHaveCount(1);await expect(page.locator('canvas[data-ascii-field]')).toHaveCount(1);
  }finally{await page.clock.resume();}

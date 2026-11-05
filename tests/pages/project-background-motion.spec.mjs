@@ -55,7 +55,7 @@ async function attachNativeMediaFailure(page,media,phase,initialTime=null){
    return {at:performance.now(),id,phase,initialTime,visibility:document.visibilityState,
     activeElement:document.activeElement?{tag:document.activeElement.tagName,id:document.activeElement.id}:null,
     backdrop:window.__globalBackground?.inspect().driver.projectStudy?.backdrop,
-    receipts:(window.__testProjectMediaReceipts??[]).slice(-256),modeReceipts:(window.__testModeNativeMedia??[]).slice(-256),
+    receipts:(window.__testProjectMediaReceipts??[]).slice(-256),modeReceipts:(window.__testModeNativeMedia??[]).slice(-256),playRejections:(window.__testProjectMediaRejections??[]).slice(-16),
     native:[...document.querySelectorAll('[data-project-motion-media]')].filter(video=>video.dataset.projectMotionId===id).slice(0,4).map(video=>({
      paused:video.paused,ended:video.ended,seeking:video.seeking,readyState:video.readyState,networkState:video.networkState,
      currentTime:video.currentTime,duration:video.duration,currentSrc:video.currentSrc,loop:video.loop,playbackRate:video.playbackRate,
@@ -306,6 +306,12 @@ async function enteredPlain(page){await page.waitForFunction(()=>['entered','fai
 test('Reduced Motion and Save Data retain real source playback under the continuous-motion policy',async({page})=>{
  test.setTimeout(scenarioTimeout(120000));const media=dot.motionMedia[0];
  await page.addInitScript(()=>{
+  const play=HTMLMediaElement.prototype.play;
+  HTMLMediaElement.prototype.play=function(...args){
+   const result=play.apply(this,args);
+   if(this.matches('[data-project-motion-media]'))result?.catch(error=>{const rows=window.__testProjectMediaRejections??=[];rows.push({name:error.name,message:error.message,source:this.currentSrc,readyState:this.readyState});if(rows.length>16)rows.shift();});
+   return result;
+  };
   if(navigator.connection)Object.defineProperty(navigator.connection,'saveData',{configurable:true,get:()=>true});
   else Object.defineProperty(navigator,'connection',{configurable:true,value:Object.assign(new EventTarget(),{saveData:true})});
  });

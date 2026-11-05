@@ -251,7 +251,11 @@ export function createExperienceDirector({input,inspection,lifecycle,stage,field
         // The information column is permanent; only its model aperture follows
         // the existing scene entry/exit. Source leader points use the real Canvas rect.
         publisher.style(modelOverlay,'opacity',canvasAwaitingPaint||!modelUIVisible?0:1);
-        modelOverlay.querySelectorAll('[data-model-viewport]').forEach(surface=>publisher.style(surface,'transform',stageTransform));
+        modelOverlay.querySelectorAll('[data-model-viewport]').forEach(surface=>{
+          // The smaller hit aperture shares the full stage's transform origin.
+          publisher.style(surface,'transform-origin',`${-canvasSurface.width*authoredViewport.left}px ${-canvasSurface.height*authoredViewport.top}px`);
+          publisher.style(surface,'transform',stageTransform);
+        });
       }
       publisher.attribute(stage.current,'data-canvas-mode',canvasPlacement.mode);
       moving=moving||!canvasPlacement.settled||canvasAwaitingPaint;

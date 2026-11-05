@@ -524,7 +524,7 @@ test('actual HTTP model and recording failures remain readable, do not retry the
 
 test('the XR project tile centres both complete source phones inside a measured glass inset',async({page},testInfo)=>{
  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/projects/');await page.waitForFunction(()=>window.__site?.inspect().phase==='entered',null,{timeout:WAIT});
- const tile=page.locator('[data-project-tile="xr-bending-active"]');await tile.scrollIntoViewIfNeeded();await tile.locator('img').evaluate(node=>node.decode());
+ const tile=page.locator('[data-project-tile="xr-bending-active"]');await tile.evaluate(node=>node.scrollIntoView({block:'center',behavior:'instant'}));await tile.locator('img').evaluate(node=>node.decode());
  const projection=await tile.evaluate(tile=>{
   const image=tile.querySelector('img'),clip=image.parentElement,css=getComputedStyle(image),tileCSS=getComputedStyle(tile),clipCSS=getComputedStyle(clip);
   if(image.offsetParent!==clip)throw Error('Unexpected image offset owner');

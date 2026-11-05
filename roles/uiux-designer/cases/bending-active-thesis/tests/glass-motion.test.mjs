@@ -54,9 +54,9 @@ test('one optical map survives remeasurement and all DOM ownership releases, inc
  const fallback=geometric.measure(element,400,400);geometric.publish(fallback,{scale:40,enabled:true});assert.equal(geometric.inspect().mode,'geometric');assert.equal(geometric.inspect().maps,0);assert.equal(element.attrs.get('data-glass-optics'),'geometric');assert.equal(element.styles.size,0);geometric.dispose();assert.equal(element.attrs.size,0);assert.equal(geometric.inspect().records,0);
 });
 
-test('source passages preserve the exact native transform at hold and reverse their optical shoulder',()=>{
+test('source passages preserve native hold and isotropic opening in either travel direction',()=>{
  assert.equal(glassPassageTransform(12,-3,1),'translate3d(12px,-3px,0)');
- const a=sampleGlassPassage(.3,1),b=sampleGlassPassage(.3,-1);assert.equal(a.scale,b.scale);assert.equal(a.rotateX,-b.rotateX);assert.equal(a.rotateY,-b.rotateY);
- const angle=x=>Number(glassPassageTransform(x,0,.3).match(/rotateX\(([-\d.]+)deg\)/)[1]);assert(Math.abs(angle(.001)-angle(-.001))<.0001,'crossing the aperture centre cannot flip the rotation');assert.equal(angle(0),0);
+ const scale=x=>Number(glassPassageTransform(x,0,.3).match(/scale\(([\d.]+)\)/)[1]);assert.equal(scale(-120),scale(120));assert.equal(scale(0),scale(120));
+ assert.equal(sampleGlassPassage(0).scale,.925);assert.equal(sampleGlassPassage(1).scale,1);
  for(let t=0;t<=1;t+=.01){const p=sampleGlassPassage(t);assert(p.scale>=.925&&p.scale<=1);assert(Object.values(p).every(Number.isFinite));}
 });

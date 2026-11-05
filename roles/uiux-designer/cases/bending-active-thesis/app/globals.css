@@ -168,10 +168,10 @@ html[data-cinematic-ready] body [data-information-window][data-information-ready
 }
 html[data-cinematic-ready] body [data-information-window][data-information-ready] [data-glyph-kind] svg>*,
 html[data-cinematic-ready] body [data-information-window][data-information-ready] :has(>[data-glyph-kind])::after{transform:none!important}
-html[data-cinematic-ready] body [data-information-window][data-information-ready]:focus-within{
+html[data-cinematic-ready] body [data-information-window][data-information-ready]:has(:focus-visible){
   transform:none!important;translate:none!important;rotate:none!important;scale:none!important;
 }
-html [data-information-window][data-information-ready]:focus-within>[data-information-skin]{clip-path:inset(0 round var(--information-radius,0px))!important}
+html [data-information-window][data-information-ready]:has(:focus-visible)>[data-information-skin]{clip-path:inset(0 round var(--information-radius,0px))!important}
 html[data-cinematic-ready] body [data-information-window][data-information-ready][data-information-moving=false],
 html[data-cinematic-static] body [data-information-window][data-information-ready]:not([data-information-nested]){transform:none!important}
 html[data-cinematic-static] [data-information-window]>[data-information-skin]{clip-path:inset(0 round var(--information-radius,0px))!important}
@@ -261,7 +261,7 @@ html [data-liquid-glass][data-liquid-mode="opaque"]>[data-liquid-skin]::after{di
 
 /* One shared whole-plane writer for every outer native reading surface. Fixed
    model annotations retain their source-scene anchoring and finite ink path. */
-html body [data-information-window][data-information-ready][data-information-plane]:not([data-information-nested])[data-information-moving="true"]:not(:focus-within){
+html body [data-information-window][data-information-ready][data-information-plane]:not([data-information-nested])[data-information-moving="true"]:not(:has(:focus-visible)){
   transform:perspective(var(--information-perspective,1200px)) translate3d(var(--information-x,0px),var(--information-y,0px),0) rotateX(var(--information-rx,0deg)) rotateY(var(--information-ry,0deg)) rotateZ(var(--information-rz,0deg)) skewY(var(--information-skew,0deg)) scale(var(--information-sx,1),var(--information-sy,1))!important;
   transform-origin:50% 50%;translate:none!important;rotate:none!important;scale:none!important;
 }
@@ -273,11 +273,11 @@ html [data-information-window][data-information-ready]>[data-information-skin]::
   box-shadow:inset 0 1px 0 rgb(255 255 255 / .3),inset 0 -1px 0 rgb(255 255 255 / .1);
   opacity:calc(.2 + var(--information-flow,0)*.65);
 }
-html body [data-information-window][data-information-ready][data-information-plane]:not([data-information-nested]):is(:focus-within,:not([data-information-moving="true"])){
+html body [data-information-window][data-information-ready][data-information-plane]:not([data-information-nested]):is(:has(:focus-visible),:not([data-information-moving="true"])){
   transform:none!important;translate:none!important;rotate:none!important;scale:none!important;
 }
 @media print{
-  html body [data-information-window][data-information-ready][data-information-plane]:not([data-information-nested])[data-information-moving="true"]:not(:focus-within){transform:none!important;translate:none!important;rotate:none!important;scale:none!important}
+  html body [data-information-window][data-information-ready][data-information-plane]:not([data-information-nested])[data-information-moving="true"]:not(:has(:focus-visible)){transform:none!important;translate:none!important;rotate:none!important;scale:none!important}
 }
 
 /* The owner's 80% desktop reference is expressed through typography and rem
@@ -287,7 +287,7 @@ html body [data-information-window][data-information-ready][data-information-pla
 /* Feed / Stream: the aperture has a clear reading centre and curved shoulders.
    Unlike the earlier velocity-only plane, spatial curvature remains meaningful
    after scrolling stops. Optical filtering never changes native layout. */
-html body [data-information-window][data-information-ready][data-information-plane][data-glass-motion]:not([data-information-nested]):not(:focus-within){
+html body [data-information-window][data-information-ready][data-information-plane][data-glass-motion]:not([data-information-nested]):not(:has(:focus-visible)){
  transform:perspective(var(--information-perspective,1400px)) translate3d(var(--information-x,0px),var(--information-y,0px),0) rotateX(var(--information-rx,0deg)) rotateY(var(--information-ry,0deg)) rotateZ(var(--information-rz,0deg)) skewY(var(--information-skew,0deg)) scale(var(--information-sx,1),var(--information-sy,1))!important;
  transform-origin:50% 50%;filter:var(--glass-field-filter,none);isolation:isolate;
 }
@@ -295,7 +295,7 @@ html [data-information-window][data-glass-motion]>[data-information-skin]::after
  background:linear-gradient(175deg,rgb(222 249 243 / .32),transparent 18%,transparent 78%,rgb(176 226 229 / .26));
  opacity:calc(.22 + var(--information-edge,0)*.5 + var(--information-flow,0)*.24);
 }
-html body [data-information-window][data-glass-motion]:focus-within{filter:none!important}
+html body [data-information-window][data-glass-motion]:has(:focus-visible){filter:none!important}
 @media(forced-colors:active){html body [data-information-window][data-glass-motion]{filter:none!important}}
 @media print{html body [data-information-window][data-glass-motion]{filter:none!important;transform:none!important}}
 
@@ -310,3 +310,7 @@ html body [data-information-window][data-glass-motion]:focus-within{filter:none!
 :is([data-portfolio-navigation],[data-project-chapter-navigation],[data-xr-chapter-navigation],[data-story-navigation]) a:is(:hover,:focus-visible)::after{opacity:1;transform:scale(1)}
 :is([data-portfolio-navigation],[data-project-chapter-navigation],[data-xr-chapter-navigation],[data-story-navigation]) a:active::after{transform:scale(1.02,.94)}
 @media(forced-colors:active),print{:is([data-portfolio-navigation],[data-project-chapter-navigation],[data-xr-chapter-navigation],[data-story-navigation]) a::after{display:none}}
+
+/* An SVG-filtered plane cannot rely on backdrop color compression. Reserve
+   readable substrate coverage while its bounded peripheral optics is active. */
+html [data-information-window][data-glass-optics="displacement"]{--glass-background:var(--material-reading-regular-fill);--glass-backdrop:var(--material-reading-regular-backdrop)}

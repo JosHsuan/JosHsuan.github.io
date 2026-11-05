@@ -137,7 +137,9 @@ export function createInformationWindowPresenter({publisher,root=globalThis.docu
     if(!reduced&&!resumed&&!seek)activeSeconds+=Math.max(0,elapsed);
     for(const item of registry.values()){
       const {element,state}=item;
-      const focused=activeElement&&(element===activeElement||element.contains(activeElement));
+      // Pointer focus must not move a radio/button between native down and up.
+      // Keyboard-visible focus gets the clear reading plane before activation.
+      const focused=activeElement&&(element===activeElement||element.contains(activeElement))&&(activeElement.matches?.(':focus-visible')??true);
       const active=item.fixed?!!canvasPlacement?.visible&&canvasPlacement.chapter===item.chapter:true;
       const visible=item.fixed?active:item.top+item.height>docY-64&&item.top<docY+viewportHeight+64;
       const target=item.fixed?clamp((Number(canvasPlacement?.y)||0)/viewportHeight,-.4,.4):targetAt(item.top,item.height,docY,viewportHeight);

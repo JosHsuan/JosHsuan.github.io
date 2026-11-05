@@ -104,7 +104,7 @@ test('source information uses desktop side placement or stable native mobile flo
    const native=label.dataset.modelLabelPlacement==='native',style=getComputedStyle(label);
    // Capture identity and geometry in one browser delivery. Separate waits and
    // reads can straddle the next native-scroll update on a slow renderer.
-   if(native&&(label.dataset.informationMoving!=='false'||!new DOMMatrix(style.transform==='none'?undefined:style.transform).isIdentity))return null;
+   if(native&&(label.dataset.informationMoving!=='false'||Number(style.getPropertyValue('--information-flow'))!==0))return null;
    const host=document.querySelector(`[data-model-study-host="${study.dataset.studyChapter}"]`),next=host.nextElementSibling.getBoundingClientRect();
    const r=window.__thesis.inspect().representation;
    return {native,position:style.position,inHost:label.parentElement===host.querySelector('[data-model-information-host]'),nextTop:next.top,documentY:panel.top+scrollY,documentHeight:document.documentElement.scrollHeight,panel:{left:panel.left,right:panel.right,top:panel.top,bottom:panel.bottom},model:{left:model.left,right:model.right,top:model.top,bottom:model.bottom},annotation:r.annotation,poseAzimuth:window.__thesis.inspect().pose.azimuth,source:r.id};
@@ -125,8 +125,8 @@ test('source information uses desktop side placement or stable native mobile flo
 // Native cards retain layout while the existing information presenter applies
 // the explicit perspective plane. Capture used layout and projected corners
 // synchronously; the fixed desktop annotation keeps its separate ink contract.
-function authoredPlaneMatrix({x,y,rx,ry,rz,skew,sx,sy,perspective},moving){
- const matrix=new Matrix4();if(!moving)return matrix.elements;
+function authoredPlaneMatrix({x,y,rx,ry,rz,skew,sx,sy,perspective},focused){
+ const matrix=new Matrix4();if(focused)return matrix.elements;
  matrix.elements[11]=-1/perspective;
  matrix.multiply(new Matrix4().makeTranslation(x,y,0));
  const radians=angle=>angle*Math.PI/180;
@@ -140,20 +140,24 @@ async function nativeCardGeometry(panel,baseline=null){
  return panel.evaluate((el,baseline)=>{
   const style=getComputedStyle(el),host=el.parentElement,parent=host.getBoundingClientRect(),rect=el.getBoundingClientRect();
   const matrix=new DOMMatrix(style.transform==='none'?undefined:style.transform),moving=el.dataset.informationMoving==='true';
-  if(baseline===null&&(el.dataset.informationMoving!=='false'||!matrix.isIdentity))return null;
+  if(baseline===null&&(el.dataset.informationMoving!=='false'||Number(style.getPropertyValue('--information-flow'))!==0))return null;
   const number=value=>parseFloat(value)||0;
   const natural={x:0,y:0};for(let node=el;node;node=node.offsetParent){natural.x+=node.offsetLeft;natural.y+=node.offsetTop;}
-  // Initial capture is permitted only after the presenter is genuinely neutral.
-  // Native used layout can differ from serialized CSS padding by a layout unit.
-  const box=baseline??{width:rect.width,height:rect.height,left:rect.left-parent.left,top:rect.top-parent.top};
-  const {width,height}=box,left=parent.left+box.left,top=parent.top+box.top;
   const origin=style.transformOrigin.split(' ').map(Number.parseFloat);
+  // Freeze native used geometry, not its changing screen-space bounding box.
+  // The initial projected origin is recovered once; subsequent frames must
+  // match this same box and the independently composed matrix below.
+  const borderBox=axis=>number(style[axis])+(style.boxSizing==='border-box'?0:axis==='width'?number(style.paddingLeft)+number(style.paddingRight)+number(style.borderLeftWidth)+number(style.borderRightWidth):number(style.paddingTop)+number(style.paddingBottom)+number(style.borderTopWidth)+number(style.borderBottomWidth));
+  const initialWidth=borderBox('width'),initialHeight=borderBox('height');
+  const relative=[[0,0],[initialWidth,0],[initialWidth,initialHeight],[0,initialHeight]].map(([x,y])=>{const p=new DOMPoint(x-origin[0],y-origin[1]).matrixTransform(matrix);return{x:origin[0]+p.x/p.w,y:origin[1]+p.y/p.w};});
+  const box=baseline??{width:initialWidth,height:initialHeight,left:rect.left-parent.left-Math.min(...relative.map(p=>p.x)),top:rect.top-parent.top-Math.min(...relative.map(p=>p.y))};
+  const {width,height}=box,left=parent.left+box.left,top=parent.top+box.top;
   const points=[[0,0],[width,0],[width,height],[0,height]].map(([x,y])=>{
    const point=new DOMPoint(x-origin[0],y-origin[1]).matrixTransform(matrix);return {x:left+origin[0]+point.x/point.w,y:top+origin[1]+point.y/point.w,w:point.w};
   });
   const ancestors=[];for(let node=host;node;node=node.parentElement)ancestors.push(getComputedStyle(node).transform);
   return {box,computedSize:[style.width,style.height],natural,documentHeight:document.documentElement.scrollHeight,position:style.position,insets:[style.left,style.right,style.top,style.bottom],onlyChild:host.children.length===1,ancestors,
-   width,height,clientSize:[el.clientWidth,el.clientHeight],plane:el.hasAttribute('data-information-plane'),moving,identity:matrix.isIdentity,
+   width,height,clientSize:[el.clientWidth,el.clientHeight],plane:el.hasAttribute('data-information-plane'),moving,focused:el.matches(':has(:focus-visible)'),flow:number(style.getPropertyValue('--information-flow')),identity:matrix.isIdentity,
    vars:Object.fromEntries(['x','y','rz','rx','ry','skew','sx','sy','perspective'].map(key=>[key,number(style.getPropertyValue('--information-'+key))])),
    matrix:Array.from(matrix.toFloat64Array()),weights:points.map(point=>point.w),
    actual:{left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom},expected:{left:Math.min(...points.map(p=>p.x)),right:Math.max(...points.map(p=>p.x)),top:Math.min(...points.map(p=>p.y)),bottom:Math.max(...points.map(p=>p.y))}};
@@ -166,14 +170,14 @@ function expectNativeCardGeometry(value){
  expect(value.plane).toBe(true);
  // Independent oracle for the authored curved field's CSS transform order
  // and bounds, including peripheral translation and liquid stretch.
- for(const [key,limit] of [['x',5],['y',3],['rx',11],['ry',12],['rz',2.2],['skew',2.8]])expect(Math.abs(value.vars[key])).toBeLessThanOrEqual(limit);
- for(const [key,limit] of [['sx',1.018],['sy',1.012]]){expect(value.vars[key]).toBeGreaterThanOrEqual(1);expect(value.vars[key]).toBeLessThanOrEqual(limit);}
- expect(value.vars.perspective).toBeGreaterThanOrEqual(850);
- expect(value.vars.perspective).toBeCloseTo(Math.max(850,...value.clientSize.map(size=>size*2.7)),1);
- const expected=authoredPlaneMatrix(value.vars,value.moving);
+ for(const [key,limit] of [['x',7],['y',31],['rx',22.2],['ry',7],['rz',.65],['skew',1.3]])expect(Math.abs(value.vars[key])).toBeLessThanOrEqual(limit);
+ for(const [key,min,max] of [['sx',1,1.047],['sy',.935,1.018]]){expect(value.vars[key]).toBeGreaterThanOrEqual(min);expect(value.vars[key]).toBeLessThanOrEqual(max);}
+ expect(value.vars.perspective).toBeGreaterThanOrEqual(1000);
+ expect(value.vars.perspective).toBeCloseTo(Math.max(1000,...value.clientSize.map(size=>size*3)),1);
+ const expected=authoredPlaneMatrix(value.vars,value.focused);
  for(let i=0;i<16;i++)expect(value.matrix[i]).toBeCloseTo(expected[i],6);
  for(const weight of value.weights){expect(Number.isFinite(weight)).toBe(true);expect(weight).toBeGreaterThan(0);}
- if(!value.moving){expect(value.identity).toBe(true);for(const key of ['x','y','rz','rx','ry','skew'])expect(value.vars[key]).toBe(0);for(const key of ['sx','sy'])expect(value.vars[key]).toBe(1);}
+ if(!value.moving){expect(value.flow).toBe(0);expect(value.vars.skew).toBe(0);expect(Math.abs(value.vars.rx)).toBeLessThanOrEqual(19);}
  for(const side of ['left','right','top','bottom'])expect(Math.abs(value.actual[side]-value.expected[side]),`${side}: ${JSON.stringify(value)}`).toBeLessThanOrEqual(.01);
 }
 
@@ -185,7 +189,7 @@ test('side information and its leader follow the displayed Canvas throughout the
  const before=await panel.boundingBox(),native=await panel.getAttribute('data-model-label-placement')==='native';
  let nativeBefore=null;
  if(native)await expect.poll(async()=>{nativeBefore=await nativeCardGeometry(panel);return nativeBefore!==null;},{timeout:WAIT}).toBe(true);
- if(native){expect(['x','y','rz','rx','ry','skew'].every(key=>nativeBefore.vars[key]===0)).toBe(true);expectNativeCardGeometry(nativeBefore);}
+ if(native)expectNativeCardGeometry(nativeBefore);
  const exit=await page.evaluate(()=>{const p=window.__story.inspect().canvasPlacement;return p.holdEnd+(p.end-p.holdEnd)*.4;});
  await page.clock.pauseAt(new Date(Date.now()+3600000));
  try{

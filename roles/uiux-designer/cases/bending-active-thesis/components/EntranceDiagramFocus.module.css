@@ -30,3 +30,6 @@
 @media print{.choices,.overlay{display:none}.descriptions{display:block}.descriptions p{visibility:visible;margin:1em 0}}
 
 .guide figcaption{font:400 var(--type-size-caption)/var(--type-leading-caption) var(--ocr)}
+
+/* Reserve screen-space touch area through the bounded Feed perspective. */
+@media(max-width:780px){.choices label{min-height:56px}}
