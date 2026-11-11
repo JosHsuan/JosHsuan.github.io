@@ -2,6 +2,8 @@
  * participants before React effects run; their actual renderer or an explicit
  * static policy reports the terminal. SiteNavigation owns the startup bound. */
 const documents=new WeakMap();
+// Visible preparation remains bounded even if a source trickles indefinitely.
+export const PREVIEW_TRANSFER_MAX_MS=120000;
 const registryFor=document=>{
  let registry=documents.get(document);
  if(!registry){registry={entries:new Map(),listeners:new Set()};documents.set(document,registry);}
@@ -9,7 +11,7 @@ const registryFor=document=>{
 };
 const entryFor=(registry,element)=>{
  let entry=registry.entries.get(element);
- if(!entry){entry={owner:null,result:null,onFallback:null,fallbackReason:null};registry.entries.set(element,entry);}
+ if(!entry){entry={owner:null,result:null,onFallback:null,fallbackReason:null,transfer:null,loaded:0};registry.entries.set(element,entry);}
  return entry;
 };
 
@@ -17,11 +19,20 @@ export function registerPagePreviewReadiness(document,element,{onFallback}={}){
  if(!document||!element)throw TypeError('A page preview requires its document and element');
  if(onFallback!==undefined&&typeof onFallback!=='function')throw TypeError('A preview fallback handler must be a function');
  const registry=registryFor(document),entry=entryFor(registry,element),owner={};let released=false;
- entry.owner=owner;entry.onFallback=onFallback??null;
+ entry.owner=owner;entry.onFallback=onFallback??null;entry.transfer=null;entry.loaded=0;
  // A component that mounts after the global preparation bound cannot silently
  // enhance an already uncovered static page. Its owner receives that latch.
  if(entry.fallbackReason!==null)entry.onFallback?.(entry.fallbackReason);
  return{
+  progress({signal,loaded}={}){
+   if(released||entry.owner!==owner||entry.result||entry.fallbackReason!==null||!signal||signal.aborted)return false;
+   if(!Number.isSafeInteger(loaded)||loaded<=0)return false;
+   if(entry.transfer===signal&&loaded<=entry.loaded)return false;
+   if(entry.transfer!==signal&&entry.transfer&&!entry.transfer.aborted)return false;
+   entry.transfer=signal;entry.loaded=loaded;
+   for(const listener of [...registry.listeners])if(registry.listeners.has(listener))listener(entry);
+   return true;
+  },
   report({mode,reason=''}={}){
    if(released||entry.owner!==owner||entry.result)return false;
    if(!['model','static'].includes(mode)||typeof reason!=='string')throw TypeError('Preview readiness requires a model or explicit static terminal');
@@ -34,7 +45,7 @@ export function registerPagePreviewReadiness(document,element,{onFallback}={}){
  };
 }
 
-export function acquirePagePreviewReadiness(document,{onReport}={}){
+export function acquirePagePreviewReadiness(document,{onReport,onProgress}={}){
  const registry=registryFor(document);
  // Discovery happens synchronously, before any awaited font/image readiness.
  // Missing component effects remain pending rather than becoming fake success.
@@ -46,7 +57,8 @@ export function acquirePagePreviewReadiness(document,{onReport}={}){
   pending:Object.freeze(participants.flatMap((entry,index)=>entry.result?[]:[`preview-${index+1}`])),
   previews:Object.freeze(participants.map(entry=>entry.result??Object.freeze({mode:'pending',reason:entry.fallbackReason??''})))});
  const finish=result=>{if(settled)return;settled=true;registry.listeners.delete(check);resolve(result);};
- const check=()=>{
+ const check=progress=>{
+  if(progress&&participants.includes(progress))onProgress?.();
   if(observed)for(const [index,entry] of participants.entries()){
    if(!entry.result||observed.has(entry))continue;observed.add(entry);
    try{onReport(Object.freeze({participant:index+1,mode:entry.result.mode,reason:entry.result.reason.slice(0,160),provenance:acquiring?'preexisting-at-acquire':'report-notification'}));}catch{/* Diagnostics cannot change readiness. */}

@@ -29,9 +29,17 @@ the decision to uncover its actual document.
 | Existing Bending EntryManager/Director | Retain Bending's delegated scene/static readiness and original clock; no second generic reveal or model-card prerequisite is added to that route. |
 
 Normal generic arrival remains `requested → ready → revealing → entered`.
-Document resources, required card preparation and native pending play consume
-the original 15-second arrival budget; successful resource completion does not
-restart it. The native effects retain their 720 ms opacity/lift recipe, and the
+Document resources, required card preparation and native pending play initially
+share a 15-second arrival budget; successful resource completion does not restart
+it. [Decision 0023](../../../../docs/decisions/0023-architecture-quality-boundaries.md)
+adds a bounded exception for actual new bytes in generic study model transfers:
+each valid progress fact before expiry renews the 15-second idle endpoint, up to
+120 seconds of visible arrival time. Hidden time suspends both remaining bounds;
+hidden/stale progress cannot replenish them. Fonts/images retain their own
+15-second readiness bound. Download completion still requires the pinned byte
+count/hash, successful parsing and a real first draw; it is not readiness.
+After preparation, native pending play uses the remaining endpoint. The native
+effects retain their 720 ms opacity/lift recipe, and the
 original 1600 ms completion bound begins at accepted `ready`. The API-absent CSS
 path is mutually exclusive. No timer, simulated event, manual native-time write
 or failed terminal substitutes for actual successful completion.

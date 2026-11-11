@@ -1,6 +1,6 @@
 import {EventManager} from '../core/EventManager.ts';
 import {acquireSiteReadiness} from './SiteReadiness.mjs';
-import {acquirePagePreviewReadiness} from './PagePreviewReadiness.mjs';
+import {acquirePagePreviewReadiness,PREVIEW_TRANSFER_MAX_MS} from './PagePreviewReadiness.mjs';
 import {subscribeSceneEntry} from './site-entry-bridge.mjs';
 
 export const BENDING_ROUTE='/projects/bending-active/';
@@ -23,7 +23,7 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
  let active=null,serial=0,connected=false,disposed=false,deadlineTimer=null,revealTimer=null,resource=null,releaseScene=null;
  let handedOff=false,sceneId=null,documentResult=null,pendingScene=null,lastScenePhase='preparing',previewResource=null;
  let revealGeneration=0,revealMode=null,revealAnimations=[],revealFrame=null,revealExpiresAt=null,startupExpiresAt=null,completePreparation=null;
- let startupRemaining=null,resumeStartup=null;
+ let startupRemaining=null,resumeStartup=null,transferExpiresAt=null,transferRemaining=null;
  const sceneRoute=path(win.location.pathname)===BENDING_ROUTE;
  const reduced={matches:false};
  const monotonic=()=>win.performance?.now()??now();
@@ -46,7 +46,7 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
  const clearDeadlines=()=>{if(deadlineTimer!==null)clearTimer(deadlineTimer);if(revealTimer!==null)clearTimer(revealTimer);deadlineTimer=revealTimer=null;};
  const releaseReveal=()=>{
   revealGeneration++;revealMode=null;
-  startupRemaining=null;resumeStartup=null;
+  startupRemaining=null;resumeStartup=null;transferExpiresAt=transferRemaining=null;
   if(revealFrame!==null)win.cancelAnimationFrame(revealFrame);revealFrame=null;revealExpiresAt=startupExpiresAt=null;completePreparation=null;
   const owned=revealAnimations;revealAnimations=[];
   for(const animation of owned)try{animation.cancel();}catch{/* Continue releasing the other owned animation. */}
@@ -177,7 +177,8 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
  };
  const pauseStartup=()=>{
   if(startupExpiresAt===null||startupExpired())return;
-  startupRemaining=Math.max(0,startupExpiresAt-monotonic());startupExpiresAt=null;
+  const at=monotonic();startupRemaining=Math.max(0,startupExpiresAt-at);startupExpiresAt=null;
+  transferRemaining=Math.max(0,transferExpiresAt-at);transferExpiresAt=null;
   if(deadlineTimer!==null)clearTimer(deadlineTimer);deadlineTimer=null;
  };
  const applyScene=fact=>{
@@ -237,7 +238,7 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
   diagnostic('arrival',{restored,freshHistory,startedAt},epoch);
   if(disposed||terminal.has(active.phase))return;
   if(!sceneRoute){
-   guardContent();startupExpiresAt=startedAt+deadline;diagnostic('startup-budget',{startedAt,expiresAt:startupExpiresAt},epoch);
+   guardContent();startupExpiresAt=startedAt+deadline;transferExpiresAt=startedAt+Math.max(deadline,PREVIEW_TRANSFER_MAX_MS);diagnostic('startup-budget',{startedAt,expiresAt:startupExpiresAt},epoch);
    if(startupExpired())return;
    const armStartup=()=>{deadlineTimer=setTimer(()=>{
     if(disposed||current!==active?.id||active.phase!=='requested')return;
@@ -257,7 +258,18 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
   else{
    // Marked card preparation starts independently of loader entry. Actual first
    // draw or an explicit static fallback must settle before reveal can start.
-   const previews=diagnosticEvents?acquirePreviews(doc,{onReport:report=>diagnostic('preview-report',report,epoch)}):acquirePreviews(doc);previewResource=previews;
+   const previews=acquirePreviews(doc,{
+    ...(diagnosticEvents?{onReport:report=>diagnostic('preview-report',report,epoch)}:{}),
+    onProgress(){
+     if(disposed||current!==active?.id||active.phase!=='requested'||doc.hidden||startupExpiresAt===null||documentResult?.ready||startupExpired())return;
+     // Only actual newly received source bytes renew the idle bound. The
+     // existing timer rechecks this endpoint; progress adds no timer or clock.
+     startupExpiresAt=Math.min(transferExpiresAt,monotonic()+deadline);
+    },
+   });previewResource=previews;
+   documentResource.promise.then(result=>{
+    if(!result.ready&&!disposed&&current===active?.id&&!terminal.has(active.phase))fail(result.failures.join(','));
+   });
    resource={promise:Promise.all([documentResource.promise,previews.promise]).then(([document,preview])=>Object.freeze({
     ready:document.ready&&preview.ready,failures:Object.freeze([...document.failures,...preview.failures]),
     pending:Object.freeze([...document.pending,...preview.pending]),previews:preview.previews,
@@ -338,7 +350,7 @@ export function createSiteNavigation({window:win,document:doc,element,onChange=(
     // Native play/reveal already has its existing hidden-static/expiry policy.
     if(active.phase==='requested'&&!documentResult?.ready){
      if(doc.hidden)pauseStartup();
-     else if(startupRemaining!==null){startupExpiresAt=monotonic()+startupRemaining;startupRemaining=null;resumeStartup?.();}
+     else if(startupRemaining!==null){const at=monotonic();startupExpiresAt=at+startupRemaining;transferExpiresAt=at+transferRemaining;startupRemaining=transferRemaining=null;resumeStartup?.();}
      return;
     }
     if(!doc.hidden)return;

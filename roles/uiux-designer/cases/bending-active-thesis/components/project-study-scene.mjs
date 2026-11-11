@@ -1,5 +1,6 @@
 import * as T from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {readPinnedModelResponse} from './pinned-model-transfer.mjs';
 import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';
 import {createRendererBudget} from './renderer-budget.mjs';
 import {fitResearchCamera,RESEARCH_MODEL_PIXELS} from './research-scene-geometry.mjs';
@@ -31,7 +32,7 @@ export function projectStudyCanvasPoint(x,y,rect,size,handheld){
 /** A single full-viewport renderer. Original source transforms, geometry and UVs
  * stay exact. Scoped material clones and a source-relative rig own presentation;
  * the existing site driver supplies every time-dependent fact. */
-export async function acquireProjectStudyScene({host,model,signal,presentation='study',onFailure=()=>{},createRenderer=options=>new T.WebGLRenderer(options)}){
+export async function acquireProjectStudyScene({host,model,signal,presentation='study',onFailure=()=>{},onProgress=()=>{},createRenderer=options=>new T.WebGLRenderer(options)}){
  if(signal.aborted)throw aborted();
  const win=host.ownerDocument.defaultView,manager=new T.LoadingManager();
  let renderer=null,budget=null,scene=null,camera=null,gltf=null,support=null,appearance=null,disposed=false,shaderError=false,minimumPitch=-.1,appearanceRevision=0;
@@ -114,7 +115,7 @@ export async function acquireProjectStudyScene({host,model,signal,presentation='
   const url=new URL(model.src,win.location.origin);
   if(url.origin!==win.location.origin||!url.pathname.startsWith('/assets/projects/')||!url.pathname.endsWith('.glb'))throw Error('Pinned public project model required');
   const response=await fetch(url,{signal});if(!response.ok)throw Error('Project model unavailable');
-  const bytes=await response.arrayBuffer();if(disposed||signal.aborted)throw aborted();
+  const bytes=await readPinnedModelResponse(response,{bytes:model.bytes,signal,onProgress});if(disposed||signal.aborted)throw aborted();
   if(bytes.byteLength!==model.bytes)throw Error('Project model byte count differs');
   revision=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),value=>value.toString(16).padStart(2,'0')).join('');
   if(revision!==model.sha256)throw Error('Project model revision differs');

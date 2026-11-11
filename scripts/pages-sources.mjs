@@ -39,6 +39,7 @@ export const PAGES_SOURCES = Object.freeze([
   'components/EditorialProjectStudy.jsx', 'components/EditorialProjectStudy.module.css', 'components/project-editorial-layout.mjs',
   'components/ProjectCaseStudyControls.jsx', 'components/EntranceDiagramFocus.jsx', 'components/EntranceDiagramFocus.module.css', 'release/project-studies.json',
   'components/ProjectCaseStudyStage.jsx', 'components/project-study-scene.mjs',
+  'components/pinned-model-transfer.mjs',
   'components/project-study-appearance.mjs',
   'runtime/site/ProjectStudyStageRegistry.mjs', 'runtime/site/ProjectStudyScenePresenter.mjs',
   'runtime/site/ProjectStudyChapterPresenter.mjs',

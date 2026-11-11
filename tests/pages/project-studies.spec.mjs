@@ -1,6 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
 import {createServer} from 'node:http';
+import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createPagesPreviewHandler} from '../../scripts/serve-pages.mjs';
 import {WAIT,frames,scenarioTimeout} from './case-helpers.mjs';
@@ -392,6 +393,35 @@ test('the original Dot source supports native drag and keyboard inspection, retu
  await semanticChapter(chapter);await expect(state).toHaveAttribute('data-project-model-availability','ready');
  await page.emulateMedia({reducedMotion:'no-preference'});expect((await facts(page)).acquisitions).toBe(1);expect(errors).toEqual([]);
 
+});
+
+test('a native HC3DP transfer exceeding fifteen seconds retains preparation until verified first draw',async({page})=>{
+ const project=studies.find(value=>value.id==='hc3dp-caustics');
+ const root=process.env.THESIS_PREVIEW_ROOT??fileURLToPath(new URL('../../.pages-workspace/out/',import.meta.url));
+ const bytes=await readFile(join(root,project.model.src.slice(1)));
+ let handler,timer,requests=0,resolveCrossed;
+ const crossed=new Promise(resolve=>{resolveCrossed=resolve;});
+ const server=createServer((request,response)=>{
+  if(request.url.split('?')[0]!==project.model.src){handler(request,response);return;}
+  requests++;const started=performance.now();let part=0;
+  response.writeHead(200,{'Content-Type':'model/gltf-binary','Content-Length':bytes.length,'Cache-Control':'no-store'});
+  response.on('close',()=>{clearTimeout(timer);resolveCrossed({closed:true});});
+  const send=()=>{
+   const end=Math.ceil(bytes.length*(part+1)/6);response.write(bytes.subarray(Math.ceil(bytes.length*part/6),end));part++;
+   if(part===5)resolveCrossed({closed:false,elapsed:performance.now()-started});
+   if(part===6){response.end();return;}
+   timer=setTimeout(send,4000);
+  };send();
+ });
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const port=server.address().port;
+ handler=createPagesPreviewHandler({root,port});
+ try{
+  await page.goto(`http://127.0.0.1:${port}`+route(project),{waitUntil:'domcontentloaded'});
+  const progress=await crossed;expect(progress.closed).toBe(false);expect(progress.elapsed).toBeGreaterThanOrEqual(16000);
+  expect(await page.evaluate(()=>window.__site.inspect().phase)).toBe('requested');
+  await expect(stage(page)).toHaveAttribute('data-project-model-phase','requested');
+  await entered(page);sourceDraw(await facts(page),project.model,page.viewportSize());closed(await facts(page));expect(requests).toBe(1);
+ }finally{clearTimeout(timer);server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
 });
 
 test('an actual HTTP source failure settles once, preserves native sources, and never upgrades after the server recovers',async({page})=>{

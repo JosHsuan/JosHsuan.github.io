@@ -1,9 +1,17 @@
 # Architecture review and revision — 11 November 2026
 
-Status: **in progress**. The owner authorizes a comprehensive architecture audit,
+Status: **first revision deployed; live-discovered transfer correction under validation**. The owner authorizes a comprehensive architecture audit,
 implementation, commit/push, verification and same-artifact deployment, with no
 paid services or charge-incurring features. The preceding skill/workflow change
 was committed separately as `9dcc58f` and pushed without deployment.
+
+The first architecture release is `95efdb7f15e344ed82dff985f3ad1b23db584580`,
+validated by [CI 43082576289](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/43082576289).
+Its downloaded export contains 268 files, with file-set SHA-256
+`a0787650ad7a740d5035113ddc6488d23b3f1cc76138e8bb37ed26aa897a886e`.
+The ZIP's GitHub digest and the extracted build-record digest both match.
+The local Windows build's 270-file count is a separate build, not the release
+candidate; no local export will be substituted for the CI artifact.
 
 ## Scope and acceptance
 
@@ -33,10 +41,10 @@ alone does not complete the task.
 | Public application import structure | Initial wider workspace scan: 166 modules, 285 internal edges, no cycles. The exact revised public handoff contains 173 files / 151 code modules / 265 code edges. Runtime's component-folder imports are pure scores/helpers or scene adapters, not evidence of a React cycle. | Shared explicit manifest, import closure/cycle checks and enforced core independence. Avoid a directory-only migration of 25 helpers that would not simplify ownership. |
 | Native lifecycle and resources | Failed stage notification left an owner registered; a disposal callback could reactivate a closed preview. Nine regression cases failed before repair. | Shared transactional stage registry and terminal-before-notification disposal; focused lifecycle tests pass 55/55. Revised portable suite: 731 total, 729 pass, 2 opt-in rendering skips. |
 | R3F / imperative scenes | Inspected Bending `SceneRuntime`/Canvas, generic `project-study-scene`, Home prepared scene/presenter, and XR scene/director. GLTF validation, PMREM ownership, first-draw gating, cancellation, geometry/material/texture disposal and context release remain in their existing adapters. | Preserve demand Canvas and final renderer/camera writers. No extra RAF, physics dependency, model conversion or render-mode downgrade. Browser resource/lifecycle acceptance remains a separate gate. |
-| Presentation and accessibility | Paired baseline/revision desktop 1440×1000 and mobile-emulated 390×844 captures for Home, Bending, XR and Mode/s initialize without page errors or horizontal overflow. Original typography, source images/models and Glass layout remain. | Diagram's actual Chromium fixture passes keyboard selection, Strict Mode, remount listener counts and SVG failure fallback. Full built browser/route acceptance is pending; this is not a physical-device or WCAG certification. |
+| Presentation and accessibility | Paired baseline/revision desktop 1440×1000 and mobile-emulated 390×844 captures for Home, Bending, XR and Mode/s initialize without page errors or horizontal overflow. The exact CI artifact additionally passes all 12 routes at both sizes, native navigation, diagram keyboard selection and advancing XR HD playback. | Diagram's actual Chromium fixture passes keyboard selection, Strict Mode, remount listener counts and SVG failure fallback. Full CI remains a separate gate; this is not a physical-device or WCAG certification. |
 | Performance | Existing draw/pixel budgets, demand schedulers, cached source bounds and retained prepared resources were reviewed. Revision adds no frame work or rendering resource. | No demonstrated CPU/GPU bottleneck warrants changing visual fidelity. No speedup, field INP or physical-device performance is claimed. Long-run and software-GPU evidence is qualified separately. |
 | Public content and build | Fresh baseline and revised builds each audit 270 output files and 147 approved assets. No release asset or pinned source record changed. | Build/lint consume one reviewed source list. Reject escaping paths, duplicate sources, nonliteral imports, unapproved dependencies and core-to-presentation imports before copying. Existing output and byte-pin audits remain. |
-| CI and publication | Documentation commit `9dcc58f` passed run `43074353466`; no deployment dispatched for that batch. Existing gate verifies candidate-bound test inventory/receipts. | `pnpm lint` and CI quality now include public code. Five negative source/lint tests pass. Revised candidate CI/deployment/live acceptance remains pending. |
+| CI and publication | Documentation commit `9dcc58f` passed run `43074353466`; no deployment dispatched for that batch. Existing gate verifies candidate-bound test inventory/receipts. | `95efdb7` passed full CI and same-artifact deployment. Live acceptance exposed the transfer cancellation documented below; its correction requires a fresh candidate and gate. |
 | Dependency security | Registry audit identified Zod 4.6.5 (high) and development-only minimatch 10.2.6 (moderate). Maintainer advisory/fix and actual repository callers were inspected. | Pin Zod 4.6.6 with a minimal lockfile update. Minimatch's vulnerable optimization level is absent from its installed caller; retain the compatible lint cohort and document the limited deferral below. |
 | Documentation | README and CI/CD falsely described receipt enforcement as unimplemented; current architecture retained superseded pause-policy wording. | Corrected actual coverage/gates and current policy; retained historical decisions and dated release evidence. Added decision 0023. |
 
@@ -151,7 +159,55 @@ live gates below.
 | Diagram Chromium fixture | 3/3 pass, no skip | Actual SVG/React, keyboard, Strict Mode, remount, preference continuity and failure fallback. |
 | Revised and final `pnpm build:pages` | Pass; 270 files / 147 assets | Full selected export, unchanged approved assets; final build follows installed Zod verification. |
 | Baseline/revision captures | Eight captures per version; no page errors/overflow | Four adapter families, desktop and mobile emulation; review is not pixel identity for continuous motion. |
+| Downloaded CI candidate and source pins | Artifact/build-record digests match; 147 approved and 137 protected original asset entries match | Exact `95efdb7` Linux export; no original source bytes changed. |
+| Independent candidate browser acceptance | 24 route checks and 6 journeys pass; eight screenshots inspected | All 12 routes at desktop/mobile sizes have readable content, no page/console errors, failed loaded images or horizontal overflow. Each size also passes native Home→About→Project→Contact, diagram keyboard selection and XR WebGL playback with native 888×1920 video. |
+| Supplemental `qa-only` attempt | Inconclusive, not counted as acceptance | Its isolated driver returned `about:blank` in the second invocation after navigating Home. The evidence/report is retained under `.runtime/qa/architecture-95efdb7/`; independent Playwright acceptance above uses one owned browser process. |
+| Framework CI | 24/24 browser checks pass | 12 root and 12 subpath checks; quality and public build jobs also pass. |
 | Local built browser regression | 46 pass / 2 fail | Four release/lifecycle/source/preview files across Chromium, mobile Chromium and Windows WebKit. The two WebKit failures require the WebGL decoded-frame path; this Windows build lacks `requestVideoFrameCallback`. No test assertion or timeout was relaxed. |
 | Windows WebKit XR diagnosis | Native playback advances after scene settlement | The initial immediate fallback snapshot was transient. A subsequent instrumented probe observes no application pause, a visible native video, and increasing time before any manual play call. Native fallback passes; WebGL phone acceptance still requires the supported CI engine. |
-| Full candidate CI | Pending | Must record exact executions before release; local fallback evidence does not replace the required WebGL path. |
-| Deployment and live checks | Pending | No revised release has been published. |
+| First release full CI | Pass: run `43082576289` | Independently reconciled 645 public checks (215 per engine), each once with no retry/skip, and 24 framework checks. Linux WebKit passed the native decoded-frame paths. |
+| First release deployment | Pass: run `43087667940` | Published the validated CI artifact without rebuilding. |
+| First release public bytes | 268/268 match after one targeted network retry | Initial old XR video request returned HTTP 503; both targeted query and normal URL rechecks returned 200 with the exact hash. Release identity remained stable; unknown-route 404/noindex passed. Initial failure remains in local evidence. |
+| First release live browsers | Incomplete; HC3DP readiness failure reproduced | Desktop and mobile attempts cancelled a valid progressing 50,438,508-byte GLB at the fixed 15-second arrival endpoint. Readable fail-open content is not successful model acceptance. |
+
+Eight maintained architecture/workflow documents also passed a 154-target local
+link existence check. This does not validate remote links or all Markdown anchors.
+
+## Live-discovered source transfer correction
+
+The first release's artifact, pin and full CI checks passed, but live network
+variance exposed a gap that loopback acceptance did not cover. HC3DP failed on
+desktop and mobile with `readiness-timeout` and an aborted model request. An
+isolated download returned the exact 50,438,508 bytes in 6.34 seconds; a successful
+instrumented page load spent about 10.7 seconds transferring and entered at
+12.53 seconds. Its longest observed task was 409 ms. These observations support
+the fixed transport deadline diagnosis, not a claim that all CPU/GPU work is fast.
+
+The correction follows decision 0023. `pinned-model-transfer` reads native decoded
+body chunks into the existing declared-size allocation, rejecting excess or
+missing bytes. `PreviewLifecycle` and `SiteNavigation` retain their own existing
+timers. New bytes from the current, non-aborted owner renew only the idle endpoint,
+bounded by 120 seconds; duplicate, stale, hidden or overdue progress cannot revive
+a terminal. Hash validation, self-contained GLB parsing, original geometry/materials
+and the genuine first draw still precede model readiness. Fonts/images retain
+their own bound, and pending native play cannot report further model progress.
+
+The feedback loop first failed two deterministic owner tests and one real
+Chromium HTTP test against the previous validated export. The HTTP test serves
+the original HC3DP model in six chunks over 20 seconds and requires preparation
+after 16 seconds, then source-verified first draw and successful entry. No browser
+deadline or acceptance assertion was relaxed. Regression coverage also checks
+stalls, total expiry, late fulfillment, hidden time, owner replacement, cancelled
+readers, truncated/oversized bodies and adapter progress forwarding. The older
+diagnostic source-context fixture was reconciled with the explicit budget
+amendment; its missing/duplicate/altered-context checks remain active.
+
+Correction validation: `pnpm check` passes; portable case/tool suite has 740 passes
+and two existing opt-in skips (742 total); public export audit passes with 270
+local files and all 147 approved assets. The slow HTTP regression passes in
+Chromium, WebKit and mobile Chromium (3/3, no retry). Inverting the progress-expiry
+guard in an ignored isolated copy makes the acquisition regression fail; product
+files were not mutated. Review found no remaining required change across
+correctness, readability, ownership, source security and resource cost. There is
+no new dependency, scheduler or original-asset change. Fresh exact candidate
+CI/deployment and complete live acceptance remain required.

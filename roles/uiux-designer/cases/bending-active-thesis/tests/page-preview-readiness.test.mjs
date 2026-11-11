@@ -95,3 +95,15 @@ test('report diagnostics bound reasons and cannot throw into readiness',async()=
  assert.equal(registration.report({mode:'static',reason:'x'.repeat(300)}),true);
  assert.equal(seen.reason.length,160);assert.equal((await readiness.promise).ready,true);
 });
+test('only the current pending owner can publish new bytes from its live transfer',()=>{
+ const node={},doc={querySelectorAll:()=>[node]};let progress=0;
+ const readiness=acquirePagePreviewReadiness(doc,{onProgress:()=>progress++}),first=registerPagePreviewReadiness(doc,node),a=new AbortController();
+ assert.equal(first.progress({signal:a.signal,loaded:1}),true);
+ for(const loaded of [0,1,-1,NaN,1.5])assert.equal(first.progress({signal:a.signal,loaded}),false);
+ const b=new AbortController();assert.equal(first.progress({signal:b.signal,loaded:2}),false);
+ a.abort();assert.equal(first.progress({signal:a.signal,loaded:3}),false);assert.equal(first.progress({signal:b.signal,loaded:1}),true);
+ const second=registerPagePreviewReadiness(doc,node),c=new AbortController();
+ assert.equal(first.progress({signal:b.signal,loaded:4}),false);assert.equal(second.progress({signal:c.signal,loaded:1}),true);
+ assert.equal(readiness.inspect().ready,false);second.report({mode:'model'});
+ assert.equal(second.progress({signal:c.signal,loaded:2}),false);assert.equal(progress,3);readiness.release();
+});

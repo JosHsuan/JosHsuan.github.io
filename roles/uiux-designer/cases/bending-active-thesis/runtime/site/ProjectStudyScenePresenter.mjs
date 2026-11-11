@@ -1,7 +1,7 @@
 import {createScrollCameraPath,sampleScrollCamera,composeCameraIntent,sampleHandheldSurface} from '../motion/scroll-camera-score.mjs';
 import {EventManager} from '../core/EventManager.ts';
 import {createPreviewLifecycle} from './PreviewLifecycle.mjs';
-import {registerPagePreviewReadiness} from './PagePreviewReadiness.mjs';
+import {registerPagePreviewReadiness,PREVIEW_TRANSFER_MAX_MS} from './PagePreviewReadiness.mjs';
 import {CANVAS_ENTRY_SECONDS,CANVAS_EXIT_SECONDS} from '../../components/canvas-motion.mjs';
 
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
@@ -123,13 +123,13 @@ export function createProjectStudyScenePresenter({root,host,model,window:win,doc
   if(press){const current=press;press=null;gestures.push({id:current.id,status:reason==='released'?'released':'cancelled',reason});if(gestures.length>32)gestures.shift();if(current.surface.hasPointerCapture?.(current.pointerId))current.surface.releasePointerCapture(current.pointerId);}
   target=rest();if(immediate){value=rest();velocity=rest();settled=true;}else settled=Object.keys(value).every(key=>value[key]===0&&velocity[key]===0);
  };
- lifecycle=createPreviewLifecycle({retainWhenInactive:true,setTimeout:win.setTimeout.bind(win),clearTimeout:win.clearTimeout.bind(win),onState:state=>{
+ lifecycle=createPreviewLifecycle({retainWhenInactive:true,transferDeadline:PREVIEW_TRANSFER_MAX_MS,now:()=>win.performance?.now?.()??Date.now(),setTimeout:win.setTimeout.bind(win),clearTimeout:win.clearTimeout.bind(win),onState:state=>{
   if(disposed)return;
   if(state.phase==='ready'&&state.resource?.firstDraw?.completed)readiness.report({mode:'model'});
   else if(state.phase==='failed'){arrivalStatic=true;staticReason=state.reason;staticReady();closeGesture('resource-unavailable',true);}
   announce();schedule();
- },start:async({signal,width,height})=>{
-  const handle=await acquire({host,model,signal,onFailure:reason=>{if(!disposed&&!signal.aborted)lifecycle.fail(reason);}});
+ },start:async({signal,width,height,reportProgress})=>{
+  const handle=await acquire({host,model,signal,onProgress:loaded=>{if(reportProgress(loaded))readiness.progress({signal,loaded});},onFailure:reason=>{if(!disposed&&!signal.aborted)lifecycle.fail(reason);}});
   if(disposed||signal.aborted){handle.dispose();throw new DOMException('Project study released','AbortError');}
   try{
    handle.present(cameraPresentation(model.chapters.includes(chapter)?chapter:model.chapters[0]));handle.resize(width,height);

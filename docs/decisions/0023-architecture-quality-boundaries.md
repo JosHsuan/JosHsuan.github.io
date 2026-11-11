@@ -41,6 +41,17 @@ renderers with R3F, add a scheduler, or move pure helpers only to rename folders
    other dependency versions. Record the development-only minimatch advisory
    and its absent triggering configuration in the review rather than forcing
    an unsupported major into the pinned lint/parser dependency tree.
+7. Live acceptance of `95efdb7` reproduced cancellation of HC3DP's valid
+   50,438,508-byte source on desktop and mobile. Generic study transfers now
+   report actual decoded response bytes through their existing lifecycle and
+   page-readiness owners. New bytes before expiry renew a 15-second idle bound,
+   within a 120-second visible arrival maximum. Unknown participants, stalled
+   downloads, duplicate/stale progress and overdue callbacks cannot extend it.
+   Document/font/image readiness retains its own original bound; native reveal
+   still requires real play acceptance and completion. Source hash, geometry,
+   material and first-draw requirements remain unchanged. This explicitly
+   amends the fixed arrival bound only for progressing source transfers; it
+   adds no frame clock, render mode, retry loop or external service.
 
 ## Verification and limitations
 

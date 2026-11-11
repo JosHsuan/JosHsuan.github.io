@@ -72,6 +72,54 @@ test('preview preparation consumes the existing arrival budget instead of receiv
  native.owned.forEach(item=>item.finish());await flush();assert.equal(manager.inspect().phase,'entered');
 });
 
+test('a progressing source transfer can cross the initial arrival deadline but still requires first draw and native play',async t=>{
+ const node=new Element(),f=environment({previews:[node]}),native=nativeReveal(f),manager=connect(t,f);
+ const registration=registerPagePreviewReadiness(f.doc,node),transfer=new AbortController();await flush();
+ f.advance(8000);registration.progress?.({signal:transfer.signal,loaded:1024});
+ f.advance(6000);registration.progress?.({signal:transfer.signal,loaded:2048});
+ f.advance(2000);await flush();assert.equal(manager.inspect().phase,'requested');assert.equal(native.frames.size,0);
+ registration.report({mode:'model'});await presented(native);assert.equal(manager.inspect().phase,'revealing');
+ native.owned.forEach(item=>item.finish());await flush();assert.equal(manager.inspect().phase,'entered');assert.equal(f.timers.size,0);
+});
+
+test('repeated bytes, expired progress and a continuing trickle cannot evade preparation bounds',async t=>{
+ for(const kind of ['repeated','late','trickle']){
+  const node=new Element(),f=environment({previews:[node]}),manager=connect(t,f),registration=registerPagePreviewReadiness(f.doc,node),transfer=new AbortController();await flush();
+  if(kind==='repeated'){
+   f.advance(10000);assert.equal(registration.progress({signal:transfer.signal,loaded:1}),true);
+   f.advance(10000);assert.equal(registration.progress({signal:transfer.signal,loaded:1}),false);f.advance(5000);
+  }else if(kind==='late'){
+   f.elapse(15000);registration.progress({signal:transfer.signal,loaded:1});
+  }else{
+   for(let i=1;i<12;i++){f.advance(10000);registration.progress({signal:transfer.signal,loaded:i});assert.equal(manager.inspect().phase,'requested');}
+   f.advance(10000);
+  }
+  await flush();assert.equal(manager.inspect().phase,'failed',kind);assert.equal(manager.inspect().reason,'readiness-timeout');assert.equal(f.timers.size,0);
+  assert.equal(registration.report({mode:'model'}),false);
+ }
+});
+
+test('source progress cannot extend document font readiness or native play after the source settles',async t=>{
+ for(const kind of ['font','native']){
+  const node=new Element(),f=environment({previews:[node],fonts:kind==='font'?new Promise(()=>{}):Promise.resolve()}),native=nativeReveal(f,{manualReady:true}),manager=connect(t,f);
+  const registration=registerPagePreviewReadiness(f.doc,node),transfer=new AbortController();await flush();
+  f.advance(10000);registration.progress({signal:transfer.signal,loaded:1});
+  if(kind==='native'){registration.report({mode:'model'});await flush();native.frame();}
+  f.advance(kind==='font'?5000:15000);await flush();
+  assert.equal(manager.inspect().phase,'failed');assert.equal(manager.inspect().reason,kind==='font'?'readiness-timeout':'presentation-timeout');
+  assert.equal(registration.progress({signal:transfer.signal,loaded:2}),false);assert.equal(f.timers.size,0);
+ }
+});
+
+test('hidden transfer preparation preserves remaining visible idle and total bounds',async t=>{
+ const node=new Element(),f=environment({previews:[node]}),manager=connect(t,f),registration=registerPagePreviewReadiness(f.doc,node),transfer=new AbortController();await flush();
+ f.advance(10000);registration.progress({signal:transfer.signal,loaded:1});
+ f.doc.hidden=true;f.doc.dispatchEvent(new Event('visibilitychange'));f.advance(200000);
+ registration.progress({signal:transfer.signal,loaded:2});assert.equal(manager.inspect().phase,'requested');assert.equal(f.timers.size,0);
+ f.doc.hidden=false;f.doc.dispatchEvent(new Event('visibilitychange'));f.advance(14999);assert.equal(manager.inspect().phase,'requested');
+ f.advance(1);await flush();assert.equal(manager.inspect().reason,'readiness-timeout');assert.equal(f.timers.size,0);
+});
+
 test('a genuine static source fallback still waits for its poster and the normal motion reveal',async t=>{
  const poster=new Element(),decoded=deferred(),node=new Element();Object.assign(poster,{complete:true,naturalWidth:100,decode:()=>decoded.promise});
  const f=environment({previews:[node],images:[poster]}),native=nativeReveal(f);f.media.matches=true;const manager=connect(t,f);

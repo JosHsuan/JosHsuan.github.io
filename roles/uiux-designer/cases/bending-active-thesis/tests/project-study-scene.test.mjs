@@ -39,6 +39,18 @@ function fixture({pending=false,firstDraw=true,reduced=false,externalStage=false
  return{doc,win,root,host,surface,control,model,modelUI,publisher,policy,timers,waiting,handle,scene,step,settle,select,pointer,key,presentations,calls,sizes,poster,advanceClock:ms=>{now+=ms;},fail:reason=>failResource(reason),get starts(){return starts;},get disposed(){return disposed;},get schedules(){return schedules;},get signal(){return fixtureSignal;}};
 }
 
+test('the scene adapter forwards native transfer progress without reporting readiness before first draw',async()=>{
+ let transfer;const pending=deferred(),f=fixture({acquisition:options=>{transfer=options;return pending.promise;}});let reports=0;
+ const readiness=acquirePagePreviewReadiness(f.doc,{onProgress:()=>reports++});
+ try{
+  await flush();f.advanceClock(8000);transfer.onProgress(100);f.advanceClock(6000);transfer.onProgress(200);f.advanceClock(2000);
+  for(const [id,timer]of [...f.timers]){f.timers.delete(id);timer.fn();}
+  assert.equal(f.scene.inspect().phase,'requested');assert.equal(transfer.signal.aborted,false);assert.equal(reports,2);assert.equal(readiness.inspect().ready,false);
+  pending.resolve(f.handle);await flush();assert.equal(f.scene.inspect().phase,'ready');assert.equal((await readiness.promise).previews[0].mode,'model');
+  transfer.onProgress(300);assert.equal(reports,2);assert.equal(f.timers.size,0);
+ }finally{readiness.release();f.scene.dispose();}
+});
+
 test('a pending static model poster has no timer until selected and preserves its active preparation bound across suspension and source departure',async()=>{
  const f=fixture({reduced:true,externalStage:true,posterPending:true});await flush();assert.equal(f.timers.size,0);f.root.dataset.projectActiveChapter='context';assert.equal(f.scene.prepare('context'),false);assert.equal(f.timers.size,1);assert.equal([...f.timers.values()][0].delay,15000);
  const stale=[...f.timers.values()][0].fn;f.advanceClock(5000);f.policy.hidden=true;f.scene.suspend('page');assert.equal(f.timers.size,0);assert.equal(f.scene.inspect().posterPreparation.remainingMs,10000);f.advanceClock(100000);stale();assert.equal(f.scene.inspect().posterFailed,false);

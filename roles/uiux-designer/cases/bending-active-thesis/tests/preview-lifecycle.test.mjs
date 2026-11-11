@@ -5,6 +5,19 @@ import {createPreviewLifecycle,createExclusivePreviewLease,observePreviewEligibi
 const deferred=()=>{let resolve,reject;const promise=new Promise((yes,no)=>{resolve=yes;reject=no;});return{promise,resolve,reject};};
 const flush=async()=>{for(let i=0;i<8;i++)await Promise.resolve();};
 
+test('progressing acquisition survives the initial deadline while a stalled transfer still aborts',async t=>{
+ let clock=0,serial=0,progress,signal;const timers=new Map(),pending=deferred();
+ const controller=createPreviewLifecycle({now:()=>clock,transferDeadline:120000,
+  start:options=>{progress=options.reportProgress;signal=options.signal;return pending.promise;},
+  setTimeout:(callback,delay)=>{timers.set(++serial,{callback,at:clock+delay});return serial;},clearTimeout:id=>timers.delete(id)});
+ t.after(()=>controller.dispose());controller.setActive(true);await flush();
+ const advance=delta=>{clock+=delta;for(const [id,timer]of [...timers])if(timer.at<=clock){timers.delete(id);timer.callback();}};
+ advance(8000);progress?.(1024);advance(6000);progress?.(2048);advance(2000);
+ assert.equal(controller.inspect().phase,'requested');assert.equal(signal.aborted,false);
+ advance(12999);assert.equal(controller.inspect().phase,'requested');advance(1);
+ assert.equal(controller.inspect().reason,'load-timeout');assert.equal(signal.aborted,true);assert.equal(timers.size,0);
+});
+
 test('permanent disposal closes acquisition before notifying reentrant observers',async()=>{
  const timers=new Map();let serial=0,starts=0,controller;
  controller=createPreviewLifecycle({
@@ -20,6 +33,18 @@ test('permanent disposal closes acquisition before notifying reentrant observers
  assert.equal(timers.size,0);
  assert.equal(starts,1);
  controller.dispose();
+});
+
+test('late progress and late fulfillment cannot revive an expired transfer before timer delivery',async t=>{
+ for(const kind of ['progress','fulfillment','maximum']){
+  let clock=0,progress,signal,disposals=0;const pending=deferred();
+  const f=fixture(t,options=>{progress=options.reportProgress;signal=options.signal;return pending.promise;},{now:()=>clock,transferDeadline:30000});
+  f.controller.setActive(true);await flush();
+  if(kind==='maximum'){clock=10000;assert.equal(progress(1),true);clock=20000;assert.equal(progress(2),true);clock=30000;assert.equal(progress(3),false);}
+  else{clock=15000;if(kind==='progress')assert.equal(progress(1),false);}
+  pending.resolve({dispose(){disposals++;}});await flush();
+  assert.equal(f.controller.inspect().reason,'load-timeout');assert.equal(signal.aborted,true);assert.equal(disposals,1);assert.equal(f.timers.size,0);
+ }
 });
 function fixture(t,start,options={}){
  const timers=new Map();let next=0;

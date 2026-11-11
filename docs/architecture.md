@@ -36,6 +36,12 @@ visual and continuous-motion authority. Historical framework timeline examples
 below do not reintroduce pause controls or preference-selected static modes in
 the selected public application.
 
+The live HC3DP acceptance follow-up in decision 0023 amends the generic study
+transfer budget: actual new response bytes may renew the 15-second idle bound,
+within a 120-second visible arrival maximum. Document readiness and actual
+first-draw/native-play evidence remain required. This supersedes the historical
+fixed arrival endpoint below only for progressing model transfers.
+
 ## Executive decision
 
 **Portfolio refinement — 20 October 2026:** [Decision 0019](decisions/0019-portfolio-refinement-and-runtime.md) implements original-portfolio Caschlatsch evidence, compact Mode/s recordings, all twelve roles' six-study UI/UX and interaction refinement, a bounded senior runtime refactor, and the architecture-led root README. `ProjectStudyChapterPresenter` publishes one native chapter result to source intent, rail and counter on the existing ordinary-page demand frame; it replaces duplicate layout/event selection without changing source recipes or introducing another clock. Explicit `pagehide.persisted === false` now closes SiteNavigation and Bending's existing feature/kernel owners; retained states keep their suspension path. The [integration contract](../roles/uiux-designer/cases/bending-active-thesis/PORTFOLIO_REFINEMENT_INTEGRATION.md) and [verification record](../roles/uiux-designer/cases/bending-active-thesis/PORTFOLIO_REFINEMENT_VERIFICATION.md) distinguish source, paired lab measurements, exact-commit CI, same-artifact publication and live acceptance. Earlier scopes below are historical checkpoints; Bending/XR presentation, original assets and the empty framework remain protected.

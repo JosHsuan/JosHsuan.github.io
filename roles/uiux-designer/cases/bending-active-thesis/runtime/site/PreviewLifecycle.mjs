@@ -8,8 +8,9 @@ export function createExclusivePreviewLease(){
 
 /** One asynchronous acquisition, one terminal, no rendering clock. start must
  * release partial resources on signal abort; late fulfilled handles are disposed. */
-export function createPreviewLifecycle({start,onState=()=>{},deadline=15000,setTimeout:setTimer=globalThis.setTimeout,clearTimeout:clearTimer=globalThis.clearTimeout,lease,retainWhenInactive=false}={}){
+export function createPreviewLifecycle({start,onState=()=>{},deadline=15000,transferDeadline=null,now=()=>performance.now(),setTimeout:setTimer=globalThis.setTimeout,clearTimeout:clearTimer=globalThis.clearTimeout,lease,retainWhenInactive=false}={}){
  if(typeof start!=='function')throw TypeError('Preview requires an acquisition factory');
+ if(transferDeadline!==null&&(!Number.isFinite(transferDeadline)||transferDeadline<deadline))throw RangeError('Transfer preparation must have a finite bound at least as long as its idle deadline');
  let active=false,disposed=false,generation=0,operation=null,handle=null,abort=null,timer=null,releaseLease=null,pending=false;
  let phase='poster',reason='initial',size={width:1,height:1},acquisitions=0,disposals=0,renders=0;
  const history=[],resourceFailures=[];
@@ -41,9 +42,22 @@ export function createPreviewLifecycle({start,onState=()=>{},deadline=15000,setT
   pending=true;phase='requested';reason='';acquisitions++;record('requested');notify();
   if(disposed||current!==generation)return;
   releaseLease=lease?.acquire(stop)??null;
-  timer=setTimer(()=>{if(current===generation&&!disposed)fail('load-timeout');},deadline);
-  Promise.resolve().then(()=>{if(signal.aborted)return null;return start({signal,...size});}).then(resource=>{
+  const started=now(),maximum=started+(transferDeadline??deadline);let expires=started+deadline,loaded=0;
+  const valid=()=>!disposed&&current===generation&&!signal.aborted&&pending;
+  const reportProgress=bytes=>{
+   if(!valid()||transferDeadline===null||!Number.isSafeInteger(bytes)||bytes<=loaded)return false;
+   const at=now();if(at>=expires){fail('load-timeout');return false;}
+   loaded=bytes;expires=Math.min(maximum,at+deadline);return true;
+  };
+  const arm=()=>{timer=setTimer(()=>{
+   if(!valid())return;
+   if(transferDeadline!==null&&now()<expires){arm();return;}
+   fail('load-timeout');
+  },transferDeadline===null?deadline:Math.max(0,Math.ceil(expires-now())));};
+  arm();
+  Promise.resolve().then(()=>{if(signal.aborted)return null;return start({signal,reportProgress,...size});}).then(resource=>{
    if(disposed||current!==generation||signal.aborted||!active){resource?.dispose?.();return;}
+   if(transferDeadline!==null&&now()>=expires){resource?.dispose?.();fail('load-timeout');return;}
    if(typeof resource?.dispose!=='function')throw Error('Invalid preview handle');
    handle=resource;pending=false;clear();
    if(handle.resize){handle.resize(size.width,size.height);renders++;}
