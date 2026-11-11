@@ -1,6 +1,6 @@
 # Architecture review and revision — 11 November 2026
 
-Status: **first revision deployed; live-discovered transfer correction under validation**. The owner authorizes a comprehensive architecture audit,
+Status: **first revision deployed; transfer correction undergoing renewed full CI diagnosis and validation**. The owner authorizes a comprehensive architecture audit,
 implementation, commit/push, verification and same-artifact deployment, with no
 paid services or charge-incurring features. The preceding skill/workflow change
 was committed separately as `9dcc58f` and pushed without deployment.
@@ -211,3 +211,75 @@ files were not mutated. Review found no remaining required change across
 correctness, readability, ownership, source security and resource cost. There is
 no new dependency, scheduler or original-asset change. Fresh exact candidate
 CI/deployment and complete live acceptance remain required.
+
+### Follow-up candidate checkpoint
+
+Candidate `498aa7d1074e16aa2b349f18016ff47c2ca5217e` is pushed. Its exact
+[CI run 43092007345](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/43092007345)
+selected the full 648-test public inventory. The downloaded 268-file export
+matches build digest `876fd62f98b899878d0f84b185a60528d14a635dbccae61beae5ad999cb26f54`;
+all 147 approved assets and 137 protected originals match. Independent local
+acceptance of that artifact passes 24 route checks and six desktop/mobile
+journeys; all eight captured screenshots were inspected. Both framework jobs
+pass their 12 browser checks. The final source boundary has 174 files, 152 code
+modules and 266 internal edges.
+
+At the 11 November 20:35 UTC observation, WebKit shard `2/3` had a failed test
+step, and all eight unfinished browser jobs had artifact-upload step failures.
+Their jobs were still running cleanup/evidence upload. Connector reads timed
+out; direct authenticated API reads verified artifact metadata but returned
+HTTP 502 for archive and failed-job log downloads. An uncached archive request
+had the same result. Check-run annotations were empty; the browser job page
+required a login unavailable in that browser. These observations do not identify
+the failed WebKit scenario or prove a global GitHub outage. No test failure has
+been retried or dismissed, no acceptance gate weakened, and this candidate has
+not been deployed. Retrieve the original failure evidence before selecting a
+repair or a fresh full validation attempt. Local evidence is retained under
+`.runtime/architecture-20261111-readiness/`.
+
+The 20:50 UTC follow-up still reports the same eight jobs as `in_progress`;
+this observation is not a terminal result and the existing run was not cancelled.
+Twelve of thirteen browser test steps report success, while WebKit `2/3` reports
+failure. One additional archive became readable: Chromium `3/6` has 43 passing
+results, no retry, and the exact candidate/run/attempt/build digest. Its ZIP digest
+is verified; this is partial receipt evidence, not full inventory reconciliation.
+The other three attempted receipt downloads and the failed WebKit log still time
+out. Direct job-log access returns HTTP 502; the whole-run archive returns HTTP
+404 while that run is active. Check annotations remain empty, and no alternate
+connected authenticated browser is available. A global service outage is not
+established.
+
+The same inability to obtain the original failed scenario has recurred across
+three goal continuations. Further product repair and publication require that
+failure evidence or restored log access. At that checkpoint the goal was blocked rather than complete;
+the unresolved candidate is not published, and no paid service or new runner was
+enabled. On resumption, first inspect the original run's authoritative state and
+retrieve its WebKit failure evidence. Then diagnose/repair as warranted, complete
+a fresh provenance-consistent full CI gate, publish its exact artifact, and finish
+live byte/route/interaction acceptance. Do not infer success from the partial
+receipts or restart a still-active run solely because observation took longer.
+
+### Resumed diagnosis after the original run ended
+
+At 22:34 UTC the original run reports `completed/failure`. The eight unfinished
+browser jobs are now cancelled, and WebKit's check annotation says it exceeded
+the 45-minute maximum. The test-step failure preceded the upload failures and
+must not be relabelled as a passing test. Its single-job log now returns
+`BlobNotFound`; the downloaded 190,444-byte whole-run log archive contains no
+WebKit job logs, and no WebKit review/receipt artifact is available.
+
+Recovered Chromium `2/6` and `6/6` logs show 35 and 41 passing tests respectively,
+then artifact creation fails after five attempts because an HTML response cannot
+be parsed as JSON. Finalization also reports HTTP 404 / artifact not found.
+This establishes a separate artifact-service failure in that execution; it does
+not establish the missing WebKit assertion or a repository runtime defect.
+
+The owner explicitly resumed diagnosis through verified deployment. Retain the
+failed run and its available evidence. Commit this checkpoint and run a fresh
+full push candidate with the same application, tests, browser image and workflow;
+the successful-ancestor selector includes the intervening unvalidated runtime
+changes. This avoids mixing rerun-attempt receipts or overwriting original run
+artifacts. Existing WebKit process diagnostics remain enabled, and no retry,
+assertion, timeout or publication gate is relaxed. Diagnose any reproduced
+failure from its actual log before changing code. A new passing run, if obtained,
+cannot retroactively identify the original missing failure.
