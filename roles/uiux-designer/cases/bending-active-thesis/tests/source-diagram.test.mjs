@@ -41,7 +41,14 @@ test('actual SVG/React rendering, keyboard selection, autonomous highlights and 
   const require = createRequire(path.join(root, 'package.json'));
   const esbuild = require(require.resolve('esbuild', {paths: [path.dirname(require.resolve('tsx'))]}));
   const {chromium} = require('@playwright/test');
-  const entry = `import React from 'react'; import {createRoot} from 'react-dom/client'; import SourceDiagram from ${JSON.stringify(path.join(caseRoot, 'components/SourceDiagram.jsx'))}; createRoot(document.getElementById('app')).render(React.createElement('main',{},...['library','miura','workflow'].map(kind=>React.createElement(SourceDiagram,{kind,key:kind}))));`;
+  const entry = `import React, {useEffect} from 'react';
+    import {createRoot} from 'react-dom/client';
+    import SourceDiagram from ${JSON.stringify(path.join(caseRoot, 'components/SourceDiagram.jsx'))};
+    import {ExperienceProvider,useExperienceInput} from ${JSON.stringify(path.join(caseRoot, 'runtime/ExperienceProvider.jsx'))};
+    function Probe(){const input=useExperienceInput();useEffect(()=>{window.diagramInput=input;},[input]);return null;}
+    const root=createRoot(document.getElementById('app'));
+    window.renderDiagrams=(visible=true)=>root.render(React.createElement(React.StrictMode,{},React.createElement(ExperienceProvider,{},React.createElement(Probe),React.createElement('main',{},...(visible?['library','miura','workflow']:[]).map(kind=>React.createElement(SourceDiagram,{kind,key:kind}))))));
+    window.renderDiagrams();`;
   const bundle = await esbuild.build({stdin: {contents: entry, loader: 'jsx', resolveDir: root}, bundle: true, write: false, outfile: 'fixture.js', loader: {'.css': 'local-css'}, jsx: 'automatic'});
   const files = new Map(bundle.outputFiles.map(file => [`/${path.basename(file.path)}`, file.contents]));
   for (const name of await readdir(assets)) files.set(`/assets/diagrams/${name}`, await readFile(path.join(assets, name)));
@@ -56,7 +63,7 @@ test('actual SVG/React rendering, keyboard selection, autonomous highlights and 
   });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   const browser = await chromium.launch({headless: true});
-  const output = process.env.DIAGRAM_OUTPUT || 'D:/JosHsuan_Website/_work/bending-active-thesis/round-06/artwork/diagrams/review';
+  const output = process.env.DIAGRAM_OUTPUT || path.join(root, '.runtime/qa/source-diagrams');
   await mkdir(output, {recursive: true});
   const errors = [];
   try {
@@ -64,7 +71,7 @@ test('actual SVG/React rendering, keyboard selection, autonomous highlights and 
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(`http://127.0.0.1:${server.address().port}/`);
     await page.waitForSelector('[data-source-diagram="workflow"] button');
-    await page.evaluate(() => {window.selectionEvents = []; window.addEventListener('thesis:representation', event => window.selectionEvents.push(event.detail));});
+    await page.evaluate(() => {window.selectionEvents = []; window.releaseSelection = window.diagramInput.state.subscribe(state => state.sourceSelection, selection => {if(selection) window.selectionEvents.push({chapterId:selection.chapterId,index:selection.index});});});
     const workflow = page.locator('[data-source-diagram="workflow"]');
     await workflow.evaluate(node => {node.dataset.sourcePresented = 'true';node.dataset.autonomousIndex = '3';});
     assert.equal(await workflow.getAttribute('data-diagram-selection'), 'origami', 'independent phase never disagrees with actual source');
@@ -100,8 +107,17 @@ test('actual SVG/React rendering, keyboard selection, autonomous highlights and 
       }
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
     }
+    const transitions=await workflow.locator('button').first().evaluate(node=>getComputedStyle(node).transitionDuration);
     await page.emulateMedia({reducedMotion: 'reduce'});
-    assert.equal(await workflow.locator('button').first().evaluate(node => getComputedStyle(node).transitionDuration), '0s');
+    assert.equal(await workflow.locator('button').first().evaluate(node=>getComputedStyle(node).transitionDuration), transitions, 'current continuous-motion contract retains the authored interaction');
+    const retained=await page.evaluate(()=>window.diagramInput.inspect().events);
+    await page.evaluate(()=>window.renderDiagrams(false));
+    await page.waitForFunction(()=>document.querySelectorAll('[data-source-diagram]').length===0);
+    await page.evaluate(()=>window.renderDiagrams());
+    await page.waitForSelector('[data-source-diagram="workflow"] button');
+    const remounted=await page.evaluate(()=>window.diagramInput.inspect().events);
+    assert.equal(remounted.nativeListeners,retained.nativeListeners,'remount retains one set of native listeners');
+    assert.equal(remounted.subscriptions,retained.subscriptions,'remount retains one set of subscriptions');
     await page.route('**/assets/diagrams/library.json', route => route.abort());
     await page.reload();
     const fallback = page.locator('[data-source-diagram="library"] img');
@@ -109,6 +125,6 @@ test('actual SVG/React rendering, keyboard selection, autonomous highlights and 
     await page.waitForFunction(() => document.querySelector('[data-source-diagram="library"] img')?.naturalWidth > 0);
     await fallback.screenshot({path: path.join(output, 'library-static-fallback.png')});
     assert.deepEqual(errors, []);
-    await writeFile(path.join(output, 'component-verification.json'), JSON.stringify({engine: 'Chromium', widths: [1120, 390], pageErrors: errors, keyboard: true, autonomousNoEvent: true, deliberateEvent: true, pinnedSelection: true, reduced: true, staticFallback: true}, null, 2));
+    await writeFile(path.join(output, 'component-verification.json'), JSON.stringify({engine: 'Chromium', widths: [1120, 390], pageErrors: errors, keyboard: true, autonomousNoEvent: true, deliberateEvent: true, pinnedSelection: true, continuousPreference: true, strictMode: true, remount: true, staticFallback: true}, null, 2));
   } finally {await browser.close(); await new Promise(resolve => server.close(resolve));}
 });

@@ -135,8 +135,9 @@ tool's separate Bun/browser runtime does not change those versions. Consult
 [impact selector](../scripts/ci-impact.mjs) for scope.
 
 - Architecture changes require `pnpm check`; public-case changes also need
-  relevant case/runtime contracts, scoped lint and the selected built-artifact
-  Playwright projects. Root lint excludes isolated role workspaces.
+  relevant case/runtime contracts and the selected built-artifact Playwright
+  projects. `pnpm lint` includes public source-manifest lint; other isolated role
+  workspaces remain outside that approved application boundary.
 - Build the selected public application with `pnpm build:pages` and verify
   `.pages-workspace/out/`; framework acceptance uses `out/`. A development
   server and a gstack browser smoke test cannot replace these gates.

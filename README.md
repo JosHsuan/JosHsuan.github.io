@@ -22,6 +22,11 @@ Implemented source, local acceptance and a deployed release are separate facts;
 the public [`release.json`](https://joshsuan.github.io/release.json) identifies
 the deployed commit and source revisions.
 
+The [11 November architecture review](docs/ARCHITECTURE_REVIEW_20261111.md)
+records the current source-boundary and lifecycle revision under
+[decision 0023](docs/decisions/0023-architecture-quality-boundaries.md).
+Its implementation, candidate checks and publication status are tracked separately.
+
 The [site-wide refinement coverage matrix](roles/uiux-designer/cases/bending-active-thesis/PORTFOLIO_SITEWIDE_COVERAGE.md)
 retains historical rollout evidence. The current contract requires shared liquid
 card motion, all model adapters, Home discovery and complete route acceptance.
@@ -74,9 +79,12 @@ pins public bytes and source-record hashes. Story/introduction/contact JSON,
 XR records and `project-studies.json` supply the selected application;
 `project-assets.json` records the reviewed derivatives and provenance.
 [`build-pages.mjs`](scripts/build-pages.mjs) verifies that handoff, copies only
-explicitly allowed source/assets into a generated workspace, builds once and
+source files from the shared [public source manifest](scripts/pages-sources.mjs)
+and pinned assets into a generated workspace, builds once and
 runs [`audit-pages.mjs`](scripts/audit-pages.mjs). Image/model/media validators
 check the declared dimensions, source geometry and native timing where relevant.
+The shared source audit rejects unapproved imports, module cycles and core-to-UI
+dependencies before copying; the same manifest selects public lint coverage.
 Original documents, drafts, SQL, private paths and raw review records are not
 browser inputs. Publicly delivered assets are downloadable; a viewer is not a
 confidentiality boundary.
@@ -106,7 +114,7 @@ describe their boundaries.
 | `SiteBackgroundDriver` | Existing ordinary-page demand scheduler for atmosphere, Home/six-case reading response, glass and generic project source presentation. No separate generic chapter or media animation loop. |
 | `ProjectStudyChapterPresenter` | One six-case semantic chapter owner. Layout invalidation caches fractional native section anchors; the current viewport midpoint selects chapter intent, rail and counter before source presentation. No user or preference-driven motion pause mode is exposed. |
 | `ProjectStudyBackdropPresenter` | One generic image/video/model source transaction: exit → prepare → enter → hold, with explicit supersession/failure closure and actual decode/paint gates. |
-| Stage registry / scene presenter / Three adapter | React registers a native host; the project owner manages preparation and inspection; the renderer alone writes the source model and final camera. Off-chapter ready resources are retained, then disposed on actual departure. |
+| Stage registry / scene presenter / Three adapter | React registers a native host through a rollback-safe document registry; the project owner manages preparation and inspection; the renderer alone writes the source model and final camera. Off-chapter ready resources are retained, then disposed on actual departure. |
 | Bending runtime / `ExperienceDirector` | Closed feature registration, validated commands/discrete state, native reading and its existing chapter/frame orchestration. Continuous values stay outside React state. |
 | `XRStageDirector` | XR's existing project-local stage, inspection and reading presentation. It does not write the ordinary driver's Layer 1 background or native video time. |
 | `EventManager`, `DisposableScope`, `DOMPresenter` | Scoped registration/cleanup and owner-specific DOM publication that suppresses unchanged writes. These services do not choose narrative or create another clock. |
@@ -182,7 +190,7 @@ not a development server.
 
 | Command | Actual scope |
 | --- | --- |
-| `pnpm check` | Framework content/lint/types/unit tests, CI selector/gate tests, framework export and artifact audit. Does not replace the public-case suites below. |
+| `pnpm check` | Framework content/types/unit tests, framework and public-source lint, source-boundary regressions, CI selector/gate tests, framework export and artifact audit. Does not replace the public-case suites below. |
 | `node --test roles/uiux-designer/cases/bending-active-thesis/tests/*.test.mjs roles/uiux-designer/tools/*.test.mjs` | Portable case/runtime/source/tool contracts. Report intentional skips separately. |
 | `pnpm build:pages` / `pnpm audit:pages` | Complete selected public export and its source/output boundaries; the latter audits existing output. |
 | `pnpm test:pages` | Built public Chromium, WebKit and mobile Chromium journeys; one worker, no retries. |
@@ -190,8 +198,9 @@ not a development server.
 | `pnpm build` / `pnpm preview` | Empty framework static export and preview at `http://127.0.0.1:4173/`. |
 | `pnpm exec playwright install chromium firefox webkit` / `pnpm test:e2e` | Built framework browser checks; CI tests root and simulated subpath exports. |
 
-Root ESLint intentionally excludes isolated role workspaces; changed case runtime
-files also need explicit scoped lint, as recorded in the architecture review.
+`pnpm lint` runs root ESLint plus `pnpm lint:pages` over the exact public source
+manifest. Isolated role research remains excluded. Native full-document links
+have three explicit exceptions; React correctness checks remain enabled.
 For a framework project-site export, `NEXT_PUBLIC_BASE_PATH` accepts one
 `/repository-name`; leave it empty for the canonical user site. The selected
 public build uses its own verified root-route configuration.
@@ -205,9 +214,9 @@ artifact when that computed scope is genuinely documentation-only.
 
 A public candidate is built once as `static-export-pages`; browser jobs download
 and verify that same complete output before and after testing. The required
-gate validates selected aggregate job results and records the commit, plan and
-output digest. Structured per-test receipt enforcement is not yet part of that
-gate; the separate release audit checks actual execution coverage.
+gate validates selected job results and candidate-bound per-test receipts against
+the enumerated test inventory. It rejects missing, duplicate, skipped, retried or
+foreign test results and records the commit, run/attempt, plan and output digest.
 
 The owner-authorized [`deploy-pages.yml`](.github/workflows/deploy-pages.yml)
 accepts a successful default-branch **push** validation run for the **same commit**.
@@ -217,7 +226,7 @@ a new public application release. After publication, check `release.json`, route
 and asset bytes, native media delivery and desktop/mobile user journeys.
 [CI/CD operations](docs/CI_CD.md) documents the procedure;
 [the DORA-informed plan](docs/CI_DELIVERY_PLAN.md) separates implemented safeguards
-from proposed faster feedback, coverage receipts and recovery improvements.
+from remaining faster-feedback, native-device and recovery improvements.
 
 Green source tests, browser simulations, a human image review, CI, deployment
 provenance and live acceptance establish different things. Current candidate

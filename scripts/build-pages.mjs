@@ -6,11 +6,13 @@ import {fileURLToPath} from 'node:url';
 import assert from 'node:assert/strict';
 import {auditPages,assertXRWorkspaceRecord,assertXRWorkspaceImage} from './audit-pages.mjs';
 import {preparePagesWorkspace} from './prepare-pages-workspace.mjs';
+import {PAGES_SOURCES, PAGES_SOURCE_ROOT} from './pages-sources.mjs';
+import {auditPagesSources} from './audit-pages-sources.mjs';
 import {assertProjectStudies,assertProjectImage,assertProjectModel,assertProjectAssetRecord,projectStudyModels,PROJECT_SLUGS} from './project-studies.mjs';
 import {projectMotionMedia,assertProjectVideo} from './project-motion-media.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
-const source = path.join(root, 'roles/uiux-designer/cases/bending-active-thesis');
+const source = path.join(root, PAGES_SOURCE_ROOT);
 const release = path.join(source, 'release');
 const work = path.join(root, '.pages-workspace');
 const digest = data => createHash('sha256').update(data).digest('hex');
@@ -66,86 +68,10 @@ for (const asset of manifest.assets) {
 }
 assert.equal(path.dirname(path.resolve(work)), path.resolve(root));
 assert.equal(path.basename(work), '.pages-workspace');
+await auditPagesSources(source, PAGES_SOURCES);
 await preparePagesWorkspace(root);
-const sources = [
-  'tsconfig.json', 'runtime/ExperienceProvider.jsx',
-  'runtime/core/DisposableScope.ts', 'runtime/core/EventManager.ts',
-  'runtime/features/ModelManager.mjs',
-  'runtime/features/DiagramManager.mjs',
-  'runtime/features/LifecycleManager.mjs', 'runtime/features/DocumentLifetime.mjs',
-  'runtime/features/EntryManager.mjs', 'runtime/motion/entry-motion.mjs',
-  'runtime/motion/library-reveal.mjs', 'runtime/presentation/LibraryDiagramPresenter.mjs',
-  'runtime/motion/liquid-glass.mjs', 'runtime/presentation/LiquidGlassPresenter.mjs',
-  'runtime/features/ReadingManager.mjs',
-  'runtime/RuntimeInput.ts', 'runtime/contracts/state.ts', 'runtime/contracts/commands.ts',
-  'runtime/core/StateStore.ts', 'runtime/core/FrameStore.ts',
-  'runtime/core/TransactionEngine.ts', 'runtime/core/CommandRouter.ts',
-  'runtime/orchestration/ExperienceDirector.mjs',
-  'runtime/orchestration/CanvasTransitionEvents.mjs',
-  'runtime/presentation/LayoutScheduler.ts', 'runtime/presentation/DOMPresenter.ts',
-  'runtime/presentation/SceneRuntime.mjs',
-  'runtime/presentation/EditorialPresenter.mjs',
-  'runtime/presentation/InformationWindowPresenter.mjs',
-  'runtime/motion/kinetic-motion.mjs', 'runtime/motion/window-motion.mjs',
-  'runtime/motion/window-path.mjs', 'runtime/motion/window-pose.mjs',
-  'runtime/motion/window-scroll.mjs', 'runtime/motion/window-outline.mjs',
-  'runtime/motion/window-recipes.mjs', 'runtime/motion/window-motion-api.mjs',
-  'runtime/motion/velocity-skin.mjs', 'runtime/motion/scroll-camera-score.mjs',
-  'runtime/motion/glass-motion.mjs', 'runtime/presentation/GlassFieldOptics.mjs',
-  'runtime/presentation/ModelAnnotationPresenter.mjs',
-  'runtime/RuntimeRoot.mjs', 'runtime/core/FeatureRegistry.ts', 'runtime/core/Registrar.ts',
-  'app/page.jsx', 'app/share-metadata.mjs', 'app/layout.jsx', 'app/not-found.jsx', 'app/globals.css', 'app/glass-materials.css', 'app/page.module.css',
-  'app/portfolio.module.css', 'app/about/page.jsx', 'app/projects/page.jsx', 'app/contact/page.jsx',
-  'app/projects/bending-active/page.jsx', 'app/projects/xr-bending-active/page.jsx',
-  'components/BendingProject.jsx', 'components/PortfolioHome.jsx', 'components/PortfolioNavigation.jsx',
-  'components/ProjectStudyChrome.jsx', 'release/xr-workspace.json',
-  'components/ProjectCaseStudy.jsx', 'components/ProjectCaseStudy.module.css', 'components/project-study-media.mjs', 'components/project-study-layout.mjs',
-  'components/EditorialProjectStudy.jsx', 'components/EditorialProjectStudy.module.css', 'components/project-editorial-layout.mjs',
-  'components/ProjectCaseStudyControls.jsx', 'components/EntranceDiagramFocus.jsx', 'components/EntranceDiagramFocus.module.css', 'release/project-studies.json',
-  'components/ProjectCaseStudyStage.jsx', 'components/project-study-scene.mjs',
-  'components/project-study-appearance.mjs',
-  'runtime/site/ProjectStudyStageRegistry.mjs', 'runtime/site/ProjectStudyScenePresenter.mjs',
-  'runtime/site/ProjectStudyChapterPresenter.mjs',
-  'runtime/site/ProjectStudyBackdropPresenter.mjs', 'runtime/site/ProjectStudyBackdropMotion.mjs',
-  ...PROJECT_SLUGS.map(slug=>`app/projects/${slug}/page.jsx`),
-  'components/HomeShowcaseStage.jsx', 'runtime/site/HomeShowcasePresenter.mjs', 'runtime/site/HomeDeckPresenter.mjs',
-  'components/xr-bamboo-appearance.mjs',
-  'components/project-study-materials.mjs',
-  'runtime/site/HomeShowcaseShots.mjs',
-  'runtime/site/HomeResearchStageRegistry.mjs',
-  'components/ProjectModelPreview.jsx', 'components/project-model-scene.mjs', 'components/project-model-recipe.mjs', 'components/project-grid-layout.mjs',
-  'components/GlobalBackground.jsx', 'runtime/background/BackgroundRuntime.mjs', 'runtime/background/SiteBackgroundDriver.mjs',
-  'components/research-scene.mjs', 'components/research-scene-geometry.mjs', 'components/prepared-research-support.mjs',
-  'components/XRSceneStage.jsx', 'components/xr-stage-scene.mjs', 'components/xr-scene-stage.module.css',
-  'runtime/xr/XRStageDirector.mjs', 'runtime/xr/XRStageMotion.mjs', 'components/xr-stage-environment.mjs',
-  'runtime/site/PreviewLifecycle.mjs', 'runtime/site/video-resource.mjs',
-  'components/XRProject.jsx', 'components/XRProject.module.css', 'release/xr-study.json', 'release/contact.json',
-  'components/SiteExperience.jsx', 'components/site-experience.module.css',
-  'runtime/site/SiteReadiness.mjs', 'runtime/site/SiteNavigation.mjs', 'runtime/site/site-entry-bridge.mjs',
-  'runtime/site/PagePreviewReadiness.mjs', 'runtime/site/HomeScrollPresenter.mjs',
-  'components/CinematicExperience.jsx', 'components/CinematicScene.jsx',
-  'components/InformationSkin.jsx',
-  'components/GlassWarp.jsx',
-  'components/LiquidGlassSkin.jsx',
-  'components/EntryLoader.jsx', 'components/entry-loader.module.css',
-  'components/ResearchEntryComposition.jsx', 'components/research-entry-composition.module.css',
-  'components/cinematic.module.css', 'components/story-input.js', 'components/story-response.mjs',
-  'components/render-budget.mjs', 'components/runtime-scheduler.mjs', 'components/dom-publisher.mjs', 'components/scene-visibility.mjs',
-  'components/renderer-budget.mjs', 'components/render-pressure.mjs',
-  'components/canvas-motion.mjs',
-  'components/page-field-renderer.mjs', 'components/render-profile.mjs', 'components/scene-recovery.mjs',
-  'components/element-score.mjs', 'components/optical-score.mjs', 'components/scene-compositor.mjs',
-  'components/scene-direction.mjs', 'components/vendor/cinematic-plan.mjs', 'components/vendor/camera-plan.mjs',
-  'components/exhibition-stage.mjs', 'components/editorial-score.mjs',
-  'components/source-scene-score.mjs', 'components/source-scroll-orientation.mjs', 'components/source-scroll-camera-state.mjs', 'components/chapter-playback.mjs', 'components/chapter-scene-score.mjs', 'components/element-choreography.mjs',
-  'components/SourceDiagram.jsx', 'components/source-diagram.module.css',
-  'components/ModelInspector.jsx', 'components/model-inspector.module.css',
-  'components/model-information.mjs',
-  'components/inspection-state.mjs', 'components/inspection-camera.mjs', 'components/inspection-lighting.mjs',
-  'components/inspection-framing-support.mjs',
-  'components/materials/cinematic-material.js', 'release/story.json', 'release/introduction.json',
-];
-for (const relative of sources) {
+
+for (const relative of PAGES_SOURCES) {
   await mkdir(path.dirname(path.join(work, relative)), {recursive: true});
   await copyFile(path.join(source, relative), path.join(work, relative));
 }

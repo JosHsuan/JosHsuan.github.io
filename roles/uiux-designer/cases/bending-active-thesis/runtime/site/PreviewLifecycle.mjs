@@ -26,10 +26,10 @@ export function createPreviewLifecycle({start,onState=()=>{},deadline=15000,setT
   const previous=handle;handle=null;if(previous){previous.dispose();disposals++;}
   releaseLease?.();releaseLease=null;pending=false;
  };
- const stop=(eventReason='offscreen',keepActive=false)=>{
-  if(disposed)return;
-  if(!keepActive)active=false;generation++;drop();record('cancelled',eventReason);phase='poster';reason=eventReason;if(!disposed)notify();
+ const reset=(eventReason,keepActive=false)=>{
+  if(!keepActive)active=false;generation++;drop();record('cancelled',eventReason);phase='poster';reason=eventReason;notify();
  };
+ const stop=(eventReason='offscreen',keepActive=false)=>{if(!disposed)reset(eventReason,keepActive);};
  const fail=eventReason=>{
   if(disposed||phase==='failed')return;
   if(operation?.terminal){resourceFailures.push(Object.freeze({id:operation.id,phase:'resource-failed',reason:eventReason}));if(resourceFailures.length>16)resourceFailures.shift();}
@@ -79,7 +79,7 @@ export function createPreviewLifecycle({start,onState=()=>{},deadline=15000,setT
   stop,
   fail,
   inspect,
-  dispose(){if(disposed)return;stop('disposed');disposed=true;},
+  dispose(){if(disposed)return;disposed=true;reset('disposed');},
  };
 }
 

@@ -34,7 +34,6 @@ export class EventManager<Events extends object = Record<string, unknown>> {
     if (signal?.aborted) return {dispose() {}};
     const capture = typeof options === 'boolean' ? options : !!options.capture;
     const once = typeof options === 'object' && !!options.once;
-    let resource: Disposable | undefined;
     const release = () => resource?.dispose();
     const handler: EventListener = event => {
       if (once) release();
@@ -42,7 +41,7 @@ export class EventManager<Events extends object = Record<string, unknown>> {
     };
     target.addEventListener(type, handler, options);
     this.nativeCount++;
-    resource = scope.add(() => {
+    const resource = scope.add(() => {
       target.removeEventListener(type, handler, capture);
       signal?.removeEventListener('abort', release);
       this.nativeCount--;

@@ -13,9 +13,10 @@
     "content:validate": "tsx scripts/validate-content.ts",
     "content:export": "tsx scripts/export-content.ts",
     "motion:validate": "tsx scripts/validate-motion.ts",
-    "lint": "eslint .",
+    "lint": "eslint . && pnpm lint:pages",
+    "lint:pages": "node scripts/lint-pages.mjs",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test tests/unit/*.test.ts tests/integration/*.test.ts",
+    "test": "tsx --test tests/unit/*.test.ts tests/integration/*.test.ts && node --test tests/quality/*.test.mjs",
     "test:ci": "node --test tests/ci/*.test.mjs",
     "build": "pnpm content:export && pnpm motion:validate && next build --webpack && pnpm audit:build",
     "audit:build": "tsx scripts/audit-build.ts",
@@ -36,7 +37,7 @@
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "three": "0.186.1",
-    "zod": "4.6.5",
+    "zod": "4.6.6",
     "zustand": "5.0.15"
   },
   "devDependencies": {

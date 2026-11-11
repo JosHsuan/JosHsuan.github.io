@@ -4,6 +4,23 @@ import {createPreviewLifecycle,createExclusivePreviewLease,observePreviewEligibi
 
 const deferred=()=>{let resolve,reject;const promise=new Promise((yes,no)=>{resolve=yes;reject=no;});return{promise,resolve,reject};};
 const flush=async()=>{for(let i=0;i<8;i++)await Promise.resolve();};
+
+test('permanent disposal closes acquisition before notifying reentrant observers',async()=>{
+ const timers=new Map();let serial=0,starts=0,controller;
+ controller=createPreviewLifecycle({
+  start:async()=>{starts++;return{dispose(){}};},
+  setTimeout:callback=>{timers.set(++serial,callback);return serial;},
+  clearTimeout:id=>timers.delete(id),
+  onState:state=>{if(state.reason==='disposed')controller.setActive(true);},
+ });
+ controller.setActive(true);await flush();controller.dispose();await flush();
+ assert.equal(controller.inspect().disposed,true);
+ assert.equal(controller.inspect().active,false);
+ assert.equal(controller.inspect().pending,false);
+ assert.equal(timers.size,0);
+ assert.equal(starts,1);
+ controller.dispose();
+});
 function fixture(t,start,options={}){
  const timers=new Map();let next=0;
  const controller=createPreviewLifecycle({start,setTimeout:(callback,delay)=>{const id=++next;timers.set(id,{callback,delay});return id;},clearTimeout:id=>timers.delete(id),...options});

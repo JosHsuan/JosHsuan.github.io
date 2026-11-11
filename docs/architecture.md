@@ -13,7 +13,7 @@ boundaries are recorded in the [architecture README](../README.md).
 |---|---|
 | Owner | JosHsuan Chao |
 | Audience | The owner, collaborating developers, and coding agents |
-| Revision | **2.24 — 3 November 2026; continuous motion, shared spatial reading and sequential model ownership** |
+| Revision | **2.25 — 11 November 2026; shared public source boundary and failure-safe runtime lifetimes** |
 | Language | English for project documentation and future website content; Traditional Chinese for discussion with the owner |
 | Scope | Portfolio, Research & Development, About/CV, Contact, and selected interactive project stories |
 | Delivery baseline | Next.js static export to GitHub Pages; no paid domain, paid storage, or continuously running backend required for the initial release |
@@ -22,6 +22,19 @@ boundaries are recorded in the [architecture README](../README.md).
 | Repository destination | `docs/architecture.md` is the maintained architecture; software implementation in the GitHub working folder takes precedence over older proposed layouts |
 | Design reference | `docs/WEBSITE_DESIGN_GUIDELINES.md` — supplied v1.0, preserved verbatim; presentation requirements for a later explicitly authorized implementation |
 | Materials preparation root | `D:\JosHsuan_Website\_private\portfolio-preparation` — designated source for all project, CV, and content preparation |
+
+## Current architecture revision — 11 November 2026
+
+[Decision 0023](decisions/0023-architecture-quality-boundaries.md) records the
+owner-authorized architecture audit and revision. The shared public source
+manifest now defines build/lint coverage and enforces import closure and core
+independence. Document-stage registration is transactional; preview disposal
+is permanent before notifications; diagram resources follow their connected
+React lifetime. [The review record](ARCHITECTURE_REVIEW_20261111.md) separates
+source evidence, rendered checks, CI and publication. Decisions 0021/0022 retain
+visual and continuous-motion authority. Historical framework timeline examples
+below do not reintroduce pause controls or preference-selected static modes in
+the selected public application.
 
 ## Executive decision
 
@@ -650,11 +663,11 @@ The selected application under `roles/uiux-designer/cases/bending-active-thesis`
 
 Under [decision 0013](decisions/0013-xr-immersive-stage.md), XR's project layer uses one transparent fixed stage for the verified bamboo assembly and recorded phone screen. Its `XRStageDirector` now reads the eight overview/context/method/Adapt/Assemble/Join/making/credits chapters under decision 0014, supplies finite inspection intent and coordinates the existing information-window presenter. The renderer is the sole camera/source-transform writer. Native video owns media time; decoded frames invalidate that same renderer, and native scroll never scrubs or concatenates the three recordings. One model aperture scopes actual-hit dragging and keyboard inspection; source reading, direct recording links and a meaningful playback control do not require viewer tabs or view-button clusters. Regular 2D glass surfaces decorate readable HTML without refracting text or original evidence pixels. None of these XR owners acquires Bending's Director or moves project geometry into the global background lease.
 
-On ordinary routes, `SiteBackgroundDriver` uses one scoped scheduler with the existing overview playback/scene score, original native input envelope and field renderer. On Bending, that driver is absent: the existing Director supplies its original seven-chapter sample, timestamp, dimensions and pause/preference inputs to the shared binding. The extraction retains the original surface classes and backdrop/stage/field sibling order, five quantized CSS writes and field draw inputs. The context provider introduces no DOM wrapper or stacking context. Model hit testing, pointer capture and project commands remain with their original owners; decorative background listeners do not intercept native scrolling or project actions. Per-frame values remain outside React state.
+On ordinary routes, `SiteBackgroundDriver` uses one scoped scheduler with the existing overview playback/scene score, original native input envelope and field renderer. On Bending, that driver is absent: the existing Director supplies its original seven-chapter sample, timestamp, dimensions and current lifecycle policy to the shared binding. Historical pause/preference fields are not authorization to reintroduce the superseded static modes. The extraction retains the original surface classes and backdrop/stage/field sibling order, five quantized CSS writes and field draw inputs. The context provider introduces no DOM wrapper or stacking context. Model hit testing, pointer capture and project commands remain with their original owners; decorative background listeners do not intercept native scrolling or project actions. Per-frame values remain outside React state.
 
-The independent field retains its 900,000-physical-pixel, 12,000-cell and 30-draw-delivery-per-second bounds. These are configured limits, not measurements of physical-device performance. Reduced Motion clears optional field motion, unavailable Canvas 2D leaves the static CSS atmosphere, and background failure never becomes a new content-readiness prerequisite. Disposal releases the binding, listeners, observation, scheduled work and field resources; stale handles cannot publish.
+The independent field retains its 900,000-physical-pixel, 12,000-cell and 30-draw-delivery-per-second bounds. These are configured limits, not measurements of physical-device performance. Under decisions 0021/0022 the current field remains continuously authored; unavailable Canvas 2D leaves the CSS atmosphere, and background failure never becomes a new content-readiness prerequisite. Disposal releases the binding, listeners, observation, scheduled work and field resources; stale handles cannot publish.
 
-Under decision 0019, `ProjectStudyChapterPresenter` is the sole six-study semantic chapter owner. It refreshes fractional section anchors on existing layout invalidations and publishes midpoint selection, rail, counter and source intent on `SiteBackgroundDriver`'s existing demand frame. Native pause has one discrete intent and truthful controls; it is not mirrored in a second React state owner. Source transactions retain exit/prepare/enter/hold and real decode/paint readiness.
+Under decision 0019, `ProjectStudyChapterPresenter` is the sole six-study semantic chapter owner. It refreshes fractional section anchors on existing layout invalidations and publishes midpoint selection, rail, counter and source intent on `SiteBackgroundDriver`'s existing demand frame. Decisions 0021/0022 remove user pause and preference-selected static presentation; the chapter result remains discrete intent outside a second React state owner. Source transactions retain exit/prepare/enter/hold and real decode/paint readiness.
 
 Native full-document navigation intentionally gives each new document one background lifetime; no canvas is claimed to persist across document replacement. An ordinary page's non-persisted `pagehide` disposes that lifetime; a browser-retained BFCache document suspends and resumes the same resource without replaying hidden time. Actual BFCache retention is browser-dependent. Explicit `pagehide.persisted === false` now permanently disposes SiteNavigation after its handoff decision and Bending through the existing DocumentLifetime/Registrar feature-before-kernel disposal. A serialized destination-owned ticket remains valid. Persisted and bare synthetic events retain their established suspension behavior; repeated disposal is idempotent. Bending keeps its existing Director clock. All eight observed native departures were nonpersisted and history return created fresh documents; genuine retained BFCache restoration remains unverified. Site readiness/navigation remains the existing discrete lifecycle, not a second reveal or frame driver.
 

@@ -4,6 +4,12 @@ Baseline selected on 2026-10-06: Windows, Node 24.19.0, pnpm 11.19.0. CI pins th
 
 Dependencies come from `https://registry.npmjs.org/`; exact direct versions and the resolved graph are recorded in `package.json` and `pnpm-lock.yaml`. CI uses a frozen install and strict peer checks. pnpm `allowBuilds` permits esbuild and sharp; unrs-resolver uses its packaged native binding without its postinstall. The explicitly selected fresh Next.js release and matching platform packages are listed in pnpm's generated release-age exceptions.
 
+The 11 November [architecture review](ARCHITECTURE_REVIEW_20261111.md) patches
+Zod alone to **4.6.6** after reviewing its collection-bound security fix. It
+also records the development-only minimatch advisory and the installed caller's
+unaffected optimization configuration. Node/pnpm and the lint/parser cohort stay
+pinned; the report does not claim that every development advisory is absent.
+
 TypeScript 5.9.3 satisfies the installed typescript-eslint 8.71.1 range (`>=4.8.4 <6.1.0`). ESLint 9.39.1 satisfies the installed eslint-plugin-react peer range (through `^9.7`); its registry deprecation is recorded. Upgrade to ESLint 10 only with a compatible Next/React lint dependency group. No ignored peer conflicts or force flags were used.
 
 The initial framework work used the existing local `r3f-fundamentals` skill for

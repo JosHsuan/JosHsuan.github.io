@@ -1,6 +1,8 @@
 'use client';
 
-import {memo, useEffect, useId, useMemo, useRef, useState} from 'react';
+/* eslint-disable @next/next/no-img-element -- Pinned native SVG fallback stays readable before hydration and on source-data failure. */
+
+import {memo, useEffect, useId, useRef, useState} from 'react';
 import {useExperienceInput} from '../runtime/ExperienceProvider';
 import styles from './source-diagram.module.css';
 import InformationSkin from './InformationSkin';
@@ -40,20 +42,25 @@ export default function SourceDiagram({kind = 'library', title, className = ''})
   const id = useId().replaceAll(':', '');
   const heading = title || TITLES[validKind];
 
-  const manager=useMemo(()=>input.features.create('diagram',{kind:validKind,getRoot:()=>frame.current,onData:setData,
-    requestLayout:()=>input.invalidateLayout('diagram-'+validKind)}),[validKind,input]);
+  const manager = useRef(null);
   useEffect(()=>input.features.connect('diagram.load.'+validKind,()=>{
-    const abort=new AbortController();void manager.load({signal:abort.signal});
-    return()=>{abort.abort();manager.cancelLoad();};
-  }),[input,validKind,manager]);
-  useEffect(()=>input.features.connect('diagram.'+validKind,()=>manager.connect()),[input,manager,validKind,data]);
+    const current=input.features.create('diagram',{kind:validKind,getRoot:()=>frame.current,onData:setData,
+      requestLayout:()=>input.invalidateLayout('diagram-'+validKind)});
+    manager.current=current;
+    const abort=new AbortController();void current.load({signal:abort.signal});
+    return()=>{
+      abort.abort();current.cancelLoad();
+      if(manager.current===current)manager.current=null;
+    };
+  }),[input,validKind]);
+  useEffect(()=>input.features.connect('diagram.'+validKind,()=>manager.current?.connect()),[input,validKind,data]);
 
   const available = data?.kind === validKind ? data : null;
   const paths = available ? new Map(available.paths.map(path => [path.id, path])) : null;
   return <figure ref={frame} className={`${styles.frame} ${className}`} data-source-diagram={validKind} data-information-window="source-diagram" data-information-motion-surface="plane"
     data-diagram-count={available?.groups.length ?? (validKind === 'library' ? 11 : validKind === 'miura' ? 3 : 4)}
-    onKeyDown={validKind==='library'?undefined:manager.key}
-    onBlur={validKind==='library'?undefined:manager.blur}>
+    onKeyDown={validKind==='library'?undefined:event=>manager.current?.key(event)}
+    onBlur={validKind==='library'?undefined:event=>manager.current?.blur(event)}>
     <InformationSkin/>
     <figcaption className={styles.heading} data-protect data-choreography="caption">
       <span className={styles.eyebrow}>Research study</span>
@@ -67,9 +74,9 @@ export default function SourceDiagram({kind = 'library', title, className = ''})
           <NativeDrawing data={available} prefix={id}/>
           {validKind!=='library'&&available.groups.map((group, index) => <g key={group.id} id={`${id}-${group.id}`} className={styles.highlight}
             data-diagram-index={index} data-diagram-active="false" aria-hidden="true"
-            onPointerEnter={event => {if (validKind !== 'workflow' && event.pointerType !== 'touch') {manager.hover(index);}}}
-            onPointerLeave={() => {manager.leave();}}
-            onClick={() => manager.activate(index)}>
+            onPointerEnter={event => {if (validKind !== 'workflow' && event.pointerType !== 'touch') {manager.current?.hover(index);}}}
+            onPointerLeave={() => {manager.current?.leave();}}
+            onClick={() => manager.current?.activate(index)}>
             {group.paths.length ? group.paths.map(pathId => <path key={pathId} className={styles.trace} d={paths.get(pathId)?.attrs.d}/>)
               : <rect className={styles.node} x={group.bounds[0]} y={group.bounds[1]} width={group.bounds[2]-group.bounds[0]} height={group.bounds[3]-group.bounds[1]} rx="12"/>}
             <rect className={styles.regionHit} x={group.bounds[0]} y={group.bounds[1]} width={group.bounds[2]-group.bounds[0]} height={group.bounds[3]-group.bounds[1]}/>
@@ -82,8 +89,8 @@ export default function SourceDiagram({kind = 'library', title, className = ''})
       <div className={styles.choices} role="group" aria-label={`Select ${heading.toLowerCase()}`}>
         {available.groups.map((group, index) => <button type="button" key={group.id} data-diagram-index={index} data-diagram-active="false"
           aria-controls={`${id}-${group.id}`} aria-pressed="false"
-          onFocus={() => {if (validKind !== 'workflow') {manager.hover(index);}}} onClick={() => manager.activate(index)}><span data-choreography="nav">{group.label}</span></button>)}
-        <button type="button" className={styles.follow} onClick={() => {manager.follow();}}><span data-choreography="nav">Follow chapter</span></button>
+          onFocus={() => {if (validKind !== 'workflow') {manager.current?.hover(index);}}} onClick={() => manager.current?.activate(index)}><span data-choreography="nav">{group.label}</span></button>)}
+        <button type="button" className={styles.follow} onClick={() => {manager.current?.follow();}}><span data-choreography="nav">Follow chapter</span></button>
       </div>
       <p className={styles.caption} data-choreography="prose">
         <span data-diagram-caption>{available.groups[0].description}</span>
