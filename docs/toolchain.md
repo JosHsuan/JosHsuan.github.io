@@ -6,6 +6,19 @@ Dependencies come from `https://registry.npmjs.org/`; exact direct versions and 
 
 TypeScript 5.9.3 satisfies the installed typescript-eslint 8.71.1 range (`>=4.8.4 <6.1.0`). ESLint 9.39.1 satisfies the installed eslint-plugin-react peer range (through `^9.7`); its registry deprecation is recorded. Upgrade to ESLint 10 only with a compatible Next/React lint dependency group. No ignored peer conflicts or force flags were used.
 
-The installed local `r3f-fundamentals` skill was read and applied to Canvas/client boundaries, demand rendering and ownership. Its source is the existing local skill installation; upstream revision and license are not independently verified here. No R3F MCP server was discovered or used, and no MCP dependency was added to the site. These optional tools are not runtime prerequisites.
+The initial framework work used the existing local `r3f-fundamentals` skill for
+Canvas/client boundaries, demand rendering and ownership. The 11 November
+[skill integration review](SKILL_INTEGRATION_REVIEW.md) records the expanded
+design, R3F and engineering skill inventory, inspected upstream revisions and
+local verification. Follow [the agent workflow](AGENT_WORKFLOW.md) to select
+skills without replacing current design contracts or runtime ownership. No R3F
+MCP dependency was added to the site.
+
+The optional `qa-only` tooling has its own pinned gstack, Bun and Chromium
+installation outside this repository. It does not replace this project's
+Node/pnpm versions, Playwright dependency, tests or CI gates. Its Windows adapter
+and isolated installation smoke test are documented in the integration review.
+Skill scripts and browser binaries are local development tools, not runtime or
+build prerequisites for the website.
 
 Actual package/type inspection, TypeScript, ESLint, Node test runner via tsx, Next webpack builds, and Playwright provide repository-local validation. See `compatibility.md` for results. No browser authoring tool or real-device GPU check should be inferred from these checks.

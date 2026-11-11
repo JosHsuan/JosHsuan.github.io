@@ -250,3 +250,9 @@ sets presentation/content priorities. [Decision 0001](docs/decisions/0001-empty-
 protects the empty reusable framework; [the decision log](docs/decisions/)
 retains earlier scope and rationale. Specialist research, private preparation
 and installed-but-unused adapters are not evidence of active public features.
+
+[Agent workflow](docs/AGENT_WORKFLOW.md) assigns design, R3F implementation,
+diagnosis, performance, code review and report-only QA to distinct stages under
+the current project contracts. The [skill integration review](docs/SKILL_INTEGRATION_REVIEW.md)
+records the local installation, source revisions and checks; these tools are
+optional development aids and are not website dependencies.

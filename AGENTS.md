@@ -1,5 +1,13 @@
 # Repository working notes
 
+Follow [the agent workflow](docs/AGENT_WORKFLOW.md) when selecting and combining
+skills. It assigns one lead per phase, keeps `qa-only` and review report-only,
+and reconciles generic skill advice with this repository's current contracts.
+Skills do not expand task scope, replace existing runtime owners or CI gates,
+or require another approval for work already authorized by the owner.
+The [installation and compatibility review](docs/SKILL_INTEGRATION_REVIEW.md)
+records the selected skills, source pins, host adaptations and verification limits.
+
 The 5 November owner direction and [decision 0022](docs/decisions/0022-glass-motion-system.md) authorize a site-wide Glass Feed / Carousel / Stream motion redesign, including bounded peripheral reading optics, compact square carousel instances, alternating Project columns, source passages, camera rhythm, foreground and entry/control motion. Follow [the current motion contract](roles/uiux-designer/cases/bending-active-thesis/GLASS_MOTION_REDESIGN.md). This supersedes preceding motion recipes in that scope while retaining native content, source geometry/assets, measured model scale and material identity, existing schedulers/final writers, the empty framework and exact-artifact CI/publication. Implementation, commit, push and GitHub Pages are authorized. No paid functions, services or charge-incurring trials.
 
 The 3 November owner direction and [decision 0021](docs/decisions/0021-continuous-motion-portfolio.md) authorize continuous motion without pause controls or preference/performance static modes, one shared curved liquid-card field, revised scale-aware model presentation, the original Mode/s machine and Caschlatsch structure, native-resolution XR recordings, removal of image-opening UI, responsive 80%-reference density, and Home's multi-model showcase and reversible eight-project discovery deck. These explicitly supersede older presentation and pause constraints in this scope. Preserve original assets/geometry, one existing scheduler/final writer per owner, the empty framework, exact toolchain and same-artifact CI/publication gate. Follow [the current contract](roles/uiux-designer/cases/bending-active-thesis/CONTINUOUS_MOTION_INTEGRATION.md); implementation, commit, push and GitHub Pages publication are authorized without another approval. No paid tools or services.
