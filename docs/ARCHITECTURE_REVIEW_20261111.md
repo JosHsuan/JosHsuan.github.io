@@ -1,11 +1,20 @@
 # Architecture review and revision — 11 November 2026
 
-Status: **first revision deployed; transfer correction undergoing renewed full CI diagnosis and validation**. The owner authorizes a comprehensive architecture audit,
+Status: **architecture revision and transfer correction deployed; CI and live acceptance verified**. The owner authorizes a comprehensive architecture audit,
 implementation, commit/push, verification and same-artifact deployment, with no
 paid services or charge-incurring features. The preceding skill/workflow change
 was committed separately as `9dcc58f` and pushed without deployment.
 
-The first architecture release is `95efdb7f15e344ed82dff985f3ad1b23db584580`,
+Final public release: **`222cf868f6c962ae7209f985f000c7d9a3880c41`**.
+[CI 43113223172](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/43113223172)
+passes all 648 public browser tests, each exactly once with zero retry/skip,
+and all 24 framework browser checks. [Deployment 43117402259](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/43117402259)
+publishes that tested artifact without rebuilding. Final live acceptance on
+12 November 2026 (Europe/Berlin) verifies all 268 public files, 24 route checks,
+six desktop/mobile journeys and eight inspected screenshots. HC3DP's original
+model reaches verified first draw on both sizes. No paid service was enabled.
+
+The earlier first architecture release is `95efdb7f15e344ed82dff985f3ad1b23db584580`,
 validated by [CI 43082576289](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/43082576289).
 Its downloaded export contains 268 files, with file-set SHA-256
 `a0787650ad7a740d5035113ddc6488d23b3f1cc76138e8bb37ed26aa897a886e`.
@@ -38,13 +47,13 @@ alone does not complete the task.
 | Area | Current evidence | Revision / remaining investigation |
 | --- | --- | --- |
 | Reusable framework and toolchain | Exact Node 24.19.0 / pnpm 11.19.0 baseline and revised `pnpm check` pass, including build and 63-file public audit. Root compiler inspection found 66 inputs, including the intended runtime contracts; hidden scratch directories are not included. | Keep the empty content/registry and compiler coverage. Public lint is now automatic. Installed Zod 4.6.6 and the subsequent fresh `pnpm check` pass. |
-| Public application import structure | Initial wider workspace scan: 166 modules, 285 internal edges, no cycles. The exact revised public handoff contains 173 files / 151 code modules / 265 code edges. Runtime's component-folder imports are pure scores/helpers or scene adapters, not evidence of a React cycle. | Shared explicit manifest, import closure/cycle checks and enforced core independence. Avoid a directory-only migration of 25 helpers that would not simplify ownership. |
-| Native lifecycle and resources | Failed stage notification left an owner registered; a disposal callback could reactivate a closed preview. Nine regression cases failed before repair. | Shared transactional stage registry and terminal-before-notification disposal; focused lifecycle tests pass 55/55. Revised portable suite: 731 total, 729 pass, 2 opt-in rendering skips. |
+| Public application import structure | Initial wider workspace scan: 166 modules, 285 internal edges, no cycles. The final transfer-correction handoff contains 174 files / 152 code modules / 266 code edges. Runtime's component-folder imports are pure scores/helpers or scene adapters, not evidence of a React cycle. | Shared explicit manifest, import closure/cycle checks and enforced core independence. Avoid a directory-only migration of 25 helpers that would not simplify ownership. |
+| Native lifecycle and resources | Failed stage notification left an owner registered; a disposal callback could reactivate a closed preview. Nine regression cases failed before repair. | Shared transactional stage registry and terminal-before-notification disposal; focused lifecycle tests pass 55/55. After the transfer correction, the portable suite has 742 total, 740 pass, 2 opt-in rendering skips. |
 | R3F / imperative scenes | Inspected Bending `SceneRuntime`/Canvas, generic `project-study-scene`, Home prepared scene/presenter, and XR scene/director. GLTF validation, PMREM ownership, first-draw gating, cancellation, geometry/material/texture disposal and context release remain in their existing adapters. | Preserve demand Canvas and final renderer/camera writers. No extra RAF, physics dependency, model conversion or render-mode downgrade. Browser resource/lifecycle acceptance remains a separate gate. |
 | Presentation and accessibility | Paired baseline/revision desktop 1440×1000 and mobile-emulated 390×844 captures for Home, Bending, XR and Mode/s initialize without page errors or horizontal overflow. The exact CI artifact additionally passes all 12 routes at both sizes, native navigation, diagram keyboard selection and advancing XR HD playback. | Diagram's actual Chromium fixture passes keyboard selection, Strict Mode, remount listener counts and SVG failure fallback. Full CI remains a separate gate; this is not a physical-device or WCAG certification. |
 | Performance | Existing draw/pixel budgets, demand schedulers, cached source bounds and retained prepared resources were reviewed. Revision adds no frame work or rendering resource. | No demonstrated CPU/GPU bottleneck warrants changing visual fidelity. No speedup, field INP or physical-device performance is claimed. Long-run and software-GPU evidence is qualified separately. |
 | Public content and build | Fresh baseline and revised builds each audit 270 output files and 147 approved assets. No release asset or pinned source record changed. | Build/lint consume one reviewed source list. Reject escaping paths, duplicate sources, nonliteral imports, unapproved dependencies and core-to-presentation imports before copying. Existing output and byte-pin audits remain. |
-| CI and publication | Documentation commit `9dcc58f` passed run `43074353466`; no deployment dispatched for that batch. Existing gate verifies candidate-bound test inventory/receipts. | `95efdb7` passed full CI and same-artifact deployment. Live acceptance exposed the transfer cancellation documented below; its correction requires a fresh candidate and gate. |
+| CI and publication | Documentation commit `9dcc58f` passed run `43074353466`; no deployment dispatched for that batch. Existing gate verifies candidate-bound test inventory/receipts. | First release `95efdb7` exposed the live transfer issue below. Corrected release `222cf86` passes all 648 public and 24 framework browser checks, same-artifact deployment, all 268 live-file hashes and desktop/mobile acceptance. |
 | Dependency security | Registry audit identified Zod 4.6.5 (high) and development-only minimatch 10.2.6 (moderate). Maintainer advisory/fix and actual repository callers were inspected. | Pin Zod 4.6.6 with a minimal lockfile update. Minimatch's vulnerable optimization level is absent from its installed caller; retain the compatible lint cohort and document the limited deferral below. |
 | Documentation | README and CI/CD falsely described receipt enforcement as unimplemented; current architecture retained superseded pause-policy wording. | Corrected actual coverage/gates and current policy; retained historical decisions and dated release evidence. Added decision 0023. |
 
@@ -62,8 +71,9 @@ checks; their source tests do not establish rendered acceptance.
    A direct scan found five errors and one warning. Build and lint now share
    `pages-sources.mjs`; `pnpm lint` runs both scopes. Core import independence
    and complete local import closure are checked before build copying. The
-   revised scan has zero errors/warnings across all 151 code files, including
-   the two approved vendor modules. Native full-document links and the SVG
+   initial revised scan has zero errors/warnings across all 151 code files,
+   including the two approved vendor modules; the final transfer correction
+   increases that passing lint scope to 152. Native full-document links and the SVG
    fallback retain explicit narrow exceptions instead of changing navigation
    or source behavior to silence framework advice.
 2. **P1 — Stage registration failed without rollback.** If a scene observer
@@ -126,8 +136,8 @@ list), architecture (existing owners and two application boundaries), security
 (path/import guards and the isolated dependency patch), and performance (no new
 frame work or resource acquisition). No additional blocking source defect was
 found. This is a single-agent review, not an independent human or multi-model
-approval. Its release recommendation remains conditional on the CI/artifact and
-live gates below.
+approval. Its release recommendation was conditional on the CI/artifact and
+live gates below; those gates now pass for the final corrected release.
 
 - The source manifest does not discover private files or make originals public.
   It reuses the previous explicit list plus the new registry module. The isolated
@@ -140,8 +150,8 @@ live gates below.
   acknowledged naming debt, not a runtime correctness defect.
 - Source checks and first-viewport captures cannot establish all interactive
   chapters, native media recovery, WebKit behavior or physical iPhone stability.
-  Full candidate CI, exact-artifact deployment and live verification are still
-  required before marking this revision complete.
+  The final candidate passes full CI, exact-artifact deployment and live
+  verification below; physical-device stability remains outside those claims.
 - Impeccable's detector reported no findings for the changed diagram component.
   Missing optional design-hook setup is not repaired as part of the architecture
   task. The current Glass contract and implementation remain visual authority.
@@ -169,6 +179,11 @@ live gates below.
 | First release deployment | Pass: run `43087667940` | Published the validated CI artifact without rebuilding. |
 | First release public bytes | 268/268 match after one targeted network retry | Initial old XR video request returned HTTP 503; both targeted query and normal URL rechecks returned 200 with the exact hash. Release identity remained stable; unknown-route 404/noindex passed. Initial failure remains in local evidence. |
 | First release live browsers | Incomplete; HC3DP readiness failure reproduced | Desktop and mobile attempts cancelled a valid progressing 50,438,508-byte GLB at the fixed 15-second arrival endpoint. Readable fail-open content is not successful model acceptance. |
+| Corrected release full CI | Pass: run `43113223172` | 648 public checks (216 per profile), 13 independently reconciled receipts, each test exactly once with zero retry/skip; all 24 framework browser checks pass. |
+| Corrected release WebKit | 216/216 pass | Previously failing shard `2/3` passes all 70 cases; the slow HC3DP transfer regression passes in 23.974 s with zero retry. Original missing failure assertion remains unidentified. |
+| Corrected release deployment | Pass: run `43117402259` | Published the exact `222cf86` validated export without rebuilding. |
+| Corrected release public bytes | 268/268 match on the first verification pass | No network/hash failures; release identity stable before/after; unknown route returns 404 with noindex. All 147 approved assets and 137 protected originals were independently pinned before publication. |
+| Corrected release live browsers | 24 route checks and six journeys pass; eight captures inspected | Normal route HTML matches the CI bytes; no page/console errors, horizontal overflow or failed loaded images. Native navigation, diagram keyboard selection, actual HC3DP source first draw on both sizes and advancing XR 888×1920 playback pass. Desktop/mobile are browser emulation, not physical-device certification. |
 
 Eight maintained architecture/workflow documents also passed a 154-target local
 link existence check. This does not validate remote links or all Markdown anchors.
@@ -209,8 +224,9 @@ Chromium, WebKit and mobile Chromium (3/3, no retry). Inverting the progress-exp
 guard in an ignored isolated copy makes the acquisition regression fail; product
 files were not mutated. Review found no remaining required change across
 correctness, readability, ownership, source security and resource cost. There is
-no new dependency, scheduler or original-asset change. Fresh exact candidate
-CI/deployment and complete live acceptance remain required.
+no new dependency, scheduler or original-asset change. At that correction
+checkpoint, fresh exact candidate CI/deployment and complete live acceptance
+were still required; their final results are recorded below.
 
 ### Follow-up candidate checkpoint
 
@@ -283,3 +299,62 @@ artifacts. Existing WebKit process diagnostics remain enabled, and no retry,
 assertion, timeout or publication gate is relaxed. Diagnose any reproduced
 failure from its actual log before changing code. A new passing run, if obtained,
 cannot retroactively identify the original missing failure.
+
+### Renewed candidate evidence
+
+The new push candidate is `222cf868f6c962ae7209f985f000c7d9a3880c41`, successfully
+verified in [run 43113223172](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/43113223172).
+Its only tracked difference from `498aa7d` is this diagnosis record; application,
+test and workflow inputs are unchanged. The plan selects full validation, all
+41 public test files, 13 shards and 648 test identities. Quality and both
+framework jobs pass: 740/742 portable checks (the same two opt-in skips), zero
+public lint errors/warnings, and 12 root plus 12 subpath browser checks.
+
+The exact 268-file CI export matches file-set digest
+`935f44e6e34cf6e43f60b73afaedb0985a0f9ec487cb16165956da97c90ec19d` and ZIP digest
+`80d246664ad17b9cb34d74a47b3c07509717aa3a1c30a5b6faab727f4d5492df`.
+All 147 approved assets and 137 protected originals match. Independent acceptance
+passes 24 routes and six desktop/mobile journeys; all eight captures were viewed.
+Both HC3DP observations require the original model SHA, successful first draw,
+`ready` scene and no static arrival. XR uses advancing native 888-by-1920 video.
+The owned loopback preview and browser were closed after acceptance. All 13
+receipts reconcile against the exact 648-test inventory and build digest with
+zero retries/skips. All three WebKit shards pass, including the previously
+failing shard's 70 tests. The original assertion could not be recovered and was
+not reproduced; no speculative runtime or test relaxation was applied. The new
+896,718-byte complete CI log archive retains the successful WebKit evidence.
+
+Later [official GitHub incident evidence](https://www.githubstatus.com/api/v2/incidents.json)
+records an Actions/Pages/multiple-product outage announced at 20:48 UTC and
+resolved at 21:21 UTC. That supports the infrastructure-failure assessment for
+the affected execution window; it does not identify the missing earlier WebKit
+assertion. The earlier operational-status observation remains a dated observation,
+not a claim that no incident occurred. New evidence is retained separately under
+`.runtime/architecture-20261111-resumed/`.
+
+### Final publication and live acceptance
+
+[Deployment 43117402259](https://github.com/JosHsuan/JosHsuan.github.io/actions/runs/43117402259)
+verifies successful default-branch push provenance and publishes the same
+`935f44e6e34cf6e43f60b73afaedb0985a0f9ec487cb16165956da97c90ec19d` export.
+The first live byte-check pass matches all 268 files, including 143 paths under
+`assets/` (a path count distinct from the 147 approved manifest entries), with
+zero failures and stable release identity. Unknown-route 404/noindex passes.
+
+The live browser pass verifies all 12 routes at desktop and mobile sizes and
+matches each normal-URL HTML response to the CI artifact. Both sizes complete
+native Home → About → Project → Contact navigation, source-diagram keyboard
+selection and advancing XR WebGL-phone playback with native 888×1920 video.
+HC3DP separately reports the exact original SHA, a ready scene, completed first
+draw, successful paint and `arrivalStatic: false`. All eight live captures were
+inspected; no new visual blocker was observed in those states. Browser processes
+were closed, and the earlier loopback preview port is confirmed closed.
+
+The completion evidence is `reconciled-release.json`, `source-assets.json`,
+`protected-inputs.json`, `live-files.json`, and the candidate/live browser records
+under the ignored resumed-evidence directory. `src/`, `content/`, the public
+release source records/assets and `.github/workflows/` have no tracked difference
+from the initial workflow commit. Maintained documentation is committed afterward
+without triggering another public deployment; the published source identity
+remains `222cf86`. Native hardware, field performance and the explicitly deferred
+development-only minimatch advisory retain their stated limits above.
